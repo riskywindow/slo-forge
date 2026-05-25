@@ -144,7 +144,10 @@ def replay_simulator(
         "canary_weight": plan.canary.initial_weight if plan.canary.enabled else 0.0,
         "max_events": 5_000_000,
     }
-    scenario_path = output_path.with_name("simulator-scenario.json")
+    # Each replay retains the exact input sent to Rust. Controller comparisons commonly write two
+    # runs into one directory; a shared filename would let the second run destroy the first run's
+    # provenance.
+    scenario_path = output_path.with_suffix(".scenario.json")
     write_json(scenario_path, scenario)
     binary = shutil.which("sloforge-sim")
     command = [binary] if binary else ["cargo", "run", "-q", "-p", "sloforge-sim", "--"]
@@ -183,17 +186,28 @@ def replay_simulator(
         "slo_attainment": max(0.0, (request_count - deadline_misses) / max(request_count, 1)),
         "processed_events": int(metrics["processed_events"]),
     }
+    recorded_command: list[str] = []
+    root = repository_root.resolve()
+    for argument in command:
+        path = Path(argument)
+        recorded_argument = argument
+        if path.is_absolute():
+            try:
+                recorded_argument = str(path.resolve().relative_to(root))
+            except ValueError:
+                recorded_argument = argument
+        recorded_command.append(recorded_argument)
     envelope = {
         "schema_version": "sloforge.replay/v1",
         "summary": summary,
         "simulation": raw,
-        "command": command,
+        "command": recorded_command,
     }
     write_json(output_path, envelope)
     return SimulatorRun(
         raw_output=raw,
         summary=summary,
-        command=command,
-        scenario_path=str(scenario_path),
-        chrome_trace_path=str(chrome_trace_path),
+        command=recorded_command,
+        scenario_path=str(scenario_path.resolve().relative_to(root)),
+        chrome_trace_path=str(chrome_trace_path.resolve().relative_to(root)),
     )

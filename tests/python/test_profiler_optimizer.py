@@ -58,6 +58,20 @@ def test_optimizer_respects_constraints_and_pareto_invariant(
     assert isinstance(result, OptimizationResult)
     assert result.selected.feasible
     assert all(margin >= 0 for margin in result.selected.constraint_margins.values())
+    for constraint in result.request.constraints:
+        center = float(getattr(result.selected.predicted, constraint.metric))
+        radius = (
+            float(getattr(result.selected.uncertainty, constraint.metric))
+            * result.request.uncertainty_safety
+        )
+        expected_margin = (
+            constraint.value - (center + radius)
+            if constraint.operator == "<="
+            else (center - radius) - constraint.value
+        )
+        assert result.selected.constraint_margins[constraint.metric] == pytest.approx(
+            expected_margin
+        )
     assert result.selected.configuration.config_id in {
         item.configuration.config_id for item in result.pareto_frontier
     }
@@ -79,7 +93,10 @@ def test_optimizer_respects_constraints_and_pareto_invariant(
         for item in measured
     )
     promoted_ids = {step.config_id for step in result.optimizer_history}
+    assert result.selected.configuration.config_id in promoted_ids
     assert (
-        result.selected.configuration.config_id in promoted_ids
-        or result.selected.fidelity == "measured"
+        next(
+            item for item in result.baseline_outcomes if item.strategy == "uncertainty_aware"
+        ).best_config_id
+        is not None
     )

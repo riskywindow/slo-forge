@@ -77,6 +77,14 @@ class CalibratedModels(BaseModel):
     limitations: list[str]
 
 
+def _finite_sample_radius(residuals: list[float], nominal_coverage: float) -> float:
+    if not residuals:
+        return 0.0
+    ordered = sorted(residuals)
+    rank = min(len(ordered), math.ceil((len(ordered) + 1) * nominal_coverage))
+    return ordered[rank - 1]
+
+
 def _curve(
     measurements: list[RawMeasurement],
     dimension: Literal["prompt_tokens", "active_sequences"],
@@ -115,15 +123,7 @@ def _curve(
     for coordinate, samples in calibration.items():
         residuals.extend(abs(sample - lookup[coordinate]) for sample in samples)
     nominal_coverage = 0.95
-    if residuals:
-        ordered_residuals = sorted(residuals)
-        finite_sample_rank = min(
-            len(ordered_residuals),
-            math.ceil((len(ordered_residuals) + 1) * nominal_coverage),
-        )
-        radius = ordered_residuals[finite_sample_rank - 1]
-    else:
-        radius = 0.0
+    radius = _finite_sample_radius(residuals, nominal_coverage)
     return MonotonicServiceCurve(
         dimension=dimension,
         points=points,
@@ -147,7 +147,50 @@ def fit_service_curves(profile: ProfileBundle, *, seed: int) -> CalibratedModels
         prefill = _curve([item for item in raw if item.stage == "prefill"], "prompt_tokens", rng)
         decode = _curve([item for item in raw if item.stage == "decode"], "active_sequences", rng)
         startup = [item.latency_ms for item in raw if item.stage == "startup" and not item.warmup]
-        held_out = [item for item in raw if item.stage == "load" and not item.failed]
+        representative_load = [item for item in raw if item.stage == "load" and not item.failed]
+        rng.shuffle(representative_load)
+        load_calibration_count = (
+            max(1, len(representative_load) // 2) if len(representative_load) > 1 else 0
+        )
+        load_calibration = representative_load[:load_calibration_count]
+        held_out = representative_load[load_calibration_count:]
+        # Stage-D prefill samples exclude HTTP/runtime queue overhead that is present in Stage-E
+        # TTFT. Calibrate the interval for the quantity the optimizer constrains, then evaluate it
+        # on a disjoint test half. Reusing all Stage-E samples as "held out" gave tiny service-only
+        # radii and severe undercoverage for workload TTFT.
+        load_prefill_residuals: list[float] = []
+        load_decode_residuals: list[float] = []
+        for item in load_calibration:
+            if item.prompt_tokens is not None and item.ttft_ms is not None:
+                center, _, _ = prefill.predict(float(item.prompt_tokens))
+                load_prefill_residuals.append(abs(center - item.ttft_ms))
+            if item.active_sequences is not None and item.itl_ms is not None:
+                center, _, _ = decode.predict(float(item.active_sequences))
+                load_decode_residuals.append(abs(center - item.itl_ms))
+        workload_radius = _finite_sample_radius(load_prefill_residuals, prefill.nominal_coverage)
+        combined_prefill_radius = max(prefill.conformal_radius_ms, workload_radius)
+        prefill = prefill.model_copy(
+            update={
+                "residual_p95_ms": combined_prefill_radius,
+                "conformal_radius_ms": combined_prefill_radius,
+                "calibration_sample_count": (
+                    prefill.calibration_sample_count + len(load_prefill_residuals)
+                ),
+            }
+        )
+        workload_decode_radius = _finite_sample_radius(
+            load_decode_residuals, decode.nominal_coverage
+        )
+        combined_decode_radius = max(decode.conformal_radius_ms, workload_decode_radius)
+        decode = decode.model_copy(
+            update={
+                "residual_p95_ms": combined_decode_radius,
+                "conformal_radius_ms": combined_decode_radius,
+                "calibration_sample_count": (
+                    decode.calibration_sample_count + len(load_decode_residuals)
+                ),
+            }
+        )
         errors: list[float] = []
         covered = 0
         decode_errors: list[float] = []
@@ -189,7 +232,7 @@ def fit_service_curves(profile: ProfileBundle, *, seed: int) -> CalibratedModels
         candidates=models,
         limitations=[
             "Intervals are calibrated only on measured mock or hardware configurations.",
-            "Conformal radii use a deterministic coordinate-stratified calibration split; representative load measurements remain held-out tests.",
+            "Conformal radii use deterministic coordinate and representative-load calibration splits with disjoint load test samples.",
             "No claim is made about unmeasured hardware generalization.",
         ],
     )

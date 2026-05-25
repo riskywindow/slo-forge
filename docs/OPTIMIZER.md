@@ -35,9 +35,7 @@ are parsed into typed constraints. For upper bounds the conservative value is `c
 
 ## Multi-fidelity acquisition
 
-All configurations receive predicted evaluation. An acquisition score combines direction-aware objective improvement, one quarter of objective uncertainty and a penalty for constraint misses. The top `trial_budget` configurations are promoted to the profile-derived measured estimator. Optimizer history records proposal order, fidelity, score, incumbent and reason.
-
-The current “measured” promotion reuses representative profile summaries and scales them analytically for replicas/concurrency/chunking; it does not launch a fresh engine for each configuration. It is a second analytical fidelity, but the serialized `measured` label is misleading. Evaluations must count those as modeled promotions unless the profiler actually executes each configuration.
+All configurations receive predicted evaluation. An acquisition score combines direction-aware objective improvement, one quarter of objective uncertainty and a penalty for constraint misses. The top `trial_budget` configurations define the proposal history. Direct representative-load measurements are attached only when a candidate exactly matches the profiled one-replica, concurrency-one, non-chunked, round-robin, 2,048-token shape; the CPU run therefore has three measured anchors and every scaled or policy-modified variant remains predicted. Optimizer history records proposal order, fidelity, score, incumbent and reason.
 
 ## Pareto frontier
 
@@ -45,7 +43,7 @@ Candidate A dominates B only if it is no worse in all latency/cost/cold-start me
 
 ## Baselines
 
-The result records exhaustive, seeded random, successive-halving-style and uncertainty-aware outcomes. These share the same mixture of predicted and analytically transformed candidates. Consequently, they are an algorithm smoke comparison rather than a measurement-efficiency experiment. A `null` best result means the budgeted strategy found no feasible point under the current radius heuristic; it is not converted to a win or silently dropped.
+The result records exhaustive, seeded random, successive-halving-style and uncertainty-aware outcomes. The budgeted strategies reveal predictions from the same candidate table; they do not execute independent configuration trials. Consequently, they are an algorithm smoke comparison rather than a measurement-efficiency experiment. A `null` best result means the budgeted strategy found no feasible point; it is not converted to a win or silently dropped.
 
 ## CPU evaluation
 

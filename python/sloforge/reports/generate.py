@@ -137,8 +137,8 @@ def _svg_scatter(optimization: OptimizationResult) -> str:
     points = [item for item in optimization.evaluated_candidates if item.feasible]
     if not points:
         raise ValueError("cannot plot an empty feasible candidate set")
-    xs = [(item.measured or item.predicted).cost_per_million_tokens for item in points]
-    ys = [(item.measured or item.predicted).p95_ttft_ms for item in points]
+    xs = [item.predicted.cost_per_million_tokens for item in points]
+    ys = [item.predicted.p95_ttft_ms for item in points]
     min_x, max_x = min(xs), max(xs)
     min_y, max_y = min(ys), max(ys)
 
@@ -414,6 +414,50 @@ def generate_report(
         item.name: index.path_for(item.name, repository_root=repository_root)
         for item in index.artifacts
     }
+    evidence_index_names = {
+        "deployment_plan": "plan",
+        "measurements": "raw_measurements",
+        "simulator_replay": "replay",
+        **{
+            name: name
+            for name in (
+                "profile",
+                "hardware",
+                "workload",
+                "models",
+                "optimization",
+                "gateway_replay",
+                "controller",
+                "predictive_controller_twin",
+                "reactive_controller_twin",
+                "chaos",
+                "command_transcript",
+                "serving_baselines",
+                "simulator_scenario",
+                "simulator_raw",
+                "simulator_trace",
+                "predictive_controller_scenario",
+                "predictive_controller_raw",
+                "predictive_controller_trace",
+                "reactive_controller_scenario",
+                "reactive_controller_raw",
+                "reactive_controller_trace",
+            )
+        },
+    }
+    indexed_by_name = {item.name: item for item in index.artifacts}
+    for evidence_name, digest in evidence.artifact_hashes.items():
+        index_name = evidence_index_names.get(evidence_name)
+        indexed = indexed_by_name.get(index_name) if index_name is not None else None
+        if indexed is None:
+            raise ValueError(
+                f"EvidenceBundle hash {evidence_name!r} has no corresponding indexed artifact"
+            )
+        if indexed.sha256 != digest.value:
+            raise ValueError(
+                f"EvidenceBundle hash mismatch for {evidence_name}: "
+                f"expected {digest.value}, indexed {indexed.sha256}"
+            )
     plan = load_deployment_plan(verified["plan"])
     if evidence.plan_digest.value != __import__(
         "sloforge.ir", fromlist=["canonical_hash"]
@@ -437,7 +481,7 @@ def generate_report(
     replay = json.loads(verified["replay"].read_text(encoding="utf-8"))
     replay_count = int(replay["summary"]["request_count"])
     replay_attainment = float(replay["summary"]["slo_attainment"])
-    selected_metrics = optimization.selected.measured or optimization.selected.predicted
+    selected_metrics = optimization.selected.predicted
     selected_model = next(
         item
         for item in models.candidates

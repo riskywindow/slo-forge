@@ -35,13 +35,13 @@ Do not run the reset form against a directory containing unrelated data. The nor
 3. Start balanced, fast and economy Rust mock backends with distinct startup, prefill, decode, concurrency, price and failure parameters.
 4. Profile their live HTTP behavior under a 180-second/0.20-USD modeled budget.
 5. Fit monotonic prefill/decode curves and record held-out error/coverage.
-6. Evaluate 540 configurations, promote 24 under the budget, build the Pareto frontier and compile a strict plan/evidence bundle.
+6. Evaluate 540 configurations, record a 24-step acquisition history, retain only the three exactly profiled shapes as measured anchors, build the Pareto frontier and compile a strict plan/evidence bundle.
 7. Start the Rust gateway with SLO-slack routing and replay all 120 requests.
 8. During replay inject backend slowdown, crash, recovery and cold-start behavior.
 9. Run the calibrated Rust simulator with slowdown, crash, cold recovery and startup slowdown.
-10. Evaluate predictive and reactive controllers and all eight labeled diagnosis faults.
+10. Evaluate predictive and reactive controller actions in matched calibrated Rust-twin scenarios, then classify all eight labeled diagnosis faults plus eight no-fault control windows.
 11. Generate local, Docker, Kubernetes, Modal and Truss exports offline.
-12. Hash 15 source artifacts and derive reports only after verification.
+12. Hash every indexed source artifact and derive reports only after verification.
 
 ## Presenter walkthrough
 

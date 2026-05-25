@@ -51,7 +51,7 @@ The demo builds an index of input path, media type and SHA-256. Report generatio
 5. loads typed optimizer/model/controller/chaos inputs;
 6. computes metrics and renders Markdown, HTML, SVG, Prometheus, OTEL and Chrome trace files.
 
-The current report verified 15 indexed artifacts. Any modified raw input fails report generation instead of silently refreshing a number.
+The report verifies every artifact-index entry before rendering; the exact count is recorded in the generated index and should not be copied from an older run. Any modified raw input fails report generation instead of silently refreshing a number.
 
 ## Bottleneck explanation
 

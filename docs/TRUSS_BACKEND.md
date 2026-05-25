@@ -11,9 +11,9 @@ model/model.py
 sloforge-export.json
 ```
 
-`config.yaml` declares model name/description, model class and module directory, pinned Torch/Transformers requirements, CPU/memory and optional accelerator, runtime concurrency, streaming timeout, tracing data and health thresholds. Plan/model metadata is supplied through non-secret environment variables. CPU plans explicitly set `use_gpu: false` in the generated subset.
+`config.yaml` declares model name/description, model class and module directory, engine-specific pinned requirements, CPU/memory and optional accelerator, runtime concurrency, streaming timeout, tracing data and health thresholds. Plan/model metadata is supplied through non-secret environment variables. CPU plans explicitly set `use_gpu: false` in the generated subset.
 
-The `Model` class implements `__init__`, `load` and `predict`. It loads a pinned-revision Transformers text-generation pipeline, validates non-empty prompts, bounds generated tokens and returns a choices-shaped object.
+The `Model` class implements `__init__`, `load` and `predict`. According to the plan it loads a pinned-revision Transformers pipeline, vLLM `LLM`, SGLang `Engine`, TensorRT-LLM `LLM`, or an explicit mock marker. Each path validates non-empty prompts, bounds generated tokens and returns a choices-shaped object.
 
 ## Schema basis and validation
 
@@ -37,7 +37,7 @@ Replica min/max, region placement, canary weight, rollback criteria and predicti
 
 ## Limitations
 
-- The exporter always generates a Transformers `Model`; it does not currently emit native vLLM/SGLang/TRT-LLM Truss server configuration. Non-Transformers plans must be rejected until that lowering exists, because silently switching engines violates the plan.
+- The exporter emits engine-specific Python model paths and requirements without silently switching engines, but native vLLM/SGLang/TensorRT-LLM Truss execution was not container-built or exercised on this CPU-only host.
 - Dtype, quantization, tensor/pipeline parallelism, batching, prefix cache, speculative decode and compilation settings are not mapped into `config.yaml` or `model.py`.
 - Validation covers the used official-schema subset, not every upstream schema condition.
 - The generated app has not been built or pushed to Baseten on the current machine.

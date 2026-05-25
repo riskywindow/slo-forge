@@ -13,7 +13,7 @@ This document is deliberately conservative. The checked-in system is a complete 
 
 The selected service curve has 7.57% held-out prefill MAPE but only 54.17% interval coverage. The uncertainty interval is therefore under-calibrated on this run. Cross-hardware generalization is neither implemented nor claimed.
 
-The optimizer's “measured” configuration evaluations analytically transform candidate profile summaries; they do not launch every replica/concurrency/batching combination. Cost is modeled from declared hourly price and output rate. Availability derives from mock failure rates and should not be mapped to provider availability.
+Only the three exact profiled CPU/mock shapes are labeled measured. The other replica/concurrency/batching/routing configurations are analytical predictions and are not fresh launches. Cost is derived from declared hourly price and observed or predicted output rate. Availability comes from mock observations or modeled failure rates and should not be mapped to provider availability.
 
 The selected steady-profile estimate met p95 TTFT and p99 ITL constraints, yet the faulted simulator replay attained only 59.17% of request deadlines. This exposes workload/fault mismatch and means the plan should not be promoted unchanged to production.
 
@@ -29,19 +29,19 @@ Cancellation is propagated by dropping streams and permits, but upstream engines
 
 ## Controller and diagnosis
 
-The controller evaluation uses an analytical TTFT observation model rather than closing the loop against a live replica manager. Scale actions are evaluated, but the checked-in demo triggered no canary and no rollback. Provider action application and failure reconciliation are not implemented.
+The controller chooses actions with an analytical TTFT model, then both policies' actions are replayed through identical calibrated Rust-simulator scenarios for deadline-miss and cost comparison. The loop still does not operate a live replica manager, and the checked-in demo triggered no canary and no rollback. Provider action application and failure reconciliation are not implemented.
 
-The diagnosis result is a closed-set test whose counter mutations and expected labels are known to the classifier. Its 100% accuracy does not predict production incident accuracy. Confidence values are heuristic and not empirically calibrated probabilities.
+The diagnosis result is a closed-set test whose counter mutations and expected labels are known to the classifier. Eight negative-control windows exercise normal-state abstention, and classifier execution is timed directly, but label agreement and zero synthetic false positives do not predict production incident accuracy or end-to-end detection latency. Confidence values are heuristic and not empirically calibrated probabilities.
 
 ## Exporters
 
-Local/Docker/Kubernetes exports are statically validated but were not all deployed in the checked-in run. Modal and Truss outputs compile/validate offline only. Both cloud model wrappers currently use Transformers even when another engine appears in the plan, so engine-specific runtime parity is incomplete. Provider autoscaling, region, canary and rollback semantics are only partially mapped.
+Local/Docker/Kubernetes exports are statically validated but were not all deployed in the checked-in run. Modal and Truss outputs compile/validate offline only. Their generated code has engine-specific Transformers, vLLM, SGLang, TensorRT-LLM and explicit-mock paths, but those non-mock cloud paths were not executed on this host. Provider autoscaling, region, distributed topology, canary and rollback semantics are only partially mapped.
 
 The Kubernetes export is a compact Helm chart; it is not an operator with reconciliation against `DeploymentPlan`. Production clusters still need image publication, secrets, policy, storage, GPU scheduling and observability configuration.
 
 ## Evaluation gaps
 
-H1 is not established: exhaustive, random and uncertainty-aware search found the same best objective in the tiny CPU/mock space, while successive halving found no feasible point. H2 has no measured engine-default or manual-static GPU baseline. H3 is one synthetic trace. H4 is closed-set synthetic diagnosis. There is no GPU benchmark report because compatible hardware was unavailable.
+H1 is not established because the CPU/mock strategies consume shared predictions rather than independent paid measurements. H2 has calibrated default/manual/compiled predictions across five regimes but no measured real-engine comparator; these predictions include losses and are not a benchmark win. H3 is a one-seed Rust-twin comparison, not live provider adaptation. H4 is closed-set synthetic diagnosis despite the added negative windows. The GPU report records explicit unavailability rather than performance numbers because compatible hardware was absent.
 
 The focused GPU logits benchmark has reference/correctness/timing code, but no GPU result is recorded and the optimization is not enabled by default.
 

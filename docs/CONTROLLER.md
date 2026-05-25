@@ -6,7 +6,7 @@ The Python controller evaluates guarded capacity and routing changes over fixed 
 
 Each window records arrival rate, sample count, interactive and long-context fractions, p95 prompt/output length, observed p95 TTFT, backend error rate and current replicas/concurrency. Workload drift is the relative deviation from a recent-rate baseline.
 
-The demo evaluator synthesizes observed TTFT from the same explicit queueing relation used by the policy experiment. A production integration should replace this observation adapter with gateway/OTEL measurements and invoke the calibrated Rust simulator for action evaluation.
+The policy evaluator constructs deterministic workload windows and uses an explicit queueing relation to rank candidate actions. For evaluation, the demo translates each policy's selected replica/concurrency actions into timed actions in otherwise identical calibrated Rust-simulator scenarios. Reported violation and cost totals come from those independent simulator replays, not from the policy's own predicted outcomes. A production integration should replace the observation adapter with gateway/OTEL measurements and apply actions through a live replica manager.
 
 ## Forecast
 

@@ -1,6 +1,6 @@
 # Architecture
 
-SLOForge is a deployment compiler with a measured runtime feedback loop. Python owns the compiler and experiment plane; Rust owns latency-sensitive request handling, trace generation, and deterministic simulation. The canonical handoff is versioned JSON, not in-process object sharing.
+SLOForge is a deployment compiler with an evidence-scoped runtime validation loop. Python owns the compiler and experiment plane; Rust owns latency-sensitive request handling, trace generation, and deterministic simulation. The canonical handoff is versioned JSON, not in-process object sharing.
 
 ```text
 Model + workload + hardware + SLO + budget
@@ -43,8 +43,8 @@ The Python/Rust boundary is JSON over bounded subprocess execution because it is
 1. A trace is validated as ordered JSONL with explicit request IDs, arrival offsets, token counts, class, priority and optional deadline/cancellation metadata.
 2. The hardware probe captures a fingerprint plus raw microbenchmark samples. CUDA is used only when explicitly requested and available.
 3. Profiling rejects infeasible candidates, probes startup/prefill/decode/load stages, labels warmups, and debits time and dollar budgets.
-4. Calibration separates prefill and decode curves, enforces monotonic medians, and records held-out MAPE and interval coverage.
-5. Optimization enumerates engine/topology/batching/routing combinations, evaluates all at low fidelity, promotes a budgeted subset, applies uncertainty-adjusted hard constraints, and emits a non-dominated frontier.
+4. Calibration separates prefill and decode curves, uses deterministic coordinate-stratified fit/calibration partitions with a finite-sample conformal rank, and evaluates MAPE and coverage on separate representative-load samples.
+5. Optimization enumerates engine/topology/batching/routing combinations and evaluates them analytically. Only a configuration shape actually executed by the profiler can carry `measured` fidelity; all scaled replica, batching, concurrency and routing variants remain predictions. A proposal budget bounds the acquisition history before uncertainty-adjusted hard constraints and Pareto selection.
 6. Compilation turns the selected evaluation into a strict `DeploymentPlan`; the accompanying `EvidenceBundle` points back to measurements, optimizer decisions, rejected candidates and artifact hashes.
 7. The simulator or gateway replays traffic. Runtime artifacts feed controller evaluation, fault diagnosis and reports.
 8. The report generator verifies the artifact index and plan digest before deriving any displayed metric.
@@ -53,7 +53,7 @@ The Python/Rust boundary is JSON over bounded subprocess execution because it is
 
 The online policy operates in fixed windows. It estimates workload composition and arrival rate, forecasts an upper-rate envelope, evaluates replica/concurrency/routing actions, and chooses the cheapest action whose predicted TTFT remains inside a safety margin. Minimum samples, cooldown, and hourly change budgets may force a hold. Routing or variant changes are canaried; an observed TTFT beyond the promotion limit restores the previous state and enters rollback cooldown.
 
-The checked-in CPU evaluation exercised scale decisions, but not a canary or rollback: zero canary windows and zero rollbacks were recorded. The state machine and rollback path are implemented and tested separately; the evaluation must not be read as evidence that rollback happened.
+The checked-in CPU evaluation exercised scale decisions, translated both policies' replica/concurrency actions into identical calibrated Rust-simulator scenarios, and compared their request deadline misses and simulated cost. It did not exercise a canary or rollback. The state machine and rollback path are implemented and tested separately; the evaluation must not be read as evidence that rollback happened or that actions were applied to live provider capacity.
 
 ## Failure handling
 
@@ -66,7 +66,7 @@ The checked-in CPU evaluation exercised scale decisions, but not a canary or rol
 
 ## Deployment IR
 
-`DeploymentPlan` is strict and frozen in Python and has a matching Rust representation. It combines model, engine, hardware, workload, SLO and budget specifications with replica, routing, admission, batching, autoscaling, cold-start, canary and rollback policies. Every metric estimate contains a point, interval, confidence, unit, sample count and measurement IDs. In the current CPU artifact, the serialized `0.95` confidence is a requested nominal level, not an empirically achieved coverage guarantee; observed prefill interval coverage was only 54.17%. Extension keys must be namespace-qualified. Unknown fields are rejected.
+`DeploymentPlan` is strict and frozen in Python and has a matching Rust representation. It combines model, engine, hardware, workload, SLO and budget specifications with replica, routing, admission, batching, autoscaling, cold-start, canary and rollback policies. Every metric estimate contains a point, interval, empirical coverage value, unit, sample count and stage-specific measurement IDs. TTFT cites prefill plus representative load, ITL cites decode plus load, startup cites startup probes, hardware has its own reference, and load-derived availability/cost/goodput cite load observations; bounded values such as availability are clamped to their domain. The curve's requested 0.95 nominal coverage remains separate from held-out empirical coverage. Extension keys must be namespace-qualified. Unknown fields are rejected.
 
 The version-1 schema is at [`schemas/deployment-plan-v1.schema.json`](../schemas/deployment-plan-v1.schema.json). Migrations accept only known alpha formats, never optimistic unknown versions. Golden fixtures and conformance tests exercise canonical serialization and SHA-256 equality across Python and Rust.
 
