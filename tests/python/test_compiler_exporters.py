@@ -77,6 +77,26 @@ def test_exporters_generate_valid_offline_artifacts(target: str, tmp_path: Path)
     )
     assert result.files
     assert result.validation
+
+
+@pytest.mark.parametrize("target", ["modal", "truss"])
+def test_mock_cloud_exporters_preserve_valid_python(target: str, tmp_path: Path) -> None:
+    context = ExportContext(
+        plan_id="mock-plan",
+        model_id="sloforge/mock-model",
+        model_revision="fixture",
+        engine="mock",
+        dtype="float32",
+        gpu_count=0,
+        concurrency=2,
+    )
+    result = export_plan(
+        context=context,
+        target=target,  # type: ignore[arg-type]
+        output=tmp_path / target,
+        repository_root=Path(__file__).resolve().parents[2],
+    )
+    assert result.validation
     assert result.deployed is False
 
 
