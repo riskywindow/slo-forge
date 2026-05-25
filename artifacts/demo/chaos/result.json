@@ -1,0 +1,449 @@
+{
+  "confusion_matrix": {
+    "cold_start_dominance": {
+      "cold_start_dominance": 1
+    },
+    "configuration_infeasibility": {
+      "configuration_infeasibility": 1
+    },
+    "decode_dominance": {
+      "decode_dominance": 1
+    },
+    "gateway_queueing": {
+      "gateway_queueing": 2
+    },
+    "insufficient_warm_capacity": {
+      "insufficient_warm_capacity": 1
+    },
+    "unhealthy_backend": {
+      "unhealthy_backend": 2
+    }
+  },
+  "diagnosis_accuracy": 1.0,
+  "executed_at": "2026-08-02T02:56:40.419263+00:00",
+  "executions": [
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 14.699999999999998,
+        "decode_ms": 156.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.8041237113402062,
+        "correct": true,
+        "counterfactual_improvement_ms": 156.0,
+        "diagnosis_latency_ms": 0.018041,
+        "evidence": [
+          "decode contribution 156.0ms"
+        ],
+        "expected_label": "decode_dominance",
+        "fault_id": "slow-backend",
+        "predicted_label": "decode_dominance"
+      },
+      "event": {
+        "backend_id": "balanced",
+        "duration_ms": 900.0,
+        "fault_id": "slow-backend",
+        "fault_type": "backend_slowdown",
+        "magnitude": 3.0,
+        "probability": 1.0,
+        "start_ms": 1500.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.625,
+        "backend_queue_ms": 17.5,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 0.375,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.625,
+        "correct": true,
+        "counterfactual_improvement_ms": 17.5,
+        "diagnosis_latency_ms": 0.006375,
+        "evidence": [
+          "error rate 0.62, healthy fraction 0.38"
+        ],
+        "expected_label": "unhealthy_backend",
+        "fault_id": "backend-process-crash",
+        "predicted_label": "unhealthy_backend"
+      },
+      "event": {
+        "backend_id": "fast",
+        "duration_ms": 800.0,
+        "fault_id": "backend-process-crash",
+        "fault_type": "backend_crash",
+        "magnitude": 2.5,
+        "probability": 1.0,
+        "start_ms": 3000.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 180.0,
+        "warm_replica_fraction": 0.19999999999999996
+      },
+      "diagnosis": {
+        "confidence": 0.99,
+        "correct": true,
+        "counterfactual_improvement_ms": 180.0,
+        "diagnosis_latency_ms": 0.004541,
+        "evidence": [
+          "startup 180.0ms dominates service"
+        ],
+        "expected_label": "cold_start_dominance",
+        "fault_id": "cold-start-spike",
+        "predicted_label": "cold_start_dominance"
+      },
+      "event": {
+        "backend_id": "economy",
+        "duration_ms": 700.0,
+        "fault_id": "cold-start-spike",
+        "fault_type": "startup_slowdown",
+        "magnitude": 4.0,
+        "probability": 1.0,
+        "start_ms": 4300.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.365,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.5,
+        "correct": true,
+        "counterfactual_improvement_ms": 7.0,
+        "diagnosis_latency_ms": 0.003166,
+        "evidence": [
+          "error rate 0.36, healthy fraction 1.00"
+        ],
+        "expected_label": "unhealthy_backend",
+        "fault_id": "injected-request-errors",
+        "predicted_label": "unhealthy_backend"
+      },
+      "event": {
+        "backend_id": "balanced",
+        "duration_ms": 400.0,
+        "fault_id": "injected-request-errors",
+        "fault_type": "request_errors",
+        "magnitude": 2.0,
+        "probability": 1.0,
+        "start_ms": 5200.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 28.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 160.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.99,
+        "correct": true,
+        "counterfactual_improvement_ms": 162.0,
+        "diagnosis_latency_ms": 0.003792,
+        "evidence": [
+          "gateway queue 160.0ms and network 2.0ms"
+        ],
+        "expected_label": "gateway_queueing",
+        "fault_id": "bounded-queue-saturation",
+        "predicted_label": "gateway_queueing"
+      },
+      "event": {
+        "backend_id": null,
+        "duration_ms": 500.0,
+        "fault_id": "bounded-queue-saturation",
+        "fault_type": "queue_saturation",
+        "magnitude": 2.0,
+        "probability": 1.0,
+        "start_ms": 6000.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 7.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 56.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 0.5
+      },
+      "diagnosis": {
+        "confidence": 0.8111111111111111,
+        "correct": true,
+        "counterfactual_improvement_ms": 56.0,
+        "diagnosis_latency_ms": 0.0035,
+        "evidence": [
+          "warm fraction 0.50 with backend queue 56.0ms"
+        ],
+        "expected_label": "insufficient_warm_capacity",
+        "fault_id": "replica-capacity-loss",
+        "predicted_label": "insufficient_warm_capacity"
+      },
+      "event": {
+        "backend_id": "fast",
+        "duration_ms": 600.0,
+        "fault_id": "replica-capacity-loss",
+        "fault_type": "capacity_loss",
+        "magnitude": 2.0,
+        "probability": 1.0,
+        "start_ms": 6900.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 41.5,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 125.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.8083333333333333,
+        "correct": true,
+        "counterfactual_improvement_ms": 166.5,
+        "diagnosis_latency_ms": 0.003083,
+        "evidence": [
+          "gateway queue 41.5ms and network 125.0ms"
+        ],
+        "expected_label": "gateway_queueing",
+        "fault_id": "network-jitter",
+        "predicted_label": "gateway_queueing"
+      },
+      "event": {
+        "backend_id": "economy",
+        "duration_ms": 500.0,
+        "fault_id": "network-jitter",
+        "fault_type": "network_jitter",
+        "magnitude": 2.5,
+        "probability": 1.0,
+        "start_ms": 7700.0
+      }
+    },
+    {
+      "applied": true,
+      "counters_before": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.005,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 0,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "counters_during": {
+        "admitted_capacity_rps": 14.0,
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.2,
+        "backend_queue_ms": 7.0,
+        "decode_ms": 52.0,
+        "gateway_queue_ms": 4.0,
+        "healthy_backend_fraction": 1.0,
+        "memory_rejections": 6,
+        "network_ms": 2.0,
+        "prefill_ms": 38.0,
+        "startup_ms": 45.0,
+        "warm_replica_fraction": 1.0
+      },
+      "diagnosis": {
+        "confidence": 0.99,
+        "correct": true,
+        "counterfactual_improvement_ms": 210.0,
+        "diagnosis_latency_ms": 0.002833,
+        "evidence": [
+          "6 memory admission rejections"
+        ],
+        "expected_label": "configuration_infeasibility",
+        "fault_id": "simulated-memory-rejection",
+        "predicted_label": "configuration_infeasibility"
+      },
+      "event": {
+        "backend_id": "balanced",
+        "duration_ms": 400.0,
+        "fault_id": "simulated-memory-rejection",
+        "fault_type": "simulated_oom",
+        "magnitude": 2.0,
+        "probability": 1.0,
+        "start_ms": 8500.0
+      }
+    }
+  ],
+  "false_positive_count": 0,
+  "false_positive_rate": 0.0,
+  "mean_diagnosis_latency_ms": 0.005666375,
+  "negative_window_count": 8,
+  "scenario_name": "cpu-demo-required-faults",
+  "schema_version": "sloforge.chaos-result/v1",
+  "seed": 41
+}

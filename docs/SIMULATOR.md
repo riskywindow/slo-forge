@@ -58,6 +58,6 @@ cargo run -q -p sloforge-sim -- simulate \
 
 <!-- Metrics source: ../artifacts/demo/simulator/replay.raw.json; provenance source: ../artifacts/demo/simulator/replay.raw.json#/provenance -->
 
-The checked-in seeded run processed 3,445 events for 120 requests over 22.25 simulated seconds. It completed 71 requests, recorded 4 backend failures and 49 deadline misses, with 5,035.21 ms p95 TTFT, 16.02 ms p99 ITL, 332.04 output tokens/s and 0.01360 USD simulated cost. Availability/SLO attainment was 59.17%. Those deliberately poor faulted-load results are retained rather than replaced by the optimizer's steady-profile estimate.
+The checked-in seeded run processed 4,970 events for 120 requests over 16.378 simulated seconds. It completed 117 requests and recorded 3 failed/deadline-missed requests, with 717.771 ms p95 TTFT, 12.697 ms p99 ITL, 688.313 output tokens/s and 0.030026 USD simulated cost. Availability/SLO attainment was 97.5%. Those faulted-load results are retained rather than replaced by the optimizer's 192.349 ms TTFT prediction or the live gateway's successful summary.
 
-The result is CPU/mock evidence. It says the state machine and calibrated replay run; it is not evidence for GPU service accuracy. The 54.17% interval coverage in the current calibration further cautions against treating the simulator as a universal predictor.
+The result is CPU/mock evidence. It says the state machine and calibrated replay run; it is not evidence for GPU service accuracy. Selected-curve prefill/decode coverage was 91.667%/100% on only 12 held-out observations each, and the simulator's faulted TTFT was far outside the steady prediction; both facts caution against treating the twin as a universal predictor.

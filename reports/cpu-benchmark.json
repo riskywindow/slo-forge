@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-08-02T02:58:31.179848+00:00",
+  "metrics": {
+    "decode_held_out_mape": 0.02097466360216701,
+    "decode_interval_coverage": 0.75,
+    "diagnosis_accuracy": 1.0,
+    "diagnosis_false_positive_rate": 0.0,
+    "diagnosis_mean_latency_ms": 0.005104125,
+    "diagnosis_negative_window_count": 8,
+    "measured_trial_count": 3,
+    "pareto_candidate_count": 4,
+    "prediction_interval_coverage": 0.9166666666666666,
+    "predictive_controller_cost_usd": 0.03695853055454321,
+    "predictive_controller_violations": 0,
+    "prefill_held_out_mape": 0.10873730084163159,
+    "reactive_controller_cost_usd": 0.03549979340172222,
+    "reactive_controller_violations": 2,
+    "replay_request_count": 120,
+    "replay_slo_attainment": 0.975,
+    "selected_config_id": "cfg-aad9cd4cfa41",
+    "selected_cost_per_million_tokens": 2.477181768824118,
+    "selected_p95_ttft_ms": 194.17921007215082,
+    "selected_p99_itl_ms": 3.5817600434447034
+  },
+  "output_hashes": {
+    "controller.svg": "4ff824cb534efa24be8f33602cb7b3eb1f6453c7b90ac96f4de9611bd6cfc212",
+    "evaluation.html": "873c61419b0b65b7a2c7752c17c4886b306ac78daab04e35df906d6d1f2fc550",
+    "evaluation.json": "7e16061921a089664d91abe847ecf57e793c018db422762d083e44d1a57ca33b",
+    "evaluation.md": "d828a9075292d751e52764b99974aad842ef37774e4bf11aa1d7ab512b20e4df",
+    "metrics.prom": "2f2e044ba47666b201e0c47878998ef45309bdb75558f78983b1c19c13c1899b",
+    "otel-traces.json": "a0c00cf4c47664afb6b77fe610f5ee01c7eaf87ab43b9437c39dc3481a102489",
+    "pareto.svg": "200ce1a576e703a42af4f1471ac818b963668792455201d815b6dfd263bb12d5",
+    "report-data.json": "9b2fc133c179931e7ce605d80e0b910d187617d6a35d55d6890dd488b9829b30",
+    "report-manifest.json": "15ce840ede8c4f4f0018167f17ab190c5edb9a0f38dd0cb42170d237ee014dd4",
+    "trace.json": "6452c11c57e1577934baf99034e791abe56fec5f35d40b2d0d391b83320b3d0e"
+  },
+  "schema_version": "sloforge.cpu-benchmark/v1",
+  "source_report": "reports/cpu-demo",
+  "verified_artifact_count": 27
+}

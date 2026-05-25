@@ -1,0 +1,16 @@
+{
+  "deployed": false,
+  "files": {
+    "config.yaml": "d742f3094dd6b63e98aec50b31a59587bdcea4e7165517943f33384fa499716f",
+    "model/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "model/model.py": "0bd27dff20ef627ae246349d9117af36f885d6cd068d6e3029ba86e507e5142c"
+  },
+  "generated_at": "2026-08-02T02:58:31.002069+00:00",
+  "output_dir": "artifacts/cpu-demo/exports/truss",
+  "schema_version": "sloforge.export/v1",
+  "target": "truss",
+  "validation": [
+    "Truss config validated against vendored official-schema subset; model compiled",
+    "Truss 0.18.24 package validation passed without credentials"
+  ]
+}

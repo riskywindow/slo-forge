@@ -1,0 +1,584 @@
+{
+  "measurement_claim": "These are calibrated configuration predictions; raw backend measurements are referenced by the profile and are not relabeled as configuration trials.",
+  "results": [
+    {
+      "baseline": "documented-engine-default",
+      "configuration": {
+        "backend_candidate_id": "mock-balanced",
+        "chunked_prefill": false,
+        "concurrency": 1,
+        "config_id": "cfg-19bc10067015",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.992,
+        "cold_start_p95_ms": 247.624175,
+        "cost_per_million_tokens": 4.449029190949488,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 41493.33341427226,
+        "p95_ttft_ms": 40293.70945744455,
+        "p99_itl_ms": 5.192053481184638,
+        "throughput_tokens_s": 68.67915278621616
+      },
+      "regime": "steady",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 40272.492"
+      ],
+      "uncertainty": {
+        "availability": 0.0011355766688074113,
+        "cold_start_p95_ms": 455.35961134375003,
+        "cost_per_million_tokens": 0.05052213748085351,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 471.18861336294543,
+        "p95_ttft_ms": 457.56596359578566,
+        "p99_itl_ms": 2.2653119999999873,
+        "throughput_tokens_s": 0.779904435374866
+      }
+    },
+    {
+      "baseline": "documented-engine-default",
+      "configuration": {
+        "backend_candidate_id": "mock-balanced",
+        "chunked_prefill": false,
+        "concurrency": 1,
+        "config_id": "cfg-19bc10067015",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.992,
+        "cold_start_p95_ms": 247.624175,
+        "cost_per_million_tokens": 4.154082686081602,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 34214.544108752285,
+        "p95_ttft_ms": 33040.10161130832,
+        "p99_itl_ms": 5.192053481184638,
+        "throughput_tokens_s": 73.55548231606704
+      },
+      "regime": "bursty",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 33018.878"
+      ],
+      "uncertainty": {
+        "availability": 0.0013848414481828606,
+        "cold_start_p95_ms": 455.35961134375003,
+        "cost_per_million_tokens": 0.057527458828645926,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 473.8171881248087,
+        "p95_ttft_ms": 457.55302163513073,
+        "p99_itl_ms": 2.2653119999999873,
+        "throughput_tokens_s": 1.0186268065237107
+      }
+    },
+    {
+      "baseline": "documented-engine-default",
+      "configuration": {
+        "backend_candidate_id": "mock-balanced",
+        "chunked_prefill": false,
+        "concurrency": 1,
+        "config_id": "cfg-19bc10067015",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.992,
+        "cold_start_p95_ms": 247.624175,
+        "cost_per_million_tokens": 2.946836921283706,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 8484.24644005867,
+        "p95_ttft_ms": 7903.515258188169,
+        "p99_itl_ms": 5.192053481184638,
+        "throughput_tokens_s": 103.689333247002
+      },
+      "regime": "short-prompts",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 7803.393"
+      ],
+      "uncertainty": {
+        "availability": 0.0037926816680159264,
+        "cold_start_p95_ms": 297.6867803867188,
+        "cost_per_million_tokens": 0.11176414369985203,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 321.780459401399,
+        "p95_ttft_ms": 299.7551743261443,
+        "p99_itl_ms": 2.2653119999999873,
+        "throughput_tokens_s": 3.932606333746988
+      }
+    },
+    {
+      "baseline": "documented-engine-default",
+      "configuration": {
+        "backend_candidate_id": "mock-balanced",
+        "chunked_prefill": false,
+        "concurrency": 1,
+        "config_id": "cfg-19bc10067015",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.992,
+        "cold_start_p95_ms": 247.624175,
+        "cost_per_million_tokens": 2.9316820929818466,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 51371.36072646845,
+        "p95_ttft_ms": 49951.85330471257,
+        "p99_itl_ms": 5.192053481184638,
+        "throughput_tokens_s": 104.22533749038648
+      },
+      "regime": "long-prompts",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 49930.642"
+      ],
+      "uncertainty": {
+        "availability": 0.001,
+        "cold_start_p95_ms": 455.3596113437501,
+        "cost_per_million_tokens": 0.026855287046094627,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 470.5805726891019,
+        "p95_ttft_ms": 457.57736222280533,
+        "p99_itl_ms": 2.2653119999999873,
+        "throughput_tokens_s": 0.9547424539928615
+      }
+    },
+    {
+      "baseline": "documented-engine-default",
+      "configuration": {
+        "backend_candidate_id": "mock-balanced",
+        "chunked_prefill": false,
+        "concurrency": 1,
+        "config_id": "cfg-19bc10067015",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.992,
+        "cold_start_p95_ms": 247.624175,
+        "cost_per_million_tokens": 4.449029190949488,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 41493.33341427226,
+        "p95_ttft_ms": 40293.70945744455,
+        "p99_itl_ms": 5.192053481184638,
+        "throughput_tokens_s": 68.67915278621616
+      },
+      "regime": "mixed",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 40272.492"
+      ],
+      "uncertainty": {
+        "availability": 0.0011355766688074113,
+        "cold_start_p95_ms": 455.35961134375003,
+        "cost_per_million_tokens": 0.05052213748085351,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 471.18861336294543,
+        "p95_ttft_ms": 457.56596359578566,
+        "p99_itl_ms": 2.2653119999999873,
+        "throughput_tokens_s": 0.779904435374866
+      }
+    },
+    {
+      "baseline": "manual-static",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 4,
+        "config_id": "cfg-6179bdb6c967",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.996,
+        "cold_start_p95_ms": 533.6959839,
+        "cost_per_million_tokens": 1.6938381368289492,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 20402.839171183066,
+        "p95_ttft_ms": 19397.759236042566,
+        "p99_itl_ms": 4.350053820127677,
+        "throughput_tokens_s": 360.78483405455626
+      },
+      "regime": "steady",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 19182.170"
+      ],
+      "uncertainty": {
+        "availability": 0.001,
+        "cold_start_p95_ms": 68.5184079752604,
+        "cost_per_million_tokens": 0.006009615505770897,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 72.38780139549637,
+        "p95_ttft_ms": 68.82185029814573,
+        "p99_itl_ms": 0.31887600000001015,
+        "throughput_tokens_s": 1.2800385620318528
+      }
+    },
+    {
+      "baseline": "manual-static",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 4,
+        "config_id": "cfg-6179bdb6c967",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.996,
+        "cold_start_p95_ms": 533.6959839,
+        "cost_per_million_tokens": 1.6038426249988291,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 17032.818912390994,
+        "p95_ttft_ms": 16048.836738278113,
+        "p99_itl_ms": 4.350053820127677,
+        "throughput_tokens_s": 381.0293488811331
+      },
+      "regime": "bursty",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 15833.246"
+      ],
+      "uncertainty": {
+        "availability": 0.001,
+        "cold_start_p95_ms": 68.5184079752604,
+        "cost_per_million_tokens": 0.006877398964984015,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 73.03802089617334,
+        "p95_ttft_ms": 68.81863061415511,
+        "p99_itl_ms": 0.31887600000001015,
+        "throughput_tokens_s": 1.6338827817508286
+      }
+    },
+    {
+      "baseline": "manual-static",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 4,
+        "config_id": "cfg-6179bdb6c967",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": true,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.996,
+        "cold_start_p95_ms": 533.6959839,
+        "cost_per_million_tokens": 1.9126295660563628,
+        "goodput_tokens_s": 319.51357542336683,
+        "p95_e2e_ms": 544.3942300656709,
+        "p95_ttft_ms": 74.36144569460932,
+        "p99_itl_ms": 4.202349435592861,
+        "throughput_tokens_s": 319.51357542336683
+      },
+      "regime": "short-prompts",
+      "rejection_reasons": [],
+      "uncertainty": {
+        "availability": 0.034999999999999996,
+        "cold_start_p95_ms": 186.793594365,
+        "cost_per_million_tokens": 0.669420348119727,
+        "goodput_tokens_s": 111.82975139817839,
+        "p95_e2e_ms": 190.53798052298478,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 1.4708223024575013,
+        "throughput_tokens_s": 111.82975139817839
+      }
+    },
+    {
+      "baseline": "manual-static",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 4,
+        "config_id": "cfg-6179bdb6c967",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.996,
+        "cold_start_p95_ms": 533.6959839,
+        "cost_per_million_tokens": 1.4250094261548905,
+        "goodput_tokens_s": 428.847065777014,
+        "p95_e2e_ms": 1727.9891669815104,
+        "p95_ttft_ms": 562.4343621857206,
+        "p99_itl_ms": 4.263185094351829,
+        "throughput_tokens_s": 428.847065777014
+      },
+      "regime": "long-prompts",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 346.694"
+      ],
+      "uncertainty": {
+        "availability": 0.012147094037313658,
+        "cold_start_p95_ms": 68.5184079752604,
+        "cost_per_million_tokens": 0.17309723503561827,
+        "goodput_tokens_s": 52.09245635619425,
+        "p95_e2e_ms": 209.90046906783698,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 0.5178531023956556,
+        "throughput_tokens_s": 52.09245635619425
+      }
+    },
+    {
+      "baseline": "manual-static",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 4,
+        "config_id": "cfg-6179bdb6c967",
+        "max_batched_tokens": 2048,
+        "replicas": 1,
+        "routing_policy": "round_robin",
+        "warm_replicas": 1
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.996,
+        "cold_start_p95_ms": 533.6959839,
+        "cost_per_million_tokens": 1.6938381368289492,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 20402.839171183066,
+        "p95_ttft_ms": 19397.759236042566,
+        "p99_itl_ms": 4.350053820127677,
+        "throughput_tokens_s": 360.78483405455626
+      },
+      "regime": "mixed",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 19182.170"
+      ],
+      "uncertainty": {
+        "availability": 0.001,
+        "cold_start_p95_ms": 68.5184079752604,
+        "cost_per_million_tokens": 0.006009615505770897,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 72.38780139549637,
+        "p95_ttft_ms": 68.82185029814573,
+        "p99_itl_ms": 0.31887600000001015,
+        "throughput_tokens_s": 1.2800385620318528
+      }
+    },
+    {
+      "baseline": "sloforge-plan",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 6,
+        "config_id": "cfg-aad9cd4cfa41",
+        "max_batched_tokens": 2048,
+        "replicas": 3,
+        "routing_policy": "slo_slack",
+        "warm_replicas": 2
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.9986648849277057,
+        "cold_start_p95_ms": 711.5946452,
+        "cost_per_million_tokens": 1.8702671810258609,
+        "goodput_tokens_s": 980.2521008403361,
+        "p95_e2e_ms": 1049.0481278677357,
+        "p95_ttft_ms": 235.80979340920373,
+        "p99_itl_ms": 3.519750419643072,
+        "throughput_tokens_s": 980.2521008403361
+      },
+      "regime": "steady",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 20.069"
+      ],
+      "uncertainty": {
+        "availability": 0.028762551782778836,
+        "cold_start_p95_ms": 204.6727783091313,
+        "cost_per_million_tokens": 0.5379365664188812,
+        "goodput_tokens_s": 281.94551810597903,
+        "p95_e2e_ms": 301.7330110042294,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 1.012370037074414,
+        "throughput_tokens_s": 281.94551810597903
+      }
+    },
+    {
+      "baseline": "sloforge-plan",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 6,
+        "config_id": "cfg-aad9cd4cfa41",
+        "max_batched_tokens": 2048,
+        "replicas": 3,
+        "routing_policy": "slo_slack",
+        "warm_replicas": 2
+      },
+      "feasible": false,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.9986648849277057,
+        "cold_start_p95_ms": 711.5946452,
+        "cost_per_million_tokens": 1.0692284166658859,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 14295.401587185293,
+        "p95_ttft_ms": 13469.559405340555,
+        "p99_itl_ms": 3.650938027607157,
+        "throughput_tokens_s": 1714.6320699650992
+      },
+      "regime": "bursty",
+      "rejection_reasons": [
+        "p95_ttft_ms misses its uncertainty-adjusted constraint by 13253.969"
+      ],
+      "uncertainty": {
+        "availability": 0.001,
+        "cold_start_p95_ms": 68.5184079752604,
+        "cost_per_million_tokens": 0.005462898468639786,
+        "goodput_tokens_s": 0.0,
+        "p95_e2e_ms": 73.03802089617334,
+        "p95_ttft_ms": 68.81863061415511,
+        "p99_itl_ms": 0.31887600000001015,
+        "throughput_tokens_s": 8.760392787259766
+      }
+    },
+    {
+      "baseline": "sloforge-plan",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 6,
+        "config_id": "cfg-aad9cd4cfa41",
+        "max_batched_tokens": 2048,
+        "replicas": 3,
+        "routing_policy": "slo_slack",
+        "warm_replicas": 2
+      },
+      "feasible": true,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.9986648849277057,
+        "cold_start_p95_ms": 711.5946452,
+        "cost_per_million_tokens": 5.737888698169089,
+        "goodput_tokens_s": 319.51357542336683,
+        "p95_e2e_ms": 417.8817133578914,
+        "p95_ttft_ms": 41.45304884034513,
+        "p99_itl_ms": 3.3654775549177134,
+        "throughput_tokens_s": 319.51357542336683
+      },
+      "regime": "short-prompts",
+      "rejection_reasons": [],
+      "uncertainty": {
+        "availability": 0.034999999999999996,
+        "cold_start_p95_ms": 249.05812581999996,
+        "cost_per_million_tokens": 2.008261044359181,
+        "goodput_tokens_s": 111.82975139817839,
+        "p95_e2e_ms": 146.25859967526196,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 1.1779171442211995,
+        "throughput_tokens_s": 111.82975139817839
+      }
+    },
+    {
+      "baseline": "sloforge-plan",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 6,
+        "config_id": "cfg-aad9cd4cfa41",
+        "max_batched_tokens": 2048,
+        "replicas": 3,
+        "routing_policy": "slo_slack",
+        "warm_replicas": 2
+      },
+      "feasible": true,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.9986648849277057,
+        "cold_start_p95_ms": 711.5946452,
+        "cost_per_million_tokens": 4.275028278464671,
+        "goodput_tokens_s": 428.847065777014,
+        "p95_e2e_ms": 1125.4644023096716,
+        "p95_ttft_ms": 202.24075130341885,
+        "p99_itl_ms": 3.3768238880989494,
+        "throughput_tokens_s": 428.847065777014
+      },
+      "regime": "long-prompts",
+      "rejection_reasons": [],
+      "uncertainty": {
+        "availability": 0.03347830744095854,
+        "cold_start_p95_ms": 238.2298430534541,
+        "cost_per_million_tokens": 1.4312071102523196,
+        "goodput_tokens_s": 143.57073913235843,
+        "p95_e2e_ms": 376.78643274377833,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 1.130503482997496,
+        "throughput_tokens_s": 143.57073913235843
+      }
+    },
+    {
+      "baseline": "sloforge-plan",
+      "configuration": {
+        "backend_candidate_id": "mock-fast",
+        "chunked_prefill": true,
+        "concurrency": 6,
+        "config_id": "cfg-aad9cd4cfa41",
+        "max_batched_tokens": 2048,
+        "replicas": 3,
+        "routing_policy": "slo_slack",
+        "warm_replicas": 2
+      },
+      "feasible": true,
+      "fidelity": "calibrated_prediction",
+      "metrics": {
+        "availability": 0.9986648849277057,
+        "cold_start_p95_ms": 711.5946452,
+        "cost_per_million_tokens": 2.477181768824118,
+        "goodput_tokens_s": 740.0883360301776,
+        "p95_e2e_ms": 994.2425667853829,
+        "p95_ttft_ms": 192.34921737537178,
+        "p99_itl_ms": 3.4706485583640383,
+        "throughput_tokens_s": 740.0883360301776
+      },
+      "regime": "mixed",
+      "rejection_reasons": [],
+      "uncertainty": {
+        "availability": 0.034999999999999996,
+        "cold_start_p95_ms": 249.05812581999996,
+        "cost_per_million_tokens": 0.8670136190884412,
+        "goodput_tokens_s": 259.03091761056214,
+        "p95_e2e_ms": 347.984898374884,
+        "p95_ttft_ms": 68.5184079752604,
+        "p99_itl_ms": 1.2147269954274134,
+        "throughput_tokens_s": 259.03091761056214
+      }
+    }
+  ],
+  "schema_version": "sloforge.serving-baselines/v1",
+  "source_profile_id": "http-profile-41-1785639382"
+}

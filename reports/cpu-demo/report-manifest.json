@@ -1,0 +1,39 @@
+{
+  "evidence_path": "artifacts/cpu-demo/evidence/evidence.json",
+  "generated_at": "2026-08-02T02:58:31.052256+00:00",
+  "metrics": {
+    "decode_held_out_mape": 0.02097466360216701,
+    "decode_interval_coverage": 0.75,
+    "diagnosis_accuracy": 1.0,
+    "diagnosis_false_positive_rate": 0.0,
+    "diagnosis_mean_latency_ms": 0.005104125,
+    "diagnosis_negative_window_count": 8,
+    "measured_trial_count": 3,
+    "pareto_candidate_count": 4,
+    "prediction_interval_coverage": 0.9166666666666666,
+    "predictive_controller_cost_usd": 0.03695853055454321,
+    "predictive_controller_violations": 0,
+    "prefill_held_out_mape": 0.10873730084163159,
+    "reactive_controller_cost_usd": 0.03549979340172222,
+    "reactive_controller_violations": 2,
+    "replay_request_count": 120,
+    "replay_slo_attainment": 0.975,
+    "selected_config_id": "cfg-aad9cd4cfa41",
+    "selected_cost_per_million_tokens": 2.477181768824118,
+    "selected_p95_ttft_ms": 194.17921007215082,
+    "selected_p99_itl_ms": 3.5817600434447034
+  },
+  "outputs": {
+    "controller.svg": "reports/cpu-demo/controller.svg",
+    "evaluation.html": "reports/cpu-demo/evaluation.html",
+    "evaluation.json": "reports/cpu-demo/evaluation.json",
+    "evaluation.md": "reports/cpu-demo/evaluation.md",
+    "metrics.prom": "reports/cpu-demo/metrics.prom",
+    "otel-traces.json": "reports/cpu-demo/otel-traces.json",
+    "pareto.svg": "reports/cpu-demo/pareto.svg",
+    "report-data.json": "reports/cpu-demo/report-data.json",
+    "trace.json": "reports/cpu-demo/trace.json"
+  },
+  "schema_version": "sloforge.report/v1",
+  "verified_artifact_count": 27
+}

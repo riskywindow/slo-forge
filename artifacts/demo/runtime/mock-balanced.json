@@ -1,0 +1,15 @@
+{
+  "bind": "127.0.0.1:50677",
+  "decode_per_token_ms": 3,
+  "failure_rate": 0.008,
+  "max_concurrency": 4,
+  "max_output_tokens": 256,
+  "name": "mock-balanced",
+  "prefill_base_ms": 8,
+  "prefill_per_token_us": 80,
+  "price_per_hour_usd": 1.1,
+  "seed": 41,
+  "startup_every_n_requests": 0,
+  "startup_jitter_ms": 21,
+  "startup_ms": 180
+}

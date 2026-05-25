@@ -1,0 +1,26 @@
+# TYPE sloforge_plan_ttft_p95_milliseconds gauge
+sloforge_plan_ttft_p95_milliseconds 192.34921737537178
+# TYPE sloforge_plan_itl_p99_milliseconds gauge
+sloforge_plan_itl_p99_milliseconds 3.4706485583640383
+# TYPE sloforge_plan_cost_per_million_tokens gauge
+sloforge_plan_cost_per_million_tokens 2.477181768824118
+# TYPE sloforge_prediction_mape_ratio gauge
+sloforge_prediction_mape_ratio 0.08400927607014826
+# TYPE sloforge_prediction_interval_coverage_ratio gauge
+sloforge_prediction_interval_coverage_ratio 0.9166666666666666
+# TYPE sloforge_decode_prediction_mape_ratio gauge
+sloforge_decode_prediction_mape_ratio 0.010090668367036012
+# TYPE sloforge_decode_interval_coverage_ratio gauge
+sloforge_decode_interval_coverage_ratio 1.0
+# TYPE sloforge_controller_slo_violations_total gauge
+sloforge_controller_slo_violations_total{controller="predictive"} 0
+# TYPE sloforge_controller_slo_violations_total gauge
+sloforge_controller_slo_violations_total{controller="reactive"} 2
+# TYPE sloforge_diagnosis_accuracy_ratio gauge
+sloforge_diagnosis_accuracy_ratio 1.0
+# TYPE sloforge_diagnosis_false_positive_ratio gauge
+sloforge_diagnosis_false_positive_ratio 0.0
+# TYPE sloforge_diagnosis_negative_windows_total gauge
+sloforge_diagnosis_negative_windows_total 8
+# TYPE sloforge_replay_slo_attainment_ratio gauge
+sloforge_replay_slo_attainment_ratio 0.975

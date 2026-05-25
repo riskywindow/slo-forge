@@ -1,0 +1,16 @@
+{
+  "deployed": false,
+  "files": {
+    "Chart.yaml": "46719643f9af73f99604109d731819b1a29b0e00e71401f5d2343b10ae764a4d",
+    "templates/NOTES.txt": "c3eec805e1bcb4d91c17af2331cffccd1cfbc94472ef7a5def4037f43e323590",
+    "templates/runtime.yaml": "f73859001aa20cbc0866924c65de00c4550ed88382d9485b1bbd8e9762051031",
+    "values.yaml": "366d78dc393b3ab49efdf57a3d7e3723a19f1ea456732c0627b7ec82b364e43b"
+  },
+  "generated_at": "2026-08-02T02:58:30.257733+00:00",
+  "output_dir": "artifacts/cpu-demo/exports/kubernetes",
+  "schema_version": "sloforge.export/v1",
+  "target": "kubernetes",
+  "validation": [
+    "Helm values, gateway contract, resources, probes, pod security, and backend NetworkPolicy validated"
+  ]
+}

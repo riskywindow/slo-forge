@@ -1,0 +1,317 @@
+{
+  "displayTimeUnit": "ms",
+  "traceEvents": [
+    {
+      "args": {
+        "replicas": 3,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 0.0
+    },
+    {
+      "args": {
+        "replicas": 3,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 1000000.0
+    },
+    {
+      "args": {
+        "replicas": 3,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 2000000.0
+    },
+    {
+      "args": {
+        "replicas": 3,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 3000000.0
+    },
+    {
+      "args": {
+        "replicas": 3,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 4000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:scale",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 5000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 6000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 7000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 8000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 9000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 10000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 11000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 12000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 13000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 14000000.0
+    },
+    {
+      "args": {
+        "replicas": 4,
+        "rollback": false
+      },
+      "cat": "control",
+      "dur": 2000,
+      "name": "controller:hold",
+      "ph": "X",
+      "pid": 1,
+      "tid": 1,
+      "ts": 15000000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "decode_dominance"
+      },
+      "cat": "chaos",
+      "dur": 900000.0,
+      "name": "fault:backend_slowdown",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 1500000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "unhealthy_backend"
+      },
+      "cat": "chaos",
+      "dur": 800000.0,
+      "name": "fault:backend_crash",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 3000000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "cold_start_dominance"
+      },
+      "cat": "chaos",
+      "dur": 700000.0,
+      "name": "fault:startup_slowdown",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 4300000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "unhealthy_backend"
+      },
+      "cat": "chaos",
+      "dur": 400000.0,
+      "name": "fault:request_errors",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 5200000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "gateway_queueing"
+      },
+      "cat": "chaos",
+      "dur": 500000.0,
+      "name": "fault:queue_saturation",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 6000000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "insufficient_warm_capacity"
+      },
+      "cat": "chaos",
+      "dur": 600000.0,
+      "name": "fault:capacity_loss",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 6900000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "gateway_queueing"
+      },
+      "cat": "chaos",
+      "dur": 500000.0,
+      "name": "fault:network_jitter",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 7700000.0
+    },
+    {
+      "args": {
+        "correct": true,
+        "diagnosis": "configuration_infeasibility"
+      },
+      "cat": "chaos",
+      "dur": 400000.0,
+      "name": "fault:simulated_oom",
+      "ph": "X",
+      "pid": 1,
+      "tid": 2,
+      "ts": 8500000.0
+    }
+  ]
+}

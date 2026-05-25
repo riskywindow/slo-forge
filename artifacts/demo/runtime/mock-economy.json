@@ -1,0 +1,15 @@
+{
+  "bind": "127.0.0.1:50679",
+  "decode_per_token_ms": 5,
+  "failure_rate": 0.015,
+  "max_concurrency": 2,
+  "max_output_tokens": 256,
+  "name": "mock-economy",
+  "prefill_base_ms": 12,
+  "prefill_per_token_us": 115,
+  "price_per_hour_usd": 0.45,
+  "seed": 43,
+  "startup_every_n_requests": 0,
+  "startup_jitter_ms": 6,
+  "startup_ms": 75
+}

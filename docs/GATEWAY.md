@@ -62,6 +62,6 @@ Run `cargo test -p sloforge-gateway`. No proprietary backend or network service 
 
 <!-- Metrics sources: ../artifacts/demo/gateway/replay.json and ../artifacts/demo/gateway/metrics.prom -->
 
-The gateway replay sent 120 requests and all 120 completed at HTTP level despite scheduled slowdown, crash/recovery and cold-start injections. It observed 1,605.45 ms p95 TTFT, 12.35 ms p99 ITL and 1,606.08 ms p95 E2E. Prometheus data records 63 queue-phase retries and 22 terminal pre-output queue-timeout errors across internal attempts, while the replay summary records 100% final availability. That difference is expected: attempt errors and final request outcomes are different denominators.
+The gateway replay materialized the compiled three-replica fast-mock topology and sent the original trace at its profiled arrival timing. All 120 requests completed despite scheduled slowdown, crash/recovery and cold-start injections. It observed 170.429 ms p95 TTFT, 9.429 ms p99 ITL and 290.455 ms p95 E2E. Prometheus data records 2 backend-status errors and 2 pre-output retries on the crashed replica while the replay summary records 100% final availability. That difference is expected: attempt errors and final request outcomes are different denominators.
 
 The demo runs on localhost with deterministic mock token generation. It validates transport and control behavior, not inference quality or public-internet security.

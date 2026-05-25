@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: {{ .Release.Name }}-config}
+data:
+  gateway.json: |
+    {"bind":"0.0.0.0:8080","backends":[{"name":"inference-0","base_url":"http://{{ .Release.Name }}-backend:8000","capacity":{{ .Values.concurrency }},"estimated_service_ms":{{ .Values.estimatedServiceMs }},"price_per_hour_usd":{{ .Values.hourlyPriceUsd }},"health_path":"/health","weight":1}],"routing_policy":"slo_slack_aware","admission_capacity":256,"stream_buffer_bytes":1048576,"max_request_bytes":1048576,"queue_timeout_ms":1000,"request_timeout_ms":120000,"connect_timeout_ms":2000,"health_interval_ms":5000,"health_timeout_ms":1000,"retry_attempts":1,"breaker_failures":3,"breaker_cooldown_ms":10000,"max_trace_events":100000,"provenance":{"plan_id":"{{ .Values.planId }}"}}
+  mock-backend.json: |
+    {"name":"inference-0","bind":"0.0.0.0:8000","seed":17,"startup_ms":25,"startup_jitter_ms":2,"startup_every_n_requests":0,"prefill_base_ms":4,"prefill_per_token_us":50,"decode_per_token_ms":3,"max_concurrency":{{ .Values.concurrency }},"max_output_tokens":4096,"price_per_hour_usd":0.0,"failure_rate":0.0}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gateway
+  labels: {app.kubernetes.io/name: sloforge-gateway, sloforge.dev/plan: {{ .Values.planId | quote }}}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels: {app.kubernetes.io/name: sloforge-gateway}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: sloforge-gateway}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8080", prometheus.io/path: "/metrics"}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["serve", "--config", "/etc/sloforge/gateway.json"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe: {httpGet: {path: /ready, port: http}, periodSeconds: 3, failureThreshold: 10}
+          livenessProbe: {httpGet: {path: /health, port: http}, periodSeconds: 10, failureThreshold: 3}
+          volumeMounts:
+            - {name: config, mountPath: /etc/sloforge, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+          resources:
+{{ toYaml .Values.gatewayResources | indent 12 }}
+      volumes:
+        - name: config
+          configMap: {name: {{ .Release.Name }}-config}
+        - name: tmp
+          emptyDir: {sizeLimit: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: {{ .Release.Name }}-gateway}
+spec:
+  selector: {app.kubernetes.io/name: sloforge-gateway}
+  ports:
+    - {name: http, port: 80, targetPort: http}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels: {app.kubernetes.io/name: sloforge-backend, sloforge.dev/plan: {{ .Values.planId | quote }} }
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
+  selector:
+    matchLabels: {app.kubernetes.io/name: sloforge-backend}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: sloforge-backend}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000"}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ toJson .Values.backendCommand }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          env:
+            - {name: HF_HOME, value: /models/huggingface}
+            - {name: XDG_CACHE_HOME, value: /models/cache}
+          ports: [{name: http, containerPort: 8000}]
+          readinessProbe: {httpGet: {path: /health, port: http}, periodSeconds: 5, failureThreshold: 60}
+          livenessProbe: {httpGet: {path: /health, port: http}, periodSeconds: 15, failureThreshold: 4}
+          volumeMounts:
+            - {name: config, mountPath: /etc/sloforge, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+            - {name: model-cache, mountPath: /models}
+          resources:
+{{ toYaml .Values.backendResources | indent 12 }}
+      volumes:
+        - name: config
+          configMap: {name: {{ .Release.Name }}-config}
+        - name: tmp
+          emptyDir: {sizeLimit: 256Mi}
+        - name: model-cache
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: {{ .Release.Name }}-backend}
+spec:
+  selector: {app.kubernetes.io/name: sloforge-backend}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: {{ .Release.Name }}-backend-ingress}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: sloforge-backend}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/name: sloforge-gateway}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: {{ .Release.Name }}-backend}
+spec:
+  minReplicas: {{ .Values.replicaCount }}
+  maxReplicas: {{ .Values.maxReplicas }}
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: {{ .Release.Name }}-backend}
+  behavior:
+    scaleDown: {stabilizationWindowSeconds: 300}
+    scaleUp: {stabilizationWindowSeconds: 15}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}

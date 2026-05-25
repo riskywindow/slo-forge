@@ -1,0 +1,50 @@
+{
+  "admission_capacity": 256,
+  "backends": [
+    {
+      "base_url": "http://127.0.0.1:50678",
+      "capacity": 6,
+      "estimated_service_ms": 16.8,
+      "health_path": "/health",
+      "name": "mock-fast-replica-0",
+      "price_per_hour_usd": 2.2,
+      "weight": 1
+    },
+    {
+      "base_url": "http://127.0.0.1:50943",
+      "capacity": 6,
+      "estimated_service_ms": 16.8,
+      "health_path": "/health",
+      "name": "mock-fast-replica-1",
+      "price_per_hour_usd": 2.2,
+      "weight": 1
+    },
+    {
+      "base_url": "http://127.0.0.1:50945",
+      "capacity": 6,
+      "estimated_service_ms": 16.8,
+      "health_path": "/health",
+      "name": "mock-fast-replica-2",
+      "price_per_hour_usd": 2.2,
+      "weight": 1
+    }
+  ],
+  "bind": "127.0.0.1:50947",
+  "breaker_cooldown_ms": 500,
+  "breaker_failures": 2,
+  "connect_timeout_ms": 1000,
+  "health_interval_ms": 200,
+  "health_timeout_ms": 150,
+  "max_request_bytes": 1048576,
+  "max_trace_events": 100000,
+  "provenance": {
+    "plan_id": "opt-0c27332ab6ce05d9",
+    "profile_id": "http-profile-41-1785639382"
+  },
+  "queue_timeout_ms": 800,
+  "request_timeout_ms": 15000,
+  "retry_attempts": 1,
+  "routing_policy": "slo_slack_aware",
+  "stream_buffer_bytes": 262144,
+  "trace_output": "artifacts/demo/runtime/gateway-trace.json"
+}

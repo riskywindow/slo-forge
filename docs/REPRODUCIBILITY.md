@@ -42,15 +42,15 @@ measurements.jsonl + hardware.json + workload.jsonl
                 -> SHA-256 artifact index -> report
 ```
 
-[`artifact-index.json`](../artifacts/demo/evidence/artifact-index.json) contains 15 named inputs. Report generation recomputes every hash and checks the canonical plan digest before reading derived metrics. The command transcript is archived at [`artifacts/demo/command-transcript.txt`](../artifacts/demo/command-transcript.txt).
+[`artifact-index.json`](../artifacts/demo/evidence/artifact-index.json) contains 27 named inputs. Report generation recomputes every hash and checks the canonical plan digest before reading derived metrics. The `EvidenceBundle` separately carries 24 artifact hashes and five typed measurement references. The command transcript is archived at [`artifacts/demo/command-transcript.txt`](../artifacts/demo/command-transcript.txt).
 
 ## Recorded CPU environment
 
 <!-- Facts source: ../artifacts/demo/hardware/local-cpu.json and ../artifacts/demo/profiles/qwen3-cpu-mocks/environment.json -->
 
-The example run currently described by the generated local artifacts was captured on macOS 15.6.1 arm64, Apple M4 Pro, 12 logical CPUs and 24 GiB memory, using Python 3.12.7. Demo measurements are build outputs rather than source: run `make demo` before following links under `artifacts/demo` or `reports/demo`. CI uploads both directories as a 14-day evidence artifact keyed by commit. The profile environment could not enumerate packages because that virtual environment lacked `pip`; the error is preserved in `environment.json`. Dependency versions remain available from `uv.lock`, but this is weaker than a successful runtime package inventory.
+The example run currently described by the generated local artifacts was captured on macOS 15.6.1 arm64, Apple M4 Pro, 12 logical CPUs and 24 GiB memory, using Python 3.12.7. Demo measurements are build outputs rather than source: run `make demo` before following links under `artifacts/demo` or `reports/demo`. CI uploads both directories as a 14-day evidence artifact keyed by commit. The profile environment successfully recorded 114 runtime packages in `environment.json`; lock files remain the reproducible dependency authority.
 
-The hardware probe's median samples were 74.72 GB/s host copy and 1,637.29 GFLOP/s for its 384-square FP32 GEMM. These numbers are host-specific and should not be used as a baseline for another machine.
+The hardware probe's median samples were 74.058 GB/s host copy and 1,541.625 GFLOP/s for its 384-square FP32 GEMM. These numbers are host-specific and should not be used as a baseline for another machine.
 
 ## Re-running individual stages
 
