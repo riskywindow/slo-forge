@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: ["mock-backend", "--config", "/etc/sloforge/mock.json"]
+    volumes:
+      - ./mock.json:/etc/sloforge/mock.json:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/health"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+      start_period: 2s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: ["serve", "--config", "/etc/sloforge/gateway.json"]
+    volumes:
+      - ./gateway.json:/etc/sloforge/gateway.json:ro
+    ports:
+      - "127.0.0.1:18080:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/ready"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+      start_period: 2s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true

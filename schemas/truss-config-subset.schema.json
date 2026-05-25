@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloforge.dev/schemas/truss-config-subset.schema.json",
+  "title": "Validated Truss configuration subset emitted by SLOForge",
+  "description": "Offline subset mirrored from Baseten's public Truss config.schema.json and documentation on 2026-08-01.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["model_name", "model_class_name", "model_module_dir", "requirements", "resources", "runtime"],
+  "properties": {
+    "model_name": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "model_class_name": {"type": "string", "minLength": 1},
+    "model_module_dir": {"type": "string", "minLength": 1},
+    "requirements": {"type": "array", "items": {"type": "string"}},
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu", "memory"],
+      "properties": {
+        "cpu": {"type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?(?:m)?$"},
+        "memory": {"type": "string", "pattern": "^[0-9]+(?:Gi|G|Mi|M)$"},
+        "accelerator": {"type": "string", "pattern": "^[A-Z0-9_]+(?::[1-8])?$"},
+        "use_gpu": {"type": "boolean"}
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predict_concurrency", "streaming_read_timeout", "health_checks"],
+      "properties": {
+        "predict_concurrency": {"type": "integer", "minimum": 1},
+        "streaming_read_timeout": {"type": "integer", "minimum": 1},
+        "enable_tracing_data": {"type": "boolean"},
+        "health_checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["startup_threshold_seconds", "restart_threshold_seconds", "stop_traffic_threshold_seconds"],
+          "properties": {
+            "startup_threshold_seconds": {"type": "integer", "minimum": 10, "maximum": 3000},
+            "restart_threshold_seconds": {"type": "integer", "minimum": 1},
+            "stop_traffic_threshold_seconds": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "environment_variables": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    }
+  }
+}

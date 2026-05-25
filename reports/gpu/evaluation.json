@@ -1,0 +1,28 @@
+{
+  "commands": [
+    "sloforge trace generate --output workloads/gpu-benchmark.jsonl --count 180 --seed 41",
+    "sloforge hardware probe --device cuda --hourly-price-usd 0 --output artifacts/hardware/gpu.json",
+    "sloforge profile --model Qwen/Qwen3-0.6B --engines transformers,vllm,sglang --hardware artifacts/hardware/gpu.json --trace workloads/gpu-benchmark.jsonl --budget-usd ${SLOFORGE_GPU_BUDGET_USD:-0} --output artifacts/profiles/gpu"
+  ],
+  "devices": [],
+  "expected_profile_schema": "sloforge.profile/v1",
+  "generated_at": "2026-08-02T02:25:24.524828+00:00",
+  "host": {
+    "machine": "arm64",
+    "platform": "macOS-15.6.1-arm64-i386-64bit",
+    "python": "3.12.7"
+  },
+  "measurements": [],
+  "model": {
+    "engines": [
+      "transformers",
+      "vllm",
+      "sglang"
+    ],
+    "identifier": "Qwen/Qwen3-0.6B",
+    "license": "Apache-2.0"
+  },
+  "reason": "No working nvidia-smi inventory was detected on this host.",
+  "schema_version": "sloforge.gpu-benchmark/v1",
+  "status": "unavailable"
+}

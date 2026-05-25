@@ -1,0 +1,328 @@
+{
+  "admission_policy": {
+    "maximum_queue_time_ms": 200.0,
+    "queue_capacity": 128,
+    "reject_when_predicted_late": true,
+    "shed_below_priority": "batch"
+  },
+  "autoscaling_policy": {
+    "control_interval_seconds": 5.0,
+    "maximum_change_per_interval": 1,
+    "minimum_samples": 50,
+    "mode": "predictive",
+    "safety_margin": 0.15,
+    "scale_down_cooldown_seconds": 60.0,
+    "scale_up_cooldown_seconds": 10.0,
+    "target_utilization": 0.7
+  },
+  "batching_policy": {
+    "dynamic_batching": true,
+    "maximum_active_sequences": 16,
+    "maximum_batch_delay_ms": 4.0,
+    "maximum_batched_tokens": 4096
+  },
+  "budget": {
+    "maximum_real_trials": 24,
+    "profiling_budget_usd": 20.0,
+    "profiling_duration_seconds": 1800.0,
+    "reserve_fraction": 0.15
+  },
+  "canary_policy": {
+    "enabled": true,
+    "initial_weight": 0.05,
+    "maximum_slo_violation_delta": 0.01,
+    "minimum_requests": 100,
+    "observation_seconds": 60.0
+  },
+  "cold_start_strategy": {
+    "minimum_warm_replicas": 1,
+    "predicted_p95_startup_ms": 850.0,
+    "prefetch_model": true,
+    "readiness_timeout_seconds": 30.0
+  },
+  "engine": {
+    "chunked_prefill": {
+      "chunk_tokens": 512,
+      "enabled": true
+    },
+    "compilation": {
+      "cuda_graphs": false,
+      "graph_batch_sizes": [],
+      "mode": "eager"
+    },
+    "dtype": "float32",
+    "extensions": {
+      "mock.sloforge.io/profile": "balanced"
+    },
+    "maximum_active_sequences": 16,
+    "maximum_batched_tokens": 4096,
+    "pipeline_parallelism": 1,
+    "prefix_cache": {
+      "capacity_tokens": 32768,
+      "enabled": true,
+      "eviction_policy": "lru"
+    },
+    "quantization": "none",
+    "runtime_name": "mock",
+    "speculative_decoding": {
+      "draft_model_id": null,
+      "enabled": false,
+      "maximum_draft_tokens": 4
+    },
+    "tensor_parallelism": 1,
+    "version": "1.0.0"
+  },
+  "extensions": {
+    "example.org/audit-level": "fixture"
+  },
+  "hardware": {
+    "cloud": null,
+    "container_memory_limit_bytes": 17179869184,
+    "cpu": {
+      "architecture": "aarch64",
+      "logical_cores": 8,
+      "measured_memory_bandwidth_gbps": 72.5,
+      "model": "deterministic-test-cpu",
+      "numa_nodes": 1,
+      "physical_cores": 8
+    },
+    "cuda_version": null,
+    "driver_version": null,
+    "extensions": {},
+    "fingerprint": {
+      "algorithm": "sha256",
+      "value": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "gpu_count": 0,
+    "gpus": [],
+    "hourly_price_usd": 0.42,
+    "instance_type": "developer-workstation",
+    "library_versions": {
+      "mock-runtime": "1.0.0"
+    },
+    "region": "local",
+    "system_memory_bytes": 34359738368,
+    "topology": []
+  },
+  "kind": "deployment_plan",
+  "metadata": {
+    "created_at": "2026-01-15T12:00:00Z",
+    "generation": 1,
+    "labels": {
+      "sloforge.io/environment": "test"
+    },
+    "name": "qwen-mock-cpu",
+    "uid": "plan-demo-0001"
+  },
+  "model": {
+    "allowed_precisions": [
+      "float32",
+      "bfloat16"
+    ],
+    "architecture": {
+      "family": "qwen3",
+      "hidden_size": 1024,
+      "num_attention_heads": 16,
+      "num_key_value_heads": 8,
+      "num_layers": 28,
+      "parameter_count": 600000000,
+      "vocabulary_size": 151936
+    },
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "extensions": {
+      "sloforge.io/source": "verified-fixture"
+    },
+    "id": "Qwen/Qwen3-0.6B",
+    "license": {
+      "name": "Apache License 2.0",
+      "redistribution_allowed": true,
+      "spdx_id": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0",
+      "verified_at": "2026-01-15T11:00:00Z"
+    },
+    "lora": [],
+    "maximum_sequence_length": 32768,
+    "minimum_precision": "float32",
+    "revision": "0123456789abcdef",
+    "tokenizer_id": "Qwen/Qwen3-0.6B",
+    "tokenizer_revision": "0123456789abcdef"
+  },
+  "predicted_metrics": {
+    "cost_per_million_tokens_usd": {
+      "confidence": 0.95,
+      "lower": 1.62,
+      "measurement_ids": [
+        "load-001"
+      ],
+      "point": 1.74,
+      "sample_count": 600,
+      "unit": "USD/1M_tokens",
+      "upper": 1.91
+    },
+    "p95_ttft_ms": {
+      "confidence": 0.95,
+      "lower": 202.0,
+      "measurement_ids": [
+        "load-001"
+      ],
+      "point": 218.0,
+      "sample_count": 600,
+      "unit": "ms",
+      "upper": 239.0
+    }
+  },
+  "provenance": {
+    "compiler_version": "0.1.0",
+    "evidence_bundle_uri": "artifacts/evidence/demo/evidence-bundle.json",
+    "git_commit": "0123456789abcdef",
+    "hardware_fingerprint": {
+      "algorithm": "sha256",
+      "value": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "optimizer_run_id": "optimizer-001",
+    "profile_id": "profile-qwen-cpu-001",
+    "workload_digest": {
+      "algorithm": "sha256",
+      "value": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  },
+  "replicas": {
+    "initial_replicas": 2,
+    "maximum_replicas": 4,
+    "minimum_replicas": 1,
+    "regions": [
+      "local"
+    ],
+    "tensor_parallelism_per_replica": 1
+  },
+  "rollback_policy": {
+    "availability_floor": 0.99,
+    "cooldown_seconds": 120.0,
+    "enabled": true,
+    "violation_windows": 2,
+    "window_seconds": 30.0
+  },
+  "routing_policy": {
+    "cold_start_penalty_ms": 350.0,
+    "health_penalty_ms": 1000.0,
+    "kind": "slo_slack",
+    "targets": [
+      {
+        "variant": "primary",
+        "weight": 0.95
+      },
+      {
+        "variant": "canary",
+        "weight": 0.05
+      }
+    ]
+  },
+  "slo": {
+    "end_to_end_latency": [
+      {
+        "maximum_ms": 3000.0,
+        "percentile": 95.0
+      }
+    ],
+    "fluidity": {
+      "maximum_missed_fraction": 0.01,
+      "token_deadline_ms": 50.0
+    },
+    "inter_token_latency": [
+      {
+        "maximum_ms": 45.0,
+        "percentile": 99.0
+      }
+    ],
+    "maximum_cost_per_million_tokens_usd": 2.5,
+    "minimum_availability": 0.999,
+    "minimum_goodput_rps": 6.0,
+    "objective_weights": {
+      "availability": 0.1,
+      "cost": 1.0,
+      "goodput": 0.1,
+      "latency": 0.25
+    },
+    "ttft": [
+      {
+        "maximum_ms": 250.0,
+        "percentile": 95.0
+      }
+    ]
+  },
+  "version": "v1alpha1",
+  "workload": {
+    "arrival_process": {
+      "burst_factor": 3.0,
+      "kind": "bursty",
+      "rate_per_second": 8.0,
+      "trace_uri": null
+    },
+    "duration_seconds": 120.0,
+    "extensions": {},
+    "output_tokens": {
+      "empirical": [
+        {
+          "value": 32,
+          "weight": 0.6
+        },
+        {
+          "value": 256,
+          "weight": 0.4
+        }
+      ],
+      "fixed_value": null,
+      "kind": "empirical",
+      "log_mean": null,
+      "log_stddev": null,
+      "maximum": 512,
+      "minimum": 1
+    },
+    "prompt_tokens": {
+      "empirical": [
+        {
+          "value": 128,
+          "weight": 0.7
+        },
+        {
+          "value": 4096,
+          "weight": 0.3
+        }
+      ],
+      "fixed_value": null,
+      "kind": "empirical",
+      "log_mean": null,
+      "log_stddev": null,
+      "maximum": 8192,
+      "minimum": 1
+    },
+    "request_classes": [
+      {
+        "adapter_ids": [],
+        "deadline_ms": 1500.0,
+        "name": "interactive",
+        "prefix_group": "system-prompt",
+        "priority": "interactive",
+        "tenant": "demo",
+        "weight": 0.8
+      },
+      {
+        "adapter_ids": [],
+        "deadline_ms": 10000.0,
+        "name": "batch",
+        "prefix_group": null,
+        "priority": "batch",
+        "tenant": "demo",
+        "weight": 0.2
+      }
+    ],
+    "seed": 7,
+    "trace_digest": {
+      "algorithm": "sha256",
+      "value": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  }
+}

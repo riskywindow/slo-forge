@@ -1,0 +1,1901 @@
+{
+  "$defs": {
+    "AdmissionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_queue_time_ms": {
+          "exclusiveMinimum": 0.0,
+          "title": "Maximum Queue Time Ms",
+          "type": "number"
+        },
+        "queue_capacity": {
+          "exclusiveMinimum": 0,
+          "title": "Queue Capacity",
+          "type": "integer"
+        },
+        "reject_when_predicted_late": {
+          "default": true,
+          "title": "Reject When Predicted Late",
+          "type": "boolean"
+        },
+        "shed_below_priority": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Priority"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "queue_capacity",
+        "maximum_queue_time_ms"
+      ],
+      "title": "AdmissionPolicy",
+      "type": "object"
+    },
+    "ArrivalKind": {
+      "enum": [
+        "poisson",
+        "deterministic",
+        "trace",
+        "bursty"
+      ],
+      "title": "ArrivalKind",
+      "type": "string"
+    },
+    "ArrivalProcess": {
+      "additionalProperties": false,
+      "properties": {
+        "burst_factor": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Burst Factor"
+        },
+        "kind": {
+          "$ref": "#/$defs/ArrivalKind"
+        },
+        "rate_per_second": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Per Second"
+        },
+        "trace_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trace Uri"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "ArrivalProcess",
+      "type": "object"
+    },
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "AutoscalingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "control_interval_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Control Interval Seconds",
+          "type": "number"
+        },
+        "maximum_change_per_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Change Per Interval",
+          "type": "integer"
+        },
+        "minimum_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Samples",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "disabled",
+            "reactive",
+            "predictive"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "safety_margin": {
+          "exclusiveMaximum": 1.0,
+          "minimum": 0.0,
+          "title": "Safety Margin",
+          "type": "number"
+        },
+        "scale_down_cooldown_seconds": {
+          "minimum": 0.0,
+          "title": "Scale Down Cooldown Seconds",
+          "type": "number"
+        },
+        "scale_up_cooldown_seconds": {
+          "minimum": 0.0,
+          "title": "Scale Up Cooldown Seconds",
+          "type": "number"
+        },
+        "target_utilization": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Target Utilization",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mode",
+        "target_utilization",
+        "control_interval_seconds",
+        "scale_up_cooldown_seconds",
+        "scale_down_cooldown_seconds",
+        "minimum_samples",
+        "safety_margin",
+        "maximum_change_per_interval"
+      ],
+      "title": "AutoscalingPolicy",
+      "type": "object"
+    },
+    "BatchingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "dynamic_batching": {
+          "default": true,
+          "title": "Dynamic Batching",
+          "type": "boolean"
+        },
+        "maximum_active_sequences": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Active Sequences",
+          "type": "integer"
+        },
+        "maximum_batch_delay_ms": {
+          "minimum": 0.0,
+          "title": "Maximum Batch Delay Ms",
+          "type": "number"
+        },
+        "maximum_batched_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Batched Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maximum_active_sequences",
+        "maximum_batched_tokens",
+        "maximum_batch_delay_ms"
+      ],
+      "title": "BatchingPolicy",
+      "type": "object"
+    },
+    "BudgetSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_real_trials": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Real Trials"
+        },
+        "profiling_budget_usd": {
+          "minimum": 0.0,
+          "title": "Profiling Budget Usd",
+          "type": "number"
+        },
+        "profiling_duration_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profiling Duration Seconds"
+        },
+        "reserve_fraction": {
+          "default": 0.15,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Reserve Fraction",
+          "type": "number"
+        }
+      },
+      "required": [
+        "profiling_budget_usd"
+      ],
+      "title": "BudgetSpec",
+      "type": "object"
+    },
+    "CanaryPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "initial_weight": {
+          "default": 0.05,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Initial Weight",
+          "type": "number"
+        },
+        "maximum_slo_violation_delta": {
+          "default": 0.01,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Maximum Slo Violation Delta",
+          "type": "number"
+        },
+        "minimum_requests": {
+          "default": 100,
+          "exclusiveMinimum": 0,
+          "title": "Minimum Requests",
+          "type": "integer"
+        },
+        "observation_seconds": {
+          "default": 60.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Observation Seconds",
+          "type": "number"
+        }
+      },
+      "title": "CanaryPolicy",
+      "type": "object"
+    },
+    "ChunkedPrefillSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "chunk_tokens": {
+          "default": 512,
+          "exclusiveMinimum": 0,
+          "title": "Chunk Tokens",
+          "type": "integer"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "title": "ChunkedPrefillSpec",
+      "type": "object"
+    },
+    "ColdStartStrategy": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_warm_replicas": {
+          "minimum": 0,
+          "title": "Minimum Warm Replicas",
+          "type": "integer"
+        },
+        "predicted_p95_startup_ms": {
+          "exclusiveMinimum": 0.0,
+          "title": "Predicted P95 Startup Ms",
+          "type": "number"
+        },
+        "prefetch_model": {
+          "default": true,
+          "title": "Prefetch Model",
+          "type": "boolean"
+        },
+        "readiness_timeout_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Readiness Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "minimum_warm_replicas",
+        "readiness_timeout_seconds",
+        "predicted_p95_startup_ms"
+      ],
+      "title": "ColdStartStrategy",
+      "type": "object"
+    },
+    "CompilationSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "cuda_graphs": {
+          "default": false,
+          "title": "Cuda Graphs",
+          "type": "boolean"
+        },
+        "graph_batch_sizes": {
+          "default": [],
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "title": "Graph Batch Sizes",
+          "type": "array"
+        },
+        "mode": {
+          "default": "eager",
+          "enum": [
+            "eager",
+            "compile",
+            "ahead_of_time"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "CompilationSpec",
+      "type": "object"
+    },
+    "CpuSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "logical_cores": {
+          "exclusiveMinimum": 0,
+          "title": "Logical Cores",
+          "type": "integer"
+        },
+        "measured_memory_bandwidth_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Memory Bandwidth Gbps"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "numa_nodes": {
+          "exclusiveMinimum": 0,
+          "title": "Numa Nodes",
+          "type": "integer"
+        },
+        "physical_cores": {
+          "exclusiveMinimum": 0,
+          "title": "Physical Cores",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "architecture",
+        "model",
+        "physical_cores",
+        "logical_cores",
+        "numa_nodes"
+      ],
+      "title": "CpuSpec",
+      "type": "object"
+    },
+    "DType": {
+      "enum": [
+        "float32",
+        "tf32",
+        "float16",
+        "bfloat16",
+        "fp8",
+        "int8",
+        "int4"
+      ],
+      "title": "DType",
+      "type": "string"
+    },
+    "DistributionKind": {
+      "enum": [
+        "fixed",
+        "empirical",
+        "lognormal"
+      ],
+      "title": "DistributionKind",
+      "type": "string"
+    },
+    "DistributionSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "empirical": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/WeightedValue"
+          },
+          "title": "Empirical",
+          "type": "array"
+        },
+        "fixed_value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Value"
+        },
+        "kind": {
+          "$ref": "#/$defs/DistributionKind"
+        },
+        "log_mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log Mean"
+        },
+        "log_stddev": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Log Stddev"
+        },
+        "maximum": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum",
+          "type": "integer"
+        },
+        "minimum": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "maximum"
+      ],
+      "title": "DistributionSpec",
+      "type": "object"
+    },
+    "DocumentMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "generation": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "uid": {
+          "minLength": 1,
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "uid",
+        "created_at"
+      ],
+      "title": "DocumentMetadata",
+      "type": "object"
+    },
+    "EngineSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "chunked_prefill": {
+          "$ref": "#/$defs/ChunkedPrefillSpec"
+        },
+        "compilation": {
+          "$ref": "#/$defs/CompilationSpec"
+        },
+        "dtype": {
+          "$ref": "#/$defs/DType"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "maximum_active_sequences": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Active Sequences",
+          "type": "integer"
+        },
+        "maximum_batched_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Batched Tokens",
+          "type": "integer"
+        },
+        "pipeline_parallelism": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Pipeline Parallelism",
+          "type": "integer"
+        },
+        "prefix_cache": {
+          "$ref": "#/$defs/PrefixCacheSpec"
+        },
+        "quantization": {
+          "$ref": "#/$defs/Quantization",
+          "default": "none"
+        },
+        "runtime": {
+          "enum": [
+            "transformers",
+            "vllm",
+            "sglang",
+            "tensorrt_llm",
+            "mock"
+          ],
+          "title": "Runtime",
+          "type": "string"
+        },
+        "speculative_decoding": {
+          "$ref": "#/$defs/SpeculativeDecodingSpec"
+        },
+        "tensor_parallelism": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Tensor Parallelism",
+          "type": "integer"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runtime",
+        "version",
+        "dtype",
+        "maximum_batched_tokens",
+        "maximum_active_sequences"
+      ],
+      "title": "EngineSpec",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "FluidityConstraint": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_missed_fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Maximum Missed Fraction",
+          "type": "number"
+        },
+        "token_deadline_ms": {
+          "exclusiveMinimum": 0.0,
+          "title": "Token Deadline Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "token_deadline_ms",
+        "maximum_missed_fraction"
+      ],
+      "title": "FluidityConstraint",
+      "type": "object"
+    },
+    "GpuSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "ecc_enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ecc Enabled"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "measured_compute_tflops": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Compute Tflops"
+        },
+        "measured_memory_bandwidth_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Memory Bandwidth Gbps"
+        },
+        "memory_clock_mhz": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Clock Mhz"
+        },
+        "pcie_generation": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pcie Generation"
+        },
+        "pcie_width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pcie Width"
+        },
+        "product": {
+          "minLength": 1,
+          "title": "Product",
+          "type": "string"
+        },
+        "uuid": {
+          "minLength": 1,
+          "title": "Uuid",
+          "type": "string"
+        },
+        "vram_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Vram Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index",
+        "product",
+        "architecture",
+        "uuid",
+        "vram_bytes"
+      ],
+      "title": "GpuSpec",
+      "type": "object"
+    },
+    "HardwareSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "cloud": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cloud"
+        },
+        "container_memory_limit_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Memory Limit Bytes"
+        },
+        "cpu": {
+          "$ref": "#/$defs/CpuSpec"
+        },
+        "cuda_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cuda Version"
+        },
+        "driver_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Driver Version"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "fingerprint": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "gpu_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Gpu Count",
+          "type": "integer"
+        },
+        "gpus": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GpuSpec"
+          },
+          "title": "Gpus",
+          "type": "array"
+        },
+        "hourly_price_usd": {
+          "minimum": 0.0,
+          "title": "Hourly Price Usd",
+          "type": "number"
+        },
+        "instance_type": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instance Type"
+        },
+        "library_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Library Versions",
+          "type": "object"
+        },
+        "region": {
+          "minLength": 1,
+          "title": "Region",
+          "type": "string"
+        },
+        "system_memory_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "System Memory Bytes",
+          "type": "integer"
+        },
+        "topology": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TopologyLink"
+          },
+          "title": "Topology",
+          "type": "array"
+        }
+      },
+      "required": [
+        "fingerprint",
+        "cpu",
+        "system_memory_bytes",
+        "hourly_price_usd",
+        "region"
+      ],
+      "title": "HardwareSpec",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LicenseMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "redistribution_allowed": {
+          "title": "Redistribution Allowed",
+          "type": "boolean"
+        },
+        "spdx_id": {
+          "minLength": 1,
+          "title": "Spdx Id",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "verified_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verified At"
+        }
+      },
+      "required": [
+        "spdx_id",
+        "name",
+        "redistribution_allowed"
+      ],
+      "title": "LicenseMetadata",
+      "type": "object"
+    },
+    "LoraSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "minLength": 1,
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "checksum": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "merged": {
+          "default": false,
+          "title": "Merged",
+          "type": "boolean"
+        },
+        "rank": {
+          "exclusiveMinimum": 0,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "revision": {
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "revision",
+        "checksum",
+        "rank"
+      ],
+      "title": "LoraSpec",
+      "type": "object"
+    },
+    "MetricConstraint": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum_ms": {
+          "exclusiveMinimum": 0.0,
+          "title": "Maximum Ms",
+          "type": "number"
+        },
+        "percentile": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0,
+          "title": "Percentile",
+          "type": "number"
+        }
+      },
+      "required": [
+        "percentile",
+        "maximum_ms"
+      ],
+      "title": "MetricConstraint",
+      "type": "object"
+    },
+    "MetricEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "measurement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Measurement Ids",
+          "type": "array"
+        },
+        "point": {
+          "title": "Point",
+          "type": "number"
+        },
+        "sample_count": {
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "point",
+        "lower",
+        "upper",
+        "confidence",
+        "unit",
+        "sample_count",
+        "measurement_ids"
+      ],
+      "title": "MetricEstimate",
+      "type": "object"
+    },
+    "ModelArchitecture": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "hidden_size": {
+          "exclusiveMinimum": 0,
+          "title": "Hidden Size",
+          "type": "integer"
+        },
+        "num_attention_heads": {
+          "exclusiveMinimum": 0,
+          "title": "Num Attention Heads",
+          "type": "integer"
+        },
+        "num_key_value_heads": {
+          "exclusiveMinimum": 0,
+          "title": "Num Key Value Heads",
+          "type": "integer"
+        },
+        "num_layers": {
+          "exclusiveMinimum": 0,
+          "title": "Num Layers",
+          "type": "integer"
+        },
+        "parameter_count": {
+          "exclusiveMinimum": 0,
+          "title": "Parameter Count",
+          "type": "integer"
+        },
+        "vocabulary_size": {
+          "exclusiveMinimum": 0,
+          "title": "Vocabulary Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "family",
+        "parameter_count",
+        "hidden_size",
+        "num_layers",
+        "num_attention_heads",
+        "num_key_value_heads",
+        "vocabulary_size"
+      ],
+      "title": "ModelArchitecture",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_precisions": {
+          "items": {
+            "$ref": "#/$defs/DType"
+          },
+          "title": "Allowed Precisions",
+          "type": "array"
+        },
+        "architecture": {
+          "$ref": "#/$defs/ModelArchitecture"
+        },
+        "checksum": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "license": {
+          "$ref": "#/$defs/LicenseMetadata"
+        },
+        "lora": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LoraSpec"
+          },
+          "title": "Lora",
+          "type": "array"
+        },
+        "maximum_sequence_length": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Sequence Length",
+          "type": "integer"
+        },
+        "minimum_precision": {
+          "$ref": "#/$defs/DType"
+        },
+        "model_id": {
+          "minLength": 1,
+          "title": "Model Id",
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "tokenizer_id": {
+          "minLength": 1,
+          "title": "Tokenizer Id",
+          "type": "string"
+        },
+        "tokenizer_revision": {
+          "minLength": 1,
+          "title": "Tokenizer Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "revision",
+        "checksum",
+        "tokenizer_id",
+        "tokenizer_revision",
+        "architecture",
+        "allowed_precisions",
+        "minimum_precision",
+        "maximum_sequence_length",
+        "license"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "ObjectiveWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Availability",
+          "type": "number"
+        },
+        "cost": {
+          "default": 1.0,
+          "minimum": 0.0,
+          "title": "Cost",
+          "type": "number"
+        },
+        "goodput": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Goodput",
+          "type": "number"
+        },
+        "latency": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Latency",
+          "type": "number"
+        }
+      },
+      "title": "ObjectiveWeights",
+      "type": "object"
+    },
+    "PrefixCacheSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Capacity Tokens",
+          "type": "integer"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "eviction_policy": {
+          "default": "lru",
+          "enum": [
+            "lru",
+            "clock"
+          ],
+          "title": "Eviction Policy",
+          "type": "string"
+        }
+      },
+      "title": "PrefixCacheSpec",
+      "type": "object"
+    },
+    "Priority": {
+      "enum": [
+        "critical",
+        "interactive",
+        "batch"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "evidence_bundle_uri": {
+          "minLength": 1,
+          "title": "Evidence Bundle Uri",
+          "type": "string"
+        },
+        "git_commit": {
+          "minLength": 1,
+          "title": "Git Commit",
+          "type": "string"
+        },
+        "hardware_fingerprint": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "optimizer_run_id": {
+          "minLength": 1,
+          "title": "Optimizer Run Id",
+          "type": "string"
+        },
+        "profile_id": {
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "workload_digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        }
+      },
+      "required": [
+        "profile_id",
+        "optimizer_run_id",
+        "workload_digest",
+        "hardware_fingerprint",
+        "evidence_bundle_uri",
+        "compiler_version",
+        "git_commit"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Quantization": {
+      "enum": [
+        "none",
+        "awq",
+        "gptq",
+        "bitsandbytes",
+        "fp8"
+      ],
+      "title": "Quantization",
+      "type": "string"
+    },
+    "ReplicaTopology": {
+      "additionalProperties": false,
+      "properties": {
+        "initial_replicas": {
+          "exclusiveMinimum": 0,
+          "title": "Initial Replicas",
+          "type": "integer"
+        },
+        "maximum_replicas": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Replicas",
+          "type": "integer"
+        },
+        "minimum_replicas": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Replicas",
+          "type": "integer"
+        },
+        "regions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Regions",
+          "type": "array"
+        },
+        "tensor_parallelism_per_replica": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Tensor Parallelism Per Replica",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "minimum_replicas",
+        "maximum_replicas",
+        "initial_replicas",
+        "regions"
+      ],
+      "title": "ReplicaTopology",
+      "type": "object"
+    },
+    "RequestClass": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Adapter Ids",
+          "type": "array"
+        },
+        "deadline_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline Ms"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "prefix_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix Group"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        },
+        "tenant": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tenant"
+        },
+        "weight": {
+          "exclusiveMinimum": 0.0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "weight",
+        "priority"
+      ],
+      "title": "RequestClass",
+      "type": "object"
+    },
+    "RollbackPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "availability_floor": {
+          "default": 0.99,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Availability Floor",
+          "type": "number"
+        },
+        "cooldown_seconds": {
+          "default": 120.0,
+          "minimum": 0.0,
+          "title": "Cooldown Seconds",
+          "type": "number"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "violation_windows": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "Violation Windows",
+          "type": "integer"
+        },
+        "window_seconds": {
+          "default": 30.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Window Seconds",
+          "type": "number"
+        }
+      },
+      "title": "RollbackPolicy",
+      "type": "object"
+    },
+    "RouteTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "minLength": 1,
+          "title": "Variant",
+          "type": "string"
+        },
+        "weight": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "variant",
+        "weight"
+      ],
+      "title": "RouteTarget",
+      "type": "object"
+    },
+    "RoutingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "cold_start_penalty_ms": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Cold Start Penalty Ms",
+          "type": "number"
+        },
+        "health_penalty_ms": {
+          "default": 1000.0,
+          "minimum": 0.0,
+          "title": "Health Penalty Ms",
+          "type": "number"
+        },
+        "kind": {
+          "$ref": "#/$defs/RoutingPolicyKind"
+        },
+        "targets": {
+          "items": {
+            "$ref": "#/$defs/RouteTarget"
+          },
+          "title": "Targets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "targets"
+      ],
+      "title": "RoutingPolicy",
+      "type": "object"
+    },
+    "RoutingPolicyKind": {
+      "enum": [
+        "round_robin",
+        "least_outstanding",
+        "earliest_finish",
+        "slo_slack"
+      ],
+      "title": "RoutingPolicyKind",
+      "type": "string"
+    },
+    "SLOSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "end_to_end_latency": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MetricConstraint"
+          },
+          "title": "End To End Latency",
+          "type": "array"
+        },
+        "fluidity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FluidityConstraint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "inter_token_latency": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MetricConstraint"
+          },
+          "title": "Inter Token Latency",
+          "type": "array"
+        },
+        "maximum_cost_per_million_tokens_usd": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Cost Per Million Tokens Usd"
+        },
+        "minimum_availability": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Availability"
+        },
+        "minimum_goodput_rps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Goodput Rps"
+        },
+        "objective_weights": {
+          "$ref": "#/$defs/ObjectiveWeights"
+        },
+        "ttft": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MetricConstraint"
+          },
+          "title": "Ttft",
+          "type": "array"
+        }
+      },
+      "title": "SLOSpec",
+      "type": "object"
+    },
+    "SpeculativeDecodingSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "draft_model_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Draft Model Id"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "maximum_draft_tokens": {
+          "default": 4,
+          "exclusiveMinimum": 0,
+          "title": "Maximum Draft Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "SpeculativeDecodingSpec",
+      "type": "object"
+    },
+    "TopologyLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "pcie",
+            "nvlink",
+            "shared_memory"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "measured_bandwidth_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Bandwidth Gbps"
+        },
+        "measured_latency_us": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Latency Us"
+        },
+        "source_gpu": {
+          "minimum": 0,
+          "title": "Source Gpu",
+          "type": "integer"
+        },
+        "target_gpu": {
+          "minimum": 0,
+          "title": "Target Gpu",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_gpu",
+        "target_gpu",
+        "kind"
+      ],
+      "title": "TopologyLink",
+      "type": "object"
+    },
+    "WeightedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "integer"
+        },
+        "weight": {
+          "exclusiveMinimum": 0.0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "weight"
+      ],
+      "title": "WeightedValue",
+      "type": "object"
+    },
+    "WorkloadSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "arrival_process": {
+          "$ref": "#/$defs/ArrivalProcess"
+        },
+        "duration_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Duration Seconds",
+          "type": "number"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "output_tokens": {
+          "$ref": "#/$defs/DistributionSpec"
+        },
+        "prompt_tokens": {
+          "$ref": "#/$defs/DistributionSpec"
+        },
+        "request_classes": {
+          "items": {
+            "$ref": "#/$defs/RequestClass"
+          },
+          "title": "Request Classes",
+          "type": "array"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "trace_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactDigest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "arrival_process",
+        "prompt_tokens",
+        "output_tokens",
+        "request_classes",
+        "duration_seconds",
+        "seed"
+      ],
+      "title": "WorkloadSpec",
+      "type": "object"
+    }
+  },
+  "$id": "urn:sloforge:schema:deployment-plan:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "admission": {
+      "$ref": "#/$defs/AdmissionPolicy"
+    },
+    "api_version": {
+      "const": "sloforge.io/v1",
+      "default": "sloforge.io/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "autoscaling": {
+      "$ref": "#/$defs/AutoscalingPolicy"
+    },
+    "batching": {
+      "$ref": "#/$defs/BatchingPolicy"
+    },
+    "budget": {
+      "$ref": "#/$defs/BudgetSpec"
+    },
+    "canary": {
+      "$ref": "#/$defs/CanaryPolicy"
+    },
+    "cold_start": {
+      "$ref": "#/$defs/ColdStartStrategy"
+    },
+    "engine": {
+      "$ref": "#/$defs/EngineSpec"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "hardware": {
+      "$ref": "#/$defs/HardwareSpec"
+    },
+    "kind": {
+      "const": "DeploymentPlan",
+      "default": "DeploymentPlan",
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/DocumentMetadata"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelSpec"
+    },
+    "predicted_metrics": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MetricEstimate"
+      },
+      "title": "Predicted Metrics",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "replica_topology": {
+      "$ref": "#/$defs/ReplicaTopology"
+    },
+    "rollback": {
+      "$ref": "#/$defs/RollbackPolicy"
+    },
+    "routing": {
+      "$ref": "#/$defs/RoutingPolicy"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "slo": {
+      "$ref": "#/$defs/SLOSpec"
+    },
+    "workload": {
+      "$ref": "#/$defs/WorkloadSpec"
+    }
+  },
+  "required": [
+    "metadata",
+    "model",
+    "engine",
+    "hardware",
+    "workload",
+    "slo",
+    "budget",
+    "replica_topology",
+    "routing",
+    "admission",
+    "batching",
+    "autoscaling",
+    "cold_start",
+    "canary",
+    "rollback",
+    "predicted_metrics",
+    "provenance"
+  ],
+  "title": "DeploymentPlan",
+  "type": "object"
+}

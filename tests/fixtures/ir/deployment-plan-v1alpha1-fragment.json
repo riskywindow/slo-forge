@@ -1,0 +1,14 @@
+{
+  "version": "v1alpha1",
+  "kind": "deployment_plan",
+  "model": {"id": "Qwen/Qwen3-0.6B"},
+  "engine": {"runtime_name": "mock"},
+  "replicas": {"minimum_replicas": 1},
+  "routing_policy": {"kind": "round_robin"},
+  "admission_policy": {"queue_capacity": 32},
+  "batching_policy": {"maximum_active_sequences": 4},
+  "autoscaling_policy": {"mode": "disabled"},
+  "cold_start_strategy": {"minimum_warm_replicas": 1},
+  "canary_policy": {"enabled": false},
+  "rollback_policy": {"enabled": true}
+}

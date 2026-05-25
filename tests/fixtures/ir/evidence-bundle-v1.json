@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "api_version": "sloforge.io/v1",
+  "kind": "EvidenceBundle",
+  "metadata": {
+    "name": "qwen-mock-cpu-evidence",
+    "uid": "evidence-demo-0001",
+    "generation": 1,
+    "created_at": "2026-01-15T12:30:00Z",
+    "labels": {"sloforge.io/environment": "test"}
+  },
+  "plan_digest": {"algorithm": "sha256", "value": "4444444444444444444444444444444444444444444444444444444444444444"},
+  "environment": {
+    "os": "macOS 15",
+    "kernel": "Darwin 24",
+    "architecture": "aarch64",
+    "hostname_hash": {"algorithm": "sha256", "value": "5555555555555555555555555555555555555555555555555555555555555555"},
+    "container_image": null,
+    "python_version": "3.12.8",
+    "rust_version": "1.85.0",
+    "package_versions": {"pydantic": "2.10.6", "sloforge": "0.1.0"},
+    "environment_allowlist": {"SLOFORGE_SEED": "7"}
+  },
+  "model_assumptions": ["Mock engine service curves stand in for an unavailable GPU."],
+  "measurements": [
+    {
+      "measurement_id": "load-001",
+      "kind": "load",
+      "uri": "measurements/load-001.json",
+      "digest": {"algorithm": "sha256", "value": "6666666666666666666666666666666666666666666666666666666666666666"},
+      "sample_count": 600,
+      "warmup_count": 20,
+      "started_at": "2026-01-15T12:01:00Z",
+      "completed_at": "2026-01-15T12:03:00Z",
+      "hardware_fingerprint": {"algorithm": "sha256", "value": "2222222222222222222222222222222222222222222222222222222222222222"}
+    }
+  ],
+  "calibration_metrics": [
+    {"model_name": "prefill-monotonic-v1", "split": "test", "metric": "mape", "value": 0.083, "sample_count": 120},
+    {"model_name": "decode-quantile-v1", "split": "test", "metric": "coverage", "value": 0.942, "sample_count": 120}
+  ],
+  "optimizer_history": [
+    {
+      "sequence": 0,
+      "candidate_id": "mock-cpu-b16",
+      "fidelity": "simulated",
+      "decision": "promote",
+      "reason_code": "pareto_probability",
+      "predicted_objective": {"point": 1.8, "lower": 1.5, "upper": 2.2, "confidence": 0.95, "unit": "USD/1M_tokens", "sample_count": 0, "measurement_ids": []},
+      "cost_usd": 0.0
+    },
+    {
+      "sequence": 1,
+      "candidate_id": "mock-cpu-b16",
+      "fidelity": "measured",
+      "decision": "select",
+      "reason_code": "lowest_feasible_cost",
+      "predicted_objective": {"point": 1.74, "lower": 1.62, "upper": 1.91, "confidence": 0.95, "unit": "USD/1M_tokens", "sample_count": 600, "measurement_ids": ["load-001"]},
+      "cost_usd": 0.014
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "candidate_id": "mock-cpu-b64",
+      "stage": "simulation",
+      "reason_code": "ttft_constraint",
+      "explanation": "Predicted p95 TTFT upper interval exceeds the hard constraint.",
+      "violated_constraints": ["p95_ttft_ms<=250"]
+    }
+  ],
+  "benchmark_results": [
+    {
+      "benchmark_id": "cpu-demo-seed-7",
+      "command": ["sloforge", "replay", "--seed", "7"],
+      "raw_result_uri": "benchmarks/cpu-demo-seed-7.json",
+      "raw_result_digest": {"algorithm": "sha256", "value": "7777777777777777777777777777777777777777777777777777777777777777"},
+      "seed": 7,
+      "started_at": "2026-01-15T12:10:00Z",
+      "completed_at": "2026-01-15T12:12:00Z",
+      "metrics": {
+        "p95_ttft_ms": {"point": 221.0, "lower": 204.0, "upper": 241.0, "confidence": 0.95, "unit": "ms", "sample_count": 600, "measurement_ids": ["load-001"]}
+      }
+    }
+  ],
+  "artifact_hashes": {
+    "measurements/load-001.json": {"algorithm": "sha256", "value": "6666666666666666666666666666666666666666666666666666666666666666"},
+    "benchmarks/cpu-demo-seed-7.json": {"algorithm": "sha256", "value": "7777777777777777777777777777777777777777777777777777777777777777"}
+  },
+  "git_commit": "0123456789abcdef",
+  "generated_at": "2026-01-15T12:30:00Z",
+  "extensions": {"example.org/reproducible": true}
+}

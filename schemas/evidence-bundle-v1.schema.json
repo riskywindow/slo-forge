@@ -1,0 +1,614 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "BenchmarkResult": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_id": {
+          "minLength": 1,
+          "title": "Benchmark Id",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricEstimate"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "raw_result_digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "raw_result_uri": {
+          "minLength": 1,
+          "title": "Raw Result Uri",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "benchmark_id",
+        "command",
+        "raw_result_uri",
+        "raw_result_digest",
+        "seed",
+        "started_at",
+        "completed_at",
+        "metrics"
+      ],
+      "title": "BenchmarkResult",
+      "type": "object"
+    },
+    "CalibrationMetric": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "enum": [
+            "mae",
+            "mape",
+            "rmse",
+            "coverage",
+            "interval_width"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "model_name": {
+          "minLength": 1,
+          "title": "Model Name",
+          "type": "string"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0.0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "model_name",
+        "split",
+        "metric",
+        "value",
+        "sample_count"
+      ],
+      "title": "CalibrationMetric",
+      "type": "object"
+    },
+    "DocumentMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "generation": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "uid": {
+          "minLength": 1,
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "uid",
+        "created_at"
+      ],
+      "title": "DocumentMetadata",
+      "type": "object"
+    },
+    "EnvironmentManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "container_image": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container Image"
+        },
+        "environment_allowlist": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Environment Allowlist",
+          "type": "object"
+        },
+        "hostname_hash": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "kernel": {
+          "minLength": 1,
+          "title": "Kernel",
+          "type": "string"
+        },
+        "os": {
+          "minLength": 1,
+          "title": "Os",
+          "type": "string"
+        },
+        "package_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Package Versions",
+          "type": "object"
+        },
+        "python_version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Python Version"
+        },
+        "rust_version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rust Version"
+        }
+      },
+      "required": [
+        "os",
+        "kernel",
+        "architecture",
+        "hostname_hash",
+        "package_versions"
+      ],
+      "title": "EnvironmentManifest",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MeasurementRef": {
+      "additionalProperties": false,
+      "properties": {
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "hardware_fingerprint": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "kind": {
+          "enum": [
+            "hardware",
+            "startup",
+            "prefill",
+            "decode",
+            "load",
+            "fault"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "measurement_id": {
+          "minLength": 1,
+          "title": "Measurement Id",
+          "type": "string"
+        },
+        "sample_count": {
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "warmup_count": {
+          "minimum": 0,
+          "title": "Warmup Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "measurement_id",
+        "kind",
+        "uri",
+        "digest",
+        "sample_count",
+        "warmup_count",
+        "started_at",
+        "completed_at",
+        "hardware_fingerprint"
+      ],
+      "title": "MeasurementRef",
+      "type": "object"
+    },
+    "MetricEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "measurement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Measurement Ids",
+          "type": "array"
+        },
+        "point": {
+          "title": "Point",
+          "type": "number"
+        },
+        "sample_count": {
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "point",
+        "lower",
+        "upper",
+        "confidence",
+        "unit",
+        "sample_count",
+        "measurement_ids"
+      ],
+      "title": "MetricEstimate",
+      "type": "object"
+    },
+    "OptimizerDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "cost_usd": {
+          "minimum": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "decision": {
+          "enum": [
+            "evaluate",
+            "promote",
+            "reject",
+            "select"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "fidelity": {
+          "enum": [
+            "static",
+            "simulated",
+            "measured"
+          ],
+          "title": "Fidelity",
+          "type": "string"
+        },
+        "predicted_objective": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MetricEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sequence",
+        "candidate_id",
+        "fidelity",
+        "decision",
+        "reason_code",
+        "cost_usd"
+      ],
+      "title": "OptimizerDecision",
+      "type": "object"
+    },
+    "RejectedCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "stage": {
+          "enum": [
+            "feasibility",
+            "simulation",
+            "measurement",
+            "selection"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "violated_constraints": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Violated Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "stage",
+        "reason_code",
+        "explanation"
+      ],
+      "title": "RejectedCandidate",
+      "type": "object"
+    }
+  },
+  "$id": "urn:sloforge:schema:evidence-bundle:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/v1",
+      "default": "sloforge.io/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "artifact_hashes": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ArtifactDigest"
+      },
+      "propertyNames": {
+        "minLength": 1
+      },
+      "title": "Artifact Hashes",
+      "type": "object"
+    },
+    "benchmark_results": {
+      "items": {
+        "$ref": "#/$defs/BenchmarkResult"
+      },
+      "title": "Benchmark Results",
+      "type": "array"
+    },
+    "calibration_metrics": {
+      "items": {
+        "$ref": "#/$defs/CalibrationMetric"
+      },
+      "title": "Calibration Metrics",
+      "type": "array"
+    },
+    "environment": {
+      "$ref": "#/$defs/EnvironmentManifest"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "git_commit": {
+      "minLength": 1,
+      "title": "Git Commit",
+      "type": "string"
+    },
+    "kind": {
+      "const": "EvidenceBundle",
+      "default": "EvidenceBundle",
+      "title": "Kind",
+      "type": "string"
+    },
+    "measurements": {
+      "items": {
+        "$ref": "#/$defs/MeasurementRef"
+      },
+      "title": "Measurements",
+      "type": "array"
+    },
+    "metadata": {
+      "$ref": "#/$defs/DocumentMetadata"
+    },
+    "model_assumptions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Model Assumptions",
+      "type": "array"
+    },
+    "optimizer_history": {
+      "items": {
+        "$ref": "#/$defs/OptimizerDecision"
+      },
+      "title": "Optimizer History",
+      "type": "array"
+    },
+    "plan_digest": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "rejected_candidates": {
+      "items": {
+        "$ref": "#/$defs/RejectedCandidate"
+      },
+      "title": "Rejected Candidates",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "metadata",
+    "plan_digest",
+    "environment",
+    "model_assumptions",
+    "measurements",
+    "calibration_metrics",
+    "optimizer_history",
+    "rejected_candidates",
+    "benchmark_results",
+    "artifact_hashes",
+    "git_commit",
+    "generated_at"
+  ],
+  "title": "EvidenceBundle",
+  "type": "object"
+}
