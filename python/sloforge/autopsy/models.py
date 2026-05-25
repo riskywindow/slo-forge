@@ -236,3 +236,149 @@ class AutopsyRun(StrictModel):
         if len(hosts) != len(set(hosts)):
             raise ValueError("at most one alignment estimate is allowed per host")
         return self
+
+
+class BottleneckKind(StrEnum):
+    ARRIVAL_OVERLOAD = "arrival_overload"
+    GATEWAY_QUEUEING = "gateway_queueing"
+    BACKEND_QUEUEING = "backend_queueing"
+    INSUFFICIENT_WARM_CAPACITY = "insufficient_warm_capacity"
+    COLD_START_REGRESSION = "cold_start_regression"
+    MODEL_LOADING_REGRESSION = "model_loading_regression"
+    CPU_LAUNCH_BOTTLENECK = "cpu_launch_bottleneck"
+    EXCESSIVE_KERNEL_LAUNCHES = "excessive_kernel_launches"
+    GPU_COMPUTE_REGRESSION = "gpu_compute_regression"
+    GPU_MEMORY_BANDWIDTH_REGRESSION = "gpu_memory_bandwidth_regression"
+    GPU_CLOCK_THROTTLING = "gpu_clock_throttling"
+    NUMA_MISPLACEMENT = "numa_misplacement"
+    PCIE_BOTTLENECK = "pcie_bottleneck"
+    NVLINK_DEGRADATION = "nvlink_degradation"
+    NETWORK_BANDWIDTH_DEGRADATION = "network_bandwidth_degradation"
+    NETWORK_LATENCY_DEGRADATION = "network_latency_degradation"
+    RANK_STRAGGLER = "rank_straggler"
+    COLLECTIVE_IMBALANCE = "collective_imbalance"
+    COLLECTIVE_ALGORITHM_REGRESSION = "collective_algorithm_regression"
+    EXPERT_LOAD_IMBALANCE = "expert_load_imbalance"
+    PREFILL_POOL_SATURATION = "prefill_pool_saturation"
+    DECODE_POOL_SATURATION = "decode_pool_saturation"
+    KV_TRANSFER_BOTTLENECK = "kv_transfer_bottleneck"
+    UNHEALTHY_WORKER = "unhealthy_worker"
+    WORKER_CRASH = "worker_crash"
+    TOPOLOGY_MISMATCH = "topology_mismatch"
+    INVALID_PHYSICAL_PLAN = "invalid_physical_plan_assumption"
+
+
+class StageDelta(StrictModel):
+    signature: NonEmpty
+    event_type: EventType
+    operation: str | None
+    rank: int | None
+    healthy_count: int = Field(ge=0)
+    degraded_count: int = Field(ge=0)
+    matched_count: int = Field(ge=0)
+    healthy_median_ms: float = Field(ge=0.0)
+    degraded_median_ms: float = Field(ge=0.0)
+    healthy_p95_ms: float = Field(ge=0.0)
+    degraded_p95_ms: float = Field(ge=0.0)
+    absolute_delta_ms: float
+    relative_delta: float
+
+    @model_validator(mode="after")
+    def finite_values(self) -> Self:
+        for name in ("absolute_delta_ms", "relative_delta"):
+            if not math.isfinite(getattr(self, name)):
+                raise ValueError(f"{name} must be finite")
+        return self
+
+
+class CounterDelta(StrictModel):
+    name: NonEmpty
+    unit: NonEmpty
+    healthy_median: float
+    degraded_median: float
+    absolute_delta: float
+    relative_delta: float
+
+
+class DifferentialComparison(StrictModel):
+    schema_version: Literal["sloforge.autopsy.comparison/v1"] = "sloforge.autopsy.comparison/v1"
+    comparison_id: NonEmpty
+    healthy_run_id: NonEmpty
+    degraded_run_id: NonEmpty
+    matched_event_count: int = Field(ge=0)
+    unmatched_healthy_count: int = Field(ge=0)
+    unmatched_degraded_count: int = Field(ge=0)
+    stage_deltas: tuple[StageDelta, ...]
+    counter_deltas: tuple[CounterDelta, ...]
+    first_divergence_event_id: str | None
+    first_divergence_ns: int | None = Field(default=None, ge=0)
+    maximum_rank_skew: float = Field(ge=1.0)
+    warnings: tuple[str, ...] = ()
+
+
+class EvidenceStatement(StrictModel):
+    metric: NonEmpty
+    observed: float
+    threshold: float
+    relation: Literal["greater_than", "less_than", "present", "absent"]
+    supports_hypothesis: bool
+    event_ids: tuple[str, ...] = ()
+    explanation: NonEmpty
+
+
+class CounterfactualEstimate(StrictModel):
+    scenario_id: NonEmpty
+    expected_improvement_ms: float
+    lower_improvement_ms: float
+    upper_improvement_ms: float
+    healthy_gap_remaining_ms: float
+    simulation_artifact: EvidenceRef | None = None
+
+    @model_validator(mode="after")
+    def ordered_interval(self) -> Self:
+        if self.lower_improvement_ms > self.expected_improvement_ms:
+            raise ValueError("counterfactual lower bound exceeds point estimate")
+        if self.expected_improvement_ms > self.upper_improvement_ms:
+            raise ValueError("counterfactual point estimate exceeds upper bound")
+        return self
+
+
+class CausalHypothesis(StrictModel):
+    hypothesis_id: NonEmpty
+    kind: BottleneckKind
+    target: NonEmpty
+    supporting_evidence: tuple[EvidenceStatement, ...]
+    contradicting_evidence: tuple[EvidenceStatement, ...]
+    counterfactual: CounterfactualEstimate | None = None
+    confidence: float = Field(ge=0.0, le=1.0)
+    rejected_reason: str | None = None
+
+
+class DiagnosisRecord(StrictModel):
+    schema_version: Literal["sloforge.autopsy.diagnosis/v1"] = "sloforge.autopsy.diagnosis/v1"
+    diagnosis_id: NonEmpty
+    degraded_run_id: NonEmpty
+    baseline_run_id: str | None
+    comparison_id: str | None
+    top_hypothesis: BottleneckKind
+    top_three: tuple[BottleneckKind, ...]
+    hypotheses: tuple[CausalHypothesis, ...]
+    first_divergence_event_id: str | None
+    first_divergence_ns: int | None = Field(default=None, ge=0)
+    confidence: float = Field(ge=0.0, le=1.0)
+    sufficient_alignment: bool
+    warnings: tuple[str, ...] = ()
+    evidence: tuple[EvidenceRef, ...]
+
+    @model_validator(mode="after")
+    def consistent_ranking(self) -> Self:
+        if not self.hypotheses:
+            raise ValueError("diagnosis requires at least one hypothesis")
+        if not self.top_three or self.top_three[0] is not self.top_hypothesis:
+            raise ValueError("top-three ranking must begin with top_hypothesis")
+        if len(self.top_three) != len(set(self.top_three)) or len(self.top_three) > 3:
+            raise ValueError("top_three must contain at most three unique kinds")
+        ranked = tuple(item.kind for item in self.hypotheses[: len(self.top_three)])
+        if ranked != self.top_three:
+            raise ValueError("hypothesis order and top_three disagree")
+        return self
