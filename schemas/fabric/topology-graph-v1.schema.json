@@ -1,0 +1,1300 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "ConnectionType": {
+      "enum": [
+        "cpu_memory",
+        "cpu_gpu",
+        "gpu_gpu",
+        "nvlink",
+        "nvswitch",
+        "pcie",
+        "gpu_nic",
+        "nic_network",
+        "storage_host",
+        "remote_memory"
+      ],
+      "title": "ConnectionType",
+      "type": "string"
+    },
+    "CpuSocketNode": {
+      "additionalProperties": false,
+      "properties": {
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "cpu_socket",
+          "default": "cpu_socket",
+          "title": "Kind",
+          "type": "string"
+        },
+        "logical_cores": {
+          "exclusiveMinimum": 0,
+          "title": "Logical Cores",
+          "type": "integer"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "physical_cores": {
+          "exclusiveMinimum": 0,
+          "title": "Physical Cores",
+          "type": "integer"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "socket_index": {
+          "minimum": 0,
+          "title": "Socket Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "socket_index",
+        "model",
+        "physical_cores",
+        "logical_cores",
+        "provenance"
+      ],
+      "title": "CpuSocketNode",
+      "type": "object"
+    },
+    "CurvePoint": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence_high": {
+          "exclusiveMinimum": 0.0,
+          "title": "Confidence High",
+          "type": "number"
+        },
+        "confidence_low": {
+          "minimum": 0.0,
+          "title": "Confidence Low",
+          "type": "number"
+        },
+        "median": {
+          "exclusiveMinimum": 0.0,
+          "title": "Median",
+          "type": "number"
+        },
+        "message_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Message Bytes",
+          "type": "integer"
+        },
+        "p95": {
+          "exclusiveMinimum": 0.0,
+          "title": "P95",
+          "type": "number"
+        },
+        "robust_dispersion": {
+          "minimum": 0.0,
+          "title": "Robust Dispersion",
+          "type": "number"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "message_bytes",
+        "median",
+        "p95",
+        "robust_dispersion",
+        "confidence_low",
+        "confidence_high",
+        "sample_count"
+      ],
+      "title": "CurvePoint",
+      "type": "object"
+    },
+    "DiscoverySource": {
+      "enum": [
+        "sysfs",
+        "hwloc",
+        "nvml",
+        "dcgm",
+        "cuda",
+        "nvidia_smi",
+        "nccl",
+        "ibverbs",
+        "ethtool",
+        "cgroup",
+        "kubernetes",
+        "synthetic"
+      ],
+      "title": "DiscoverySource",
+      "type": "string"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "FactProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "field": {
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/DiscoverySource"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": [
+        "source",
+        "observed_at",
+        "confidence",
+        "field"
+      ],
+      "title": "FactProvenance",
+      "type": "object"
+    },
+    "GpuNode": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "compute_capability": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compute Capability"
+        },
+        "gpu_index": {
+          "minimum": 0,
+          "title": "Gpu Index",
+          "type": "integer"
+        },
+        "health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "gpu",
+          "default": "gpu",
+          "title": "Kind",
+          "type": "string"
+        },
+        "memory_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Memory Bytes",
+          "type": "integer"
+        },
+        "mig_state": {
+          "$ref": "#/$defs/MigState"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "numa_domain_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain Id"
+        },
+        "pci_address": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pci Address"
+        },
+        "product": {
+          "minLength": 1,
+          "title": "Product",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "uuid": {
+          "minLength": 1,
+          "title": "Uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "gpu_index",
+        "uuid",
+        "product",
+        "architecture",
+        "memory_bytes",
+        "mig_state",
+        "health",
+        "provenance"
+      ],
+      "title": "GpuNode",
+      "type": "object"
+    },
+    "HealthState": {
+      "enum": [
+        "healthy",
+        "degraded",
+        "failed",
+        "unknown"
+      ],
+      "title": "HealthState",
+      "type": "string"
+    },
+    "HostNode": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "container_visible": {
+          "title": "Container Visible",
+          "type": "boolean"
+        },
+        "fault_domain": {
+          "minLength": 1,
+          "title": "Fault Domain",
+          "type": "string"
+        },
+        "kind": {
+          "const": "host",
+          "default": "host",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "operating_system": {
+          "minLength": 1,
+          "title": "Operating System",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "total_memory_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Total Memory Bytes",
+          "type": "integer"
+        },
+        "visible_memory_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Visible Memory Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "node_id",
+        "name",
+        "architecture",
+        "operating_system",
+        "total_memory_bytes",
+        "visible_memory_bytes",
+        "container_visible",
+        "fault_domain",
+        "provenance"
+      ],
+      "title": "HostNode",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MemoryDomainNode": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Capacity Bytes",
+          "type": "integer"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "memory_domain",
+          "default": "memory_domain",
+          "title": "Kind",
+          "type": "string"
+        },
+        "measured_bandwidth_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured Bandwidth Gbps"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "numa_domain_id": {
+          "minLength": 1,
+          "title": "Numa Domain Id",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "numa_domain_id",
+        "capacity_bytes",
+        "provenance"
+      ],
+      "title": "MemoryDomainNode",
+      "type": "object"
+    },
+    "MigState": {
+      "enum": [
+        "disabled",
+        "enabled",
+        "instance",
+        "unknown"
+      ],
+      "title": "MigState",
+      "type": "string"
+    },
+    "NetworkRailNode": {
+      "additionalProperties": false,
+      "properties": {
+        "health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "kind": {
+          "const": "network_rail",
+          "default": "network_rail",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "subnet": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subnet"
+        },
+        "transport": {
+          "enum": [
+            "ethernet",
+            "infiniband",
+            "roce",
+            "synthetic"
+          ],
+          "title": "Transport",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "name",
+        "transport",
+        "health",
+        "provenance"
+      ],
+      "title": "NetworkRailNode",
+      "type": "object"
+    },
+    "NicNode": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "gpu_direct_rdma": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gpu Direct Rdma"
+        },
+        "health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "interface": {
+          "minLength": 1,
+          "title": "Interface",
+          "type": "string"
+        },
+        "kind": {
+          "const": "nic",
+          "default": "nic",
+          "title": "Kind",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "numa_domain_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain Id"
+        },
+        "pci_address": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pci Address"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "rdma_capable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rdma Capable"
+        },
+        "speed_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speed Gbps"
+        },
+        "transport": {
+          "enum": [
+            "ethernet",
+            "infiniband",
+            "roce",
+            "unknown"
+          ],
+          "title": "Transport",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "interface",
+        "transport",
+        "active",
+        "health",
+        "provenance"
+      ],
+      "title": "NicNode",
+      "type": "object"
+    },
+    "NumaDomainNode": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu_set": {
+          "pattern": "^[0-9]+(?:[-,][0-9]+)*$",
+          "title": "Cpu Set",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "numa_domain",
+          "default": "numa_domain",
+          "title": "Kind",
+          "type": "string"
+        },
+        "memory_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Memory Bytes",
+          "type": "integer"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "numa_index": {
+          "minimum": 0,
+          "title": "Numa Index",
+          "type": "integer"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "socket_id": {
+          "minLength": 1,
+          "title": "Socket Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "socket_id",
+        "numa_index",
+        "cpu_set",
+        "memory_bytes",
+        "provenance"
+      ],
+      "title": "NumaDomainNode",
+      "type": "object"
+    },
+    "NvSwitchNode": {
+      "additionalProperties": false,
+      "properties": {
+        "generation": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "nv_switch",
+          "default": "nv_switch",
+          "title": "Kind",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "switch_domain": {
+          "minLength": 1,
+          "title": "Switch Domain",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "host_id",
+        "switch_domain",
+        "health",
+        "provenance"
+      ],
+      "title": "NvSwitchNode",
+      "type": "object"
+    },
+    "PcieNode": {
+      "additionalProperties": false,
+      "properties": {
+        "generation": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "pcie_root_complex",
+            "pcie_switch"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "pci_address": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pci Address"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width"
+        }
+      },
+      "required": [
+        "kind",
+        "node_id",
+        "host_id",
+        "provenance"
+      ],
+      "title": "PcieNode",
+      "type": "object"
+    },
+    "RemoteMemoryNode": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Capacity Bytes",
+          "type": "integer"
+        },
+        "host_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Host Id"
+        },
+        "kind": {
+          "const": "remote_memory",
+          "default": "remote_memory",
+          "title": "Kind",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "protocol": {
+          "minLength": 1,
+          "title": "Protocol",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "capacity_bytes",
+        "protocol",
+        "provenance"
+      ],
+      "title": "RemoteMemoryNode",
+      "type": "object"
+    },
+    "SoftwareComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/DiscoverySource"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "source"
+      ],
+      "title": "SoftwareComponent",
+      "type": "object"
+    },
+    "StorageTierNode": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capacity Bytes"
+        },
+        "host_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Host Id"
+        },
+        "kind": {
+          "const": "storage_tier",
+          "default": "storage_tier",
+          "title": "Kind",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "tier": {
+          "enum": [
+            "object",
+            "remote_fs",
+            "local_nvme",
+            "page_cache",
+            "memory"
+          ],
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "tier",
+        "provenance"
+      ],
+      "title": "StorageTierNode",
+      "type": "object"
+    },
+    "TopologyEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "bandwidth_curve_gbps": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CurvePoint"
+          },
+          "title": "Bandwidth Curve Gbps",
+          "type": "array"
+        },
+        "connection": {
+          "$ref": "#/$defs/ConnectionType"
+        },
+        "contention_domain": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contention Domain"
+        },
+        "directionality": {
+          "enum": [
+            "unidirectional",
+            "bidirectional"
+          ],
+          "title": "Directionality",
+          "type": "string"
+        },
+        "discovery_provenance": {
+          "items": {
+            "$ref": "#/$defs/FactProvenance"
+          },
+          "title": "Discovery Provenance",
+          "type": "array"
+        },
+        "duplex": {
+          "enum": [
+            "half",
+            "full",
+            "unknown"
+          ],
+          "title": "Duplex",
+          "type": "string"
+        },
+        "edge_id": {
+          "minLength": 1,
+          "title": "Edge Id",
+          "type": "string"
+        },
+        "health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "latency_curve_us": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CurvePoint"
+          },
+          "title": "Latency Curve Us",
+          "type": "array"
+        },
+        "measured_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured At"
+        },
+        "measurement_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measurement Confidence"
+        },
+        "measurement_environment_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactDigest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sharing_group": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sharing Group"
+        },
+        "source_node_id": {
+          "minLength": 1,
+          "title": "Source Node Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "minLength": 1,
+          "title": "Target Node Id",
+          "type": "string"
+        },
+        "theoretical_bandwidth_gbps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theoretical Bandwidth Gbps"
+        }
+      },
+      "required": [
+        "edge_id",
+        "source_node_id",
+        "target_node_id",
+        "connection",
+        "directionality",
+        "duplex",
+        "health",
+        "discovery_provenance"
+      ],
+      "title": "TopologyEdge",
+      "type": "object"
+    }
+  },
+  "$id": "urn:sloforge:fabric:topology-graph-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/fabric/v1",
+      "default": "sloforge.io/fabric/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "container_limited": {
+      "title": "Container Limited",
+      "type": "boolean"
+    },
+    "discovered_at": {
+      "format": "date-time",
+      "title": "Discovered At",
+      "type": "string"
+    },
+    "discovery_warnings": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Discovery Warnings",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/TopologyEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "kind": {
+      "const": "TopologyGraph",
+      "default": "TopologyGraph",
+      "title": "Kind",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "cpu_socket": "#/$defs/CpuSocketNode",
+            "gpu": "#/$defs/GpuNode",
+            "host": "#/$defs/HostNode",
+            "memory_domain": "#/$defs/MemoryDomainNode",
+            "network_rail": "#/$defs/NetworkRailNode",
+            "nic": "#/$defs/NicNode",
+            "numa_domain": "#/$defs/NumaDomainNode",
+            "nv_switch": "#/$defs/NvSwitchNode",
+            "pcie_root_complex": "#/$defs/PcieNode",
+            "pcie_switch": "#/$defs/PcieNode",
+            "remote_memory": "#/$defs/RemoteMemoryNode",
+            "storage_tier": "#/$defs/StorageTierNode"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/HostNode"
+          },
+          {
+            "$ref": "#/$defs/CpuSocketNode"
+          },
+          {
+            "$ref": "#/$defs/NumaDomainNode"
+          },
+          {
+            "$ref": "#/$defs/MemoryDomainNode"
+          },
+          {
+            "$ref": "#/$defs/GpuNode"
+          },
+          {
+            "$ref": "#/$defs/NvSwitchNode"
+          },
+          {
+            "$ref": "#/$defs/PcieNode"
+          },
+          {
+            "$ref": "#/$defs/NicNode"
+          },
+          {
+            "$ref": "#/$defs/NetworkRailNode"
+          },
+          {
+            "$ref": "#/$defs/StorageTierNode"
+          },
+          {
+            "$ref": "#/$defs/RemoteMemoryNode"
+          }
+        ]
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "software": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SoftwareComponent"
+      },
+      "title": "Software",
+      "type": "array"
+    },
+    "topology_id": {
+      "minLength": 1,
+      "title": "Topology Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "topology_id",
+    "discovered_at",
+    "nodes",
+    "edges",
+    "container_limited"
+  ],
+  "title": "TopologyGraph",
+  "type": "object"
+}

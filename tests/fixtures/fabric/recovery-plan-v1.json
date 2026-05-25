@@ -1,0 +1,19 @@
+{
+  "schema_version":"1.0.0","api_version":"sloforge.io/fabric/v1","kind":"RecoveryPlan","recovery_id":"recovery-fixture-v1",
+  "diagnosis":{"kind":"Diagnosis","api_version":"sloforge.io/autopsy/v1","uri":"artifacts/autopsy/diagnosis.json","digest":{"algorithm":"sha256","value":"4444444444444444444444444444444444444444444444444444444444444444"},"uid":"diagnosis-1","generation":1},
+  "physical_plan":{"kind":"PhysicalExecutionPlan","api_version":"sloforge.io/fabric/v1","uri":"artifacts/fabric/physical.json","digest":{"algorithm":"sha256","value":"5555555555555555555555555555555555555555555555555555555555555555"},"uid":"physical-fixture-v1","generation":1},
+  "actions":[
+    {"action_id":"quarantine-rail","kind":"quarantine_rail","scope":"deployment_rebuild","target_ids":["rail-0"],"order":0,"idempotency_key":"recovery-fixture-v1/0","timeout_seconds":30.0,"rollback_action_id":"restore-routing","requires_external_mutation":false},
+    {"action_id":"restore-routing","kind":"change_rank_placement","scope":"new_replica","target_ids":["swap-ranks"],"order":1,"idempotency_key":"recovery-fixture-v1/1","timeout_seconds":120.0,"rollback_action_id":null,"requires_external_mutation":false}
+  ],
+  "expected_slo_improvement":{
+    "p95_ttft_ms":{"estimate":80.0,"lower":50.0,"upper":110.0,"confidence":0.9,"unit":"ms"},"p99_tpot_ms":{"estimate":14.0,"lower":8.0,"upper":20.0,"confidence":0.9,"unit":"ms"},"p95_end_to_end_ms":{"estimate":310.0,"lower":220.0,"upper":420.0,"confidence":0.9,"unit":"ms"},"throughput_tokens_per_second":{"estimate":160.0,"lower":110.0,"upper":210.0,"confidence":0.9,"unit":"tokens/s"},"goodput_tokens_per_second":{"estimate":170.0,"lower":100.0,"upper":220.0,"confidence":0.9,"unit":"tokens/s"},"cost_usd_per_million_tokens":{"estimate":0.1,"lower":0.0,"upper":0.3,"confidence":0.9,"unit":"USD/Mtoken"},"availability":{"estimate":0.008,"lower":0.003,"upper":0.02,"confidence":0.9,"unit":"ratio"},"communication_overhead_fraction":{"estimate":0.12,"lower":0.07,"upper":0.18,"confidence":0.9,"unit":"ratio"}
+  },
+  "expected_cost_usd":0.02,"expected_disruption_seconds":0.0,"expected_build_seconds":18.0,"confidence":0.88,"compatibility_constraints":["same-model-revision","preserve-started-streams"],
+  "traffic_migration":{"shadow_fraction":0.1,"canary_fraction":0.05,"minimum_shadow_samples":20,"minimum_canary_samples":40,"maximum_inflight_streams_at_drain":0,"preserve_started_streams":true},
+  "promotion_criteria":[{"metric":"p99_tpot_ms","comparator":"le","threshold":45.0,"window_seconds":30.0}],
+  "rollback_criteria":[{"metric":"error_rate","comparator":"gt","threshold":0.01,"window_seconds":10.0}],
+  "abort_criteria":[{"metric":"replacement_readiness_seconds","comparator":"gt","threshold":120.0,"window_seconds":120.0}],
+  "evidence":[{"kind":"CounterfactualRun","api_version":"sloforge.io/autopsy/v1","uri":"artifacts/autopsy/counterfactual.json","digest":{"algorithm":"sha256","value":"6666666666666666666666666666666666666666666666666666666666666666"},"uid":null,"generation":null}],
+  "external_mutation_authorized":false,"extensions":{}
+}

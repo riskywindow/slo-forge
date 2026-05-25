@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "api_version": "sloforge.io/fabric/v1",
+  "kind": "TopologyGraph",
+  "topology_id": "synthetic-two-gpu",
+  "discovered_at": "2026-08-01T12:00:00Z",
+  "nodes": [
+    {
+      "kind": "host",
+      "node_id": "host-0",
+      "name": "fabric-host-0",
+      "architecture": "x86_64",
+      "operating_system": "linux",
+      "total_memory_bytes": 274877906944,
+      "visible_memory_bytes": 274877906944,
+      "container_visible": false,
+      "fault_domain": "rack-a",
+      "provenance": [{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"host"}]
+    },
+    {
+      "kind":"cpu_socket","node_id":"cpu-0","host_id":"host-0","socket_index":0,
+      "model":"Synthetic EPYC","physical_cores":32,"logical_cores":64,
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"cpu"}]
+    },
+    {
+      "kind":"numa_domain","node_id":"numa-0","host_id":"host-0","socket_id":"cpu-0","numa_index":0,"cpu_set":"0-63","memory_bytes":274877906944,
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"numa"}]
+    },
+    {
+      "kind":"gpu","node_id":"gpu-0","host_id":"host-0","gpu_index":0,"uuid":"GPU-SYNTH-0","product":"Synthetic H100","architecture":"hopper","memory_bytes":85899345920,"compute_capability":"9.0","mig_state":"disabled","numa_domain_id":"numa-0","pci_address":"0000:41:00.0","health":"healthy",
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"gpu"}]
+    },
+    {
+      "kind":"gpu","node_id":"gpu-1","host_id":"host-0","gpu_index":1,"uuid":"GPU-SYNTH-1","product":"Synthetic H100","architecture":"hopper","memory_bytes":85899345920,"compute_capability":"9.0","mig_state":"disabled","numa_domain_id":"numa-0","pci_address":"0000:42:00.0","health":"healthy",
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"gpu"}]
+    },
+    {
+      "kind":"nic","node_id":"nic-0","host_id":"host-0","interface":"mlx5_0","pci_address":"0000:43:00.0","speed_gbps":200.0,"transport":"infiniband","active":true,"rdma_capable":true,"gpu_direct_rdma":true,"numa_domain_id":"numa-0","health":"healthy",
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"nic"}]
+    },
+    {
+      "kind":"network_rail","node_id":"rail-0","name":"ib-rail-a","transport":"infiniband","subnet":"synthetic-a","health":"healthy",
+      "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"rail"}]
+    }
+  ],
+  "edges": [
+    {
+      "edge_id":"nvlink-0-1","source_node_id":"gpu-0","target_node_id":"gpu-1","connection":"nvlink","directionality":"bidirectional","duplex":"full","theoretical_bandwidth_gbps":900.0,
+      "bandwidth_curve_gbps":[{"message_bytes":1048576,"median":824.0,"p95":840.0,"robust_dispersion":5.2,"confidence_low":813.0,"confidence_high":835.0,"sample_count":30}],
+      "latency_curve_us":[{"message_bytes":8,"median":2.8,"p95":3.2,"robust_dispersion":0.1,"confidence_low":2.7,"confidence_high":2.9,"sample_count":30}],
+      "sharing_group":"nvlink-domain-0","contention_domain":"nvlink-domain-0","health":"healthy","measurement_confidence":0.95,"measured_at":"2026-08-01T12:01:00Z","measurement_environment_digest":{"algorithm":"sha256","value":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+      "discovery_provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"nvlink"}]
+    },
+    {
+      "edge_id":"gpu0-nic0","source_node_id":"gpu-0","target_node_id":"nic-0","connection":"gpu_nic","directionality":"bidirectional","duplex":"full","theoretical_bandwidth_gbps":200.0,"bandwidth_curve_gbps":[],"latency_curve_us":[],"sharing_group":"pcie-root-0","contention_domain":"pcie-root-0","health":"healthy","measurement_confidence":null,"measured_at":null,"measurement_environment_digest":null,
+      "discovery_provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"locality"}]
+    },
+    {
+      "edge_id":"nic0-rail0","source_node_id":"nic-0","target_node_id":"rail-0","connection":"nic_network","directionality":"bidirectional","duplex":"full","theoretical_bandwidth_gbps":200.0,"bandwidth_curve_gbps":[],"latency_curve_us":[],"sharing_group":null,"contention_domain":"rail-0","health":"healthy","measurement_confidence":null,"measured_at":null,"measurement_environment_digest":null,
+      "discovery_provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://two-gpu","field":"network"}]
+    }
+  ],
+  "software": [{"name":"nccl","version":"2.27.3","source":"synthetic"}],
+  "container_limited": false,
+  "discovery_warnings": [],
+  "extensions": {"sloforge.io/fixture":"two-gpu"}
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0","api_version":"sloforge.io/fabric/v1","kind":"FabricProfile","profile_id":"profile-synthetic-two-gpu",
+  "topology_fingerprint":{"algorithm":"sha256","value":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+  "created_at":"2026-08-01T12:05:00Z",
+  "hardware_manifest":{"kind":"TopologyGraph","api_version":"sloforge.io/fabric/v1","uri":"artifacts/fabric/topology.json","digest":{"algorithm":"sha256","value":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},"uid":"synthetic-two-gpu","generation":1},
+  "software_manifest":{"kind":"EnvironmentManifest","api_version":"sloforge.io/v1","uri":"artifacts/fabric/environment.json","digest":{"algorithm":"sha256","value":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},"uid":null,"generation":null},
+  "measurements":[{
+    "measurement_id":"all-reduce-1m","primitive":"collective","transport":"nvlink","rank_count":2,"message_bytes":1048576,"concurrency":1,"warmup_count":5,
+    "samples":[{"duration_us":10.2,"bytes_transferred":1048576,"success":true,"failure_reason":null},{"duration_us":10.6,"bytes_transferred":1048576,"success":true,"failure_reason":null},{"duration_us":10.4,"bytes_transferred":1048576,"success":true,"failure_reason":null}],
+    "summary_median_us":10.4,"summary_p95_us":10.6,"confidence_low_us":10.2,"confidence_high_us":10.6,
+    "invocation":{"argv":["sloforge","fabric","benchmark","--synthetic"],"timeout_seconds":30.0,"process_placement":"ranks=0,1;cpus=0-3","environment_digest":{"algorithm":"sha256","value":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"}},
+    "artifact_digest":{"algorithm":"sha256","value":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}
+  }],
+  "raw_artifacts":[{"kind":"FabricRawSamples","api_version":"sloforge.io/fabric/v1","uri":"artifacts/fabric/raw/all-reduce-1m.json","digest":{"algorithm":"sha256","value":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},"uid":null,"generation":null}],
+  "extensions":{}
+}

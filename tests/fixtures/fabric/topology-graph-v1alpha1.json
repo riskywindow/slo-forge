@@ -1,0 +1,16 @@
+{
+  "version":"v1alpha1",
+  "api_version":"sloforge.io/fabric/v1alpha1",
+  "kind":"TopologyGraph",
+  "id":"alpha-single-host",
+  "discovered_at":"2026-08-01T12:00:00Z",
+  "nodes":[{
+    "kind":"host","node_id":"host-0","name":"alpha-host","architecture":"x86_64","operating_system":"linux","total_memory_bytes":1024,"visible_memory_bytes":1024,"container_visible":false,"fault_domain":"host-0",
+    "provenance":[{"source":"synthetic","observed_at":"2026-08-01T12:00:00Z","confidence":1.0,"source_uri":"fixture://alpha","field":"host"}]
+  }],
+  "links":[],
+  "software":[],
+  "container_limited":false,
+  "discovery_warnings":[],
+  "extensions":{}
+}

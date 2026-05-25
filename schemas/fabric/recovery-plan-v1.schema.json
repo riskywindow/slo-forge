@@ -1,0 +1,497 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "DocumentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "minLength": 1,
+          "title": "Api Version",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "uid": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uid"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "api_version",
+        "uri",
+        "digest"
+      ],
+      "title": "DocumentReference",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MetricInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "estimate": {
+          "minimum": 0.0,
+          "title": "Estimate",
+          "type": "number"
+        },
+        "lower": {
+          "minimum": 0.0,
+          "title": "Lower",
+          "type": "number"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "minimum": 0.0,
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "estimate",
+        "lower",
+        "upper",
+        "confidence",
+        "unit"
+      ],
+      "title": "MetricInterval",
+      "type": "object"
+    },
+    "PhysicalMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "communication_overhead_fraction": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "cost_usd_per_million_tokens": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "goodput_tokens_per_second": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p95_end_to_end_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p95_ttft_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p99_tpot_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "throughput_tokens_per_second": {
+          "$ref": "#/$defs/MetricInterval"
+        }
+      },
+      "required": [
+        "p95_ttft_ms",
+        "p99_tpot_ms",
+        "p95_end_to_end_ms",
+        "throughput_tokens_per_second",
+        "goodput_tokens_per_second",
+        "cost_usd_per_million_tokens",
+        "availability",
+        "communication_overhead_fraction"
+      ],
+      "title": "PhysicalMetrics",
+      "type": "object"
+    },
+    "RecoveryAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "minLength": 1,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/RecoveryActionKind"
+        },
+        "order": {
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        },
+        "requires_external_mutation": {
+          "default": false,
+          "title": "Requires External Mutation",
+          "type": "boolean"
+        },
+        "rollback_action_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rollback Action Id"
+        },
+        "scope": {
+          "$ref": "#/$defs/RecoveryScope"
+        },
+        "target_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Target Ids",
+          "type": "array"
+        },
+        "timeout_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "action_id",
+        "kind",
+        "scope",
+        "target_ids",
+        "order",
+        "idempotency_key",
+        "timeout_seconds"
+      ],
+      "title": "RecoveryAction",
+      "type": "object"
+    },
+    "RecoveryActionKind": {
+      "enum": [
+        "stop_routing",
+        "drain_worker",
+        "restart_worker",
+        "quarantine_gpu",
+        "quarantine_nic",
+        "quarantine_rail",
+        "replace_replica",
+        "change_rank_placement",
+        "change_rank_ordering",
+        "change_nic_affinity",
+        "change_numa_affinity",
+        "move_expert_group",
+        "replicate_hot_experts",
+        "change_worker_ratio",
+        "switch_kv_transport",
+        "switch_collective",
+        "reduce_communication_concurrency",
+        "reduce_request_concurrency",
+        "shed_low_priority",
+        "switch_parallelism",
+        "switch_aggregation",
+        "rebuild_deployment",
+        "degraded_model"
+      ],
+      "title": "RecoveryActionKind",
+      "type": "string"
+    },
+    "RecoveryCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "comparator": {
+          "enum": [
+            "lt",
+            "le",
+            "gt",
+            "ge"
+          ],
+          "title": "Comparator",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "window_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Window Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric",
+        "comparator",
+        "threshold",
+        "window_seconds"
+      ],
+      "title": "RecoveryCriterion",
+      "type": "object"
+    },
+    "RecoveryScope": {
+      "enum": [
+        "request_path",
+        "worker_local",
+        "replica_local",
+        "new_replica",
+        "deployment_rebuild",
+        "operator_required"
+      ],
+      "title": "RecoveryScope",
+      "type": "string"
+    },
+    "TrafficMigrationPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "canary_fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Canary Fraction",
+          "type": "number"
+        },
+        "maximum_inflight_streams_at_drain": {
+          "minimum": 0,
+          "title": "Maximum Inflight Streams At Drain",
+          "type": "integer"
+        },
+        "minimum_canary_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Canary Samples",
+          "type": "integer"
+        },
+        "minimum_shadow_samples": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Shadow Samples",
+          "type": "integer"
+        },
+        "preserve_started_streams": {
+          "title": "Preserve Started Streams",
+          "type": "boolean"
+        },
+        "shadow_fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Shadow Fraction",
+          "type": "number"
+        }
+      },
+      "required": [
+        "shadow_fraction",
+        "canary_fraction",
+        "minimum_shadow_samples",
+        "minimum_canary_samples",
+        "maximum_inflight_streams_at_drain",
+        "preserve_started_streams"
+      ],
+      "title": "TrafficMigrationPlan",
+      "type": "object"
+    }
+  },
+  "$id": "urn:sloforge:fabric:recovery-plan-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "abort_criteria": {
+      "items": {
+        "$ref": "#/$defs/RecoveryCriterion"
+      },
+      "title": "Abort Criteria",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/RecoveryAction"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "api_version": {
+      "const": "sloforge.io/fabric/v1",
+      "default": "sloforge.io/fabric/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "compatibility_constraints": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Compatibility Constraints",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "diagnosis": {
+      "$ref": "#/$defs/DocumentReference"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/DocumentReference"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "expected_build_seconds": {
+      "minimum": 0.0,
+      "title": "Expected Build Seconds",
+      "type": "number"
+    },
+    "expected_cost_usd": {
+      "minimum": 0.0,
+      "title": "Expected Cost Usd",
+      "type": "number"
+    },
+    "expected_disruption_seconds": {
+      "minimum": 0.0,
+      "title": "Expected Disruption Seconds",
+      "type": "number"
+    },
+    "expected_slo_improvement": {
+      "$ref": "#/$defs/PhysicalMetrics"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "external_mutation_authorized": {
+      "default": false,
+      "title": "External Mutation Authorized",
+      "type": "boolean"
+    },
+    "kind": {
+      "const": "RecoveryPlan",
+      "default": "RecoveryPlan",
+      "title": "Kind",
+      "type": "string"
+    },
+    "physical_plan": {
+      "$ref": "#/$defs/DocumentReference"
+    },
+    "promotion_criteria": {
+      "items": {
+        "$ref": "#/$defs/RecoveryCriterion"
+      },
+      "title": "Promotion Criteria",
+      "type": "array"
+    },
+    "recovery_id": {
+      "minLength": 1,
+      "title": "Recovery Id",
+      "type": "string"
+    },
+    "rollback_criteria": {
+      "items": {
+        "$ref": "#/$defs/RecoveryCriterion"
+      },
+      "title": "Rollback Criteria",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "traffic_migration": {
+      "$ref": "#/$defs/TrafficMigrationPlan"
+    }
+  },
+  "required": [
+    "recovery_id",
+    "diagnosis",
+    "physical_plan",
+    "actions",
+    "expected_slo_improvement",
+    "expected_cost_usd",
+    "expected_disruption_seconds",
+    "expected_build_seconds",
+    "confidence",
+    "compatibility_constraints",
+    "traffic_migration",
+    "promotion_criteria",
+    "rollback_criteria",
+    "abort_criteria",
+    "evidence"
+  ],
+  "title": "RecoveryPlan",
+  "type": "object"
+}
