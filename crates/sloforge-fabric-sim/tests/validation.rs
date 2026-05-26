@@ -73,3 +73,19 @@ fn enforces_event_limit() {
         Err(SimError::EventLimitExceeded(1))
     ));
 }
+
+#[test]
+fn rejects_demand_above_exclusive_capacity() {
+    let mut input = request(
+        vec![resource(
+            "gpu",
+            ResourceKind::GpuCompute,
+            SchedulingMode::Exclusive,
+        )],
+        vec![compute("a", "gpu", 10.0)],
+    );
+    input.operations[0].demands[0].units = 2.0;
+    assert!(
+        matches!(validate(&input), Err(SimError::InvalidInput(message)) if message.contains("exceeds exclusive"))
+    );
+}
