@@ -5,7 +5,7 @@ mod common;
 use common::{compute, request, resource};
 use sloforge_fabric_sim::{
     CounterfactualModifier, FaultEffect, OperationKind, PhysicalOperation, ResourceDemand,
-    ResourceKind, SchedulingMode, TimedFault, simulate,
+    ResourceKind, SchedulingMode, SharingGroup, TimedFault, simulate,
 };
 
 #[test]
@@ -86,6 +86,38 @@ fn fair_share_contention_conserves_link_capacity() {
 }
 
 #[test]
+fn shared_pcie_domain_contends_across_distinct_links() {
+    let mut left = resource("pcie-left", ResourceKind::Pcie, SchedulingMode::FairShare);
+    let mut right = resource("pcie-right", ResourceKind::Pcie, SchedulingMode::FairShare);
+    left.sharing_group = Some("pcie-switch-0".into());
+    right.sharing_group = Some("pcie-switch-0".into());
+    let transfer = |id: &str, resource_id: &str| PhysicalOperation {
+        id: id.into(),
+        kind: OperationKind::PointToPoint { bytes: 1_000_000 },
+        rank_ids: vec![id.into()],
+        dependencies: Vec::new(),
+        demands: vec![ResourceDemand {
+            resource_id: resource_id.into(),
+            units: 1.0,
+        }],
+        earliest_start_us: 0.0,
+        uncertainty_fraction: 0.0,
+        request_id: None,
+    };
+    let mut input = request(
+        vec![left, right],
+        vec![transfer("a", "pcie-left"), transfer("b", "pcie-right")],
+    );
+    input.sharing_groups.push(SharingGroup {
+        id: "pcie-switch-0".into(),
+        capacity_units: 1.0,
+        max_concurrency: 2,
+    });
+    let output = simulate(&input).expect("valid shared-domain case");
+    assert!((output.metrics.makespan_us - 2_000.0).abs() < 1e-6);
+}
+
+#[test]
 fn collective_waits_for_every_rank_dependency() {
     let mut rank0 = compute("rank0-prefill", "gpu-0", 50.0);
     rank0.rank_ids = vec!["rank-0".into()];
@@ -162,6 +194,14 @@ fn timed_link_and_rank_faults_slow_then_recover() {
     let output = simulate(&input).expect("recovering fault");
     assert!((output.metrics.makespan_us - 150.0).abs() < 1e-9);
     assert_eq!(output.applied_faults, vec!["clock", "rank"]);
+    assert_eq!(
+        output
+            .trace_events
+            .iter()
+            .filter(|event| event.cat == "fabric_fault")
+            .count(),
+        2
+    );
 
     input.counterfactuals = vec![
         CounterfactualModifier::RemoveFault {
