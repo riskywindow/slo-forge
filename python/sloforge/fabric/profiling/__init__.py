@@ -1,5 +1,6 @@
 """Fabric benchmarking public API."""
 
+from sloforge.fabric.ir import FabricProfile
 from sloforge.fabric.profiling.adapters import (
     AdapterAvailability,
     AdapterCommand,
@@ -14,16 +15,19 @@ from sloforge.fabric.profiling.benchmark import (
     load_profile,
     save_profile,
 )
+from sloforge.fabric.profiling.conversion import to_canonical_profile
 from sloforge.fabric.profiling.models import (
     BenchmarkCase,
     BenchmarkResult,
     BenchmarkStatus,
     Direction,
-    FabricProfile,
     MeasurementMode,
     Primitive,
     RawSample,
     RobustSummary,
+)
+from sloforge.fabric.profiling.models import (
+    FabricProfile as RawFabricProfile,
 )
 
 __all__ = [
@@ -36,6 +40,7 @@ __all__ = [
     "FabricProfile",
     "MeasurementMode",
     "Primitive",
+    "RawFabricProfile",
     "RawSample",
     "RobustSummary",
     "adapter_inventory",
@@ -46,4 +51,5 @@ __all__ = [
     "build_nvidia_smi_command",
     "load_profile",
     "save_profile",
+    "to_canonical_profile",
 ]

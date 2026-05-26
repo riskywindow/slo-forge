@@ -101,6 +101,14 @@ class RawSample(StrictModel):
     seed: int | None
 
 
+class RawSampleArtifact(StrictModel):
+    schema_version: Literal["sloforge.fabric.raw-samples/v1"] = "sloforge.fabric.raw-samples/v1"
+    case_id: NonEmpty
+    mode: MeasurementMode
+    samples: tuple[RawSample, ...]
+    benchmark_artifact_hash: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+
+
 class RobustSummary(StrictModel):
     sample_count: int = Field(ge=1)
     median_microseconds: float = Field(ge=0.0)
@@ -184,14 +192,20 @@ def profile_hash(profile: FabricProfile) -> str:
 
 
 def finalize_result(**values: object) -> BenchmarkResult:
-    provisional = BenchmarkResult.model_construct(artifact_hash="", **values)
+    provisional = BenchmarkResult.model_construct(
+        artifact_hash="",
+        **values,  # type: ignore[arg-type]
+    )
     payload = provisional.model_dump(mode="json")
     payload["artifact_hash"] = result_hash(provisional)
-    return BenchmarkResult.model_validate(payload)
+    return BenchmarkResult.model_validate_json(json.dumps(payload))
 
 
 def finalize_profile(**values: object) -> FabricProfile:
-    provisional = FabricProfile.model_construct(profile_hash="", **values)
+    provisional = FabricProfile.model_construct(
+        profile_hash="",
+        **values,  # type: ignore[arg-type]
+    )
     payload = provisional.model_dump(mode="json")
     payload["profile_hash"] = profile_hash(provisional)
-    return FabricProfile.model_validate(payload)
+    return FabricProfile.model_validate_json(json.dumps(payload))

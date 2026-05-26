@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 from enum import StrEnum
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -147,7 +147,7 @@ class SoftwareComponent(StrictModel):
     provenance: Provenance
 
 
-class TopologyGraph(StrictModel):
+class DiscoveryTopologyGraph(StrictModel):
     schema_version: Literal["sloforge.fabric.topology/v1"] = "sloforge.fabric.topology/v1"
     topology_id: NonEmpty
     captured_at: NonEmpty
@@ -176,34 +176,37 @@ class TopologyGraph(StrictModel):
         return self
 
 
-def _stable_payload(graph: TopologyGraph) -> dict[str, object]:
-    raw = graph.model_dump(mode="json")
+def _stable_payload(graph: DiscoveryTopologyGraph) -> dict[str, object]:
+    raw: Any = graph.model_dump(mode="json")
     raw.pop("fingerprint", None)
     raw.pop("captured_at", None)
-    for node in raw["nodes"]:  # type: ignore[union-attr]
+    for node in raw["nodes"]:
         for fact in node["facts"]:
             for observation in fact["observations"]:
                 observation["provenance"].pop("captured_at", None)
-    for edge in raw["edges"]:  # type: ignore[union-attr]
+    for edge in raw["edges"]:
         for fact in edge["facts"]:
             for observation in fact["observations"]:
                 observation["provenance"].pop("captured_at", None)
-    for fact in raw["visibility"]["facts"]:  # type: ignore[index]
+    for fact in raw["visibility"]["facts"]:
         for observation in fact["observations"]:
             observation["provenance"].pop("captured_at", None)
-    for component in raw["software"]:  # type: ignore[union-attr]
+    for component in raw["software"]:
         component["provenance"].pop("captured_at", None)
-    return raw
+    return cast(dict[str, object], raw)
 
 
-def topology_fingerprint(graph: TopologyGraph) -> str:
+def topology_fingerprint(graph: DiscoveryTopologyGraph) -> str:
     payload = _stable_payload(graph)
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return hashlib.sha256(encoded).hexdigest()
 
 
-def finalize_graph(**values: object) -> TopologyGraph:
-    provisional = TopologyGraph.model_construct(fingerprint="", **values)
-    return TopologyGraph.model_validate(
-        {**provisional.model_dump(mode="json"), "fingerprint": topology_fingerprint(provisional)}
+def finalize_graph(**values: object) -> DiscoveryTopologyGraph:
+    provisional = DiscoveryTopologyGraph.model_construct(
+        fingerprint="",
+        **values,  # type: ignore[arg-type]
     )
+    payload = provisional.model_dump(mode="json")
+    payload["fingerprint"] = topology_fingerprint(provisional)
+    return DiscoveryTopologyGraph.model_validate_json(json.dumps(payload))

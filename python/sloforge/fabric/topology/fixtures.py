@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from sloforge.fabric.ir import TopologyGraph as CanonicalTopologyGraph
 from sloforge.fabric.topology.models import (
+    DiscoveryTopologyGraph,
     EdgeKind,
     FactState,
     HealthState,
@@ -18,7 +19,6 @@ from sloforge.fabric.topology.models import (
     Provenance,
     SoftwareComponent,
     TopologyEdge,
-    TopologyGraph,
     TopologyNode,
     Visibility,
     finalize_graph,
@@ -85,7 +85,7 @@ def _conflicting_fact(name: str, left: int, right: int, *, unit: str) -> Observe
     )
 
 
-def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
+def build_discovery_fixture(spec_or_name: FixtureSpec | str | Path) -> DiscoveryTopologyGraph:
     """Build a canonical graph from a checked-in compact fixture descriptor."""
     if isinstance(spec_or_name, FixtureSpec):
         spec = spec_or_name
@@ -110,8 +110,11 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                 health=HealthState.HEALTHY,
                 facts=(
                     _fact("hostname", host),
+                    _fact("architecture", "x86_64"),
+                    _fact("operating_system", "synthetic-linux"),
                     _fact("logical_cpu_count", 64, unit="count"),
                     _fact("memory_capacity", 512 * 1024**3, unit="bytes"),
+                    _fact("visible_memory_capacity", 512 * 1024**3, unit="bytes"),
                 ),
             )
         )
@@ -125,7 +128,12 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                         kind=NodeKind.CPU_SOCKET,
                         host_id=host,
                         health=HealthState.HEALTHY,
-                        facts=(_fact("socket_index", numa_index),),
+                        facts=(
+                            _fact("socket_index", numa_index),
+                            _fact("cpu_model", "Synthetic EPYC"),
+                            _fact("physical_core_count", 16, unit="count"),
+                            _fact("logical_cpu_count", 32, unit="count"),
+                        ),
                     ),
                     TopologyNode(
                         node_id=numa_id,
@@ -134,6 +142,7 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                         health=HealthState.HEALTHY,
                         facts=(
                             _fact("numa_index", numa_index),
+                            _fact("cpu_set", f"{numa_index * 32}-{numa_index * 32 + 31}"),
                             _fact(
                                 "memory_capacity",
                                 (512 * 1024**3) // spec.numa_per_host,
@@ -189,6 +198,9 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                         _fact("index", gpu_index),
                         _fact("uuid", f"GPU-{host_index:02d}-{gpu_index:02d}"),
                         _fact("product_name", "Synthetic H100 SXM"),
+                        _fact("architecture", "Hopper"),
+                        _fact("compute_capability", "9.0"),
+                        _fact("pci_bus_id", f"0000:{numa_index + 1:02x}:{gpu_index:02x}.0"),
                         _fact("memory_capacity", 80 * 1024**3, unit="bytes"),
                         _fact("memory_bandwidth", 3_350_000_000_000, unit="bytes_per_second"),
                         _fact("mig_mode", spec.mig_instances_per_gpu > 0),
@@ -231,11 +243,7 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                     if left // spec.nvlink_group_size != right // spec.nvlink_group_size:
                         continue
                     left_id, right_id = f"{host}/gpu/{left}", f"{host}/gpu/{right}"
-                    degraded = (
-                        spec.degraded_edge == "nvlink"
-                        and left == 0
-                        and right == 1
-                    )
+                    degraded = spec.degraded_edge == "nvlink" and left == 0 and right == 1
                     edges.append(
                         TopologyEdge(
                             edge_id=f"nvlink:{left_id}:{right_id}",
@@ -249,7 +257,11 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                             health=HealthState.DEGRADED if degraded else HealthState.HEALTHY,
                             facts=(
                                 _fact("connection_type", "nvlink"),
-                                _fact("theoretical_bandwidth", 450_000_000_000, unit="bytes_per_second"),
+                                _fact(
+                                    "theoretical_bandwidth",
+                                    450_000_000_000,
+                                    unit="bytes_per_second",
+                                ),
                                 _fact(
                                     "measured_bandwidth",
                                     90_000_000_000 if degraded else 405_000_000_000,
@@ -275,7 +287,10 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                             if spec.degraded_edge == "network" and rail_index == 0
                             else HealthState.HEALTHY
                         ),
-                        facts=(_fact("transport", spec.network),),
+                        facts=(
+                            _fact("name", rail_id),
+                            _fact("transport", spec.network),
+                        ),
                     )
                 )
             nodes.append(
@@ -285,8 +300,11 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                     host_id=host,
                     health=HealthState.HEALTHY,
                     facts=(
+                        _fact("interface_name", f"fabric{rail_index}"),
                         _fact("transport", spec.network),
                         _fact("link_speed", 400_000, unit="megabits_per_second"),
+                        _fact("active_port", True),
+                        _fact("rdma_capable", spec.network in {"infiniband", "roce"}),
                         _fact("gpudirect_rdma", spec.network in {"infiniband", "roce"}),
                         _fact("roce_capable", spec.network == "roce"),
                     ),
@@ -316,7 +334,11 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
                             else 45_000_000_000,
                             unit="bytes_per_second",
                         ),
-                        _fact("latency", 12.0 if spec.degraded_edge == "network" else 3.2, unit="microseconds"),
+                        _fact(
+                            "latency",
+                            12.0 if spec.degraded_edge == "network" else 3.2,
+                            unit="microseconds",
+                        ),
                     ),
                 )
             )
@@ -353,7 +375,7 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
         edges=tuple(edges),
         visibility=Visibility(
             in_container=spec.container_limited,
-            host_devices_visible=False if spec.container_limited else True,
+            host_devices_visible=not spec.container_limited,
             visible_gpu_ids=visible,
             restrictions=restrictions,
             facts=(
@@ -379,8 +401,20 @@ def build_fixture(spec_or_name: FixtureSpec | str | Path) -> TopologyGraph:
             ),
         ),
         warnings=(
-            ("Host topology is intentionally hidden by the fixture container boundary.")
+            ("Host topology is intentionally hidden by the fixture container boundary.",)
             if spec.container_limited
             else ()
         ),
     )
+
+
+def build_canonical_fixture(spec_or_name: FixtureSpec | str | Path) -> CanonicalTopologyGraph:
+    """Build and finalize a fixture into the canonical Fabric IR."""
+    from sloforge.fabric.topology.conversion import to_canonical_topology
+
+    return to_canonical_topology(build_discovery_fixture(spec_or_name))
+
+
+def build_fixture(spec_or_name: FixtureSpec | str | Path) -> CanonicalTopologyGraph:
+    """Build a compiler-facing canonical fixture graph."""
+    return build_canonical_fixture(spec_or_name)

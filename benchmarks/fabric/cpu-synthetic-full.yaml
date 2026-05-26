@@ -1,0 +1,13 @@
+schema_version: sloforge.fabric.benchmark-suite/v1
+name: cpu-synthetic-full
+mode: synthetic_calibrated
+topology_fixture: two_node_infiniband
+seed: 20260801
+warmup_count: 3
+sample_count: 11
+message_bytes: [1024, 65536, 1048576, 16777216]
+rank_counts: [2, 4, 8]
+concurrency: [1, 2]
+notes: >-
+  Deterministic CPU-safe calibration fixture. Values are labeled synthetic and
+  must never be reported as hardware measurements.
