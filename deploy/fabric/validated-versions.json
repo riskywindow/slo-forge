@@ -1,0 +1,90 @@
+{
+  "schema_version": "sloforge.fabric-adapter-compatibility/v1",
+  "validated_at": "2026-08-01",
+  "offline_only": true,
+  "components": [
+    {
+      "name": "kubernetes",
+      "validated_range": ">=1.31,<2",
+      "fields": [
+        "apps/v1 Deployment rollingUpdate",
+        "nodeAffinity",
+        "podAntiAffinity",
+        "topologySpreadConstraints",
+        "device-plugin extended resources"
+      ],
+      "sources": [
+        "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/",
+        "https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/",
+        "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/",
+        "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+      ]
+    },
+    {
+      "name": "vllm",
+      "validated_range": ">=0.12.0,<1.0.0",
+      "fields": [
+        "--tensor-parallel-size",
+        "--pipeline-parallel-size",
+        "--data-parallel-size",
+        "--enable-expert-parallel",
+        "--kv-transfer-config NixlConnector"
+      ],
+      "sources": [
+        "https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/",
+        "https://docs.vllm.ai/en/latest/features/disagg_prefill/"
+      ]
+    },
+    {
+      "name": "sglang",
+      "validated_range": ">=0.5.0,<1.0.0",
+      "fields": [
+        "--tp",
+        "--pp",
+        "--dp",
+        "--ep-size",
+        "--enable-dp-attention",
+        "--disaggregation-mode"
+      ],
+      "sources": [
+        "https://docs.sglang.ai/backend/pd_disaggregation.html",
+        "https://docs.nvidia.com/dynamo/dev/kubernetes/model-deployment/deploy-with-dgd"
+      ]
+    },
+    {
+      "name": "nvidia-dynamo",
+      "validated_range": ">=1.0.0,<2.0.0",
+      "fields": [
+        "nvidia.com/v1beta1 DynamoGraphDeployment",
+        "spec.components",
+        "podTemplate",
+        "multinode.nodeCount",
+        "nvidia.com/enable-grove"
+      ],
+      "sources": [
+        "https://docs.nvidia.com/dynamo/dev/kubernetes-api/full-api-reference",
+        "https://docs.nvidia.com/dynamo/dev/knowledge-base/kubernetes/multinode/multinode-deployments",
+        "https://docs.nvidia.com/dynamo/dev/kubernetes/model-deployment/deploy-with-dgd"
+      ]
+    },
+    {
+      "name": "modal",
+      "validated_range": "1.5.3",
+      "fields": ["modal.Image.env metadata only; no physical-placement enforcement"],
+      "sources": ["https://modal.com/docs/reference/modal.Image#env"]
+    },
+    {
+      "name": "truss",
+      "validated_range": "0.18.24",
+      "fields": [
+        "environment_variables metadata only",
+        "model_metadata flexible object",
+        "no physical-placement enforcement"
+      ],
+      "sources": [
+        "https://docs.baseten.co/reference/truss-configuration",
+        "https://github.com/basetenlabs/truss/blob/main/truss/config.schema.json"
+      ]
+    }
+  ]
+}
