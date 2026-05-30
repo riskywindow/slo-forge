@@ -2,16 +2,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from sloforge.autopsy import BottleneckKind, compare_runs, diagnose
+from sloforge.autopsy.capture import capture_simulation_run
 from sloforge.fabric.ir import (
     FabricProfile,
     PhysicalExecutionPlan,
     TopologyGraph,
+    canonical_hash,
     load_fabric_profile,
     load_physical_execution_plan,
     load_topology_graph,
 )
 from sloforge.fabric.simulation import (
     FabricSimulationRequest,
+    RankSlowdownFault,
     RemoveFault,
     ResourceRateFault,
     SimulationWorkload,
@@ -20,6 +24,7 @@ from sloforge.fabric.simulation import (
     request_latencies,
     run_simulation,
 )
+from sloforge.util import write_json
 
 ROOT = Path(__file__).parents[2]
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
@@ -107,3 +112,63 @@ def test_counterfactual_removes_labeled_link_fault() -> None:
     assert degraded.applied_faults == (fault.id,)
     assert repaired.applied_faults == ()
     assert repaired.metrics.makespan_us < degraded.metrics.makespan_us
+
+
+def test_simulation_capture_drives_rank_straggler_diagnosis(tmp_path: Path) -> None:
+    plan, topology, profile = _inputs()
+    workload = SimulationWorkload(
+        request_count=2,
+        arrival_interval_us=100.0,
+        prompt_tokens=256,
+        output_tokens=2,
+    )
+    healthy_request = build_simulation_request(
+        plan,
+        topology,
+        profile,
+        workload,
+        seed=23,
+    )
+    degraded_request = healthy_request.model_copy(
+        update={
+            "faults": (
+                TimedFault(
+                    id="rank-0-slow",
+                    start_us=0.0,
+                    end_us=1_000_000.0,
+                    effect=RankSlowdownFault(rank_id="rank-0", multiplier=0.4),
+                    ground_truth_label="rank_specific_gpu_slowdown",
+                ),
+            )
+        }
+    )
+    healthy_output = run_simulation(healthy_request, repository_root=ROOT)
+    degraded_output = run_simulation(degraded_request, repository_root=ROOT)
+    healthy_path = tmp_path / "healthy.json"
+    degraded_path = tmp_path / "degraded.json"
+    write_json(healthy_path, healthy_output.model_dump(mode="json"))
+    write_json(degraded_path, degraded_output.model_dump(mode="json"))
+    topology_hash = canonical_hash(topology)
+    healthy_run = capture_simulation_run(
+        run_id="healthy",
+        request=healthy_request,
+        output=healthy_output,
+        plan=plan,
+        topology_fingerprint=topology_hash,
+        workload_fingerprint="d" * 64,
+        artifact_path=healthy_path,
+    )
+    degraded_run = capture_simulation_run(
+        run_id="degraded",
+        request=degraded_request,
+        output=degraded_output,
+        plan=plan,
+        topology_fingerprint=topology_hash,
+        workload_fingerprint="d" * 64,
+        artifact_path=degraded_path,
+    )
+    assert degraded_run.fault_intervals[0].fault_type == "rank_specific_gpu_slowdown"
+    comparison = compare_runs(healthy_run, degraded_run)
+    diagnosis = diagnose(degraded_run, comparison=comparison, baseline=healthy_run)
+    assert diagnosis.top_hypothesis is BottleneckKind.RANK_STRAGGLER
+    assert comparison.maximum_rank_skew > 1.0

@@ -62,8 +62,15 @@ def _rank_skew(run: AutopsyRun) -> float:
         if event.rank is None or event.event_type not in {
             EventType.COLLECTIVE,
             EventType.COLLECTIVE_WAIT,
+            EventType.DECODE,
             EventType.EXPERT_DISPATCH,
             EventType.EXPERT_COMBINE,
+            EventType.GPU_COMPUTE,
+            EventType.KV_TRANSFER,
+            EventType.NETWORK_TRANSFER,
+            EventType.NVLINK_TRANSFER,
+            EventType.PCIE_TRANSFER,
+            EventType.PREFILL,
         }:
             continue
         groups[(event.event_type, event.operation, event.request_id)][event.rank].append(
@@ -73,7 +80,9 @@ def _rank_skew(run: AutopsyRun) -> float:
     for ranks in groups.values():
         medians = [statistics.median(values) for values in ranks.values() if values]
         if len(medians) >= 2 and min(medians) > 0.0:
-            maximum = max(maximum, max(medians) / statistics.median(medians))
+            # ``median_low`` keeps the two-rank case sensitive to one straggler;
+            # the arithmetic midpoint would dilute a 2.5x skew to 1.43x.
+            maximum = max(maximum, max(medians) / statistics.median_low(medians))
     return maximum
 
 
