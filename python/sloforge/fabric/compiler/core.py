@@ -716,9 +716,14 @@ def _evaluate_candidate(
     disaggregated: bool,
     placement_strategy: OptimizationStrategy,
     excluded: frozenset[str] = frozenset(),
+    preselected_gpus: tuple[GpuNode, ...] | None = None,
 ) -> _Candidate | CandidateSummary:
     rank_count = tp * pp * dp
-    gpus = _ordered_gpus(request.topology, rank_count, placement_strategy, excluded)
+    gpus = (
+        preselected_gpus
+        if preselected_gpus is not None
+        else _ordered_gpus(request.topology, rank_count, placement_strategy, excluded)
+    )
     gpu_ids = tuple(gpu.node_id for gpu in gpus)
     candidate_id = _candidate_id(tp, pp, dp, ep, disaggregated, gpu_ids)
     rejection: list[str] = []
@@ -970,7 +975,11 @@ def _recovery_variants(
         for item in sorted(candidates, key=lambda item: item.summary.objective_score)
         if item.candidate_id != selected.candidate_id
         and item.summary.feasible
-        and item.gpu_ids != selected.gpu_ids
+        and (
+            item.gpu_ids != selected.gpu_ids
+            or (item.tp, item.pp, item.dp, item.ep, item.disaggregated)
+            != (selected.tp, selected.pp, selected.dp, selected.ep, selected.disaggregated)
+        )
     )
     result: list[RecoveryVariant] = []
     for index, alternate in enumerate(alternatives[:3]):
@@ -1031,10 +1040,15 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
     # placement or curve evaluation. Tiny exhaustive mode intentionally visits
     # the same finite space to serve as a correctness oracle.
     combinations = itertools.product(degrees, degrees, degrees, degrees, disaggregation_options)
+    placement_cache: dict[int, tuple[GpuNode, ...]] = {}
     for tp, pp, dp, ep, disaggregated in combinations:
         rank_count = tp * pp * dp
         if rank_count > maximum:
             continue
+        if rank_count not in placement_cache:
+            placement_cache[rank_count] = _ordered_gpus(
+                request.topology, rank_count, placement_strategy
+            )
         outcome = _evaluate_candidate(
             request,
             tp=tp,
@@ -1043,6 +1057,7 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             ep=ep,
             disaggregated=disaggregated,
             placement_strategy=placement_strategy,
+            preselected_gpus=placement_cache[rank_count],
         )
         if isinstance(outcome, CandidateSummary):
             summaries.append(outcome)
