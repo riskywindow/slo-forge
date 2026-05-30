@@ -14,9 +14,13 @@ from sloforge.fabric.ir import (
     DocumentReference,
     FabricMeasurementSeries,
     FabricRawSample,
+    canonical_hash,
 )
 from sloforge.fabric.ir import (
     FabricProfile as CanonicalFabricProfile,
+)
+from sloforge.fabric.ir import (
+    TopologyGraph as CanonicalTopologyGraph,
 )
 from sloforge.fabric.profiling.models import (
     BenchmarkResult,
@@ -113,15 +117,26 @@ def _series(result: BenchmarkResult) -> FabricMeasurementSeries:
     )
 
 
-def to_canonical_profile(profile: FabricProfile) -> CanonicalFabricProfile:
-    """Convert successful measurements while retaining raw artifact references."""
-    topology_digest = ArtifactDigest(algorithm="sha256", value=profile.topology_fingerprint)
+def to_canonical_profile(
+    profile: FabricProfile, *, topology: CanonicalTopologyGraph
+) -> CanonicalFabricProfile:
+    """Convert measurements and bind them to an exact canonical topology hash."""
+    canonical_topology_hash = canonical_hash(topology)
+    discovery_fingerprint = topology.extensions.root.get("sloforge.io/discovery-fingerprint")
+    compatible_fingerprints = {canonical_topology_hash}
+    if isinstance(discovery_fingerprint, str):
+        compatible_fingerprints.add(discovery_fingerprint)
+    if profile.topology_fingerprint not in compatible_fingerprints:
+        raise ValueError(
+            "raw FabricProfile topology does not correspond to the supplied canonical TopologyGraph"
+        )
+    topology_digest = ArtifactDigest(algorithm="sha256", value=canonical_topology_hash)
     environment_payload = [item.model_dump(mode="json") for item in profile.environment]
     environment_digest = _digest(environment_payload)
     hardware_reference = DocumentReference(
         kind="TopologyGraph",
         api_version="sloforge.io/fabric/v1",
-        uri=f"urn:sloforge:topology:{profile.topology_fingerprint}",
+        uri=f"urn:sloforge:topology:{canonical_topology_hash}",
         digest=topology_digest,
     )
     software_reference = DocumentReference(
