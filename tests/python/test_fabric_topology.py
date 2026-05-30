@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -17,6 +18,7 @@ from sloforge.fabric.topology import (
     load_topology,
     save_topology,
 )
+from sloforge.fabric.topology import discovery as discovery_module
 from sloforge.fabric.topology.discovery import observed
 from sloforge.fabric.topology.fixtures import FIXTURE_TIME
 from sloforge.fabric.topology.models import DiscoveryTopologyGraph, Provenance
@@ -71,6 +73,10 @@ def test_expected_fixture_shapes_and_capabilities() -> None:
         for node in mig.nodes
         if node.kind is NodeKind.GPU
     )
+    pcie = build_discovery_fixture("multi_numa_pcie")
+    assert sum(node.kind is NodeKind.PCIE_ROOT for node in pcie.nodes) == 4
+    assert sum(node.kind is NodeKind.PCIE_SWITCH for node in pcie.nodes) == 4
+    assert any(edge.kind.value == "pcie" and edge.contention_domain for edge in pcie.edges)
 
 
 def test_degraded_container_and_conflict_fixtures_preserve_epistemic_state() -> None:
@@ -131,6 +137,43 @@ def test_fixture_descriptors_reject_unknown_fields(tmp_path: Path) -> None:
     path.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(ValidationError):
         build_discovery_fixture(path)
+
+
+def test_nvidia_topology_matrix_normalizes_nvlink_and_pcie(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output = """        GPU0 GPU1 GPU2 CPU Affinity\nGPU0   X    NV4  PHB  0-31\nGPU1   NV4  X    PIX  0-31\nGPU2   PHB  PIX  X    32-63\n"""
+
+    def fake_run(argv: tuple[str, ...], timeout_s: float = 5.0) -> subprocess.CompletedProcess[str]:
+        del argv, timeout_s
+        return subprocess.CompletedProcess(["nvidia-smi"], 0, output, "")
+
+    monkeypatch.setattr(discovery_module, "_run", fake_run)
+    rows = tuple(
+        (
+            str(index),
+            f"GPU-{index}",
+            "Synthetic GPU",
+            "81920",
+            f"0000:0{index}:00.0",
+            "600.0",
+            "9.0",
+            "Disabled",
+            "0",
+            "1500",
+            "250.0",
+        )
+        for index in range(3)
+    )
+    edges = discovery_module._gpu_topology_edges("host", rows, FIXTURE_TIME)
+    assert len(edges) == 3
+    assert edges[0].fact("connection_type") is not None
+    assert {
+        edge.fact("connection_type").value for edge in edges if edge.fact("connection_type")
+    } == {
+        "nvlink",
+        "pcie",
+    }
 
 
 @pytest.mark.parametrize(
