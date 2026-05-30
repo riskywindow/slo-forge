@@ -1,0 +1,43 @@
+schema_version: 1.0.0
+matrix_id: deterministic-runtime-fixture
+cases:
+  - case_id: synthetic-latency
+    repository: .
+    revision: HEAD
+    hardware:
+      architecture: cpu
+      minimum_cpu_cores: 1
+      minimum_memory_gib: 0.5
+      gpu_count: 0
+      requires_rdma: false
+    benchmark:
+      command:
+        executable: python3
+        arguments: [benchmark.py]
+        timeout_seconds: 5.0
+      metrics:
+        - name: p99_ttft_ms
+          unit: ms
+          direction: lower_is_better
+          practical_threshold_percent: 5.0
+          significance_level: 0.05
+          maximum_noise_percent: 5.0
+        - name: throughput_rps
+          unit: request/s
+          direction: higher_is_better
+          practical_threshold_percent: 5.0
+          significance_level: 0.05
+          maximum_noise_percent: 5.0
+      input:
+        model: synthetic-moe
+        workload: mixed-bursty
+        prompt_tokens: 128
+        output_tokens: 32
+        concurrency: 4
+      warmup_trials: 2
+      repetitions: 7
+      maximum_repetitions: 21
+      failed_trial_retries: 1
+      bootstrap_rounds: 500
+      seed: 2026
+    budget_seconds: 120.0
