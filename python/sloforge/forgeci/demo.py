@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import subprocess
 from pathlib import Path
 
 from sloforge.forgeci import run_fixture_evaluation
@@ -18,6 +19,21 @@ def run_forgeci_demo(*, output_directory: Path, report_path: Path, reset: bool) 
             raise ValueError("refusing to reset a broad directory")
         shutil.rmtree(output_directory)
     evaluation = run_fixture_evaluation(output_directory, report_path)
+    fixture_repository = output_directory / "fixture-repository"
+    bundle_path = output_directory / "fixture-repository.bundle"
+    completed = subprocess.run(
+        ["git", "-C", str(fixture_repository), "bundle", "create", str(bundle_path), "--all"],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        timeout=15.0,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(f"failed to preserve fixture history: {completed.stderr.strip()}")
+    # A portable bundle retains the exact history without embedding a nested
+    # worktree repository in SLOForge's own artifact tree.
+    shutil.rmtree(fixture_repository / ".git")
     if not evaluation.bisection_correct:
         raise RuntimeError("ForgeCI did not identify the fixture's first regressing commit")
     print(evaluation.model_dump_json(indent=2))
