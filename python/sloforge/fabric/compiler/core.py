@@ -75,6 +75,7 @@ class CompilerObjective(StrEnum):
 
 class OptimizationStrategy(StrEnum):
     EXHAUSTIVE = "exhaustive"
+    RANDOM_PLACEMENT = "random_placement"
     TOPOLOGY_UNAWARE = "topology_unaware"
     GREEDY_TOPOLOGY_AWARE = "greedy_topology_aware"
     HIERARCHICAL = "hierarchical"
@@ -285,12 +286,21 @@ def _ordered_gpus(
     count: int,
     strategy: OptimizationStrategy,
     excluded: frozenset[str] = frozenset(),
+    seed: int = 0,
 ) -> tuple[GpuNode, ...]:
     available = tuple(gpu for gpu in _healthy_gpus(topology) if gpu.node_id not in excluded)
     if len(available) < count:
         return ()
     if strategy is OptimizationStrategy.TOPOLOGY_UNAWARE:
         return available[:count]
+    if strategy is OptimizationStrategy.RANDOM_PLACEMENT:
+        # Content-hash ordering gives a reproducible seeded random baseline
+        # independent of process hash randomization and Python container order.
+        randomized = sorted(
+            available,
+            key=lambda gpu: hashlib.sha256(f"{seed}:{gpu.node_id}".encode()).digest(),
+        )
+        return tuple(randomized[:count])
     # Deterministic greedy maximum-affinity expansion. The first GPU is chosen
     # by fault-domain stability; subsequent ranks maximize their weakest link to
     # the already selected group.
@@ -741,7 +751,13 @@ def _evaluate_candidate(
     gpus = (
         preselected_gpus
         if preselected_gpus is not None
-        else _ordered_gpus(request.topology, rank_count, placement_strategy, excluded)
+        else _ordered_gpus(
+            request.topology,
+            rank_count,
+            placement_strategy,
+            excluded,
+            seed=request.seed,
+        )
     )
     gpu_ids = tuple(gpu.node_id for gpu in gpus)
     candidate_id = _candidate_id(tp, pp, dp, ep, disaggregated, gpu_ids)
@@ -1051,8 +1067,12 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
     summaries: list[CandidateSummary] = []
     strategy = request.strategy
     placement_strategy = (
-        OptimizationStrategy.TOPOLOGY_UNAWARE
-        if strategy is OptimizationStrategy.TOPOLOGY_UNAWARE
+        strategy
+        if strategy
+        in {
+            OptimizationStrategy.RANDOM_PLACEMENT,
+            OptimizationStrategy.TOPOLOGY_UNAWARE,
+        }
         else OptimizationStrategy.GREEDY_TOPOLOGY_AWARE
     )
     # The hierarchical strategy prunes impossible degree products before any
@@ -1073,7 +1093,10 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             continue
         if rank_count not in placement_cache:
             placement_cache[rank_count] = _ordered_gpus(
-                request.topology, rank_count, placement_strategy
+                request.topology,
+                rank_count,
+                placement_strategy,
+                seed=request.seed,
             )
         outcome = _evaluate_candidate(
             request,
