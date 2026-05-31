@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "comparison_id": "forgeci-intentional-regression-61853d225032-6ef26198a7--forgeci-intentional-regression-f2047b539634-0aaaafa3f9",
+  "baseline_run_id": "forgeci-intentional-regression-61853d225032-6ef26198a7",
+  "candidate_run_id": "forgeci-intentional-regression-f2047b539634-0aaaafa3f9",
+  "classification": "regression",
+  "metrics": [
+    {
+      "metric": "p99_ttft_ms",
+      "unit": "ms",
+      "baseline_median": 100.1467666484547,
+      "candidate_median": 112.16437864626927,
+      "degradation_percent": 12.000000000000005,
+      "degradation_ci_low_percent": 11.669535821972225,
+      "degradation_ci_high_percent": 12.33144212221065,
+      "cliffs_delta": 1.0,
+      "noise_floor_percent": 0.20174215330764958,
+      "corrected_significance_level": 0.025,
+      "classification": "regression",
+      "rationale": "degradation 12.000% exceeds practical/noise threshold 5.000% and corrected 97.5% interval excludes zero"
+    },
+    {
+      "metric": "throughput_rps",
+      "unit": "request/s",
+      "baseline_median": 99.85344844035764,
+      "candidate_median": 89.15486467889075,
+      "degradation_percent": 10.714285714285719,
+      "degradation_ci_low_percent": 10.450062083696883,
+      "degradation_ci_high_percent": 10.977729733759402,
+      "cliffs_delta": 1.0,
+      "noise_floor_percent": 0.20146800930373768,
+      "corrected_significance_level": 0.025,
+      "classification": "regression",
+      "rationale": "degradation 10.714% exceeds practical/noise threshold 5.000% and corrected 97.5% interval excludes zero"
+    }
+  ],
+  "correction_method": "bonferroni",
+  "warnings": []
+}

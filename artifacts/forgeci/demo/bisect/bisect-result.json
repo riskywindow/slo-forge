@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "/Users/rishivinodkumar/sloforge/artifacts/forgeci/demo/fixture-repository",
+  "good_commit": "61853d2250324d26b71a79307ed527686caf5db8",
+  "bad_commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
+  "first_regressing_commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
+  "confidence": 0.975,
+  "steps": [
+    {
+      "commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
+      "classification": "regression",
+      "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/f2047b539634bef041c7a3a0712e11604c37ac82-0.json",
+      "repetitions": 7,
+      "attempt": 0
+    },
+    {
+      "commit": "c17280f4aa3eddb91665acb963784880c0a18652",
+      "classification": "unchanged",
+      "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/c17280f4aa3eddb91665acb963784880c0a18652-0.json",
+      "repetitions": 7,
+      "attempt": 0
+    },
+    {
+      "commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
+      "classification": "regression",
+      "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/a4a027eeb5d87c6b67e5f347e3a67e2679929651-0.json",
+      "repetitions": 7,
+      "attempt": 0
+    }
+  ],
+  "inconclusive_commits": [],
+  "artifact_directory": "artifacts/forgeci/demo/bisect",
+  "caveats": []
+}
