@@ -1,0 +1,15 @@
+{
+  "schema_version": "sloforge.fabric.observed-collective-trace/v1",
+  "plan_id": "rank-ordering-fixture",
+  "operation_id": "tp-all-reduce",
+  "calibration_mode": "synthetic_calibrated",
+  "observed_duration_microseconds": [120.0, 124.0, 122.0, 121.0, 125.0],
+  "collective_critical_path_fraction": 0.42,
+  "rank_wait": [],
+  "fault_free": true,
+  "provenance": {
+    "generator": "deterministic asymmetric four-GPU topology fixture",
+    "seed": 17,
+    "hardware_exercised": false
+  }
+}
