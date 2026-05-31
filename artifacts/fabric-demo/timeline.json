@@ -1,0 +1,79 @@
+[
+  {
+    "at_ms": 0.176,
+    "detail": "p95 TTFT 2484.092 ms exceeded 1051.471 ms",
+    "event": "SLO_REGRESSION",
+    "evidence_uri": "autopsy/comparison.json",
+    "sequence": 0
+  },
+  {
+    "at_ms": 1.176,
+    "detail": "rank_straggler confidence=0.900",
+    "event": "CAUSAL_DIAGNOSIS",
+    "evidence_uri": "autopsy/diagnosis.json",
+    "sequence": 1
+  },
+  {
+    "at_ms": 2.176,
+    "detail": "evaluated 7 repairs; selected remove-both-faults",
+    "event": "COUNTERFACTUAL_SELECTION",
+    "evidence_uri": "autopsy/counterfactuals.json",
+    "sequence": 2
+  },
+  {
+    "at_ms": 1000.0,
+    "detail": "counterfactual simulation validation passed",
+    "event": "VALIDATED_IN_SIMULATION",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 3
+  },
+  {
+    "at_ms": 2000.0,
+    "detail": "simulated action change_rank_placement completed",
+    "event": "BUILDING_REPLACEMENT",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 4
+  },
+  {
+    "at_ms": 3000.0,
+    "detail": "replacement is ready; starting shadow traffic",
+    "event": "SHADOWING",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 5
+  },
+  {
+    "at_ms": 4000.0,
+    "detail": "shadow sample and SLO criteria passed",
+    "event": "CANARYING",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 6
+  },
+  {
+    "at_ms": 5000.0,
+    "detail": "canary sample and SLO criteria passed",
+    "event": "PROMOTING",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 7
+  },
+  {
+    "at_ms": 6000.0,
+    "detail": "traffic migrated; old workers no longer receive new requests",
+    "event": "DRAINING_OLD",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 8
+  },
+  {
+    "at_ms": 8000.0,
+    "detail": "old workers drained; recovery completed",
+    "event": "COMPLETED",
+    "evidence_uri": "recovery/execution.json",
+    "sequence": 9
+  },
+  {
+    "at_ms": 9000.0,
+    "detail": "p95 TTFT restored to 955.883 ms",
+    "event": "SLO_RESTORED",
+    "evidence_uri": "simulations/restored.json",
+    "sequence": 10
+  }
+]

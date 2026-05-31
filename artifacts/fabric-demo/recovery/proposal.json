@@ -1,0 +1,230 @@
+{
+  "abort_criteria": [
+    {
+      "comparator": "gt",
+      "metric": "replacement_readiness_seconds",
+      "threshold": 300.0,
+      "window_seconds": 300.0
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "action-00-stop_routing",
+      "idempotency_key": "recovery-4dacd63731b4d910/0/stop_routing",
+      "kind": "stop_routing",
+      "order": 0,
+      "requires_external_mutation": false,
+      "rollback_action_id": null,
+      "scope": "request_path",
+      "target_ids": [
+        "rank_group",
+        "recovery-0-physical-17ebc4cb030e"
+      ],
+      "timeout_seconds": 10.0
+    },
+    {
+      "action_id": "action-01-drain_worker",
+      "idempotency_key": "recovery-4dacd63731b4d910/1/drain_worker",
+      "kind": "drain_worker",
+      "order": 1,
+      "requires_external_mutation": false,
+      "rollback_action_id": null,
+      "scope": "worker_local",
+      "target_ids": [
+        "rank_group",
+        "recovery-0-physical-17ebc4cb030e"
+      ],
+      "timeout_seconds": 120.0
+    },
+    {
+      "action_id": "action-02-restart_worker",
+      "idempotency_key": "recovery-4dacd63731b4d910/2/restart_worker",
+      "kind": "restart_worker",
+      "order": 2,
+      "requires_external_mutation": false,
+      "rollback_action_id": null,
+      "scope": "worker_local",
+      "target_ids": [
+        "rank_group",
+        "recovery-0-physical-17ebc4cb030e"
+      ],
+      "timeout_seconds": 120.0
+    },
+    {
+      "action_id": "action-03-change_rank_placement",
+      "idempotency_key": "recovery-4dacd63731b4d910/3/change_rank_placement",
+      "kind": "change_rank_placement",
+      "order": 3,
+      "requires_external_mutation": false,
+      "rollback_action_id": null,
+      "scope": "new_replica",
+      "target_ids": [
+        "rank_group",
+        "recovery-0-physical-17ebc4cb030e"
+      ],
+      "timeout_seconds": 30.0
+    }
+  ],
+  "api_version": "sloforge.io/fabric/v1",
+  "compatibility_constraints": [
+    "same-model-digest",
+    "preserve-started-streams",
+    "healthy-topology-path",
+    "recovery-variant:recovery-0-physical-17ebc4cb030e"
+  ],
+  "confidence": 0.9,
+  "diagnosis": {
+    "api_version": "sloforge.autopsy.diagnosis/v1",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "560e5a14c2ce9895af8bf567d8b0f5e78079c073cbbf69a07b8efc67dd959ed0"
+    },
+    "generation": 1,
+    "kind": "DiagnosisRecord",
+    "uid": "diagnosis-9540d986a8a317da",
+    "uri": "artifacts/autopsy/degraded-run/diagnosis.json"
+  },
+  "evidence": [
+    {
+      "api_version": "sloforge.autopsy.event/v1",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "9eff8d5f790d7705fedddd0bfb0c2daefced689d5f704125bffa3cf1f2291fba"
+      },
+      "generation": null,
+      "kind": "AutopsyEvidence",
+      "uid": null,
+      "uri": "artifacts/fabric-demo/simulations/degraded.json"
+    },
+    {
+      "api_version": "sloforge.autopsy.event/v1",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "5ecd00daa04dcdbe467ab3db9a7938215830f82357a4dde981ee9661237ba3a0"
+      },
+      "generation": null,
+      "kind": "AutopsyEvidence",
+      "uid": null,
+      "uri": "artifacts/fabric-demo/simulations/healthy.json"
+    }
+  ],
+  "expected_build_seconds": 10.0,
+  "expected_cost_usd": 0.022222222222222227,
+  "expected_disruption_seconds": 1.0,
+  "expected_slo_improvement": {
+    "availability": {
+      "confidence": 0.9,
+      "estimate": 0.001998999999999973,
+      "lower": 0.0017990999999999758,
+      "unit": "ratio",
+      "upper": 0.0021988999999999702
+    },
+    "communication_overhead_fraction": {
+      "confidence": 0.9,
+      "estimate": 6.950615571512842e-05,
+      "lower": 6.255554014361559e-05,
+      "unit": "ratio",
+      "upper": 7.645677128664126e-05
+    },
+    "cost_usd_per_million_tokens": {
+      "confidence": 0.9,
+      "estimate": 0.0,
+      "lower": 0.0,
+      "unit": "USD/Mtoken",
+      "upper": 0.0
+    },
+    "goodput_tokens_per_second": {
+      "confidence": 0.9,
+      "estimate": 640.0,
+      "lower": 576.0,
+      "unit": "tokens/s",
+      "upper": 704.0
+    },
+    "p95_end_to_end_ms": {
+      "confidence": 0.9,
+      "estimate": 104.96912,
+      "lower": 94.47220800000001,
+      "unit": "ms",
+      "upper": 115.466032
+    },
+    "p95_ttft_ms": {
+      "confidence": 0.9,
+      "estimate": 40.969120000000004,
+      "lower": 36.872208,
+      "unit": "ms",
+      "upper": 45.06603200000001
+    },
+    "p99_tpot_ms": {
+      "confidence": 0.9,
+      "estimate": 1.0,
+      "lower": 0.9,
+      "unit": "ms",
+      "upper": 1.1
+    },
+    "throughput_tokens_per_second": {
+      "confidence": 0.9,
+      "estimate": 695.6521739130435,
+      "lower": 626.0869565217391,
+      "unit": "tokens/s",
+      "upper": 765.2173913043479
+    }
+  },
+  "extensions": {},
+  "external_mutation_authorized": false,
+  "kind": "RecoveryPlan",
+  "physical_plan": {
+    "api_version": "sloforge.io/fabric/v1",
+    "digest": {
+      "algorithm": "sha256",
+      "value": "b237cd37d72076d36a161fdf011ecb27e54f9e6fcb56b1f092d7a6e464bb61d6"
+    },
+    "generation": 1,
+    "kind": "PhysicalExecutionPlan",
+    "uid": "physical-plan-8255ccdd8b3d846d",
+    "uri": "artifacts/physical-plans/physical-plan-8255ccdd8b3d846d.json"
+  },
+  "promotion_criteria": [
+    {
+      "comparator": "le",
+      "metric": "p99_tpot_ms",
+      "threshold": 1.3750000000000009,
+      "window_seconds": 30.0
+    },
+    {
+      "comparator": "le",
+      "metric": "p95_ttft_ms",
+      "threshold": 1051.4707653267544,
+      "window_seconds": 30.0
+    },
+    {
+      "comparator": "le",
+      "metric": "error_rate",
+      "threshold": 0.01,
+      "window_seconds": 30.0
+    }
+  ],
+  "recovery_id": "recovery-4dacd63731b4d910",
+  "rollback_criteria": [
+    {
+      "comparator": "gt",
+      "metric": "error_rate",
+      "threshold": 0.01,
+      "window_seconds": 10.0
+    },
+    {
+      "comparator": "gt",
+      "metric": "p99_tpot_ms",
+      "threshold": 1.650000000000001,
+      "window_seconds": 30.0
+    }
+  ],
+  "schema_version": "1.0.0",
+  "traffic_migration": {
+    "canary_fraction": 0.05,
+    "maximum_inflight_streams_at_drain": 0,
+    "minimum_canary_samples": 4,
+    "minimum_shadow_samples": 3,
+    "preserve_started_streams": true,
+    "shadow_fraction": 0.1
+  }
+}

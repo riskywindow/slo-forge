@@ -1075,7 +1075,7 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             OptimizerTraceEntry(
                 sequence=sequence,
                 candidate_id=item.candidate_id,
-                phase="simulation" if item.feasible else "feasibility",
+                phase="lower_bound" if item.feasible else "feasibility",
                 decision=(
                     "select"
                     if item.candidate_id == selected.candidate_id
@@ -1086,7 +1086,11 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
                     if item.candidate_id == selected.candidate_id
                     else ("pareto_candidate" if item.feasible else "+".join(item.rejection_codes))
                 ),
-                simulator_calls=1 if item.feasible else 0,
+                # Compilation ranks the finite candidate space with measured
+                # service/link curves. Runtime validation is an explicit
+                # subsequent compiler pass (``fabric simulate``/``validate``),
+                # so do not claim simulator executions that did not occur.
+                simulator_calls=0,
                 solver_time_ms=0.0,
             )
         )
@@ -1183,5 +1187,5 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         all_candidates=tuple(sorted(summaries, key=lambda item: item.candidate_id)),
         strategy=request.strategy,
         solver_time_ms=0.0,
-        simulator_calls=len(feasible),
+        simulator_calls=0,
     )

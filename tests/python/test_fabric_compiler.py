@@ -76,7 +76,8 @@ def test_hierarchical_compiler_produces_valid_explainable_plan() -> None:
     assert result.selected.optimizer_history
     assert result.selected.rejected_alternatives
     assert result.pareto_frontier
-    assert result.simulator_calls > 0
+    assert result.simulator_calls == 0
+    assert all(entry.simulator_calls == 0 for entry in result.selected.optimizer_history)
     assert len(result.selected.rank_placement.bindings) == (
         result.selected.parallelism.expected_rank_count
     )
