@@ -1,0 +1,11 @@
+# WarmPath local demonstration
+
+The profile uses measured local reads and checksum verification. The snapshot payload is an explicitly synthetic deterministic fixture.
+
+- Plan: `warmpath-eb19aa057c17b1bc` (exhaustive; 243 candidates)
+- Predicted p50/p95 readiness: 0.960 / 1.112 ms
+- Measured local execution readiness: 4.368 ms
+- Restore/checksums: pass
+- Deferred non-critical artifacts: 1
+
+All reported values are loaded from `artifacts/warmpath/manifest.json`; raw stage samples are retained under `artifacts/warmpath/profile/raw/`.

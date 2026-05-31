@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "f59d1bbbfed5cd3c8a694d1ba64986cb90275102cb377f350efb284a46ccfbca",
+  "artifact_id": "tokenizer",
+  "confidence_interval_high_ms": 0.0005,
+  "confidence_interval_low_ms": 0.000416,
+  "confidence_level": 0.95,
+  "environment_fingerprint": "caca9fa447fc282c3b32f60ece5240f17785bc89a4ce2bf9f84062bf86f2e0b4",
+  "invocation": "local-read:tokenizer.json:chunk=1048576",
+  "median_absolute_deviation_ms": 1.0000000000000243e-06,
+  "median_ms": 0.000417,
+  "p95_ms": 0.0005,
+  "raw_samples_ms": [
+    0.0005,
+    0.0005,
+    0.000416,
+    0.000416,
+    0.000375,
+    0.000417,
+    0.000417
+  ],
+  "source": "measured",
+  "stage": "verify",
+  "tier_id": "local-nvme",
+  "timeout_seconds": 10.0,
+  "warmup_count": 2
+}

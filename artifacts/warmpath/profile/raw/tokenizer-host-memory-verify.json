@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "c5424001013122671e2e975124b65f78a7ba09454eff1f47364bfd7284e5b2d7",
+  "artifact_id": "tokenizer",
+  "confidence_interval_high_ms": 0.000375,
+  "confidence_interval_low_ms": 0.000334,
+  "confidence_level": 0.95,
+  "environment_fingerprint": "caca9fa447fc282c3b32f60ece5240f17785bc89a4ce2bf9f84062bf86f2e0b4",
+  "invocation": "host-memory-copy:tokenizer.json",
+  "median_absolute_deviation_ms": 0.0,
+  "median_ms": 0.000334,
+  "p95_ms": 0.000375,
+  "raw_samples_ms": [
+    0.000375,
+    0.000333,
+    0.000334,
+    0.000334,
+    0.000334,
+    0.000334,
+    0.000375
+  ],
+  "source": "measured",
+  "stage": "verify",
+  "tier_id": "host-memory",
+  "timeout_seconds": 10.0,
+  "warmup_count": 2
+}

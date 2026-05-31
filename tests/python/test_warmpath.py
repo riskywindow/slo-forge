@@ -25,6 +25,7 @@ from sloforge.warmpath import (
     profile_local_startup,
     simulate_cold_start,
 )
+from sloforge.warmpath.demo import WarmPathDemoManifest
 
 
 def _sha(payload: bytes) -> str:
@@ -108,6 +109,22 @@ def _fixture(tmp_path: Path) -> tuple[ArtifactGraph, Path, tuple[StorageTierSpec
         ),
     )
     return graph, source, tiers
+
+
+def test_checked_in_warmpath_demo_is_measured_and_hash_verified() -> None:
+    root = Path(__file__).parents[2]
+    artifact_root = root / "artifacts" / "warmpath"
+    manifest = WarmPathDemoManifest.model_validate_json(
+        (artifact_root / "manifest.json").read_text(encoding="utf-8")
+    )
+
+    assert manifest.profile_source == "measured"
+    assert manifest.synthetic_snapshot is True
+    assert manifest.restore_success and manifest.checksum_verified
+    assert manifest.deferred_artifact_count > 0
+    for artifact in manifest.artifacts:
+        payload = (artifact_root / artifact.path).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == artifact.sha256
 
 
 def test_artifact_graph_rejects_cycles_unknown_edges_and_path_traversal() -> None:
