@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from sloforge.fabric.compiler import (
     CompilerAssumptions,
     CompilerConstraints,
@@ -98,6 +100,40 @@ def test_topology_unaware_baseline_is_available() -> None:
     result = compile_physical_plan(_request(OptimizationStrategy.TOPOLOGY_UNAWARE))
     assert result.strategy is OptimizationStrategy.TOPOLOGY_UNAWARE
     assert result.selected.rank_placement.bindings[0].gpu_id == "gpu-0"
+
+
+def test_fixed_parallelism_exposes_topology_comparison_space() -> None:
+    request = _request(OptimizationStrategy.GREEDY_TOPOLOGY_AWARE)
+    constrained = request.model_copy(
+        update={
+            "constraints": request.constraints.model_copy(
+                update={
+                    "tensor_parallel_degree": 2,
+                    "pipeline_parallel_degree": 1,
+                    "data_parallel_degree": 1,
+                    "expert_parallel_degree": 1,
+                }
+            )
+        }
+    )
+    result = compile_physical_plan(constrained)
+    assert result.selected.parallelism.tensor_parallel_degree == 2
+    assert result.selected.parallelism.pipeline_parallel_degree == 1
+    assert len(result.selected.rank_placement.bindings) == 2
+
+
+def test_fixed_parallelism_cannot_exceed_rank_limit() -> None:
+    with pytest.raises(ValueError, match="fixed TP x PP x DP"):
+        CompilerConstraints(
+            prompt_tokens_p95=512,
+            output_tokens_p95=64,
+            maximum_concurrent_requests=8,
+            p95_ttft_ms=1_000.0,
+            p99_tpot_ms=100.0,
+            maximum_ranks=2,
+            tensor_parallel_degree=2,
+            pipeline_parallel_degree=2,
+        )
 
 
 def test_stale_fabric_profile_is_rejected() -> None:
