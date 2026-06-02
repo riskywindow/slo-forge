@@ -10,7 +10,7 @@
   "actions": [
     {
       "action_id": "action-00-stop_routing",
-      "idempotency_key": "recovery-79a75de329598f83/0/stop_routing",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/0/stop_routing",
       "kind": "stop_routing",
       "order": 0,
       "requires_external_mutation": false,
@@ -24,7 +24,7 @@
     },
     {
       "action_id": "action-01-drain_worker",
-      "idempotency_key": "recovery-79a75de329598f83/1/drain_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/1/drain_worker",
       "kind": "drain_worker",
       "order": 1,
       "requires_external_mutation": false,
@@ -38,7 +38,7 @@
     },
     {
       "action_id": "action-02-restart_worker",
-      "idempotency_key": "recovery-79a75de329598f83/2/restart_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/2/restart_worker",
       "kind": "restart_worker",
       "order": 2,
       "requires_external_mutation": false,
@@ -52,7 +52,7 @@
     },
     {
       "action_id": "action-03-change_rank_placement",
-      "idempotency_key": "recovery-79a75de329598f83/3/change_rank_placement",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/3/change_rank_placement",
       "kind": "change_rank_placement",
       "order": 3,
       "requires_external_mutation": false,
@@ -77,7 +77,7 @@
     "api_version": "sloforge.autopsy.diagnosis/v1",
     "digest": {
       "algorithm": "sha256",
-      "value": "e5e13a06abfb82c9c01025234deab2443e0ddbcbb65a11ca3b3ef294054a5848"
+      "value": "3587cf4ce38d55d7157c48abd921f5a9e7bef7eee4ae5af58486e7c9aa41160b"
     },
     "generation": 1,
     "kind": "DiagnosisRecord",
@@ -89,7 +89,7 @@
       "api_version": "sloforge.autopsy.event/v1",
       "digest": {
         "algorithm": "sha256",
-        "value": "9344f93f1f2a5217e76559cc5d9d19b20a4f829cfd838568e75f7220fdf000a6"
+        "value": "f16134495a26c91e8c79746a83e357d34389505b1a721c87efda93b7277ee786"
       },
       "generation": null,
       "kind": "AutopsyEvidence",
@@ -100,7 +100,7 @@
       "api_version": "sloforge.autopsy.event/v1",
       "digest": {
         "algorithm": "sha256",
-        "value": "8bc485293cd277ddc68f2d09a6e69d3698bfefebb0050888c1391c8c582e612a"
+        "value": "a31a1cad1cc7a4c71ea45482fbfd41b8a9731428faf196cacaefe35241a523b9"
       },
       "generation": null,
       "kind": "AutopsyEvidence",
@@ -176,12 +176,12 @@
     "api_version": "sloforge.io/fabric/v1",
     "digest": {
       "algorithm": "sha256",
-      "value": "fa60f7db2edd6959d004c39fe1fb1857511384b2a56cdae0bf04be82cad3b7ea"
+      "value": "f7c98f63e603047f4e26e4d54c4d9503d646106d7edf946bf893645d5fc5b4dc"
     },
     "generation": 1,
     "kind": "PhysicalExecutionPlan",
-    "uid": "physical-plan-ba44cefbb6a8b469",
-    "uri": "artifacts/physical-plans/physical-plan-ba44cefbb6a8b469.json"
+    "uid": "physical-plan-75732ff902f1c340",
+    "uri": "artifacts/physical-plans/physical-plan-75732ff902f1c340.json"
   },
   "promotion_criteria": [
     {
@@ -203,7 +203,7 @@
       "window_seconds": 30.0
     }
   ],
-  "recovery_id": "recovery-79a75de329598f83",
+  "recovery_id": "recovery-1ecc3a327a5d96ce",
   "rollback_criteria": [
     {
       "comparator": "gt",

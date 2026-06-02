@@ -6198,7 +6198,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "63a6749c5b8e292af0c2a379eccaf7f4ccb2eef8ffe0d70a215fc6b6e549fa81"
+      "value": "6554487bcb4d92c696ea0a3b795fd4f27fa11fd5ae2450219b8efc1317e69e06"
     },
     "failure_exposure": [
       {
@@ -6232,7 +6232,7 @@
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "f979c165675b1294edbb0bfb10e8ecad13249519",
+    "git_commit": "c7bc4f57e3c078769451a620540b2bad17cec45f",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 536870912,
@@ -8199,7 +8199,7 @@
       ],
       "tensor_parallel_degree": 1
     },
-    "plan_id": "physical-plan-ba44cefbb6a8b469",
+    "plan_id": "physical-plan-75732ff902f1c340",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -11378,9 +11378,9 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "57e7899716251d58ea945baa214d38670d5706c05e630096a09f750cbadddae3"
+        "value": "e3cd1482d8334348403e27f77da818ce2d76ba491cb37371e3ce19f48c8d19e0"
       },
-      "generated_at": "2026-08-02T05:38:53.177293Z",
+      "generated_at": "2026-08-02T05:40:58.345860Z",
       "seed": 41
     },
     "schema_version": "1.0.0",

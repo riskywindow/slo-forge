@@ -7,10 +7,13 @@ import hashlib
 import html
 import json
 import shutil
+import subprocess
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Literal
 
+import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
 from sloforge.autopsy import BottleneckKind, DiagnosisRecord, compare_runs, diagnose
@@ -34,6 +37,7 @@ from sloforge.autopsy.counterfactual import (
 from sloforge.autopsy.counterfactual import (
     ScaleResourceCurve as AutopsyScaleResourceCurve,
 )
+from sloforge.demo import ManagedProcess, _port, _wait_ready
 from sloforge.fabric.compiler import (
     CompilerAssumptions,
     CompilerConstraints,
@@ -144,6 +148,7 @@ class FabricDemoManifest(DemoModel):
     diagnosis: str
     diagnosis_confidence: Annotated[float, Field(ge=0.0, le=1.0)]
     ground_truth_faults: tuple[str, ...]
+    live_gateway_requests: Annotated[int, Field(gt=0)]
     counterfactuals_evaluated: Annotated[int, Field(gt=0)]
     selected_counterfactual: str
     recovery_final_state: str
@@ -538,6 +543,171 @@ def _artifact(path: Path, root: Path) -> DemoArtifact:
     return DemoArtifact(path=str(path.relative_to(root)), sha256=sha256_file(path))
 
 
+def _exercise_gateway(
+    *,
+    repository_root: Path,
+    artifact_dir: Path,
+    plan: PhysicalExecutionPlan,
+    workload: tuple[WorkloadRecord, ...],
+) -> tuple[Path, Path, Path]:
+    """Replay bounded live SSE traffic through the production Rust gateway."""
+
+    binary = repository_root / "target" / "debug" / "sloforge-gateway"
+    if not binary.is_file():
+        completed = subprocess.run(
+            ["cargo", "build", "--locked", "-q", "-p", "sloforge-gateway"],
+            cwd=repository_root,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=120.0,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise RuntimeError(f"gateway build failed: {completed.stderr.strip()}")
+    runtime = artifact_dir / "runtime"
+    logs = runtime / "logs"
+    processes: list[ManagedProcess] = []
+    gateway: ManagedProcess | None = None
+    endpoints: list[str] = []
+    try:
+        for index in range(2):
+            port = _port()
+            config = runtime / f"fabric-backend-{index}.json"
+            write_json(
+                config,
+                {
+                    "name": f"fabric-backend-{index}",
+                    "bind": f"127.0.0.1:{port}",
+                    "seed": 410 + index,
+                    "startup_ms": 5 + index * 3,
+                    "startup_jitter_ms": 1,
+                    "startup_every_n_requests": 0,
+                    "prefill_base_ms": 2 + index,
+                    "prefill_per_token_us": 20 + index * 5,
+                    "decode_per_token_ms": 1 + index,
+                    "max_concurrency": 4,
+                    "max_output_tokens": 32,
+                    "price_per_hour_usd": 1.0 + index * 0.25,
+                    "failure_rate": 0.0,
+                },
+            )
+            process = ManagedProcess(
+                name=f"fabric-backend-{index}",
+                command=[str(binary), "mock-backend", "--config", str(config)],
+                cwd=repository_root,
+                log_dir=logs,
+            )
+            processes.append(process)
+            endpoint = f"http://127.0.0.1:{port}"
+            _wait_ready(f"{endpoint}/health", process)
+            endpoints.append(endpoint)
+        gateway_port = _port()
+        trace_path = runtime / "gateway.perfetto.json"
+        gateway_config = runtime / "gateway.json"
+        write_json(
+            gateway_config,
+            {
+                "bind": f"127.0.0.1:{gateway_port}",
+                "backends": [
+                    {
+                        "name": f"fabric-backend-{index}",
+                        "base_url": endpoint,
+                        "capacity": 4,
+                        "estimated_service_ms": 12.0 + index * 2.0,
+                        "price_per_hour_usd": 1.0 + index * 0.25,
+                        "health_path": "/health",
+                        "weight": 1,
+                    }
+                    for index, endpoint in enumerate(endpoints)
+                ],
+                "routing_policy": "slo_slack_aware",
+                "admission_capacity": 32,
+                "stream_buffer_bytes": 262_144,
+                "max_request_bytes": 1_048_576,
+                "queue_timeout_ms": 2_000,
+                "request_timeout_ms": 30_000,
+                "connect_timeout_ms": 1_000,
+                "health_interval_ms": 100,
+                "health_timeout_ms": 100,
+                "retry_attempts": 1,
+                "breaker_failures": 2,
+                "breaker_cooldown_ms": 250,
+                "trace_output": str(trace_path),
+                "max_trace_events": 100_000,
+                "provenance": {"physical_plan_id": plan.plan_id},
+            },
+        )
+        gateway = ManagedProcess(
+            name="fabric-gateway",
+            command=[str(binary), "serve", "--config", str(gateway_config)],
+            cwd=repository_root,
+            log_dir=logs,
+        )
+        gateway_url = f"http://127.0.0.1:{gateway_port}"
+        _wait_ready(f"{gateway_url}/ready", gateway)
+        samples: list[dict[str, object]] = []
+        for record in workload:
+            started = time.perf_counter_ns()
+            first_byte_ns: int | None = None
+            chunks: list[str] = []
+            with httpx.stream(
+                "POST",
+                f"{gateway_url}/v1/completions",
+                json={
+                    "model": "sloforge/fabric-mock",
+                    "prompt": "x " * min(record.prompt_tokens, 2_048),
+                    "max_tokens": min(record.output_tokens, 4),
+                    "stream": True,
+                    "priority": record.priority,
+                },
+                headers={"x-request-id": record.request_id},
+                timeout=30.0,
+            ) as response:
+                response.raise_for_status()
+                for chunk in response.iter_text():
+                    if chunk and first_byte_ns is None:
+                        first_byte_ns = time.perf_counter_ns()
+                    chunks.append(chunk)
+            finished = time.perf_counter_ns()
+            body = "".join(chunks)
+            if "[DONE]" not in body or first_byte_ns is None:
+                raise RuntimeError(f"gateway stream was incomplete for {record.request_id}")
+            samples.append(
+                {
+                    "request_id": record.request_id,
+                    "priority": record.priority,
+                    "ttft_ms": (first_byte_ns - started) / 1_000_000.0,
+                    "end_to_end_ms": (finished - started) / 1_000_000.0,
+                    "stream_bytes": len(body.encode()),
+                }
+            )
+        replay_path = runtime / "gateway-replay.json"
+        write_json(
+            replay_path,
+            {
+                "schema_version": "sloforge.fabric.gateway-replay/v1",
+                "physical_plan_id": plan.plan_id,
+                "request_count": len(samples),
+                "samples": samples,
+            },
+        )
+        response = httpx.get(f"{gateway_url}/metrics", timeout=3.0)
+        response.raise_for_status()
+        metrics_path = runtime / "gateway.prom"
+        metrics_path.write_text(response.text, encoding="utf-8")
+        gateway.stop()
+        gateway = None
+        if not trace_path.is_file():
+            raise RuntimeError("gateway did not flush its configured trace")
+        return replay_path, metrics_path, trace_path
+    finally:
+        if gateway is not None:
+            gateway.stop()
+        for process in reversed(processes):
+            process.stop()
+
+
 def _render_report(manifest: FabricDemoManifest, timeline: tuple[TimelineEvent, ...]) -> str:
     lines = [
         "# SLOForge Fabric CPU demonstration",
@@ -550,6 +720,7 @@ def _render_report(manifest: FabricDemoManifest, timeline: tuple[TimelineEvent, 
         f"- Physical plan: `{manifest.physical_plan_id}`",
         f"- Diagnosis: `{manifest.diagnosis}` ({manifest.diagnosis_confidence:.3f} confidence)",
         f"- Counterfactuals evaluated: {manifest.counterfactuals_evaluated}",
+        f"- Live Rust gateway SSE requests: {manifest.live_gateway_requests}",
         f"- Selected repair: `{manifest.selected_counterfactual}`",
         f"- Recovery state: `{manifest.recovery_final_state}`",
         "",
@@ -663,6 +834,12 @@ def run_fabric_demo(
     records, workload = _workload(seed)
     workload_path = artifact_dir / "mixed-bursty.jsonl"
     _write_workload(workload_path, records)
+    gateway_replay_path, gateway_metrics_path, gateway_trace_path = _exercise_gateway(
+        repository_root=repository_root,
+        artifact_dir=artifact_dir,
+        plan=aware.selected,
+        workload=records,
+    )
     workload_fingerprint = sha256_file(workload_path)
     healthy_request = build_simulation_request(
         aware.selected, topology, profile, workload, seed=seed
@@ -834,6 +1011,9 @@ def run_fabric_demo(
         artifact_dir / "traces" / "otel.json",
         artifact_dir / "metrics" / "degraded.prom",
         timeline_path,
+        gateway_replay_path,
+        gateway_metrics_path,
+        gateway_trace_path,
     )
     manifest = FabricDemoManifest(
         seed=seed,
@@ -851,6 +1031,7 @@ def run_fabric_demo(
         diagnosis=diagnosis.top_hypothesis.value,
         diagnosis_confidence=diagnosis.confidence,
         ground_truth_faults=tuple(fault.ground_truth_label for fault in faults),
+        live_gateway_requests=len(records),
         counterfactuals_evaluated=len(replay.evaluations),
         selected_counterfactual=replay.selected_scenario_id,
         recovery_final_state=recovery_snapshot.state.value,

@@ -37,6 +37,7 @@ def test_checked_in_demo_report_is_derived_from_hashed_artifacts() -> None:
     assert manifest.degraded.p95_ttft_ms > manifest.healthy.p95_ttft_ms
     assert manifest.restored.p95_ttft_ms <= manifest.p95_ttft_slo_ms
     assert manifest.counterfactuals_evaluated >= 7
+    assert manifest.live_gateway_requests == 12
     assert manifest.recovery_final_state == "COMPLETED"
     assert set(manifest.ground_truth_faults) == {
         "network_bandwidth_degradation",

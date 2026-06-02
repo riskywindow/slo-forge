@@ -6,7 +6,7 @@
     },
     {
       "path": "fabric-profile.json",
-      "sha256": "81a12962d77e9427e721ca8dbcc897fcc6923e5eda4af857157741f9bbed46d9"
+      "sha256": "ed0cab849fef11b84151d9527ee1de15790b3e5360f9c47b783fd03ef0e3eb06"
     },
     {
       "path": "model-graph.json",
@@ -14,11 +14,11 @@
     },
     {
       "path": "physical-plan.json",
-      "sha256": "9bcf2fa01a978305483591b5227af09e5376618b2050d5d29fff8bc26ab4009b"
+      "sha256": "cec561e35597a564332222cb374d9ae265312bd437c5bb8f9d17243ec029133d"
     },
     {
       "path": "physical-plan-topology-unaware.json",
-      "sha256": "b6e05735ca4dadc5766db6ca9b93be0fe7cba7ece94aa8856c10ac8e701ba1dc"
+      "sha256": "78a7caf03def67d6409d713d198b00a9032accc5c76d051fc3beafb0a37e9e5e"
     },
     {
       "path": "mixed-bursty.jsonl",
@@ -26,15 +26,15 @@
     },
     {
       "path": "simulations/healthy.json",
-      "sha256": "8bc485293cd277ddc68f2d09a6e69d3698bfefebb0050888c1391c8c582e612a"
+      "sha256": "a31a1cad1cc7a4c71ea45482fbfd41b8a9731428faf196cacaefe35241a523b9"
     },
     {
       "path": "simulations/degraded.json",
-      "sha256": "9344f93f1f2a5217e76559cc5d9d19b20a4f829cfd838568e75f7220fdf000a6"
+      "sha256": "f16134495a26c91e8c79746a83e357d34389505b1a721c87efda93b7277ee786"
     },
     {
       "path": "simulations/restored.json",
-      "sha256": "2a312190f8a84e0f55e932e409014b7690f8985c21c067c2f0b5eae2f5c766f5"
+      "sha256": "3983c61ada28589dc387f4b42fb00a132450eeaca361193814e54b8dc63a684a"
     },
     {
       "path": "autopsy/comparison.json",
@@ -42,27 +42,27 @@
     },
     {
       "path": "autopsy/diagnosis.json",
-      "sha256": "f3f97a62dca6b1eaa6538cae54acbaca950fed29ec4fcb6b2ffb2477e508f0f5"
+      "sha256": "d8173a5465031087774de02290c0f69cdf8ee73d6210e1295dd07928d5bde45c"
     },
     {
       "path": "autopsy/counterfactuals.json",
-      "sha256": "8106cf58c8bf770a9ff53f9cfd76a09d6313da326632f17bc49ca2a942723554"
+      "sha256": "f5290b9c90a15cdac945a9bc7422b1b703d70cc14e97b44805705a4f1f3634c7"
     },
     {
       "path": "recovery/proposal.json",
-      "sha256": "d06070aa1d1e556c9fe4c52a02d4c7ef6f3648e67f54dc7610a1aa20a037710c"
+      "sha256": "74d817db27fa0383a12064581aa48157fb45cc7ecea7a57f6a2efc6679e83c14"
     },
     {
       "path": "recovery/execution.json",
-      "sha256": "e4f33b6f78f2010a6db043e3fac16f0c762ccd746c9e69e9aaca5cc1d91b0975"
+      "sha256": "2a72d7dbef66365620cfa28e34193280d3e6b73fc143fb8c913794aaf235473b"
     },
     {
       "path": "traces/degraded.perfetto.json",
-      "sha256": "ab03e4aed3b2d0eac45871428d0aa0380ca65f895b909da27a8a2e2d762744b1"
+      "sha256": "cab8dcfa92051dc6444d44c59fe59e925fe7a704d6959ea6b3e6e4eaff15a633"
     },
     {
       "path": "traces/otel.json",
-      "sha256": "3fb038f5e84eb6c83e1021b0192325e064c7f66b060e4b24cf71993308d814e6"
+      "sha256": "8f590ba119b08dd05442b78009b4389289953831e7ddf4b0eb341136011b8b93"
     },
     {
       "path": "metrics/degraded.prom",
@@ -71,9 +71,21 @@
     {
       "path": "timeline.json",
       "sha256": "d606825f374023921c878bed467a6f54eff62f6a019efd4d3c0f57671aef370c"
+    },
+    {
+      "path": "runtime/gateway-replay.json",
+      "sha256": "1cdd1798af9c8d375c04c955cf05cb81105d87427eef3a2a6b9371486dcbe011"
+    },
+    {
+      "path": "runtime/gateway.prom",
+      "sha256": "cb7cba353f69cc0a2b4644c1178c442cee4ae6253a4a635327070cb13b071085"
+    },
+    {
+      "path": "runtime/gateway.perfetto.json",
+      "sha256": "6c2f294ffa92e0983da55a42a2bdb5ca522f056c32e867eac867e274834c17ee"
     }
   ],
-  "baseline_plan_id": "physical-plan-69f74313ea9c5e7f",
+  "baseline_plan_id": "physical-plan-99d7a5677165cfe9",
   "counterfactuals_evaluated": 7,
   "degraded": {
     "makespan_ms": 5627.629373107173,
@@ -95,8 +107,9 @@
     "p99_tpot_ms": 1.2500000000000007
   },
   "healthy_slo_attained": true,
+  "live_gateway_requests": 12,
   "p95_ttft_slo_ms": 1051.4707653267544,
-  "physical_plan_id": "physical-plan-ba44cefbb6a8b469",
+  "physical_plan_id": "physical-plan-75732ff902f1c340",
   "recovery_final_state": "COMPLETED",
   "restored": {
     "makespan_ms": 1039.420113933413,
