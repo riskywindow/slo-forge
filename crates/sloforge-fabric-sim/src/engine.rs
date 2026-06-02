@@ -712,9 +712,12 @@ fn operation_duration(
                 .map_err(|_| SimError::InvalidInput("collective rank count exceeds u32".into()))?;
             let ranks = f64::from(rank_count);
             let factor = match algorithm.as_str() {
-                "ring" => 2.0 * (ranks - 1.0) / ranks,
-                "tree" => ranks.log2().ceil(),
-                "all_to_all" => ranks - 1.0,
+                // Auto is a deterministic simulator policy, not an implicit
+                // transport fallback: model a ring and retain the requested
+                // algorithm in the emitted operation trace.
+                "ring" | "auto" => 2.0 * (ranks - 1.0) / ranks,
+                "tree" | "recursive_doubling" => ranks.log2().ceil(),
+                "all_to_all" | "pairwise" => ranks - 1.0,
                 "direct" => 1.0,
                 _ => {
                     return Err(SimError::InvalidInput(

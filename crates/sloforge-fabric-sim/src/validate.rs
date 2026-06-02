@@ -235,7 +235,13 @@ fn validate_operation_kind(operation: &PhysicalOperation) -> Result<(), SimError
             if collective_id.is_empty()
                 || !matches!(
                     algorithm.as_str(),
-                    "ring" | "tree" | "direct" | "all_to_all"
+                    "ring"
+                        | "tree"
+                        | "recursive_doubling"
+                        | "direct"
+                        | "pairwise"
+                        | "all_to_all"
+                        | "auto"
                 )
                 || participants.len() < 2
                 || participants.len() != participating_ranks.len()
