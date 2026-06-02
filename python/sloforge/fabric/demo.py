@@ -42,6 +42,7 @@ from sloforge.fabric.compiler import (
     OptimizationStrategy,
     compile_physical_plan,
 )
+from sloforge.fabric.faults import bind_physical_faults, load_physical_fault_scenario
 from sloforge.fabric.ir import (
     DocumentReference,
     FabricProfile,
@@ -61,16 +62,13 @@ from sloforge.fabric.simulation import (
     CounterfactualModifier,
     FabricSimulationOutput,
     FabricSimulationRequest,
-    RankSlowdownFault,
     RemoveFault,
     ReplaceResource,
     ResourceKind,
-    ResourceRateFault,
     ScaleRank,
     ScaleResourceCurve,
     SimulationRequestShape,
     SimulationWorkload,
-    TimedFault,
     build_simulation_request,
     request_latencies,
     run_simulation,
@@ -669,27 +667,10 @@ def run_fabric_demo(
     healthy_request = build_simulation_request(
         aware.selected, topology, profile, workload, seed=seed
     )
-    rail = next(
-        resource
-        for resource in healthy_request.resources
-        if resource.kind is ResourceKind.NETWORK_RAIL
+    scenario = load_physical_fault_scenario(
+        repository_root / "scenarios" / "fabric" / "dual-fault-demo.yaml"
     )
-    faults = (
-        TimedFault(
-            id="fault-network-rail-degradation",
-            start_us=0.0,
-            end_us=10_000_000_000.0,
-            effect=ResourceRateFault(resource_id=rail.id, multiplier=0.05),
-            ground_truth_label="network_bandwidth_degradation",
-        ),
-        TimedFault(
-            id="fault-rank-6-slowdown",
-            start_us=0.0,
-            end_us=10_000_000_000.0,
-            effect=RankSlowdownFault(rank_id="rank-6", multiplier=0.25),
-            ground_truth_label="rank_specific_gpu_slowdown",
-        ),
-    )
+    faults = bind_physical_faults(scenario, healthy_request)
     degraded_request = healthy_request.model_copy(update={"faults": faults})
     healthy_output = run_simulation(
         healthy_request, repository_root=repository_root, timeout_seconds=60

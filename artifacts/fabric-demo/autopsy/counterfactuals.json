@@ -2,7 +2,7 @@
   "degraded": {
     "makespan_us": 5627629.373107173,
     "operation_count": 588,
-    "output_sha256": "14702f299abb44e2d7ba6b62d693c0ed67616347fb8008fb3671a6711fcae1db",
+    "output_sha256": "a77ba616066df847b69cee00b0bda2c2fd17629c5b257d09514e1f1a85fcf863",
     "predicted_lower_us": 5349963.640832606,
     "predicted_upper_us": 5905295.105381739,
     "processed_events": 1272
@@ -17,7 +17,7 @@
       "observation": {
         "makespan_us": 4140359.6316839675,
         "operation_count": 588,
-        "output_sha256": "442aadd2ad30272de417886002d6b60407ae26753dd4fa57e64f66054055cebe",
+        "output_sha256": "aea96aa42a70b0695c8b7c8b7a74f435425a51ac11f51ed1c03bf13e03a0d576",
         "predicted_lower_us": 3862693.8994094008,
         "predicted_upper_us": 4418025.363958535,
         "processed_events": 1272
@@ -47,7 +47,7 @@
       "observation": {
         "makespan_us": 1039420.113933413,
         "operation_count": 588,
-        "output_sha256": "80f932e7d1ba173446b6f48e35d76c439410f820809dd58dd383a946ded77ba1",
+        "output_sha256": "dd2c565abc2330e2cdf9daa47f971bbd4ce7d69ca53ad1d6fb0686b4db4d8f46",
         "predicted_lower_us": 761754.3816588462,
         "predicted_upper_us": 1317085.84620798,
         "processed_events": 1236
@@ -58,11 +58,11 @@
         "hypothesis_kind": "network_bandwidth_degradation",
         "modifications": [
           {
-            "fault_id": "fault-network-rail-degradation",
+            "fault_id": "degrade-primary-rail",
             "type": "remove_fault"
           },
           {
-            "fault_id": "fault-rank-6-slowdown",
+            "fault_id": "slow-rank-six",
             "type": "remove_fault"
           }
         ],
@@ -80,7 +80,7 @@
       "observation": {
         "makespan_us": 4152196.509071062,
         "operation_count": 588,
-        "output_sha256": "64fb193232630661bb854494fbcf3f4003cb3a6d7c8380b4d27f61fd00b1b9e5",
+        "output_sha256": "80eb5ac6293f1f2471e71bb83e1e16bfc90c7414cd37c5c6e91ede859c5f1ce4",
         "predicted_lower_us": 3874530.776796495,
         "predicted_upper_us": 4429862.241345629,
         "processed_events": 1272
@@ -91,7 +91,7 @@
         "hypothesis_kind": "network_bandwidth_degradation",
         "modifications": [
           {
-            "fault_id": "fault-network-rail-degradation",
+            "fault_id": "degrade-primary-rail",
             "type": "remove_fault"
           }
         ],
@@ -109,7 +109,7 @@
       "observation": {
         "makespan_us": 1372640.9682767931,
         "operation_count": 588,
-        "output_sha256": "0a81b10394a4193bb9469ceb36c6cff8b1ea14ed6d988a3a45b2084da2339b70",
+        "output_sha256": "3a7b123753b99d2f550b56cded85badebc8a2a068b11d54afd76fa03f049cef2",
         "predicted_lower_us": 1094975.2360022264,
         "predicted_upper_us": 1650306.70055136,
         "processed_events": 1236
@@ -120,7 +120,7 @@
         "hypothesis_kind": "rank_straggler",
         "modifications": [
           {
-            "fault_id": "fault-rank-6-slowdown",
+            "fault_id": "slow-rank-six",
             "type": "remove_fault"
           }
         ],
@@ -138,7 +138,7 @@
       "observation": {
         "makespan_us": 5287611.128840506,
         "operation_count": 588,
-        "output_sha256": "92793378b88de3d75c2c71d2e2fc842f00920880f493cee97c325f14d2b0df91",
+        "output_sha256": "ef4fc400dc2668dd6322f095eb6e77dc54b6b744df6fe6de79a5012c6c31cfd7",
         "predicted_lower_us": 5009945.613868227,
         "predicted_upper_us": 5565276.643812785,
         "processed_events": 1272
@@ -169,7 +169,7 @@
       "observation": {
         "makespan_us": 1372640.9682767931,
         "operation_count": 588,
-        "output_sha256": "1705e00958e209c315fa06743cf7c3143e25d88e21432c9c701e5d1c0155db6f",
+        "output_sha256": "56259a7ad462ceeda1a4aed07450cb86b3d6d84b0b4075e6e29e9d5719cd68fc",
         "predicted_lower_us": 1103233.2749084167,
         "predicted_upper_us": 1642048.6616451696,
         "processed_events": 1236
@@ -199,7 +199,7 @@
       "observation": {
         "makespan_us": 6024891.781090913,
         "operation_count": 588,
-        "output_sha256": "3d33efcadb52784bbee5bd5931fd92e52151d92e4dd9eb55b3e0c984a5a80bc6",
+        "output_sha256": "b75126818c3330cbd31d519a241482101b8857250cfcad00fd6a3824429b537d",
         "predicted_lower_us": 5742387.071290045,
         "predicted_upper_us": 6307396.490891782,
         "processed_events": 1307
@@ -233,5 +233,5 @@
   ],
   "schema_version": "sloforge.autopsy.counterfactual/v1",
   "selected_scenario_id": "remove-both-faults",
-  "simulation_input_sha256": "3fd546a0c4684de5c65c63fff7cd30245bef5d70c37157a30e390614d7464a2d"
+  "simulation_input_sha256": "85e9686b7caa1967eceb22c3b9959d8efc5afbdeb55789ef609b6ce90fe09be9"
 }

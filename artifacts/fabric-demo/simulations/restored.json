@@ -1,11 +1,11 @@
 {
   "applied_counterfactuals": [
     {
-      "fault_id": "fault-network-rail-degradation",
+      "fault_id": "degrade-primary-rail",
       "type": "remove_fault"
     },
     {
-      "fault_id": "fault-rank-6-slowdown",
+      "fault_id": "slow-rank-six",
       "type": "remove_fault"
     }
   ],
@@ -11197,7 +11197,7 @@
       "analytical"
     ],
     "counterfactual_count": 2,
-    "input_sha256": "7f98ca8247bd7849c781dfbd68b12ca51d0b441f27d75d732ff97f7edcfaefc0",
+    "input_sha256": "c5825fb7e952f2ef285d45d922a8be4e9901784505704e915731a1cba59361b0",
     "seed": 41,
     "simulator_version": "0.1.0"
   },

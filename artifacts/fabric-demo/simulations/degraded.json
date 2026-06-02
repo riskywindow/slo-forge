@@ -1,8 +1,8 @@
 {
   "applied_counterfactuals": [],
   "applied_faults": [
-    "fault-network-rail-degradation",
-    "fault-rank-6-slowdown"
+    "degrade-primary-rail",
+    "slow-rank-six"
   ],
   "metrics": {
     "cost_usd": 0.0,
@@ -11191,7 +11191,7 @@
       "analytical"
     ],
     "counterfactual_count": 0,
-    "input_sha256": "afe8b1af5a0cb4a822d9ef80fad75fb5faf0f54348615a94231b70985a57c7cb",
+    "input_sha256": "47aa597a15185371ed5ff5fd53d34c4dcc384e489a20cac7819346e15ad48b0e",
     "seed": 41,
     "simulator_version": "0.1.0"
   },
@@ -11208,7 +11208,7 @@
       },
       "cat": "fabric_fault",
       "dur": 5627629.373107173,
-      "name": "fault-network-rail-degradation",
+      "name": "degrade-primary-rail",
       "ph": "X",
       "pid": 1,
       "tid": "fault-injector",
@@ -11225,7 +11225,7 @@
       },
       "cat": "fabric_fault",
       "dur": 5627629.373107173,
-      "name": "fault-rank-6-slowdown",
+      "name": "slow-rank-six",
       "ph": "X",
       "pid": 1,
       "tid": "fault-injector",

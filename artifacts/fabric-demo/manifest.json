@@ -6,7 +6,7 @@
     },
     {
       "path": "fabric-profile.json",
-      "sha256": "fa09ceb75babe338617b24fc2119a855045173adc1cf954ac1f8f0a99aa6edfe"
+      "sha256": "81a12962d77e9427e721ca8dbcc897fcc6923e5eda4af857157741f9bbed46d9"
     },
     {
       "path": "model-graph.json",
@@ -14,11 +14,11 @@
     },
     {
       "path": "physical-plan.json",
-      "sha256": "3ab99a5f8b39409e2b6fc476e960e8ea12fe3b377b2266370103ad5bfd104575"
+      "sha256": "9bcf2fa01a978305483591b5227af09e5376618b2050d5d29fff8bc26ab4009b"
     },
     {
       "path": "physical-plan-topology-unaware.json",
-      "sha256": "8a25281f0cc1ab08617e992f32c6602ea4eeefadb379a98266df40918473d1ec"
+      "sha256": "b6e05735ca4dadc5766db6ca9b93be0fe7cba7ece94aa8856c10ac8e701ba1dc"
     },
     {
       "path": "mixed-bursty.jsonl",
@@ -26,15 +26,15 @@
     },
     {
       "path": "simulations/healthy.json",
-      "sha256": "5ecd00daa04dcdbe467ab3db9a7938215830f82357a4dde981ee9661237ba3a0"
+      "sha256": "8bc485293cd277ddc68f2d09a6e69d3698bfefebb0050888c1391c8c582e612a"
     },
     {
       "path": "simulations/degraded.json",
-      "sha256": "9eff8d5f790d7705fedddd0bfb0c2daefced689d5f704125bffa3cf1f2291fba"
+      "sha256": "9344f93f1f2a5217e76559cc5d9d19b20a4f829cfd838568e75f7220fdf000a6"
     },
     {
       "path": "simulations/restored.json",
-      "sha256": "d3a9df70b103262ae0894540c048b6cf275dddc1d27a3540c92026bce65fb9e7"
+      "sha256": "2a312190f8a84e0f55e932e409014b7690f8985c21c067c2f0b5eae2f5c766f5"
     },
     {
       "path": "autopsy/comparison.json",
@@ -42,27 +42,27 @@
     },
     {
       "path": "autopsy/diagnosis.json",
-      "sha256": "7b080df36c21019097cfc6b1abf52905e321b54c93fbd083bfa6dd9188ea0675"
+      "sha256": "f3f97a62dca6b1eaa6538cae54acbaca950fed29ec4fcb6b2ffb2477e508f0f5"
     },
     {
       "path": "autopsy/counterfactuals.json",
-      "sha256": "395d2d0867c8c047187d82570a468efcf16eb4985704350ec26a32378c48d592"
+      "sha256": "8106cf58c8bf770a9ff53f9cfd76a09d6313da326632f17bc49ca2a942723554"
     },
     {
       "path": "recovery/proposal.json",
-      "sha256": "4ba1e2b6955212ed75ecba1f8cded0a2ebee1d8dfa4ad3ff3def1d36c24d0cde"
+      "sha256": "d06070aa1d1e556c9fe4c52a02d4c7ef6f3648e67f54dc7610a1aa20a037710c"
     },
     {
       "path": "recovery/execution.json",
-      "sha256": "d6ce12ec12ea842cac143a99b137b9272c3d141b92a63ecd1e16c575bded28b1"
+      "sha256": "e4f33b6f78f2010a6db043e3fac16f0c762ccd746c9e69e9aaca5cc1d91b0975"
     },
     {
       "path": "traces/degraded.perfetto.json",
-      "sha256": "9e5414dc0f31ea91a9ed382d69bf8b85b117135ac13e6772222fcc515dca4454"
+      "sha256": "ab03e4aed3b2d0eac45871428d0aa0380ca65f895b909da27a8a2e2d762744b1"
     },
     {
       "path": "traces/otel.json",
-      "sha256": "51e7e9be20b540a599af81daea0120a90a7c3ac7c8f1f10a32800427b2dc53af"
+      "sha256": "3fb038f5e84eb6c83e1021b0192325e064c7f66b060e4b24cf71993308d814e6"
     },
     {
       "path": "metrics/degraded.prom",
@@ -73,7 +73,7 @@
       "sha256": "d606825f374023921c878bed467a6f54eff62f6a019efd4d3c0f57671aef370c"
     }
   ],
-  "baseline_plan_id": "physical-plan-7bd103bcf82bbb88",
+  "baseline_plan_id": "physical-plan-69f74313ea9c5e7f",
   "counterfactuals_evaluated": 7,
   "degraded": {
     "makespan_ms": 5627.629373107173,
@@ -96,7 +96,7 @@
   },
   "healthy_slo_attained": true,
   "p95_ttft_slo_ms": 1051.4707653267544,
-  "physical_plan_id": "physical-plan-8255ccdd8b3d846d",
+  "physical_plan_id": "physical-plan-ba44cefbb6a8b469",
   "recovery_final_state": "COMPLETED",
   "restored": {
     "makespan_ms": 1039.420113933413,

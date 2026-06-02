@@ -1,0 +1,16 @@
+schema_version: sloforge.fabric.faults/v1
+scenario_id: dual-fabric-degradation
+execution_mode: simulation
+faults:
+  - fault_id: degrade-primary-rail
+    fault_type: network_bandwidth_degradation
+    target_id: nic-network:host-0/nic/0:rail-0
+    start_us: 0.0
+    end_us: 10000000.0
+    degradation_multiplier: 0.05
+  - fault_id: slow-rank-six
+    fault_type: rank_specific_gpu_slowdown
+    target_id: rank-6
+    start_us: 0.0
+    end_us: 10000000.0
+    degradation_multiplier: 0.25
