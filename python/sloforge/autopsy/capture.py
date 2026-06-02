@@ -103,7 +103,15 @@ def _counters(outcome: OperationOutcome, event_type: EventType) -> tuple[Counter
             unit="ms",
         ),
     ]
-    if event_type is EventType.NETWORK_TRANSFER and outcome.duration_us > 0.0:
+    traverses_network = any(
+        "rail" in resource_id.casefold() or "nic-network" in resource_id.casefold()
+        for resource_id in outcome.resource_ids
+    )
+    if (
+        (event_type is EventType.NETWORK_TRANSFER or traverses_network)
+        and outcome.duration_us > 0.0
+        and outcome.transferred_bytes > 0
+    ):
         counters.append(
             CounterValue(
                 name="network_bandwidth_gbps",
