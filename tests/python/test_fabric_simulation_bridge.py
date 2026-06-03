@@ -7,6 +7,8 @@ from sloforge.autopsy.capture import _counters as captured_counters
 from sloforge.autopsy.capture import capture_simulation_run
 from sloforge.autopsy.models import EventType
 from sloforge.fabric.ir import (
+    CollectiveOperation,
+    CollectivePlan,
     FabricProfile,
     PhysicalExecutionPlan,
     TopologyGraph,
@@ -22,8 +24,10 @@ from sloforge.fabric.simulation import (
     RankSlowdownFault,
     RemoveFault,
     ResourceRateFault,
+    SimulationRequestShape,
     SimulationWorkload,
     TimedFault,
+    _lower_collective_before_kv,
     build_simulation_request,
     request_latencies,
     run_simulation,
@@ -66,6 +70,73 @@ def test_physical_plan_lowers_to_strict_rust_protocol() -> None:
     assert sum(":prefill" in operation.id for operation in request.operations) == 2
     assert sum(operation.id.endswith(":decode") for operation in request.operations) == 2
     assert FabricSimulationRequest.model_validate_json(request.model_dump_json()) == request
+
+
+def test_collective_stage_filter_does_not_lower_decode_collectives_before_kv() -> None:
+    assert _lower_collective_before_kv({0, 1}, {0, 1}, {2, 3})
+    assert not _lower_collective_before_kv({2, 3}, {0, 1}, {2, 3})
+    # Backward-compatible v1 plans could split a parallel group across P/D
+    # roles; lower that legacy operation once instead of silently dropping it.
+    assert _lower_collective_before_kv({1, 2}, {0, 1}, {2, 3})
+
+
+def test_expert_skew_scales_only_all_to_all_message_demand() -> None:
+    plan, topology, profile = _inputs()
+    existing = plan.collectives.operations[0]
+    all_to_all = CollectiveOperation(
+        operation_id="expert-all-to-all",
+        operation="all_to_all",
+        participating_ranks=existing.participating_ranks,
+        message_size_intercept_bytes=existing.message_size_intercept_bytes,
+        message_size_bytes_per_token=existing.message_size_bytes_per_token,
+        algorithm="pairwise",
+        transport=existing.transport,
+        channel_count=existing.channel_count,
+        rail_ids=existing.rail_ids,
+        rank_order=existing.rank_order,
+        expected_duration_us=existing.expected_duration_us,
+        uncertainty_us=existing.uncertainty_us,
+        fallback=existing.fallback,
+    )
+    plan = plan.model_copy(
+        update={"collectives": CollectivePlan(operations=(existing, all_to_all))}
+    )
+
+    def lowered(skew: float) -> FabricSimulationRequest:
+        return build_simulation_request(
+            plan,
+            topology,
+            profile,
+            SimulationWorkload(
+                request_count=1,
+                arrival_interval_us=0.0,
+                prompt_tokens=128,
+                output_tokens=2,
+                requests=(
+                    SimulationRequestShape(
+                        arrival_us=0.0,
+                        prompt_tokens=128,
+                        output_tokens=2,
+                        priority="normal",
+                        request_class="expert",
+                        expert_skew_factor=skew,
+                    ),
+                ),
+            ),
+            seed=11,
+        )
+
+    balanced = tuple(
+        operation.kind.bytes
+        for operation in lowered(1.0).operations
+        if operation.kind.type == "collective"
+    )
+    skewed = tuple(
+        operation.kind.bytes
+        for operation in lowered(3.0).operations
+        if operation.kind.type == "collective"
+    )
+    assert skewed == (balanced[0], balanced[1] * 3)
 
 
 def test_kv_transfer_retains_stage_and_emits_physical_network_counter() -> None:
