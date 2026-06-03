@@ -403,7 +403,17 @@ impl Engine {
                 FaultEffect::RankSlowdown {
                     rank_id,
                     multiplier,
-                } if operation.rank_ids.contains(rank_id) => Some(*multiplier),
+                } if operation.rank_ids.contains(rank_id)
+                    && matches!(
+                        operation.kind,
+                        OperationKind::GpuCompute { .. } | OperationKind::HbmAccess { .. }
+                    ) =>
+                {
+                    // Rank service degradation models GPU execution, not a
+                    // silent reduction in calibrated link capacity. Collective
+                    // participants still observe the delayed dependency/barrier.
+                    Some(*multiplier)
+                }
                 FaultEffect::CollectiveDelay {
                     collective_id,
                     multiplier,

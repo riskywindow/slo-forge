@@ -217,6 +217,47 @@ fn timed_link_and_rank_faults_slow_then_recover() {
 }
 
 #[test]
+fn rank_gpu_slowdown_does_not_rewrite_link_capacity() {
+    let mut input = request(
+        vec![resource(
+            "rail-0",
+            ResourceKind::NetworkRail,
+            SchedulingMode::Exclusive,
+        )],
+        vec![PhysicalOperation {
+            id: "rank-6-kv".into(),
+            kind: OperationKind::KvTransfer {
+                bytes: 1_000_000,
+                chunks: 1,
+            },
+            rank_ids: vec!["rank-6".into(), "decode-0".into()],
+            dependencies: Vec::new(),
+            demands: vec![ResourceDemand {
+                resource_id: "rail-0".into(),
+                units: 1.0,
+            }],
+            earliest_start_us: 0.0,
+            uncertainty_fraction: 0.0,
+            request_id: None,
+        }],
+    );
+    input.faults = vec![TimedFault {
+        id: "rank-gpu-only".into(),
+        start_us: 0.0,
+        end_us: None,
+        effect: FaultEffect::RankSlowdown {
+            rank_id: "rank-6".into(),
+            multiplier: 0.25,
+        },
+        ground_truth_label: "rank_specific_gpu_slowdown".into(),
+    }];
+
+    let output = simulate(&input).expect("communication is unaffected by GPU service fault");
+    assert!((output.metrics.makespan_us - 1_000.0).abs() < 1e-6);
+    assert!(output.applied_faults.is_empty());
+}
+
+#[test]
 fn temporary_rail_loss_stalls_without_fallback() {
     let mut input = request(
         vec![resource(
