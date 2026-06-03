@@ -14,6 +14,8 @@ from sloforge.fabric.ir import (
     DocumentReference,
     FabricMeasurementSeries,
     FabricRawSample,
+    NicNode,
+    TopologyGraph,
     canonical_hash,
 )
 from sloforge.fabric.ir import (
@@ -61,7 +63,32 @@ def _digest(value: object) -> ArtifactDigest:
     return ArtifactDigest(algorithm="sha256", value=hashlib.sha256(payload).hexdigest())
 
 
-def _series(result: BenchmarkResult) -> FabricMeasurementSeries:
+def _transport(result: BenchmarkResult, topology: TopologyGraph) -> str:
+    edges = {edge.edge_id: edge for edge in topology.edges}
+    path = tuple(edges[edge_id] for edge_id in result.case.topology_path if edge_id in edges)
+    connections = {edge.connection.value for edge in path}
+    if "nic_network" in connections:
+        nic_ids = {
+            endpoint for edge in path for endpoint in (edge.source_node_id, edge.target_node_id)
+        }
+        transports = sorted(
+            node.transport
+            for node in topology.nodes
+            if isinstance(node, NicNode) and node.node_id in nic_ids
+        )
+        return transports[0] if transports else "tcp"
+    if connections & {"nvlink", "nvswitch"}:
+        return "nvlink"
+    if connections & {"pcie", "gpu_nic", "cpu_gpu"}:
+        return "pcie"
+    if "cpu_memory" in connections:
+        return "shared_memory"
+    if result.case.primitive in {Primitive.KERNEL_LAUNCH, Primitive.DEVICE_SYNCHRONIZE}:
+        return "runtime"
+    return "device"
+
+
+def _series(result: BenchmarkResult, topology: TopologyGraph) -> FabricMeasurementSeries:
     if result.status is not BenchmarkStatus.SUCCESS or result.summary is None:
         raise ValueError(
             f"canonical FabricProfile cannot encode unsuccessful series {result.case.case_id}; "
@@ -85,7 +112,7 @@ def _series(result: BenchmarkResult) -> FabricMeasurementSeries:
             ],
             _PRIMITIVE_CATEGORY[result.case.primitive],
         ),
-        transport=result.case.invocation.adapter,
+        transport=_transport(result, topology),
         rank_count=result.case.rank_count,
         message_bytes=result.case.message_bytes,
         concurrency=result.case.concurrency,
@@ -161,7 +188,7 @@ def to_canonical_profile(
         created_at=datetime.fromisoformat(profile.captured_at),
         hardware_manifest=hardware_reference,
         software_manifest=software_reference,
-        measurements=tuple(_series(result) for result in profile.results),
+        measurements=tuple(_series(result, topology) for result in profile.results),
         raw_artifacts=raw_artifacts,
         extensions=Extensions(
             root={

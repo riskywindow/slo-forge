@@ -436,14 +436,24 @@ def _link_resources(
 
 
 def _edge_latency_us(edge: TopologyEdge, message_bytes: int) -> float:
-    if edge.latency_curve_us:
-        point = min(
+    base_latency = (
+        min(
             edge.latency_curve_us,
             key=lambda item: abs(item.message_bytes - message_bytes),
-        )
-        return point.median
-    bandwidth = edge.theoretical_bandwidth_gbps or 0.001
-    return 2.0 + message_bytes * 8.0 / (bandwidth * 1_000.0)
+        ).median
+        if edge.latency_curve_us
+        else 2.0
+    )
+    bandwidth_points = edge.bandwidth_curve_gbps
+    bandwidth = (
+        min(
+            bandwidth_points,
+            key=lambda item: abs(item.message_bytes - message_bytes),
+        ).median
+        if bandwidth_points
+        else (edge.theoretical_bandwidth_gbps or 0.001)
+    )
+    return base_latency + message_bytes * 8.0 / (bandwidth * 1_000.0)
 
 
 def _shortest_edge_path(
