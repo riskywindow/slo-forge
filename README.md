@@ -25,6 +25,74 @@ flowchart LR
 
 Python owns profiling orchestration, statistical models, optimization, control experiments, diagnosis, lowering, and reports. Rust owns the asynchronous streaming data plane, bounded telemetry, load generation, and deterministic discrete-event simulation. Their primary boundary is canonical JSON over a stable subprocess protocol: it is debuggable, language-neutral, and keeps a Python crash outside the latency-sensitive gateway process. See [Architecture](docs/ARCHITECTURE.md) and [ADR 0001](docs/adr/0001-rust-python-boundary.md).
 
+## SLOForge Fabric
+
+Fabric extends the logical compiler into a topology-aware physical execution compiler and self-healing multi-node runtime. It maps tensor, pipeline, data, and expert-parallel ranks onto concrete hosts, GPUs, NUMA domains, NICs, and rails; lowers collectives and KV transfers onto measured paths; validates the resulting `PhysicalExecutionPlan` in a deterministic communication-aware Rust twin; and binds every decision to canonical evidence hashes.
+
+```mermaid
+flowchart LR
+    D[DeploymentPlan] --> C[Physical compiler]
+    M[ModelGraph] --> C
+    T[TopologyGraph + provenance] --> C
+    P[FabricProfile curves] --> C
+    C --> X[PhysicalExecutionPlan]
+    X --> S[Contention-aware Rust twin]
+    X --> A[Runtime adapters]
+    A --> O[Canonical Autopsy evidence]
+    O --> H[Causal hypotheses]
+    H --> S
+    S --> R[RecoveryPlan]
+    R --> G[Simulation / shadow / canary / promotion]
+    G --> O
+```
+
+Autopsy is a structured causal debugger, not an LLM wrapper. It aligns cross-host clocks with explicit uncertainty, matches comparable workload slices, scores supporting and contradicting evidence, removes each suspected cause in the digital twin, and records why alternatives were rejected. The recovery controller cannot mutate production by default: disruptive proposals must pass simulation, shadow, minimum-sample canary, promotion, drain, and rollback guards.
+
+The complete no-GPU path is reproducible locally:
+
+```console
+make fabric-check
+make fabric-demo
+make autopsy-demo
+make forgeci-demo
+make warmpath-demo
+make extension-evaluation
+```
+
+`make fabric-demo` uses an explicit synthetic two-host/eight-GPU-per-host topology with NUMA domains, PCIe/NVLink contention domains, two network rails, MoE expert placement, disaggregated prefill/decode workers, and calibrated synthetic link curves. It starts the real Rust gateway, replays streaming traffic, injects a rail degradation and rank-local GPU slowdown, captures canonical evidence, evaluates counterfactual repairs, and executes the selected recovery through shadow and canary promotion. Its static report and UI reject missing or hash-mismatched artifacts.
+
+The same workflow is exposed through the CLI:
+
+```console
+sloforge fabric discover --fixture two_node_infiniband \
+  --output artifacts/fabric/topology.json
+sloforge fabric benchmark --topology artifacts/fabric/topology.json --suite full --synthetic \
+  --output artifacts/fabric/measurements
+sloforge fabric model inspect --model synthetic --synthetic-moe \
+  --output artifacts/models/model-graph.json
+sloforge fabric compile --deployment-plan artifacts/plans/current.json \
+  --topology artifacts/fabric/topology.json \
+  --fabric-profile artifacts/fabric/measurements/fabric-profile.json \
+  --model-graph artifacts/models/model-graph.json \
+  --slo 'p95_ttft_ms<=250,p99_tpot_ms<=45' \
+  --output artifacts/physical-plans/plan.json
+sloforge fabric simulate --plan artifacts/physical-plans/plan.json \
+  --topology artifacts/fabric/topology.json \
+  --fabric-profile artifacts/fabric/measurements/fabric-profile.json \
+  --trace workloads/mixed-bursty.jsonl --output artifacts/simulations/run-001
+sloforge autopsy diagnose artifacts/autopsy/degraded-run.json \
+  --baseline artifacts/autopsy/healthy-run.json \
+  --output artifacts/autopsy/diagnosis.json
+sloforge recovery plan --diagnosis artifacts/autopsy/diagnosis.json \
+  --physical-plan artifacts/physical-plans/plan.json \
+  --output artifacts/recovery/proposal.json
+sloforge recovery apply --proposal artifacts/recovery/proposal.json --mode shadow-canary
+```
+
+ForgeCI uses repeated trials, bootstrap intervals, an explicit noise floor, practical significance, inconclusive classification, and a portable fixture repository to validate performance bisection without external projects. WarmPath profiles a real local artifact DAG and chooses among storage, cache, host-memory, lazy-restore, and warm-capacity strategies under readiness, cost, compatibility, capacity, and failure constraints.
+
+On this checked-in development host, topology discovery and local memory profiling are hardware-backed, but NVIDIA GPU, NVLink, NCCL, RDMA, InfiniBand/RoCE, and multi-node runtime execution are unavailable. Those adapters are version-gated and fixture-tested; the repository does not present synthetic measurements as hardware results. See the [Fabric architecture](docs/fabric/ARCHITECTURE.md), [Autopsy diagnosis model](docs/autopsy/DIAGNOSIS.md), [recovery safety model](docs/recovery/SAFETY.md), [Fabric limitations](docs/FABRIC_LIMITATIONS.md), and [extension report](paper/fabric_extension/SLOFORGE_FABRIC.md).
+
 ## Three-minute CPU quickstart
 
 Prerequisites are Python 3.11+, [uv](https://docs.astral.sh/uv/), Rust 1.93.1, and Node 22. Node is only used by the local artifact UI, but the full repository `bootstrap` and `check` targets include that UI. No NVIDIA GPU, model download, cloud account, or credentials are needed.
