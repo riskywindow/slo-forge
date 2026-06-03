@@ -1,11 +1,15 @@
 import "./styles.css";
 import { renderDashboard } from "./components";
+import { renderFabricDashboard } from "./fabric-components";
+import {
+  FabricArtifactValidationError,
+  fetchArtifactDocument,
+  parseArtifactDocument,
+} from "./fabric-parser";
 import {
   ArtifactValidationError,
-  fetchReportArtifact,
-  parseReportArtifact,
 } from "./parser";
-import type { ReportArtifact } from "./types";
+import type { ArtifactDocument } from "./fabric-types";
 
 const appNode = document.querySelector<HTMLDivElement>("#app");
 if (appNode === null) throw new Error("Missing #app mount element");
@@ -17,10 +21,13 @@ const initialSource =
   environmentSource ??
   "./report-data.json";
 
-function shell(content: string, source: string): string {
+function shell(content: string, source: string, kind: ArtifactDocument["kind"] = "logical"): string {
+  const navigation = kind === "fabric"
+    ? '<a href="#fabric-topology">Topology</a><a href="#fabric-placement">Placement</a><a href="#fabric-communication">Communication</a><a href="#fabric-autopsy">Autopsy</a><a href="#fabric-recovery">Recovery</a>'
+    : '<a href="#plan">Plan</a><a href="#evidence">Evidence</a><a href="#frontier">Frontier</a><a href="#runtime">Runtime</a><a href="#faults">Faults</a>';
   return `<header class="app-bar">
-    <a class="brand" href="#dashboard" aria-label="SLOForge artifact explorer home"><span class="brand-mark">S</span><span><strong>SLOForge</strong><small>artifact explorer</small></span></a>
-    <nav aria-label="Evidence sections"><a href="#plan">Plan</a><a href="#evidence">Evidence</a><a href="#frontier">Frontier</a><a href="#runtime">Runtime</a><a href="#faults">Faults</a></nav>
+    <a class="brand" href="#dashboard" aria-label="SLOForge artifact explorer home"><span class="brand-mark">S</span><span><strong>SLOForge</strong><small>${kind === "fabric" ? "fabric explorer" : "artifact explorer"}</small></span></a>
+    <nav aria-label="Evidence sections">${navigation}</nav>
     <details class="source-control"><summary>Load artifact</summary><form id="source-form"><label for="source-url">Artifact URL</label><div><input id="source-url" name="source" type="text" value="${escapeAttribute(source)}" spellcheck="false" autocomplete="off"/><button type="submit">Load</button></div><label class="file-label" for="artifact-file">or choose local JSON<input id="artifact-file" type="file" accept="application/json,.json"/></label><p>Tip: append <code>?data=/path/report-data.json</code> to configure a static deployment.</p></form></details>
   </header>${content}<footer><p>Rendered locally from validated SLOForge evidence. No data leaves this browser.</p></footer>`;
 }
@@ -53,8 +60,11 @@ function bindShell(source: string): void {
   });
 }
 
-function renderReport(report: ReportArtifact, source: string): void {
-  app.innerHTML = shell(renderDashboard(report), source);
+function renderDocument(document: ArtifactDocument, source: string): void {
+  const dashboard = document.kind === "fabric"
+    ? renderFabricDashboard(document.value)
+    : renderDashboard(document.value);
+  app.innerHTML = shell(dashboard, source, document.kind);
   bindShell(source);
 }
 
@@ -69,7 +79,7 @@ function renderLoading(source: string): void {
 function renderError(error: unknown, source: string): void {
   const message = error instanceof Error ? error.message : String(error);
   const details =
-    error instanceof ArtifactValidationError
+    error instanceof ArtifactValidationError || error instanceof FabricArtifactValidationError
       ? `<ul>${error.problems.map((problem) => `<li>${escapeAttribute(problem)}</li>`).join("")}</ul>`
       : "";
   app.innerHTML = shell(
@@ -84,7 +94,7 @@ async function loadFromUrl(source: string): Promise<void> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 10_000);
   try {
-    renderReport(await fetchReportArtifact(source, controller.signal), source);
+    renderDocument(await fetchArtifactDocument(source, controller.signal), source);
   } catch (error: unknown) {
     renderError(error, source);
   } finally {
@@ -100,7 +110,7 @@ async function loadFromFile(file: File, displayedSource: string): Promise<void> 
   }
   renderLoading(file.name);
   try {
-    renderReport(parseReportArtifact(JSON.parse(await file.text()) as unknown), file.name);
+    renderDocument(parseArtifactDocument(JSON.parse(await file.text()) as unknown), file.name);
   } catch (error: unknown) {
     renderError(error, file.name);
   }
