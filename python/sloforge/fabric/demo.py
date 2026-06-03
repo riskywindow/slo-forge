@@ -830,7 +830,8 @@ def run_fabric_demo(
     baseline_path = artifact_dir / "physical-plan-topology-unaware.json"
     save_physical_execution_plan(plan_path, aware.selected)
     save_physical_execution_plan(baseline_path, unaware.selected)
-    write_json(artifact_dir / "optimizer.json", aware.model_dump(mode="json"))
+    optimizer_path = artifact_dir / "optimizer.json"
+    write_json(optimizer_path, aware.model_dump(mode="json"))
     records, workload = _workload(seed)
     workload_path = artifact_dir / "mixed-bursty.jsonl"
     _write_workload(workload_path, records)
@@ -998,6 +999,7 @@ def run_fabric_demo(
         model_path,
         plan_path,
         baseline_path,
+        optimizer_path,
         workload_path,
         healthy_path,
         degraded_path,
