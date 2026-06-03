@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import os
 import subprocess
 from enum import StrEnum
@@ -12,11 +13,14 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from sloforge.fabric.ir import (
+    CollectiveOperation,
     ConnectionType,
     FabricProfile,
+    HealthState,
     PhysicalExecutionPlan,
     TopologyEdge,
     TopologyGraph,
+    WorkerRole,
 )
 
 PositiveFloat = Annotated[float, Field(gt=0.0, allow_inf_nan=False)]
@@ -431,18 +435,89 @@ def _link_resources(
     return tuple(result)
 
 
+def _edge_latency_us(edge: TopologyEdge, message_bytes: int) -> float:
+    if edge.latency_curve_us:
+        point = min(
+            edge.latency_curve_us,
+            key=lambda item: abs(item.message_bytes - message_bytes),
+        )
+        return point.median
+    bandwidth = edge.theoretical_bandwidth_gbps or 0.001
+    return 2.0 + message_bytes * 8.0 / (bandwidth * 1_000.0)
+
+
+def _shortest_edge_path(
+    topology: TopologyGraph, source: str, target: str, message_bytes: int
+) -> tuple[tuple[str, ...], float]:
+    adjacency: dict[str, list[tuple[str, TopologyEdge]]] = {}
+    for edge in topology.edges:
+        if edge.health is HealthState.FAILED:
+            continue
+        adjacency.setdefault(edge.source_node_id, []).append((edge.target_node_id, edge))
+        if edge.directionality == "bidirectional":
+            adjacency.setdefault(edge.target_node_id, []).append((edge.source_node_id, edge))
+    pending: list[tuple[float, str, tuple[str, ...]]] = [(0.0, source, ())]
+    best: dict[str, float] = {}
+    while pending:
+        pending.sort(key=lambda item: (item[0], item[1], item[2]))
+        duration, node_id, path = pending.pop(0)
+        if duration >= best.get(node_id, math.inf):
+            continue
+        best[node_id] = duration
+        if node_id == target:
+            return path, duration
+        for neighbor, edge in sorted(adjacency.get(node_id, ()), key=lambda item: item[1].edge_id):
+            pending.append(
+                (
+                    duration + _edge_latency_us(edge, message_bytes),
+                    neighbor,
+                    (*path, edge.edge_id),
+                )
+            )
+    raise ValueError(f"collective ranks have no physical path from {source} to {target}")
+
+
 def _collective_resource_ids(
-    operation_transport: str, resources: tuple[PhysicalResource, ...]
+    collective: CollectiveOperation,
+    plan: PhysicalExecutionPlan,
+    topology: TopologyGraph,
+    resources: tuple[PhysicalResource, ...],
+    message_bytes: int,
 ) -> tuple[str, ...]:
-    kinds = {
-        "nvlink": {ResourceKind.NVLINK, ResourceKind.NVSWITCH},
-        "pcie": {ResourceKind.PCIE},
-        "infiniband": {ResourceKind.NETWORK_RAIL, ResourceKind.PCIE},
-        "roce": {ResourceKind.NETWORK_RAIL, ResourceKind.PCIE},
-        "tcp": {ResourceKind.NETWORK_RAIL},
-        "shared_memory": {ResourceKind.NUMA_MEMORY},
-    }.get(operation_transport, set())
-    return tuple(resource.id for resource in resources if resource.kind in kinds)
+    """Lower a collective onto its slowest rank-order path, not the whole fabric.
+
+    Collective algorithms progress at their critical participant path. The Rust
+    model applies the ring/tree/pairwise algorithm factor to this serial path and
+    then contends its sharing domains with other operations.
+    """
+
+    gpu_by_rank = {binding.rank_id: binding.gpu_id for binding in plan.rank_placement.bindings}
+    ranks = collective.rank_order
+    if collective.algorithm == "pairwise":
+        pairs = tuple(
+            (ranks[left], ranks[right])
+            for left in range(len(ranks))
+            for right in range(left + 1, len(ranks))
+        )
+    elif len(ranks) == 2:
+        pairs = ((ranks[0], ranks[1]),)
+    else:
+        pairs = tuple(zip(ranks, (*ranks[1:], ranks[0]), strict=True))
+    paths = tuple(
+        _shortest_edge_path(
+            topology,
+            gpu_by_rank[left],
+            gpu_by_rank[right],
+            message_bytes,
+        )
+        for left, right in pairs
+    )
+    edge_path, _ = max(paths, key=lambda item: (item[1], item[0]))
+    available = {resource.id for resource in resources}
+    missing = tuple(edge_id for edge_id in edge_path if edge_id not in available)
+    if missing:
+        raise ValueError(f"collective path has no simulator resources: {missing}")
+    return edge_path
 
 
 def build_simulation_request(
@@ -490,6 +565,18 @@ def build_simulation_request(
     operations: list[PhysicalOperation] = []
     uncertainty = 1.0 - plan.predicted_metrics.p95_ttft_ms.confidence
     rank_count = len(plan.rank_placement.bindings)
+    prefill_bindings = tuple(
+        binding
+        for binding in plan.rank_placement.bindings
+        if binding.worker_role in {WorkerRole.PREFILL, WorkerRole.AGGREGATED}
+    )
+    decode_bindings = tuple(
+        binding
+        for binding in plan.rank_placement.bindings
+        if binding.worker_role in {WorkerRole.DECODE, WorkerRole.AGGREGATED}
+    )
+    if not prefill_bindings or not decode_bindings:
+        raise ValueError("physical plan must have eligible prefill and decode workers")
     baseline_prefill_per_rank_us = (
         plan.predicted_metrics.p95_ttft_ms.estimate * 1_000.0 / max(1, rank_count)
     )
@@ -513,7 +600,7 @@ def build_simulation_request(
             plan.predicted_metrics.p99_tpot_ms.estimate * 1_000.0 * shape.output_tokens
         )
         prefill_ids: list[str] = []
-        for binding in plan.rank_placement.bindings:
+        for binding in prefill_bindings:
             launch_id = f"{request_id}:rank-{binding.rank_id}:launch"
             prefill_id = f"{request_id}:rank-{binding.rank_id}:prefill"
             operations.extend(
@@ -548,7 +635,13 @@ def build_simulation_request(
                 collective.message_size_intercept_bytes
                 + round(collective.message_size_bytes_per_token * shape.prompt_tokens),
             )
-            resource_ids = _collective_resource_ids(collective.transport, tuple(resources))
+            resource_ids = _collective_resource_ids(
+                collective,
+                plan,
+                topology,
+                tuple(resources),
+                message_bytes,
+            )
             operations.append(
                 PhysicalOperation(
                     id=operation_id,
@@ -594,7 +687,7 @@ def build_simulation_request(
                     )
                 )
                 dependency_ids = (operation_id,)
-        for binding in plan.rank_placement.bindings:
+        for binding in decode_bindings:
             operations.append(
                 PhysicalOperation(
                     id=f"{request_id}:rank-{binding.rank_id}:decode",

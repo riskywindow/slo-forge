@@ -10,6 +10,7 @@ from sloforge.fabric.ir import (
     FabricProfile,
     PhysicalExecutionPlan,
     TopologyGraph,
+    WorkerRole,
     canonical_hash,
     load_fabric_profile,
     load_physical_execution_plan,
@@ -58,6 +59,12 @@ def test_physical_plan_lowers_to_strict_rust_protocol() -> None:
     assert request.operations
     assert request.resources
     assert any(operation.kind.type == "collective" for operation in request.operations)
+    collective = next(
+        operation for operation in request.operations if operation.kind.type == "collective"
+    )
+    assert tuple(demand.resource_id for demand in collective.demands) == ("nvlink-0-1",)
+    assert sum(":prefill" in operation.id for operation in request.operations) == 2
+    assert sum(operation.id.endswith(":decode") for operation in request.operations) == 2
     assert FabricSimulationRequest.model_validate_json(request.model_dump_json()) == request
 
 
@@ -138,6 +145,18 @@ def test_counterfactual_removes_labeled_link_fault() -> None:
 
 def test_simulation_capture_drives_rank_straggler_diagnosis(tmp_path: Path) -> None:
     plan, topology, profile = _inputs()
+    plan = plan.model_copy(
+        update={
+            "rank_placement": plan.rank_placement.model_copy(
+                update={
+                    "bindings": tuple(
+                        binding.model_copy(update={"worker_role": WorkerRole.AGGREGATED})
+                        for binding in plan.rank_placement.bindings
+                    )
+                }
+            )
+        }
+    )
     workload = SimulationWorkload(
         request_count=2,
         arrival_interval_us=100.0,
