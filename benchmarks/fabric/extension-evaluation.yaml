@@ -6,7 +6,7 @@ command: >-
 seeds: [13, 29, 47]
 topologies:
   - two_node_infiniband
-  - degraded_topology
+  - two_node_degraded_network
 methods:
   - random_placement
   - sequential_placement

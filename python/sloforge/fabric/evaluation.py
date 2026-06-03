@@ -59,6 +59,7 @@ from sloforge.fabric.simulation import (
     run_simulation,
 )
 from sloforge.fabric.topology import build_canonical_fixture
+from sloforge.fabric.topology.fixtures import FixtureSpec
 from sloforge.ir import ArtifactDigest
 from sloforge.recovery import RecoveryPolicy, plan_recovery
 from sloforge.util import (
@@ -94,7 +95,10 @@ RecoveryMethod = Literal[
 
 class EvaluationConfig(EvaluationModel):
     seeds: tuple[Annotated[int, Field(ge=0)], ...] = (13, 29, 47)
-    topology_fixtures: tuple[str, ...] = ("two_node_infiniband", "degraded_topology")
+    topology_fixtures: tuple[str, ...] = (
+        "two_node_infiniband",
+        "two_node_degraded_network",
+    )
     methods: tuple[EvaluationMethod, ...] = tuple(EvaluationMethod)
     request_count: Annotated[int, Field(ge=2, le=64)] = 8
     simulator_timeout_seconds: Annotated[float, Field(gt=0.0, le=300.0)] = 60.0
@@ -161,8 +165,12 @@ class MethodSummary(EvaluationModel):
     method: EvaluationMethod
     p95_ttft_ms: IntervalSummary
     p99_tpot_ms: IntervalSummary
+    p95_end_to_end_ms: IntervalSummary
     throughput_tokens_per_second: IntervalSummary
+    goodput_tokens_per_second: IntervalSummary
     communication_time_ms: IntervalSummary
+    communication_overhead_fraction: IntervalSummary
+    predicted_cost_usd_per_million_tokens: IntervalSummary
     slo_attainment: IntervalSummary
 
 
@@ -254,6 +262,21 @@ class FabricEvaluationResult(EvaluationModel):
     limitations: tuple[str, ...]
     artifacts: tuple[ArtifactRef, ...]
 
+    @model_validator(mode="after")
+    def complete_matrix_and_unique_artifacts(self) -> Self:
+        expected_trials = (
+            len(self.config.seeds) * len(self.config.topology_fixtures) * len(self.config.methods)
+        )
+        if len(self.plan_trials) != expected_trials:
+            raise ValueError("plan trials do not cover the configured evaluation matrix")
+        methods = {item.method for item in self.method_summaries}
+        if methods != set(self.config.methods):
+            raise ValueError("method summaries do not cover configured methods")
+        paths = [artifact.path for artifact in self.artifacts]
+        if len(paths) != len(set(paths)):
+            raise ValueError("evaluation artifact references must be unique")
+        return self
+
 
 def _bootstrap_median(values: tuple[float, ...], *, seed: int, repetitions: int) -> IntervalSummary:
     if not values:
@@ -309,6 +332,25 @@ def _strategy(method: EvaluationMethod) -> OptimizationStrategy:
         EvaluationMethod.GREEDY: OptimizationStrategy.GREEDY_TOPOLOGY_AWARE,
         EvaluationMethod.HIERARCHICAL: OptimizationStrategy.HIERARCHICAL,
     }[method]
+
+
+def _topology(name: str) -> TopologyGraph:
+    if name != "two_node_degraded_network":
+        return build_canonical_fixture(name)
+    return build_canonical_fixture(
+        FixtureSpec(
+            schema_version="sloforge.fabric.fixture/v1",
+            name=name,
+            hosts=2,
+            gpus_per_host=8,
+            numa_per_host=2,
+            network="infiniband",
+            rails_per_host=2,
+            nvlink_group_size=4,
+            mig_instances_per_gpu=0,
+            degraded_edge="network",
+        )
+    )
 
 
 def _workload(seed: int, request_count: int) -> SimulationWorkload:
@@ -550,14 +592,34 @@ def _method_summaries(
                     seed=20_000 + index,
                     repetitions=config.bootstrap_repetitions,
                 ),
+                p95_end_to_end_ms=_bootstrap_median(
+                    tuple(item.observed_p95_e2e_ms for item in selected),
+                    seed=25_000 + index,
+                    repetitions=config.bootstrap_repetitions,
+                ),
                 throughput_tokens_per_second=_bootstrap_median(
                     tuple(item.throughput_tokens_per_second for item in selected),
                     seed=30_000 + index,
                     repetitions=config.bootstrap_repetitions,
                 ),
+                goodput_tokens_per_second=_bootstrap_median(
+                    tuple(item.goodput_tokens_per_second for item in selected),
+                    seed=35_000 + index,
+                    repetitions=config.bootstrap_repetitions,
+                ),
                 communication_time_ms=_bootstrap_median(
                     tuple(item.communication_time_ms for item in selected),
                     seed=40_000 + index,
+                    repetitions=config.bootstrap_repetitions,
+                ),
+                communication_overhead_fraction=_bootstrap_median(
+                    tuple(item.communication_overhead_fraction for item in selected),
+                    seed=45_000 + index,
+                    repetitions=config.bootstrap_repetitions,
+                ),
+                predicted_cost_usd_per_million_tokens=_bootstrap_median(
+                    tuple(item.cost_usd_per_million_tokens for item in selected),
+                    seed=47_000 + index,
                     repetitions=config.bootstrap_repetitions,
                 ),
                 slo_attainment=_bootstrap_median(
@@ -635,8 +697,13 @@ def _twin_results(trials: tuple[PlanTrial, ...]) -> tuple[tuple[TwinTrial, ...],
 
 
 def _faults(request: FabricSimulationRequest) -> tuple[tuple[TimedFault, BottleneckKind], ...]:
+    demanded = {
+        demand.resource_id for operation in request.operations for demand in operation.demands
+    }
     rail = next(
-        resource for resource in request.resources if resource.kind is ResourceKind.NETWORK_RAIL
+        resource
+        for resource in request.resources
+        if resource.kind is ResourceKind.NETWORK_RAIL and resource.id in demanded
     )
     return (
         (
@@ -915,6 +982,13 @@ def _bar_plot(path: Path, title: str, values: tuple[tuple[str, float], ...], uni
 
 
 def _render_fabric_report(result: FabricEvaluationResult) -> str:
+    fastest = min(result.method_summaries, key=lambda item: item.p95_ttft_ms.median)
+    hierarchy = next(
+        item for item in result.method_summaries if item.method is EvaluationMethod.HIERARCHICAL
+    )
+    hierarchy_delta = (
+        hierarchy.p95_ttft_ms.median / max(fastest.p95_ttft_ms.median, 1e-12) - 1.0
+    ) * 100.0
     lines = [
         "# SLOForge Fabric evaluation",
         "",
@@ -932,6 +1006,15 @@ def _render_fabric_report(result: FabricEvaluationResult) -> str:
             f"[{item.p95_ttft_ms.confidence_low:.3f}, {item.p95_ttft_ms.confidence_high:.3f}] | "
             f"{item.communication_time_ms.median:.3f} | {item.slo_attainment.median:.3f} |"
         )
+    lines.extend(
+        (
+            "",
+            f"Fastest median: `{fastest.method.value}` at "
+            f"{fastest.p95_ttft_ms.median:.3f} ms. The hierarchical compiler was "
+            f"{hierarchy_delta:+.2f}% relative to that baseline. This comparison is reported "
+            "even when the primary method loses.",
+        )
+    )
     lines.extend(
         (
             "",
@@ -1127,7 +1210,7 @@ def run_fabric_evaluation(
         (commands_path, "environment"),
     ]
     for topology_name in active.topology_fixtures:
-        topology = build_canonical_fixture(topology_name)
+        topology = _topology(topology_name)
         for seed in active.seeds:
             case_dir = artifact_root / "trials" / topology_name / f"seed-{seed}"
             raw_profile = benchmark_synthetic_fabric(
@@ -1137,6 +1220,10 @@ def run_fabric_evaluation(
                 warmup_count=2,
                 sample_count=5,
                 output_dir=case_dir / "fabric-profile-raw",
+            )
+            raw_artifacts.extend(
+                (path, "synthetic")
+                for path in sorted((case_dir / "fabric-profile-raw").rglob("*.json"))
             )
             profile = to_canonical_profile(raw_profile, topology=topology)
             topology_path = case_dir / "topology.json"
