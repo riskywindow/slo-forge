@@ -136,7 +136,14 @@ impl Engine {
                     CounterfactualModifier::ScaleRank {
                         rank_id,
                         duration_multiplier,
-                    } if operation.rank_ids.contains(rank_id) => Some(*duration_multiplier),
+                    } if operation.rank_ids.contains(rank_id)
+                        && matches!(
+                            operation.kind,
+                            OperationKind::GpuCompute { .. } | OperationKind::HbmAccess { .. }
+                        ) =>
+                    {
+                        Some(*duration_multiplier)
+                    }
                     _ => None,
                 })
                 .product::<f64>();

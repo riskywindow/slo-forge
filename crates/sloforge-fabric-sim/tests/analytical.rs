@@ -255,6 +255,13 @@ fn rank_gpu_slowdown_does_not_rewrite_link_capacity() {
     let output = simulate(&input).expect("communication is unaffected by GPU service fault");
     assert!((output.metrics.makespan_us - 1_000.0).abs() < 1e-6);
     assert!(output.applied_faults.is_empty());
+
+    input.counterfactuals = vec![CounterfactualModifier::ScaleRank {
+        rank_id: "rank-6".into(),
+        duration_multiplier: 0.25,
+    }];
+    let counterfactual = simulate(&input).expect("rank repair does not rewrite link service");
+    assert!((counterfactual.metrics.makespan_us - 1_000.0).abs() < 1e-6);
 }
 
 #[test]
