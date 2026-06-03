@@ -373,15 +373,20 @@ def _placement(
     *,
     tp: int,
     pp: int,
+    dp: int,
     disaggregated: bool,
 ) -> RankPlacement:
     bindings: list[RankBinding] = []
-    rank_count = len(gpus)
-    split = max(1, rank_count // 2)
+    replica_size = tp * pp
+    # Prefill/decode disaggregation is a role split between complete model
+    # replicas. Splitting a TP or PP group would create ranks that cannot run a
+    # complete collective/stage graph in either worker pool.
+    prefill_replica_count = max(1, dp // 2) if disaggregated else 0
     for rank, gpu in enumerate(gpus):
         nic_id, rail_id = _nearest_nic(topology, gpu)
         if disaggregated:
-            role = WorkerRole.PREFILL if rank < split else WorkerRole.DECODE
+            replica = rank // replica_size
+            role = WorkerRole.PREFILL if replica < prefill_replica_count else WorkerRole.DECODE
         else:
             role = WorkerRole.AGGREGATED
         bindings.append(
@@ -394,7 +399,7 @@ def _placement(
                 network_rail_id=rail_id,
                 process_cpu_affinity=_numa_cpu_set(topology, gpu.numa_domain_id),
                 worker_role=role,
-                replica_id=f"replica-{rank // (tp * pp)}",
+                replica_id=f"replica-{rank // replica_size}",
                 fault_domain=gpu.host_id,
             )
         )
@@ -436,18 +441,22 @@ def _parallelism(tp: int, pp: int, dp: int, ep: int, disaggregated: bool) -> Par
             )
     rank_count = tp * pp * dp
     if ep > 1:
-        for start in range(0, rank_count, ep):
-            ranks = tuple(range(start, min(rank_count, start + ep)))
-            if len(ranks) == ep:
+        # EP groups never cross a data-replica boundary. A group spanning two
+        # replicas would turn independent fault/routing units into one mandatory
+        # collective domain.
+        for replica in range(dp):
+            base = replica * replica_size
+            for local_start in range(0, replica_size, ep):
+                ranks = tuple(range(base + local_start, base + local_start + ep))
                 groups.append(
                     ParallelGroup(
-                        group_id=f"ep-{start // ep}",
+                        group_id=f"ep-{replica}-{local_start // ep}",
                         kind=ParallelismKind.EXPERT,
                         rank_ids=ranks,
                     )
                 )
     if disaggregated:
-        split = max(1, rank_count // 2)
+        split = max(1, dp // 2) * replica_size
         groups.extend(
             (
                 ParallelGroup(
@@ -496,7 +505,10 @@ def _memory_plan(
     kv_per_request = sum(layer.kv_bytes_per_token for layer in model.layers) * (
         constraints.prompt_tokens_p95 + constraints.output_tokens_p95
     )
-    kv_cache = math.ceil(kv_per_request * constraints.maximum_concurrent_requests / dp)
+    # Data replicas duplicate state; they do not shard one replica's KV cache.
+    # TP and PP partition heads/layers, respectively, so each rank owns only its
+    # corresponding shard of the per-replica cache.
+    kv_cache = math.ceil(kv_per_request * constraints.maximum_concurrent_requests / shard_count)
     activations = math.ceil(
         sum(layer.activation_bytes_per_token for layer in model.layers)
         * constraints.maximum_concurrent_requests
@@ -612,6 +624,7 @@ def _collectives(
     for requirement in requirements:
         kind = ParallelismKind(requirement.parallelism_dimension)
         groups = tuple(group for group in parallelism.groups if group.kind is kind)
+        replica_durations_us: list[float] = []
         for group in groups:
             if len(group.rank_ids) < 2:
                 continue
@@ -669,8 +682,12 @@ def _collectives(
                     fallback_serialization="critical_path",
                 )
             )
-            total_us += duration_us * (1.0 - overlap_fraction)
+            replica_durations_us.append(duration_us * (1.0 - overlap_fraction))
             sequence += 1
+        # Data replicas execute independently. The request critical path sees
+        # one group's collective (or the slowest group under robust planning),
+        # not the sum of collectives across every replica.
+        total_us += max(replica_durations_us, default=0.0)
     return (
         CollectivePlan(operations=tuple(operations)),
         CommunicationOverlapPlan(windows=tuple(overlap)),
@@ -683,51 +700,62 @@ def _kv_transfer(
 ) -> tuple[KVTransferPlan | None, float]:
     if not disaggregated:
         return None, 0.0
-    prefill = tuple(
-        binding.rank_id
-        for binding in placement.bindings
-        if binding.worker_role is WorkerRole.PREFILL
-    )
-    decode = tuple(
-        binding.rank_id
-        for binding in placement.bindings
-        if binding.worker_role is WorkerRole.DECODE
-    )
-    if not prefill or not decode:
+    prefill_replicas: dict[str, list[RankBinding]] = defaultdict(list)
+    decode_replicas: dict[str, list[RankBinding]] = defaultdict(list)
+    for binding in placement.bindings:
+        if binding.worker_role is WorkerRole.PREFILL:
+            prefill_replicas[binding.replica_id].append(binding)
+        elif binding.worker_role is WorkerRole.DECODE:
+            decode_replicas[binding.replica_id].append(binding)
+    if not prefill_replicas or not decode_replicas:
         return None, math.inf
-    binding_by_rank = {binding.rank_id: binding for binding in placement.bindings}
-    producer = binding_by_rank[prefill[0]]
-    consumer = binding_by_rank[decode[0]]
     kv_bytes = max(
         1,
         sum(layer.kv_bytes_per_token for layer in request.model.layers)
         * request.constraints.prompt_tokens_p95,
     )
-    path, path_us, _ = _shortest_path(request.topology, producer.gpu_id, consumer.gpu_id, kv_bytes)
-    if not path or not math.isfinite(path_us):
-        return None, math.inf
-    transport, _, _, _ = _transport_for_ranks(request.topology, placement, (prefill[0], decode[0]))
-    serialization: Literal["raw", "paged", "nixl", "runtime_native"] = (
-        "nixl" if transport in {"infiniband", "roce"} else "paged"
+    prefill_groups = tuple(tuple(value) for _, value in sorted(prefill_replicas.items()))
+    decode_groups = tuple(tuple(value) for _, value in sorted(decode_replicas.items()))
+    routes: list[KVTransferRoute] = []
+    route_latencies: list[float] = []
+    for index, producers in enumerate(prefill_groups):
+        consumers = decode_groups[index % len(decode_groups)]
+        producer = producers[0]
+        consumer = consumers[0]
+        path, path_us, _ = _shortest_path(
+            request.topology, producer.gpu_id, consumer.gpu_id, kv_bytes
+        )
+        if not path or not math.isfinite(path_us):
+            return None, math.inf
+        rank_pair = (producer.rank_id, consumer.rank_id)
+        transport, _, _, _ = _transport_for_ranks(request.topology, placement, rank_pair)
+        serialization: Literal["raw", "paged", "nixl", "runtime_native"] = (
+            "nixl" if transport in {"infiniband", "roce"} else "paged"
+        )
+        routes.append(
+            KVTransferRoute(
+                route_id=f"kv-prefill-decode-{index}",
+                producer_rank_ids=tuple(binding.rank_id for binding in producers),
+                consumer_rank_ids=tuple(binding.rank_id for binding in consumers),
+                edge_path=path,
+                serialization_format=serialization,
+                chunk_bytes=min(kv_bytes, 2 * 1024 * 1024),
+                maximum_inflight_chunks=4,
+                overlap_with_decode=True,
+                cache_owner="decode",
+                eviction_policy="deadline",
+                retry_limit=1,
+                fallback="recompute",
+                transport_adapter=f"sloforge.{transport}",
+                expected_latency_us=max(path_us, 0.001),
+                expected_cost_usd=0.0,
+            )
+        )
+        route_latencies.append(path_us)
+    return (
+        KVTransferPlan(routes=tuple(routes), backpressure_limit_bytes=kv_bytes * 2),
+        max(route_latencies),
     )
-    route = KVTransferRoute(
-        route_id="kv-prefill-decode-0",
-        producer_rank_ids=prefill,
-        consumer_rank_ids=decode,
-        edge_path=path,
-        serialization_format=serialization,
-        chunk_bytes=min(kv_bytes, 2 * 1024 * 1024),
-        maximum_inflight_chunks=4,
-        overlap_with_decode=True,
-        cache_owner="decode",
-        eviction_policy="deadline",
-        retry_limit=1,
-        fallback="recompute",
-        transport_adapter=f"sloforge.{transport}",
-        expected_latency_us=max(path_us, 0.001),
-        expected_cost_usd=0.0,
-    )
-    return KVTransferPlan(routes=(route,), backpressure_limit_bytes=kv_bytes * 2), path_us
 
 
 def _candidate_id(
@@ -766,11 +794,29 @@ def _evaluate_candidate(
     rejection: list[str] = []
     if len(gpus) != rank_count:
         rejection.append("insufficient_healthy_gpus")
-    if disaggregated and rank_count < 2:
-        rejection.append("disaggregation_requires_two_ranks")
-    expert_count = sum(len(layer.experts) for layer in request.model.layers)
-    if ep > 1 and (expert_count == 0 or expert_count % ep != 0 or rank_count % ep != 0):
+    if disaggregated and dp < 2:
+        rejection.append("disaggregation_requires_two_data_replicas")
+    moe_expert_counts = tuple(len(layer.experts) for layer in request.model.layers if layer.experts)
+    replica_size = tp * pp
+    if ep > 1 and (
+        not moe_expert_counts
+        or any(count % ep != 0 for count in moe_expert_counts)
+        or replica_size % ep != 0
+    ):
         rejection.append("expert_parallelism_not_divisible")
+    if tp > 1 and (
+        request.model.attention_heads % tp != 0 or request.model.key_value_heads % tp != 0
+    ):
+        rejection.append("tensor_parallelism_not_divisible")
+    available_stage_boundaries = 1 + sum(
+        layer.allowed_stage_boundaries_after for layer in request.model.layers[:-1]
+    )
+    if pp > available_stage_boundaries:
+        rejection.append("pipeline_stage_boundaries_unavailable")
+    if ep > 1 and "expert_parallel" not in request.model.runtime_features:
+        rejection.append("expert_parallelism_not_supported")
+    if disaggregated and "prefill_decode_disaggregation" not in request.model.runtime_features:
+        rejection.append("disaggregation_not_supported")
     if rank_count > request.constraints.maximum_ranks:
         rejection.append("maximum_ranks_exceeded")
     if rejection:
@@ -793,7 +839,14 @@ def _evaluate_candidate(
             feasible=False,
             rejection_codes=tuple(rejection),
         )
-    placement = _placement(request.topology, gpus, tp=tp, pp=pp, disaggregated=disaggregated)
+    placement = _placement(
+        request.topology,
+        gpus,
+        tp=tp,
+        pp=pp,
+        dp=dp,
+        disaggregated=disaggregated,
+    )
     try:
         memory = _memory_plan(request.model, gpus, request.constraints, tp=tp, pp=pp, dp=dp)
     except ValueError:
@@ -822,15 +875,19 @@ def _evaluate_candidate(
     kv_transfer, kv_us = _kv_transfer(request, placement, disaggregated)
     if disaggregated and (kv_transfer is None or not math.isfinite(kv_us)):
         rejection.append("kv_transfer_path_unreachable")
-    prefill_parallel = max(1, rank_count // 2) if disaggregated else rank_count
-    decode_parallel = max(1, rank_count - prefill_parallel) if disaggregated else rank_count
+    prefill_replicas = max(1, dp // 2) if disaggregated else dp
+    decode_replicas = dp - prefill_replicas if disaggregated else dp
+    # TP shortens the per-request compute path. PP partitions memory and enables
+    # pipeline occupancy, but its sequential stages do not divide one request's
+    # TTFT/TPOT again. DP adds independent throughput replicas, not latency speedup.
+    per_request_compute_parallelism = tp
     prefill_ms = (
         request.constraints.prompt_tokens_p95
-        / (request.assumptions.prefill_tokens_per_second_per_gpu * prefill_parallel)
+        / (request.assumptions.prefill_tokens_per_second_per_gpu * per_request_compute_parallelism)
         * 1_000.0
     )
     decode_step_ms = 1_000.0 / (
-        request.assumptions.decode_tokens_per_second_per_gpu * decode_parallel
+        request.assumptions.decode_tokens_per_second_per_gpu * per_request_compute_parallelism
     )
     ttft_ms = prefill_ms + collective_us / 1_000.0 + kv_us / 1_000.0
     tpot_ms = (
@@ -838,7 +895,8 @@ def _evaluate_candidate(
     )
     goodput = (
         request.assumptions.decode_tokens_per_second_per_gpu
-        * decode_parallel
+        * per_request_compute_parallelism
+        * decode_replicas
         * (0.92 if collective_us > 0 else 1.0)
     )
     cost_per_million = (

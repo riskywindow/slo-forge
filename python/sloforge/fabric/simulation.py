@@ -18,6 +18,7 @@ from sloforge.fabric.ir import (
     FabricProfile,
     HealthState,
     PhysicalExecutionPlan,
+    RankBinding,
     TopologyEdge,
     TopologyGraph,
     WorkerRole,
@@ -574,21 +575,30 @@ def build_simulation_request(
     )
     operations: list[PhysicalOperation] = []
     uncertainty = 1.0 - plan.predicted_metrics.p95_ttft_ms.confidence
-    rank_count = len(plan.rank_placement.bindings)
-    prefill_bindings = tuple(
-        binding
-        for binding in plan.rank_placement.bindings
-        if binding.worker_role in {WorkerRole.PREFILL, WorkerRole.AGGREGATED}
-    )
-    decode_bindings = tuple(
-        binding
-        for binding in plan.rank_placement.bindings
-        if binding.worker_role in {WorkerRole.DECODE, WorkerRole.AGGREGATED}
-    )
-    if not prefill_bindings or not decode_bindings:
+    prefill_by_replica: dict[str, list[RankBinding]] = {}
+    decode_by_replica: dict[str, list[RankBinding]] = {}
+    for binding in plan.rank_placement.bindings:
+        if binding.worker_role in {WorkerRole.PREFILL, WorkerRole.AGGREGATED}:
+            prefill_by_replica.setdefault(binding.replica_id, []).append(binding)
+        if binding.worker_role in {WorkerRole.DECODE, WorkerRole.AGGREGATED}:
+            decode_by_replica.setdefault(binding.replica_id, []).append(binding)
+    prefill_replicas = tuple(tuple(value) for _, value in sorted(prefill_by_replica.items()))
+    decode_replicas = tuple(tuple(value) for _, value in sorted(decode_by_replica.items()))
+    if not prefill_replicas or not decode_replicas:
         raise ValueError("physical plan must have eligible prefill and decode workers")
-    baseline_prefill_per_rank_us = (
-        plan.predicted_metrics.p95_ttft_ms.estimate * 1_000.0 / max(1, rank_count)
+    planned_communication_us = (
+        plan.predicted_metrics.communication_overhead_fraction.estimate
+        * plan.predicted_metrics.p95_end_to_end_ms.estimate
+        * 1_000.0
+    )
+    # Predicted TTFT is already a plan-level latency after TP/PP lowering. Each
+    # participating rank executes its shard for that wall-clock duration; dividing
+    # it by rank count here would apply model parallel speedup a second time. The
+    # explicit communication DAG below contributes its own duration, so retain only
+    # the compute component in the opaque GPU operation.
+    baseline_prefill_per_rank_us = max(
+        0.001,
+        plan.predicted_metrics.p95_ttft_ms.estimate * 1_000.0 - planned_communication_us,
     )
     request_shapes = workload.requests or tuple(
         SimulationRequestShape(
@@ -603,6 +613,10 @@ def build_simulation_request(
     for request_index, shape in enumerate(request_shapes):
         request_id = f"request-{request_index:06d}"
         arrival_us = shape.arrival_us
+        prefill_bindings = prefill_replicas[request_index % len(prefill_replicas)]
+        decode_bindings = decode_replicas[request_index % len(decode_replicas)]
+        active_prefill_ranks = {binding.rank_id for binding in prefill_bindings}
+        active_decode_ranks = {binding.rank_id for binding in decode_bindings}
         prefill_per_rank_us = baseline_prefill_per_rank_us * (
             shape.prompt_tokens / workload.prompt_tokens
         )
@@ -639,6 +653,14 @@ def build_simulation_request(
             prefill_ids.append(prefill_id)
         dependency_ids: tuple[str, ...] = tuple(prefill_ids)
         for collective_index, collective in enumerate(plan.collectives.operations):
+            # Lower only collectives belonging to the routed prefill/decode
+            # replica pair. The union preserves v1 plans that split roles within
+            # one replica while new compiler output keeps each group within a
+            # complete role-specific replica.
+            if not set(collective.participating_ranks) <= (
+                active_prefill_ranks | active_decode_ranks
+            ):
+                continue
             operation_id = f"{request_id}:collective-{collective_index}"
             message_bytes = max(
                 1,
@@ -674,6 +696,11 @@ def build_simulation_request(
             dependency_ids = (operation_id,)
         if plan.kv_transfer is not None:
             for route_index, route in enumerate(plan.kv_transfer.routes):
+                if (
+                    not set(route.producer_rank_ids) <= active_prefill_ranks
+                    or not set(route.consumer_rank_ids) <= active_decode_ranks
+                ):
+                    continue
                 operation_id = f"{request_id}:kv-{route_index}"
                 kv_bytes = max(1, route.chunk_bytes * route.maximum_inflight_chunks)
                 operations.append(
