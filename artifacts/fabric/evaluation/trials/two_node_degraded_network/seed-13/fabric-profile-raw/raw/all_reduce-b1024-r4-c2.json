@@ -1,0 +1,43 @@
+{
+  "benchmark_artifact_hash": "ed4a88c1def6a67f81fcdc1dd945dfb2f4d0055959b8e0eb2d3286ffa1847a93",
+  "case_id": "all_reduce-b1024-r4-c2",
+  "mode": "synthetic_calibrated",
+  "samples": [
+    {
+      "duration_microseconds": 24.09147202716938,
+      "sample_index": 0,
+      "seed": 1522347071223906831,
+      "synthetic": true,
+      "throughput_bytes_per_second": 42504667.163765445
+    },
+    {
+      "duration_microseconds": 23.68997583355156,
+      "sample_index": 1,
+      "seed": 1522347071223906831,
+      "synthetic": true,
+      "throughput_bytes_per_second": 43225033.54139064
+    },
+    {
+      "duration_microseconds": 22.373324703271997,
+      "sample_index": 2,
+      "seed": 1522347071223906831,
+      "synthetic": true,
+      "throughput_bytes_per_second": 45768790.00241947
+    },
+    {
+      "duration_microseconds": 23.881796068273925,
+      "sample_index": 3,
+      "seed": 1522347071223906831,
+      "synthetic": true,
+      "throughput_bytes_per_second": 42877847.08790583
+    },
+    {
+      "duration_microseconds": 23.73445649799756,
+      "sample_index": 4,
+      "seed": 1522347071223906831,
+      "synthetic": true,
+      "throughput_bytes_per_second": 43144025.652594715
+    }
+  ],
+  "schema_version": "sloforge.fabric.raw-samples/v1"
+}

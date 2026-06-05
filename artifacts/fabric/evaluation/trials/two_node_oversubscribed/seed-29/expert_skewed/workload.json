@@ -1,0 +1,73 @@
+{
+  "arrival_interval_us": 0.0,
+  "cpu_launch_us": 5.0,
+  "output_tokens": 96,
+  "prompt_tokens": 2048,
+  "request_count": 8,
+  "requests": [
+    {
+      "arrival_us": 109.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 229.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 360.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 502.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 15502.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 15596.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 15701.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    },
+    {
+      "arrival_us": 15817.0,
+      "expert_skew_factor": 4.0,
+      "output_tokens": 64,
+      "priority": "normal",
+      "prompt_tokens": 2048,
+      "request_class": "expert_skewed"
+    }
+  ]
+}

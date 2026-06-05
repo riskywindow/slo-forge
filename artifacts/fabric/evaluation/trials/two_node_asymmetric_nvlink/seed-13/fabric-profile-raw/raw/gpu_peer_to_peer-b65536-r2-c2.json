@@ -1,0 +1,43 @@
+{
+  "benchmark_artifact_hash": "3eb87c4afbcf6f9fea5a0e0e908c9f582bf787dabbf664a82e2e892f0cd8ea97",
+  "case_id": "gpu_peer_to_peer-b65536-r2-c2",
+  "mode": "synthetic_calibrated",
+  "samples": [
+    {
+      "duration_microseconds": 7.224018280843945,
+      "sample_index": 0,
+      "seed": 13297209670942996537,
+      "synthetic": true,
+      "throughput_bytes_per_second": 9071959324.048634
+    },
+    {
+      "duration_microseconds": 7.409791653449144,
+      "sample_index": 1,
+      "seed": 13297209670942996537,
+      "synthetic": true,
+      "throughput_bytes_per_second": 8844513188.099424
+    },
+    {
+      "duration_microseconds": 7.425625543465605,
+      "sample_index": 2,
+      "seed": 13297209670942996537,
+      "synthetic": true,
+      "throughput_bytes_per_second": 8825653760.26405
+    },
+    {
+      "duration_microseconds": 7.704578562104885,
+      "sample_index": 3,
+      "seed": 13297209670942996537,
+      "synthetic": true,
+      "throughput_bytes_per_second": 8506110940.621731
+    },
+    {
+      "duration_microseconds": 7.606981328069261,
+      "sample_index": 4,
+      "seed": 13297209670942996537,
+      "synthetic": true,
+      "throughput_bytes_per_second": 8615243967.824196
+    }
+  ],
+  "schema_version": "sloforge.fabric.raw-samples/v1"
+}

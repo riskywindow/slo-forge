@@ -1,0 +1,628 @@
+{
+  "baseline_run_id": "healthy-two_node_degraded_network-47-rank-2-straggler",
+  "comparison_id": "comparison-ce1f4b0459e9070e",
+  "confidence": 0.9,
+  "degraded_run_id": "degraded-two_node_degraded_network-47-rank-2-straggler",
+  "diagnosis_id": "diagnosis-55a020889f7827e2",
+  "evidence": [
+    {
+      "artifact_uri": "artifacts/fabric/evaluation/autopsy/two_node_degraded_network/seed-47/rank-2-straggler/degraded-simulation.json.gz",
+      "record_index": null,
+      "sha256": "fe339b11efa2fef94c5ec676a48fd78091404ee67162daaf7659a20e00138f9e",
+      "source": "sloforge-fabric-sim"
+    },
+    {
+      "artifact_uri": "artifacts/fabric/evaluation/trials/two_node_degraded_network/seed-47/mixed_bursty/hierarchical_compiler/simulation.json.gz",
+      "record_index": null,
+      "sha256": "80d8248f10f3be48d27f5f702f7010e2dedb52c025141577aba22eb83254748c",
+      "source": "sloforge-fabric-sim"
+    }
+  ],
+  "first_divergence_event_id": "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2",
+  "first_divergence_ns": 167000,
+  "hypotheses": [
+    {
+      "confidence": 0.9,
+      "contradicting_evidence": [],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "kind": "rank_straggler",
+      "rejected_reason": null,
+      "supporting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "rank_skew=2.85714 exceeds 1.2",
+          "metric": "rank_skew",
+          "observed": 2.85714375,
+          "relation": "greater_than",
+          "supports_hypothesis": true,
+          "threshold": 1.2
+        }
+      ],
+      "target": "rank_group"
+    },
+    {
+      "confidence": 0.87,
+      "contradicting_evidence": [],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-22-kv_transfer_bottleneck",
+      "kind": "kv_transfer_bottleneck",
+      "rejected_reason": null,
+      "supporting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "kv_transfer_delta=0.429637 exceeds 0.2",
+          "metric": "kv_transfer_delta",
+          "observed": 0.4296366202594018,
+          "relation": "greater_than",
+          "supports_hypothesis": true,
+          "threshold": 0.2
+        }
+      ],
+      "target": "kv_transfer"
+    },
+    {
+      "confidence": 0.87,
+      "contradicting_evidence": [],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-20-prefill_pool_saturation",
+      "kind": "prefill_pool_saturation",
+      "rejected_reason": null,
+      "supporting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "prefill_delta=1.85714 exceeds 0.2",
+          "metric": "prefill_delta",
+          "observed": 1.85714375,
+          "relation": "greater_than",
+          "supports_hypothesis": true,
+          "threshold": 0.2
+        }
+      ],
+      "target": "prefill_pool"
+    },
+    {
+      "confidence": 0.2,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "arrival_capacity_ratio=1 does not exceed 1",
+          "metric": "arrival_capacity_ratio",
+          "observed": 1.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 1.0
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-00-arrival_overload",
+      "kind": "arrival_overload",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "deployment"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "backend_queue_delta=0 does not exceed 0.2",
+          "metric": "backend_queue_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-02-backend_queueing",
+      "kind": "backend_queueing",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "backend_pool"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "startup_delta=0 does not exceed 0.2",
+          "metric": "startup_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-04-cold_start_regression",
+      "kind": "cold_start_regression",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "worker_startup"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "collective_delta=0 does not exceed 0.2",
+          "metric": "collective_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-18-collective_algorithm_regression",
+      "kind": "collective_algorithm_regression",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "collective_algorithm"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "collective_wait_delta=0 does not exceed 0.2",
+          "metric": "collective_wait_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-17-collective_imbalance",
+      "kind": "collective_imbalance",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "collective_group"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "cpu_launch_delta=0 does not exceed 0.2",
+          "metric": "cpu_launch_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-06-cpu_launch_bottleneck",
+      "kind": "cpu_launch_bottleneck",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "cpu_launch"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "decode_delta=1.22898e-08 does not exceed 0.2",
+          "metric": "decode_delta",
+          "observed": 1.2289777184805837e-08,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-21-decode_pool_saturation",
+      "kind": "decode_pool_saturation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "decode_pool"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "kernel_count_delta=0 does not exceed 0.2",
+          "metric": "kernel_count_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-07-excessive_kernel_launches",
+      "kind": "excessive_kernel_launches",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "gpu_runtime"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "expert_imbalance=0 does not exceed 0.15",
+          "metric": "expert_imbalance",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.15
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-19-expert_load_imbalance",
+      "kind": "expert_load_imbalance",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "expert_group"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "gateway_queue_delta=0 does not exceed 0.2",
+          "metric": "gateway_queue_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-01-gateway_queueing",
+      "kind": "gateway_queueing",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "gateway"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "gpu_clock_drop=0 does not exceed 0.1",
+          "metric": "gpu_clock_drop",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.1
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-10-gpu_clock_throttling",
+      "kind": "gpu_clock_throttling",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "gpu_clock"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "gpu_compute_delta=0 does not exceed 0.2",
+          "metric": "gpu_compute_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-08-gpu_compute_regression",
+      "kind": "gpu_compute_regression",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "gpu_compute"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "gpu_memory_delta=0 does not exceed 0.2",
+          "metric": "gpu_memory_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-09-gpu_memory_bandwidth_regression",
+      "kind": "gpu_memory_bandwidth_regression",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "gpu_hbm"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "warm_fraction_drop=0 does not exceed 0.15",
+          "metric": "warm_fraction_drop",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.15
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-03-insufficient_warm_capacity",
+      "kind": "insufficient_warm_capacity",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "worker_pool"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "invalid_plan_assumption=0 does not exceed 0.5",
+          "metric": "invalid_plan_assumption",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.5
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-26-invalid_physical_plan_assumption",
+      "kind": "invalid_physical_plan_assumption",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "physical_plan"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "model_load_delta=0 does not exceed 0.2",
+          "metric": "model_load_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-05-model_loading_regression",
+      "kind": "model_loading_regression",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "model_loader"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "network_bandwidth_drop=0 does not exceed 0.15",
+          "metric": "network_bandwidth_drop",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.15
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "kind": "network_bandwidth_degradation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "network_rail"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "network_latency_delta=0 does not exceed 0.2",
+          "metric": "network_latency_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-15-network_latency_degradation",
+      "kind": "network_latency_degradation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "network_rail"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "numa_remote_delta=0 does not exceed 0.15",
+          "metric": "numa_remote_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.15
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-11-numa_misplacement",
+      "kind": "numa_misplacement",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "numa_affinity"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "nvlink_delta=0 does not exceed 0.2",
+          "metric": "nvlink_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-13-nvlink_degradation",
+      "kind": "nvlink_degradation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "nvlink_path"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "pcie_delta=0 does not exceed 0.2",
+          "metric": "pcie_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-12-pcie_bottleneck",
+      "kind": "pcie_bottleneck",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "pcie_path"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "topology_mismatch=0 does not exceed 0.5",
+          "metric": "topology_mismatch",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.5
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-25-topology_mismatch",
+      "kind": "topology_mismatch",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "physical_plan"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "unhealthy_worker=0 does not exceed 0.5",
+          "metric": "unhealthy_worker",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.5
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-23-unhealthy_worker",
+      "kind": "unhealthy_worker",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "worker"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_degraded_network-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "worker_crash=0 does not exceed 0.5",
+          "metric": "worker_crash",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.5
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-24-worker_crash",
+      "kind": "worker_crash",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "worker"
+    }
+  ],
+  "schema_version": "sloforge.autopsy.diagnosis/v1",
+  "sufficient_alignment": true,
+  "top_hypothesis": "rank_straggler",
+  "top_three": [
+    "rank_straggler",
+    "kv_transfer_bottleneck",
+    "prefill_pool_saturation"
+  ],
+  "warnings": []
+}
