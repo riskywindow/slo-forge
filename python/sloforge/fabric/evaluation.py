@@ -9,6 +9,7 @@ separate status field and remains unexercised when no NVIDIA device is visible.
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
 import html
 import json
@@ -36,6 +37,7 @@ from sloforge.fabric.compiler import (
     compile_physical_plan,
 )
 from sloforge.fabric.ir import (
+    ConnectionType,
     DocumentReference,
     FabricProfile,
     PhysicalExecutionPlan,
@@ -83,6 +85,12 @@ class EvaluationMethod(StrEnum):
     HIERARCHICAL = "hierarchical_compiler"
 
 
+class WorkloadRegime(StrEnum):
+    MIXED_BURSTY = "mixed_bursty"
+    LONG_CONTEXT = "long_context"
+    EXPERT_SKEWED = "expert_skewed"
+
+
 ArtifactProvenance = Literal["synthetic", "environment", "compiler", "simulator", "autopsy"]
 RecoveryMethod = Literal[
     "no_recovery",
@@ -97,8 +105,11 @@ class EvaluationConfig(EvaluationModel):
     seeds: tuple[Annotated[int, Field(ge=0)], ...] = (13, 29, 47)
     topology_fixtures: tuple[str, ...] = (
         "two_node_infiniband",
+        "two_node_asymmetric_nvlink",
+        "two_node_oversubscribed",
         "two_node_degraded_network",
     )
+    workload_regimes: tuple[WorkloadRegime, ...] = tuple(WorkloadRegime)
     methods: tuple[EvaluationMethod, ...] = tuple(EvaluationMethod)
     request_count: Annotated[int, Field(ge=2, le=64)] = 8
     simulator_timeout_seconds: Annotated[float, Field(gt=0.0, le=300.0)] = 60.0
@@ -111,6 +122,7 @@ class EvaluationConfig(EvaluationModel):
         for name, values in (
             ("seeds", self.seeds),
             ("topology_fixtures", self.topology_fixtures),
+            ("workload_regimes", self.workload_regimes),
             ("methods", self.methods),
         ):
             if not values or len(values) != len(set(values)):
@@ -134,6 +146,10 @@ class IntervalSummary(EvaluationModel):
 class PlanTrial(EvaluationModel):
     seed: Annotated[int, Field(ge=0)]
     topology: str
+    topology_class: Literal["favorable", "asymmetric", "oversubscribed", "degraded"]
+    workload_regime: WorkloadRegime
+    representative_collective_message_bytes: Annotated[int, Field(gt=0)]
+    contention_class: Literal["nominal", "oversubscribed"]
     method: EvaluationMethod
     strategy: OptimizationStrategy
     plan_id: str
@@ -177,6 +193,9 @@ class MethodSummary(EvaluationModel):
 class TwinTrial(EvaluationModel):
     seed: Annotated[int, Field(ge=0)]
     topology: str
+    workload_regime: WorkloadRegime
+    representative_collective_message_bytes: Annotated[int, Field(gt=0)]
+    contention_class: Literal["nominal", "oversubscribed"]
     method: EvaluationMethod
     predicted_ms: Annotated[float, Field(ge=0.0)]
     isolated_observed_ms: Annotated[float, Field(ge=0.0)]
@@ -194,12 +213,24 @@ class TwinSummary(EvaluationModel):
     interval_coverage: Annotated[float, Field(ge=0.0, le=1.0)]
     median_workload_queueing_delta_ms: Annotated[float, Field(ge=0.0)]
     hierarchical_selection_regret_ms: Annotated[float, Field(ge=0.0)]
+    pareto_selection_regret_fraction: Annotated[float, Field(ge=0.0)]
     caveat: str
+
+
+class TwinGroupSummary(EvaluationModel):
+    dimension: Literal["topology", "workload", "message_size", "contention"]
+    value: str
+    sample_count: Annotated[int, Field(gt=0)]
+    mean_absolute_error_ms: Annotated[float, Field(ge=0.0)]
+    median_relative_error: Annotated[float, Field(ge=0.0)]
+    rank_correlation: Annotated[float, Field(ge=-1.0, le=1.0)]
+    interval_coverage: Annotated[float, Field(ge=0.0, le=1.0)]
 
 
 class DiagnosisTrial(EvaluationModel):
     seed: Annotated[int, Field(ge=0)]
     topology: str
+    workload_regime: WorkloadRegime
     fault_id: str
     ground_truth: BottleneckKind
     top_one: BottleneckKind
@@ -226,6 +257,7 @@ class DiagnosisSummary(EvaluationModel):
 class RecoveryTrial(EvaluationModel):
     seed: Annotated[int, Field(ge=0)]
     topology: str
+    workload_regime: WorkloadRegime
     fault_id: str
     method: RecoveryMethod
     restored_slo: bool
@@ -255,6 +287,7 @@ class FabricEvaluationResult(EvaluationModel):
     method_summaries: tuple[MethodSummary, ...]
     twin_trials: tuple[TwinTrial, ...]
     twin_summary: TwinSummary
+    twin_group_summaries: tuple[TwinGroupSummary, ...]
     diagnosis_trials: tuple[DiagnosisTrial, ...]
     diagnosis_summary: DiagnosisSummary
     recovery_trials: tuple[RecoveryTrial, ...]
@@ -265,7 +298,10 @@ class FabricEvaluationResult(EvaluationModel):
     @model_validator(mode="after")
     def complete_matrix_and_unique_artifacts(self) -> Self:
         expected_trials = (
-            len(self.config.seeds) * len(self.config.topology_fixtures) * len(self.config.methods)
+            len(self.config.seeds)
+            * len(self.config.topology_fixtures)
+            * len(self.config.methods)
+            * len(self.config.workload_regimes)
         )
         if len(self.plan_trials) != expected_trials:
             raise ValueError("plan trials do not cover the configured evaluation matrix")
@@ -335,31 +371,99 @@ def _strategy(method: EvaluationMethod) -> OptimizationStrategy:
 
 
 def _topology(name: str) -> TopologyGraph:
-    if name != "two_node_degraded_network":
+    if name == "two_node_infiniband":
         return build_canonical_fixture(name)
-    return build_canonical_fixture(
-        FixtureSpec(
-            schema_version="sloforge.fabric.fixture/v1",
-            name=name,
-            hosts=2,
-            gpus_per_host=8,
-            numa_per_host=2,
-            network="infiniband",
-            rails_per_host=2,
-            nvlink_group_size=4,
-            mig_instances_per_gpu=0,
-            degraded_edge="network",
+    if name in {"two_node_asymmetric_nvlink", "two_node_degraded_network"}:
+        return build_canonical_fixture(
+            FixtureSpec(
+                schema_version="sloforge.fabric.fixture/v1",
+                name=name,
+                hosts=2,
+                gpus_per_host=8,
+                numa_per_host=2,
+                network="infiniband",
+                rails_per_host=2,
+                nvlink_group_size=4,
+                mig_instances_per_gpu=0,
+                degraded_edge=("nvlink" if name == "two_node_asymmetric_nvlink" else "network"),
+            )
         )
+    if name != "two_node_oversubscribed":
+        return build_canonical_fixture(name)
+    base = build_canonical_fixture("two_node_infiniband")
+    edges = []
+    for edge in base.edges:
+        if edge.connection is not ConnectionType.NIC_NETWORK:
+            edges.append(edge)
+            continue
+        edges.append(
+            edge.model_copy(
+                update={
+                    "theoretical_bandwidth_gbps": ((edge.theoretical_bandwidth_gbps or 1.0) * 0.25),
+                    "bandwidth_curve_gbps": tuple(
+                        point.model_copy(
+                            update={
+                                "median": point.median * 0.25,
+                                "p95": point.p95 * 0.25,
+                                "robust_dispersion": point.robust_dispersion * 0.25,
+                                "confidence_low": point.confidence_low * 0.25,
+                                "confidence_high": point.confidence_high * 0.25,
+                            }
+                        )
+                        for point in edge.bandwidth_curve_gbps
+                    ),
+                    "sharing_group": "synthetic-oversubscribed-rail",
+                    "contention_domain": "synthetic-oversubscribed-rail",
+                }
+            )
+        )
+    return TopologyGraph.model_validate(
+        {
+            **base.model_dump(mode="python"),
+            "topology_id": "synthetic-two-node-oversubscribed",
+            "edges": tuple(edges),
+            "discovery_warnings": (
+                *base.discovery_warnings,
+                "synthetic evaluation: network rails share one oversubscribed contention domain",
+            ),
+        }
     )
 
 
-def _workload(seed: int, request_count: int) -> SimulationWorkload:
+def _topology_class(
+    name: str,
+) -> Literal["favorable", "asymmetric", "oversubscribed", "degraded"]:
+    if name == "two_node_asymmetric_nvlink":
+        return "asymmetric"
+    if name == "two_node_oversubscribed":
+        return "oversubscribed"
+    if name == "two_node_degraded_network":
+        return "degraded"
+    return "favorable"
+
+
+def _contention_class(name: str) -> Literal["nominal", "oversubscribed"]:
+    return "oversubscribed" if name == "two_node_oversubscribed" else "nominal"
+
+
+def _workload(
+    seed: int, request_count: int, regime: WorkloadRegime = WorkloadRegime.MIXED_BURSTY
+) -> SimulationWorkload:
     arrivals = 0.0
     requests: list[SimulationRequestShape] = []
     for index in range(request_count):
         arrivals += 15_000.0 if index and index % 4 == 0 else 80.0 + (seed + index * 11) % 70
         priority: Literal["high", "normal", "low"]
-        if index % 4 == 0:
+        if regime is WorkloadRegime.LONG_CONTEXT:
+            prompt, output, priority, request_class = (
+                16_384 + (index % 2) * 8_192,
+                96,
+                "normal",
+                "long_context",
+            )
+        elif regime is WorkloadRegime.EXPERT_SKEWED:
+            prompt, output, priority, request_class = 2_048, 64, "normal", "expert_skewed"
+        elif index % 4 == 0:
             prompt, output, priority, request_class = 8_192, 64, "normal", "long_context"
         elif index % 3 == 0:
             prompt, output, priority, request_class = 2_048, 96, "low", "batch"
@@ -372,32 +476,55 @@ def _workload(seed: int, request_count: int) -> SimulationWorkload:
                 output_tokens=output,
                 priority=priority,
                 request_class=request_class,
+                expert_skew_factor=(4.0 if regime is WorkloadRegime.EXPERT_SKEWED else 1.0),
             )
         )
     return SimulationWorkload(
         request_count=request_count,
         arrival_interval_us=0.0,
-        prompt_tokens=8_192,
+        prompt_tokens=_representative_prompt_tokens(regime),
         output_tokens=96,
         requests=tuple(requests),
     )
 
 
-def _isolated_service_workload() -> SimulationWorkload:
+def _representative_prompt_tokens(regime: WorkloadRegime) -> int:
+    return {
+        WorkloadRegime.MIXED_BURSTY: 8_192,
+        WorkloadRegime.LONG_CONTEXT: 24_576,
+        WorkloadRegime.EXPERT_SKEWED: 2_048,
+    }[regime]
+
+
+def _representative_output_tokens(regime: WorkloadRegime) -> int:
+    return 96 if regime is not WorkloadRegime.EXPERT_SKEWED else 64
+
+
+def _representative_collective_message_bytes(regime: WorkloadRegime) -> int:
+    # The largest synthetic MoE communication requirement is 8192 bytes/token.
+    # Expert skew multiplies this after the typed workload factor is applied.
+    skew = 4 if regime is WorkloadRegime.EXPERT_SKEWED else 1
+    return _representative_prompt_tokens(regime) * 8_192 * skew
+
+
+def _isolated_service_workload(
+    regime: WorkloadRegime = WorkloadRegime.MIXED_BURSTY,
+) -> SimulationWorkload:
     """Representative p95 request shape without workload queueing."""
 
     return SimulationWorkload(
         request_count=1,
         arrival_interval_us=0.0,
-        prompt_tokens=8_192,
-        output_tokens=96,
+        prompt_tokens=_representative_prompt_tokens(regime),
+        output_tokens=_representative_output_tokens(regime),
         requests=(
             SimulationRequestShape(
                 arrival_us=0.0,
-                prompt_tokens=8_192,
-                output_tokens=96,
+                prompt_tokens=_representative_prompt_tokens(regime),
+                output_tokens=_representative_output_tokens(regime),
                 priority="normal",
-                request_class="isolated_p95_shape",
+                request_class=f"isolated_{regime.value}",
+                expert_skew_factor=(4.0 if regime is WorkloadRegime.EXPERT_SKEWED else 1.0),
             ),
         ),
     )
@@ -421,6 +548,7 @@ def _compile_request(
     topology: TopologyGraph,
     profile: FabricProfile,
     method: EvaluationMethod,
+    workload_regime: WorkloadRegime,
     seed: int,
     environment_digest: ArtifactDigest,
 ) -> CompilerRequest:
@@ -434,8 +562,8 @@ def _compile_request(
         topology=topology,
         fabric_profile=profile,
         constraints=CompilerConstraints(
-            prompt_tokens_p95=8_192,
-            output_tokens_p95=96,
+            prompt_tokens_p95=_representative_prompt_tokens(workload_regime),
+            output_tokens_p95=_representative_output_tokens(workload_regime),
             maximum_concurrent_requests=32,
             p95_ttft_ms=5_000.0,
             p99_tpot_ms=45.0,
@@ -516,13 +644,24 @@ def _artifact(path: Path, root: Path, provenance: ArtifactProvenance) -> Artifac
 
 
 def _write_simulation(path: Path, output: FabricSimulationOutput) -> None:
-    write_json(path, output.model_dump(mode="json"))
+    if not path.name.endswith(".json.gz"):
+        raise ValueError("compressed simulation artifacts must use the .json.gz suffix")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(
+        output.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode()
+    with gzip.GzipFile(filename=str(path), mode="wb", compresslevel=9, mtime=0) as handle:
+        handle.write(payload)
 
 
 def _plan_trial(
     *,
     seed: int,
     topology_name: str,
+    workload_regime: WorkloadRegime,
     method: EvaluationMethod,
     compilation: PhysicalCompileResult,
     output: FabricSimulationOutput,
@@ -545,6 +684,12 @@ def _plan_trial(
     return PlanTrial(
         seed=seed,
         topology=topology_name,
+        topology_class=_topology_class(topology_name),
+        workload_regime=workload_regime,
+        representative_collective_message_bytes=_representative_collective_message_bytes(
+            workload_regime
+        ),
+        contention_class=_contention_class(topology_name),
         method=method,
         strategy=compilation.strategy,
         plan_id=plan.plan_id,
@@ -637,6 +782,9 @@ def _twin_results(trials: tuple[PlanTrial, ...]) -> tuple[tuple[TwinTrial, ...],
         TwinTrial(
             seed=trial.seed,
             topology=trial.topology,
+            workload_regime=trial.workload_regime,
+            representative_collective_message_bytes=(trial.representative_collective_message_bytes),
+            contention_class=trial.contention_class,
             method=trial.method,
             predicted_ms=trial.predicted_p95_ttft_ms,
             isolated_observed_ms=trial.isolated_service_ttft_ms,
@@ -659,9 +807,16 @@ def _twin_results(trials: tuple[PlanTrial, ...]) -> tuple[tuple[TwinTrial, ...],
     )
     correlations: list[float] = []
     regrets: list[float] = []
-    groups = sorted({(item.seed, item.topology) for item in trials})
-    for seed, topology in groups:
-        group = tuple(item for item in trials if item.seed == seed and item.topology == topology)
+    pareto_regrets: list[float] = []
+    groups = sorted({(item.seed, item.topology, item.workload_regime) for item in trials})
+    for seed, topology, workload_regime in groups:
+        group = tuple(
+            item
+            for item in trials
+            if item.seed == seed
+            and item.topology == topology
+            and item.workload_regime is workload_regime
+        )
         correlations.append(
             _spearman(
                 tuple(item.predicted_p95_ttft_ms for item in group),
@@ -679,6 +834,39 @@ def _twin_results(trials: tuple[PlanTrial, ...]) -> tuple[tuple[TwinTrial, ...],
                     - min(item.observed_p95_ttft_ms for item in group),
                 )
             )
+            frontier = tuple(
+                candidate
+                for candidate in group
+                if not any(
+                    other is not candidate
+                    and other.observed_p95_ttft_ms <= candidate.observed_p95_ttft_ms
+                    and other.cost_usd_per_million_tokens <= candidate.cost_usd_per_million_tokens
+                    and other.throughput_tokens_per_second >= candidate.throughput_tokens_per_second
+                    and (
+                        other.observed_p95_ttft_ms < candidate.observed_p95_ttft_ms
+                        or other.cost_usd_per_million_tokens < candidate.cost_usd_per_million_tokens
+                        or other.throughput_tokens_per_second
+                        > candidate.throughput_tokens_per_second
+                    )
+                    for other in group
+                )
+            )
+            pareto_regrets.append(
+                min(
+                    max(
+                        0.0,
+                        hierarchy.observed_p95_ttft_ms / max(candidate.observed_p95_ttft_ms, 1e-12)
+                        - 1.0,
+                        hierarchy.cost_usd_per_million_tokens
+                        / max(candidate.cost_usd_per_million_tokens, 1e-12)
+                        - 1.0,
+                        candidate.throughput_tokens_per_second
+                        / max(hierarchy.throughput_tokens_per_second, 1e-12)
+                        - 1.0,
+                    )
+                    for candidate in frontier
+                )
+            )
     return items, TwinSummary(
         mean_absolute_error_ms=statistics.mean(item.absolute_error_ms for item in items),
         median_relative_error=statistics.median(item.relative_error for item in items),
@@ -688,12 +876,97 @@ def _twin_results(trials: tuple[PlanTrial, ...]) -> tuple[tuple[TwinTrial, ...],
             item.workload_queueing_delta_ms for item in items
         ),
         hierarchical_selection_regret_ms=statistics.median(regrets) if regrets else 0.0,
+        pareto_selection_regret_fraction=(
+            statistics.median(pareto_regrets) if pareto_regrets else 0.0
+        ),
         caveat=(
             "Compiler isolated-service intervals are compared with one representative p95-shape "
             "request in the deterministic Rust simulator; loaded p95 and queueing are reported "
             "separately. This remains synthetic internal validation, not hardware accuracy."
         ),
     )
+
+
+def _twin_group_summaries(trials: tuple[TwinTrial, ...]) -> tuple[TwinGroupSummary, ...]:
+    dimensions: tuple[
+        tuple[
+            Literal["topology", "workload", "message_size", "contention"],
+            dict[str, tuple[TwinTrial, ...]],
+        ],
+        ...,
+    ] = (
+        (
+            "topology",
+            {
+                value: tuple(item for item in trials if item.topology == value)
+                for value in sorted({item.topology for item in trials})
+            },
+        ),
+        (
+            "workload",
+            {
+                value.value: tuple(item for item in trials if item.workload_regime is value)
+                for value in sorted(
+                    {item.workload_regime for item in trials}, key=lambda item: item.value
+                )
+            },
+        ),
+        (
+            "message_size",
+            {
+                str(value): tuple(
+                    item for item in trials if item.representative_collective_message_bytes == value
+                )
+                for value in sorted(
+                    {item.representative_collective_message_bytes for item in trials}
+                )
+            },
+        ),
+        (
+            "contention",
+            {
+                value: tuple(item for item in trials if item.contention_class == value)
+                for value in sorted({item.contention_class for item in trials})
+            },
+        ),
+    )
+    result: list[TwinGroupSummary] = []
+    for dimension, groups in dimensions:
+        for value, selected in groups.items():
+            correlations: list[float] = []
+            keys = sorted({(item.seed, item.topology, item.workload_regime) for item in selected})
+            for seed, topology, workload in keys:
+                matrix = tuple(
+                    item
+                    for item in selected
+                    if item.seed == seed
+                    and item.topology == topology
+                    and item.workload_regime is workload
+                )
+                if len(matrix) > 1:
+                    correlations.append(
+                        _spearman(
+                            tuple(item.predicted_ms for item in matrix),
+                            tuple(item.isolated_observed_ms for item in matrix),
+                        )
+                    )
+            result.append(
+                TwinGroupSummary(
+                    dimension=dimension,
+                    value=value,
+                    sample_count=len(selected),
+                    mean_absolute_error_ms=statistics.mean(
+                        item.absolute_error_ms for item in selected
+                    ),
+                    median_relative_error=statistics.median(
+                        item.relative_error for item in selected
+                    ),
+                    rank_correlation=(statistics.mean(correlations) if correlations else 0.0),
+                    interval_coverage=sum(item.interval_covered for item in selected)
+                    / len(selected),
+                )
+            )
+    return tuple(result)
 
 
 def _faults(request: FabricSimulationRequest) -> tuple[tuple[TimedFault, BottleneckKind], ...]:
@@ -733,6 +1006,7 @@ def _recovery_trials(
     *,
     seed: int,
     topology: str,
+    workload_regime: WorkloadRegime,
     fault: TimedFault,
     expected: BottleneckKind,
     diagnosis_top: BottleneckKind,
@@ -793,6 +1067,7 @@ def _recovery_trials(
         RecoveryTrial(
             seed=seed,
             topology=topology,
+            workload_regime=workload_regime,
             fault_id=fault.id,
             method=method,
             restored_slo=post <= target,
@@ -811,6 +1086,7 @@ def _diagnosis_and_recovery(
     artifact_root: Path,
     seed: int,
     topology_name: str,
+    workload_regime: WorkloadRegime,
     topology: TopologyGraph,
     profile: FabricProfile,
     plan: PhysicalExecutionPlan,
@@ -846,8 +1122,8 @@ def _diagnosis_and_recovery(
             repository_root=repository_root,
             timeout_seconds=config.simulator_timeout_seconds,
         )
-        degraded_path = output_dir / fault.id / "degraded-simulation.json"
-        restored_path = output_dir / fault.id / "counterfactual-simulation.json"
+        degraded_path = output_dir / fault.id / "degraded-simulation.json.gz"
+        restored_path = output_dir / fault.id / "counterfactual-simulation.json.gz"
         _write_simulation(degraded_path, degraded)
         _write_simulation(restored_path, restored)
         healthy_run = capture_simulation_run(
@@ -893,6 +1169,7 @@ def _diagnosis_and_recovery(
             DiagnosisTrial(
                 seed=seed,
                 topology=topology_name,
+                workload_regime=workload_regime,
                 fault_id=fault.id,
                 ground_truth=expected,
                 top_one=diagnosis.top_hypothesis,
@@ -912,6 +1189,7 @@ def _diagnosis_and_recovery(
             _recovery_trials(
                 seed=seed,
                 topology=topology_name,
+                workload_regime=workload_regime,
                 fault=fault,
                 expected=expected,
                 diagnosis_top=diagnosis.top_hypothesis,
@@ -984,16 +1262,22 @@ def _bar_plot(path: Path, title: str, values: tuple[tuple[str, float], ...], uni
 def _render_fabric_report(result: FabricEvaluationResult) -> str:
     fastest = min(result.method_summaries, key=lambda item: item.p95_ttft_ms.median)
     hierarchy = next(
-        item for item in result.method_summaries if item.method is EvaluationMethod.HIERARCHICAL
+        (item for item in result.method_summaries if item.method is EvaluationMethod.HIERARCHICAL),
+        None,
     )
     hierarchy_delta = (
-        hierarchy.p95_ttft_ms.median / max(fastest.p95_ttft_ms.median, 1e-12) - 1.0
-    ) * 100.0
+        (hierarchy.p95_ttft_ms.median / max(fastest.p95_ttft_ms.median, 1e-12) - 1.0) * 100.0
+        if hierarchy is not None
+        else 0.0
+    )
     lines = [
         "# SLOForge Fabric evaluation",
         "",
         "This report is generated from deterministic CPU simulation artifacts. It contains no "
         "hardware-backed GPU or network measurements.",
+        "Random, sequential, greedy, and hierarchical placement hold TP=8/PP=1/DP=2/EP=4 "
+        "constant. The topology-unaware optimizer is separately allowed to choose parallelism, "
+        "so it is a joint-configuration baseline rather than a placement-only comparison.",
         "",
         "## H1 — topology-aware compilation",
         "",
@@ -1006,13 +1290,17 @@ def _render_fabric_report(result: FabricEvaluationResult) -> str:
             f"[{item.p95_ttft_ms.confidence_low:.3f}, {item.p95_ttft_ms.confidence_high:.3f}] | "
             f"{item.communication_time_ms.median:.3f} | {item.slo_attainment.median:.3f} |"
         )
+    hierarchy_statement = (
+        f"The hierarchical compiler was {hierarchy_delta:+.2f}% relative to that baseline. "
+        "This comparison is reported even when the primary method loses."
+        if hierarchy is not None
+        else "The focused matrix did not include the hierarchical compiler."
+    )
     lines.extend(
         (
             "",
             f"Fastest median: `{fastest.method.value}` at "
-            f"{fastest.p95_ttft_ms.median:.3f} ms. The hierarchical compiler was "
-            f"{hierarchy_delta:+.2f}% relative to that baseline. This comparison is reported "
-            "even when the primary method loses.",
+            f"{fastest.p95_ttft_ms.median:.3f} ms. {hierarchy_statement}",
         )
     )
     lines.extend(
@@ -1028,6 +1316,26 @@ def _render_fabric_report(result: FabricEvaluationResult) -> str:
             f"{result.twin_summary.median_workload_queueing_delta_ms:.3f} ms",
             f"- Hierarchical selection regret: "
             f"{result.twin_summary.hierarchical_selection_regret_ms:.3f} ms",
+            f"- Pareto-selection regret: "
+            f"{result.twin_summary.pareto_selection_regret_fraction:.3f}",
+            "",
+            "### Prediction error by regime",
+            "",
+            "| dimension | value | samples | MAE ms | median relative error | "
+            "rank correlation | interval coverage |",
+            "|---|---|---:|---:|---:|---:|---:|",
+        )
+    )
+    for group_summary in result.twin_group_summaries:
+        lines.append(
+            f"| {group_summary.dimension} | {group_summary.value} | "
+            f"{group_summary.sample_count} | {group_summary.mean_absolute_error_ms:.3f} | "
+            f"{group_summary.median_relative_error:.3f} | "
+            f"{group_summary.rank_correlation:.3f} | "
+            f"{group_summary.interval_coverage:.3f} |"
+        )
+    lines.extend(
+        (
             "",
             result.twin_summary.caveat,
             "",
@@ -1231,135 +1539,147 @@ def run_fabric_evaluation(
             write_json(topology_path, topology.model_dump(mode="json"))
             write_json(profile_path, profile.model_dump(mode="json"))
             raw_artifacts.extend(((topology_path, "synthetic"), (profile_path, "synthetic")))
-            workload = _workload(seed, active.request_count)
-            workload_path = case_dir / "workload.json"
-            write_json(workload_path, workload.model_dump(mode="json"))
-            raw_artifacts.append((workload_path, "synthetic"))
-            hierarchy_context: (
-                tuple[
-                    PhysicalExecutionPlan,
-                    FabricSimulationRequest,
-                    FabricSimulationOutput,
-                    Path,
-                ]
-                | None
-            ) = None
-            for method in active.methods:
-                compile_result = compile_physical_plan(
-                    _compile_request(
+            for workload_regime in active.workload_regimes:
+                workload = _workload(seed, active.request_count, workload_regime)
+                workload_dir = case_dir / workload_regime.value
+                workload_path = workload_dir / "workload.json"
+                write_json(workload_path, workload.model_dump(mode="json"))
+                raw_artifacts.append((workload_path, "synthetic"))
+                hierarchy_context: (
+                    tuple[
+                        PhysicalExecutionPlan,
+                        FabricSimulationRequest,
+                        FabricSimulationOutput,
+                        Path,
+                    ]
+                    | None
+                ) = None
+                for method in active.methods:
+                    compile_result = compile_physical_plan(
+                        _compile_request(
+                            repository_root=repository_root,
+                            topology=topology,
+                            profile=profile,
+                            method=method,
+                            workload_regime=workload_regime,
+                            seed=seed,
+                            environment_digest=environment_digest,
+                        )
+                    )
+                    simulation_request = build_simulation_request(
+                        compile_result.selected,
+                        topology,
+                        profile,
+                        workload,
+                        seed=seed,
+                    )
+                    output = run_simulation(
+                        simulation_request,
                         repository_root=repository_root,
-                        topology=topology,
-                        profile=profile,
-                        method=method,
+                        timeout_seconds=active.simulator_timeout_seconds,
+                    )
+                    isolated_request = build_simulation_request(
+                        compile_result.selected,
+                        topology,
+                        profile,
+                        _isolated_service_workload(workload_regime),
                         seed=seed,
-                        environment_digest=environment_digest,
                     )
-                )
-                simulation_request = build_simulation_request(
-                    compile_result.selected,
-                    topology,
-                    profile,
-                    workload,
-                    seed=seed,
-                )
-                output = run_simulation(
-                    simulation_request,
-                    repository_root=repository_root,
-                    timeout_seconds=active.simulator_timeout_seconds,
-                )
-                isolated_request = build_simulation_request(
-                    compile_result.selected,
-                    topology,
-                    profile,
-                    _isolated_service_workload(),
-                    seed=seed,
-                )
-                isolated_output = run_simulation(
-                    isolated_request,
-                    repository_root=repository_root,
-                    timeout_seconds=active.simulator_timeout_seconds,
-                )
-                method_dir = case_dir / method.value
-                compiler_path = method_dir / "compiler.json"
-                simulation_path = method_dir / "simulation.json"
-                isolated_simulation_path = method_dir / "isolated-service-simulation.json"
-                write_json(compiler_path, compile_result.model_dump(mode="json"))
-                _write_simulation(simulation_path, output)
-                _write_simulation(isolated_simulation_path, isolated_output)
-                raw_artifacts.extend(
-                    (
-                        (compiler_path, "compiler"),
-                        (simulation_path, "simulator"),
-                        (isolated_simulation_path, "simulator"),
+                    isolated_output = run_simulation(
+                        isolated_request,
+                        repository_root=repository_root,
+                        timeout_seconds=active.simulator_timeout_seconds,
                     )
-                )
-                plan_trials.append(
-                    _plan_trial(
-                        seed=seed,
-                        topology_name=topology_name,
-                        method=method,
-                        compilation=compile_result,
-                        output=output,
-                        isolated_output=isolated_output,
-                        workload=workload,
-                        config=active,
-                        simulation_path=simulation_path.relative_to(artifact_root),
-                        isolated_simulation_path=isolated_simulation_path.relative_to(
-                            artifact_root
-                        ),
-                        compiler_path=compiler_path.relative_to(artifact_root),
+                    method_dir = workload_dir / method.value
+                    compiler_path = method_dir / "compiler.json"
+                    simulation_path = method_dir / "simulation.json.gz"
+                    isolated_simulation_path = method_dir / "isolated-service-simulation.json.gz"
+                    write_json(compiler_path, compile_result.model_dump(mode="json"))
+                    _write_simulation(simulation_path, output)
+                    _write_simulation(isolated_simulation_path, isolated_output)
+                    raw_artifacts.extend(
+                        (
+                            (compiler_path, "compiler"),
+                            (simulation_path, "simulator"),
+                            (isolated_simulation_path, "simulator"),
+                        )
                     )
-                )
-                if method is EvaluationMethod.HIERARCHICAL:
+                    plan_trials.append(
+                        _plan_trial(
+                            seed=seed,
+                            topology_name=topology_name,
+                            workload_regime=workload_regime,
+                            method=method,
+                            compilation=compile_result,
+                            output=output,
+                            isolated_output=isolated_output,
+                            workload=workload,
+                            config=active,
+                            simulation_path=simulation_path.relative_to(artifact_root),
+                            isolated_simulation_path=isolated_simulation_path.relative_to(
+                                artifact_root
+                            ),
+                            compiler_path=compiler_path.relative_to(artifact_root),
+                        )
+                    )
+                    if method is EvaluationMethod.HIERARCHICAL:
+                        hierarchy_context = (
+                            compile_result.selected,
+                            simulation_request,
+                            output,
+                            simulation_path,
+                        )
+                if hierarchy_context is None:
+                    # H3/H4 require the primary compiler even if a caller requests
+                    # only baseline methods for a focused H1/H2 test.
+                    compile_result = compile_physical_plan(
+                        _compile_request(
+                            repository_root=repository_root,
+                            topology=topology,
+                            profile=profile,
+                            method=EvaluationMethod.HIERARCHICAL,
+                            workload_regime=workload_regime,
+                            seed=seed,
+                            environment_digest=environment_digest,
+                        )
+                    )
+                    request = build_simulation_request(
+                        compile_result.selected, topology, profile, workload, seed=seed
+                    )
+                    output = run_simulation(
+                        request,
+                        repository_root=repository_root,
+                        timeout_seconds=active.simulator_timeout_seconds,
+                    )
+                    simulation_path = workload_dir / "hierarchical-autopsy" / "simulation.json.gz"
+                    _write_simulation(simulation_path, output)
+                    raw_artifacts.append((simulation_path, "simulator"))
                     hierarchy_context = (
                         compile_result.selected,
-                        simulation_request,
+                        request,
                         output,
                         simulation_path,
                     )
-            if hierarchy_context is None:
-                # H3/H4 require the primary compiler even if a caller requests
-                # only baseline methods for a focused H1/H2 test.
-                compile_result = compile_physical_plan(
-                    _compile_request(
+                if workload_regime is WorkloadRegime.MIXED_BURSTY:
+                    plan, request, healthy_output, healthy_path = hierarchy_context
+                    diagnoses, recoveries, autopsy_paths = _diagnosis_and_recovery(
                         repository_root=repository_root,
+                        artifact_root=artifact_root,
+                        seed=seed,
+                        topology_name=topology_name,
+                        workload_regime=workload_regime,
                         topology=topology,
                         profile=profile,
-                        method=EvaluationMethod.HIERARCHICAL,
-                        seed=seed,
-                        environment_digest=environment_digest,
+                        plan=plan,
+                        workload=workload,
+                        healthy_request=request,
+                        healthy_output=healthy_output,
+                        healthy_path=healthy_path,
+                        config=active,
                     )
-                )
-                request = build_simulation_request(
-                    compile_result.selected, topology, profile, workload, seed=seed
-                )
-                output = run_simulation(
-                    request,
-                    repository_root=repository_root,
-                    timeout_seconds=active.simulator_timeout_seconds,
-                )
-                simulation_path = case_dir / "hierarchical-autopsy" / "simulation.json"
-                _write_simulation(simulation_path, output)
-                raw_artifacts.append((simulation_path, "simulator"))
-                hierarchy_context = (compile_result.selected, request, output, simulation_path)
-            plan, request, healthy_output, healthy_path = hierarchy_context
-            diagnoses, recoveries, autopsy_paths = _diagnosis_and_recovery(
-                repository_root=repository_root,
-                artifact_root=artifact_root,
-                seed=seed,
-                topology_name=topology_name,
-                topology=topology,
-                profile=profile,
-                plan=plan,
-                workload=workload,
-                healthy_request=request,
-                healthy_output=healthy_output,
-                healthy_path=healthy_path,
-                config=active,
-            )
-            diagnosis_trials.extend(diagnoses)
-            recovery_trials.extend(recoveries)
-            raw_artifacts.extend((path, "autopsy") for path in autopsy_paths)
+                    diagnosis_trials.extend(diagnoses)
+                    recovery_trials.extend(recoveries)
+                    raw_artifacts.extend((path, "autopsy") for path in autopsy_paths)
     plans = tuple(plan_trials)
     twin_trials, twin_summary = _twin_results(plans)
     result = FabricEvaluationResult(
@@ -1372,6 +1692,7 @@ def run_fabric_evaluation(
         method_summaries=_method_summaries(plans, active),
         twin_trials=twin_trials,
         twin_summary=twin_summary,
+        twin_group_summaries=_twin_group_summaries(twin_trials),
         diagnosis_trials=tuple(diagnosis_trials),
         diagnosis_summary=_diagnosis_summary(tuple(diagnosis_trials)),
         recovery_trials=tuple(recovery_trials),
@@ -1379,6 +1700,7 @@ def run_fabric_evaluation(
         limitations=(
             "Synthetic H100, NVLink, PCIe, and InfiniBand curves are deterministic fixtures, not measurements.",
             "Compiler analytical predictions and the Rust simulator share calibration inputs; H2 is internal validation.",
+            "The topology-unaware optimizer jointly chooses parallelism; other H1 methods use fixed degrees.",
             "Recovery action durations are declared policy parameters; only post-action request metrics are simulated.",
             "No GPU, NCCL, RDMA, multi-node runtime, or privileged fault was exercised by this evaluation.",
         ),
