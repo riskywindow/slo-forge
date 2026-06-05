@@ -134,3 +134,59 @@ fn accepts_every_algorithm_in_the_physical_ir_contract() {
         assert!(simulate(&input).is_ok(), "algorithm={algorithm}");
     }
 }
+
+#[test]
+fn rejects_unknown_fault_targets_and_invalid_transformed_demands() {
+    let mut unknown_rank = request(
+        vec![resource(
+            "gpu",
+            ResourceKind::GpuCompute,
+            SchedulingMode::Exclusive,
+        )],
+        vec![compute("decode", "gpu", 10.0)],
+    );
+    unknown_rank.faults.push(sloforge_fabric_sim::TimedFault {
+        id: "wrong-rank".into(),
+        start_us: 0.0,
+        end_us: None,
+        effect: sloforge_fabric_sim::FaultEffect::RankSlowdown {
+            rank_id: "rank-missing".into(),
+            multiplier: 0.5,
+        },
+        ground_truth_label: "rank_specific_slowdown".into(),
+    });
+    assert!(validate(&unknown_rank).is_err());
+
+    let mut replaced = request(
+        vec![
+            resource("gpu-a", ResourceKind::GpuCompute, SchedulingMode::Exclusive),
+            resource("gpu-b", ResourceKind::GpuCompute, SchedulingMode::Exclusive),
+        ],
+        vec![sloforge_fabric_sim::PhysicalOperation {
+            id: "two-resources".into(),
+            kind: OperationKind::GpuCompute { duration_us: 10.0 },
+            rank_ids: vec!["rank-0".into()],
+            dependencies: Vec::new(),
+            demands: vec![
+                sloforge_fabric_sim::ResourceDemand {
+                    resource_id: "gpu-a".into(),
+                    units: 1.0,
+                },
+                sloforge_fabric_sim::ResourceDemand {
+                    resource_id: "gpu-b".into(),
+                    units: 1.0,
+                },
+            ],
+            earliest_start_us: 0.0,
+            uncertainty_fraction: 0.0,
+            request_id: None,
+        }],
+    );
+    replaced.counterfactuals.push(
+        sloforge_fabric_sim::CounterfactualModifier::ReplaceResource {
+            from_resource_id: "gpu-a".into(),
+            to_resource_id: "gpu-b".into(),
+        },
+    );
+    assert!(simulate(&replaced).is_err());
+}

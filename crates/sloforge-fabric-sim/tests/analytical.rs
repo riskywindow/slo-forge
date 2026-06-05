@@ -118,6 +118,105 @@ fn shared_pcie_domain_contends_across_distinct_links() {
 }
 
 #[test]
+fn one_flow_crossing_two_edges_in_one_domain_is_counted_once() {
+    let mut left = resource(
+        "nic-left",
+        ResourceKind::NicQueue,
+        SchedulingMode::FairShare,
+    );
+    let mut right = resource(
+        "nic-right",
+        ResourceKind::NicQueue,
+        SchedulingMode::FairShare,
+    );
+    left.sharing_group = Some("rail-domain".into());
+    right.sharing_group = Some("rail-domain".into());
+    let transfer = PhysicalOperation {
+        id: "cross-node".into(),
+        kind: OperationKind::PointToPoint { bytes: 1_000_000 },
+        rank_ids: vec!["rank-0".into(), "rank-1".into()],
+        dependencies: Vec::new(),
+        demands: vec![
+            ResourceDemand {
+                resource_id: "nic-left".into(),
+                units: 1.0,
+            },
+            ResourceDemand {
+                resource_id: "nic-right".into(),
+                units: 1.0,
+            },
+        ],
+        earliest_start_us: 0.0,
+        uncertainty_fraction: 0.0,
+        request_id: None,
+    };
+    let mut input = request(vec![left, right], vec![transfer]);
+    input.sharing_groups.push(SharingGroup {
+        id: "rail-domain".into(),
+        capacity_units: 1.0,
+        max_concurrency: 2,
+    });
+    let output = simulate(&input).expect("one flow does not contend with itself");
+    // The two calibrated edge latencies are serial (2 ms), with no additional
+    // factor caused merely by both edges sharing one contention domain.
+    assert!((output.metrics.makespan_us - 2_000.0).abs() < 1e-6);
+}
+
+#[test]
+fn independent_path_faults_use_the_slowest_hop_not_their_product() {
+    let transfer = PhysicalOperation {
+        id: "cross-node".into(),
+        kind: OperationKind::PointToPoint { bytes: 1_000_000 },
+        rank_ids: vec!["rank-0".into(), "rank-1".into()],
+        dependencies: Vec::new(),
+        demands: vec![
+            ResourceDemand {
+                resource_id: "left".into(),
+                units: 1.0,
+            },
+            ResourceDemand {
+                resource_id: "right".into(),
+                units: 1.0,
+            },
+        ],
+        earliest_start_us: 0.0,
+        uncertainty_fraction: 0.0,
+        request_id: None,
+    };
+    let mut input = request(
+        vec![
+            resource("left", ResourceKind::NicQueue, SchedulingMode::FairShare),
+            resource("right", ResourceKind::NicQueue, SchedulingMode::FairShare),
+        ],
+        vec![transfer],
+    );
+    input.faults = vec![
+        TimedFault {
+            id: "left-slow".into(),
+            start_us: 0.0,
+            end_us: None,
+            effect: FaultEffect::ResourceRate {
+                resource_id: "left".into(),
+                multiplier: 0.5,
+            },
+            ground_truth_label: "nic_bandwidth_degradation".into(),
+        },
+        TimedFault {
+            id: "right-slow".into(),
+            start_us: 0.0,
+            end_us: None,
+            effect: FaultEffect::ResourceRate {
+                resource_id: "right".into(),
+                multiplier: 0.5,
+            },
+            ground_truth_label: "network_bandwidth_degradation".into(),
+        },
+    ];
+    let output = simulate(&input).expect("flow-level path faults");
+    assert!((output.metrics.makespan_us - 4_000.0).abs() < 1e-6);
+}
+
+#[test]
 fn collective_waits_for_every_rank_dependency() {
     let mut rank0 = compute("rank0-prefill", "gpu-0", 50.0);
     rank0.rank_ids = vec!["rank-0".into()];

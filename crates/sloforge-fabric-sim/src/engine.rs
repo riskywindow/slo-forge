@@ -61,6 +61,16 @@ pub fn simulate(input: &FabricSimulationRequest) -> Result<FabricSimulationOutpu
     let input_sha256 = format!("{:x}", Sha256::digest(&canonical));
     let mut transformed = input.clone();
     apply_counterfactuals(&mut transformed);
+    // Counterfactual replacement and curve scaling can change invariants that
+    // held for the original request (for example, merging two demands onto one
+    // exclusive resource or overflowing a calibrated curve). Fail closed after
+    // transformation instead of executing an invalid physical graph.
+    let mut invariant_check = transformed.clone();
+    // Remove-fault modifiers intentionally reference faults that are absent
+    // after transformation. They were validated against the original input;
+    // this second pass is solely for transformed graph/resource invariants.
+    invariant_check.counterfactuals.clear();
+    validate(&invariant_check)?;
     let mut engine = Engine::new(transformed)?;
     engine.run()?;
     engine.output(input_sha256)
@@ -343,13 +353,25 @@ impl Engine {
         let mut group_units: HashMap<usize, f64> = HashMap::new();
         let mut resource_users: HashMap<usize, usize> = HashMap::new();
         for index in active {
+            let mut operation_group_units: HashMap<usize, f64> = HashMap::new();
             for demand in &self.operations[*index].operation.demands {
                 let resource_index = self.resources_by_id[&demand.resource_id];
                 *resource_units.entry(resource_index).or_default() += demand.units;
                 *resource_users.entry(resource_index).or_default() += 1;
                 if let Some(group_id) = &self.input.resources[resource_index].sharing_group {
-                    *group_units.entry(self.groups_by_id[group_id]).or_default() += demand.units;
+                    let group_index = self.groups_by_id[group_id];
+                    // A path may traverse several resources in the same
+                    // contention domain. Count the flow once at its largest
+                    // demand rather than once per edge; otherwise even one
+                    // transfer is spuriously throttled by its path length.
+                    operation_group_units
+                        .entry(group_index)
+                        .and_modify(|units| *units = units.max(demand.units))
+                        .or_insert(demand.units);
                 }
+            }
+            for (group_index, units) in operation_group_units {
+                *group_units.entry(group_index).or_default() += units;
             }
         }
         for (index, users) in resource_users {
@@ -383,12 +405,14 @@ impl Engine {
 
     fn fault_rate(&mut self, operation_index: usize) -> f64 {
         let operation = &self.operations[operation_index].operation;
-        let mut rate = 1.0;
+        let mut global_rate = 1.0;
+        let mut resource_rates = HashMap::<&str, f64>::new();
         for fault in &self.input.faults {
             if !fault_active(fault.start_us, fault.end_us, self.now_us) {
                 continue;
             }
-            let factor = match &fault.effect {
+            let mut applied = false;
+            match &fault.effect {
                 FaultEffect::ResourceRate {
                     resource_id,
                     multiplier,
@@ -397,7 +421,8 @@ impl Engine {
                     .iter()
                     .any(|demand| demand.resource_id == *resource_id) =>
                 {
-                    Some(*multiplier)
+                    *resource_rates.entry(resource_id).or_insert(1.0) *= multiplier;
+                    applied = true;
                 }
                 FaultEffect::ResourceUnavailable { resource_id }
                     if operation
@@ -405,7 +430,8 @@ impl Engine {
                         .iter()
                         .any(|demand| demand.resource_id == *resource_id) =>
                 {
-                    Some(0.0)
+                    resource_rates.insert(resource_id, 0.0);
+                    applied = true;
                 }
                 FaultEffect::RankSlowdown {
                     rank_id,
@@ -419,7 +445,8 @@ impl Engine {
                     // Rank service degradation models GPU execution, not a
                     // silent reduction in calibrated link capacity. Collective
                     // participants still observe the delayed dependency/barrier.
-                    Some(*multiplier)
+                    global_rate *= multiplier;
+                    applied = true;
                 }
                 FaultEffect::CollectiveDelay {
                     collective_id,
@@ -429,16 +456,25 @@ impl Engine {
                     OperationKind::Collective { collective_id: id, .. } if id == collective_id
                 ) =>
                 {
-                    Some(*multiplier)
+                    global_rate *= multiplier;
+                    applied = true;
                 }
-                _ => None,
-            };
-            if let Some(factor) = factor {
-                rate *= factor;
+                _ => {}
+            }
+            if applied {
                 self.applied_faults.insert(fault.id.clone());
             }
         }
-        rate
+        // Flow-level path service is limited by its slowest physical resource.
+        // Independent faults on different hops therefore take the minimum;
+        // multiplying them would invent a quadratic slowdown. Multiple faults
+        // on the same hop still compose multiplicatively above.
+        let physical_rate = resource_rates
+            .values()
+            .copied()
+            .min_by(f64::total_cmp)
+            .unwrap_or(1.0);
+        global_rate * physical_rate
     }
 
     fn advance(&mut self, active: &[usize], rates: &[f64], delta: f64) {
