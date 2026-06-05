@@ -1,0 +1,32 @@
+{
+  "artifacts": [
+    {
+      "path": "artifacts/warmpath/evaluation/result.json",
+      "sha256": "a7cd46198ce99d9638ea7f60a985c8966d882583e2c92ce3cb7959fb668b76ff"
+    },
+    {
+      "path": "artifacts/warmpath/evaluation/raw/trials.jsonl",
+      "sha256": "d14bce01e44edc3f8cb1524c4ef4b8dfd6d95affce65b36086be703a4d2f5d44"
+    },
+    {
+      "path": "artifacts/warmpath/evaluation/environment.json",
+      "sha256": "baa9832af9ba96a7f5b9a2f0cf51c80298d62d1450ff32ccc1db1ea21a260e17"
+    },
+    {
+      "path": "reports/warmpath-evaluation-h6.svg",
+      "sha256": "0b00b357a219a56aa452cf6e95ada538de06d747d69ceb316c80a60e5e2b5c54"
+    },
+    {
+      "path": "reports/warmpath-evaluation.md",
+      "sha256": "700336142061f955bcabda4000c60c2b50d1b26784dfaa30adb02fd41b4ad4b2"
+    },
+    {
+      "path": "benchmarks/warmpath/h6-evaluation.yaml",
+      "sha256": "27e4cd9f717ebfb7d785ec3248373e3cac227591132358a36f838f36ec273bad"
+    }
+  ],
+  "command": "python -m sloforge.warmpath.evaluation --config benchmarks/warmpath/h6-evaluation.yaml --output artifacts/warmpath/evaluation --report reports/warmpath-evaluation.md --reset",
+  "raw_trial_count": 13332,
+  "result_path": "artifacts/warmpath/evaluation/result.json",
+  "schema_version": "sloforge.warmpath.evaluation-manifest/v1"
+}

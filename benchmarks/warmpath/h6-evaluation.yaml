@@ -1,0 +1,15 @@
+schema_version: sloforge.warmpath.evaluation-config/v1
+graph_path: artifacts/warmpath/input/artifact-graph.json
+profile_path: artifacts/warmpath/profile/profile.json
+plan_path: artifacts/warmpath/plan.json
+seeds: [101, 211, 307, 401, 503, 601, 701, 809, 907, 1009, 1103]
+trials_per_seed: 101
+bootstrap_rounds: 2000
+cold_tier_id: local-nvme
+local_disk_tier_id: local-nvme
+page_cache_tier_id: page-cache
+host_memory_tier_id: host-memory
+eviction_probability: 0.25
+restore_failure_probability: 0.03
+warm_replica_failure_probability: 0.01
+warm_replica_hourly_cost_usd: 0.42
