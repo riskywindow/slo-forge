@@ -88,6 +88,31 @@ def test_hierarchical_compiler_produces_valid_explainable_plan() -> None:
     )
 
 
+def test_physical_end_to_end_metrics_use_requested_output_length() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+    output_tokens_p95 = 96
+    result = compile_physical_plan(
+        request.model_copy(
+            update={
+                "constraints": request.constraints.model_copy(
+                    update={"output_tokens_p95": output_tokens_p95}
+                )
+            }
+        )
+    )
+    metrics = result.selected.predicted_metrics
+    assert metrics.p95_end_to_end_ms.estimate == pytest.approx(
+        metrics.p95_ttft_ms.estimate
+        + metrics.p99_tpot_ms.estimate * output_tokens_p95
+    )
+    for variant in result.selected.recovery_variants:
+        degraded = variant.expected_degraded_metrics
+        assert degraded.p95_end_to_end_ms.estimate == pytest.approx(
+            degraded.p95_ttft_ms.estimate
+            + degraded.p99_tpot_ms.estimate * output_tokens_p95
+        )
+
+
 def test_compiler_is_deterministic() -> None:
     request = _request(OptimizationStrategy.EXHAUSTIVE)
     first = compile_physical_plan(request)
@@ -194,6 +219,50 @@ def test_disaggregation_assigns_complete_data_replicas_to_worker_pools() -> None
         "disaggregation_requires_two_data_replicas" in candidate.rejection_codes
         for candidate in search.all_candidates
     )
+
+
+def test_disaggregated_replicas_each_contain_the_full_expert_set() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+    constrained = request.model_copy(
+        update={
+            "constraints": request.constraints.model_copy(
+                update={
+                    "tensor_parallel_degree": 1,
+                    "pipeline_parallel_degree": 1,
+                    "data_parallel_degree": 2,
+                    "expert_parallel_degree": 1,
+                    "require_disaggregation": True,
+                }
+            )
+        }
+    )
+    result = compile_physical_plan(constrained)
+    placement = result.selected.expert_placement
+    assert placement is not None
+    binding_by_rank = {
+        binding.rank_id: binding for binding in result.selected.rank_placement.bindings
+    }
+    expected_experts = {
+        expert.expert_id for layer in request.model.layers for expert in layer.experts
+    }
+    experts_by_replica: dict[str, set[str]] = {}
+    roles_by_replica: dict[str, set[str]] = {}
+    for assignment in placement.assignments:
+        assert len(assignment.rank_ids) == 2
+        for rank_id in assignment.rank_ids:
+            binding = binding_by_rank[rank_id]
+            experts_by_replica.setdefault(binding.replica_id, set()).add(
+                assignment.expert_id
+            )
+            roles_by_replica.setdefault(binding.replica_id, set()).add(
+                binding.worker_role.value
+            )
+    assert experts_by_replica == {
+        "replica-0": expected_experts,
+        "replica-1": expected_experts,
+    }
+    assert roles_by_replica == {"replica-0": {"prefill"}, "replica-1": {"decode"}}
+    assert placement.maximum_replicas_per_expert == 2
 
 
 def test_data_parallelism_duplicates_kv_while_pipeline_parallelism_shards_it() -> None:
