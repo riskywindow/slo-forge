@@ -112,6 +112,9 @@ def test_kubernetes_adapter_emits_physical_scheduling_and_safe_rollout(tmp_path:
         output=tmp_path / "kubernetes",
     )
     manifest = yaml.safe_load((tmp_path / "kubernetes" / "physical-plan.yaml").read_text())
+    config_map = next(item for item in manifest["items"] if item["kind"] == "ConfigMap")
+    assert isinstance(config_map["data"]["physical-plan.json"], str)
+    assert json.loads(config_map["data"]["physical-plan.json"])["kind"] == "PhysicalExecutionPlan"
     deployment = next(item for item in manifest["items"] if item["kind"] == "Deployment")
     pod = deployment["spec"]["template"]["spec"]
     expression = pod["affinity"]["nodeAffinity"]["requiredDuringSchedulingIgnoredDuringExecution"][
@@ -130,6 +133,10 @@ def test_kubernetes_adapter_emits_physical_scheduling_and_safe_rollout(tmp_path:
     }
     assert result.capabilities.exact_gpu_uuid_placement is False
     assert result.capabilities.advisory_only
+    persisted_result = json.loads(
+        (tmp_path / "kubernetes" / "export-result.json").read_text(encoding="utf-8")
+    )
+    assert result.model_dump(mode="json") == persisted_result
 
 
 def test_dynamo_adapter_uses_current_v1beta1_component_shape(tmp_path: Path) -> None:

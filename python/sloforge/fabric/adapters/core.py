@@ -328,8 +328,8 @@ def _render_kubernetes(context: FabricAdapterContext, output: Path) -> None:
                 "labels": {"sloforge.dev/physical-plan": context.plan.plan_id},
             },
             "data": {
-                "physical-plan.json": canonical_json(context.plan),
-                "topology.json": canonical_json(context.topology),
+                "physical-plan.json": canonical_json(context.plan).decode("utf-8"),
+                "topology.json": canonical_json(context.topology).decode("utf-8"),
             },
         }
     ]
@@ -829,14 +829,7 @@ def export_physical_plan(
         validations=validations,
     )
     _write_json(output / "export-result.json", result.model_dump(mode="json"))
-    return result.model_copy(
-        update={
-            "artifacts": (
-                *artifacts,
-                GeneratedArtifact(
-                    path="export-result.json",
-                    sha256=sha256_file(output / "export-result.json"),
-                ),
-            )
-        }
-    )
+    # A manifest cannot recursively include its own digest. Keep the returned
+    # value byte-for-byte equivalent to the persisted result and treat the
+    # result file as the envelope for the listed generated artifacts.
+    return result
