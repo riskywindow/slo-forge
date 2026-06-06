@@ -159,8 +159,7 @@ def apply_command(
         executor.tick(observation)
     if mode == "shadow-canary" and executor.snapshot.state is not RecoveryState.COMPLETED:
         raise RuntimeError(f"guarded recovery did not complete: {executor.snapshot.state.value}")
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_bytes(executor.dump_state())
+    executor.persist_state(output)
     json_result(
         {
             "output": str(output),

@@ -218,6 +218,7 @@ def _mock_config(candidate: BackendCandidate, port: int, seed: int) -> dict[str,
         "max_output_tokens": 256,
         "price_per_hour_usd": candidate.hourly_price_usd,
         "failure_rate": candidate.failure_rate,
+        "fault_api_enabled": True,
     }
 
 

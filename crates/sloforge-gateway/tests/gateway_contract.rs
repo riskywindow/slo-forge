@@ -37,6 +37,7 @@ async fn start_backend(name: &str, decode_ms: u64) -> Result<RunningBackend, Box
         max_output_tokens: 32,
         price_per_hour_usd: 0.25,
         failure_rate: 0.0,
+        fault_api_enabled: true,
     })?;
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
     let address = listener.local_addr()?;
@@ -91,6 +92,7 @@ fn gateway_config(urls: &[(&str, &str)], admission_capacity: usize) -> GatewayCo
         admission_capacity,
         stream_buffer_bytes: 16 * 1_024,
         max_request_bytes: 16 * 1_024,
+        max_output_tokens: 1_024,
         queue_timeout_ms: 100,
         request_timeout_ms: 3_000,
         connect_timeout_ms: 200,
@@ -496,6 +498,28 @@ async fn malformed_requests_are_structured_and_backend_health_is_visible()
         .await?;
     assert_eq!(health.status(), axum::http::StatusCode::OK);
     assert!(response_text(health).await?.contains("alpha"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn output_token_limit_is_enforced_before_backend_admission() -> Result<(), Box<dyn Error>> {
+    let backend = start_backend("bounded", 1).await?;
+    let mut config = gateway_config(&[("bounded", &backend.url)], 2);
+    config.max_output_tokens = 4;
+    let gateway = Gateway::new(config)?;
+    let response = gateway
+        .router()
+        .oneshot(completion_request(true, 5)?)
+        .await?;
+    assert_eq!(response.status(), axum::http::StatusCode::BAD_REQUEST);
+    let body = response_text(response).await?;
+    assert!(body.contains("max_tokens must not exceed 4"));
+    assert!(
+        !gateway
+            .metrics
+            .render_prometheus()?
+            .contains("sloforge_gateway_requests_total")
+    );
     Ok(())
 }
 

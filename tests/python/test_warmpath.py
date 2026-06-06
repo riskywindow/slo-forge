@@ -159,6 +159,22 @@ def test_artifact_graph_rejects_cycles_unknown_edges_and_path_traversal() -> Non
             sha256=_sha(payload),
             source_relative_path="../secret",
         )
+    with pytest.raises(ValidationError, match="relative"):
+        ArtifactNode(
+            artifact_id="windows-escape",
+            kind=ArtifactKind.MODEL_CONFIG,
+            size_bytes=1,
+            sha256=_sha(payload),
+            source_relative_path=r"cache\..\secret",
+        )
+    with pytest.raises(ValidationError, match="relative"):
+        ArtifactNode(
+            artifact_id="windows-drive",
+            kind=ArtifactKind.MODEL_CONFIG,
+            size_bytes=1,
+            sha256=_sha(payload),
+            source_relative_path=r"C:\secret",
+        )
     with pytest.raises(ValidationError, match="GPU memory images"):
         ArtifactNode(
             artifact_id="gpu-snapshot",

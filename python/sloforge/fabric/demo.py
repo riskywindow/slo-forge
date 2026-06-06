@@ -590,6 +590,7 @@ def _exercise_gateway(
                     "max_output_tokens": 32,
                     "price_per_hour_usd": 1.0 + index * 0.25,
                     "failure_rate": 0.0,
+                    "fault_api_enabled": True,
                 },
             )
             process = ManagedProcess(

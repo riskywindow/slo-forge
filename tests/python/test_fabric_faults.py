@@ -106,3 +106,18 @@ def test_loader_is_simulation_only_and_unknown_targets_fail() -> None:
     assert loaded.execution_mode == "simulation"
     with pytest.raises(ValueError, match="unknown resource"):
         bind_physical_faults(loaded, _request())
+
+
+def test_loader_bounds_documents_and_rejects_yaml_references(tmp_path: Path) -> None:
+    alias = tmp_path / "alias.yaml"
+    alias.write_text(
+        "schema_version: &version sloforge.fabric.faults/v1\n"
+        "scenario_id: fixture\nexecution_mode: simulation\nfaults: *version\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="anchors or aliases"):
+        load_physical_fault_scenario(alias)
+    oversized = tmp_path / "oversized.yaml"
+    oversized.write_bytes(b" " * (4 * 1024 * 1024 + 1))
+    with pytest.raises(ValueError, match="exceeds 4 MiB"):
+        load_physical_fault_scenario(oversized)

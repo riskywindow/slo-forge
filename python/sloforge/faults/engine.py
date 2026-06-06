@@ -7,6 +7,7 @@ from typing import Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from yaml.tokens import AliasToken, AnchorToken
 
 from sloforge.util import utc_now
 
@@ -135,7 +136,10 @@ def load_scenario(path: Path) -> FaultScenario:
         payload = handle.read(max_bytes + 1)
     if len(payload) > max_bytes:
         raise ValueError(f"{path}: fault scenario exceeds {max_bytes} byte safety limit")
-    document = yaml.safe_load(payload.decode("utf-8"))
+    text = payload.decode("utf-8")
+    if any(isinstance(token, (AliasToken, AnchorToken)) for token in yaml.scan(text)):
+        raise ValueError("fault scenarios do not permit YAML anchors or aliases")
+    document = yaml.safe_load(text)
     return FaultScenario.model_validate(document)
 
 

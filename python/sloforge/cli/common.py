@@ -12,11 +12,13 @@ from typing import Any
 import yaml
 from pydantic import BaseModel
 from rich.console import Console
+from yaml.tokens import AliasToken, AnchorToken
 
 from sloforge.ir import ArtifactDigest
 from sloforge.util import canonical_json, sha256_bytes, write_json
 
 console = Console()
+MAX_CONTROL_DOCUMENT_BYTES = 4 * 1024 * 1024
 
 
 def repository_root() -> Path:
@@ -32,8 +34,16 @@ def write_model(path: Path, value: BaseModel) -> None:
 
 
 def load_yaml_or_json(path: Path) -> Any:
-    text = path.read_text(encoding="utf-8")
-    return json.loads(text) if path.suffix.lower() == ".json" else yaml.safe_load(text)
+    with path.open("rb") as handle:
+        payload = handle.read(MAX_CONTROL_DOCUMENT_BYTES + 1)
+    if len(payload) > MAX_CONTROL_DOCUMENT_BYTES:
+        raise ValueError("control document exceeds 4 MiB")
+    text = payload.decode("utf-8")
+    if path.suffix.lower() == ".json":
+        return json.loads(text)
+    if any(isinstance(token, (AliasToken, AnchorToken)) for token in yaml.scan(text)):
+        raise ValueError("control documents do not permit YAML anchors or aliases")
+    return yaml.safe_load(text)
 
 
 def current_git_commit() -> str:

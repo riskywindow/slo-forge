@@ -839,6 +839,8 @@ def export_physical_plan(
     """Lower a physical plan without deploying or mutating an external environment."""
 
     validate_runtime(context, target)
+    if output.is_symlink():
+        raise ValueError("adapter output directory cannot be a symbolic link")
     output.mkdir(parents=True, exist_ok=True)
     renderers = {
         DeploymentTarget.LOCAL: _render_local,
@@ -850,6 +852,8 @@ def export_physical_plan(
         renderers[target](context, output)
     else:
         _render_cloud_metadata(context, output, target)
+    if any(candidate.is_symlink() for candidate in output.rglob("*")):
+        raise ValueError("adapter output cannot contain symbolic links")
     validations = _validate_output(target, output)
     artifacts = tuple(
         GeneratedArtifact(path=str(path.relative_to(output)), sha256=sha256_file(path))

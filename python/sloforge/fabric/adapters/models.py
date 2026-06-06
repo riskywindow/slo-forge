@@ -17,6 +17,7 @@ from sloforge.fabric.ir import (
     NumaDomainNode,
     PhysicalExecutionPlan,
     TopologyGraph,
+    canonical_hash,
 )
 
 NonEmptyString = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -119,6 +120,11 @@ class FabricAdapterContext(AdapterModel):
                 raise ValueError(
                     f"rank {binding.rank_id} network_rail_id is absent or not a network rail"
                 )
+        topology_hash = canonical_hash(self.topology)
+        if self.plan.topology_fingerprint.value != topology_hash:
+            raise ValueError(
+                "physical plan topology fingerprint does not match supplied topology artifact"
+            )
         if self.runtime is RuntimeKind.DYNAMO and self.dynamo_backend is None:
             raise ValueError("Dynamo runtime requires dynamo_backend")
         if self.runtime is not RuntimeKind.DYNAMO and self.dynamo_backend is not None:

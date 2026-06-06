@@ -10,11 +10,13 @@ import platform
 import signal
 import subprocess
 import sys
+import threading
 import time
 import uuid
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import BinaryIO
 
 from sloforge.forgeci.hardware import validate_requirements
 from sloforge.forgeci.models import (
@@ -34,11 +36,35 @@ from sloforge.forgeci.models import (
 )
 from sloforge.forgeci.statistics import compare_metric, summarize_metric
 
+MAX_COMMAND_OUTPUT_BYTES = 1024 * 1024
+_SECRET_ENVIRONMENT_MARKERS = (
+    "API_KEY",
+    "ACCESS_KEY",
+    "AUTH_TOKEN",
+    "BEARER",
+    "CLIENT_SECRET",
+    "COOKIE",
+    "CREDENTIAL",
+    "PASSWORD",
+    "PRIVATE_KEY",
+    "SECRET",
+    "SSH_AUTH_SOCK",
+    "TOKEN",
+    "_TOKEN",
+)
+
 
 class CommandOutcome:
     """Internal immutable command result."""
 
-    __slots__ = ("duration_seconds", "exit_code", "stderr", "stdout", "timed_out")
+    __slots__ = (
+        "duration_seconds",
+        "exit_code",
+        "output_truncated",
+        "stderr",
+        "stdout",
+        "timed_out",
+    )
 
     def __init__(
         self,
@@ -48,12 +74,54 @@ class CommandOutcome:
         exit_code: int | None,
         duration_seconds: float,
         timed_out: bool,
+        output_truncated: bool,
     ) -> None:
         self.stdout = stdout
         self.stderr = stderr
         self.exit_code = exit_code
         self.duration_seconds = duration_seconds
         self.timed_out = timed_out
+        self.output_truncated = output_truncated
+
+
+class _CappedOutput:
+    """Capture a bounded prefix while continuing to drain a subprocess pipe."""
+
+    def __init__(self) -> None:
+        self.data = bytearray()
+        self.truncated = False
+
+    def drain(self, stream: BinaryIO) -> None:
+        try:
+            while True:
+                chunk = stream.read(64 * 1024)
+                if not chunk:
+                    break
+                remaining = MAX_COMMAND_OUTPUT_BYTES - len(self.data)
+                if remaining > 0:
+                    self.data.extend(chunk[:remaining])
+                if len(chunk) > remaining:
+                    self.truncated = True
+        except (OSError, ValueError):
+            self.truncated = True
+
+    def text(self) -> str:
+        value = self.data.decode("utf-8", errors="replace")
+        if self.truncated:
+            return value + "\n...[output truncated at 1048576 bytes]\n"
+        return value
+
+
+def _terminate_process_group(process: subprocess.Popen[bytes], signal_number: int) -> None:
+    try:
+        if os.name != "nt":
+            os.killpg(process.pid, signal_number)
+        elif signal_number == signal.SIGTERM:
+            process.terminate()
+        else:
+            process.kill()
+    except ProcessLookupError:
+        return
 
 
 def _bounded_command(
@@ -76,39 +144,49 @@ def _bounded_command(
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
+        text=False,
         start_new_session=start_new_session,
         creationflags=creationflags,
     )
+    if process.stdout is None or process.stderr is None:
+        process.kill()
+        raise RuntimeError("subprocess output pipes were not created")
+    stdout_capture = _CappedOutput()
+    stderr_capture = _CappedOutput()
+    readers = (
+        threading.Thread(target=stdout_capture.drain, args=(process.stdout,), daemon=True),
+        threading.Thread(target=stderr_capture.drain, args=(process.stderr,), daemon=True),
+    )
+    for reader in readers:
+        reader.start()
+    timed_out = False
     try:
-        stdout, stderr = process.communicate(timeout=command.timeout_seconds)
-        return CommandOutcome(
-            stdout=stdout,
-            stderr=stderr,
-            exit_code=process.returncode,
-            duration_seconds=time.monotonic() - started,
-            timed_out=False,
-        )
+        process.wait(timeout=command.timeout_seconds)
     except subprocess.TimeoutExpired:
-        if os.name != "nt":
-            os.killpg(process.pid, signal.SIGTERM)
-        else:
-            process.terminate()
+        timed_out = True
+        _terminate_process_group(process, signal.SIGTERM)
         try:
-            stdout, stderr = process.communicate(timeout=2.0)
+            process.wait(timeout=2.0)
         except subprocess.TimeoutExpired:
-            if os.name != "nt":
-                os.killpg(process.pid, signal.SIGKILL)
-            else:
-                process.kill()
-            stdout, stderr = process.communicate()
-        return CommandOutcome(
-            stdout=stdout,
-            stderr=stderr,
-            exit_code=None,
-            duration_seconds=time.monotonic() - started,
-            timed_out=True,
-        )
+            _terminate_process_group(process, signal.SIGKILL)
+            process.wait(timeout=2.0)
+    for reader in readers:
+        reader.join(timeout=2.0)
+    if any(reader.is_alive() for reader in readers):
+        process.stdout.close()
+        process.stderr.close()
+        for reader in readers:
+            reader.join(timeout=2.0)
+    if any(reader.is_alive() for reader in readers):
+        raise RuntimeError("subprocess output reader did not terminate after pipe closure")
+    return CommandOutcome(
+        stdout=stdout_capture.text(),
+        stderr=stderr_capture.text(),
+        exit_code=None if timed_out else process.returncode,
+        duration_seconds=time.monotonic() - started,
+        timed_out=timed_out,
+        output_truncated=stdout_capture.truncated or stderr_capture.truncated,
+    )
 
 
 def _parse_metrics(stdout: str, benchmark: BenchmarkSpec) -> tuple[MetricValue, ...]:
@@ -136,7 +214,11 @@ def _parse_metrics(stdout: str, benchmark: BenchmarkSpec) -> tuple[MetricValue, 
 
 
 def _environment(case: MatrixCase, phase: str, trial: int, seed: int) -> dict[str, str]:
-    environment = dict(os.environ)
+    environment = {
+        name: value
+        for name, value in os.environ.items()
+        if not any(marker in name.upper() for marker in _SECRET_ENVIRONMENT_MARKERS)
+    }
     environment.update(
         {
             "SLOFORGE_FORGECI_PHASE": phase,
@@ -202,7 +284,9 @@ def _run_trial(
         metrics: tuple[MetricValue, ...] = ()
         error: str | None = None
         status = TrialStatus.TIMED_OUT if outcome.timed_out else TrialStatus.FAILED
-        if outcome.exit_code == 0 and not outcome.timed_out:
+        if outcome.output_truncated:
+            error = f"command output exceeded {MAX_COMMAND_OUTPUT_BYTES} bytes"
+        elif outcome.exit_code == 0 and not outcome.timed_out:
             try:
                 metrics = _parse_metrics(outcome.stdout, case.benchmark)
                 status = TrialStatus.SUCCEEDED
@@ -310,6 +394,12 @@ def run_case(
             artifact_dir / "build" / f"{index:03d}.stderr",
             _redact_output(outcome.stderr, case),
         )
+        if outcome.output_truncated:
+            warnings.append(
+                f"build command {index} output exceeded {MAX_COMMAND_OUTPUT_BYTES} bytes"
+            )
+            build_failed = True
+            break
         if outcome.timed_out or outcome.exit_code != 0:
             warnings.append(f"build command {index} failed with status {outcome.exit_code}")
             build_failed = True
