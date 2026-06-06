@@ -152,7 +152,7 @@ def test_replay_selects_supported_repair_and_rejects_alternative() -> None:
         if modifiers == []:
             return _observation(10_000.0, 100.0)
         assert isinstance(modifiers, list)
-        if modifiers[0]["type"] == "remove_fault":  # type: ignore[index]
+        if modifiers[0]["type"] == "remove_fault":
             return _observation(6_000.0, 100.0)
         return _observation(10_500.0, 100.0)
 
@@ -221,6 +221,45 @@ def test_replay_records_a_failed_alternative() -> None:
     assert replay.selected_scenario_id is None
     assert replay.evaluations[0].status == "simulation_failed"
     assert replay.evaluations[0].rejected_reason == "invalid replacement path"
+
+
+def test_counterfactual_evidence_reranks_a_contradicted_top_hypothesis() -> None:
+    def runner(request: Mapping[str, object]) -> SimulationObservation:
+        modifiers = request.get("counterfactuals", [])
+        if modifiers == []:
+            return _observation(10_000.0, 100.0)
+        assert isinstance(modifiers, list)
+        if modifiers[0]["type"] == "remove_fault":
+            return _observation(10_500.0, 100.0)
+        return _observation(6_000.0, 100.0)
+
+    replay = replay_counterfactuals(
+        _diagnosis(),
+        simulation_request={"seed": 7, "counterfactuals": []},
+        scenarios=(
+            CounterfactualScenario(
+                scenario_id="network-does-not-repair",
+                hypothesis_id="h-network",
+                hypothesis_kind=BottleneckKind.NETWORK_BANDWIDTH_DEGRADATION,
+                rationale="test the original top hypothesis",
+                modifications=(RemoveFault(fault_id="rail-degraded"),),
+            ),
+            CounterfactualScenario(
+                scenario_id="rank-repairs",
+                hypothesis_id="h-rank",
+                hypothesis_kind=BottleneckKind.RANK_STRAGGLER,
+                rationale="restore rank service time",
+                modifications=(ScaleRank(rank_id="rank-6", duration_multiplier=0.5),),
+            ),
+        ),
+        healthy_reference_us=5_900.0,
+        runner=runner,
+    )
+    augmented = attach_counterfactuals(_diagnosis(), replay)
+    assert replay.selected_scenario_id == "rank-repairs"
+    assert augmented.top_hypothesis is BottleneckKind.RANK_STRAGGLER
+    assert augmented.hypotheses[0].kind is BottleneckKind.RANK_STRAGGLER
+    assert augmented.hypotheses[1].rejected_reason is not None
 
 
 def test_minimizer_reduces_events_ranks_and_counters_deterministically() -> None:

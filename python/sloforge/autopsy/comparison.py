@@ -40,6 +40,29 @@ def _signature_text(signature: tuple[EventType, str | None, int | None, str | No
     return f"{event_type.value}:{operation or '-'}:rank={rank}:request={request_id or '-'}"
 
 
+def _event_start(event: AutopsyEvent) -> int:
+    return event.normalized_start_ns if event.normalized_start_ns is not None else event.start_ns
+
+
+def _event_uncertainty(event: AutopsyEvent) -> int:
+    return event.alignment_uncertainty_ns or 0
+
+
+def _global_ordering_usable(healthy: AutopsyRun, degraded: AutopsyRun) -> bool:
+    hosts = {event.host for event in (*healthy.events, *degraded.events)}
+    if len(hosts) <= 1:
+        return True
+    for run in (healthy, degraded):
+        estimates = {estimate.host: estimate for estimate in run.alignments}
+        if not {event.host for event in run.events}.issubset(estimates):
+            return False
+        if any(
+            estimate.quality is AlignmentQuality.INSUFFICIENT for estimate in estimates.values()
+        ):
+            return False
+    return True
+
+
 def _relative_delta(healthy: float, degraded: float) -> float:
     if healthy > 0.0:
         return (degraded - healthy) / healthy
@@ -89,6 +112,12 @@ def _rank_skew(run: AutopsyRun) -> float:
 def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialComparison:
     if healthy.workload_fingerprint != degraded.workload_fingerprint:
         raise ValueError("healthy and degraded runs must use the same workload fingerprint")
+    if healthy.topology_fingerprint != degraded.topology_fingerprint:
+        raise ValueError("healthy and degraded runs must use the same topology fingerprint")
+    if healthy.physical_plan_hash != degraded.physical_plan_hash:
+        raise ValueError("healthy and degraded runs must use the same physical plan")
+    if healthy.reference_host != degraded.reference_host:
+        raise ValueError("healthy and degraded runs must use the same reference host")
     healthy_groups: dict[
         tuple[EventType, str | None, int | None, str | None], list[AutopsyEvent]
     ] = defaultdict(list)
@@ -104,12 +133,12 @@ def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialCompa
     matched = 0
     unmatched_healthy = 0
     unmatched_degraded = 0
-    first_divergence: tuple[int, str] | None = None
+    divergence_candidates: list[tuple[int, int, str, str]] = []
     for signature in sorted(
         set(healthy_groups) | set(degraded_groups), key=lambda item: _signature_text(item)
     ):
-        healthy_events = sorted(healthy_groups[signature], key=lambda event: event.start_ns)
-        degraded_events = sorted(degraded_groups[signature], key=lambda event: event.start_ns)
+        healthy_events = sorted(healthy_groups[signature], key=_event_start)
+        degraded_events = sorted(degraded_groups[signature], key=_event_start)
         pair_count = min(len(healthy_events), len(degraded_events))
         matched += pair_count
         unmatched_healthy += len(healthy_events) - pair_count
@@ -142,13 +171,14 @@ def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialCompa
             threshold_ns = max(100_000, int(healthy_event.duration_ns * 0.15))
             if degraded_event.duration_ns - healthy_event.duration_ns <= threshold_ns:
                 continue
-            start = (
-                degraded_event.normalized_start_ns
-                if degraded_event.normalized_start_ns is not None
-                else degraded_event.start_ns
+            divergence_candidates.append(
+                (
+                    _event_start(degraded_event),
+                    _event_uncertainty(degraded_event),
+                    degraded_event.event_id,
+                    degraded_event.host,
+                )
             )
-            if first_divergence is None or start < first_divergence[0]:
-                first_divergence = (start, degraded_event.event_id)
 
     healthy_counters = _counter_groups(healthy)
     degraded_counters = _counter_groups(degraded)
@@ -177,7 +207,17 @@ def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialCompa
 
     warnings: list[str] = []
     qualities = {estimate.quality for estimate in (*healthy.alignments, *degraded.alignments)}
-    if AlignmentQuality.INSUFFICIENT in qualities:
+    ordering_usable = _global_ordering_usable(healthy, degraded)
+    event_hosts = {event.host for event in (*healthy.events, *degraded.events)}
+    missing_alignment = any(
+        {event.host for event in run.events} - {estimate.host for estimate in run.alignments}
+        for run in (healthy, degraded)
+    )
+    if len(event_hosts) > 1 and missing_alignment:
+        warnings.append(
+            "cross-host alignment estimates are missing; event ordering is not causal evidence"
+        )
+    elif AlignmentQuality.INSUFFICIENT in qualities:
         warnings.append(
             "cross-host alignment is insufficient; event ordering is not causal evidence"
         )
@@ -185,6 +225,21 @@ def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialCompa
         warnings.append(
             "cross-host alignment is degraded; fine-grained ordering has reduced confidence"
         )
+    first_divergence: tuple[int, str] | None = None
+    if ordering_usable and divergence_candidates:
+        candidates = sorted(divergence_candidates, key=lambda item: (item[0], item[2]))
+        earliest = candidates[0]
+        earliest_upper = earliest[0] + earliest[1]
+        overlaps = any(
+            candidate[3] != earliest[3] and candidate[0] - candidate[1] < earliest_upper
+            for candidate in candidates[1:]
+        )
+        if overlaps:
+            warnings.append(
+                "first divergence is ambiguous within cross-host clock-alignment uncertainty"
+            )
+        else:
+            first_divergence = (earliest[0], earliest[2])
     identifier = hashlib.sha256(
         f"{healthy.run_id}\0{degraded.run_id}\0{matched}".encode()
     ).hexdigest()[:16]

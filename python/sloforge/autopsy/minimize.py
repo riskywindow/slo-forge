@@ -9,7 +9,7 @@ from pydantic import Field
 
 from sloforge.util import canonical_json, sha256_bytes
 
-from .models import AutopsyEvent, AutopsyRun, NonEmpty, StrictModel
+from .models import AutopsyEvent, AutopsyRun, FaultInterval, NonEmpty, StrictModel
 
 DiagnosisPredicate = Callable[[AutopsyRun], bool]
 Item = TypeVar("Item")
@@ -25,9 +25,12 @@ class MinimizationResult(StrictModel):
     minimized_rank_count: int = Field(ge=0)
     original_counter_count: int = Field(ge=0)
     minimized_counter_count: int = Field(ge=0)
+    original_fault_count: int = Field(ge=0)
+    minimized_fault_count: int = Field(ge=0)
     removed_event_ids: tuple[str, ...]
     removed_ranks: tuple[int, ...]
     removed_counters: tuple[str, ...]
+    removed_fault_ids: tuple[str, ...]
     predicate_evaluations: int = Field(ge=1)
     bundle_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
@@ -49,6 +52,12 @@ def _with_events(run: AutopsyRun, events: Sequence[AutopsyEvent]) -> AutopsyRun:
         for event in events
     )
     return AutopsyRun.model_validate({**run.model_dump(mode="python"), "events": repaired})
+
+
+def _with_faults(run: AutopsyRun, faults: Sequence[FaultInterval]) -> AutopsyRun:
+    return AutopsyRun.model_validate(
+        {**run.model_dump(mode="python"), "fault_intervals": tuple(faults)}
+    )
 
 
 def _chunks(items: Sequence[Item], count: int) -> tuple[tuple[Item, ...], ...]:
@@ -110,6 +119,7 @@ def minimize_run(run: AutopsyRun, predicate: DiagnosisPredicate) -> Minimization
     original_events = tuple(run.events)
     original_ranks = _ranks(run)
     original_counters = _counter_keys(run)
+    original_faults = tuple(run.fault_intervals)
     current = run
 
     for rank in _ranks(current):
@@ -168,14 +178,22 @@ def minimize_run(run: AutopsyRun, predicate: DiagnosisPredicate) -> Minimization
         for event in current.events
     )
     current = _with_events(current, final_events)
-    digest = sha256_bytes(canonical_json(current.model_dump(mode="json")).encode())
+
+    def accepts_faults(faults: tuple[FaultInterval, ...]) -> bool:
+        nonlocal evaluations
+        evaluations += 1
+        return predicate(_with_faults(current, faults))
+
+    minimized_faults = _ddmin(current.fault_intervals, accepts_faults)
+    current = _with_faults(current, minimized_faults)
     minimized = AutopsyRun.model_validate(
         {
             **current.model_dump(mode="python"),
-            "run_id": f"{run.run_id}-min-{digest[:12]}",
+            "run_id": f"{run.run_id}-minimized",
             "warnings": (*current.warnings, "deterministically minimized Autopsy reproducer"),
         }
     )
+    digest = sha256_bytes(canonical_json(minimized.model_dump(mode="json")).encode())
     retained_ids = {event.event_id for event in minimized.events}
     minimized_counter_keys = set(_counter_keys(minimized))
     return MinimizationResult(
@@ -187,6 +205,8 @@ def minimize_run(run: AutopsyRun, predicate: DiagnosisPredicate) -> Minimization
         minimized_rank_count=len(_ranks(minimized)),
         original_counter_count=len(original_counters),
         minimized_counter_count=len(minimized_counter_keys),
+        original_fault_count=len(original_faults),
+        minimized_fault_count=len(minimized.fault_intervals),
         removed_event_ids=tuple(
             event.event_id for event in original_events if event.event_id not in retained_ids
         ),
@@ -195,6 +215,9 @@ def minimize_run(run: AutopsyRun, predicate: DiagnosisPredicate) -> Minimization
             f"{event_id}:{counter_name}"
             for event_id, counter_name in original_counters
             if (event_id, counter_name) not in minimized_counter_keys
+        ),
+        removed_fault_ids=tuple(
+            fault.fault_id for fault in original_faults if fault not in minimized.fault_intervals
         ),
         predicate_evaluations=evaluations,
         bundle_sha256=digest,

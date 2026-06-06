@@ -235,6 +235,15 @@ class AutopsyRun(StrictModel):
         hosts = [alignment.host for alignment in self.alignments]
         if len(hosts) != len(set(hosts)):
             raise ValueError("at most one alignment estimate is allowed per host")
+        wrong_reference = sorted(
+            alignment.host
+            for alignment in self.alignments
+            if alignment.reference_host != self.reference_host
+        )
+        if wrong_reference:
+            raise ValueError(
+                f"alignment estimates use a different reference host for {wrong_reference}"
+            )
         return self
 
 
