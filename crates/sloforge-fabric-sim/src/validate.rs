@@ -200,6 +200,12 @@ fn validate_operation(
         }
         finite_positive("resource demand units", demand.units)?;
         let (kind, scheduling, capacity) = resource_properties[demand.resource_id.as_str()];
+        if !resource_compatible(&operation.kind, kind) {
+            return invalid(format!(
+                "operation {} cannot execute on resource {} of kind {kind:?}",
+                operation.id, demand.resource_id
+            ));
+        }
         if scheduling == SchedulingMode::Exclusive && demand.units > capacity {
             return invalid(format!(
                 "operation {} demand exceeds exclusive resource {} capacity",
@@ -228,6 +234,43 @@ fn validate_operation(
     }
     validate_operation_kind(operation)?;
     Ok(())
+}
+
+const fn resource_compatible(operation: &OperationKind, resource: ResourceKind) -> bool {
+    match operation {
+        OperationKind::CpuLaunch { .. } => matches!(resource, ResourceKind::CpuCoreGroup),
+        OperationKind::GpuCompute { .. } => matches!(resource, ResourceKind::GpuCompute),
+        OperationKind::HbmAccess { .. } => matches!(resource, ResourceKind::GpuHbm),
+        OperationKind::PointToPoint { .. }
+        | OperationKind::Collective { .. }
+        | OperationKind::ExpertDispatch { .. }
+        | OperationKind::ExpertCombine { .. }
+        | OperationKind::KvTransfer { .. } => matches!(
+            resource,
+            ResourceKind::NumaMemory
+                | ResourceKind::GpuHbm
+                | ResourceKind::GpuCopyEngine
+                | ResourceKind::Nvlink
+                | ResourceKind::Nvswitch
+                | ResourceKind::Pcie
+                | ResourceKind::NicQueue
+                | ResourceKind::NetworkRail
+        ),
+        OperationKind::StorageFetch { .. } => matches!(
+            resource,
+            ResourceKind::NumaMemory | ResourceKind::NetworkRail | ResourceKind::StoragePath
+        ),
+        OperationKind::Startup { .. } => matches!(
+            resource,
+            ResourceKind::CpuCoreGroup
+                | ResourceKind::NumaMemory
+                | ResourceKind::GpuCompute
+                | ResourceKind::GpuHbm
+                | ResourceKind::NetworkRail
+                | ResourceKind::StoragePath
+        ),
+        OperationKind::Synchronization => true,
+    }
 }
 
 fn validate_operation_kind(operation: &PhysicalOperation) -> Result<(), SimError> {
