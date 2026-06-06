@@ -4,17 +4,17 @@ The measurements below are explicitly labeled synthetic or local fixture
 results. Source comments are retained beside each bullet so metrics can be
 audited before use.
 
-<!-- source: artifacts/fabric-demo/manifest.json and artifacts/fabric-demo/physical-plan.json; deterministic synthetic hardware, seed 41 -->
+<!-- source: artifacts/fabric/evaluation/result.json and reports/fabric-evaluation.md; 180 deterministic synthetic plan trials, not hardware measurement -->
 - Built a topology-aware physical inference compiler and deterministic Rust
-  communication twin that mapped a synthetic two-host/16-rank deployment,
-  preserved 174 rejected alternatives and three recovery variants, and validated
-  faults through artifact-hashed traces and reports.
+  communication twin evaluated across 180 synthetic plan trials, preserving the
+  negative result that its 626.120 ms median p95 TTFT was 1.57% slower than the
+  already topology-aligned sequential fixture rather than claiming a win.
 
 <!-- source: artifacts/fabric-demo/manifest.json and artifacts/fabric-demo/recovery/execution.json; synthetic simulation, not GPU measurement -->
 - Implemented structured causal diagnosis and guarded self-healing that evaluated
   seven synthetic counterfactual repairs, moved through simulation, shadow,
   canary, promotion, and stream-preserving drain, and restored simulated p95 TTFT
-  from 2484.092 ms to 955.883 ms after simultaneous network/rank faults.
+  from 2470.966 ms to 947.314 ms after simultaneous network/rank faults.
 
 <!-- source: artifacts/forgeci/demo/evaluation.json; deterministic local fixture repository -->
 - Built a robust performance-regression CI/bisector that identified the exact

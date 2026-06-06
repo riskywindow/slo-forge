@@ -26,18 +26,19 @@ physical-plan, and workload fingerprints and includes alignment estimates,
 ground-truth fault intervals where available, evidence references, and warnings.
 
 The implemented simulator capture converts every physical operation outcome to
-a canonical event. It retains request, rank, resource, dependency, timing,
-operation, and derived counters. The schema is intentionally broad enough for
-gateway, scheduler, engine, NCCL, GPU, NIC, CPU, NUMA, container, and controller
-adapters, but those privileged/hardware sources were not captured on the current
-machine.
+a canonical event. It retains request, rank, resource, timing, operation, and
+derived counters. Parent/dependency fields are supported by the canonical model,
+but the current simulator capture does not reconstruct dependency edges from its
+operation outcomes. The schema is intentionally broad enough for gateway,
+scheduler, engine, NCCL, GPU, NIC, CPU, NUMA, container, and controller adapters,
+but those privileged/hardware sources were not captured on the current machine.
 
 ## Analysis pipeline
 
 Time alignment transforms local monotonic timestamps with an explicit affine
 offset/drift estimate and uncertainty. Differential analysis verifies compatible
 topology, plan, and workload fingerprints, then matches stages by event type,
-operation, rank, and request class. It reports count, median, relative deltas,
+operation, rank, and request identity. It reports count, median, relative deltas,
 counter changes, first divergence, rank skew, and alignment sufficiency.
 
 The diagnosis engine evaluates all 27 `BottleneckKind` rules. Each hypothesis
@@ -50,23 +51,23 @@ new bounded simulation. The result reports improvement interval, remaining
 healthy-reference gap, confidence, and status: supported, contradicted,
 inconclusive, or simulation failed.
 
-Minimal reproduction uses deterministic delta debugging over ranks, events, and
-counters. Event dependencies to removed events are repaired and the diagnosis
-predicate is evaluated on a fully validated run after every reduction.
+Minimal reproduction uses deterministic delta debugging over ranks, events,
+counters, and fault intervals. Event dependencies to removed events are repaired
+and the diagnosis predicate is evaluated on a fully validated run after every
+reduction.
 
 ## Evidence from the flagship demo
 
-The synthetic degraded run contains 768 canonical events in
+The synthetic degraded run contains 480 canonical events in
 `artifacts/fabric-demo/autopsy/degraded-run.json`. The diagnosis in
-`artifacts/fabric-demo/autopsy/diagnosis.json` ranked `rank_straggler` first at
-demo-level confidence 0.90 and recorded the first divergence at 176,000 ns.
+`artifacts/fabric-demo/autopsy/diagnosis.json` ranked
+`network_bandwidth_degradation` first at deterministic evidence confidence 0.95
+and recorded the first divergence at 176,000 ns.
 Seven repairs were evaluated; `remove-both-faults` restored the healthy simulated
 reference. These are deterministic synthetic results, not measured multi-node
 diagnosis accuracy.
 
-The same artifact exposes current multi-fault ambiguity: network bandwidth
-degradation was a ground-truth fault, but its direct threshold rule was
-contradicted in the aggregate comparison and did not enter the top three. The
-combined counterfactual nevertheless showed it was needed for full restoration.
-This is reported as a limitation, not relabeled as a correct top-1 diagnosis.
-
+The same artifact ranks `rank_straggler` second and `kv_transfer_bottleneck`
+third after counterfactual attachment. This one two-fault run shows the intended
+causal path, but it is not a calibrated claim about arbitrary simultaneous
+faults; diagnosis accuracy must be read from the explicit evaluation corpus.

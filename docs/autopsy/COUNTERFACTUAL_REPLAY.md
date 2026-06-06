@@ -26,8 +26,9 @@ becomes `simulation_failed` with no numeric estimate.
 
 Each successful scenario records simulated makespan and interval, operation and
 event counts, output hash, improvement bounds, healthy-reference residual, and
-confidence. `attach_counterfactuals` adds the selected estimate to the matching
-hypothesis while retaining the original support and contradiction statements.
+confidence. `attach_counterfactuals` adds the strongest evaluated estimate for
+each matching hypothesis, retains the original support and contradiction
+statements, and reranks the diagnosis from the causal outcomes.
 
 ## Causal interpretation
 
@@ -41,4 +42,3 @@ The flagship replay evaluated seven scenarios and selected
 `remove-both-faults`; its exact results are in
 `artifacts/fabric-demo/autopsy/counterfactuals.json` and its choice is summarized
 in `artifacts/fabric-demo/manifest.json`.
-

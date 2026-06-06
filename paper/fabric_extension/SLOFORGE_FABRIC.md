@@ -13,12 +13,16 @@ machine. The system preserves topology and measurement provenance, separates
 synthetic calibration from hardware measurement, and lowers plans into existing
 runtimes without replacing their data planes. On a deterministic CPU-only
 two-host/16-rank synthetic demonstration, two simultaneous physical faults raised
-simulated p95 TTFT from 955.883 ms to 2484.092 ms; seven counterfactuals selected
-a combined repair and the guarded recovery restored 955.883 ms. This is a
+simulated p95 TTFT from 947.314 ms to 2470.966 ms; seven counterfactuals selected
+a combined repair and the guarded recovery restored 947.314 ms. This is a
 synthetic systems validation, not a multi-GPU performance claim. A local ForgeCI
 fixture bisected an injected 12.00% TTFT regression, and WarmPath exhaustively
 evaluated 243 local artifact placements. Real NVIDIA and RDMA validation was
-unavailable on the evaluation host.
+unavailable on the evaluation host. In the broader 180-trial synthetic matrix,
+the hierarchical compiler was 1.57% slower than an already topology-aligned
+sequential baseline. The twin's Spearman rank correlation was 0.881, but its
+28.35% median relative error and 0% interval coverage expose an uncertainty-
+calibration failure rather than a production-accuracy result.
 
 ## 1. Motivation
 
@@ -143,12 +147,13 @@ visible rather than labeling every estimate a simulation.
 
 Autopsy's event schema binds request and operation timing to host, process,
 thread, rank, replica, GPU, NIC, NUMA, physical resource, counters, dependencies,
-clock, and evidence hash. Cross-node alignment estimates affine offset and drift;
-residual p95 plus half-RTT p95 is retained as uncertainty. Insufficient alignment
-prevents fine-order claims.
+clock, and evidence hash. Cross-node alignment estimates affine offset and drift
+with a bounded Theil-Sen fit over lowest-RTT samples; residual p95 plus half-RTT
+p95 is retained as uncertainty. Insufficient or overlapping alignment intervals
+prevent fine-order claims.
 
 Healthy and degraded runs are matched by topology, plan, workload, stage,
-operation, rank, and request class. The comparator produces stage and counter
+operation, rank, and request identity. The comparator produces stage and counter
 deltas, rank skew, and first divergence. Twenty-seven deterministic rules cover
 queue, startup, CPU/GPU, NUMA/PCIe/NVLink/network, collective, expert,
 prefill/decode/KV, health, and plan faults. Every hypothesis records support,
@@ -204,7 +209,12 @@ inspection, physical compiler, Autopsy, recovery, adapters, ForgeCI, WarmPath,
 and reports. Rust implements the physical simulator and matching IR protocol.
 The boundary is versioned JSON over subprocess. Runtime adapters generate local,
 Docker, Kubernetes, Dynamo, Modal, and Truss artifacts offline and fail closed on
-unvalidated versions or unenforceable requirements.
+unvalidated versions or unenforceable requirements. Direct vLLM/SGLang groups
+reject multi-host replicas; tagged Dynamo v1beta1 DGD is the multi-node engine
+path. The adapters keep vLLM's native NIXL KV connector separate from Dynamo
+wrapper flags, keep SGLang expert parallelism separate from DP attention, reject
+generic Kubernetes multi-node export without a gang contract, and treat Modal
+and Truss physical metadata as advisory.
 
 Tests include Python unit/property-like invariants, strict schema and artifact
 checks, Rust unit/integration/property tests, analytical queue cases,
@@ -219,17 +229,44 @@ ForgeCI bisection, and WarmPath checksum/eviction.
 The CPU-only demonstration uses a synthetic two-host, 16-GPU topology, a
 synthetic MoE graph, synthetic fabric curves, and 12 bursty mixed requests. It
 injects network bandwidth reduction and rank-specific slowdown. According to
-`artifacts/fabric-demo/manifest.json`, healthy simulated p95 TTFT was 955.883 ms,
-degraded p95 TTFT 2484.092 ms, and restored p95 TTFT 955.883 ms. Degraded p99 TPOT
-was 5.000 ms versus 1.250 ms healthy/restored. Seven counterfactuals selected
+`artifacts/fabric-demo/manifest.json`, healthy simulated p95 TTFT was 947.314 ms,
+degraded p95 TTFT 2470.966 ms, and restored p95 TTFT 947.314 ms. Degraded p99 TPOT
+was 1.250 ms, equal to the healthy/restored value. Seven counterfactuals selected
 removing both faults; the guarded recovery completed.
 
-Autopsy ranked `rank_straggler` first with report confidence 0.90. It did not rank
-the simultaneous network fault in the top three. The combined counterfactual,
-not the direct network signal, established that both modeled faults were needed
-for full restoration. This is a negative multi-fault attribution result.
+Autopsy ranked `network_bandwidth_degradation` first with deterministic evidence
+confidence 0.95 and `rank_straggler` second. The combined counterfactual
+established that both modeled faults were needed for full restoration. This is
+one synthetic two-fault result, not calibrated general multi-fault accuracy.
 
-### 12.2 ForgeCI fixture
+### 12.2 Physical compiler, twin, Autopsy, and recovery matrix
+
+`artifacts/fabric/evaluation/result.json` indexes 180 deterministic synthetic
+plan trials: four topology fixtures by three workload regimes, three seeds, and
+five methods. Median p95 TTFT was 2831.682 ms for random placement, 616.434 ms
+for sequential placement, 622.311 ms for the topology-unaware joint optimizer,
+and 626.120 ms for both topology-aware methods. Random placement's median SLO
+attainment was 0.4375; the other methods attained 1.0. The hierarchical method
+was 1.57% slower than sequential, so this fixture does not support H1 against an
+already aligned order. The topology-unaware baseline could also change
+parallelism, unlike the placement-only methods.
+
+For H2, the twin's Spearman rank correlation was 0.881 and Pareto-selection
+regret 2.06%, but median relative error was 28.35% and interval coverage was 0%.
+The rank ordering is useful within this synthetic corpus; the uncertainty model
+is not calibrated and cannot support production safety claims.
+
+For H3, Autopsy top-1 and top-3 accuracy were 1.0 across 24 deterministic cases
+covering network-bandwidth degradation and rank-straggler families. The median
+0.925 confidence is a deterministic evidence score, not a probability, and the
+corpus is too narrow for general accuracy claims. For H4, diagnosis-driven,
+threshold, and full-deployment replacement each restored 100% of modeled cases.
+Median declared action time/cost was 90.5 s/$0, 60 s/$0.0667, and 180 s/$3.20,
+respectively. Action time and cost are policy constants and post-action request
+metrics come from Rust simulation, not a live failover. The threshold baseline
+therefore remains faster in this corpus.
+
+### 12.3 ForgeCI fixture
 
 `artifacts/forgeci/demo/evaluation.json` reports correct first-commit bisection in
 a four-commit local fixture after three unique commits, zero inconclusive rate,
@@ -237,20 +274,20 @@ and confidence 0.975. Injected p99 TTFT degradation was 12.00% with corrected
 interval [11.47%, 12.53%]; throughput degradation was 10.71% with interval
 [10.29%, 11.20%]. Both are synthetic process metrics.
 
-### 12.3 WarmPath local reference
+### 12.4 WarmPath local reference
 
 `artifacts/warmpath/manifest.json` records 243 exhaustive candidates, three eager
 critical artifacts, one deferred artifact, checksum success, and measured local
 execution. The payload is a deterministic synthetic snapshot; local read and
 verification times are real and can vary by run.
 
-### 12.4 Rank ordering
+### 12.5 Rank ordering
 
 `reports/rank-ordering-experiment.md` records a synthetic calibrated exact search
 over six orders and two message regimes. Because no matched hardware experiment
 exists, the integration decision is `measure_on_hardware` and enablement is false.
 
-### 12.5 Hardware status
+### 12.6 Hardware status
 
 The evaluation host had no NVIDIA GPU or RDMA fabric. Consequently there is no
 GPU, NVLink, NCCL, InfiniBand, RoCE, DeepEP, NIXL, or real multi-node result. The
@@ -273,11 +310,15 @@ diagnosis, and guarded repair. A detailed comparison and primary links are in
 Physical performance is synthetic on this host. Compiler search is heuristic and
 analytical, and real-hardware residual calibration is absent. The flagship
 selected EP=1, so it does not validate measured expert-parallel collectives.
-Autopsy has multi-fault signal dilution and affine clock assumptions. Live
-privileged telemetry and production recovery drivers are unexercised. Cloud
-adapters are offline; Modal and Truss placement metadata is advisory. ForgeCI's
-fixture is deliberately deterministic. WarmPath does not restore GPU/process or
-provider-private snapshot state. Full details are in
+PP lacks an explicit layer-to-stage/send-receive schedule; decode lowering is
+opaque rather than per-token/per-layer; multi-hop paths use a conservative
+additive flow model; and NIC placement is heuristic. Autopsy assumes affine
+clocks and its evidence confidence is not a posterior. Live privileged telemetry
+and production recovery drivers are unexercised; local rollback is state/traffic
+rollback, not general infrastructure undo. Cloud adapters are offline; Modal and
+Truss placement metadata is advisory. ForgeCI's fixture is deliberately
+deterministic. WarmPath does not restore GPU/process or provider-private snapshot
+state. Full details are in
 `docs/FABRIC_LIMITATIONS.md`.
 
 ## 15. Ethics and operational safety
@@ -297,4 +338,3 @@ held-out prediction and diagnosis calibration. Algorithmically, simulator-guided
 candidate refinement, stronger multi-fault causal interaction models, wider
 model-graph inspection, and authorized Kubernetes/Dynamo action drivers are the
 clearest extensions. These are not claimed as completed here.
-

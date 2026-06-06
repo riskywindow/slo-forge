@@ -31,13 +31,16 @@ criteria apply globally. State and total deadlines yield `ABORTED` before traffi
 movement, `ROLLED_BACK` after canary/promotion, or `OPERATOR_REQUIRED` if a drain
 deadline expires with active streams.
 
+`ROLLED_BACK` is a persisted controller/traffic state. The simulated executor
+does not execute a general inverse action for every `rollback_action_id`, so it
+must not be described as automated infrastructure undo for an external driver.
+
 Duplicate observation idempotency keys return the unchanged snapshot. Observation
 times must be monotonic. Snapshot plan hash must equal the active recovery plan,
 which supports controller restart without replaying side effects. Audit records
 contain sequence, before/after state, reason, idempotency key, timestamp, and
 typed fields and are bounded by configuration.
 
-The deterministic flagship execution reached `COMPLETED` with 13 audit records;
+The deterministic flagship execution reached `COMPLETED` with 12 audit records;
 the exact snapshot and action attempts are in
 `artifacts/fabric-demo/recovery/execution.json`.
-

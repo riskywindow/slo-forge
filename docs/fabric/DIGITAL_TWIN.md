@@ -30,6 +30,15 @@ Python's `build_simulation_request` lowers a `PhysicalExecutionPlan`, topology,
 profile, and typed workload shapes to this protocol. `run_simulation` invokes
 the Rust binary with a bounded input, output limit, timeout, and process group.
 
+The Rust protocol can express per-layer, per-token, and expert operations, but
+the current Python request lowerer does not reconstruct that full runtime DAG.
+It lowers decode as one calibrated GPU operation and represents pipeline stages
+at stage granularity; layer-level communication overlap, per-token expert
+dispatch/combine, pipeline microbatch bubbles, and PP send/receive remain
+approximate. A multi-edge demand uses additive path service time and slowest-link
+fair sharing, a conservative flow/store-and-forward approximation rather than a
+cut-through packet model.
+
 ## Faults and counterfactuals
 
 Timed faults use half-open intervals and ground-truth labels. Implemented effects
@@ -60,4 +69,3 @@ The CPU flagship artifacts are
 `artifacts/fabric-demo/simulations/{healthy,degraded,restored}.json`. They are
 synthetic validation of scheduling, contention, fault propagation, and recovery.
 Real-hardware residual evaluation has not been performed on this machine.
-

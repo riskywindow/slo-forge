@@ -38,7 +38,7 @@ TPOT rollback thresholds, readiness abort threshold, compatibility constraints,
 evidence links, and external authorization state.
 
 The flagship proposal in `artifacts/fabric-demo/recovery/proposal.json` contains
-four local simulated actions: stop routing, drain, restart, and alternate rank
-placement. It has 3 shadow and 4 canary minimum samples and preserves started
-streams. It must not be interpreted as an applied production change.
-
+three local simulated actions: quarantine the affected rail, change NIC
+affinity, and change rank placement. It has 3 shadow and 4 canary minimum samples
+and preserves started streams. It must not be interpreted as an applied
+production change.

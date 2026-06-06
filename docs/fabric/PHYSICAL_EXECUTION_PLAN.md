@@ -39,6 +39,12 @@ disaggregation, communication groups, and replica groups. `RankPlacement` maps
 each integer rank to host, GPU, NUMA domain, optional NIC and rail, CPU affinity,
 worker role, replica, and fault domain.
 
+The v1 pipeline representation identifies PP rank groups and available stage
+boundaries but does not include an explicit layer-to-stage map or PP send/receive
+schedule. PP output is therefore physical placement intent for runtime lowering,
+not a complete executable layer schedule. Runtime adapters must validate their
+own partition mapping rather than infer one from rank order.
+
 `ExpertPlacement` assigns model experts to ranks with replication, load
 assumption, hot-expert flag, capacity factor, and rebalance constraints.
 `CollectivePlan` describes collective kind, ranks, message model, algorithm,
@@ -80,4 +86,3 @@ identifier; extension values remain JSON but cannot replace a core field.
 into the current minor representation. Major-version changes require an
 explicit migration and new fixtures. Readers reject an unsupported major rather
 than guessing. Writers always emit the current schema.
-

@@ -29,6 +29,11 @@ sensitive environment values. Generated Docker and Kubernetes artifacts drop
 capabilities, avoid service-account tokens, use read-only mounts where possible,
 declare resource limits, and provide graceful termination.
 
+Gateway configuration bounds output tokens, timeouts, capacities, and queues.
+The Rust mock backend's `/admin/fault` API is disabled by default and exists only
+when a scoped demo/test config sets `fault_api_enabled: true`; it is not a
+production control endpoint.
+
 Discovery is read-only and records unknown capability. It never changes clocks,
 networking, or GPU state. Privileged probes, network faults, GPU clock changes,
 and external deployment mutation use separate false-by-default opt-ins:
@@ -69,4 +74,3 @@ runtime commands and model files can execute code outside SLOForge's parser.
 Physical metadata may reveal fleet topology. Counterfactual simulation can be
 wrong under unmodeled behavior; recovery safety gates reduce but do not eliminate
 that risk.
-
