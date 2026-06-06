@@ -13,13 +13,26 @@ from sloforge.fabric.compiler import (
     OptimizationStrategy,
     compile_physical_plan,
 )
+from sloforge.fabric.compiler.core import (
+    CandidateSummary,
+    _degrees,
+    _ordered_candidate_gpus,
+    _pareto,
+    _profile_duration,
+    _service_availability,
+)
 from sloforge.fabric.ir import (
     DocumentReference,
+    FabricMeasurementSeries,
+    RankBinding,
+    RankPlacement,
+    WorkerRole,
     canonical_hash,
     load_fabric_profile,
     load_model_graph,
     load_topology_graph,
 )
+from sloforge.fabric.topology import build_canonical_fixture
 from sloforge.ir import ArtifactDigest
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
@@ -102,14 +115,12 @@ def test_physical_end_to_end_metrics_use_requested_output_length() -> None:
     )
     metrics = result.selected.predicted_metrics
     assert metrics.p95_end_to_end_ms.estimate == pytest.approx(
-        metrics.p95_ttft_ms.estimate
-        + metrics.p99_tpot_ms.estimate * output_tokens_p95
+        metrics.p95_ttft_ms.estimate + metrics.p99_tpot_ms.estimate * output_tokens_p95
     )
     for variant in result.selected.recovery_variants:
         degraded = variant.expected_degraded_metrics
         assert degraded.p95_end_to_end_ms.estimate == pytest.approx(
-            degraded.p95_ttft_ms.estimate
-            + degraded.p99_tpot_ms.estimate * output_tokens_p95
+            degraded.p95_ttft_ms.estimate + degraded.p99_tpot_ms.estimate * output_tokens_p95
         )
 
 
@@ -251,12 +262,8 @@ def test_disaggregated_replicas_each_contain_the_full_expert_set() -> None:
         assert len(assignment.rank_ids) == 2
         for rank_id in assignment.rank_ids:
             binding = binding_by_rank[rank_id]
-            experts_by_replica.setdefault(binding.replica_id, set()).add(
-                assignment.expert_id
-            )
-            roles_by_replica.setdefault(binding.replica_id, set()).add(
-                binding.worker_role.value
-            )
+            experts_by_replica.setdefault(binding.replica_id, set()).add(assignment.expert_id)
+            roles_by_replica.setdefault(binding.replica_id, set()).add(binding.worker_role.value)
     assert experts_by_replica == {
         "replica-0": expected_experts,
         "replica-1": expected_experts,
@@ -288,3 +295,173 @@ def test_data_parallelism_duplicates_kv_while_pipeline_parallelism_shards_it() -
     single_replica_kv = compile_fixed(pp=1, dp=1)
     assert compile_fixed(pp=1, dp=2) == single_replica_kv
     assert compile_fixed(pp=2, dp=1) == (single_replica_kv + 1) // 2
+
+
+def test_exhaustive_degree_space_includes_non_power_of_two_choices() -> None:
+    assert _degrees(4, OptimizationStrategy.EXHAUSTIVE) == (1, 2, 3, 4)
+    assert _degrees(8, OptimizationStrategy.HIERARCHICAL, fixed=3) == (3,)
+
+
+def test_profile_curve_collapses_duplicate_sizes_before_extrapolation() -> None:
+    profile = load_fabric_profile(FIXTURES / "fabric-profile-v1.json")
+    base = next(item for item in profile.measurements if item.primitive == "collective")
+
+    def point(identifier: str, size: int, duration: float) -> FabricMeasurementSeries:
+        return base.model_copy(
+            update={
+                "measurement_id": identifier,
+                "message_bytes": size,
+                "summary_median_us": duration,
+                "confidence_low_us": duration - 1.0,
+                "confidence_high_us": duration + 1.0,
+            }
+        )
+
+    profile = profile.model_copy(
+        update={
+            "measurements": (
+                point("small", 100, 10.0),
+                point("large-a", 200, 20.0),
+                point("large-b", 200, 22.0),
+            )
+        }
+    )
+    duration, uncertainty = _profile_duration(
+        profile, "collective", base.transport, base.rank_count, 300
+    )
+    assert duration == pytest.approx(32.0)
+    assert uncertainty == pytest.approx(1.0)
+
+
+def test_required_collective_transport_cannot_silently_disappear() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+    constrained = request.model_copy(
+        update={
+            "constraints": request.constraints.model_copy(
+                update={
+                    "tensor_parallel_degree": 2,
+                    "pipeline_parallel_degree": 1,
+                    "data_parallel_degree": 1,
+                    "expert_parallel_degree": 1,
+                    "permitted_transports": ("tcp",),
+                }
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="collective_transport_not_permitted"):
+        compile_physical_plan(constrained)
+
+
+def test_hard_latency_slo_uses_prediction_interval_upper_bound() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+    constrained = request.model_copy(
+        update={
+            "constraints": request.constraints.model_copy(
+                update={
+                    "tensor_parallel_degree": 1,
+                    "pipeline_parallel_degree": 1,
+                    "data_parallel_degree": 1,
+                    "expert_parallel_degree": 1,
+                    # The fixed candidate estimate is about 64 ms, but its 10%
+                    # uncertainty bound exceeds this hard constraint.
+                    "p95_ttft_ms": 68.0,
+                }
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="p95_ttft_slo"):
+        compile_physical_plan(constrained)
+
+
+def test_pareto_frontier_preserves_goodput_tradeoff() -> None:
+    def candidate(identifier: str, *, latency: float, goodput: float) -> CandidateSummary:
+        return CandidateSummary(
+            candidate_id=identifier,
+            tensor_parallel=1,
+            pipeline_parallel=1,
+            data_parallel=1,
+            expert_parallel=1,
+            disaggregated=False,
+            gpu_ids=("gpu-0",),
+            communication_us=10.0,
+            p95_ttft_ms=latency,
+            p99_tpot_ms=latency,
+            goodput_tokens_per_second=goodput,
+            cost_per_million_tokens=1.0,
+            availability=0.99,
+            failure_exposure_score=0.01,
+            objective_score=latency,
+            feasible=True,
+            rejection_codes=(),
+        )
+
+    frontier = _pareto(
+        (
+            candidate("lower-latency", latency=10.0, goodput=100.0),
+            candidate("higher-goodput", latency=11.0, goodput=200.0),
+        )
+    )
+    assert {item.candidate_id for item in frontier} == {
+        "lower-latency",
+        "higher-goodput",
+    }
+
+
+def test_robust_placement_spreads_complete_replicas_across_hosts() -> None:
+    topology = build_canonical_fixture("two_node_infiniband")
+    placement = _ordered_candidate_gpus(
+        topology,
+        tp=2,
+        pp=1,
+        dp=2,
+        strategy=OptimizationStrategy.ROBUST_FAILURE,
+        seed=7,
+    )
+    assert len(placement) == 4
+    first_replica_hosts = {gpu.host_id for gpu in placement[:2]}
+    second_replica_hosts = {gpu.host_id for gpu in placement[2:]}
+    assert len(first_replica_hosts) == len(second_replica_hosts) == 1
+    assert first_replica_hosts != second_replica_hosts
+
+
+def test_availability_preserves_shared_fault_domain_correlation() -> None:
+    def binding(rank: int, replica: str, role: WorkerRole, domain: str) -> RankBinding:
+        return RankBinding(
+            rank_id=rank,
+            host_id=domain,
+            gpu_id=f"gpu-{rank}",
+            numa_domain_id=f"numa-{rank}",
+            process_cpu_affinity=str(rank),
+            worker_role=role,
+            replica_id=replica,
+            fault_domain=domain,
+        )
+
+    shared_aggregated = RankPlacement(
+        bindings=(
+            binding(0, "replica-0", WorkerRole.AGGREGATED, "host-a"),
+            binding(1, "replica-1", WorkerRole.AGGREGATED, "host-a"),
+        )
+    )
+    independent_aggregated = RankPlacement(
+        bindings=(
+            binding(0, "replica-0", WorkerRole.AGGREGATED, "host-a"),
+            binding(1, "replica-1", WorkerRole.AGGREGATED, "host-b"),
+        )
+    )
+    shared_disaggregated = RankPlacement(
+        bindings=(
+            binding(0, "prefill", WorkerRole.PREFILL, "host-a"),
+            binding(1, "decode", WorkerRole.DECODE, "host-a"),
+        )
+    )
+    independent_disaggregated = RankPlacement(
+        bindings=(
+            binding(0, "prefill", WorkerRole.PREFILL, "host-a"),
+            binding(1, "decode", WorkerRole.DECODE, "host-b"),
+        )
+    )
+    assert _service_availability(shared_aggregated, 0.9) == pytest.approx(0.9)
+    assert _service_availability(independent_aggregated, 0.9) == pytest.approx(0.99)
+    assert _service_availability(shared_disaggregated, 0.9) == pytest.approx(0.9)
+    assert _service_availability(independent_disaggregated, 0.9) == pytest.approx(0.81)
