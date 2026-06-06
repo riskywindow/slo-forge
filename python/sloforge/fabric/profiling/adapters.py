@@ -166,6 +166,7 @@ def build_nccl_tests_command(
     maximum_bytes: int,
     step_factor: int,
     gpus_per_process: int,
+    visible_devices: tuple[str, ...],
     iterations: int,
     warmups: int,
     timeout_seconds: float = 120.0,
@@ -177,6 +178,12 @@ def build_nccl_tests_command(
         raise ValueError("NCCL test message bounds are invalid")
     if step_factor < 2 or gpus_per_process < 1 or iterations < 1 or warmups < 0:
         raise ValueError("NCCL test counts are invalid")
+    if (
+        len(visible_devices) != gpus_per_process
+        or len(set(visible_devices)) != len(visible_devices)
+        or any(not device.strip() or "," in device for device in visible_devices)
+    ):
+        raise ValueError("NCCL visible_devices must contain one unique explicit identifier per GPU")
     expected_name = {
         "all_reduce": "all_reduce_perf",
         "all_gather": "all_gather_perf",
@@ -188,7 +195,9 @@ def build_nccl_tests_command(
     if executable.name != expected_name:
         raise ValueError(f"{operation} requires the {expected_name} binary, got {executable.name}")
     resolved = _required_executable(executable, "nccl-tests")
-    environment: list[tuple[str, str]] = []
+    environment: list[tuple[str, str]] = [
+        ("CUDA_VISIBLE_DEVICES", ",".join(visible_devices)),
+    ]
     if algorithm:
         environment.append(("NCCL_ALGO", algorithm))
     if protocol:

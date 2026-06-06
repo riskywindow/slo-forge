@@ -1,6 +1,6 @@
 # Collective rank-ordering experiment
 
-- Artifact hash: `dd3d14c4b13cbf27282d45f524ff7d72ee25bb6e35bf658dbfcb0bc5dc7e9856`
+- Artifact hash: `1ed6199556658ae957aa5428e2cae85a5dd5c82b514391b3e3abb17d51c63d81`
 - Physical plan: `rank-ordering-fixture`
 - Collective: `tp-all-reduce`
 - Calibration: **synthetic calibrated**
@@ -19,7 +19,7 @@
 
 ## Integration decision
 
-synthetic calibrated trials show confidence-supported benefit in every regime, but production enablement requires matched hardware measurements
+synthetic calibrated inputs produce confidence-supported modeled benefit in every regime, but the paired A/B trials are digital-twin executions; production enablement requires matched on-device measurements of both orderings
 
 Warmup trials were retained in the raw artifact but excluded from all summaries. Trials use matched per-link perturbations, so the reported interval is paired.
 

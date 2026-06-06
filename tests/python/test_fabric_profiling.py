@@ -238,6 +238,7 @@ def test_nccl_builder_is_version_isolated_and_does_not_execute(tmp_path: Path) -
         maximum_bytes=1024 * 1024,
         step_factor=2,
         gpus_per_process=4,
+        visible_devices=("GPU-0", "GPU-1", "GPU-2", "GPU-3"),
         iterations=20,
         warmups=5,
         algorithm="Ring",
@@ -245,6 +246,7 @@ def test_nccl_builder_is_version_isolated_and_does_not_execute(tmp_path: Path) -
         channels=4,
     )
     assert command.argv[0] == str(binary.resolve())
+    assert ("CUDA_VISIBLE_DEVICES", "GPU-0,GPU-1,GPU-2,GPU-3") in command.environment
     assert ("NCCL_ALGO", "Ring") in command.environment
     assert command.requires_gpu
     with pytest.raises(ValueError, match="all_gather_perf"):
@@ -255,6 +257,7 @@ def test_nccl_builder_is_version_isolated_and_does_not_execute(tmp_path: Path) -
             maximum_bytes=1,
             step_factor=2,
             gpus_per_process=1,
+            visible_devices=("GPU-0",),
             iterations=1,
             warmups=0,
         )
@@ -301,6 +304,7 @@ def test_command_builder_requires_executable(tmp_path: Path) -> None:
             maximum_bytes=1,
             step_factor=2,
             gpus_per_process=1,
+            visible_devices=("GPU-0",),
             iterations=1,
             warmups=0,
         )
@@ -316,8 +320,29 @@ def test_adapter_builders_do_not_mutate_environment(tmp_path: Path) -> None:
         maximum_bytes=1,
         step_factor=2,
         gpus_per_process=1,
+        visible_devices=("GPU-0",),
         iterations=1,
         warmups=0,
         algorithm="Tree",
     )
     assert dict(os.environ) == before
+
+
+def test_nccl_builder_rejects_implicit_or_mismatched_device_sets(tmp_path: Path) -> None:
+    binary = _executable(tmp_path, "all_reduce_perf")
+    common = {
+        "executable": binary,
+        "operation": "all_reduce",
+        "minimum_bytes": 1,
+        "maximum_bytes": 1,
+        "step_factor": 2,
+        "gpus_per_process": 2,
+        "iterations": 1,
+        "warmups": 0,
+    }
+    with pytest.raises(ValueError, match="one unique explicit identifier"):
+        build_nccl_tests_command(**common, visible_devices=())
+    with pytest.raises(ValueError, match="one unique explicit identifier"):
+        build_nccl_tests_command(**common, visible_devices=("GPU-0", "GPU-0"))
+    with pytest.raises(ValueError, match="one unique explicit identifier"):
+        build_nccl_tests_command(**common, visible_devices=("GPU-0,GPU-1", "GPU-2"))

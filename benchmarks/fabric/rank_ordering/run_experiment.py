@@ -59,6 +59,7 @@ def main() -> None:
         bundle.topology,
         bundle.trace_evidence,
         bundle.config,
+        evidence_root=PROJECT_ROOT,
     )
     paths = write_experiment_artifacts(args.output, experiment, report_path=args.report)
     print(f"decision={experiment.decision.status.value}")
