@@ -488,6 +488,39 @@ def test_irrelevant_matched_events_do_not_inflate_network_confidence() -> None:
     assert confidence(0) == confidence(100)
 
 
+def test_repeated_physical_counter_evidence_outranks_propagated_stage_delay() -> None:
+    healthy_events = tuple(
+        _event(
+            f"healthy-{index}",
+            duration_ns=1_000,
+            event_type=EventType.KV_TRANSFER,
+            request_id=f"request-{index}",
+            counter=CounterValue(name="network_bandwidth_gbps", value=100.0, unit="Gbps"),
+        )
+        for index in range(8)
+    )
+    degraded_events = tuple(
+        _event(
+            f"degraded-{index}",
+            duration_ns=20_000,
+            event_type=EventType.KV_TRANSFER,
+            request_id=f"request-{index}",
+            counter=CounterValue(name="network_bandwidth_gbps", value=10.0, unit="Gbps"),
+        )
+        for index in range(8)
+    )
+    healthy = _run("healthy", healthy_events)
+    degraded = _run("degraded", degraded_events)
+    comparison = compare_runs(healthy, degraded)
+    bandwidth = next(
+        item for item in comparison.counter_deltas if item.name == "network_bandwidth_gbps"
+    )
+    assert bandwidth.healthy_count == bandwidth.degraded_count == 8
+    result = diagnose(degraded, comparison=comparison, baseline=healthy)
+    assert result.top_hypothesis is BottleneckKind.NETWORK_BANDWIDTH_DEGRADATION
+    assert BottleneckKind.KV_TRANSFER_BOTTLENECK in result.top_three
+
+
 def test_no_signal_diagnosis_is_explicitly_rejected_and_low_confidence() -> None:
     healthy = _run("healthy", (_event("healthy", duration_ns=100_000),))
     degraded = _run("degraded", (_event("degraded", duration_ns=100_000),))

@@ -201,7 +201,11 @@ def _signal_sample_count(comparison: DifferentialComparison, signal: str) -> int
         item.matched_count for item in comparison.stage_deltas if item.event_type in event_types
     )
     counter_names = _SIGNAL_COUNTERS.get(signal, frozenset())
-    counter_count = sum(item.name in counter_names for item in comparison.counter_deltas)
+    counter_count = sum(
+        max(1, min(item.healthy_count, item.degraded_count))
+        for item in comparison.counter_deltas
+        if item.name in counter_names
+    )
     return stage_count + counter_count
 
 

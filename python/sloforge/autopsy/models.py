@@ -303,6 +303,10 @@ class StageDelta(StrictModel):
 class CounterDelta(StrictModel):
     name: NonEmpty
     unit: NonEmpty
+    # Defaults preserve comparison/v1 artifacts emitted before sample counts
+    # were retained. New comparisons always populate both counts.
+    healthy_count: int = Field(default=0, ge=0)
+    degraded_count: int = Field(default=0, ge=0)
     healthy_median: float
     degraded_median: float
     absolute_delta: float
