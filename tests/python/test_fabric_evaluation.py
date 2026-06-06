@@ -79,6 +79,13 @@ def test_artifact_derived_evaluation_round_trip(tmp_path: Path) -> None:
     assert len(result.recovery_trials) == 10
     assert result.hardware_backed_validation == "not_exercised_no_compatible_hardware"
     assert all(item.simulator_calls == 0 for item in result.plan_trials)
+    random_trial = next(
+        item for item in result.plan_trials if item.method is EvaluationMethod.RANDOM
+    )
+    # Evaluation must retain a baseline even when it misses the declared SLO;
+    # hard production compiler constraints are tested in the compiler suite.
+    assert random_trial.observed_p95_ttft_ms >= 0.0
+    assert 0.0 <= random_trial.slo_attainment <= 1.0
     validated = validate_evaluation_artifacts(
         artifact_root=artifact_root,
         report_dir=report_dir,
