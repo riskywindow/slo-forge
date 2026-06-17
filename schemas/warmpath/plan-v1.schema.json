@@ -1,0 +1,315 @@
+{
+  "$defs": {
+    "ArtifactPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "estimate_source": {
+          "enum": [
+            "measured",
+            "theoretical",
+            "warm"
+          ],
+          "title": "Estimate Source",
+          "type": "string"
+        },
+        "expected_duration_ms": {
+          "minimum": 0.0,
+          "title": "Expected Duration Ms",
+          "type": "number"
+        },
+        "mode": {
+          "$ref": "#/$defs/MaterializationMode"
+        },
+        "prefetch_order": {
+          "minimum": 0,
+          "title": "Prefetch Order",
+          "type": "integer"
+        },
+        "tier_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Tier Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "tier_id",
+        "mode",
+        "prefetch_order",
+        "expected_duration_ms",
+        "estimate_source"
+      ],
+      "title": "ArtifactPlacement",
+      "type": "object"
+    },
+    "MaterializationMode": {
+      "enum": [
+        "eager_restore",
+        "lazy_restore",
+        "rebuild",
+        "keep_warm"
+      ],
+      "title": "MaterializationMode",
+      "type": "string"
+    },
+    "RejectedWarmPathCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "reason_code": {
+          "enum": [
+            "compatibility",
+            "capacity",
+            "startup_slo",
+            "cost_budget",
+            "security",
+            "failure"
+          ],
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "reason_code",
+        "explanation"
+      ],
+      "title": "RejectedWarmPathCandidate",
+      "type": "object"
+    },
+    "StartupStage": {
+      "enum": [
+        "fetch",
+        "verify",
+        "restore",
+        "weight_load",
+        "runtime_initialization",
+        "communication_initialization",
+        "graph_capture",
+        "readiness"
+      ],
+      "title": "StartupStage",
+      "type": "string"
+    },
+    "StartupStagePrediction": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "estimate_source": {
+          "enum": [
+            "measured",
+            "theoretical",
+            "warm"
+          ],
+          "title": "Estimate Source",
+          "type": "string"
+        },
+        "finish_ms": {
+          "minimum": 0.0,
+          "title": "Finish Ms",
+          "type": "number"
+        },
+        "resource": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Resource",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/StartupStage"
+        },
+        "start_ms": {
+          "minimum": 0.0,
+          "title": "Start Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "stage",
+        "start_ms",
+        "finish_ms",
+        "resource",
+        "estimate_source"
+      ],
+      "title": "StartupStagePrediction",
+      "type": "object"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/warmpath/plan-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "compiler_version": {
+      "minLength": 1,
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "evaluated_candidate_count": {
+      "exclusiveMinimum": 0,
+      "title": "Evaluated Candidate Count",
+      "type": "integer"
+    },
+    "evidence_references": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Evidence References",
+      "type": "array"
+    },
+    "graph_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Graph Hash",
+      "type": "string"
+    },
+    "graph_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Graph Id",
+      "type": "string"
+    },
+    "host_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Host Fingerprint",
+      "type": "string"
+    },
+    "objective_value": {
+      "minimum": 0.0,
+      "title": "Objective Value",
+      "type": "number"
+    },
+    "optimizer": {
+      "enum": [
+        "exhaustive",
+        "beam"
+      ],
+      "title": "Optimizer",
+      "type": "string"
+    },
+    "optimizer_seed": {
+      "title": "Optimizer Seed",
+      "type": "integer"
+    },
+    "placements": {
+      "items": {
+        "$ref": "#/$defs/ArtifactPlacement"
+      },
+      "title": "Placements",
+      "type": "array"
+    },
+    "plan_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "predicted_hourly_cost": {
+      "minimum": 0.0,
+      "title": "Predicted Hourly Cost",
+      "type": "number"
+    },
+    "predicted_p50_ready_time_ms": {
+      "minimum": 0.0,
+      "title": "Predicted P50 Ready Time Ms",
+      "type": "number"
+    },
+    "predicted_p95_ready_time_ms": {
+      "minimum": 0.0,
+      "title": "Predicted P95 Ready Time Ms",
+      "type": "number"
+    },
+    "predicted_restore_failure_probability": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Predicted Restore Failure Probability",
+      "type": "number"
+    },
+    "prediction_interval_high_ms": {
+      "minimum": 0.0,
+      "title": "Prediction Interval High Ms",
+      "type": "number"
+    },
+    "prediction_interval_low_ms": {
+      "minimum": 0.0,
+      "title": "Prediction Interval Low Ms",
+      "type": "number"
+    },
+    "profile_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Profile Hash",
+      "type": "string"
+    },
+    "profile_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "rejected_candidates": {
+      "items": {
+        "$ref": "#/$defs/RejectedWarmPathCandidate"
+      },
+      "title": "Rejected Candidates",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "stage_predictions": {
+      "items": {
+        "$ref": "#/$defs/StartupStagePrediction"
+      },
+      "title": "Stage Predictions",
+      "type": "array"
+    },
+    "warm_replica_count": {
+      "minimum": 0,
+      "title": "Warm Replica Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "plan_id",
+    "profile_id",
+    "graph_id",
+    "host_fingerprint",
+    "placements",
+    "warm_replica_count",
+    "predicted_p50_ready_time_ms",
+    "predicted_p95_ready_time_ms",
+    "prediction_interval_low_ms",
+    "prediction_interval_high_ms",
+    "predicted_hourly_cost",
+    "predicted_restore_failure_probability",
+    "objective_value",
+    "stage_predictions",
+    "rejected_candidates",
+    "optimizer",
+    "optimizer_seed",
+    "evaluated_candidate_count",
+    "evidence_references",
+    "compiler_version",
+    "graph_hash",
+    "profile_hash"
+  ],
+  "title": "WarmPathPlan",
+  "type": "object"
+}

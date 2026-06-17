@@ -1,0 +1,88 @@
+{
+  "bundle_sha256": "630ddedbf2d627cb2518cabbb1565d741863e312191d701bd5f71f93d8ca5b7a",
+  "minimized_counter_count": 1,
+  "minimized_event_count": 1,
+  "minimized_fault_count": 0,
+  "minimized_rank_count": 1,
+  "minimized_run": {
+    "alignments": [],
+    "artifacts": [
+      {
+        "artifact_uri": "fixture://fabric-simulation",
+        "record_index": null,
+        "sha256": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
+        "source": "synthetic-fixture"
+      }
+    ],
+    "events": [
+      {
+        "alignment_confidence": 0,
+        "alignment_uncertainty_ns": null,
+        "counters": [
+          {
+            "name": "network_bandwidth_gbps",
+            "unit": "Gb/s",
+            "value": 50
+          }
+        ],
+        "dependency_event_ids": [],
+        "end_ns": 4000000,
+        "event_id": "degraded-golden-event",
+        "event_type": "network_transfer",
+        "evidence": {
+          "artifact_uri": "fixture://fabric-simulation",
+          "record_index": null,
+          "sha256": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
+          "source": "synthetic-fixture"
+        },
+        "gpu": "gpu-0",
+        "host": "host-0",
+        "model_id": "model-0",
+        "nic": "nic-0",
+        "normalized_end_ns": null,
+        "normalized_start_ns": null,
+        "numa_domain": "numa-0",
+        "operation": "expert-dispatch",
+        "parent_event_id": null,
+        "process_id": null,
+        "rank": 0,
+        "replica": "replica-0",
+        "request_id": "request-0",
+        "resource": {
+          "contention_domain": "rail-0",
+          "resource_id": "rail-0",
+          "resource_type": "network_rail",
+          "topology_node_id": "rail-0"
+        },
+        "schema_version": "sloforge.autopsy.event/v1",
+        "source_clock": "synthetic",
+        "start_ns": 1000000,
+        "thread_id": null
+      }
+    ],
+    "fault_intervals": [],
+    "physical_plan_hash": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
+    "reference_host": "host-0",
+    "run_id": "degraded-golden-minimized",
+    "schema_version": "sloforge.autopsy.run/v1",
+    "source": "synthetic_fixture",
+    "topology_fingerprint": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
+    "warnings": [
+      "deterministically minimized Autopsy reproducer"
+    ],
+    "workload_fingerprint": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67"
+  },
+  "original_counter_count": 1,
+  "original_event_count": 1,
+  "original_fault_count": 1,
+  "original_rank_count": 1,
+  "original_run_id": "degraded-golden",
+  "predicate_evaluations": 5,
+  "removed_counters": [],
+  "removed_event_ids": [],
+  "removed_fault_ids": [
+    "rail-degraded"
+  ],
+  "removed_ranks": [],
+  "schema_version": "sloforge.autopsy.minimization/v1"
+}

@@ -1,0 +1,383 @@
+{
+  "$defs": {
+    "HostEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "minLength": 1,
+          "title": "Architecture",
+          "type": "string"
+        },
+        "driver_major_version": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Driver Major Version"
+        },
+        "gpu_architecture": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gpu Architecture"
+        },
+        "gpu_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Gpu Count",
+          "type": "integer"
+        },
+        "host_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Host Fingerprint",
+          "type": "string"
+        },
+        "operating_system": {
+          "minLength": 1,
+          "title": "Operating System",
+          "type": "string"
+        },
+        "runtime": {
+          "minLength": 1,
+          "title": "Runtime",
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "title": "Runtime Version",
+          "type": "string"
+        },
+        "topology_fingerprint": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topology Fingerprint"
+        }
+      },
+      "required": [
+        "operating_system",
+        "architecture",
+        "runtime",
+        "runtime_version",
+        "host_fingerprint"
+      ],
+      "title": "HostEnvironment",
+      "type": "object"
+    },
+    "SecurityClass": {
+      "enum": [
+        "public",
+        "internal",
+        "restricted"
+      ],
+      "title": "SecurityClass",
+      "type": "string"
+    },
+    "StageMeasurement": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "confidence_interval_high_ms": {
+          "minimum": 0.0,
+          "title": "Confidence Interval High Ms",
+          "type": "number"
+        },
+        "confidence_interval_low_ms": {
+          "minimum": 0.0,
+          "title": "Confidence Interval Low Ms",
+          "type": "number"
+        },
+        "confidence_level": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "environment_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Environment Fingerprint",
+          "type": "string"
+        },
+        "invocation": {
+          "minLength": 1,
+          "title": "Invocation",
+          "type": "string"
+        },
+        "median_absolute_deviation_ms": {
+          "minimum": 0.0,
+          "title": "Median Absolute Deviation Ms",
+          "type": "number"
+        },
+        "median_ms": {
+          "minimum": 0.0,
+          "title": "Median Ms",
+          "type": "number"
+        },
+        "p95_ms": {
+          "minimum": 0.0,
+          "title": "P95 Ms",
+          "type": "number"
+        },
+        "raw_samples_ms": {
+          "items": {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "title": "Raw Samples Ms",
+          "type": "array"
+        },
+        "source": {
+          "enum": [
+            "measured",
+            "synthetic_fixture"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/StartupStage"
+        },
+        "tier_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Tier Id",
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "warmup_count": {
+          "minimum": 0,
+          "title": "Warmup Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "tier_id",
+        "stage",
+        "warmup_count",
+        "raw_samples_ms",
+        "median_ms",
+        "p95_ms",
+        "median_absolute_deviation_ms",
+        "confidence_level",
+        "confidence_interval_low_ms",
+        "confidence_interval_high_ms",
+        "source",
+        "environment_fingerprint",
+        "invocation",
+        "timeout_seconds",
+        "artifact_hash"
+      ],
+      "title": "StageMeasurement",
+      "type": "object"
+    },
+    "StartupStage": {
+      "enum": [
+        "fetch",
+        "verify",
+        "restore",
+        "weight_load",
+        "runtime_initialization",
+        "communication_initialization",
+        "graph_capture",
+        "readiness"
+      ],
+      "title": "StartupStage",
+      "type": "string"
+    },
+    "StorageKind": {
+      "enum": [
+        "object_storage",
+        "remote_filesystem",
+        "regional_cache",
+        "zonal_cache",
+        "peer_host",
+        "remote_memory",
+        "local_nvme",
+        "page_cache",
+        "host_memory",
+        "pinned_host_memory",
+        "gpu_hbm"
+      ],
+      "title": "StorageKind",
+      "type": "string"
+    },
+    "StorageTierSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "base_read_latency_ms": {
+          "minimum": 0.0,
+          "title": "Base Read Latency Ms",
+          "type": "number"
+        },
+        "capacity_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Capacity Bytes",
+          "type": "integer"
+        },
+        "hourly_cost_per_gib": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Hourly Cost Per Gib",
+          "type": "number"
+        },
+        "kind": {
+          "$ref": "#/$defs/StorageKind"
+        },
+        "local_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Path"
+        },
+        "maximum_parallel_reads": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Maximum Parallel Reads",
+          "type": "integer"
+        },
+        "maximum_security_class": {
+          "$ref": "#/$defs/SecurityClass",
+          "default": "internal"
+        },
+        "persistent": {
+          "default": true,
+          "title": "Persistent",
+          "type": "boolean"
+        },
+        "read_bandwidth_bytes_per_second": {
+          "exclusiveMinimum": 0.0,
+          "title": "Read Bandwidth Bytes Per Second",
+          "type": "number"
+        },
+        "restore_failure_probability": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Restore Failure Probability",
+          "type": "number"
+        },
+        "tier_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Tier Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tier_id",
+        "kind",
+        "capacity_bytes",
+        "read_bandwidth_bytes_per_second",
+        "base_read_latency_ms"
+      ],
+      "title": "StorageTierSpec",
+      "type": "object"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/warmpath/startup-profile-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "environment_manifest_path": {
+      "minLength": 1,
+      "title": "Environment Manifest Path",
+      "type": "string"
+    },
+    "graph_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Graph Id",
+      "type": "string"
+    },
+    "host": {
+      "$ref": "#/$defs/HostEnvironment"
+    },
+    "measurements": {
+      "items": {
+        "$ref": "#/$defs/StageMeasurement"
+      },
+      "title": "Measurements",
+      "type": "array"
+    },
+    "profile_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "raw_artifact_directory": {
+      "minLength": 1,
+      "title": "Raw Artifact Directory",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tiers": {
+      "items": {
+        "$ref": "#/$defs/StorageTierSpec"
+      },
+      "title": "Tiers",
+      "type": "array"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "profile_id",
+    "graph_id",
+    "host",
+    "tiers",
+    "measurements",
+    "raw_artifact_directory",
+    "environment_manifest_path"
+  ],
+  "title": "StartupProfile",
+  "type": "object"
+}

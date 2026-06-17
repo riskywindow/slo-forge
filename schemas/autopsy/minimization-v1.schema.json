@@ -1,0 +1,764 @@
+{
+  "$defs": {
+    "AlignmentEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "drift_ppm": {
+          "title": "Drift Ppm",
+          "type": "number"
+        },
+        "host": {
+          "minLength": 1,
+          "title": "Host",
+          "type": "string"
+        },
+        "offset_ns": {
+          "title": "Offset Ns",
+          "type": "number"
+        },
+        "quality": {
+          "$ref": "#/$defs/AlignmentQuality"
+        },
+        "reference_host": {
+          "minLength": 1,
+          "title": "Reference Host",
+          "type": "string"
+        },
+        "reference_local_ns": {
+          "minimum": 0,
+          "title": "Reference Local Ns",
+          "type": "integer"
+        },
+        "residual_p95_ns": {
+          "minimum": 0,
+          "title": "Residual P95 Ns",
+          "type": "integer"
+        },
+        "sample_count": {
+          "minimum": 1,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "uncertainty_ns": {
+          "minimum": 0,
+          "title": "Uncertainty Ns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "host",
+        "reference_host",
+        "offset_ns",
+        "drift_ppm",
+        "reference_local_ns",
+        "uncertainty_ns",
+        "sample_count",
+        "confidence",
+        "quality",
+        "residual_p95_ns"
+      ],
+      "title": "AlignmentEstimate",
+      "type": "object"
+    },
+    "AlignmentQuality": {
+      "enum": [
+        "good",
+        "degraded",
+        "insufficient"
+      ],
+      "title": "AlignmentQuality",
+      "type": "string"
+    },
+    "AutopsyEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_confidence": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Alignment Confidence",
+          "type": "number"
+        },
+        "alignment_uncertainty_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alignment Uncertainty Ns"
+        },
+        "counters": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CounterValue"
+          },
+          "title": "Counters",
+          "type": "array"
+        },
+        "dependency_event_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependency Event Ids",
+          "type": "array"
+        },
+        "end_ns": {
+          "minimum": 0,
+          "title": "End Ns",
+          "type": "integer"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "$ref": "#/$defs/EventType"
+        },
+        "evidence": {
+          "$ref": "#/$defs/EvidenceRef"
+        },
+        "gpu": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gpu"
+        },
+        "host": {
+          "minLength": 1,
+          "title": "Host",
+          "type": "string"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "nic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nic"
+        },
+        "normalized_end_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalized End Ns"
+        },
+        "normalized_start_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalized Start Ns"
+        },
+        "numa_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation"
+        },
+        "parent_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Event Id"
+        },
+        "process_id": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Process Id"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rank"
+        },
+        "replica": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replica"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceRef"
+        },
+        "schema_version": {
+          "const": "sloforge.autopsy.event/v1",
+          "default": "sloforge.autopsy.event/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_clock": {
+          "$ref": "#/$defs/SourceClock"
+        },
+        "start_ns": {
+          "minimum": 0,
+          "title": "Start Ns",
+          "type": "integer"
+        },
+        "thread_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thread Id"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "host",
+        "start_ns",
+        "end_ns",
+        "source_clock",
+        "resource",
+        "evidence"
+      ],
+      "title": "AutopsyEvent",
+      "type": "object"
+    },
+    "AutopsyRun": {
+      "additionalProperties": false,
+      "properties": {
+        "alignments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AlignmentEstimate"
+          },
+          "title": "Alignments",
+          "type": "array"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/AutopsyEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "fault_intervals": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FaultInterval"
+          },
+          "title": "Fault Intervals",
+          "type": "array"
+        },
+        "physical_plan_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Physical Plan Hash",
+          "type": "string"
+        },
+        "reference_host": {
+          "minLength": 1,
+          "title": "Reference Host",
+          "type": "string"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "sloforge.autopsy.run/v1",
+          "default": "sloforge.autopsy.run/v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "live",
+            "simulator",
+            "synthetic_fixture",
+            "imported_trace"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "topology_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Topology Fingerprint",
+          "type": "string"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "workload_fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Workload Fingerprint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "source",
+        "topology_fingerprint",
+        "physical_plan_hash",
+        "workload_fingerprint",
+        "reference_host",
+        "events",
+        "artifacts"
+      ],
+      "title": "AutopsyRun",
+      "type": "object"
+    },
+    "CounterValue": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CounterValue",
+      "type": "object"
+    },
+    "EventType": {
+      "enum": [
+        "request",
+        "gateway_queue",
+        "backend_queue",
+        "scheduler",
+        "prefill",
+        "decode",
+        "token_stream",
+        "cpu_launch",
+        "gpu_compute",
+        "gpu_memory",
+        "kernel",
+        "collective",
+        "collective_wait",
+        "expert_dispatch",
+        "expert_combine",
+        "kv_transfer",
+        "network_transfer",
+        "pcie_transfer",
+        "nvlink_transfer",
+        "storage_read",
+        "startup",
+        "readiness",
+        "controller",
+        "recovery",
+        "fault",
+        "health"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "record_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Record Index"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "artifact_uri",
+        "sha256"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "FaultInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "end_ns": {
+          "minimum": 0,
+          "title": "End Ns",
+          "type": "integer"
+        },
+        "fault_id": {
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "fault_type": {
+          "minLength": 1,
+          "title": "Fault Type",
+          "type": "string"
+        },
+        "ground_truth": {
+          "default": true,
+          "title": "Ground Truth",
+          "type": "boolean"
+        },
+        "parameters": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CounterValue"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "start_ns": {
+          "minimum": 0,
+          "title": "Start Ns",
+          "type": "integer"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fault_id",
+        "fault_type",
+        "target",
+        "start_ns",
+        "end_ns"
+      ],
+      "title": "FaultInterval",
+      "type": "object"
+    },
+    "ResourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "contention_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contention Domain"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_type": {
+          "enum": [
+            "cpu_core_group",
+            "numa_memory",
+            "gpu_compute",
+            "gpu_hbm",
+            "copy_engine",
+            "nvlink",
+            "nvswitch",
+            "pcie",
+            "nic_queue",
+            "network_rail",
+            "storage",
+            "process",
+            "logical_queue"
+          ],
+          "title": "Resource Type",
+          "type": "string"
+        },
+        "topology_node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topology Node Id"
+        }
+      },
+      "required": [
+        "resource_id",
+        "resource_type"
+      ],
+      "title": "ResourceRef",
+      "type": "object"
+    },
+    "SourceClock": {
+      "enum": [
+        "monotonic",
+        "monotonic_raw",
+        "cuda_global_timer",
+        "cupti",
+        "wall",
+        "synthetic"
+      ],
+      "title": "SourceClock",
+      "type": "string"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/autopsy/minimization-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Sha256",
+      "type": "string"
+    },
+    "minimized_counter_count": {
+      "minimum": 0,
+      "title": "Minimized Counter Count",
+      "type": "integer"
+    },
+    "minimized_event_count": {
+      "minimum": 0,
+      "title": "Minimized Event Count",
+      "type": "integer"
+    },
+    "minimized_fault_count": {
+      "minimum": 0,
+      "title": "Minimized Fault Count",
+      "type": "integer"
+    },
+    "minimized_rank_count": {
+      "minimum": 0,
+      "title": "Minimized Rank Count",
+      "type": "integer"
+    },
+    "minimized_run": {
+      "$ref": "#/$defs/AutopsyRun"
+    },
+    "original_counter_count": {
+      "minimum": 0,
+      "title": "Original Counter Count",
+      "type": "integer"
+    },
+    "original_event_count": {
+      "minimum": 0,
+      "title": "Original Event Count",
+      "type": "integer"
+    },
+    "original_fault_count": {
+      "minimum": 0,
+      "title": "Original Fault Count",
+      "type": "integer"
+    },
+    "original_rank_count": {
+      "minimum": 0,
+      "title": "Original Rank Count",
+      "type": "integer"
+    },
+    "original_run_id": {
+      "minLength": 1,
+      "title": "Original Run Id",
+      "type": "string"
+    },
+    "predicate_evaluations": {
+      "minimum": 1,
+      "title": "Predicate Evaluations",
+      "type": "integer"
+    },
+    "removed_counters": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Removed Counters",
+      "type": "array"
+    },
+    "removed_event_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Removed Event Ids",
+      "type": "array"
+    },
+    "removed_fault_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Removed Fault Ids",
+      "type": "array"
+    },
+    "removed_ranks": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Removed Ranks",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "sloforge.autopsy.minimization/v1",
+      "default": "sloforge.autopsy.minimization/v1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "original_run_id",
+    "minimized_run",
+    "original_event_count",
+    "minimized_event_count",
+    "original_rank_count",
+    "minimized_rank_count",
+    "original_counter_count",
+    "minimized_counter_count",
+    "original_fault_count",
+    "minimized_fault_count",
+    "removed_event_ids",
+    "removed_ranks",
+    "removed_counters",
+    "removed_fault_ids",
+    "predicate_evaluations",
+    "bundle_sha256"
+  ],
+  "title": "MinimizationResult",
+  "type": "object"
+}

@@ -1,0 +1,424 @@
+{
+  "$defs": {
+    "CounterValue": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CounterValue",
+      "type": "object"
+    },
+    "EventType": {
+      "enum": [
+        "request",
+        "gateway_queue",
+        "backend_queue",
+        "scheduler",
+        "prefill",
+        "decode",
+        "token_stream",
+        "cpu_launch",
+        "gpu_compute",
+        "gpu_memory",
+        "kernel",
+        "collective",
+        "collective_wait",
+        "expert_dispatch",
+        "expert_combine",
+        "kv_transfer",
+        "network_transfer",
+        "pcie_transfer",
+        "nvlink_transfer",
+        "storage_read",
+        "startup",
+        "readiness",
+        "controller",
+        "recovery",
+        "fault",
+        "health"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "record_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Record Index"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "artifact_uri",
+        "sha256"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "ResourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "contention_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contention Domain"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_type": {
+          "enum": [
+            "cpu_core_group",
+            "numa_memory",
+            "gpu_compute",
+            "gpu_hbm",
+            "copy_engine",
+            "nvlink",
+            "nvswitch",
+            "pcie",
+            "nic_queue",
+            "network_rail",
+            "storage",
+            "process",
+            "logical_queue"
+          ],
+          "title": "Resource Type",
+          "type": "string"
+        },
+        "topology_node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topology Node Id"
+        }
+      },
+      "required": [
+        "resource_id",
+        "resource_type"
+      ],
+      "title": "ResourceRef",
+      "type": "object"
+    },
+    "SourceClock": {
+      "enum": [
+        "monotonic",
+        "monotonic_raw",
+        "cuda_global_timer",
+        "cupti",
+        "wall",
+        "synthetic"
+      ],
+      "title": "SourceClock",
+      "type": "string"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/autopsy/event-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "alignment_confidence": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Alignment Confidence",
+      "type": "number"
+    },
+    "alignment_uncertainty_ns": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Alignment Uncertainty Ns"
+    },
+    "counters": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/CounterValue"
+      },
+      "title": "Counters",
+      "type": "array"
+    },
+    "dependency_event_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Dependency Event Ids",
+      "type": "array"
+    },
+    "end_ns": {
+      "minimum": 0,
+      "title": "End Ns",
+      "type": "integer"
+    },
+    "event_id": {
+      "minLength": 1,
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "$ref": "#/$defs/EventType"
+    },
+    "evidence": {
+      "$ref": "#/$defs/EvidenceRef"
+    },
+    "gpu": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gpu"
+    },
+    "host": {
+      "minLength": 1,
+      "title": "Host",
+      "type": "string"
+    },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "nic": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Nic"
+    },
+    "normalized_end_ns": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized End Ns"
+    },
+    "normalized_start_ns": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalized Start Ns"
+    },
+    "numa_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Numa Domain"
+    },
+    "operation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Operation"
+    },
+    "parent_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Event Id"
+    },
+    "process_id": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Process Id"
+    },
+    "rank": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rank"
+    },
+    "replica": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Replica"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Id"
+    },
+    "resource": {
+      "$ref": "#/$defs/ResourceRef"
+    },
+    "schema_version": {
+      "const": "sloforge.autopsy.event/v1",
+      "default": "sloforge.autopsy.event/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_clock": {
+      "$ref": "#/$defs/SourceClock"
+    },
+    "start_ns": {
+      "minimum": 0,
+      "title": "Start Ns",
+      "type": "integer"
+    },
+    "thread_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Thread Id"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "host",
+    "start_ns",
+    "end_ns",
+    "source_clock",
+    "resource",
+    "evidence"
+  ],
+  "title": "AutopsyEvent",
+  "type": "object"
+}

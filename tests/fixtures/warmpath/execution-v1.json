@@ -1,0 +1,65 @@
+{
+  "artifact_hash": "082021e1fb24463e98c01933f9c67261d1c9e91c0f893bfc26994b5b6dd75f48",
+  "cache_evictions": [],
+  "execution_id": "warmpath-local-demo",
+  "failure_reason": null,
+  "output_directory": "artifacts/warmpath/execution",
+  "plan_id": "warmpath-eb19aa057c17b1bc",
+  "ready_time_ms": 4.367792,
+  "records": [
+    {
+      "artifact_id": "model-config",
+      "bytes_materialized": 35,
+      "checksum_verified": true,
+      "destination_path": "artifacts/warmpath/execution/config.json",
+      "error": null,
+      "finished_ns": 214095691509458,
+      "mode": "eager_restore",
+      "source_path": "artifacts/warmpath/input/files/config.json",
+      "started_ns": 214095691040458,
+      "status": "restored",
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "tokenizer",
+      "bytes_materialized": 40,
+      "checksum_verified": true,
+      "destination_path": "artifacts/warmpath/execution/tokenizer.json",
+      "error": null,
+      "finished_ns": 214095691848125,
+      "mode": "eager_restore",
+      "source_path": "artifacts/warmpath/input/files/tokenizer.json",
+      "started_ns": 214095691525083,
+      "status": "restored",
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "model-weights",
+      "bytes_materialized": 2097152,
+      "checksum_verified": true,
+      "destination_path": "artifacts/warmpath/execution/weights.bin",
+      "error": null,
+      "finished_ns": 214095695388125,
+      "mode": "eager_restore",
+      "source_path": "artifacts/warmpath/input/files/weights.bin",
+      "started_ns": 214095691852833,
+      "status": "restored",
+      "tier_id": "page-cache"
+    },
+    {
+      "artifact_id": "runtime-cache",
+      "bytes_materialized": 0,
+      "checksum_verified": false,
+      "destination_path": null,
+      "error": null,
+      "finished_ns": 214095695402500,
+      "mode": "lazy_restore",
+      "source_path": null,
+      "started_ns": 214095695401166,
+      "status": "deferred",
+      "tier_id": "host-memory"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "success": true
+}

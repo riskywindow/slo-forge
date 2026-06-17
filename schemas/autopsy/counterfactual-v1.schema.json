@@ -1,0 +1,418 @@
+{
+  "$defs": {
+    "BottleneckKind": {
+      "enum": [
+        "arrival_overload",
+        "gateway_queueing",
+        "backend_queueing",
+        "insufficient_warm_capacity",
+        "cold_start_regression",
+        "model_loading_regression",
+        "cpu_launch_bottleneck",
+        "excessive_kernel_launches",
+        "gpu_compute_regression",
+        "gpu_memory_bandwidth_regression",
+        "gpu_clock_throttling",
+        "numa_misplacement",
+        "pcie_bottleneck",
+        "nvlink_degradation",
+        "network_bandwidth_degradation",
+        "network_latency_degradation",
+        "rank_straggler",
+        "collective_imbalance",
+        "collective_algorithm_regression",
+        "expert_load_imbalance",
+        "prefill_pool_saturation",
+        "decode_pool_saturation",
+        "kv_transfer_bottleneck",
+        "unhealthy_worker",
+        "worker_crash",
+        "topology_mismatch",
+        "invalid_physical_plan_assumption"
+      ],
+      "title": "BottleneckKind",
+      "type": "string"
+    },
+    "CounterfactualScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "hypothesis_id": {
+          "minLength": 1,
+          "title": "Hypothesis Id",
+          "type": "string"
+        },
+        "hypothesis_kind": {
+          "$ref": "#/$defs/BottleneckKind"
+        },
+        "modifications": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "remove_fault": "#/$defs/RemoveFault",
+                "replace_resource": "#/$defs/ReplaceResource",
+                "scale_rank": "#/$defs/ScaleRank",
+                "scale_resource_curve": "#/$defs/ScaleResourceCurve"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/RemoveFault"
+              },
+              {
+                "$ref": "#/$defs/ScaleResourceCurve"
+              },
+              {
+                "$ref": "#/$defs/ScaleRank"
+              },
+              {
+                "$ref": "#/$defs/ReplaceResource"
+              }
+            ]
+          },
+          "title": "Modifications",
+          "type": "array"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "hypothesis_id",
+        "hypothesis_kind",
+        "rationale",
+        "modifications"
+      ],
+      "title": "CounterfactualScenario",
+      "type": "object"
+    },
+    "RemoveFault": {
+      "additionalProperties": false,
+      "properties": {
+        "fault_id": {
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "remove_fault",
+          "default": "remove_fault",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fault_id"
+      ],
+      "title": "RemoveFault",
+      "type": "object"
+    },
+    "ReplaceResource": {
+      "additionalProperties": false,
+      "properties": {
+        "from_resource_id": {
+          "minLength": 1,
+          "title": "From Resource Id",
+          "type": "string"
+        },
+        "to_resource_id": {
+          "minLength": 1,
+          "title": "To Resource Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "replace_resource",
+          "default": "replace_resource",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_resource_id",
+        "to_resource_id"
+      ],
+      "title": "ReplaceResource",
+      "type": "object"
+    },
+    "ScaleRank": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_multiplier": {
+          "exclusiveMinimum": 0.0,
+          "title": "Duration Multiplier",
+          "type": "number"
+        },
+        "rank_id": {
+          "minLength": 1,
+          "title": "Rank Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "scale_rank",
+          "default": "scale_rank",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rank_id",
+        "duration_multiplier"
+      ],
+      "title": "ScaleRank",
+      "type": "object"
+    },
+    "ScaleResourceCurve": {
+      "additionalProperties": false,
+      "properties": {
+        "bandwidth_multiplier": {
+          "exclusiveMinimum": 0.0,
+          "title": "Bandwidth Multiplier",
+          "type": "number"
+        },
+        "latency_multiplier": {
+          "exclusiveMinimum": 0.0,
+          "title": "Latency Multiplier",
+          "type": "number"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "scale_resource_curve",
+          "default": "scale_resource_curve",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_id",
+        "latency_multiplier",
+        "bandwidth_multiplier"
+      ],
+      "title": "ScaleResourceCurve",
+      "type": "object"
+    },
+    "ScenarioEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "expected_improvement_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Improvement Ms"
+        },
+        "healthy_reference_residual_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Healthy Reference Residual Ms"
+        },
+        "lower_improvement_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lower Improvement Ms"
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SimulationObservation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rejected_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rejected Reason"
+        },
+        "scenario": {
+          "$ref": "#/$defs/CounterfactualScenario"
+        },
+        "status": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "inconclusive",
+            "simulation_failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "upper_improvement_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upper Improvement Ms"
+        }
+      },
+      "required": [
+        "scenario",
+        "status",
+        "expected_improvement_ms",
+        "lower_improvement_ms",
+        "upper_improvement_ms",
+        "healthy_reference_residual_ms",
+        "confidence",
+        "observation",
+        "rejected_reason"
+      ],
+      "title": "ScenarioEvaluation",
+      "type": "object"
+    },
+    "SimulationObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "makespan_us": {
+          "minimum": 0.0,
+          "title": "Makespan Us",
+          "type": "number"
+        },
+        "operation_count": {
+          "minimum": 0,
+          "title": "Operation Count",
+          "type": "integer"
+        },
+        "output_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Output Sha256",
+          "type": "string"
+        },
+        "predicted_lower_us": {
+          "minimum": 0.0,
+          "title": "Predicted Lower Us",
+          "type": "number"
+        },
+        "predicted_upper_us": {
+          "minimum": 0.0,
+          "title": "Predicted Upper Us",
+          "type": "number"
+        },
+        "processed_events": {
+          "minimum": 0,
+          "title": "Processed Events",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "makespan_us",
+        "predicted_lower_us",
+        "predicted_upper_us",
+        "operation_count",
+        "processed_events",
+        "output_sha256"
+      ],
+      "title": "SimulationObservation",
+      "type": "object"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/autopsy/counterfactual-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "degraded": {
+      "$ref": "#/$defs/SimulationObservation"
+    },
+    "diagnosis_id": {
+      "minLength": 1,
+      "title": "Diagnosis Id",
+      "type": "string"
+    },
+    "evaluations": {
+      "items": {
+        "$ref": "#/$defs/ScenarioEvaluation"
+      },
+      "title": "Evaluations",
+      "type": "array"
+    },
+    "healthy_reference_us": {
+      "minimum": 0.0,
+      "title": "Healthy Reference Us",
+      "type": "number"
+    },
+    "rejected_scenario_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rejected Scenario Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "sloforge.autopsy.counterfactual/v1",
+      "default": "sloforge.autopsy.counterfactual/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selected_scenario_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Selected Scenario Id"
+    },
+    "simulation_input_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Simulation Input Sha256",
+      "type": "string"
+    }
+  },
+  "required": [
+    "diagnosis_id",
+    "simulation_input_sha256",
+    "degraded",
+    "healthy_reference_us",
+    "evaluations",
+    "selected_scenario_id",
+    "rejected_scenario_ids"
+  ],
+  "title": "CounterfactualReplay",
+  "type": "object"
+}
