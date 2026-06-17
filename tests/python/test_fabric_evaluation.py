@@ -78,7 +78,7 @@ def test_artifact_derived_evaluation_round_trip(tmp_path: Path) -> None:
     assert len(result.diagnosis_trials) == 2
     assert len(result.recovery_trials) == 10
     assert result.hardware_backed_validation == "not_exercised_no_compatible_hardware"
-    assert all(item.simulator_calls == 0 for item in result.plan_trials)
+    assert all(item.simulator_calls >= 1 for item in result.plan_trials)
     random_trial = next(
         item for item in result.plan_trials if item.method is EvaluationMethod.RANDOM
     )

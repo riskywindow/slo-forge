@@ -17,9 +17,15 @@ a `PhysicalExecutionPlan` plus a Pareto frontier and complete candidate trace.
    overlap plans.
 7. Score latency, communication, cost, tail risk, failure exposure, and
    reconfiguration cost with explicit equations and uncertainty.
-8. Extract the non-dominated frontier, select the requested robust objective,
-   and generate up to three recovery variants.
-9. Emit all rejected candidates and optimizer decisions.
+8. Promote the analytical winner, non-dominated frontier, and leading recovery
+   alternatives into isolated-request validation through the Rust physical
+   simulator. Recompute latency, communication, goodput, cost, and objective
+   values from the simulator result, then repeat promotion until every final
+   Pareto candidate has been validated.
+9. Reject plans whose operation DAG cannot be lowered or validated, select the
+   requested robust objective, and generate up to three simulator-validated
+   recovery variants.
+10. Emit all rejected candidates and optimizer decisions.
 
 ## Strategies
 
@@ -49,11 +55,21 @@ selected weights depend on `CompilerObjective`: minimize cost, minimize latency,
 maximize goodput, or robust balanced. Metric intervals expand estimates by the
 declared relative measurement uncertainty.
 
-This is an inspectable analytical ranking pass over calibrated curves. It is not
-the discrete-event simulator. `simulator_calls` is therefore zero in compiler
-results and optimizer history. `sloforge fabric simulate`/`validate` is the next
-explicit pass and supplies queueing/contention validation before execution or
-recovery.
+The analytical ranking pass is followed by bounded, fail-closed calls to the
+same Rust discrete-event simulator used by `fabric simulate`. Compiler
+refinement intentionally uses one isolated p95-shaped request: the physical twin
+models exclusive operation resources and does not reproduce an engine's
+continuous-batching scheduler. `sloforge fabric validate` remains the separate
+representative-workload queueing and contention gate.
+
+`PhysicalCompileResult.simulator_calls` and
+`simulator_validated_candidate_ids` record the exact calls. Its
+`solver_time_ms` is observed local wall time and is diagnostic, so it is outside
+the canonical `PhysicalExecutionPlan` hash. Optimizer history instead records a
+deterministic processed-event work estimate (1,000 reference events per reported
+millisecond) to keep repeated plan hashes stable; the unambiguous raw count is
+`deterministic_solver_work_units` on the outer result. Simulator requests have a
+30-second timeout, explicit request/response bounds, and bounded failure text.
 
 ## Explainability
 
