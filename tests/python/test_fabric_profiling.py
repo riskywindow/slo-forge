@@ -18,6 +18,7 @@ from sloforge.fabric.compiler import (
 )
 from sloforge.fabric.ir import DocumentReference, canonical_hash, load_model_graph
 from sloforge.fabric.profiling import (
+    AdapterExecutionError,
     BenchmarkStatus,
     MeasurementMode,
     Primitive,
@@ -27,7 +28,11 @@ from sloforge.fabric.profiling import (
     build_ibverbs_command,
     build_nccl_tests_command,
     build_nvidia_smi_command,
+    execute_bounded,
     load_profile,
+    parse_nccl_tests_output,
+    read_nvidia_inventory,
+    run_nccl_tests_profile,
     to_canonical_profile,
 )
 from sloforge.fabric.profiling.models import FabricProfile
@@ -40,6 +45,13 @@ FABRIC_FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
 def _executable(tmp_path: Path, name: str) -> Path:
     path = tmp_path / name
     path.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    path.chmod(path.stat().st_mode | 0o700)
+    return path
+
+
+def _script(tmp_path: Path, name: str, body: str) -> Path:
+    path = tmp_path / name
+    path.write_text(f"#!/bin/sh\nset -eu\n{body}\n", encoding="utf-8")
     path.chmod(path.stat().st_mode | 0o700)
     return path
 
@@ -346,3 +358,140 @@ def test_nccl_builder_rejects_implicit_or_mismatched_device_sets(tmp_path: Path)
         build_nccl_tests_command(**common, visible_devices=("GPU-0", "GPU-0"))
     with pytest.raises(ValueError, match="one unique explicit identifier"):
         build_nccl_tests_command(**common, visible_devices=("GPU-0,GPU-1", "GPU-2"))
+
+
+NCCL_TABLE = """# size count type redop root time algbw busbw #wrong time algbw busbw #wrong
+1024 256 float sum -1 5.00 0.205 0.360 0 4.90 0.209 0.366 0
+2048 512 float sum -1 6.00 0.341 0.597 0 5.80 0.353 0.617 0
+4096 1024 float sum -1 7.00 0.585 1.024 0 6.90 0.594 1.039 0
+"""
+
+
+def test_nccl_parser_retains_standard_out_of_place_and_in_place_columns() -> None:
+    rows = parse_nccl_tests_output(NCCL_TABLE)
+    assert [row.message_bytes for row in rows] == [1024, 2048, 4096]
+    assert rows[0].out_of_place_time_us == 5.0
+    assert rows[0].in_place_bus_gbps == 0.366
+    with pytest.raises(AdapterExecutionError, match="no recognized"):
+        parse_nccl_tests_output("# only diagnostic output\n")
+    with pytest.raises(AdapterExecutionError, match="repeated message size"):
+        parse_nccl_tests_output(NCCL_TABLE + NCCL_TABLE.splitlines()[1] + "\n")
+
+
+def test_measured_nccl_runner_executes_bounded_fixture_and_preserves_raw_samples(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    binary = _script(
+        tmp_path,
+        "all_reduce_perf",
+        'test -z "${NCCL_UNSAFE_AMBIENT:-}"\n' + f"cat <<'EOF'\n{NCCL_TABLE}EOF",
+    )
+    monkeypatch.setenv("NCCL_UNSAFE_AMBIENT", "must-not-be-inherited")
+    command = build_nccl_tests_command(
+        executable=binary,
+        operation="all_reduce",
+        minimum_bytes=1024,
+        maximum_bytes=4096,
+        step_factor=2,
+        gpus_per_process=2,
+        visible_devices=("GPU-0", "GPU-1"),
+        iterations=5,
+        warmups=2,
+        timeout_seconds=2.0,
+    )
+    output = tmp_path / "evidence"
+    profile = run_nccl_tests_profile(
+        command=command,
+        operation="all_reduce",
+        topology_fingerprint="a" * 64,
+        suite="quick",
+        minimum_bytes=1024,
+        maximum_bytes=4096,
+        step_factor=2,
+        repetitions=3,
+        warmup_count=2,
+        seed=17,
+        output_dir=output,
+    )
+    assert len(profile.results) == 3
+    assert all(result.status is BenchmarkStatus.SUCCESS for result in profile.results)
+    assert all(result.mode is MeasurementMode.MEASURED for result in profile.results)
+    assert all(len(result.raw_samples) == 3 for result in profile.results)
+    assert all(not sample.synthetic for result in profile.results for sample in result.raw_samples)
+    assert profile.results[0].raw_samples[0].throughput_bytes_per_second == 205_000_000.0
+    assert len(tuple((output / "captures").glob("*.json"))) == 3
+
+
+def test_measured_nccl_runner_records_adapter_failure_without_partial_measurement(
+    tmp_path: Path,
+) -> None:
+    binary = _script(tmp_path, "all_reduce_perf", "echo adapter-failed >&2\nexit 7")
+    command = build_nccl_tests_command(
+        executable=binary,
+        operation="all_reduce",
+        minimum_bytes=1024,
+        maximum_bytes=1024,
+        step_factor=2,
+        gpus_per_process=1,
+        visible_devices=("GPU-0",),
+        iterations=1,
+        warmups=0,
+    )
+    profile = run_nccl_tests_profile(
+        command=command,
+        operation="all_reduce",
+        topology_fingerprint="b" * 64,
+        suite="quick",
+        minimum_bytes=1024,
+        maximum_bytes=1024,
+        step_factor=2,
+        repetitions=3,
+        warmup_count=0,
+        seed=3,
+        output_dir=tmp_path / "failed",
+    )
+    assert len(profile.results) == 1
+    result = profile.results[0]
+    assert result.status is BenchmarkStatus.FAILED
+    assert not result.raw_samples
+    assert result.failure_reason and "return_code=7" in result.failure_reason
+
+
+def test_bounded_executor_caps_output_and_terminates_process(tmp_path: Path) -> None:
+    binary = _script(
+        tmp_path,
+        "all_reduce_perf",
+        "i=0\nwhile test $i -lt 6000; do printf x; i=$((i + 1)); done\nsleep 20",
+    )
+    command = build_nccl_tests_command(
+        executable=binary,
+        operation="all_reduce",
+        minimum_bytes=1,
+        maximum_bytes=1,
+        step_factor=2,
+        gpus_per_process=1,
+        visible_devices=("GPU-0",),
+        iterations=1,
+        warmups=0,
+        timeout_seconds=2.0,
+    )
+    capture = execute_bounded(command, repetition=0, maximum_output_bytes=4096)
+    assert capture.output_limited
+    assert len(capture.stdout.encode()) == 4096
+    assert capture.duration_seconds < command.timeout_seconds
+
+
+def test_read_only_nvidia_inventory_executes_allowlisted_query(tmp_path: Path) -> None:
+    binary = _script(
+        tmp_path,
+        "nvidia-smi",
+        "printf '%s\\n' 'GPU-test, NVIDIA H100 80GB HBM3, 81559'",
+    )
+    fields = ("uuid", "name", "memory.total")
+    command = build_nvidia_smi_command(executable=binary, gpu_id="GPU-test", fields=fields)
+    record = read_nvidia_inventory(command, gpu_id="GPU-test", fields=fields)
+    assert dict(record.fields) == {
+        "uuid": "GPU-test",
+        "name": "NVIDIA H100 80GB HBM3",
+        "memory.total": "81559",
+    }
