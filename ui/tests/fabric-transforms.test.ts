@@ -3,6 +3,7 @@ import {
   counterfactualRanking,
   hostIds,
   kvLinkEvidence,
+  paretoCandidates,
   placementsByHost,
   requestMetricComparisons,
   resourceHotspots,
@@ -38,6 +39,16 @@ describe("Fabric data transforms", () => {
     );
     const hotspots = resourceHotspots(bundle);
     expect(hotspots[0]?.degraded).toBeGreaterThanOrEqual(hotspots.at(-1)?.degraded ?? 0);
+  });
+
+  it("marks only the optimizer-history selection on the Pareto frontier", () => {
+    const candidates = paretoCandidates(bundle);
+    const selected = candidates.filter((candidate) => candidate.selected);
+    const selectedId = bundle.physical_plan.optimizer_history.find(
+      (event) => event.decision === "select",
+    )?.candidate_id;
+    expect(selected).toHaveLength(1);
+    expect(selected[0]?.candidate_id).toBe(selectedId);
   });
 
   it("joins selected KV paths to calibrated edges and raw measurements", () => {

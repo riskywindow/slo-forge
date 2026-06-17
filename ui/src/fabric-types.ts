@@ -65,6 +65,12 @@ export type FabricMeasurement = {
 };
 
 export type FabricProfile = {
+  extensions: {
+    "sloforge.io/measurement-modes": ("measured" | "synthetic_calibrated")[];
+    "sloforge.io/profile-seed": number;
+    "sloforge.io/profile-suite": string;
+    "sloforge.io/raw-profile-hash": string;
+  };
   kind: "FabricProfile";
   measurements: FabricMeasurement[];
   profile_id: string;
@@ -262,11 +268,15 @@ export type RecoveryAction = {
 };
 
 export type RecoveryPlan = {
+  abort_criteria: RecoveryCriterion[];
   actions: RecoveryAction[];
   confidence: number;
+  diagnosis: { uid: string };
   expected_slo_improvement: Record<string, PhysicalMetric>;
   external_mutation_authorized: boolean;
+  physical_plan: { uid: string };
   recovery_id: string;
+  rollback_criteria: RecoveryCriterion[];
   schema_version: string;
   traffic_migration: {
     canary_fraction: number;
@@ -275,6 +285,13 @@ export type RecoveryPlan = {
     preserve_started_streams: boolean;
     shadow_fraction: number;
   };
+};
+
+export type RecoveryCriterion = {
+  comparator: string;
+  metric: string;
+  threshold: number;
+  window_seconds: number;
 };
 
 export type RecoveryAuditRecord = {

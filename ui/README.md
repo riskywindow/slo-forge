@@ -27,11 +27,27 @@ Autopsy diagnosis, counterfactuals, and recovery audit produced by
 http://127.0.0.1:4175/ui/dist/?data=/artifacts/fabric-demo/manifest.json
 ```
 
-The Fabric loader resolves only the required artifacts named by the manifest
-and verifies every response against its recorded SHA-256 before rendering.
+The served-manifest Fabric loader resolves only the required artifacts named by
+the manifest and verifies every response against its recorded SHA-256 before
+rendering. The manifest is the trust root; host it with the same integrity and
+access controls as the report. Duplicate or missing entries, oversized files,
+malformed JSON, digest mismatches, dangling topology/rank/KV references, and
+cross-artifact identity mismatches produce a visible error instead of a partial
+dashboard. Each fetched artifact is capped at 50 MiB.
+
+The Fabric view renders the physical topology edges, rank and expert placement,
+prefill/decode pools, collectives, KV routes, overlap windows, profiled link
+curves, request and resource metrics, optimizer Pareto frontier, causal
+diagnosis, counterfactual ranking, guarded recovery audit, and evidence-linked
+timeline. Synthetic calibrated profiles are labeled as synthetic; the UI never
+relables them as hardware measurements.
+
 For a local file picker, use a pre-composed
 `sloforge.fabric.ui-bundle/v1` JSON object because browsers cannot grant a
-single selected manifest access to sibling files.
+single selected manifest access to sibling files. A pre-composed bundle is
+schema- and cross-reference-validated, but its embedded objects cannot be
+reconstructed into the original byte streams for manifest SHA-256 verification.
+Use the served-manifest path when byte-level integrity is required.
 
 Validation commands:
 
