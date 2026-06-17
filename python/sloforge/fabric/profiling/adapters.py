@@ -170,6 +170,7 @@ def build_nccl_tests_command(
     iterations: int,
     warmups: int,
     timeout_seconds: float = 120.0,
+    transport: Literal["local"] = "local",
     algorithm: Literal["Ring", "Tree", "CollNetDirect", "CollNetChain"] | None = None,
     protocol: Literal["Simple", "LL", "LL128"] | None = None,
     channels: int | None = None,
@@ -197,6 +198,9 @@ def build_nccl_tests_command(
     resolved = _required_executable(executable, "nccl-tests")
     environment: list[tuple[str, str]] = [
         ("CUDA_VISIBLE_DEVICES", ",".join(visible_devices)),
+        # This runner is intentionally one host/process. Prevent an accidental
+        # ambient InfiniBand path from changing the measured transport class.
+        ("NCCL_IB_DISABLE", "1"),
     ]
     if algorithm:
         environment.append(("NCCL_ALGO", algorithm))
@@ -230,7 +234,7 @@ def build_nccl_tests_command(
         ),
         environment=tuple(environment),
         timeout_seconds=timeout_seconds,
-        expected_transport="nccl",
+        expected_transport=f"nccl-{transport}",
         requires_gpu=True,
         requires_multi_process=False,
     )

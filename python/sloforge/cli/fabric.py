@@ -18,6 +18,7 @@ from sloforge.fabric.compiler import (
 )
 from sloforge.fabric.ir import (
     DocumentReference,
+    GpuNode,
     PhysicalExecutionPlan,
     canonical_hash,
     load_fabric_profile,
@@ -30,8 +31,14 @@ from sloforge.fabric.ir import (
 from sloforge.fabric.model_graph import inspect_local_model, synthetic_moe_model_graph
 from sloforge.fabric.profiling import (
     BenchmarkStatus,
+    NvidiaInventoryRecord,
     benchmark_host_memory,
     benchmark_synthetic_fabric,
+    build_nccl_tests_command,
+    build_nvidia_smi_command,
+    read_nvidia_inventory,
+    run_nccl_tests_profile,
+    save_profile,
     to_canonical_profile,
 )
 from sloforge.fabric.simulation import (
@@ -146,32 +153,158 @@ def benchmark_command(
     synthetic: Annotated[bool, typer.Option("--synthetic/--measured")] = False,
     seed: Annotated[int, typer.Option("--seed", min=0)] = 41,
     warmups: Annotated[int, typer.Option("--warmups", min=0)] = 3,
-    samples: Annotated[int, typer.Option("--samples", min=3)] = 7,
+    samples: Annotated[int, typer.Option("--samples", min=3, max=100)] = 7,
+    adapter: Annotated[Literal["nccl-tests"] | None, typer.Option("--adapter")] = None,
+    transport: Annotated[Literal["nccl-local"] | None, typer.Option("--transport")] = None,
+    adapter_executable: Annotated[Path | None, typer.Option("--adapter-executable")] = None,
+    visible_devices: Annotated[list[str] | None, typer.Option("--visible-device")] = None,
+    operation: Annotated[
+        Literal[
+            "all_reduce",
+            "all_gather",
+            "reduce_scatter",
+            "broadcast",
+            "send_receive",
+            "all_to_all",
+        ],
+        typer.Option("--operation"),
+    ] = "all_reduce",
+    inner_iterations: Annotated[int, typer.Option("--inner-iterations", min=1, max=10_000)] = 20,
+    timeout_seconds: Annotated[
+        float, typer.Option("--timeout-seconds", min=0.1, max=3_600.0)
+    ] = 120.0,
+    maximum_output_bytes: Annotated[
+        int, typer.Option("--maximum-output-bytes", min=4_096, max=16 * 1024 * 1024)
+    ] = 1 << 20,
+    nvidia_smi_executable: Annotated[Path | None, typer.Option("--nvidia-smi-executable")] = None,
+    adapter_version: Annotated[str | None, typer.Option("--adapter-version")] = None,
 ) -> None:
-    """Measure host memory or explicitly generate calibrated synthetic fabric curves."""
+    """Run an explicit measured adapter or generate calibrated synthetic curves."""
 
     graph = load_topology_graph(topology)
     output.mkdir(parents=True, exist_ok=True)
     if not synthetic:
-        if suite != "host-memory":
-            raise typer.BadParameter(
-                "measured quick/full suites require a hardware adapter; use --synthetic "
-                "for fixtures or --suite host-memory for the portable measured probe"
+        if suite == "host-memory":
+            if any(
+                value is not None
+                for value in (adapter, transport, adapter_executable, visible_devices)
+            ):
+                raise typer.BadParameter("host-memory does not accept GPU adapter options")
+            result = benchmark_host_memory(
+                message_bytes=1 << 20,
+                warmup_count=warmups,
+                sample_count=samples,
+                seed=seed,
             )
-        result = benchmark_host_memory(
-            message_bytes=1 << 20,
-            warmup_count=warmups,
-            sample_count=samples,
-            seed=seed,
+            path = output / "host-memory.json"
+            write_json(path, result.model_dump(mode="json"))
+            json_result(
+                {
+                    "output": str(path),
+                    "mode": result.mode.value,
+                    "status": result.status.value,
+                    "artifact_hash": result.artifact_hash,
+                }
+            )
+            return
+        if adapter != "nccl-tests" or transport != "nccl-local":
+            raise typer.BadParameter(
+                "measured quick/full requires explicit --adapter nccl-tests "
+                "--transport nccl-local; use --synthetic for fixtures or --suite host-memory "
+                "for the portable probe"
+            )
+        if adapter_executable is None or not visible_devices:
+            raise typer.BadParameter(
+                "measured NCCL requires --adapter-executable and at least one "
+                "--visible-device; ambient GPU visibility is never inherited"
+            )
+        gpu_nodes = tuple(node for node in graph.nodes if isinstance(node, GpuNode))
+        matched = tuple(
+            node
+            for device in visible_devices
+            for node in gpu_nodes
+            if device in {node.node_id, node.uuid}
         )
-        path = output / "host-memory.json"
-        write_json(path, result.model_dump(mode="json"))
+        if len(matched) != len(visible_devices) or len({node.node_id for node in matched}) != len(
+            matched
+        ):
+            raise typer.BadParameter(
+                "every explicit device must uniquely match a GPU node ID or UUID in the topology"
+            )
+        if len({node.host_id for node in matched}) != 1:
+            raise typer.BadParameter(
+                "the local NCCL runner cannot span hosts; use an external bounded orchestrator"
+            )
+        minimum_bytes = 1_024
+        maximum_bytes = 1 << (20 if suite == "quick" else 24)
+        step_factor = 2
+        command = build_nccl_tests_command(
+            executable=adapter_executable,
+            operation=operation,
+            minimum_bytes=minimum_bytes,
+            maximum_bytes=maximum_bytes,
+            step_factor=step_factor,
+            gpus_per_process=len(visible_devices),
+            visible_devices=tuple(visible_devices),
+            iterations=inner_iterations,
+            warmups=warmups,
+            timeout_seconds=timeout_seconds,
+            transport="local",
+        )
+        inventory: tuple[NvidiaInventoryRecord, ...] = ()
+        if nvidia_smi_executable is not None:
+            inventory_fields = ("uuid", "name", "memory.total", "clocks.sm", "clocks.mem")
+            inventory = tuple(
+                read_nvidia_inventory(
+                    build_nvidia_smi_command(
+                        executable=nvidia_smi_executable,
+                        gpu_id=device,
+                        fields=inventory_fields,
+                        timeout_seconds=min(10.0, timeout_seconds),
+                    ),
+                    gpu_id=device,
+                    fields=inventory_fields,
+                )
+                for device in visible_devices
+            )
+        raw_output = output / "raw"
+        raw_profile = run_nccl_tests_profile(
+            command=command,
+            operation=operation,
+            topology_fingerprint=canonical_hash(graph),
+            suite=suite,
+            minimum_bytes=minimum_bytes,
+            maximum_bytes=maximum_bytes,
+            step_factor=step_factor,
+            repetitions=samples,
+            warmup_count=warmups,
+            seed=seed,
+            adapter_version=adapter_version,
+            inventory=inventory,
+            output_dir=raw_output,
+            maximum_output_bytes=maximum_output_bytes,
+        )
+        save_profile(raw_output, raw_profile)
+        failed = [
+            result for result in raw_profile.results if result.status is not BenchmarkStatus.SUCCESS
+        ]
+        if failed:
+            raise typer.BadParameter(
+                f"measured adapter failed closed; inspect {raw_output / 'profile.json'}: "
+                f"{failed[0].failure_reason}"
+            )
+        profile = to_canonical_profile(raw_profile, topology=graph)
+        profile_path = output / "fabric-profile.json"
+        save_fabric_profile(profile_path, profile)
         json_result(
             {
-                "output": str(path),
-                "mode": result.mode.value,
-                "status": result.status.value,
-                "artifact_hash": result.artifact_hash,
+                "output": str(profile_path),
+                "raw_output": str(raw_output),
+                "mode": "measured",
+                "adapter": adapter,
+                "operation": operation,
+                "measurements": len(profile.measurements),
+                "profile_hash": canonical_hash(profile),
             }
         )
         return
@@ -436,6 +569,11 @@ def validate_command(
     output: Annotated[Path, typer.Option("--output", "-o")],
     seed: Annotated[int, typer.Option("--seed", min=0)] = 41,
     timeout_seconds: Annotated[float, typer.Option("--timeout-seconds", min=0.1)] = 30.0,
+    max_relative_error: Annotated[float, typer.Option("--max-relative-error", min=0.0)] = 0.25,
+    require_prediction_interval: Annotated[
+        bool,
+        typer.Option("--require-prediction-interval/--ignore-prediction-interval"),
+    ] = True,
 ) -> None:
     physical, result = _simulate(
         plan_path=plan,
@@ -449,17 +587,36 @@ def validate_command(
     )
     latencies = request_latencies(result)
     observed_ttft = percentile([item.ttft_us / 1_000.0 for item in latencies], 0.95)
-    predicted_ttft = physical.predicted_metrics.p95_ttft_ms.estimate
+    predicted_interval = physical.predicted_metrics.p95_ttft_ms
+    predicted_ttft = predicted_interval.estimate
+    relative_error = abs(observed_ttft - predicted_ttft) / max(predicted_ttft, 1e-9)
+    interval_covered = predicted_interval.lower <= observed_ttft <= predicted_interval.upper
+    failure_reasons: list[str] = []
+    if relative_error > max_relative_error:
+        failure_reasons.append(
+            f"relative_error={relative_error:.6f} exceeds {max_relative_error:.6f}"
+        )
+    if require_prediction_interval and not interval_covered:
+        failure_reasons.append("observed p95 TTFT is outside the plan prediction interval")
     validation = {
         "schema_version": "sloforge.fabric.validation/v1",
         "plan_id": physical.plan_id,
         "seed": seed,
         "request_count": len(latencies),
         "predicted_p95_ttft_ms": predicted_ttft,
+        "predicted_p95_ttft_lower_ms": predicted_interval.lower,
+        "predicted_p95_ttft_upper_ms": predicted_interval.upper,
         "observed_p95_ttft_ms": observed_ttft,
         "absolute_error_ms": abs(observed_ttft - predicted_ttft),
-        "relative_error": abs(observed_ttft - predicted_ttft) / max(predicted_ttft, 1e-9),
+        "relative_error": relative_error,
+        "maximum_relative_error": max_relative_error,
+        "prediction_interval_covered": interval_covered,
+        "prediction_interval_required": require_prediction_interval,
+        "valid": not failure_reasons,
+        "failure_reasons": failure_reasons,
         "simulation_result_sha256": sha256_file(output / "result.json"),
     }
     write_json(output / "validation.json", validation)
     json_result({"output": str(output / "validation.json"), **validation})
+    if failure_reasons:
+        raise typer.Exit(code=1)
