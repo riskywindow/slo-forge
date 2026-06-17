@@ -719,6 +719,8 @@ def _render_report(manifest: FabricDemoManifest, timeline: tuple[TimelineEvent, 
         "## Outcome",
         "",
         f"- Physical plan: `{manifest.physical_plan_id}`",
+        "- Injected physical faults: "
+        + ", ".join(f"`{fault}`" for fault in manifest.ground_truth_faults),
         f"- Diagnosis: `{manifest.diagnosis}` ({manifest.diagnosis_confidence:.3f} confidence)",
         f"- Counterfactuals evaluated: {manifest.counterfactuals_evaluated}",
         f"- Live Rust gateway SSE requests: {manifest.live_gateway_requests}",
