@@ -21,7 +21,7 @@ from sloforge.autopsy import (
 from sloforge.autopsy.counterfactual import bind_subprocess_runner
 from sloforge.fabric.ir import canonical_hash, load_physical_execution_plan
 from sloforge.fabric.simulation import FabricSimulationOutput, FabricSimulationRequest
-from sloforge.util import canonical_json, sha256_bytes
+from sloforge.util import canonical_json, sha256_bytes, sha256_file
 
 from .common import console, json_result, load_yaml_or_json, repository_root, write_model
 
@@ -46,6 +46,81 @@ def _scenarios(path: Path) -> tuple[CounterfactualScenario, ...]:
             json.dumps(value, sort_keys=True, separators=(",", ":")), strict=True
         )
         for value in values
+    )
+
+
+def _contained_bundle_path(bundle: Path, value: object, field: str) -> Path:
+    if not isinstance(value, str) or not value:
+        raise typer.BadParameter(f"Autopsy replay metadata {field} must be a relative path")
+    candidate = (bundle / value).resolve()
+    boundary = bundle.parent.resolve()
+    try:
+        candidate.relative_to(boundary)
+    except ValueError as error:
+        raise typer.BadParameter(f"Autopsy replay metadata {field} escapes its bundle") from error
+    if not candidate.is_file():
+        raise typer.BadParameter(f"Autopsy replay metadata {field} is missing: {candidate}")
+    return candidate
+
+
+def _verify_bundle_hash(metadata: dict[object, object], field: str, path: Path) -> None:
+    expected = metadata.get(f"{field}_sha256")
+    if not isinstance(expected, str) or sha256_file(path) != expected:
+        raise typer.BadParameter(f"Autopsy replay {field} hash does not match metadata")
+
+
+def _resolve_replay_bundle(
+    evidence: Path,
+    baseline: Path | None,
+    simulation_input: Path | None,
+    healthy_reference_us: float | None,
+    output: Path | None,
+) -> tuple[Path, Path, Path, float, Path]:
+    if evidence.is_file():
+        if baseline is None or simulation_input is None or healthy_reference_us is None:
+            raise typer.BadParameter(
+                "file evidence requires --baseline, --simulation-input, and "
+                "--healthy-reference-us; pass a replay-bundle directory to resolve them"
+            )
+        return (
+            evidence,
+            baseline,
+            simulation_input,
+            healthy_reference_us,
+            output or evidence.with_name("counterfactual-replay.json"),
+        )
+
+    metadata_path = evidence / "replay-metadata.json"
+    if not metadata_path.is_file():
+        raise typer.BadParameter(f"Autopsy replay bundle is missing {metadata_path.name}")
+    metadata = load_yaml_or_json(metadata_path)
+    if not isinstance(metadata, dict):
+        raise typer.BadParameter("Autopsy replay metadata must contain one JSON object")
+    degraded_path = _contained_bundle_path(evidence, metadata.get("degraded"), "degraded")
+    _verify_bundle_hash(metadata, "degraded", degraded_path)
+    if baseline is None:
+        baseline_path = _contained_bundle_path(evidence, metadata.get("baseline"), "baseline")
+        _verify_bundle_hash(metadata, "baseline", baseline_path)
+    else:
+        baseline_path = baseline
+    input_path = simulation_input or _contained_bundle_path(
+        evidence, metadata.get("simulation_input"), "simulation_input"
+    )
+    reference = healthy_reference_us
+    if reference is None:
+        raw_reference = metadata.get("healthy_reference_us")
+        if isinstance(raw_reference, bool) or not isinstance(raw_reference, int | float):
+            raise typer.BadParameter("Autopsy replay metadata healthy_reference_us must be numeric")
+        reference = float(raw_reference)
+    if reference < 0.0:
+        raise typer.BadParameter("healthy reference must be non-negative")
+    _verify_bundle_hash(metadata, "simulation_input", input_path)
+    return (
+        degraded_path,
+        baseline_path,
+        input_path,
+        reference,
+        output or evidence / "cli-counterfactual-replay.json",
     )
 
 
@@ -139,34 +214,45 @@ def diagnose_command(
 
 @autopsy_app.command("replay")
 def replay_command(
-    evidence: Annotated[Path, typer.Option("--evidence", exists=True, dir_okay=False)],
-    baseline: Annotated[Path, typer.Option("--baseline", exists=True, dir_okay=False)],
-    simulation_input: Annotated[
-        Path, typer.Option("--simulation-input", exists=True, dir_okay=False)
-    ],
+    evidence: Annotated[Path, typer.Option("--evidence", exists=True)],
     counterfactual: Annotated[Path, typer.Option("--counterfactual", exists=True, dir_okay=False)],
-    healthy_reference_us: Annotated[float, typer.Option("--healthy-reference-us", min=0.0)],
-    output: Annotated[Path, typer.Option("--output", "-o")],
+    baseline: Annotated[
+        Path | None, typer.Option("--baseline", exists=True, dir_okay=False)
+    ] = None,
+    simulation_input: Annotated[
+        Path | None, typer.Option("--simulation-input", exists=True, dir_okay=False)
+    ] = None,
+    healthy_reference_us: Annotated[
+        float | None, typer.Option("--healthy-reference-us", min=0.0)
+    ] = None,
+    output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
     timeout_seconds: Annotated[float, typer.Option("--timeout-seconds", min=0.1)] = 120.0,
 ) -> None:
-    healthy = _run(baseline)
-    degraded = _run(evidence)
+    degraded_path, baseline_path, input_path, reference_us, output_path = _resolve_replay_bundle(
+        evidence,
+        baseline,
+        simulation_input,
+        healthy_reference_us,
+        output,
+    )
+    healthy = _run(baseline_path)
+    degraded = _run(degraded_path)
     comparison = compare_runs(healthy, degraded)
     record = diagnose(degraded, comparison=comparison, baseline=healthy)
-    request_value = json.loads(simulation_input.read_text(encoding="utf-8"))
+    request_value = json.loads(input_path.read_text(encoding="utf-8"))
     if not isinstance(request_value, dict):
         raise typer.BadParameter("simulation input must contain one JSON object")
     replay = replay_counterfactuals(
         diagnosis=record,
         simulation_request=request_value,
         scenarios=_scenarios(counterfactual),
-        healthy_reference_us=healthy_reference_us,
+        healthy_reference_us=reference_us,
         runner=bind_subprocess_runner(repository_root=repository_root(), timeout_s=timeout_seconds),
     )
-    write_model(output, replay)
+    write_model(output_path, replay)
     json_result(
         {
-            "output": str(output),
+            "output": str(output_path),
             "diagnosis_id": replay.diagnosis_id,
             "evaluated": len(replay.evaluations),
             "selected": replay.selected_scenario_id,

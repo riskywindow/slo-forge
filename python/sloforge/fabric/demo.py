@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
-import json
 import shutil
 import subprocess
 import time
@@ -89,6 +88,7 @@ from sloforge.recovery import (
     RecoveryState,
     plan_recovery,
 )
+from sloforge.trace.format import TraceRequest, write_trace
 from sloforge.util import (
     environment_manifest,
     git_commit,
@@ -216,11 +216,25 @@ def _workload(seed: int) -> tuple[tuple[WorkloadRecord, ...], SimulationWorkload
 
 
 def _write_workload(path: Path, records: tuple[WorkloadRecord, ...]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = "".join(
-        json.dumps(record.model_dump(mode="json"), sort_keys=True) + "\n" for record in records
+    priority: dict[Literal["high", "normal", "low"], Literal[0, 1, 2, 3]] = {
+        "high": 0,
+        "normal": 1,
+        "low": 2,
+    }
+    write_trace(
+        path,
+        [
+            TraceRequest(
+                request_id=record.request_id,
+                arrival_ms=record.arrival_us / 1_000.0,
+                prompt_tokens=record.prompt_tokens,
+                output_tokens=record.output_tokens,
+                priority=priority[record.priority],
+                request_class=record.request_class,
+            )
+            for record in records
+        ],
     )
-    path.write_text(payload, encoding="utf-8")
 
 
 def _compiler_request(
@@ -249,6 +263,14 @@ def _compiler_request(
             minimum_goodput_tokens_per_second=500.0,
             minimum_availability=0.95,
             maximum_ranks=16,
+            # The flagship is intentionally a multi-node physical-placement
+            # demonstration. Hold parallel degrees constant so the aware and
+            # unaware baselines compare placement on the same 16-rank job and
+            # the exercised KV route must cross the calibrated fabric.
+            tensor_parallel_degree=8,
+            pipeline_parallel_degree=1,
+            data_parallel_degree=2,
+            expert_parallel_degree=4,
             require_disaggregation=True,
         ),
         assumptions=CompilerAssumptions(
@@ -497,16 +519,135 @@ def _write_trace(path: Path, output: FabricSimulationOutput) -> None:
     )
 
 
-def _write_prometheus(path: Path, metrics: SloMetrics, *, run: str) -> None:
-    lines = (
-        "# TYPE sloforge_fabric_p95_ttft_ms gauge",
-        f'sloforge_fabric_p95_ttft_ms{{run="{run}"}} {metrics.p95_ttft_ms:.9f}',
-        "# TYPE sloforge_fabric_p99_tpot_ms gauge",
-        f'sloforge_fabric_p99_tpot_ms{{run="{run}"}} {metrics.p99_tpot_ms:.9f}',
-        "# TYPE sloforge_fabric_e2e_p95_ms gauge",
-        f'sloforge_fabric_e2e_p95_ms{{run="{run}"}} {metrics.p95_end_to_end_ms:.9f}',
-        "",
+def _prometheus_label(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '\\"')
+
+
+def _operation_p95_ms(output: FabricSimulationOutput, marker: str) -> float:
+    durations = [
+        operation.duration_us / 1_000.0
+        for operation in output.operations
+        if marker in operation.operation_id
+    ]
+    return percentile(durations, 0.95) if durations else 0.0
+
+
+def _write_prometheus(
+    path: Path,
+    metrics: SloMetrics,
+    output: FabricSimulationOutput,
+    *,
+    run: str,
+    plan: PhysicalExecutionPlan,
+    topology_fingerprint: str,
+    diagnosis_confidence: float,
+    recovery: RecoverySnapshot,
+    slo_target_ms: float,
+) -> None:
+    label = f'run="{_prometheus_label(run)}",mode="synthetic_calibrated"'
+    collective_operations = [
+        operation for operation in output.operations if ":collective-" in operation.operation_id
+    ]
+    network_operations = [
+        operation
+        for operation in output.operations
+        if any(
+            resource.startswith(("nic-network:", "gpu-nic:")) for resource in operation.resource_ids
+        )
+    ]
+    collective_wait_ms = [operation.wait_us / 1_000.0 for operation in collective_operations]
+    network_duration_ms = [operation.duration_us / 1_000.0 for operation in network_operations]
+    rank_busy = [
+        resource.busy_time_us
+        for resource in output.metrics.resources
+        if resource.resource_id.startswith("compute:") and resource.busy_time_us > 0.0
+    ]
+    rank_skew = max(rank_busy) / min(rank_busy) if rank_busy else 1.0
+    network_bytes = sum(
+        resource.transferred_bytes
+        for resource in output.metrics.resources
+        if resource.resource_id.startswith("nic-network:")
     )
+    network_throughput = network_bytes / max(output.metrics.makespan_us / 1_000_000.0, 1e-9)
+    recovery_seconds = (recovery.last_observed_at_ms - recovery.started_at_ms) / 1_000.0
+    rollback_count = sum(
+        record.state_after is RecoveryState.ROLLED_BACK for record in recovery.audit
+    )
+    canary_observed = any(
+        record.state_after is RecoveryState.CANARYING for record in recovery.audit
+    )
+    lines = [
+        "# TYPE sloforge_fabric_p95_ttft_ms gauge",
+        f"sloforge_fabric_p95_ttft_ms{{{label}}} {metrics.p95_ttft_ms:.9f}",
+        "# TYPE sloforge_fabric_p99_tpot_ms gauge",
+        f"sloforge_fabric_p99_tpot_ms{{{label}}} {metrics.p99_tpot_ms:.9f}",
+        "# TYPE sloforge_fabric_e2e_p95_ms gauge",
+        f"sloforge_fabric_e2e_p95_ms{{{label}}} {metrics.p95_end_to_end_ms:.9f}",
+        "# TYPE sloforge_fabric_queue_p95_ms gauge",
+        f"sloforge_fabric_queue_p95_ms{{{label}}} "
+        f"{percentile([item.wait_us / 1_000.0 for item in output.operations], 0.95):.9f}",
+        "# TYPE sloforge_fabric_prefill_p95_ms gauge",
+        f"sloforge_fabric_prefill_p95_ms{{{label}}} {_operation_p95_ms(output, ':prefill'):.9f}",
+        "# TYPE sloforge_fabric_decode_p95_ms gauge",
+        f"sloforge_fabric_decode_p95_ms{{{label}}} {_operation_p95_ms(output, ':decode'):.9f}",
+        "# TYPE sloforge_fabric_kv_transfer_p95_ms gauge",
+        f"sloforge_fabric_kv_transfer_p95_ms{{{label}}} {_operation_p95_ms(output, ':kv-'):.9f}",
+        "# TYPE sloforge_fabric_collective_p95_ms gauge",
+        f"sloforge_fabric_collective_p95_ms{{{label}}} "
+        f"{_operation_p95_ms(output, ':collective-'):.9f}",
+        "# TYPE sloforge_fabric_collective_wait_p95_ms gauge",
+        f"sloforge_fabric_collective_wait_p95_ms{{{label}}} "
+        f"{(percentile(collective_wait_ms, 0.95) if collective_wait_ms else 0.0):.9f}",
+        "# TYPE sloforge_fabric_collective_bytes_total counter",
+        f"sloforge_fabric_collective_bytes_total{{{label}}} "
+        f"{sum(item.transferred_bytes for item in collective_operations)}",
+        "# TYPE sloforge_fabric_network_transfer_p95_ms gauge",
+        f"sloforge_fabric_network_transfer_p95_ms{{{label}}} "
+        f"{(percentile(network_duration_ms, 0.95) if network_duration_ms else 0.0):.9f}",
+        "# TYPE sloforge_fabric_network_throughput_bytes_per_second gauge",
+        f"sloforge_fabric_network_throughput_bytes_per_second{{{label}}} {network_throughput:.9f}",
+        "# TYPE sloforge_fabric_rank_skew_ratio gauge",
+        f"sloforge_fabric_rank_skew_ratio{{{label}}} {rank_skew:.9f}",
+        "# TYPE sloforge_fabric_overlap_efficiency_ratio gauge",
+        f"sloforge_fabric_overlap_efficiency_ratio{{{label}}} "
+        f"{output.metrics.overlap_efficiency:.9f}",
+        "# TYPE sloforge_fabric_cpu_launch_p95_ms gauge",
+        f"sloforge_fabric_cpu_launch_p95_ms{{{label}}} {_operation_p95_ms(output, ':launch'):.9f}",
+        "# TYPE sloforge_fabric_prediction_absolute_error_ms gauge",
+        f"sloforge_fabric_prediction_absolute_error_ms{{{label}}} "
+        f"{abs(metrics.p95_ttft_ms - plan.predicted_metrics.p95_ttft_ms.estimate):.9f}",
+        "# TYPE sloforge_fabric_diagnosis_confidence_ratio gauge",
+        f"sloforge_fabric_diagnosis_confidence_ratio{{{label}}} {diagnosis_confidence:.9f}",
+        "# TYPE sloforge_fabric_recovery_actions_total gauge",
+        f"sloforge_fabric_recovery_actions_total{{{label}}} {len(recovery.action_attempts)}",
+        "# TYPE sloforge_fabric_recovery_rollbacks_total counter",
+        f"sloforge_fabric_recovery_rollbacks_total{{{label}}} {rollback_count}",
+        "# TYPE sloforge_fabric_recovery_time_seconds gauge",
+        f"sloforge_fabric_recovery_time_seconds{{{label}}} {recovery_seconds:.9f}",
+        "# TYPE sloforge_fabric_canary_observed gauge",
+        f"sloforge_fabric_canary_observed{{{label}}} {1 if canary_observed else 0}",
+        "# TYPE sloforge_fabric_restored_slo_margin_ms gauge",
+        f"sloforge_fabric_restored_slo_margin_ms{{{label}}} "
+        f"{slo_target_ms - metrics.p95_ttft_ms:.9f}",
+        "# TYPE sloforge_fabric_applied_faults gauge",
+        f"sloforge_fabric_applied_faults{{{label}}} {len(output.applied_faults)}",
+        "# TYPE sloforge_fabric_plan_info gauge",
+        "sloforge_fabric_plan_info{"
+        f'plan_id="{_prometheus_label(plan.plan_id)}",'
+        f'topology_fingerprint="{_prometheus_label(topology_fingerprint)}"'
+        "} 1",
+    ]
+    for resource in output.metrics.resources:
+        resource_label = _prometheus_label(resource.resource_id)
+        lines.extend(
+            (
+                f'sloforge_fabric_resource_utilization_ratio{{{label},resource_id="{resource_label}"}} '
+                f"{resource.utilization:.9f}",
+                f'sloforge_fabric_resource_transferred_bytes{{{label},resource_id="{resource_label}"}} '
+                f"{resource.transferred_bytes}",
+            )
+        )
+    lines.append("")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -853,6 +994,10 @@ def run_fabric_demo(
     )
     faults = bind_physical_faults(scenario, healthy_request)
     degraded_request = healthy_request.model_copy(update={"faults": faults})
+    healthy_request_path = artifact_dir / "simulations" / "healthy-request.json"
+    degraded_request_path = artifact_dir / "simulations" / "degraded-request.json"
+    write_json(healthy_request_path, healthy_request.model_dump(mode="json"))
+    write_json(degraded_request_path, degraded_request.model_dump(mode="json"))
     healthy_output = run_simulation(
         healthy_request, repository_root=repository_root, timeout_seconds=60
     )
@@ -893,6 +1038,11 @@ def run_fabric_demo(
         rank_fault_id=faults[1].id,
         degraded_request=degraded_request,
     )
+    scenarios_path = artifact_dir / "autopsy" / "scenarios.json"
+    write_json(
+        scenarios_path,
+        {"scenarios": [item.model_dump(mode="json") for item in scenarios]},
+    )
     replay = replay_counterfactuals(
         diagnosis,
         simulation_request=degraded_request.model_dump(mode="json"),
@@ -916,11 +1066,14 @@ def run_fabric_demo(
     restored_output = run_simulation(
         restored_request, repository_root=repository_root, timeout_seconds=60
     )
+    restored_request_path = artifact_dir / "simulations" / "restored-request.json"
+    write_json(restored_request_path, restored_request.model_dump(mode="json"))
     restored_path = artifact_dir / "simulations" / "restored.json"
     write_json(restored_path, restored_output.model_dump(mode="json"))
     healthy_metrics = _metrics(healthy_output, workload)
     degraded_metrics = _metrics(degraded_output, workload)
     restored_metrics = _metrics(restored_output, workload)
+    slo_target = max(healthy_metrics.p95_ttft_ms, restored_metrics.p95_ttft_ms) * 1.10
     proposal, recovery_timeline, recovery_snapshot = _run_recovery(
         replay, diagnosis, aware.selected, restored_metrics
     )
@@ -934,6 +1087,22 @@ def run_fabric_demo(
     write_json(comparison_path, comparison.model_dump(mode="json"))
     write_json(diagnosis_path, diagnosis.model_dump(mode="json"))
     write_json(replay_path, replay.model_dump(mode="json"))
+    replay_metadata_path = artifact_dir / "autopsy" / "replay-metadata.json"
+    write_json(
+        replay_metadata_path,
+        {
+            "schema_version": "sloforge.autopsy.replay-bundle/v1",
+            "baseline": "healthy-run.json",
+            "baseline_sha256": sha256_file(healthy_autopsy),
+            "degraded": "degraded-run.json",
+            "degraded_sha256": sha256_file(degraded_autopsy),
+            "simulation_input": "../simulations/degraded-request.json",
+            "scenarios": "scenarios.json",
+            "scenarios_sha256": sha256_file(scenarios_path),
+            "healthy_reference_us": healthy_output.metrics.makespan_us,
+            "simulation_input_sha256": sha256_file(degraded_request_path),
+        },
+    )
     _write_trace(artifact_dir / "traces" / "degraded.perfetto.json", degraded_output)
     write_json(
         artifact_dir / "traces" / "otel.json",
@@ -948,11 +1117,24 @@ def run_fabric_demo(
             ]
         },
     )
-    _write_prometheus(artifact_dir / "metrics" / "healthy.prom", healthy_metrics, run="healthy")
-    _write_prometheus(artifact_dir / "metrics" / "degraded.prom", degraded_metrics, run="degraded")
-    _write_prometheus(artifact_dir / "metrics" / "restored.prom", restored_metrics, run="restored")
+    topology_fingerprint = canonical_hash(topology)
+    for run_name, run_metrics, run_output in (
+        ("healthy", healthy_metrics, healthy_output),
+        ("degraded", degraded_metrics, degraded_output),
+        ("restored", restored_metrics, restored_output),
+    ):
+        _write_prometheus(
+            artifact_dir / "metrics" / f"{run_name}.prom",
+            run_metrics,
+            run_output,
+            run=run_name,
+            plan=aware.selected,
+            topology_fingerprint=topology_fingerprint,
+            diagnosis_confidence=diagnosis.confidence,
+            recovery=recovery_snapshot,
+            slo_target_ms=slo_target,
+        )
     _write_plot(report_dir / "p95-ttft.svg", healthy_metrics, degraded_metrics, restored_metrics)
-    slo_target = max(healthy_metrics.p95_ttft_ms, restored_metrics.p95_ttft_ms) * 1.10
     if degraded_metrics.p95_ttft_ms <= slo_target:
         raise RuntimeError("faults did not produce the required p95 TTFT SLO regression")
     if restored_metrics.p95_ttft_ms > slo_target:
@@ -996,30 +1178,44 @@ def run_fabric_demo(
     )
     timeline_path = artifact_dir / "timeline.json"
     write_json(timeline_path, [event.model_dump(mode="json") for event in timeline])
-    artifact_paths = (
+    artifact_paths = [
+        environment_path,
         topology_path,
         profile_path,
         model_path,
+        logical_path,
         plan_path,
         baseline_path,
         optimizer_path,
         workload_path,
+        healthy_request_path,
+        degraded_request_path,
+        restored_request_path,
         healthy_path,
         degraded_path,
         restored_path,
+        healthy_autopsy,
+        degraded_autopsy,
         comparison_path,
         diagnosis_path,
         replay_path,
+        scenarios_path,
+        replay_metadata_path,
         recovery_plan_path,
         recovery_execution_path,
         artifact_dir / "traces" / "degraded.perfetto.json",
         artifact_dir / "traces" / "otel.json",
+        artifact_dir / "metrics" / "healthy.prom",
         artifact_dir / "metrics" / "degraded.prom",
+        artifact_dir / "metrics" / "restored.prom",
         timeline_path,
         gateway_replay_path,
         gateway_metrics_path,
         gateway_trace_path,
-    )
+    ]
+    for directory in (artifact_dir / "fabric-profile-raw", artifact_dir / "runtime"):
+        artifact_paths.extend(sorted(path for path in directory.rglob("*") if path.is_file()))
+    artifact_paths = list(dict.fromkeys(artifact_paths))
     manifest = FabricDemoManifest(
         seed=seed,
         synthetic_hardware=True,
