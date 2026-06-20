@@ -60,7 +60,11 @@ same Rust discrete-event simulator used by `fabric simulate`. Compiler
 refinement intentionally uses one isolated p95-shaped request: the physical twin
 models exclusive operation resources and does not reproduce an engine's
 continuous-batching scheduler. `sloforge fabric validate` remains the separate
-representative-workload queueing and contention gate.
+representative-workload queueing and contention gate. That command fails closed
+when either observed p95 TTFT or p99 time per output token exceeds its allowed
+prediction error or calibrated interval. Passing `--slo` also makes the gate
+enforce both hard latency constraints; without it, the command reports that no
+hard SLO was evaluated instead of inventing thresholds.
 
 `PhysicalCompileResult.simulator_calls` and
 `simulator_validated_candidate_ids` record the exact calls. Its

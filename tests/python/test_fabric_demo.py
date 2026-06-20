@@ -138,9 +138,49 @@ def test_fabric_validate_fails_closed_on_material_prediction_error(tmp_path: Pat
             str(artifact_root / "mixed-bursty.jsonl"),
             "--output",
             str(validation_dir),
+            "--slo",
+            "p95_ttft_ms<=100,p99_tpot_ms<=0.1",
         ],
     )
     assert result.exit_code == 1
     validation = json.loads((validation_dir / "validation.json").read_text(encoding="utf-8"))
     assert validation["valid"] is False
     assert validation["failure_reasons"]
+    assert validation["hard_slo_evaluated"] is True
+    assert validation["slo_attained"] is False
+    assert validation["observed_p99_tpot_ms"] > 0.0
+    assert validation["p99_tpot_relative_error"] >= 0.0
+
+
+def test_fabric_validate_succeeds_when_explicit_limits_are_satisfied(
+    tmp_path: Path,
+) -> None:
+    artifact_root = ROOT / "artifacts" / "fabric-demo"
+    validation_dir = tmp_path / "validation"
+    result = runner.invoke(
+        app,
+        [
+            "fabric",
+            "validate",
+            "--plan",
+            str(artifact_root / "physical-plan.json"),
+            "--topology",
+            str(artifact_root / "topology.json"),
+            "--fabric-profile",
+            str(artifact_root / "fabric-profile.json"),
+            "--trace",
+            str(artifact_root / "mixed-bursty.jsonl"),
+            "--output",
+            str(validation_dir),
+            "--max-relative-error",
+            "100",
+            "--ignore-prediction-interval",
+            "--slo",
+            "p95_ttft_ms<=100000,p99_tpot_ms<=1000",
+        ],
+    )
+    assert result.exit_code == 0, result.output or repr(result.exception)
+    validation = json.loads((validation_dir / "validation.json").read_text(encoding="utf-8"))
+    assert validation["valid"] is True
+    assert validation["slo_attained"] is True
+    assert validation["failure_reasons"] == []

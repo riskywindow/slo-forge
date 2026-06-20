@@ -35,6 +35,7 @@ if uv --directory "$clean_root" run --locked sloforge fabric validate \
   --fabric-profile "$clean_root/artifacts/fabric-demo/fabric-profile.json" \
   --trace "$clean_root/artifacts/fabric-demo/mixed-bursty.jsonl" \
   --max-relative-error 0 \
+  --slo "p95_ttft_ms<=100,p99_tpot_ms<=0.1" \
   --output "$clean_root/artifacts/clean-room-validation"; then
   echo "error: strict prediction validation unexpectedly passed" >&2
   exit 1
@@ -53,6 +54,9 @@ assert manifest["degraded_slo_attained"] is False
 assert manifest["restored_slo_attained"] is True
 assert validation["valid"] is False
 assert validation["failure_reasons"]
+assert validation["hard_slo_evaluated"] is True
+assert validation["slo_attained"] is False
+assert validation["observed_p99_tpot_ms"] > 0
 assert replay["evaluations"] and replay["selected_scenario_id"]
 (root / "artifacts/clean-room-result.json").write_text(
     json.dumps(
