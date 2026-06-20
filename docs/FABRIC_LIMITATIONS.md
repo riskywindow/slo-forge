@@ -13,16 +13,19 @@ fabric curves are explicitly synthetic calibrated values.
 
 ## Physical compiler
 
-The compiler uses an inspectable finite/hierarchical analytical ranking. It does
-not call the Rust simulator during candidate ranking and truthfully reports zero
-simulator calls; queue/contention simulation is a separate validation pass. It
-uses deterministic graph search and heuristic placement rather than MILP/CP-SAT,
-and it does not actively select NCCL environment tuning from hardware trials.
+The compiler uses an inspectable finite/hierarchical analytical ranking and then
+refines its winner, Pareto set, and leading recovery alternatives in the Rust
+physical simulator. The refinement workload is one isolated p95-shaped request;
+representative open-loop queueing remains a separate, fail-closed `fabric
+validate` pass. Placement uses deterministic graph search and heuristics rather
+than MILP/CP-SAT, and collective environment choices have not been selected from
+hardware trials.
 
-The current flagship selected a 16-stage pipeline with TP=1 and EP=1. Its
-synthetic model graph contains MoE experts, but the selected plan has no
-expert-parallel collective operations. The demo validates cross-node KV/network
-contention and rank slowdown, not measured expert-parallel execution.
+The flagship intentionally fixes TP=8, PP=1, DP=2, and EP=4 for both aware and
+unaware compiles. This isolates rank-placement behavior and guarantees that its
+prefill/decode KV route crosses the synthetic two-node fabric. It exercises MoE
+collective lowering, cross-node KV/network contention, and rank slowdown, not
+measured expert-parallel execution or proof that those degrees are optimal.
 
 Model inspection reads local configuration and safetensors metadata; it does not
 trace arbitrary model code or verify every runtime partition constraint.

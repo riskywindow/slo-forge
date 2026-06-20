@@ -79,7 +79,9 @@ objective alternative. `optimizer_history` contains stable sequence, phase,
 decision, reason, solver time, and simulator call count. The plan records the
 predicted dominant bottleneck and host fault exposure.
 
-The deterministic flagship compile emitted a 16-rank disaggregated plan, 174
-rejected alternatives, and three recovery variants in
-`artifacts/fabric-demo/physical-plan.json`. Those counts are synthetic-demo
-results, not evidence that the selected degrees are suitable for real hardware.
+The deterministic flagship fixes a 16-rank TP=8/PP=1/DP=2/EP=4 disaggregated
+shape for both aware and unaware strategies so that it compares physical
+placement over the same multi-node job. Its optimizer trace and recovery
+variants are in `artifacts/fabric-demo/optimizer.json` and
+`physical-plan.json`. This synthetic-demo shape is not evidence that those
+degrees are suitable for real hardware.
