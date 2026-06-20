@@ -13,8 +13,8 @@ machine. The system preserves topology and measurement provenance, separates
 synthetic calibration from hardware measurement, and lowers plans into existing
 runtimes without replacing their data planes. On a deterministic CPU-only
 two-host/16-rank synthetic demonstration, two simultaneous physical faults raised
-simulated p95 TTFT from 947.314 ms to 2470.966 ms; seven counterfactuals selected
-a combined repair and the guarded recovery restored 947.314 ms. This is a
+simulated p95 TTFT from 1152.714 ms to 7045.952 ms; seven counterfactuals selected
+a combined repair and the guarded recovery restored 1152.714 ms. This is a
 synthetic systems validation, not a multi-GPU performance claim. A local ForgeCI
 fixture bisected an injected 12.00% TTFT regression, and WarmPath exhaustively
 evaluated 243 local artifact placements. Real NVIDIA and RDMA validation was
@@ -138,10 +138,13 @@ healthy graph paths, message-size latency, bottleneck bandwidth, host/NUMA
 locality, and stable tie-breaking. Feasible candidates are compared on TTFT,
 TPOT, cost, and failure exposure to construct a Pareto frontier.
 
-The ranking pass is analytical over calibrated curves and truthfully records zero
-event-simulator calls. The selected plan must pass the separate Rust simulation
-and deployment-validation passes. This separation makes fidelity and cost
-visible rather than labeling every estimate a simulation.
+The first ranking pass is analytical over calibrated curves. It promotes the
+analytical Pareto set and leading recovery alternatives into the Rust event
+simulator, replaces their latency/communication/goodput/cost estimates with
+simulated values, and repeats until the final frontier has been validated.
+Simulator calls and deterministic work units remain in the optimization trace.
+A separate loaded-workload pass validates queueing that the isolated service-
+shape refinement deliberately does not model.
 
 ## 7. Causal diagnosis
 
@@ -229,15 +232,16 @@ ForgeCI bisection, and WarmPath checksum/eviction.
 The CPU-only demonstration uses a synthetic two-host, 16-GPU topology, a
 synthetic MoE graph, synthetic fabric curves, and 12 bursty mixed requests. It
 injects network bandwidth reduction and rank-specific slowdown. According to
-`artifacts/fabric-demo/manifest.json`, healthy simulated p95 TTFT was 947.314 ms,
-degraded p95 TTFT 2470.966 ms, and restored p95 TTFT 947.314 ms. Degraded p99 TPOT
-was 1.250 ms, equal to the healthy/restored value. Seven counterfactuals selected
+`artifacts/fabric-demo/manifest.json`, healthy simulated p95 TTFT was 1152.714 ms,
+degraded p95 TTFT 7045.952 ms, and restored p95 TTFT 1152.714 ms. Degraded p99 TPOT
+was 1.257 ms, equal to the healthy/restored value. Seven counterfactuals selected
 removing both faults; the guarded recovery completed.
 
-Autopsy ranked `network_bandwidth_degradation` first with deterministic evidence
-confidence 0.95 and `rank_straggler` second. The combined counterfactual
-established that both modeled faults were needed for full restoration. This is
-one synthetic two-fault result, not calibrated general multi-fault accuracy.
+Autopsy ranked `network_bandwidth_degradation` first with counterfactually
+adjusted deterministic evidence confidence 0.834 and `rank_straggler` second.
+The combined counterfactual established that both modeled faults were needed for
+full restoration. This is one synthetic two-fault result, not calibrated general
+multi-fault accuracy.
 
 ### 12.2 Physical compiler, twin, Autopsy, and recovery matrix
 
@@ -307,9 +311,10 @@ diagnosis, and guarded repair. A detailed comparison and primary links are in
 
 ## 14. Limitations
 
-Physical performance is synthetic on this host. Compiler search is heuristic and
-analytical, and real-hardware residual calibration is absent. The flagship
-selected EP=1, so it does not validate measured expert-parallel collectives.
+Physical performance is synthetic on this host. Compiler search combines an
+analytical heuristic with Rust-twin refinement, and real-hardware residual
+calibration is absent. The flagship selected EP=4, but its expert-parallel
+collectives remain synthetic rather than measured.
 PP lacks an explicit layer-to-stage/send-receive schedule; decode lowering is
 opaque rather than per-token/per-layer; multi-hop paths use a conservative
 additive flow model; and NIC placement is heuristic. Autopsy assumes affine
@@ -334,7 +339,7 @@ require access control. Hashes provide integrity, not provenance signatures.
 
 The next empirical requirement is matched NVIDIA multi-GPU and multi-node
 calibration across message size, contention, and runtime versions, followed by
-held-out prediction and diagnosis calibration. Algorithmically, simulator-guided
-candidate refinement, stronger multi-fault causal interaction models, wider
+held-out prediction and diagnosis calibration. Algorithmically, stronger
+multi-fault causal interaction models, wider
 model-graph inspection, and authorized Kubernetes/Dynamo action drivers are the
 clearest extensions. These are not claimed as completed here.

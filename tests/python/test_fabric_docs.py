@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -73,3 +74,21 @@ def test_resume_metrics_have_artifact_source_comments() -> None:
     comments = [line for line in content.splitlines() if line.startswith("<!-- source:")]
     assert len(bullets) == len(comments) == 5
     assert "explicitly labeled synthetic" in content
+
+
+def test_recruiter_documents_match_current_flagship_artifact() -> None:
+    manifest = json.loads(
+        (ROOT / "artifacts/fabric-demo/manifest.json").read_text(encoding="utf-8")
+    )
+    healthy = manifest["healthy"]["p95_ttft_ms"]
+    degraded = manifest["degraded"]["p95_ttft_ms"]
+    expected_values = (f"{healthy:.3f}", f"{degraded:.3f}")
+    current_documents = (
+        ROOT / "docs/FABRIC_INTERVIEW_DEEP_DIVE.md",
+        ROOT / "docs/FABRIC_RESUME_BULLETS.md",
+        ROOT / "paper/fabric_extension/SLOFORGE_FABRIC.md",
+    )
+    for path in current_documents:
+        content = path.read_text(encoding="utf-8")
+        assert all(value in content for value in expected_values), path
+        assert "zero simulator calls" not in content, path

@@ -49,16 +49,22 @@ facts needed for a typed canonical node rather than inventing a capability.
 The profile layer separates explicitly synthetic calibration from measured
 host data. Synthetic fixtures cover GPU, collective, expert-dispatch, KV, and
 startup shapes in CPU CI. The current-host measured path implements bounded
-host-memory copies. Optional GPU/transport adapters advertise availability and
-commands; they never silently substitute CPU execution.
+host-memory copies. The optional local NCCL-tests path executes an explicitly
+selected binary with an explicit device set, bounded output and timeouts, then
+ingests its standard table into typed raw samples. Other optional transport
+adapters advertise availability and commands only; none silently substitute CPU
+execution.
 
 The compiler enumerates parallelism and disaggregation candidates, applies
 memory/runtime/topology/SLO feasibility rules, places ranks, selects paths, and
-calculates an inspectable robust objective. It emits the Pareto set, every
-rejection, failure exposure, and three recovery variants when enough feasible
-alternatives exist. Analytical ranking is intentionally distinct from the Rust
-validation pass. The compiler records zero simulator calls because it does not
-pretend candidate scoring was discrete-event simulation.
+calculates an inspectable robust lower-bound objective. It then promotes the
+analytical Pareto set plus leading recovery alternatives into the Rust twin,
+recomputes their latency, communication, goodput, cost, feasibility, and
+objective, and repeats until the final frontier has been simulated. It emits
+the Pareto set, every rejection, failure exposure, simulator work units, and
+three simulator-validated recovery variants when enough alternatives exist.
+Loaded-trace validation remains separate because compiler refinement models one
+representative service-shape request rather than a continuous-batching queue.
 
 The Rust simulator schedules a dependency graph on exclusive or fair-share
 resources. It models CPU launch groups, GPU compute/HBM/copy engines, NVLink,
@@ -107,4 +113,3 @@ streams are never retried by the recovery layer.
 completed recovery. It is not GPU or network measurement. Hardware discovery
 works on the current Apple Silicon host, while NVIDIA, NCCL, RDMA, and multi-node
 runtime execution remain unexercised on this machine.
-
