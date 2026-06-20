@@ -9,10 +9,13 @@ from typer.testing import CliRunner
 from sloforge.autopsy import (
     AutopsyEvent,
     AutopsyRun,
+    BottleneckKind,
     EventType,
     EvidenceRef,
     ResourceRef,
     SourceClock,
+    compare_runs,
+    diagnose,
 )
 from sloforge.cli.main import app
 from sloforge.fabric.ir import (
@@ -344,12 +347,10 @@ def _autopsy_run(run_id: str, *, degraded: bool, directory: Path) -> AutopsyRun:
 def test_autopsy_compare_diagnose_minimize_and_report(tmp_path: Path) -> None:
     healthy_path = tmp_path / "healthy.json"
     degraded_path = tmp_path / "degraded.json"
-    healthy_path.write_text(
-        _autopsy_run("healthy", degraded=False, directory=tmp_path).model_dump_json()
-    )
-    degraded_path.write_text(
-        _autopsy_run("degraded", degraded=True, directory=tmp_path).model_dump_json()
-    )
+    healthy_run = _autopsy_run("healthy", degraded=False, directory=tmp_path)
+    degraded_run = _autopsy_run("degraded", degraded=True, directory=tmp_path)
+    healthy_path.write_text(healthy_run.model_dump_json())
+    degraded_path.write_text(degraded_run.model_dump_json())
     comparison = tmp_path / "comparison.json"
     diagnosis = tmp_path / "diagnosis.json"
     minimized = tmp_path / "minimized.json"
@@ -389,6 +390,18 @@ def test_autopsy_compare_diagnose_minimize_and_report(tmp_path: Path) -> None:
             str(minimized),
         ]
     )
+    minimized_payload = json.loads(minimized.read_text(encoding="utf-8"))
+    minimized_run = minimized_payload["minimized_run"]
+    assert minimized_payload["minimized_event_count"] >= 2
+    parsed_minimized_run = AutopsyRun.model_validate_json(json.dumps(minimized_run))
+    minimized_diagnosis = diagnose(
+        parsed_minimized_run,
+        comparison=compare_runs(healthy_run, parsed_minimized_run),
+        baseline=healthy_run,
+    )
+    assert minimized_diagnosis.top_hypothesis is BottleneckKind.RANK_STRAGGLER
+    assert minimized_diagnosis.hypotheses[0].rejected_reason is None
+    assert minimized_diagnosis.hypotheses[0].supporting_evidence
     rendered = _invoke(["autopsy", "report", str(diagnosis), "--output", str(report)])
     assert "SLOForge Autopsy" in rendered
     assert report.is_file()

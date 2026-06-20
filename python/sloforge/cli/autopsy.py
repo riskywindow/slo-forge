@@ -270,17 +270,29 @@ def minimize_command(
     healthy = _run(baseline)
     source = _run(degraded)
     original = diagnose(source, comparison=compare_runs(healthy, source), baseline=healthy)
+    original_top = original.hypotheses[0]
+    if original_top.rejected_reason is not None or not original_top.supporting_evidence:
+        raise typer.BadParameter(
+            "the source run has no supported top diagnosis to preserve during minimization"
+        )
 
     def preserves(candidate: AutopsyRun) -> bool:
         try:
+            candidate_comparison = compare_runs(healthy, candidate)
             result = diagnose(
                 candidate,
-                comparison=compare_runs(healthy, candidate),
+                comparison=candidate_comparison,
                 baseline=healthy,
             )
         except ValueError:
             return False
-        return result.top_hypothesis is original.top_hypothesis
+        candidate_top = result.hypotheses[0]
+        return (
+            candidate_comparison.matched_event_count > 0
+            and result.top_hypothesis is original.top_hypothesis
+            and candidate_top.rejected_reason is None
+            and bool(candidate_top.supporting_evidence)
+        )
 
     minimized = minimize_run(source, preserves)
     write_model(output, minimized)
