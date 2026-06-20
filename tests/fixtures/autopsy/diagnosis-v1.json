@@ -51,7 +51,7 @@
           ],
           "explanation": "network_latency_delta=2 exceeds 0.2",
           "metric": "network_latency_delta",
-          "observed": 2,
+          "observed": 2.0,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
@@ -68,10 +68,10 @@
           ],
           "explanation": "arrival_capacity_ratio=1 does not exceed 1",
           "metric": "arrival_capacity_ratio",
-          "observed": 1,
+          "observed": 1.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
-          "threshold": 1
+          "threshold": 1.0
         }
       ],
       "counterfactual": null,
@@ -90,7 +90,7 @@
           ],
           "explanation": "rank_skew=1 does not exceed 1.2",
           "metric": "rank_skew",
-          "observed": 1,
+          "observed": 1.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 1.2
@@ -112,7 +112,7 @@
           ],
           "explanation": "backend_queue_delta=0 does not exceed 0.2",
           "metric": "backend_queue_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -134,7 +134,7 @@
           ],
           "explanation": "startup_delta=0 does not exceed 0.2",
           "metric": "startup_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -156,7 +156,7 @@
           ],
           "explanation": "collective_delta=0 does not exceed 0.2",
           "metric": "collective_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -178,7 +178,7 @@
           ],
           "explanation": "collective_wait_delta=0 does not exceed 0.2",
           "metric": "collective_wait_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -200,7 +200,7 @@
           ],
           "explanation": "cpu_launch_delta=0 does not exceed 0.2",
           "metric": "cpu_launch_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -222,7 +222,7 @@
           ],
           "explanation": "decode_delta=0 does not exceed 0.2",
           "metric": "decode_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -244,7 +244,7 @@
           ],
           "explanation": "kernel_count_delta=0 does not exceed 0.2",
           "metric": "kernel_count_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -266,7 +266,7 @@
           ],
           "explanation": "expert_imbalance=0 does not exceed 0.15",
           "metric": "expert_imbalance",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.15
@@ -288,7 +288,7 @@
           ],
           "explanation": "gateway_queue_delta=0 does not exceed 0.2",
           "metric": "gateway_queue_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -310,7 +310,7 @@
           ],
           "explanation": "gpu_clock_drop=0 does not exceed 0.1",
           "metric": "gpu_clock_drop",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.1
@@ -332,7 +332,7 @@
           ],
           "explanation": "gpu_compute_delta=0 does not exceed 0.2",
           "metric": "gpu_compute_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -354,7 +354,7 @@
           ],
           "explanation": "gpu_memory_delta=0 does not exceed 0.2",
           "metric": "gpu_memory_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -376,7 +376,7 @@
           ],
           "explanation": "warm_fraction_drop=0 does not exceed 0.15",
           "metric": "warm_fraction_drop",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.15
@@ -398,7 +398,7 @@
           ],
           "explanation": "invalid_plan_assumption=0 does not exceed 0.5",
           "metric": "invalid_plan_assumption",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.5
@@ -420,7 +420,7 @@
           ],
           "explanation": "kv_transfer_delta=0 does not exceed 0.2",
           "metric": "kv_transfer_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -442,7 +442,7 @@
           ],
           "explanation": "model_load_delta=0 does not exceed 0.2",
           "metric": "model_load_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -464,7 +464,7 @@
           ],
           "explanation": "numa_remote_delta=0 does not exceed 0.15",
           "metric": "numa_remote_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.15
@@ -486,7 +486,7 @@
           ],
           "explanation": "nvlink_delta=0 does not exceed 0.2",
           "metric": "nvlink_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -508,7 +508,7 @@
           ],
           "explanation": "pcie_delta=0 does not exceed 0.2",
           "metric": "pcie_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -530,7 +530,7 @@
           ],
           "explanation": "prefill_delta=0 does not exceed 0.2",
           "metric": "prefill_delta",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -552,7 +552,7 @@
           ],
           "explanation": "topology_mismatch=0 does not exceed 0.5",
           "metric": "topology_mismatch",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.5
@@ -574,7 +574,7 @@
           ],
           "explanation": "unhealthy_worker=0 does not exceed 0.5",
           "metric": "unhealthy_worker",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.5
@@ -596,7 +596,7 @@
           ],
           "explanation": "worker_crash=0 does not exceed 0.5",
           "metric": "worker_crash",
-          "observed": 0,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.5
