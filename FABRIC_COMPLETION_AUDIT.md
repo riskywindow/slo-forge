@@ -423,3 +423,83 @@ Fabric, Autopsy, ForgeCI, and WarmPath evaluation reports, environment/software 
 10. Export the required physical metric set, with plan/topology identifiers and evidence links, in Prometheus and structured telemetry; include all logs/metrics/runs in the demo manifest.
 11. Regenerate evaluation and reports after the final source commit and require source-commit freshness in the final artifact verification step.
 
+## Post-fix disposition — 2026-08-02
+
+This disposition re-audited the five original HIGH integration gaps against
+`be8a3834499f5f8be9734536df1fe7e1fbba45db`. Commits after the functional fix
+`606680f` changed documentation and the clean-room harness only; the public
+workflow checks below exercised the same core implementation. The checked
+`artifacts/fabric-demo` tree was treated as immutable input. All audit outputs
+were written under `/tmp`.
+
+### HIGH-gap disposition
+
+| Original gap | Post-fix status | Direct evidence |
+|---|---|---|
+| Demo workload was not accepted by the public trace/simulator path | **CLOSED** | `mixed-bursty.jsonl` now validates as the canonical request trace and contains 12 requests, three priorities, and mixed lengths. `sloforge fabric simulate --plan artifacts/fabric-demo/physical-plan.json --topology artifacts/fabric-demo/topology.json --fabric-profile artifacts/fabric-demo/fabric-profile.json --trace artifacts/fabric-demo/mixed-bursty.jsonl ...` exited 0 and produced a 588-operation, 1,523-event result. The demo test executes the same public command. |
+| Counterfactual replay depended on missing, reconstructed simulator inputs | **CLOSED** | The manifest now hashes healthy/degraded/restored simulation request documents plus `autopsy/replay-metadata.json` and `autopsy/scenarios.json`. Standalone `sloforge autopsy replay --evidence artifacts/fabric-demo/autopsy --counterfactual artifacts/fabric-demo/autopsy/scenarios.json ...` exited 0, evaluated seven scenarios, selected `remove-both-faults`, and recorded six rejected scenario IDs. Input and run hashes are resolved and checked from the evidence directory. |
+| `fabric validate` was fail-open | **CLOSED for the original failure** | The exact demo validation exited 1, emitted `valid: false`, measured 12 requests, and recorded two reasons: relative error 14.430933 exceeded 0.25 and observed p95 TTFT 1,620.063 ms fell outside the 94.489–115.487 ms prediction interval. A typed/versioned result is persisted before the nonzero exit. Metric breadth and success-path coverage remain MEDIUM findings below. |
+| Hierarchical optimization reported zero simulator work and placeholder timing | **CLOSED** | A fresh public hierarchical compile over the demo topology/profile/model produced 175 candidates, a three-point Pareto frontier, 13 simulator calls, 13 simulator-validated candidate IDs, 1,014 deterministic work units, and 7,197.266 ms measured solver time. The checked demo optimizer records one simulator call and 306.503 ms because its fixed 16-rank search yields one Pareto candidate. |
+| Fabric `benchmark` did not execute a bounded measured GPU/collective adapter | **CLOSED for bounded NCCL adapter execution** | Deterministic executable fixtures exercised both public measured modes without hardware. `quick` produced 11 points from 1 KiB–1 MiB; `full` produced 15 points from 1 KiB–16 MiB. Each point preserved three raw measured samples; three bounded command captures were retained per run; all statuses were `success`; and canonical profiles identified `nccl-local` with measurement mode `measured`. Wider full-suite breadth remains MEDIUM. |
+
+### Rechecked integration findings
+
+- **CLOSED — manifest completeness for the flagship bundle.** The demo manifest
+  contains 140 hash-checked entries, including the environment, canonical trace,
+  all three simulation request/result pairs, replay metadata/scenarios, Autopsy
+  runs and decisions, three Prometheus exports, runtime configuration/logs,
+  gateway metrics/traces, and recursive raw profiler captures. Calling the
+  report validator against the Markdown report succeeded with every manifest
+  digest verified.
+- **CLOSED — public evidence schemas.** Checked Draft 2020-12 schemas and golden
+  fixtures exist for six Autopsy and four WarmPath documents. Their strict-model,
+  unknown-field, round-trip, and explicit no-unmigrated-legacy tests passed.
+- **PARTIAL — physical metric breadth (MEDIUM).** The demo now exports TTFT,
+  TPOT, E2E, queue/prefill/decode/KV/collective/network durations, collective
+  bytes/wait, network throughput, rank skew, overlap, CPU launch delay,
+  prediction error, diagnosis confidence, recovery/canary/rollback/restored
+  margin, plan/topology identity, and per-resource utilization/bytes. It does
+  not export explicit GPU clock/power/memory series, network latency/error
+  counters, NUMA-locality, or worker-readiness metrics. Generic simulator
+  resource utilization does not replace unavailable hardware counters.
+- **PARTIAL — validation scope (MEDIUM).** `fabric validate` now fails closed on
+  p95 TTFT prediction error and interval coverage, but it does not evaluate p99
+  TPOT, end-to-end latency, goodput, availability, cost, or the plan's hard SLO
+  constraints. The focused suite contains a material-failure CLI test but no
+  success-path CLI test at this revision.
+- **PARTIAL — measured profiler breadth (MEDIUM).** Measured quick/full are an
+  explicitly selected single NCCL primitive and message-size sweep on one host.
+  Operations can be selected independently, but `--suite full` does not
+  orchestrate the complete CPU↔GPU, GPU↔GPU, collective, expert-parallel, KV,
+  contention, and startup matrix, and no bounded multi-host runner is present.
+- **PARTIAL — Autopsy capture (MEDIUM, explicit limitation).** The public command
+  accurately describes and accepts only a simulator request/result. No
+  non-privileged gateway/runtime trace-import or live NVML/NIC capture command is
+  available.
+- **PARTIAL — physical deployment export (MEDIUM).** Offline physical-plan
+  renderers exist and are fixture-tested through `export_physical_plan`, but the
+  root `sloforge export` command still loads only the logical `DeploymentPlan`;
+  the Fabric command group exposes no physical export command.
+- **OPEN — final source freshness (MEDIUM integration gate).** The working demo
+  plan records Git commit `001d53b`, older than this audit, and
+  `environment.json` does not contain a Git field. Final artifact regeneration
+  and a source-commit freshness assertion are still required before the final
+  completion report can claim current-source provenance.
+
+### Post-fix acceptance results
+
+- Python: `137 passed in 7.94s` across Fabric CLI/demo/compiler/profiler/evidence
+  and Autopsy adversarial/alignment/counterfactual/diagnosis tests.
+- Rust: 10 Fabric protocol conformance tests and 20 Fabric simulator
+  unit/integration/property tests passed. The two packages' doc tests also
+  passed.
+- Public workflows: trace simulation exit 0; fail-closed validation exit 1 as
+  required; standalone counterfactual replay exit 0; hierarchical compile exit
+  0 with nonzero simulator evidence; measured quick and full fixture executions
+  exit 0; manifest/report hash verification passed.
+
+The original five HIGH findings are therefore resolved at their stated
+integration boundaries. The six remaining items above are reasonable MEDIUM
+scope/provenance limitations; none invalidates the exercised CPU-only synthetic
+flagship path, but they must not be described as hardware-backed, live-capture,
+full-fabric-profiler, or full-SLO-validation coverage.
