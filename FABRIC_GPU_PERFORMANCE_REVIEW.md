@@ -39,7 +39,9 @@ GPU, NVLink, NCCL, InfiniBand, or RoCE result is claimed.
    only a GPU count. Command construction now requires one unique explicit
    device identifier per requested GPU and emits `CUDA_VISIBLE_DEVICES`.
    Empty, duplicate, comma-containing, and cardinality-mismatched device sets
-   fail closed.
+   fail closed. The subsequently added local measured runner also strips
+   ambient NCCL variables and explicitly disables InfiniBand for its declared
+   `nccl-local` transport class.
 4. Medium: profiler documentation claimed that generic raw artifacts retained
    warmup phases and per-result hardware fingerprints. The implementation keeps
    warmup counts but not warmup durations; the enclosing profile, rather than an
@@ -82,14 +84,27 @@ GPU, NVLink, NCCL, InfiniBand, or RoCE result is claimed.
 `adapter_inventory` performs bounded version probes and distinguishes missing,
 available, and version-unparsed tools. The NCCL, ibverbs, and NVIDIA-SMI builders
 validate executable paths, arguments, read-only fields, timeouts, and explicit
-environment overlays without mutating the parent environment. They only build
-commands: they do not execute tools, parse hardware output, synchronize CUDA
-work, or ingest NCCL samples into a `FabricProfile`.
+environment overlays without mutating the parent environment.
+
+After this review's original command-builder audit, the repository added a
+bounded local NCCL-tests executor and standard 13-column result parser. The CLI
+requires an explicit adapter, `nccl-local` transport, executable, and topology-
+matched device set. Independent process invocations produce typed measured raw
+samples, bounded stdout/stderr capture artifacts, robust summaries, and a
+canonical `FabricProfile`. Timeouts, output overflow, incorrect collective
+results, unexpected sizes, and nonzero exits fail closed while preserving a raw
+failure artifact. Optional NVIDIA inventory uses only the existing read-only
+field allowlist.
+
+Fixture executables exercise this control and parsing path in CI, but do not
+constitute GPU measurements. There is still no cross-host launcher,
+ib-perftest pair orchestration, DeepEP/NIXL result ingester, or hardware-backed
+validation on this machine.
 
 Therefore `benchmarks/fabric/hardware-full.yaml` is a hardware matrix
-specification, not an exercised hardware benchmark runner. This is documented as
-an unimplemented hardware-output ingestion limitation, not described as
-implemented-but-unexercised. Normal CI requires none of the optional stacks.
+specification, not an exercised hardware benchmark run. The local NCCL ingestion
+path is implemented but hardware-unexercised; the remaining adapters are command
+builders only. Normal CI requires none of the optional stacks.
 
 ## Checked experiment
 
@@ -119,14 +134,20 @@ All checks passed!
 
 uv run --locked mypy \
   python/sloforge/fabric/performance/rank_ordering.py \
-  python/sloforge/fabric/profiling/adapters.py
-Success: no issues found in 2 source files
+  python/sloforge/fabric/profiling/adapters.py \
+  python/sloforge/fabric/profiling/runner.py \
+  python/sloforge/cli/fabric.py
+Success: no issues found in 4 source files
 
 uv run --locked pytest -q \
   tests/python/test_fabric_performance.py \
-  tests/python/test_fabric_profiling.py
-31 passed
+  tests/python/test_fabric_profiling.py \
+  tests/python/test_fabric_cli.py
+44 passed
 ```
+
+The `44 passed` count above is scoped to the GPU-performance, profiling, and CLI
+files after the measured adapter work; it remains fixture-backed on this host.
 
 The checked experiment was regenerated through
 `uv run --locked python benchmarks/fabric/rank_ordering/run_experiment.py`; its
