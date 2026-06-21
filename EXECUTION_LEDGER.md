@@ -200,3 +200,75 @@ build, and committed-archive `make clean-room-test` all passed. No paid cloud
 resource, privileged probe, traffic-control rule, GPU clock mutation, external
 deployment mutation, labeled Docker container, or orphan SLOForge process
 remained.
+
+## SLOForge Genesis extension
+
+Baseline recorded: 2026-08-02 (America/Los_Angeles).
+
+- Baseline commit: `435a04799a831c3d19fce18eb816b206d23778d7`.
+- Annotated baseline tag: `sloforge-genesis-baseline-435a047`.
+- Baseline source worktree was clean before validation and was restored to that
+  clean state after the artifact-producing demonstrations.
+- Baseline checks passed: `make check` (362 Python tests passed, 3 expected
+  no-Torch skips; all Rust workspace tests; 28 UI tests and production build)
+  and `make fabric-check` (292 focused Python tests and 31 Fabric Rust tests).
+- Baseline demonstrations passed: `make demo` (120 live and 120 simulated
+  requests), `make fabric-demo`, `make autopsy-demo`, `make forgeci-demo`, and
+  `make warmpath-demo`.
+- Process architecture is `x86_64` on macOS 15.6.1 with 12 logical CPUs and
+  24 GiB RAM. Rust 1.93.1, Python 3.12.7, uv 0.10.2, Node 22.16.0, npm 11.4.2,
+  Docker 29.4.0, and Z3 are available. No NVIDIA inventory or CUDA compiler is
+  available. Genesis GPU, synthesis, deployment, privileged-probe, and live
+  promotion opt-ins/budgets are absent, so paid, privileged, and external
+  mutation paths remain disabled.
+- Existing compatibility boundary: strict Pydantic/Serde wire types and
+  canonical SHA-256 JSON over bounded subprocess stdin/stdout; HTTP/SSE is
+  confined to the live data plane. Additive changes remain compatible within
+  an IR major version and incompatible changes require explicit migration.
+- Existing deployment/controller extension points are the offline exporter and
+  Fabric adapter interfaces plus the persisted guarded recovery state machine.
+  Existing evidence uses hash-linked `EvidenceBundle`, artifact-index, physical
+  manifest, raw JSON/JSONL, Prometheus, OTel-shaped, and Perfetto artifacts.
+
+Genesis status vocabulary: **exercised** means the acceptance command ran on
+this host; **synthetic exercised** means deterministic CPU fixtures were used;
+**implemented, unexercised** is reserved for real hardware or external paths
+that could not run here.
+
+| Genesis task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline, task graph, root integration, CLI, release gates | root | in progress; baseline exercised | `main` / repository root | root manifests, CLI integration, ledger, final report | all lanes | baseline commands above; final Genesis gates | `artifacts/genesis/baseline/record.json` | baseline `435a047` |
+| InferenceGenome, Transformation, Candidate, Counterexample IR, migrations and conformance | Genesis IR lane | in progress | `genesis-ir` / `/tmp/sloforge-genesis-ir` | `crates/sloforge-genesis-ir`, `python/sloforge/genesis/ir`, `schemas/{inference_genome,transformation,candidate,counterexample}`, Genesis golden fixtures/tests | baseline | Python/Rust/schema round trips, hash agreement, migration/property tests | schemas and golden fixtures | pending |
+| GenesisCapsule, content-addressed artifacts, sandbox and independent validation | Genesis trust lane | in progress | `genesis-trust` / `/tmp/sloforge-genesis-trust` | `python/sloforge/genesis/{capsule,artifacts,sandbox}`, `schemas/genesis_capsule`, focused tests/docs | Genesis IR contracts | tamper/stale/hardware/sandbox tests | capsule fixtures and sandbox evidence | pending |
+| Zero-day frontend and conservative generated baseline runtime | Genesis frontend/runtime lane | in progress | `genesis-frontend` / `/tmp/sloforge-genesis-frontend` | `python/sloforge/genesis/{frontend,runtime}`, reference package fixture, focused tests | IR shape | inspect/generate/differential/stream/cancel/bounds/shutdown tests | inspection and generated runtime fixtures | pending |
+| Policy DSL and bounded compiler/interpreter | pending lane | pending | pending worktree | `python/sloforge/genesis/policy_dsl`, `dsl/policy` | IR | parser/type/interpreter/equivalence/property tests | policy graph fixtures | pending |
+| Tensor rewrite system and symbolic constraints | pending lane | pending | pending worktree | `python/sloforge/genesis/tensor_rewrites`, `dsl/tensor` | IR, frontend | rewrite soundness and approximate-quality gates | rewrite fixtures | pending |
+| State and memory synthesis and migration verification | pending lane | pending | pending worktree | `python/sloforge/genesis/state_transforms`, `dsl/state` | IR, runtime | ownership/memory/rollback/migration tests | state transformation fixtures | pending |
+| Search, lifecycle, budgets, Pareto archive and CEGIS | pending lane | pending | pending worktree | `python/sloforge/genesis/{search,synthesis}` | IR, verification, synthesis surfaces | deterministic budget/lifecycle/CEGIS tests | candidate histories | pending |
+| Operator, quality, resource and performance verification | pending lane | pending | pending worktree | `python/sloforge/genesis/{verification,quality,benchmarks}` | frontend, runtime, IR | differential/property/fuzz/resource/statistics tests | scoped evidence records | pending |
+| Explicit-state runtime protocol model checker | pending lane | pending | pending worktree | `crates/sloforge-genesis-modelcheck`, `modelcheck` | IR, runtime protocols | invariant pass/fail and minimized trace tests | model-check results | pending |
+| Distributed synthesis and Fabric validation bridge | pending lane | pending | pending worktree | Genesis distributed modules and Fabric bridge | IR, Fabric | existing Fabric validators plus mutation tests | physical candidate plans | pending |
+| Autopsy-guided mutation and frozen-region enforcement | pending lane | pending | pending worktree | Genesis Autopsy bridge | search, Autopsy | guided/unguided comparison | mutation budgets | pending |
+| Optimization lineage, transfer and invalidation | pending lane | pending | pending worktree | `python/sloforge/lineage`, `schemas/lineage` | candidate lifecycle, CEGIS | SQLite transaction/transfer/invalidation tests | SQLite/JSON/GraphML lineage | pending |
+| Champion-challenger evolution and promotion safety | pending lane | pending | pending worktree | `python/sloforge/genesis/evolution` | capsule, runtime, recovery | shadow/canary/restart/active-stream/rollback tests | evolution timeline | pending |
+| Executable red team and minimization | pending lane | pending | pending worktree | `python/sloforge/redteam`, `schemas/counterexample`, red-team fixtures | verification, CEGIS | tensor/protocol/resource/integrity demos | counterexample corpus | pending |
+| ServingSynthBench grammar, hidden tasks, baselines and reports | pending lane | pending | pending worktree | `python/sloforge/synthbench`, `benchmarks/synthbench`, generated model tasks | frontend, runtime, search | `make synthbench-smoke` and evaluation | raw task/run/report bundles | pending |
+| Flagship HybridDecoder and artifact-backed Genesis demos | pending lane | pending | pending worktree | flagship model/workload/demo/report modules | trusted core through evolution | all Genesis demos | final capsule, timeline and reports | pending |
+| Trace-justified kernel lab and upstream-ready bundle | pending lane | pending | pending worktree | `python/sloforge/genesis/kernel_lab`, `benchmarks/genesis`, `generated/patches` | Autopsy, verification | CPU fixture plus GPU-unavailable or compatible hardware path | raw benchmark and bundle | pending |
+| Evaluation H1-H9 and statistical review | pending lane | pending | pending worktree | Genesis evaluation runners/reports | all core demos | `make genesis-evaluation` | raw multi-seed results | pending |
+| Visualization | pending lane | pending | pending worktree | Genesis artifact-backed UI extensions | stable artifact schemas | UI checks against real bundles | static report/UI bundle | pending |
+| Security, compiler, formal, runtime, GPU, distributed, numerical, concurrency and adversarial reviews | pending review lanes | pending | rotating review worktrees | review reports and bounded fixes | integrated system | review-specific commands plus final gates | review records | pending |
+| Documentation, ADRs, paper, clean-room and final report | root plus documentation/review lanes | pending | `main` plus review worktrees | `README.md`, Genesis/lineage/redteam/synthbench docs, ADRs, `paper/genesis`, final report | stable implementation/evidence | document inventory, clean-room and report verification | `GENESIS_FINAL_REPORT.md` | pending |
+
+### Genesis dependency graph
+
+1. Canonical IR, capsule/artifact trust, sandbox, frontend, and conservative
+   runtime establish the trusted vertical slice.
+2. The vertical slice unlocks policy, tensor, state, distributed, operator,
+   resource, quality, and model-checking surfaces.
+3. Those surfaces unlock the auditable lifecycle, CEGIS, search, Autopsy
+   guidance, lineage and transfer.
+4. Accepted capsules plus lineage unlock evolution, executable red teaming,
+   ServingSynthBench and the flagship drift/rejection/promotion demonstration.
+5. Stable raw artifacts unlock evaluation, visualization, documentation,
+   adversarial review and clean-room release verification.
