@@ -238,9 +238,9 @@ that could not run here.
 | Genesis task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
 |---|---|---|---|---|---|---|---|---|
 | Baseline, task graph, root integration, CLI, release gates | root | in progress; baseline exercised | `main` / repository root | root manifests, CLI integration, ledger, final report | all lanes | baseline commands above; final Genesis gates | `artifacts/genesis/baseline/record.json` | baseline `435a047` |
-| InferenceGenome, Transformation, Candidate, Counterexample IR, migrations and conformance | Genesis IR lane | in progress | `genesis-ir` / `/tmp/sloforge-genesis-ir` | `crates/sloforge-genesis-ir`, `python/sloforge/genesis/ir`, `schemas/{inference_genome,transformation,candidate,counterexample}`, Genesis golden fixtures/tests | baseline | Python/Rust/schema round trips, hash agreement, migration/property tests | schemas and golden fixtures | pending |
-| GenesisCapsule, content-addressed artifacts, sandbox and independent validation | Genesis trust lane | in progress | `genesis-trust` / `/tmp/sloforge-genesis-trust` | `python/sloforge/genesis/{capsule,artifacts,sandbox}`, `schemas/genesis_capsule`, focused tests/docs | Genesis IR contracts | tamper/stale/hardware/sandbox tests | capsule fixtures and sandbox evidence | pending |
-| Zero-day frontend and conservative generated baseline runtime | Genesis frontend/runtime lane | in progress | `genesis-frontend` / `/tmp/sloforge-genesis-frontend` | `python/sloforge/genesis/{frontend,runtime}`, reference package fixture, focused tests | IR shape | inspect/generate/differential/stream/cancel/bounds/shutdown tests | inspection and generated runtime fixtures | pending |
+| InferenceGenome, Transformation, Candidate, Counterexample IR, migrations and conformance | Genesis IR lane | in progress | reserved branch `genesis-ir`; shared `main` checkout with disjoint ownership | `crates/sloforge-genesis-ir`, `python/sloforge/genesis/ir`, `schemas/{inference_genome,transformation,candidate,counterexample}`, Genesis golden fixtures/tests | baseline | Python/Rust/schema round trips, hash agreement, migration/property tests | schemas and golden fixtures | pending |
+| GenesisCapsule, content-addressed artifacts, sandbox and independent validation | Genesis trust lane | in progress | reserved branch `genesis-trust`; shared `main` checkout with disjoint ownership | `python/sloforge/genesis/{capsule,artifacts,sandbox}`, `schemas/genesis_capsule`, focused tests/docs | Genesis IR contracts | tamper/stale/hardware/sandbox tests | capsule fixtures and sandbox evidence | pending |
+| Zero-day frontend and conservative generated baseline runtime | Genesis frontend/runtime lane | in progress | reserved branch `genesis-frontend`; shared `main` checkout with disjoint ownership | `python/sloforge/genesis/{frontend,runtime}`, reference package fixture, focused tests | IR shape | inspect/generate/differential/stream/cancel/bounds/shutdown tests | inspection and generated runtime fixtures | pending |
 | Policy DSL and bounded compiler/interpreter | pending lane | pending | pending worktree | `python/sloforge/genesis/policy_dsl`, `dsl/policy` | IR | parser/type/interpreter/equivalence/property tests | policy graph fixtures | pending |
 | Tensor rewrite system and symbolic constraints | pending lane | pending | pending worktree | `python/sloforge/genesis/tensor_rewrites`, `dsl/tensor` | IR, frontend | rewrite soundness and approximate-quality gates | rewrite fixtures | pending |
 | State and memory synthesis and migration verification | pending lane | pending | pending worktree | `python/sloforge/genesis/state_transforms`, `dsl/state` | IR, runtime | ownership/memory/rollback/migration tests | state transformation fixtures | pending |
@@ -272,3 +272,10 @@ that could not run here.
    ServingSynthBench and the flagship drift/rejection/promotion demonstration.
 5. Stable raw artifacts unlock evaluation, visualization, documentation,
    adversarial review and clean-room release verification.
+
+The host had only 330 MiB free when three temporary worktrees were attempted;
+Git aborted each copy before registration. The incomplete directories were
+absent after the failure. The three named branches are retained as immutable
+lane starting points, while agents use the shared checkout with disjoint file
+ownership and root-controlled commits to avoid triplicating the large tracked
+evidence corpus.
