@@ -16,6 +16,31 @@ All exporters write canonical `physical-plan.json`, `topology.json`, SHA-256
 artifact records, capability flags, and validation results. The result always
 sets `deployed: false`.
 
+The public offline lowering entry point is:
+
+```shell
+sloforge fabric export \
+  --plan artifacts/physical-plans/plan.json \
+  --topology artifacts/fabric/topology.json \
+  --target kubernetes \
+  --model-id Qwen/Qwen3-0.6B \
+  --model-revision main \
+  --image ghcr.io/sloforge/runtime:0.1.0 \
+  --runtime native \
+  --runtime-version 0.1.0 \
+  --output generated/fabric-kubernetes
+```
+
+The CLI supports exactly the adapter targets listed below. Runtime lowering is
+selected independently with `--runtime native|vllm|sglang|dynamo` and a version
+inside the reviewed compatibility range. Dynamo additionally requires
+`--dynamo-backend vllm|sglang`; multi-node Dynamo requires an explicit gang
+scheduler and RDMA resource name. Modal and Truss require
+`--allow-advisory-cloud-metadata` because their output cannot enforce physical
+rank placement. The command rejects an existing output directory and removes a
+newly-created partial directory when validation or rendering fails. It never
+executes, deploys, or mutates the generated configuration.
+
 ## Targets
 
 - Local emits bounded launch groups, explicit CPU affinity, expected GPU UUID,
