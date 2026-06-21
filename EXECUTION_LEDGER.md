@@ -1,6 +1,6 @@
 # SLOForge execution ledger
 
-Updated: 2026-08-01 (America/Los_Angeles)
+Updated: 2026-08-02 (America/Los_Angeles)
 
 | Task | Owner | Status | Files owned | Dependencies | Acceptance test | Commit/patch |
 |---|---|---|---|---|---|---|
@@ -45,29 +45,114 @@ Updated: 2026-08-01 (America/Los_Angeles)
 
 ## SLOForge Fabric extension
 
-Baseline recorded: 2026-08-01 (America/Los_Angeles)
+Baseline recorded: 2026-08-01 (America/Los_Angeles). Ledger audit snapshot:
+integrated source revision `8154c2895f38f044ce0e0f8cdf48d1907dff0d33` on `main`, before
+this ledger-only commit and before final evidence publication.
 
-- Baseline commit: `c67e082a13fc6882d7849a862c6667a787b43a72`
-- Baseline tag: `sloforge-fabric-baseline-c67e082`
-- Validation environment: Apple Silicon macOS 15.6.1, 12 logical CPUs, 24 GiB RAM; no NVIDIA device, RDMA device, privileged probe authorization, cloud credentials, or GPU budget.
-- Clean detached-worktree bootstrap: passed with 114 locked Python packages, all five Rust crates, and 231 locked UI packages.
-- Baseline `make check`: passed; Python 67 passed/3 expected no-Torch skips, Rust 62 passed, UI 11 passed plus production build, Ruff/mypy/fmt/clippy all clean.
-- Baseline `make demo`: passed; selected `cfg-aad9cd4cfa41`, 120 live gateway requests, 120 simulated requests, diagnosis accuracy 1.0. The detached worktree preserved committed release evidence.
+- Baseline commit: `c67e082a13fc6882d7849a862c6667a787b43a72`.
+- Annotated baseline tag: `sloforge-fabric-baseline-c67e082`; dereferencing the
+  tag resolves to the baseline commit above.
+- Baseline environment: Apple M4 Pro/Apple Silicon, macOS 15.6.1, 12 logical
+  CPUs, 24 GiB RAM. No NVIDIA device, CUDA toolkit, NCCL tests binary, RDMA
+  device, privileged-probe authorization, cloud credentials, or
+  `SLOFORGE_GPU_BUDGET_USD` was available.
+- Baseline clean detached-worktree bootstrap passed with 114 locked Python
+  packages, all five then-current Rust crates, and 231 locked UI packages.
+- Baseline `make check` passed: Python 67 passed/3 expected no-Torch skips,
+  Rust 62 passed, UI 11 passed plus production build, and Ruff, mypy, fmt, and
+  warning-denied Clippy were clean.
+- Baseline `make demo` passed: selected `cfg-aad9cd4cfa41`, replayed 120 live
+  gateway requests and 120 simulated requests, and reported diagnosis accuracy
+  1.0 from the retained baseline evidence.
+- Agent concurrency: the environment exposed four total slots. Root plus three
+  implementation/review lanes was the maximum available concurrency; the
+  requested six simultaneous subagents was not available.
 
-| Fabric task | Owner | Status | Branch/worktree | Files owned | Dependencies | Acceptance command | Artifact | Commit |
-|---|---|---|---|---|---|---|---|---|
-| Baseline validation and extension integration | root | complete; integration ongoing | `main` | root manifests, CLI integration, ledger, final release | existing system | `make check && make demo` | detached baseline logs | baseline `c67e082` |
-| PhysicalExecutionPlan, schemas, migrations, conformance | IR/protocol lane | complete | shared worktree, disjoint ownership | `python/sloforge/fabric/ir`, `crates/sloforge-fabric-protocol`, `schemas/fabric`, golden fixtures | baseline IR | Python/Rust canonical round trip and schema tests | golden physical plan | `091f9b5` |
-| Topology discovery, fixtures, and fabric profiling | topology/profiling lane | complete; local CPU exercised, GPU fabric unavailable | shared worktree, disjoint ownership | `python/sloforge/fabric/{topology,profiling}`, topology fixtures | Fabric IR | fixture discovery and benchmark artifact tests | topology/profile fixtures | `bf866ee` |
-| Communication-aware simulator | simulator lane | complete | shared worktree, disjoint ownership | `crates/sloforge-fabric-sim` | Fabric IR/profile | deterministic resource, contention, failure, and analytical tests | physical simulation trace | `cdb92c7` |
-| Physical compiler and baselines | compiler lane + root | complete; explicit simulator validation pass retained separately | shared worktree, disjoint ownership | `python/sloforge/fabric/{model_graph,compiler}` | IR, topology, simulator | optimizer invariants and compiled-plan validation | physical plan/frontier | `557a3bd`, `826d7ad` |
-| Autopsy event model, alignment, diagnosis, replay, minimization | Autopsy lanes | complete | shared worktree, disjoint ownership | `python/sloforge/autopsy`, optional Rust ingestion | simulator/evidence | deterministic injected-fault diagnosis suite | diagnosis bundle | `cdb92c7`, `0026d95` |
-| Recovery planner and guarded executor | recovery lane | complete | shared worktree, disjoint ownership | `python/sloforge/recovery` | physical plan, Autopsy | restart-safe shadow/canary/promotion/rollback tests | recovery proposal/audit | `5f85999` |
-| Synthetic fabric demo, reports, and UI | root + future UI lane | core demo complete; UI pending | shared worktree, disjoint ownership | demo/report/UI Fabric additions | Tier 1 | `python -m sloforge.fabric.demo --reset` | `artifacts/fabric-demo/manifest.json` | `826d7ad` |
-| ForgeCI | ForgeCI lane | core complete; demo integration pending | shared worktree, disjoint ownership | `python/sloforge/forgeci`, fixtures | Tier 1 | fixture regression tests | local bisection/issue bundle | `af75c62` |
-| WarmPath | WarmPath lane | core complete; demo integration pending | shared worktree, disjoint ownership | `python/sloforge/warmpath` | Tier 1 | local profiler/planner/executor tests | artifact DAG/plan/run | `cd32a23` |
-| Adapters and low-level experiment | performance/adapters lanes | adapters complete; experiment running | shared worktree, disjoint ownership | Fabric exporters/adapters, benchmark experiment | Tier 1 traces | offline validation and correctness benchmark | adapter manifests/raw experiment | `25867bb`; experiment pending |
-| Evaluation, documentation, reviews, clean-room release | review lanes + root | pending | shared worktree, disjoint ownership | `docs/{fabric,autopsy,recovery,forgeci,warmpath}`, reports, paper | integrated extension | `make extension-evaluation && make clean-room-test` | evaluation/report/reviews | pending |
+Status vocabulary: **exercised** means the listed acceptance path ran on this
+host; **synthetic exercised** means it ran against deterministic calibrated
+fixtures rather than GPU/RDMA hardware; **static exercised** means schemas,
+commands, or generated output were validated without launching that external
+runtime; **implemented, unexercised** identifies paths that could not run on
+this host. A final clean archive and final artifact publication are still in
+progress and are not represented as passing below.
+
+| Fabric task | Owner | Status and boundary | Files owned | Acceptance command/evidence | Artifact | Commits |
+|---|---|---|---|---|---|---|
+| Baseline validation and non-regression integration | root | Baseline exercised and tagged; post-extension source passed the full suite after regenerating Fabric evidence. Final exact-HEAD rerun remains in progress. | root manifests, CLI integration, ledger, release | baseline `make check && make demo`; last integrated worktree `make check`: 350 Python passed/3 expected GPU skips, all 98 Rust tests, 28 UI tests/build | baseline tag; `FABRIC_CLEANROOM_REVIEW.md` | baseline `c67e082`; integration through `8154c28` |
+| PhysicalExecutionPlan, TopologyGraph, ModelGraph, schemas, migrations, and conformance | IR/protocol lane | Complete; Python/Rust and JSON-schema paths exercised with golden fixtures. | `python/sloforge/fabric/ir`, `crates/sloforge-fabric-protocol`, `schemas/fabric`, golden fixtures | canonical round trip, stable-hash, migration, schema, property, and Rust conformance tests under `make fabric-check` | `schemas/fabric/*`, golden physical/topology/profile fixtures | `98f60af`, `5f58977`, `091f9b5`, `bf121b3`, `1cb5069` |
+| Topology discovery and provenance | topology lane | Complete for current-host and synthetic fixtures; local macOS discovery exercised (53 typed nodes/26 edges in the clean-room wheel smoke). NVIDIA/NVLink/MIG/NIC/RDMA discovery implemented or fixture-covered but hardware-unexercised. | `python/sloforge/fabric/topology`, topology fixtures | `sloforge fabric discover`; discovery/provenance/conflict fixture tests | `artifacts/fabric/local/topology.json` | `0a00c8d`, `a1253f5`, `1d0b5f9` |
+| Fabric profiling and measured-adapter runner | profiling lane | Synthetic-calibrated suite and real host-memory path exercised. Bounded NCCL adapter execution/parser exercised with deterministic fake executables; real CUDA/NCCL/DeepEP/NIXL/RDMA measurements unexercised and never silently substituted. | `python/sloforge/fabric/profiling`, fabric benchmark fixtures | profiling tests; `sloforge fabric benchmark --mode synthetic`; measured quick/full fake-executable tests with process-group timeout/output bounds | `artifacts/fabric-demo/fabric-profile*.json`; current-host profile output when regenerated | `0a00c8d`, `82ce914`, `bf866ee`, `a02638c`, `ca5b508`, `001d53b` |
+| Communication-aware Rust digital twin | simulator lane | Complete at calibrated flow/collective level; deterministic synthetic contention, barriers, failures, KV transfer, counterfactuals, resource conservation, and invalid-plan paths exercised. It is not a packet- or kernel-level simulator. | `crates/sloforge-fabric-sim`, Python JSON subprocess bridge | Fabric Rust fmt/Clippy/tests plus analytical/property/two-node tests and public `sloforge fabric simulate` | `artifacts/fabric-demo/simulations/*.json`, Perfetto traces | `038213a`, `1ee0fd1`, `46643df`, `3b9a5c5`, `cdb92c7`, `bcb213a`, `3f80342` |
+| Physical compiler, baselines, and simulator refinement | compiler lane + root | Complete and synthetic exercised. Exhaustive/tiny, random, sequential, topology-unaware, greedy topology-aware, hierarchical, and robust-failure paths exist. Selected candidates are now refined through bounded Rust-twin calls; hardware calibration remains unexercised. | `python/sloforge/fabric/{model_graph,compiler,simulation}` | compiler invariants, feasibility, topology binding, nonzero simulator-call accounting, public compile/simulate/validate tests | `artifacts/fabric-demo/{physical-plan.json,physical-plan-topology-unaware.json,optimizer.json}` | `c982f4e`, `f1ed184`, `557a3bd`, `68dc5e0`, `5e61816`, `b4b6a23`, `8154c28` |
+| Autopsy event model, time alignment, differential diagnosis, replay, and minimization | Autopsy lanes | Complete and deterministic synthetic fault matrix exercised. Self-contained directory replay is hash-verified. Capture on this host uses simulated/runtime artifacts; privileged CUPTI/DCGM/eBPF/multi-node capture is not claimed. | `python/sloforge/autopsy`, schemas and fixtures | Autopsy unit/property/rule tests; public compare/diagnose/replay/minimize; `make autopsy-demo` final standalone target rerun still pending | `artifacts/fabric-demo/autopsy/*`; `reports/autopsy-evaluation.md` | `f9c195c`, `5b21b61`, `0026d95`, `cdb92c7`, `e74cdb8`, `5460ab8`, `d523a92`, `606680f` |
+| Recovery planner and guarded executor | recovery lane | Complete for bounded local simulated driver: simulation validation, shadow, canary, promotion, drain, rollback state, idempotency, restart recovery, and stream preservation exercised. External production mutation and general infrastructure undo are disabled/unexercised. | `python/sloforge/recovery`, recovery schemas | recovery state-machine/concurrency tests and flagship local execution | `artifacts/fabric-demo/recovery/{proposal,execution}.json` | `5f85999`, `9ab76be` |
+| Physical fault injection and deterministic two-node cluster | fault/demo lanes | Complete and synthetic exercised for network degradation plus rank-specific GPU slowdown in the flagship run, with exact ground-truth intervals. No host-wide clock/network mutation occurred. | Fabric simulator faults, scenarios, demo | deterministic fault-scope/counterfactual tests and `make fabric-demo` | `artifacts/fabric-demo/autopsy/scenarios.json`, degraded simulation/evidence | `1ee0fd1`, `3c8ad0d`, `3b7cb09`, `606680f` |
+| Flagship Fabric demo, telemetry, report, and local gateway | root | End-to-end source path exercised after regeneration: canonical trace, two-host synthetic topology, compile, twin, two faults, diagnosis, seven counterfactuals, guarded recovery, local Rust gateway, Prometheus/OTel/Perfetto, and artifact-derived report. The checked-in bundle is stale relative to the current source and final regeneration/publication is in progress. | `python/sloforge/fabric/demo.py`, runtime/report integration | last worktree `make fabric-demo` passed; final exact-HEAD `make fabric-demo` and archive replay pending | `artifacts/fabric-demo/manifest.json`, `reports/fabric-demo/*` | `826d7ad`, `6508edd`, `114fcce`, `606680f`, `99dc339` |
+| Artifact visualization | UI lane | Complete and exercised: manifest and component hashes, size bounds, physical/cross-artifact reference checks, topology/rank/expert/collective/KV/Autopsy/recovery views, 28 tests, typecheck/lint/build. | `ui` Fabric explorer | UI portion of `make check` | served `artifacts/fabric-demo` bundle; `FABRIC_UI_REVIEW.md` | `8345915`, `542e43f` |
+| ForgeCI | ForgeCI lane | Complete and local fixture exercised: robust repeated trials, intentional 12% regression, bisection, minimization, and upstream issue bundle. External large-runtime repositories and GPU matrices are unexercised. Final `make forgeci-demo` regeneration remains in progress. | `python/sloforge/forgeci`, fixture repository/matrices | ForgeCI tests and prior deterministic `make forgeci-demo`; final exact-HEAD rerun pending | `artifacts/forgeci/demo/*`, `reports/forgeci-evaluation.md` | `af75c62`, `05a0839`, `c170382`, `db95487` |
+| WarmPath | WarmPath lane | Complete and local exercised: startup profiling, typed artifact DAG, storage-tier model, planner, simulator, executor, eviction/cost evaluation. Modal/cloud snapshots and GPU-memory restore are unexercised. Final `make warmpath-demo` regeneration remains in progress. | `python/sloforge/warmpath`, schemas, local fixtures | WarmPath tests and local evaluation; final exact-HEAD `make warmpath-demo` pending | `artifacts/warmpath/*`, `reports/warmpath-evaluation.md` | `cd32a23`, `86a7819`, `f34b129`, `62f5adf`, `bf121b3` |
+| Runtime and deployment adapters | adapters lane | Complete at the documented boundary. Local execution exercised; Docker/Kubernetes/Dynamo/vLLM/SGLang/Modal/Truss physical outputs validated offline or statically with fail-closed representability checks. No live Dynamo/vLLM/SGLang cluster, paid Modal, or Truss deployment ran. | `python/sloforge/fabric/adapters`, `deploy/fabric`, `deploy/dynamo` | adapter schema/version/ownership tests; final `make docker-smoke` rerun pending | adapter manifests, `deploy/fabric/validated-versions.json`, `RUNTIME_ADAPTER_REVIEW.md` | `25867bb`, `93232d0`, `2828433`, `beba063` |
+| Trace-justified low-level rank-ordering experiment | GPU/performance lane | Complete synthetic experiment; exact six-order search, randomized paired trials, raw warmups/samples, intervals, and correctness gates exist. It is deliberately not enabled: production decision is `measure_on_hardware`. | `benchmarks/fabric/rank_ordering`, experiment tests/report | rank-ordering tests and benchmark script | `reports/rank-ordering-experiment.md`, raw synthetic input/trace artifacts | `9a830df`, `3e56920` |
+| Evaluation H1-H6 and reports | evaluation lane | Existing synthetic/local evaluations exercised and preserve negative results. H1-H4 cover 180 physical trials and 24 deterministic diagnosis cases; ForgeCI and WarmPath evaluations exist. Results must be regenerated after final source stabilization before release numbers are frozen. | evaluation runners, `reports/*evaluation*` | prior `make extension-evaluation` passed; final exact-HEAD regeneration pending | `artifacts/fabric/evaluation/*`, `artifacts/{forgeci,warmpath}`, evaluation Markdown/HTML/SVG | `fc1eda7`, `872e8bd`, `4be8437`, `ab0e51f`, `f34b129` |
+| Documentation, ADRs, paper, security, architecture, methodology, and UI reviews | documentation/review lanes | Complete at current source boundary; architecture, distributed systems/networking, simulator/optimizer, Autopsy/statistics, runtime, GPU methodology, security/concurrency, UI, documentation, related work, limitations, interview, resume, and paper reviews are present. Open fidelity limits remain explicit. | `README.md`, `docs`, `paper/fabric_extension`, review reports | document inventory/link/claim audits and review-specific test commands | `ARCHITECTURE_DISTRIBUTED_NETWORK_REVIEW.md`, `AUTOPSY_STATISTICAL_REVIEW.md`, `SIMULATOR_OPTIMIZER_REVIEW.md`, `RUNTIME_ADAPTER_REVIEW.md`, `FABRIC_GPU_PERFORMANCE_REVIEW.md`, `FABRIC_SECURITY_CONCURRENCY_REVIEW.md`, `FABRIC_UI_REVIEW.md`, `FABRIC_DOCUMENTATION_REVIEW.md` | `f979c16`, `90eb7f4`, `08fb98c`, `c99a1ef`, `e74cdb8`, `3f80342`, `93232d0`, `3e56920`, `9ab76be`, `5f4200e`, `542e43f` |
+| Final adversarial review, clean-room archive, evidence publication, and final report | root + final review lanes | **In progress; release blocker.** The latest clean-room audit passed after regenerating evidence but proved the committed archive still carries stale Fabric artifacts. The expanded clean-room gate, fresh hiring/depth review, final exact-HEAD demos/checks, committed artifact publication, and `FABRIC_FINAL_REPORT.md` have not yet completed. | release evidence, final reviews, ledger/report | required: `make check`, `make fabric-check`, all four demos, `make extension-evaluation`, `make docker-smoke`, then committed-archive `make clean-room-test` | `FABRIC_CLEANROOM_REVIEW.md`; final artifacts/report pending | audit `e6f84ea`; clean-room reports `49ae62d`, `be8a383`; completion pending |
+
+### Fabric acceptance state at this ledger audit
+
+- `make fabric-check`: passed on the regenerated integrated worktree before the
+  latest validation hardening; the clean-room audit recorded 280 Python tests
+  and 31 Fabric Rust tests. Final exact-HEAD rerun is pending.
+- `make check`: passed on the same regenerated worktree; the audit recorded 350
+  Python tests with three legitimate GPU/Torch skips, all 98 Rust tests, and 28
+  UI tests plus production build. Final exact-HEAD rerun is pending.
+- Public `sloforge fabric simulate`: passed on the regenerated bundle with 588
+  operations and 1,523 events. Standalone hash-verified `autopsy replay` passed
+  with seven counterfactuals. `fabric validate` failed closed as designed and
+  wrote its structured result. Revision `8154c28` subsequently added p99 TPOT
+  and optional hard-SLO validation; its focused tests passed, but the final
+  all-target gate is pending.
+- `make fabric-demo`: passed after source-side artifact-contract fixes, but the
+  resulting worktree artifacts have not yet been committed against final source.
+- `make autopsy-demo`, final `make forgeci-demo`, final `make warmpath-demo`,
+  final `make extension-evaluation`, final `make docker-smoke`, and the expanded
+  committed-archive `make clean-room-test` remain pending at this audit point.
+- `FABRIC_FINAL_REPORT.md` and the fresh final adversarial hiring/depth review
+  are not present yet and must not be inferred from earlier component reviews.
+
+### Fabric hardware and deployment disposition
+
+- Implemented and exercised on this host: deterministic two-node/four-or-eight
+  GPU fixtures; local Apple-host topology and CPU/host-memory probing; Rust
+  digital twin; local Rust gateway; synthetic fault, diagnosis, counterfactual,
+  and recovery; ForgeCI fixture repository; WarmPath local filesystem/page-cache
+  path; offline exporters; UI and static reports.
+- Implemented or command/schema validated but hardware-unexercised: CUDA/NVML,
+  NCCL collectives, NVLink/NVSwitch, MIG, InfiniBand/RoCE/RDMA, multi-GPU and
+  multi-node runtime paths, DeepEP/NIXL, privileged telemetry/faults, vLLM,
+  SGLang, and NVIDIA Dynamo execution.
+- Static/offline only: Kubernetes/Dynamo manifests and advisory Modal/Truss
+  metadata. No credentials, paid resources, privileged host mutation, GPU clock
+  changes, traffic-control changes, or external deployment mutation were used.
+- The rank-ordering improvement is a synthetic digital-twin result. It is not a
+  hardware speedup claim and remains disabled pending matched GPU measurements.
+
+### Open release discrepancies
+
+1. The old ledger incorrectly left the UI, ForgeCI demo integration, WarmPath
+   demo integration, simulator-in-loop compiler refinement, measured-adapter
+   execution, and the low-level experiment pending; their rows above now point
+   to the implementing commits and evidence.
+2. The old ledger called the physical compiler's simulator a separate validation
+   pass. `b4b6a23` now performs bounded Rust-twin refinement during compilation
+   and records nonzero simulator calls and solver time.
+3. The old ledger described topology/profiling as simply complete. The actual
+   boundary is local/synthetic execution plus real-adapter orchestration tests;
+   no NVIDIA, NCCL, NVLink, IB/RoCE, or RDMA measurement occurred on this host.
+4. The committed flagship evidence predates the latest artifact and validation
+   contracts. `FABRIC_CLEANROOM_REVIEW.md` correctly treats artifact publication
+   and a subsequent archive test as an open release blocker.
+5. Component and methodology reviews are complete, but the prompt-required fresh
+   final adversarial review and `FABRIC_FINAL_REPORT.md` are still outstanding.
 
 ### Fabric dependency graph
 
