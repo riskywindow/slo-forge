@@ -106,11 +106,12 @@ default. No production speedup is claimed.
 ## Checked synthetic evaluation
 
 The 180-trial H1 matrix did not show a win over its already topology-aligned
-sequential fixture: the sequential median p95 TTFT was 616.434 ms and the
-hierarchical compiler was 626.120 ms, 1.57% slower. The twin's rank correlation
-was 0.881, but median relative error was 28.35% and prediction-interval coverage
-was 0%. The latter is a calibration failure, not evidence that the intervals are
-conservative.
+sequential fixture: the sequential median p95 TTFT was 616.428 ms and the
+hierarchical compiler was 626.068 ms, 1.56% slower. The internally calibrated
+twin's rank correlation was 0.993, median relative error was 0.0284%, and
+prediction-interval coverage was 73.33%. Coverage fell to 20% for expert-skewed
+traffic, and compiler predictions share synthetic calibration inputs with the
+twin; these values are not independent hardware-accuracy evidence.
 
 Autopsy top-1/top-3 accuracy was 1.0 across 24 deterministic cases from only two
 fault families; the 0.925 median score is not a probability. Diagnosis-driven

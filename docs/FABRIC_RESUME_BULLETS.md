@@ -7,8 +7,10 @@ audited before use.
 <!-- source: artifacts/fabric/evaluation/result.json and reports/fabric-evaluation.md; 180 deterministic synthetic plan trials, not hardware measurement -->
 - Built a topology-aware physical inference compiler and deterministic Rust
   communication twin evaluated across 180 synthetic plan trials, preserving the
-  negative result that its 626.120 ms median p95 TTFT was 1.57% slower than the
-  already topology-aligned sequential fixture rather than claiming a win.
+  negative result that its 626.068 ms median p95 TTFT was 1.56% slower than the
+  already topology-aligned sequential fixture; its internally calibrated twin
+  reached 0.993 rank correlation and 73.33% interval coverage, including only
+  20% coverage on expert-skewed traffic.
 
 <!-- source: artifacts/fabric-demo/manifest.json and artifacts/fabric-demo/recovery/execution.json; synthetic simulation, not GPU measurement -->
 - Implemented structured causal diagnosis and guarded self-healing that evaluated

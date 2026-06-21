@@ -19,10 +19,11 @@ synthetic systems validation, not a multi-GPU performance claim. A local ForgeCI
 fixture bisected an injected 12.00% TTFT regression, and WarmPath exhaustively
 evaluated 243 local artifact placements. Real NVIDIA and RDMA validation was
 unavailable on the evaluation host. In the broader 180-trial synthetic matrix,
-the hierarchical compiler was 1.57% slower than an already topology-aligned
-sequential baseline. The twin's Spearman rank correlation was 0.881, but its
-28.35% median relative error and 0% interval coverage expose an uncertainty-
-calibration failure rather than a production-accuracy result.
+the hierarchical compiler was 1.56% slower than an already topology-aligned
+sequential baseline. The internally calibrated twin's Spearman rank correlation
+was 0.993, with 0.0284% median relative error and 73.33% interval coverage;
+expert-skewed coverage was only 20%, and shared synthetic calibration prevents
+interpreting this as independent hardware accuracy.
 
 ## 1. Motivation
 
@@ -247,18 +248,20 @@ multi-fault accuracy.
 
 `artifacts/fabric/evaluation/result.json` indexes 180 deterministic synthetic
 plan trials: four topology fixtures by three workload regimes, three seeds, and
-five methods. Median p95 TTFT was 2831.682 ms for random placement, 616.434 ms
-for sequential placement, 622.311 ms for the topology-unaware joint optimizer,
-and 626.120 ms for both topology-aware methods. Random placement's median SLO
+five methods. Median p95 TTFT was 2831.615 ms for random placement, 616.428 ms
+for sequential placement, 1015.728 ms for the topology-unaware joint optimizer,
+and 626.068 ms for both topology-aware methods. Random placement's median SLO
 attainment was 0.4375; the other methods attained 1.0. The hierarchical method
-was 1.57% slower than sequential, so this fixture does not support H1 against an
+was 1.56% slower than sequential, so this fixture does not support H1 against an
 already aligned order. The topology-unaware baseline could also change
 parallelism, unlike the placement-only methods.
 
-For H2, the twin's Spearman rank correlation was 0.881 and Pareto-selection
-regret 2.06%, but median relative error was 28.35% and interval coverage was 0%.
-The rank ordering is useful within this synthetic corpus; the uncertainty model
-is not calibrated and cannot support production safety claims.
+For H2, the twin's Spearman rank correlation was 0.993, Pareto-selection regret
+1.003%, median relative error 0.0284%, mean absolute error 16.295 ms, and interval
+coverage 73.33%. Expert-skewed traffic had 18.44% median relative error and only
+20% coverage. Compiler predictions and the twin share synthetic calibration
+inputs, so this is internal consistency/ranking evidence rather than independent
+hardware calibration and cannot support production safety claims.
 
 For H3, Autopsy top-1 and top-3 accuracy were 1.0 across 24 deterministic cases
 covering network-bandwidth degradation and rank-straggler families. The median
