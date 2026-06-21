@@ -92,3 +92,13 @@ def test_recruiter_documents_match_current_flagship_artifact() -> None:
         content = path.read_text(encoding="utf-8")
         assert all(value in content for value in expected_values), path
         assert "zero simulator calls" not in content, path
+
+
+def test_autopsy_architecture_matches_current_flagship_evidence() -> None:
+    root = ROOT / "artifacts/fabric-demo"
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    degraded = json.loads((root / "autopsy/degraded-run.json").read_text(encoding="utf-8"))
+    content = (ROOT / "docs/autopsy/ARCHITECTURE.md").read_text(encoding="utf-8")
+    assert f"{len(degraded['events']):,} canonical events" in content
+    assert f"{manifest['diagnosis_confidence']:.3f}" in content
+    assert f"`{manifest['diagnosis']}` first" in content
