@@ -7,15 +7,15 @@
   ],
   "graph_hash": "388b47de3fd3e27af426e132c25098cc6c5cd2ba3793b518fbd23f838ec5f2c8",
   "graph_id": "warmpath-local-demo",
-  "host_fingerprint": "3d198c9c3af31d2d7125f19f33e6c8473b6849b3c9d248bbc1dc855fca07ea78",
-  "objective_value": 1.054403629412118,
+  "host_fingerprint": "2e8d6c41b4f837e238fb316ef22b0fedb902ea271a38c3c46d602ef22dd299b6",
+  "objective_value": 0.894760414103123,
   "optimizer": "exhaustive",
   "optimizer_seed": 2026,
   "placements": [
     {
       "artifact_id": "model-config",
       "estimate_source": "measured",
-      "expected_duration_ms": 0.0005296999999999999,
+      "expected_duration_ms": 0.0005161,
       "mode": "eager_restore",
       "prefetch_order": 0,
       "tier_id": "host-memory"
@@ -31,7 +31,7 @@
     {
       "artifact_id": "model-weights",
       "estimate_source": "measured",
-      "expected_duration_ms": 0.9818415999999999,
+      "expected_duration_ms": 0.8817294999999998,
       "mode": "eager_restore",
       "prefetch_order": 2,
       "tier_id": "page-cache"
@@ -39,20 +39,20 @@
     {
       "artifact_id": "runtime-cache",
       "estimate_source": "measured",
-      "expected_duration_ms": 0.09196979999999999,
+      "expected_duration_ms": 0.08121239999999996,
       "mode": "lazy_restore",
       "prefetch_order": 3,
       "tier_id": "host-memory"
     }
   ],
-  "plan_id": "warmpath-eb19aa057c17b1bc",
+  "plan_id": "warmpath-18c7910b4c2e3467",
   "predicted_hourly_cost": 1.2210523709654808e-06,
-  "predicted_p50_ready_time_ms": 0.9781341070783641,
-  "predicted_p95_ready_time_ms": 1.0544035683594994,
+  "predicted_p50_ready_time_ms": 0.881742564655699,
+  "predicted_p95_ready_time_ms": 0.8947603530505045,
   "predicted_restore_failure_probability": 0.0,
-  "prediction_interval_high_ms": 1.1119966189705475,
-  "prediction_interval_low_ms": 0.8418451343739053,
-  "profile_hash": "4af9d440860ad820684f209f04552725229bcc89cca1e098a793fce190388157",
+  "prediction_interval_high_ms": 0.9041221232999145,
+  "prediction_interval_low_ms": 0.8562312866325128,
+  "profile_hash": "959cb013b95fa97e632e3076adf8299f43f71d4e0a9f4fd1d6c0af09bf95492a",
   "profile_id": "warmpath-local-demo",
   "rejected_candidates": [],
   "schema_version": "1.0.0",
@@ -60,7 +60,7 @@
     {
       "artifact_id": "model-config",
       "estimate_source": "measured",
-      "finish_ms": 0.0005296999999999999,
+      "finish_ms": 0.0005161,
       "resource": "host-memory",
       "stage": "restore",
       "start_ms": 0.0
@@ -68,26 +68,26 @@
     {
       "artifact_id": "tokenizer",
       "estimate_source": "measured",
-      "finish_ms": 0.0010716999999999999,
+      "finish_ms": 0.0010581,
       "resource": "host-memory",
       "stage": "restore",
-      "start_ms": 0.0005296999999999999
+      "start_ms": 0.0005161
     },
     {
       "artifact_id": "model-weights",
       "estimate_source": "measured",
-      "finish_ms": 0.9823712999999998,
+      "finish_ms": 0.8822455999999999,
       "resource": "page-cache",
       "stage": "restore",
-      "start_ms": 0.0005296999999999999
+      "start_ms": 0.0005161
     },
     {
       "artifact_id": "runtime-cache",
       "estimate_source": "measured",
-      "finish_ms": 1.0743410999999998,
+      "finish_ms": 0.9634579999999998,
       "resource": "host-memory",
       "stage": "restore",
-      "start_ms": 0.9823712999999998
+      "start_ms": 0.8822455999999999
     }
   ],
   "warm_replica_count": 0

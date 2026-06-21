@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/basetenlabs/truss/main/truss/config.schema.json
-model_name: sloforge-opt-0c27332ab6ce05d9
-description: Generated from SLOForge DeploymentPlan opt-0c27332ab6ce05d9
+model_name: sloforge-opt-6bc8aed6c3b3caee
+description: Generated from SLOForge DeploymentPlan opt-6bc8aed6c3b3caee
 model_class_name: Model
 model_module_dir: model
 requirements: []
@@ -17,6 +17,6 @@ runtime:
     restart_threshold_seconds: 600
     stop_traffic_threshold_seconds: 300
 environment_variables:
-  SLOFORGE_PLAN_ID: opt-0c27332ab6ce05d9
+  SLOFORGE_PLAN_ID: opt-6bc8aed6c3b3caee
   MODEL_ID: sloforge/mock-qwen3-0.6b-shape
   MODEL_REVISION: cpu-demo-v1

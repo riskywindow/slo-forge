@@ -1,11 +1,11 @@
 {
-  "artifact_hash": "7ab766bc7eaebf7ed9e85f30177a13708235e68ad751f343beb79158d7a76f65",
+  "artifact_hash": "52db8ac97121d6c83c82e3d932b36d62502966199c41e1ff69ed2d6f8fb431f4",
   "cache_evictions": [],
   "execution_id": "warmpath-local-demo",
   "failure_reason": null,
   "output_directory": "artifacts/warmpath/execution",
-  "plan_id": "warmpath-eb19aa057c17b1bc",
-  "ready_time_ms": 4.367792,
+  "plan_id": "warmpath-18c7910b4c2e3467",
+  "ready_time_ms": 3.86425,
   "records": [
     {
       "artifact_id": "model-config",
@@ -13,10 +13,10 @@
       "checksum_verified": true,
       "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/execution/config.json",
       "error": null,
-      "finished_ns": 214095691509458,
+      "finished_ns": 222494667792250,
       "mode": "eager_restore",
       "source_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/input/files/config.json",
-      "started_ns": 214095691040458,
+      "started_ns": 222494667236333,
       "status": "restored",
       "tier_id": "host-memory"
     },
@@ -26,10 +26,10 @@
       "checksum_verified": true,
       "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/execution/tokenizer.json",
       "error": null,
-      "finished_ns": 214095691848125,
+      "finished_ns": 222494668119458,
       "mode": "eager_restore",
       "source_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/input/files/tokenizer.json",
-      "started_ns": 214095691525083,
+      "started_ns": 222494667809000,
       "status": "restored",
       "tier_id": "host-memory"
     },
@@ -39,10 +39,10 @@
       "checksum_verified": true,
       "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/execution/weights.bin",
       "error": null,
-      "finished_ns": 214095695388125,
+      "finished_ns": 222494671082541,
       "mode": "eager_restore",
       "source_path": "/Users/rishivinodkumar/sloforge/artifacts/warmpath/input/files/weights.bin",
-      "started_ns": 214095691852833,
+      "started_ns": 222494668124333,
       "status": "restored",
       "tier_id": "page-cache"
     },
@@ -52,10 +52,10 @@
       "checksum_verified": false,
       "destination_path": null,
       "error": null,
-      "finished_ns": 214095695402500,
+      "finished_ns": 222494671094625,
       "mode": "lazy_restore",
       "source_path": null,
-      "started_ns": 214095695401166,
+      "started_ns": 222494671093208,
       "status": "deferred",
       "tier_id": "host-memory"
     }

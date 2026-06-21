@@ -3,7 +3,7 @@
     "action_count": 1,
     "cold_start_exposure": 1,
     "controller": "predictive",
-    "estimated_cost_usd": 0.036938528198543215,
+    "estimated_cost_usd": 0.037004680772430555,
     "recovery_windows": 2,
     "replica_oscillations": 0,
     "rollback_count": 0,
@@ -11,7 +11,7 @@
   },
   "predictive_decisions": [
     {
-      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "actual_outcome_p95_ttft_ms": 206.8114649638145,
       "alternatives": [
         {
           "action": {
@@ -23,10 +23,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 14509.206500882028,
-          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_p95_ttft_ms": 14440.849945109374,
+          "predicted_slo_attainment": 0.017312000398194465,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14440.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -39,10 +39,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 7025.284586498392,
-          "predicted_slo_attainment": 0.035585747014500284,
+          "predicted_p95_ttft_ms": 6992.186687062847,
+          "predicted_slo_attainment": 0.035754194101046737,
           "predicted_utilization": 1.0363225834851908,
-          "rejection_reason": "upper forecast predicts 7025.3ms TTFT at 1.04 utilization",
+          "rejection_reason": "upper forecast predicts 6992.2ms TTFT at 1.04 utilization",
           "safe": false
         },
         {
@@ -55,10 +55,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 1176.523359127696,
-          "predicted_slo_attainment": 0.2124904686850895,
+          "predicted_p95_ttft_ms": 1170.9804588587424,
+          "predicted_slo_attainment": 0.21349630398072936,
           "predicted_utilization": 0.8461538461538461,
-          "rejection_reason": "upper forecast predicts 1176.5ms TTFT at 0.85 utilization",
+          "rejection_reason": "upper forecast predicts 1171.0ms TTFT at 0.85 utilization",
           "safe": false
         },
         {
@@ -71,10 +71,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 677.9849300759118,
-          "predicted_slo_attainment": 0.3687397594102988,
+          "predicted_p95_ttft_ms": 674.7907709271716,
+          "predicted_slo_attainment": 0.3704852092990197,
           "predicted_utilization": 0.7327907262791404,
-          "rejection_reason": "upper forecast predicts 678.0ms TTFT at 0.73 utilization",
+          "rejection_reason": "upper forecast predicts 674.8ms TTFT at 0.73 utilization",
           "safe": false
         },
         {
@@ -87,10 +87,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 7025.284586498392,
-          "predicted_slo_attainment": 0.035585747014500284,
+          "predicted_p95_ttft_ms": 6992.186687062847,
+          "predicted_slo_attainment": 0.035754194101046737,
           "predicted_utilization": 1.0363225834851908,
-          "rejection_reason": "upper forecast predicts 7025.3ms TTFT at 1.04 utilization",
+          "rejection_reason": "upper forecast predicts 6992.2ms TTFT at 1.04 utilization",
           "safe": false
         },
         {
@@ -103,10 +103,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 297.2902030559447,
-          "predicted_slo_attainment": 0.8409291575375408,
+          "predicted_p95_ttft_ms": 295.8895934261471,
+          "predicted_slo_attainment": 0.8449097418574778,
           "predicted_utilization": 0.5181612917425954,
-          "rejection_reason": "upper forecast predicts 297.3ms TTFT at 0.52 utilization",
+          "rejection_reason": "upper forecast predicts 295.9ms TTFT at 0.52 utilization",
           "safe": false
         },
         {
@@ -119,10 +119,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 272.654619734355,
-          "predicted_slo_attainment": 0.9169109265178519,
+          "predicted_p95_ttft_ms": 271.37007459266096,
+          "predicted_slo_attainment": 0.9212511747113663,
           "predicted_utilization": 0.4230769230769231,
-          "rejection_reason": "upper forecast predicts 272.7ms TTFT at 0.42 utilization",
+          "rejection_reason": "upper forecast predicts 271.4ms TTFT at 0.42 utilization",
           "safe": false
         },
         {
@@ -135,10 +135,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 273.00476744084517,
-          "predicted_slo_attainment": 0.9157349241315726,
+          "predicted_p95_ttft_ms": 271.71857266440196,
+          "predicted_slo_attainment": 0.920069605653249,
           "predicted_utilization": 0.3663953631395702,
-          "rejection_reason": "upper forecast predicts 273.0ms TTFT at 0.37 utilization",
+          "rejection_reason": "upper forecast predicts 271.7ms TTFT at 0.37 utilization",
           "safe": false
         },
         {
@@ -151,10 +151,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 485.700641785065,
-          "predicted_slo_attainment": 0.5147203410750926,
+          "predicted_p95_ttft_ms": 483.4123827402319,
+          "predicted_slo_attainment": 0.5171567980589791,
           "predicted_utilization": 0.6908817223234605,
-          "rejection_reason": "upper forecast predicts 485.7ms TTFT at 0.69 utilization",
+          "rejection_reason": "upper forecast predicts 483.4ms TTFT at 0.69 utilization",
           "safe": false
         },
         {
@@ -167,10 +167,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 225.7145665010812,
+          "predicted_p95_ttft_ms": 224.65116786844106,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.34544086116173023,
-          "rejection_reason": "upper forecast predicts 225.7ms TTFT at 0.35 utilization",
+          "rejection_reason": "upper forecast predicts 224.7ms TTFT at 0.35 utilization",
           "safe": false
         },
         {
@@ -183,10 +183,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 231.15044292547705,
+          "predicted_p95_ttft_ms": 230.06143449881026,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.28205128205128205,
-          "rejection_reason": "upper forecast predicts 231.2ms TTFT at 0.28 utilization",
+          "rejection_reason": "upper forecast predicts 230.1ms TTFT at 0.28 utilization",
           "safe": false
         },
         {
@@ -199,10 +199,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 243.05973789919776,
+          "predicted_p95_ttft_ms": 241.91462176009097,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.24426357542638016,
-          "rejection_reason": "upper forecast predicts 243.1ms TTFT at 0.24 utilization",
+          "rejection_reason": "upper forecast predicts 241.9ms TTFT at 0.24 utilization",
           "safe": false
         },
         {
@@ -215,10 +215,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 297.2902030559447,
-          "predicted_slo_attainment": 0.8409291575375408,
+          "predicted_p95_ttft_ms": 295.8895934261471,
+          "predicted_slo_attainment": 0.8449097418574778,
           "predicted_utilization": 0.5181612917425954,
-          "rejection_reason": "upper forecast predicts 297.3ms TTFT at 0.52 utilization",
+          "rejection_reason": "upper forecast predicts 295.9ms TTFT at 0.52 utilization",
           "safe": false
         },
         {
@@ -231,7 +231,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 208.20595058531705,
+          "predicted_p95_ttft_ms": 207.2250394877654,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2590806458712977,
           "rejection_reason": null,
@@ -247,10 +247,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 219.90269853282723,
+          "predicted_p95_ttft_ms": 218.86668108584266,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.21153846153846154,
-          "rejection_reason": "upper forecast predicts 219.9ms TTFT at 0.21 utilization",
+          "rejection_reason": "upper forecast predicts 218.9ms TTFT at 0.21 utilization",
           "safe": false
         },
         {
@@ -263,10 +263,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 234.53077168067185,
+          "predicted_p95_ttft_ms": 233.42583766696,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.1831976815697851,
-          "rejection_reason": "upper forecast predicts 234.5ms TTFT at 0.18 utilization",
+          "rejection_reason": "upper forecast predicts 233.4ms TTFT at 0.18 utilization",
           "safe": false
         }
       ],
@@ -289,14 +289,14 @@
         "lower_rps": 4.5,
         "upper_rps": 5.5
       },
-      "generated_at": "2026-08-02T02:56:39.645956+00:00",
+      "generated_at": "2026-08-02T07:51:03.646286+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.6,
         "long_context_fraction": 0.4,
-        "observed_p95_ttft_ms": 207.79041838365882,
+        "observed_p95_ttft_ms": 206.8114649638145,
         "output_p95": 193.0,
         "prompt_p95": 1265.2,
         "replicas": 3,
@@ -312,7 +312,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 201.01671537615712,
+      "actual_outcome_p95_ttft_ms": 200.06967459105212,
       "alternatives": [
         {
           "action": {
@@ -324,10 +324,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 14509.206500882028,
-          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_p95_ttft_ms": 14440.849945109374,
+          "predicted_slo_attainment": 0.017312000398194465,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14440.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -340,10 +340,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 2658.2422089989973,
-          "predicted_slo_attainment": 0.09404711096440735,
+          "predicted_p95_ttft_ms": 2645.718555013811,
+          "predicted_slo_attainment": 0.09449228812574698,
           "predicted_utilization": 0.9326903251366717,
-          "rejection_reason": "upper forecast predicts 2658.2ms TTFT at 0.93 utilization",
+          "rejection_reason": "upper forecast predicts 2645.7ms TTFT at 0.93 utilization",
           "safe": false
         },
         {
@@ -356,10 +356,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 714.1757551062177,
-          "predicted_slo_attainment": 0.3500538882936709,
+          "predicted_p95_ttft_ms": 710.811091791761,
+          "predicted_slo_attainment": 0.35171088758592406,
           "predicted_utilization": 0.7615384615384616,
-          "rejection_reason": "upper forecast predicts 714.2ms TTFT at 0.76 utilization",
+          "rejection_reason": "upper forecast predicts 710.8ms TTFT at 0.76 utilization",
           "safe": false
         },
         {
@@ -372,10 +372,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 513.0506550774437,
-          "predicted_slo_attainment": 0.4872813191560259,
+          "predicted_p95_ttft_ms": 510.6335431757097,
+          "predicted_slo_attainment": 0.4895878920237221,
           "predicted_utilization": 0.6595116536512263,
-          "rejection_reason": "upper forecast predicts 513.1ms TTFT at 0.66 utilization",
+          "rejection_reason": "upper forecast predicts 510.6ms TTFT at 0.66 utilization",
           "safe": false
         },
         {
@@ -388,10 +388,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 2658.2422089989973,
-          "predicted_slo_attainment": 0.09404711096440735,
+          "predicted_p95_ttft_ms": 2645.718555013811,
+          "predicted_slo_attainment": 0.09449228812574698,
           "predicted_utilization": 0.9326903251366717,
-          "rejection_reason": "upper forecast predicts 2658.2ms TTFT at 0.93 utilization",
+          "rejection_reason": "upper forecast predicts 2645.7ms TTFT at 0.93 utilization",
           "safe": false
         },
         {
@@ -404,10 +404,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 268.71150296112637,
-          "predicted_slo_attainment": 0.9303658282026233,
+          "predicted_p95_ttft_ms": 267.44553484372454,
+          "predicted_slo_attainment": 0.9347697659117082,
           "predicted_utilization": 0.46634516256833586,
-          "rejection_reason": "upper forecast predicts 268.7ms TTFT at 0.47 utilization",
+          "rejection_reason": "upper forecast predicts 267.4ms TTFT at 0.47 utilization",
           "safe": false
         },
         {
@@ -420,10 +420,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 256.8148614353146,
-          "predicted_slo_attainment": 0.9734639132750069,
+          "predicted_p95_ttft_ms": 255.60494141674693,
+          "predicted_slo_attainment": 0.9780718581351351,
           "predicted_utilization": 0.3807692307692308,
-          "rejection_reason": "upper forecast predicts 256.8ms TTFT at 0.38 utilization",
+          "rejection_reason": "upper forecast predicts 255.6ms TTFT at 0.38 utilization",
           "safe": false
         },
         {
@@ -436,10 +436,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 261.82255313638916,
-          "predicted_slo_attainment": 0.9548451690094454,
+          "predicted_p95_ttft_ms": 260.5890406107443,
+          "predicted_slo_attainment": 0.9593649810217395,
           "predicted_utilization": 0.32975582682561316,
-          "rejection_reason": "upper forecast predicts 261.8ms TTFT at 0.33 utilization",
+          "rejection_reason": "upper forecast predicts 260.6ms TTFT at 0.33 utilization",
           "safe": false
         },
         {
@@ -452,10 +452,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 386.07184970130595,
-          "predicted_slo_attainment": 0.6475478597919498,
+          "predicted_p95_ttft_ms": 384.2529671921381,
+          "predicted_slo_attainment": 0.6506130631256581,
           "predicted_utilization": 0.6217935500911145,
-          "rejection_reason": "upper forecast predicts 386.1ms TTFT at 0.62 utilization",
+          "rejection_reason": "upper forecast predicts 384.3ms TTFT at 0.62 utilization",
           "safe": false
         },
         {
@@ -468,10 +468,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 217.68861703974173,
+          "predicted_p95_ttft_ms": 216.6630306928354,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.31089677504555724,
-          "rejection_reason": "upper forecast predicts 217.7ms TTFT at 0.31 utilization",
+          "rejection_reason": "upper forecast predicts 216.7ms TTFT at 0.31 utilization",
           "safe": false
         },
         {
@@ -484,10 +484,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 226.06344760067756,
+          "predicted_p95_ttft_ms": 224.9984053005949,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.25384615384615383,
-          "rejection_reason": "upper forecast predicts 226.1ms TTFT at 0.25 utilization",
+          "rejection_reason": "upper forecast predicts 225.0ms TTFT at 0.25 utilization",
           "safe": false
         },
         {
@@ -500,10 +500,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 239.22950419260098,
+          "predicted_p95_ttft_ms": 238.102433256998,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.21983721788374214,
-          "rejection_reason": "upper forecast predicts 239.2ms TTFT at 0.22 utilization",
+          "rejection_reason": "upper forecast predicts 238.1ms TTFT at 0.22 utilization",
           "safe": false
         },
         {
@@ -516,10 +516,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 268.71150296112637,
-          "predicted_slo_attainment": 0.9303658282026233,
+          "predicted_p95_ttft_ms": 267.44553484372454,
+          "predicted_slo_attainment": 0.9347697659117082,
           "predicted_utilization": 0.46634516256833586,
-          "rejection_reason": "upper forecast predicts 268.7ms TTFT at 0.47 utilization",
+          "rejection_reason": "upper forecast predicts 267.4ms TTFT at 0.47 utilization",
           "safe": false
         },
         {
@@ -532,7 +532,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 204.44651996113615,
+          "predicted_p95_ttft_ms": 203.48332049578985,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.23317258128416793,
           "rejection_reason": null,
@@ -548,10 +548,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 217.40882513536425,
+          "predicted_p95_ttft_ms": 216.3845569591598,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.1903846153846154,
-          "rejection_reason": "upper forecast predicts 217.4ms TTFT at 0.19 utilization",
+          "rejection_reason": "upper forecast predicts 216.4ms TTFT at 0.19 utilization",
           "safe": false
         },
         {
@@ -564,10 +564,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 232.6076129545708,
+          "predicted_p95_ttft_ms": 231.51173942991554,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.16487791341280658,
-          "rejection_reason": "upper forecast predicts 232.6ms TTFT at 0.16 utilization",
+          "rejection_reason": "upper forecast predicts 231.5ms TTFT at 0.16 utilization",
           "safe": false
         }
       ],
@@ -590,14 +590,14 @@
         "lower_rps": 3.95,
         "upper_rps": 4.95
       },
-      "generated_at": "2026-08-02T02:56:39.646090+00:00",
+      "generated_at": "2026-08-02T07:51:03.646400+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 201.01671537615712,
+        "observed_p95_ttft_ms": 200.06967459105212,
         "output_p95": 68.0,
         "prompt_p95": 165.09999999999997,
         "replicas": 3,
@@ -613,7 +613,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "actual_outcome_p95_ttft_ms": 206.8114649638145,
       "alternatives": [
         {
           "action": {
@@ -625,10 +625,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 14509.206500882028,
-          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_p95_ttft_ms": 14440.849945109374,
+          "predicted_slo_attainment": 0.017312000398194465,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14440.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -641,10 +641,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 8169.907248365379,
-          "predicted_slo_attainment": 0.030600102596026357,
+          "predicted_p95_ttft_ms": 8131.416740945394,
+          "predicted_slo_attainment": 0.030744949861090737,
           "predicted_utilization": 1.1197465514557488,
-          "rejection_reason": "upper forecast predicts 8169.9ms TTFT at 1.12 utilization",
+          "rejection_reason": "upper forecast predicts 8131.4ms TTFT at 1.12 utilization",
           "safe": false
         },
         {
@@ -657,10 +657,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 2237.02719840319,
-          "predicted_slo_attainment": 0.11175545839516489,
+          "predicted_p95_ttft_ms": 2226.487995281138,
+          "predicted_slo_attainment": 0.11228445899095565,
           "predicted_utilization": 0.9142692307692308,
-          "rejection_reason": "upper forecast predicts 2237.0ms TTFT at 0.91 utilization",
+          "rejection_reason": "upper forecast predicts 2226.5ms TTFT at 0.91 utilization",
           "safe": false
         },
         {
@@ -673,10 +673,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 903.5402891280306,
-          "predicted_slo_attainment": 0.2766893773395148,
+          "predicted_p95_ttft_ms": 899.2834814133658,
+          "predicted_slo_attainment": 0.2779991016927005,
           "predicted_utilization": 0.7917803797446112,
-          "rejection_reason": "upper forecast predicts 903.5ms TTFT at 0.79 utilization",
+          "rejection_reason": "upper forecast predicts 899.3ms TTFT at 0.79 utilization",
           "safe": false
         },
         {
@@ -689,10 +689,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 8169.907248365379,
-          "predicted_slo_attainment": 0.030600102596026357,
+          "predicted_p95_ttft_ms": 8131.416740945394,
+          "predicted_slo_attainment": 0.030744949861090737,
           "predicted_utilization": 1.1197465514557488,
-          "rejection_reason": "upper forecast predicts 8169.9ms TTFT at 1.12 utilization",
+          "rejection_reason": "upper forecast predicts 8131.4ms TTFT at 1.12 utilization",
           "safe": false
         },
         {
@@ -705,10 +705,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 326.8770766776863,
-          "predicted_slo_attainment": 0.7648134966849017,
+          "predicted_p95_ttft_ms": 325.3370757740282,
+          "predicted_slo_attainment": 0.7684337833467353,
           "predicted_utilization": 0.5598732757278744,
-          "rejection_reason": "upper forecast predicts 326.9ms TTFT at 0.56 utilization",
+          "rejection_reason": "upper forecast predicts 325.3ms TTFT at 0.56 utilization",
           "safe": false
         },
         {
@@ -721,10 +721,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 288.1962775297555,
-          "predicted_slo_attainment": 0.8674643619371113,
+          "predicted_p95_ttft_ms": 286.83851169209674,
+          "predicted_slo_attainment": 0.8715705521034058,
           "predicted_utilization": 0.4571346153846154,
-          "rejection_reason": "upper forecast predicts 288.2ms TTFT at 0.46 utilization",
+          "rejection_reason": "upper forecast predicts 286.8ms TTFT at 0.46 utilization",
           "safe": false
         },
         {
@@ -737,10 +737,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 283.7192939885172,
-          "predicted_slo_attainment": 0.881152622669779,
+          "predicted_p95_ttft_ms": 282.3826203570457,
+          "predicted_slo_attainment": 0.8853236069695047,
           "predicted_utilization": 0.3958901898723056,
-          "rejection_reason": "upper forecast predicts 283.7ms TTFT at 0.40 utilization",
+          "rejection_reason": "upper forecast predicts 282.4ms TTFT at 0.40 utilization",
           "safe": false
         },
         {
@@ -753,10 +753,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 610.5778978209082,
-          "predicted_slo_attainment": 0.4094481652418555,
+          "predicted_p95_ttft_ms": 607.7013103160431,
+          "predicted_slo_attainment": 0.41138631060378034,
           "predicted_utilization": 0.7464977009704991,
-          "rejection_reason": "upper forecast predicts 610.6ms TTFT at 0.75 utilization",
+          "rejection_reason": "upper forecast predicts 607.7ms TTFT at 0.75 utilization",
           "safe": false
         },
         {
@@ -769,10 +769,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 233.3463624313218,
+          "predicted_p95_ttft_ms": 232.24700847031002,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.37324885048524953,
-          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.37 utilization",
+          "rejection_reason": "upper forecast predicts 232.2ms TTFT at 0.37 utilization",
           "safe": false
         },
         {
@@ -785,10 +785,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 235.89131724217359,
+          "predicted_p95_ttft_ms": 234.77997335287344,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.30475641025641026,
-          "rejection_reason": "upper forecast predicts 235.9ms TTFT at 0.30 utilization",
+          "rejection_reason": "upper forecast predicts 234.8ms TTFT at 0.30 utilization",
           "safe": false
         },
         {
@@ -801,10 +801,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 246.5930899973734,
+          "predicted_p95_ttft_ms": 245.43132733939953,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2639267932482038,
-          "rejection_reason": "upper forecast predicts 246.6ms TTFT at 0.26 utilization",
+          "rejection_reason": "upper forecast predicts 245.4ms TTFT at 0.26 utilization",
           "safe": false
         },
         {
@@ -817,10 +817,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 326.8770766776863,
-          "predicted_slo_attainment": 0.7648134966849017,
+          "predicted_p95_ttft_ms": 325.3370757740282,
+          "predicted_slo_attainment": 0.7684337833467353,
           "predicted_utilization": 0.5598732757278744,
-          "rejection_reason": "upper forecast predicts 326.9ms TTFT at 0.56 utilization",
+          "rejection_reason": "upper forecast predicts 325.3ms TTFT at 0.56 utilization",
           "safe": false
         },
         {
@@ -833,7 +833,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 211.68742050715883,
+          "predicted_p95_ttft_ms": 210.69010732084593,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2799366378639372,
           "rejection_reason": null,
@@ -849,10 +849,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 222.18502505156616,
+          "predicted_p95_ttft_ms": 221.13825498485969,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2285673076923077,
-          "rejection_reason": "upper forecast predicts 222.2ms TTFT at 0.23 utilization",
+          "rejection_reason": "upper forecast predicts 221.1ms TTFT at 0.23 utilization",
           "safe": false
         },
         {
@@ -865,10 +865,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 236.27971000307758,
+          "predicted_p95_ttft_ms": 235.16653629686627,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.1979450949361528,
-          "rejection_reason": "upper forecast predicts 236.3ms TTFT at 0.20 utilization",
+          "rejection_reason": "upper forecast predicts 235.2ms TTFT at 0.20 utilization",
           "safe": false
         }
       ],
@@ -891,14 +891,14 @@
         "lower_rps": 4.8622499999999995,
         "upper_rps": 5.94275
       },
-      "generated_at": "2026-08-02T02:56:39.646160+00:00",
+      "generated_at": "2026-08-02T07:51:03.646470+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.4,
         "long_context_fraction": 0.6,
-        "observed_p95_ttft_ms": 207.79041838365882,
+        "observed_p95_ttft_ms": 206.8114649638145,
         "output_p95": 213.2,
         "prompt_p95": 978.0,
         "replicas": 3,
@@ -914,7 +914,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 191.43981659897415,
+      "actual_outcome_p95_ttft_ms": 190.5378950156223,
       "alternatives": [
         {
           "action": {
@@ -926,10 +926,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -942,10 +942,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 1292.9278388227794,
-          "predicted_slo_attainment": 0.1933595924638972,
+          "predicted_p95_ttft_ms": 1286.8365274944078,
+          "predicted_slo_attainment": 0.19427487070698374,
           "predicted_utilization": 0.8834414496351368,
-          "rejection_reason": "upper forecast predicts 1292.9ms TTFT at 0.88 utilization",
+          "rejection_reason": "upper forecast predicts 1286.8ms TTFT at 0.88 utilization",
           "safe": false
         },
         {
@@ -958,10 +958,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 525.0288674430849,
-          "predicted_slo_attainment": 0.47616429400827365,
+          "predicted_p95_ttft_ms": 522.5553231415792,
+          "predicted_slo_attainment": 0.47841824382729703,
           "predicted_utilization": 0.721326923076923,
-          "rejection_reason": "upper forecast predicts 525.0ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 522.6ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -974,10 +974,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 404.36493219540785,
-          "predicted_slo_attainment": 0.6182534144162344,
+          "predicted_p95_ttft_ms": 402.4598663299216,
+          "predicted_slo_attainment": 0.6211799508849891,
           "predicted_utilization": 0.624687439818279,
-          "rejection_reason": "upper forecast predicts 404.4ms TTFT at 0.62 utilization",
+          "rejection_reason": "upper forecast predicts 402.5ms TTFT at 0.62 utilization",
           "safe": false
         },
         {
@@ -990,10 +990,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 1292.9278388227794,
-          "predicted_slo_attainment": 0.1933595924638972,
+          "predicted_p95_ttft_ms": 1286.8365274944078,
+          "predicted_slo_attainment": 0.19427487070698374,
           "predicted_utilization": 0.8834414496351368,
-          "rejection_reason": "upper forecast predicts 1292.9ms TTFT at 0.88 utilization",
+          "rejection_reason": "upper forecast predicts 1286.8ms TTFT at 0.88 utilization",
           "safe": false
         },
         {
@@ -1006,10 +1006,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 226.71738252488115,
+          "predicted_p95_ttft_ms": 225.64925937133378,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.4417207248175684,
-          "rejection_reason": "upper forecast predicts 226.7ms TTFT at 0.44 utilization",
+          "rejection_reason": "upper forecast predicts 225.6ms TTFT at 0.44 utilization",
           "safe": false
         },
         {
@@ -1022,10 +1022,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 220.37898439985975,
+          "predicted_p95_ttft_ms": 219.3407230492246,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3606634615384615,
-          "rejection_reason": "upper forecast predicts 220.4ms TTFT at 0.36 utilization",
+          "rejection_reason": "upper forecast predicts 219.3ms TTFT at 0.36 utilization",
           "safe": false
         },
         {
@@ -1038,10 +1038,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 226.36634367877193,
+          "predicted_p95_ttft_ms": 225.29987435835878,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3123437199091395,
-          "rejection_reason": "upper forecast predicts 226.4ms TTFT at 0.31 utilization",
+          "rejection_reason": "upper forecast predicts 225.3ms TTFT at 0.31 utilization",
           "safe": false
         },
         {
@@ -1054,10 +1054,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 309.77733259009045,
-          "predicted_slo_attainment": 0.8070312889252289,
+          "predicted_p95_ttft_ms": 308.3178929225241,
+          "predicted_slo_attainment": 0.8108514158236722,
           "predicted_utilization": 0.5889609664234245,
-          "rejection_reason": "upper forecast predicts 309.8ms TTFT at 0.59 utilization",
+          "rejection_reason": "upper forecast predicts 308.3ms TTFT at 0.59 utilization",
           "safe": false
         },
         {
@@ -1070,7 +1070,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 188.651180936221,
+          "predicted_p95_ttft_ms": 187.7623973235224,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2944804832117123,
           "rejection_reason": null,
@@ -1086,7 +1086,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 197.05945209164926,
+          "predicted_p95_ttft_ms": 196.13105497864294,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2404423076923077,
           "rejection_reason": null,
@@ -1102,7 +1102,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 209.09779038218258,
+          "predicted_p95_ttft_ms": 208.1126776009061,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.208229146606093,
           "rejection_reason": null,
@@ -1118,10 +1118,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 226.71738252488115,
+          "predicted_p95_ttft_ms": 225.64925937133378,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.4417207248175684,
-          "rejection_reason": "upper forecast predicts 226.7ms TTFT at 0.44 utilization",
+          "rejection_reason": "upper forecast predicts 225.6ms TTFT at 0.44 utilization",
           "safe": false
         },
         {
@@ -1134,7 +1134,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 178.51933448634554,
+          "predicted_p95_ttft_ms": 177.67828457478964,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2208603624087842,
           "rejection_reason": null,
@@ -1150,7 +1150,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 190.38662282445375,
+          "predicted_p95_ttft_ms": 189.48966310438388,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.18033173076923076,
           "rejection_reason": null,
@@ -1166,7 +1166,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 203.97146968428655,
+          "predicted_p95_ttft_ms": 203.01050830141168,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.15617185995456975,
           "rejection_reason": null,
@@ -1192,14 +1192,14 @@
         "lower_rps": 0.688625,
         "upper_rps": 4.688625
       },
-      "generated_at": "2026-08-02T02:56:39.646223+00:00",
+      "generated_at": "2026-08-02T07:51:03.646527+00:00",
       "observed": {
         "arrival_rate_rps": 1.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 191.43981659897415,
+        "observed_p95_ttft_ms": 190.5378950156223,
         "output_p95": 51.0,
         "prompt_p95": 157.0,
         "replicas": 3,
@@ -1215,7 +1215,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 321.90901563587374,
+      "actual_outcome_p95_ttft_ms": 323.0991881266509,
       "alternatives": [
         {
           "action": {
@@ -1227,10 +1227,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 22477.669657186972,
-          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_p95_ttft_ms": 22560.77482909375,
+          "predicted_slo_attainment": 0.011081179697676294,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 22560.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1243,10 +1243,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 22477.669657186972,
-          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_p95_ttft_ms": 22560.77482909375,
+          "predicted_slo_attainment": 0.011081179697676294,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 22560.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1259,10 +1259,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 18958.334186013788,
-          "predicted_slo_attainment": 0.01318681259371583,
+          "predicted_p95_ttft_ms": 19028.427556261846,
+          "predicted_slo_attainment": 0.013138237474474363,
           "predicted_utilization": 1.3169048076923078,
-          "rejection_reason": "upper forecast predicts 18958.3ms TTFT at 1.32 utilization",
+          "rejection_reason": "upper forecast predicts 19028.4ms TTFT at 1.32 utilization",
           "safe": false
         },
         {
@@ -1275,10 +1275,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 15480.024770998984,
-          "predicted_slo_attainment": 0.016149844958152904,
+          "predicted_p95_ttft_ms": 15537.258022458556,
+          "predicted_slo_attainment": 0.01609035517326377,
           "predicted_utilization": 1.1404730178273994,
-          "rejection_reason": "upper forecast predicts 15480.0ms TTFT at 1.14 utilization",
+          "rejection_reason": "upper forecast predicts 15537.3ms TTFT at 1.14 utilization",
           "safe": false
         },
         {
@@ -1291,10 +1291,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 22477.669657186972,
-          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_p95_ttft_ms": 22560.77482909375,
+          "predicted_slo_attainment": 0.011081179697676294,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 22560.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1307,10 +1307,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 1289.4549381887357,
-          "predicted_slo_attainment": 0.1938803696011034,
+          "predicted_p95_ttft_ms": 1294.2223529580845,
+          "predicted_slo_attainment": 0.19316618927852552,
           "predicted_utilization": 0.8064362046660404,
-          "rejection_reason": "upper forecast predicts 1289.5ms TTFT at 0.81 utilization",
+          "rejection_reason": "upper forecast predicts 1294.2ms TTFT at 0.81 utilization",
           "safe": false
         },
         {
@@ -1323,10 +1323,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 731.6017034034487,
-          "predicted_slo_attainment": 0.34171598950219384,
+          "predicted_p95_ttft_ms": 734.306605034975,
+          "predicted_slo_attainment": 0.34045723991287336,
           "predicted_utilization": 0.6584524038461539,
-          "rejection_reason": "upper forecast predicts 731.6ms TTFT at 0.66 utilization",
+          "rejection_reason": "upper forecast predicts 734.3ms TTFT at 0.66 utilization",
           "safe": false
         },
         {
@@ -1339,10 +1339,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 613.0539380096287,
-          "predicted_slo_attainment": 0.407794460650008,
+          "predicted_p95_ttft_ms": 615.3205409842002,
+          "predicted_slo_attainment": 0.40629230352057977,
           "predicted_utilization": 0.5702365089136997,
-          "rejection_reason": "upper forecast predicts 613.1ms TTFT at 0.57 utilization",
+          "rejection_reason": "upper forecast predicts 615.3ms TTFT at 0.57 utilization",
           "safe": false
         },
         {
@@ -1355,10 +1355,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 11693.897699180865,
-          "predicted_slo_attainment": 0.021378671716746078,
+          "predicted_p95_ttft_ms": 11737.132758391726,
+          "predicted_slo_attainment": 0.021299920955674366,
           "predicted_utilization": 1.0752482728880537,
-          "rejection_reason": "upper forecast predicts 11693.9ms TTFT at 1.08 utilization",
+          "rejection_reason": "upper forecast predicts 11737.1ms TTFT at 1.08 utilization",
           "safe": false
         },
         {
@@ -1371,10 +1371,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 480.6431194730273,
-          "predicted_slo_attainment": 0.5201364377671686,
+          "predicted_p95_ttft_ms": 482.4201688593209,
+          "predicted_slo_attainment": 0.5182204562282776,
           "predicted_utilization": 0.5376241364440268,
-          "rejection_reason": "upper forecast predicts 480.6ms TTFT at 0.54 utilization",
+          "rejection_reason": "upper forecast predicts 482.4ms TTFT at 0.54 utilization",
           "safe": false
         },
         {
@@ -1387,10 +1387,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 433.10142438516243,
-          "predicted_slo_attainment": 0.5772319967658937,
+          "predicted_p95_ttft_ms": 434.7027010688906,
+          "predicted_slo_attainment": 0.5751056972622322,
           "predicted_utilization": 0.43896826923076926,
-          "rejection_reason": "upper forecast predicts 433.1ms TTFT at 0.44 utilization",
+          "rejection_reason": "upper forecast predicts 434.7ms TTFT at 0.44 utilization",
           "safe": false
         },
         {
@@ -1403,10 +1403,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 430.3657109357658,
-          "predicted_slo_attainment": 0.5809012977739617,
+          "predicted_p95_ttft_ms": 431.9568730506811,
+          "predicted_slo_attainment": 0.5787614819840307,
           "predicted_utilization": 0.38015767260913313,
-          "rejection_reason": "upper forecast predicts 430.4ms TTFT at 0.38 utilization",
+          "rejection_reason": "upper forecast predicts 432.0ms TTFT at 0.38 utilization",
           "safe": false
         },
         {
@@ -1419,10 +1419,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 1289.4549381887357,
-          "predicted_slo_attainment": 0.1938803696011034,
+          "predicted_p95_ttft_ms": 1294.2223529580845,
+          "predicted_slo_attainment": 0.19316618927852552,
           "predicted_utilization": 0.8064362046660404,
-          "rejection_reason": "upper forecast predicts 1289.5ms TTFT at 0.81 utilization",
+          "rejection_reason": "upper forecast predicts 1294.2ms TTFT at 0.81 utilization",
           "safe": false
         },
         {
@@ -1435,10 +1435,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 376.33414143091494,
-          "predicted_slo_attainment": 0.6643032679667025,
+          "predicted_p95_ttft_ms": 377.7255362683244,
+          "predicted_slo_attainment": 0.6618562315638831,
           "predicted_utilization": 0.4032181023330202,
-          "rejection_reason": "upper forecast predicts 376.3ms TTFT at 0.40 utilization",
+          "rejection_reason": "upper forecast predicts 377.7ms TTFT at 0.40 utilization",
           "safe": false
         },
         {
@@ -1451,10 +1451,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 374.46980622766694,
-          "predicted_slo_attainment": 0.6676105679078627,
+          "predicted_p95_ttft_ms": 375.85430818427864,
+          "predicted_slo_attainment": 0.6651513486907454,
           "predicted_utilization": 0.32922620192307694,
-          "rejection_reason": "upper forecast predicts 374.5ms TTFT at 0.33 utilization",
+          "rejection_reason": "upper forecast predicts 375.9ms TTFT at 0.33 utilization",
           "safe": false
         },
         {
@@ -1467,10 +1467,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 388.6812338162418,
-          "predicted_slo_attainment": 0.6432005927978334,
+          "predicted_p95_ttft_ms": 390.11827872551726,
+          "predicted_slo_attainment": 0.6408312904915104,
           "predicted_utilization": 0.28511825445684985,
-          "rejection_reason": "upper forecast predicts 388.7ms TTFT at 0.29 utilization",
+          "rejection_reason": "upper forecast predicts 390.1ms TTFT at 0.29 utilization",
           "safe": false
         }
       ],
@@ -1493,14 +1493,14 @@
         "lower_rps": 4.55988125,
         "upper_rps": 8.55988125
       },
-      "generated_at": "2026-08-02T02:56:39.646291+00:00",
+      "generated_at": "2026-08-02T07:51:03.646589+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.4,
         "long_context_fraction": 0.6,
-        "observed_p95_ttft_ms": 321.90901563587374,
+        "observed_p95_ttft_ms": 323.0991881266509,
         "output_p95": 191.99999999999997,
         "prompt_p95": 3271.7999999999997,
         "replicas": 3,
@@ -1516,7 +1516,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 1214.1209851222004,
+      "actual_outcome_p95_ttft_ms": 1207.1790739287462,
       "alternatives": [
         {
           "action": {
@@ -1528,10 +1528,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1544,10 +1544,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1560,10 +1560,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 13917.230875646042,
-          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_p95_ttft_ms": 13851.663267348913,
+          "predicted_slo_attainment": 0.018048374059835764,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13851.7ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1576,10 +1576,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 15066.360030515898,
-          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_p95_ttft_ms": 14995.378583001573,
+          "predicted_slo_attainment": 0.016671803156966935,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14995.4ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1592,10 +1592,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1608,10 +1608,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1624,10 +1624,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 13917.230875646042,
-          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_p95_ttft_ms": 13851.663267348913,
+          "predicted_slo_attainment": 0.018048374059835764,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13851.7ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1640,10 +1640,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 15066.360030515898,
-          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_p95_ttft_ms": 14995.378583001573,
+          "predicted_slo_attainment": 0.016671803156966935,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14995.4ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1656,10 +1656,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1672,10 +1672,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1688,10 +1688,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 13917.230875646042,
-          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_p95_ttft_ms": 13851.663267348913,
+          "predicted_slo_attainment": 0.018048374059835764,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13851.7ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1704,10 +1704,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 11953.508637616302,
-          "predicted_slo_attainment": 0.020914361429687604,
+          "predicted_p95_ttft_ms": 11897.192623379655,
+          "predicted_slo_attainment": 0.02101336070735838,
           "predicted_utilization": 1.3337655717036794,
-          "rejection_reason": "upper forecast predicts 11953.5ms TTFT at 1.33 utilization",
+          "rejection_reason": "upper forecast predicts 11897.2ms TTFT at 1.33 utilization",
           "safe": false
         },
         {
@@ -1720,10 +1720,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1736,10 +1736,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 11375.353406694685,
-          "predicted_slo_attainment": 0.021977339170215902,
+          "predicted_p95_ttft_ms": 11321.761228546891,
+          "predicted_slo_attainment": 0.022081370111360903,
           "predicted_utilization": 1.414672020397236,
-          "rejection_reason": "upper forecast predicts 11375.4ms TTFT at 1.41 utilization",
+          "rejection_reason": "upper forecast predicts 11321.8ms TTFT at 1.41 utilization",
           "safe": false
         },
         {
@@ -1752,10 +1752,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 8327.13062849483,
-          "predicted_slo_attainment": 0.030022346370371367,
+          "predicted_p95_ttft_ms": 8287.899401811395,
+          "predicted_slo_attainment": 0.030164458794632597,
           "predicted_utilization": 1.1550748677884615,
-          "rejection_reason": "upper forecast predicts 8327.1ms TTFT at 1.16 utilization",
+          "rejection_reason": "upper forecast predicts 8287.9ms TTFT at 1.16 utilization",
           "safe": false
         },
         {
@@ -1768,10 +1768,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 6810.57929962431,
-          "predicted_slo_attainment": 0.03670759696077405,
+          "predicted_p95_ttft_ms": 6778.492931309782,
+          "predicted_slo_attainment": 0.03688135438561171,
           "predicted_utilization": 1.0003241787777595,
-          "rejection_reason": "upper forecast predicts 6810.6ms TTFT at 1.00 utilization",
+          "rejection_reason": "upper forecast predicts 6778.5ms TTFT at 1.00 utilization",
           "safe": false
         }
       ],
@@ -1794,14 +1794,14 @@
         "lower_rps": 15.0319465625,
         "upper_rps": 30.0319465625
       },
-      "generated_at": "2026-08-02T02:56:39.646365+00:00",
+      "generated_at": "2026-08-02T07:51:03.646671+00:00",
       "observed": {
         "arrival_rate_rps": 20.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.7,
         "long_context_fraction": 0.3,
-        "observed_p95_ttft_ms": 6885.124483559548,
+        "observed_p95_ttft_ms": 6852.686913956173,
         "output_p95": 227.20000000000005,
         "prompt_p95": 1603.7500000000002,
         "replicas": 3,
@@ -1819,7 +1819,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 225.89649321151765,
+      "actual_outcome_p95_ttft_ms": 224.8322374759527,
       "alternatives": [
         {
           "action": {
@@ -1831,10 +1831,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1847,10 +1847,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1863,10 +1863,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 15066.360030515898,
-          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_p95_ttft_ms": 14995.378583001573,
+          "predicted_slo_attainment": 0.016671803156966935,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14995.4ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1879,10 +1879,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1895,10 +1895,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1911,10 +1911,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 7896.254904773242,
-          "predicted_slo_attainment": 0.031660578719270624,
+          "predicted_p95_ttft_ms": 7859.0536430253715,
+          "predicted_slo_attainment": 0.03181044580626651,
           "predicted_utilization": 1.0793258587977281,
-          "rejection_reason": "upper forecast predicts 7896.3ms TTFT at 1.08 utilization",
+          "rejection_reason": "upper forecast predicts 7859.1ms TTFT at 1.08 utilization",
           "safe": false
         },
         {
@@ -1927,10 +1927,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1943,10 +1943,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 5966.881432912884,
-          "predicted_slo_attainment": 0.04189793325220411,
+          "predicted_p95_ttft_ms": 5938.76993946678,
+          "predicted_slo_attainment": 0.04209625941873858,
           "predicted_utilization": 1.0175981784878234,
-          "rejection_reason": "upper forecast predicts 5966.9ms TTFT at 1.02 utilization",
+          "rejection_reason": "upper forecast predicts 5938.8ms TTFT at 1.02 utilization",
           "safe": false
         },
         {
@@ -1959,10 +1959,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 564.2262012428704,
-          "predicted_slo_attainment": 0.4430847051223483,
+          "predicted_p95_ttft_ms": 561.5679883494702,
+          "predicted_slo_attainment": 0.4451820708918724,
           "predicted_utilization": 0.7195505725318188,
-          "rejection_reason": "upper forecast predicts 564.2ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 561.6ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -1975,10 +1975,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -1991,10 +1991,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 581.242626654866,
-          "predicted_slo_attainment": 0.43011298300468015,
+          "predicted_p95_ttft_ms": 578.5042450608096,
+          "predicted_slo_attainment": 0.43214894641563295,
           "predicted_utilization": 0.7631986338658676,
-          "rejection_reason": "upper forecast predicts 581.2ms TTFT at 0.76 utilization",
+          "rejection_reason": "upper forecast predicts 578.5ms TTFT at 0.76 utilization",
           "safe": false
         },
         {
@@ -2007,10 +2007,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 323.6607637419483,
-          "predicted_slo_attainment": 0.7724136750765461,
+          "predicted_p95_ttft_ms": 322.13591570516553,
+          "predicted_slo_attainment": 0.7760699375999172,
           "predicted_utilization": 0.5396629293988641,
-          "rejection_reason": "upper forecast predicts 323.7ms TTFT at 0.54 utilization",
+          "rejection_reason": "upper forecast predicts 322.1ms TTFT at 0.54 utilization",
           "safe": false
         }
       ],
@@ -2033,14 +2033,14 @@
         "lower_rps": 5.2018759531250005,
         "upper_rps": 16.201875953125
       },
-      "generated_at": "2026-08-02T02:56:39.646478+00:00",
+      "generated_at": "2026-08-02T07:51:03.646727+00:00",
       "observed": {
         "arrival_rate_rps": 9.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.7777777777777778,
         "long_context_fraction": 0.2222222222222222,
-        "observed_p95_ttft_ms": 225.89649321151765,
+        "observed_p95_ttft_ms": 224.8322374759527,
         "output_p95": 240.39999999999995,
         "prompt_p95": 1504.7999999999995,
         "replicas": 4,
@@ -2056,7 +2056,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 217.175529740466,
+      "actual_outcome_p95_ttft_ms": 216.3261832182597,
       "alternatives": [
         {
           "action": {
@@ -2068,10 +2068,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 13213.999112241123,
-          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_p95_ttft_ms": 13162.320802977498,
+          "predicted_slo_attainment": 0.018993610909669254,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13162.3ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2084,10 +2084,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 13213.999112241123,
-          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_p95_ttft_ms": 13162.320802977498,
+          "predicted_slo_attainment": 0.018993610909669254,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13162.3ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2100,10 +2100,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 11547.319333768422,
-          "predicted_slo_attainment": 0.0216500464544106,
+          "predicted_p95_ttft_ms": 11502.159202105971,
+          "predicted_slo_attainment": 0.021735049533502075,
           "predicted_utilization": 1.2878256319930388,
-          "rejection_reason": "upper forecast predicts 11547.3ms TTFT at 1.29 utilization",
+          "rejection_reason": "upper forecast predicts 11502.2ms TTFT at 1.29 utilization",
           "safe": false
         },
         {
@@ -2116,10 +2116,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 13213.999112241123,
-          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_p95_ttft_ms": 13162.320802977498,
+          "predicted_slo_attainment": 0.018993610909669254,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13162.3ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2132,10 +2132,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 1787.1649791071181,
-          "predicted_slo_attainment": 0.13988635795946605,
+          "predicted_p95_ttft_ms": 1780.175598851306,
+          "predicted_slo_attainment": 0.14043558408581575,
           "predicted_utilization": 0.910630237368129,
-          "rejection_reason": "upper forecast predicts 1787.2ms TTFT at 0.91 utilization",
+          "rejection_reason": "upper forecast predicts 1780.2ms TTFT at 0.91 utilization",
           "safe": false
         },
         {
@@ -2148,10 +2148,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 444.0561052866404,
-          "predicted_slo_attainment": 0.5629919215695138,
+          "predicted_p95_ttft_ms": 442.3194570135113,
+          "predicted_slo_attainment": 0.5652023577890298,
           "predicted_utilization": 0.6439128159965194,
-          "rejection_reason": "upper forecast predicts 444.1ms TTFT at 0.64 utilization",
+          "rejection_reason": "upper forecast predicts 442.3ms TTFT at 0.64 utilization",
           "safe": false
         },
         {
@@ -2164,10 +2164,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 8717.864349642738,
-          "predicted_slo_attainment": 0.028676748108640293,
+          "predicted_p95_ttft_ms": 8683.76986498655,
+          "predicted_slo_attainment": 0.02878933964015031,
           "predicted_utilization": 1.214173649824172,
-          "rejection_reason": "upper forecast predicts 8717.9ms TTFT at 1.21 utilization",
+          "rejection_reason": "upper forecast predicts 8683.8ms TTFT at 1.21 utilization",
           "safe": false
         },
         {
@@ -2180,10 +2180,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 336.9577981091837,
-          "predicted_slo_attainment": 0.7419326734767926,
+          "predicted_p95_ttft_ms": 335.6399980131216,
+          "predicted_slo_attainment": 0.7448456723868364,
           "predicted_utilization": 0.607086824912086,
-          "rejection_reason": "upper forecast predicts 337.0ms TTFT at 0.61 utilization",
+          "rejection_reason": "upper forecast predicts 335.6ms TTFT at 0.61 utilization",
           "safe": false
         },
         {
@@ -2196,10 +2196,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 271.40887915989833,
-          "predicted_slo_attainment": 0.9211194592226828,
+          "predicted_p95_ttft_ms": 270.34743274424625,
+          "predicted_slo_attainment": 0.9247359868088879,
           "predicted_utilization": 0.4292752106643463,
-          "rejection_reason": "upper forecast predicts 271.4ms TTFT at 0.43 utilization",
+          "rejection_reason": "upper forecast predicts 270.3ms TTFT at 0.43 utilization",
           "safe": false
         },
         {
@@ -2212,10 +2212,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 1787.1649791071181,
-          "predicted_slo_attainment": 0.13988635795946605,
+          "predicted_p95_ttft_ms": 1780.175598851306,
+          "predicted_slo_attainment": 0.14043558408581575,
           "predicted_utilization": 0.910630237368129,
-          "rejection_reason": "upper forecast predicts 1787.2ms TTFT at 0.91 utilization",
+          "rejection_reason": "upper forecast predicts 1780.2ms TTFT at 0.91 utilization",
           "safe": false
         },
         {
@@ -2228,10 +2228,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 240.04425546068606,
+          "predicted_p95_ttft_ms": 239.105472192632,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.4553151186840645,
-          "rejection_reason": "upper forecast predicts 240.0ms TTFT at 0.46 utilization",
+          "rejection_reason": "upper forecast predicts 239.1ms TTFT at 0.46 utilization",
           "safe": false
         },
         {
@@ -2244,10 +2244,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 236.52928449072928,
+          "predicted_p95_ttft_ms": 235.60424783755647,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3219564079982597,
-          "rejection_reason": "upper forecast predicts 236.5ms TTFT at 0.32 utilization",
+          "rejection_reason": "upper forecast predicts 235.6ms TTFT at 0.32 utilization",
           "safe": false
         }
       ],
@@ -2270,14 +2270,14 @@
         "lower_rps": 7.6658441789062515,
         "upper_rps": 9.665844178906251
       },
-      "generated_at": "2026-08-02T02:56:39.646585+00:00",
+      "generated_at": "2026-08-02T07:51:03.646824+00:00",
       "observed": {
         "arrival_rate_rps": 7.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.5714285714285714,
         "long_context_fraction": 0.42857142857142855,
-        "observed_p95_ttft_ms": 217.175529740466,
+        "observed_p95_ttft_ms": 216.3261832182597,
         "output_p95": 215.79999999999995,
         "prompt_p95": 2083.3999999999996,
         "replicas": 4,
@@ -2293,7 +2293,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -2305,10 +2305,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2321,10 +2321,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 11650.619310193544,
-          "predicted_slo_attainment": 0.021458086762929936,
+          "predicted_p95_ttft_ms": 11595.730284483227,
+          "predicted_slo_attainment": 0.021559659794306907,
           "predicted_utilization": 1.4319396493271106,
-          "rejection_reason": "upper forecast predicts 11650.6ms TTFT at 1.43 utilization",
+          "rejection_reason": "upper forecast predicts 11595.7ms TTFT at 1.43 utilization",
           "safe": false
         },
         {
@@ -2337,10 +2337,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 6972.986182688636,
-          "predicted_slo_attainment": 0.035852645258448695,
+          "predicted_p95_ttft_ms": 6940.134674312219,
+          "predicted_slo_attainment": 0.03602235572248106,
           "predicted_utilization": 1.0125342362890868,
-          "rejection_reason": "upper forecast predicts 6973.0ms TTFT at 1.01 utilization",
+          "rejection_reason": "upper forecast predicts 6940.1ms TTFT at 1.01 utilization",
           "safe": false
         },
         {
@@ -2353,10 +2353,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 11650.619310193544,
-          "predicted_slo_attainment": 0.021458086762929936,
+          "predicted_p95_ttft_ms": 11595.730284483227,
+          "predicted_slo_attainment": 0.021559659794306907,
           "predicted_utilization": 1.4319396493271106,
-          "rejection_reason": "upper forecast predicts 11650.6ms TTFT at 1.43 utilization",
+          "rejection_reason": "upper forecast predicts 11595.7ms TTFT at 1.43 utilization",
           "safe": false
         },
         {
@@ -2369,10 +2369,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 471.2072731042455,
-          "predicted_slo_attainment": 0.5305520824265638,
+          "predicted_p95_ttft_ms": 468.98729599919346,
+          "predicted_slo_attainment": 0.5330634798270313,
           "predicted_utilization": 0.7159698246635553,
-          "rejection_reason": "upper forecast predicts 471.2ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 469.0ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -2385,10 +2385,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 301.1526602031825,
-          "predicted_slo_attainment": 0.8301437544377968,
+          "predicted_p95_ttft_ms": 299.7338535570706,
+          "predicted_slo_attainment": 0.8340732854602256,
           "predicted_utilization": 0.5062671181445434,
-          "rejection_reason": "upper forecast predicts 301.2ms TTFT at 0.51 utilization",
+          "rejection_reason": "upper forecast predicts 299.7ms TTFT at 0.51 utilization",
           "safe": false
         },
         {
@@ -2401,10 +2401,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 3542.2472417325334,
-          "predicted_slo_attainment": 0.07057666586754785,
+          "predicted_p95_ttft_ms": 3525.558815585638,
+          "predicted_slo_attainment": 0.07091074438889257,
           "predicted_utilization": 0.9546264328847403,
-          "rejection_reason": "upper forecast predicts 3542.2ms TTFT at 0.95 utilization",
+          "rejection_reason": "upper forecast predicts 3525.6ms TTFT at 0.95 utilization",
           "safe": false
         },
         {
@@ -2417,10 +2417,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 241.2295019189453,
+          "predicted_p95_ttft_ms": 240.09300848624585,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.4773132164423701,
-          "rejection_reason": "upper forecast predicts 241.2ms TTFT at 0.48 utilization",
+          "rejection_reason": "upper forecast predicts 240.1ms TTFT at 0.48 utilization",
           "safe": false
         },
         {
@@ -2433,10 +2433,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 232.32893183083107,
+          "predicted_p95_ttft_ms": 231.23437124370798,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.33751141209636226,
-          "rejection_reason": "upper forecast predicts 232.3ms TTFT at 0.34 utilization",
+          "rejection_reason": "upper forecast predicts 231.2ms TTFT at 0.34 utilization",
           "safe": false
         },
         {
@@ -2449,10 +2449,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 471.2072731042455,
-          "predicted_slo_attainment": 0.5305520824265638,
+          "predicted_p95_ttft_ms": 468.98729599919346,
+          "predicted_slo_attainment": 0.5330634798270313,
           "predicted_utilization": 0.7159698246635553,
-          "rejection_reason": "upper forecast predicts 471.2ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 469.0ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -2465,7 +2465,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 201.53623365506817,
+          "predicted_p95_ttft_ms": 200.5867452874434,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.35798491233177765,
           "rejection_reason": null,
@@ -2481,10 +2481,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 215.24950129472788,
+          "predicted_p95_ttft_ms": 214.2354062413978,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2531335590722717,
-          "rejection_reason": "upper forecast predicts 215.2ms TTFT at 0.25 utilization",
+          "rejection_reason": "upper forecast predicts 214.2ms TTFT at 0.25 utilization",
           "safe": false
         }
       ],
@@ -2507,14 +2507,14 @@
         "lower_rps": 4.599629880507813,
         "upper_rps": 7.599629880507813
       },
-      "generated_at": "2026-08-02T02:56:39.646642+00:00",
+      "generated_at": "2026-08-02T07:51:03.646879+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.5,
         "long_context_fraction": 0.5,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 214.39999999999998,
         "prompt_p95": 1245.2,
         "replicas": 4,
@@ -2530,7 +2530,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -2542,10 +2542,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2558,10 +2558,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 6050.268415897614,
-          "predicted_slo_attainment": 0.041320480814223536,
+          "predicted_p95_ttft_ms": 6021.764065202372,
+          "predicted_slo_attainment": 0.0415160735779505,
           "predicted_utilization": 1.024888514379903,
-          "rejection_reason": "upper forecast predicts 6050.3ms TTFT at 1.02 utilization",
+          "rejection_reason": "upper forecast predicts 6021.8ms TTFT at 1.02 utilization",
           "safe": false
         },
         {
@@ -2574,10 +2574,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 576.4408244465386,
-          "predicted_slo_attainment": 0.43369586156572776,
+          "predicted_p95_ttft_ms": 573.725065361883,
+          "predicted_slo_attainment": 0.4357487847289885,
           "predicted_utilization": 0.7247056184782358,
-          "rejection_reason": "upper forecast predicts 576.4ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 573.7ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -2590,10 +2590,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 6050.268415897614,
-          "predicted_slo_attainment": 0.041320480814223536,
+          "predicted_p95_ttft_ms": 6021.764065202372,
+          "predicted_slo_attainment": 0.0415160735779505,
           "predicted_utilization": 1.024888514379903,
-          "rejection_reason": "upper forecast predicts 6050.3ms TTFT at 1.02 utilization",
+          "rejection_reason": "upper forecast predicts 6021.8ms TTFT at 1.02 utilization",
           "safe": false
         },
         {
@@ -2606,10 +2606,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 258.48740844805457,
-          "predicted_slo_attainment": 0.9671650990699604,
+          "predicted_p95_ttft_ms": 257.2696086358433,
+          "predicted_slo_attainment": 0.971743228147351,
           "predicted_utilization": 0.5124442571899515,
-          "rejection_reason": "upper forecast predicts 258.5ms TTFT at 0.51 utilization",
+          "rejection_reason": "upper forecast predicts 257.3ms TTFT at 0.51 utilization",
           "safe": false
         },
         {
@@ -2622,10 +2622,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 239.0620082552437,
+          "predicted_p95_ttft_ms": 237.93572643552952,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3623528092391179,
-          "rejection_reason": "upper forecast predicts 239.1ms TTFT at 0.36 utilization",
+          "rejection_reason": "upper forecast predicts 237.9ms TTFT at 0.36 utilization",
           "safe": false
         },
         {
@@ -2638,10 +2638,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 415.6176245241619,
-          "predicted_slo_attainment": 0.6015144335763516,
+          "predicted_p95_ttft_ms": 413.6595443680102,
+          "predicted_slo_attainment": 0.6043617351606149,
           "predicted_utilization": 0.6832590095866019,
-          "rejection_reason": "upper forecast predicts 415.6ms TTFT at 0.68 utilization",
+          "rejection_reason": "upper forecast predicts 413.7ms TTFT at 0.68 utilization",
           "safe": false
         },
         {
@@ -2654,7 +2654,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 197.78328805938784,
+          "predicted_p95_ttft_ms": 196.85148077135258,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.34162950479330095,
           "rejection_reason": null,
@@ -2670,11 +2670,11 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 213.49471583923173,
+          "predicted_p95_ttft_ms": 212.4888880257297,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.24156853949274526,
-          "rejection_reason": "upper forecast predicts 213.5ms TTFT at 0.24 utilization",
-          "safe": false
+          "rejection_reason": null,
+          "safe": true
         },
         {
           "action": {
@@ -2686,10 +2686,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 258.48740844805457,
-          "predicted_slo_attainment": 0.9671650990699604,
+          "predicted_p95_ttft_ms": 257.2696086358433,
+          "predicted_slo_attainment": 0.971743228147351,
           "predicted_utilization": 0.5124442571899515,
-          "rejection_reason": "upper forecast predicts 258.5ms TTFT at 0.51 utilization",
+          "rejection_reason": "upper forecast predicts 257.3ms TTFT at 0.51 utilization",
           "safe": false
         },
         {
@@ -2702,7 +2702,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 182.83002747173774,
+          "predicted_p95_ttft_ms": 181.96866879102507,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.25622212859497573,
           "rejection_reason": null,
@@ -2718,7 +2718,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 206.1886609805893,
+          "predicted_p95_ttft_ms": 205.21725384656364,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.18117640461955895,
           "rejection_reason": null,
@@ -2744,14 +2744,14 @@
         "lower_rps": 4.450350101605664,
         "upper_rps": 5.439316790851367
       },
-      "generated_at": "2026-08-02T02:56:39.646695+00:00",
+      "generated_at": "2026-08-02T07:51:03.646927+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 88.89999999999998,
         "prompt_p95": 180.95,
         "replicas": 4,
@@ -2767,7 +2767,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -2779,10 +2779,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -2795,10 +2795,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 1874.4672381488394,
-          "predicted_slo_attainment": 0.13337122938829893,
+          "predicted_p95_ttft_ms": 1865.6361470550057,
+          "predicted_slo_attainment": 0.13400254942242448,
           "predicted_utilization": 0.9171817682044401,
-          "rejection_reason": "upper forecast predicts 1874.5ms TTFT at 0.92 utilization",
+          "rejection_reason": "upper forecast predicts 1865.6ms TTFT at 0.92 utilization",
           "safe": false
         },
         {
@@ -2811,10 +2811,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 435.49168088446555,
-          "predicted_slo_attainment": 0.574063778881517,
+          "predicted_p95_ttft_ms": 433.4399690026961,
+          "predicted_slo_attainment": 0.5767811412852074,
           "predicted_utilization": 0.6485454478780278,
-          "rejection_reason": "upper forecast predicts 435.5ms TTFT at 0.65 utilization",
+          "rejection_reason": "upper forecast predicts 433.4ms TTFT at 0.65 utilization",
           "safe": false
         },
         {
@@ -2827,10 +2827,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 1874.4672381488394,
-          "predicted_slo_attainment": 0.13337122938829893,
+          "predicted_p95_ttft_ms": 1865.6361470550057,
+          "predicted_slo_attainment": 0.13400254942242448,
           "predicted_utilization": 0.9171817682044401,
-          "rejection_reason": "upper forecast predicts 1874.5ms TTFT at 0.92 utilization",
+          "rejection_reason": "upper forecast predicts 1865.6ms TTFT at 0.92 utilization",
           "safe": false
         },
         {
@@ -2843,10 +2843,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 233.25997754730497,
+          "predicted_p95_ttft_ms": 232.16103056741525,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.45859088410222004,
-          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.46 utilization",
+          "rejection_reason": "upper forecast predicts 232.2ms TTFT at 0.46 utilization",
           "safe": false
         },
         {
@@ -2859,10 +2859,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 229.090795863483,
+          "predicted_p95_ttft_ms": 228.0114909570781,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3242727239390139,
-          "rejection_reason": "upper forecast predicts 229.1ms TTFT at 0.32 utilization",
+          "rejection_reason": "upper forecast predicts 228.0ms TTFT at 0.32 utilization",
           "safe": false
         },
         {
@@ -2875,10 +2875,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 329.6600749223173,
-          "predicted_slo_attainment": 0.7583569228360797,
+          "predicted_p95_ttft_ms": 328.1069626073141,
+          "predicted_slo_attainment": 0.7619466469512435,
           "predicted_utilization": 0.6114545121362933,
-          "rejection_reason": "upper forecast predicts 329.7ms TTFT at 0.61 utilization",
+          "rejection_reason": "upper forecast predicts 328.1ms TTFT at 0.61 utilization",
           "safe": false
         },
         {
@@ -2891,7 +2891,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 190.61916881073077,
+          "predicted_p95_ttft_ms": 189.72111350747517,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.30572725606814666,
           "rejection_reason": null,
@@ -2907,7 +2907,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 210.06158640237607,
+          "predicted_p95_ttft_ms": 209.07193293333674,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2161818159593426,
           "rejection_reason": null,
@@ -2923,10 +2923,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 233.25997754730497,
+          "predicted_p95_ttft_ms": 232.16103056741525,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.45859088410222004,
-          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.46 utilization",
+          "rejection_reason": "upper forecast predicts 232.2ms TTFT at 0.46 utilization",
           "safe": false
         },
         {
@@ -2939,7 +2939,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 179.4621575428512,
+          "predicted_p95_ttft_ms": 178.6166657524895,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.22929544205111002,
           "rejection_reason": null,
@@ -2955,7 +2955,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 204.46146290089345,
+          "predicted_p95_ttft_ms": 203.49819303556393,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.16213636196950695,
           "rejection_reason": null,
@@ -2981,14 +2981,14 @@
         "lower_rps": 3.9826575457225486,
         "upper_rps": 4.867692555883115
       },
-      "generated_at": "2026-08-02T02:56:39.646746+00:00",
+      "generated_at": "2026-08-02T07:51:03.646974+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 107.74999999999999,
         "prompt_p95": 193.54999999999998,
         "replicas": 4,
@@ -3004,7 +3004,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 204.1275003666601,
+      "actual_outcome_p95_ttft_ms": 203.16580388362377,
       "alternatives": [
         {
           "action": {
@@ -3016,10 +3016,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3032,10 +3032,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 11625.547986727777,
-          "predicted_slo_attainment": 0.021504362657606392,
+          "predicted_p95_ttft_ms": 11570.77707838802,
+          "predicted_slo_attainment": 0.021606154738470572,
           "predicted_utilization": 1.4303755356321926,
-          "rejection_reason": "upper forecast predicts 11625.5ms TTFT at 1.43 utilization",
+          "rejection_reason": "upper forecast predicts 11570.8ms TTFT at 1.43 utilization",
           "safe": false
         },
         {
@@ -3048,10 +3048,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 6958.1941018438365,
-          "predicted_slo_attainment": 0.03592886262453544,
+          "predicted_p95_ttft_ms": 6925.412282716048,
+          "predicted_slo_attainment": 0.03609893386765323,
           "predicted_utilization": 1.0114282408888635,
-          "rejection_reason": "upper forecast predicts 6958.2ms TTFT at 1.01 utilization",
+          "rejection_reason": "upper forecast predicts 6925.4ms TTFT at 1.01 utilization",
           "safe": false
         },
         {
@@ -3064,10 +3064,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 11625.547986727777,
-          "predicted_slo_attainment": 0.021504362657606392,
+          "predicted_p95_ttft_ms": 11570.77707838802,
+          "predicted_slo_attainment": 0.021606154738470572,
           "predicted_utilization": 1.4303755356321926,
-          "rejection_reason": "upper forecast predicts 11625.5ms TTFT at 1.43 utilization",
+          "rejection_reason": "upper forecast predicts 11570.8ms TTFT at 1.43 utilization",
           "safe": false
         },
         {
@@ -3080,10 +3080,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 469.71450293726775,
-          "predicted_slo_attainment": 0.5322381966847392,
+          "predicted_p95_ttft_ms": 467.5015586514928,
+          "predicted_slo_attainment": 0.5347575753995868,
           "predicted_utilization": 0.7151877678160963,
-          "rejection_reason": "upper forecast predicts 469.7ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 467.5ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -3096,10 +3096,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 300.8130789925776,
-          "predicted_slo_attainment": 0.8310808853034234,
+          "predicted_p95_ttft_ms": 299.3958721997698,
+          "predicted_slo_attainment": 0.8350148522862374,
           "predicted_utilization": 0.5057141204444318,
-          "rejection_reason": "upper forecast predicts 300.8ms TTFT at 0.51 utilization",
+          "rejection_reason": "upper forecast predicts 299.4ms TTFT at 0.51 utilization",
           "safe": false
         },
         {
@@ -3112,10 +3112,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 3459.2429306880717,
-          "predicted_slo_attainment": 0.07227014841373773,
+          "predicted_p95_ttft_ms": 3442.9455589256418,
+          "predicted_slo_attainment": 0.07261224312765827,
           "predicted_utilization": 0.9535836904214616,
-          "rejection_reason": "upper forecast predicts 3459.2ms TTFT at 0.95 utilization",
+          "rejection_reason": "upper forecast predicts 3442.9ms TTFT at 0.95 utilization",
           "safe": false
         },
         {
@@ -3128,10 +3128,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 240.99680268654038,
+          "predicted_p95_ttft_ms": 239.8614055590081,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.4767918452107308,
-          "rejection_reason": "upper forecast predicts 241.0ms TTFT at 0.48 utilization",
+          "rejection_reason": "upper forecast predicts 239.9ms TTFT at 0.48 utilization",
           "safe": false
         },
         {
@@ -3144,10 +3144,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 232.23558782016198,
+          "predicted_p95_ttft_ms": 231.14146700037358,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.3371427469629545,
-          "rejection_reason": "upper forecast predicts 232.2ms TTFT at 0.34 utilization",
+          "rejection_reason": "upper forecast predicts 231.1ms TTFT at 0.34 utilization",
           "safe": false
         },
         {
@@ -3160,10 +3160,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 469.71450293726775,
-          "predicted_slo_attainment": 0.5322381966847392,
+          "predicted_p95_ttft_ms": 467.5015586514928,
+          "predicted_slo_attainment": 0.5347575753995868,
           "predicted_utilization": 0.7151877678160963,
-          "rejection_reason": "upper forecast predicts 469.7ms TTFT at 0.72 utilization",
+          "rejection_reason": "upper forecast predicts 467.5ms TTFT at 0.72 utilization",
           "safe": false
         },
         {
@@ -3176,7 +3176,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 201.4426451489634,
+          "predicted_p95_ttft_ms": 200.49359770055338,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.35759388390804814,
           "rejection_reason": null,
@@ -3192,10 +3192,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 215.2060854759911,
+          "predicted_p95_ttft_ms": 214.19219496560655,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2528570602222159,
-          "rejection_reason": "upper forecast predicts 215.2ms TTFT at 0.25 utilization",
+          "rejection_reason": "upper forecast predicts 214.2ms TTFT at 0.25 utilization",
           "safe": false
         }
       ],
@@ -3218,14 +3218,14 @@
         "lower_rps": 5.591328772861274,
         "upper_rps": 7.591328772861274
       },
-      "generated_at": "2026-08-02T02:56:39.646798+00:00",
+      "generated_at": "2026-08-02T07:51:03.647018+00:00",
       "observed": {
         "arrival_rate_rps": 6.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.6666666666666666,
         "long_context_fraction": 0.3333333333333333,
-        "observed_p95_ttft_ms": 204.1275003666601,
+        "observed_p95_ttft_ms": 203.16580388362377,
         "output_p95": 177.5,
         "prompt_p95": 871.5,
         "replicas": 4,
@@ -3241,7 +3241,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 250.14185296729812,
+      "actual_outcome_p95_ttft_ms": 248.96337118592746,
       "alternatives": [
         {
           "action": {
@@ -3253,10 +3253,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3269,10 +3269,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3285,10 +3285,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 15066.360030515898,
-          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_p95_ttft_ms": 14995.378583001573,
+          "predicted_slo_attainment": 0.016671803156966935,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14995.4ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3301,10 +3301,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3317,10 +3317,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 10163.759834307415,
-          "predicted_slo_attainment": 0.024597196714166127,
+          "predicted_p95_ttft_ms": 10115.875781107714,
+          "predicted_slo_attainment": 0.024713628894781108,
           "predicted_utilization": 1.3360174601734325,
-          "rejection_reason": "upper forecast predicts 10163.8ms TTFT at 1.34 utilization",
+          "rejection_reason": "upper forecast predicts 10115.9ms TTFT at 1.34 utilization",
           "safe": false
         },
         {
@@ -3333,10 +3333,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 3398.0126926345306,
-          "predicted_slo_attainment": 0.07357241500065476,
+          "predicted_p95_ttft_ms": 3382.0037920701793,
+          "predicted_slo_attainment": 0.0739206740649368,
           "predicted_utilization": 0.9447070058722622,
-          "rejection_reason": "upper forecast predicts 3398.0ms TTFT at 0.94 utilization",
+          "rejection_reason": "upper forecast predicts 3382.0ms TTFT at 0.94 utilization",
           "safe": false
         },
         {
@@ -3349,10 +3349,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3365,10 +3365,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 1387.1260704238196,
-          "predicted_slo_attainment": 0.18022875161131932,
+          "predicted_p95_ttft_ms": 1380.5909673090584,
+          "predicted_slo_attainment": 0.18108187429856995,
           "predicted_utilization": 0.8906783067822881,
-          "rejection_reason": "upper forecast predicts 1387.1ms TTFT at 0.89 utilization",
+          "rejection_reason": "upper forecast predicts 1380.6ms TTFT at 0.89 utilization",
           "safe": false
         },
         {
@@ -3381,10 +3381,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 410.6518771532372,
-          "predicted_slo_attainment": 0.6087881583132543,
+          "predicted_p95_ttft_ms": 408.7171918937736,
+          "predicted_slo_attainment": 0.6116698904727637,
           "predicted_utilization": 0.6298046705815081,
-          "rejection_reason": "upper forecast predicts 410.7ms TTFT at 0.63 utilization",
+          "rejection_reason": "upper forecast predicts 408.7ms TTFT at 0.63 utilization",
           "safe": false
         },
         {
@@ -3397,10 +3397,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 10163.759834307415,
-          "predicted_slo_attainment": 0.024597196714166127,
+          "predicted_p95_ttft_ms": 10115.875781107714,
+          "predicted_slo_attainment": 0.024713628894781108,
           "predicted_utilization": 1.3360174601734325,
-          "rejection_reason": "upper forecast predicts 10163.8ms TTFT at 1.34 utilization",
+          "rejection_reason": "upper forecast predicts 10115.9ms TTFT at 1.34 utilization",
           "safe": false
         },
         {
@@ -3413,10 +3413,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 393.8150736498237,
-          "predicted_slo_attainment": 0.6348157212039512,
+          "predicted_p95_ttft_ms": 391.9597108465981,
+          "predicted_slo_attainment": 0.6378206562608749,
           "predicted_utilization": 0.6680087300867162,
-          "rejection_reason": "upper forecast predicts 393.8ms TTFT at 0.67 utilization",
+          "rejection_reason": "upper forecast predicts 392.0ms TTFT at 0.67 utilization",
           "safe": false
         },
         {
@@ -3429,10 +3429,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 282.0689743763979,
-          "predicted_slo_attainment": 0.8863080406227009,
+          "predicted_p95_ttft_ms": 280.740075819642,
+          "predicted_slo_attainment": 0.8905034283762515,
           "predicted_utilization": 0.4723535029361311,
-          "rejection_reason": "upper forecast predicts 282.1ms TTFT at 0.47 utilization",
+          "rejection_reason": "upper forecast predicts 280.7ms TTFT at 0.47 utilization",
           "safe": false
         }
       ],
@@ -3455,14 +3455,14 @@
         "lower_rps": 9.181097947787574,
         "upper_rps": 14.181097947787574
       },
-      "generated_at": "2026-08-02T02:56:39.646852+00:00",
+      "generated_at": "2026-08-02T07:51:03.647065+00:00",
       "observed": {
         "arrival_rate_rps": 11.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.5454545454545454,
         "long_context_fraction": 0.45454545454545453,
-        "observed_p95_ttft_ms": 250.14185296729812,
+        "observed_p95_ttft_ms": 248.96337118592746,
         "output_p95": 245.0,
         "prompt_p95": 1521.5,
         "replicas": 4,
@@ -3478,7 +3478,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 739.668855107771,
+      "actual_outcome_p95_ttft_ms": 737.5892863728969,
       "alternatives": [
         {
           "action": {
@@ -3490,10 +3490,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3506,10 +3506,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3522,10 +3522,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 16378.171369946382,
-          "predicted_slo_attainment": 0.015264219329072659,
+          "predicted_p95_ttft_ms": 16332.124368129078,
+          "predicted_slo_attainment": 0.015307255465667182,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 16378.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 16332.1ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3538,10 +3538,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3554,10 +3554,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3570,10 +3570,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 16378.171369946382,
-          "predicted_slo_attainment": 0.015264219329072659,
+          "predicted_p95_ttft_ms": 16332.124368129078,
+          "predicted_slo_attainment": 0.015307255465667182,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 16378.2ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 16332.1ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3586,10 +3586,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3602,10 +3602,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3618,10 +3618,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 9173.091340216946,
-          "predicted_slo_attainment": 0.027253625929128427,
+          "predicted_p95_ttft_ms": 9147.301321046165,
+          "predicted_slo_attainment": 0.02733046515312648,
           "predicted_utilization": 1.1166839806593982,
-          "rejection_reason": "upper forecast predicts 9173.1ms TTFT at 1.12 utilization",
+          "rejection_reason": "upper forecast predicts 9147.3ms TTFT at 1.12 utilization",
           "safe": false
         },
         {
@@ -3634,10 +3634,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 13879.806245717273,
-          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_p95_ttft_ms": 13840.783362821254,
+          "predicted_slo_attainment": 0.01806256144948727,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 13840.8ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3650,10 +3650,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 8722.703369394576,
-          "predicted_slo_attainment": 0.02866083935367757,
+          "predicted_p95_ttft_ms": 8698.179609761719,
+          "predicted_slo_attainment": 0.028741646093331085,
           "predicted_utilization": 1.1844222227499719,
-          "rejection_reason": "upper forecast predicts 8722.7ms TTFT at 1.18 utilization",
+          "rejection_reason": "upper forecast predicts 8698.2ms TTFT at 1.18 utilization",
           "safe": false
         },
         {
@@ -3666,10 +3666,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 1145.787768915344,
-          "predicted_slo_attainment": 0.2181904945945283,
+          "predicted_p95_ttft_ms": 1142.5664024828068,
+          "predicted_slo_attainment": 0.21880566368549592,
           "predicted_utilization": 0.8375129854945487,
-          "rejection_reason": "upper forecast predicts 1145.8ms TTFT at 0.84 utilization",
+          "rejection_reason": "upper forecast predicts 1142.6ms TTFT at 0.84 utilization",
           "safe": false
         }
       ],
@@ -3692,14 +3692,14 @@
         "lower_rps": 16.14399407650441,
         "upper_rps": 25.14399407650441
       },
-      "generated_at": "2026-08-02T02:56:39.646910+00:00",
+      "generated_at": "2026-08-02T07:51:03.647123+00:00",
       "observed": {
         "arrival_rate_rps": 20.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.75,
         "long_context_fraction": 0.25,
-        "observed_p95_ttft_ms": 739.668855107771,
+        "observed_p95_ttft_ms": 737.5892863728969,
         "output_p95": 261.55,
         "prompt_p95": 2203.9000000000005,
         "replicas": 4,
@@ -3717,7 +3717,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 217.01804595336364,
+      "actual_outcome_p95_ttft_ms": 215.995618837106,
       "alternatives": [
         {
           "action": {
@@ -3729,10 +3729,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3745,10 +3745,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3761,10 +3761,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 15066.360030515898,
-          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_p95_ttft_ms": 14995.378583001573,
+          "predicted_slo_attainment": 0.016671803156966935,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 14995.4ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3777,10 +3777,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3793,10 +3793,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3809,10 +3809,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 8730.58825600934,
-          "predicted_slo_attainment": 0.028634954789893204,
+          "predicted_p95_ttft_ms": 8689.456238003137,
+          "predicted_slo_attainment": 0.02877049991996401,
           "predicted_utilization": 1.1363117547321813,
-          "rejection_reason": "upper forecast predicts 8730.6ms TTFT at 1.14 utilization",
+          "rejection_reason": "upper forecast predicts 8689.5ms TTFT at 1.14 utilization",
           "safe": false
         },
         {
@@ -3825,10 +3825,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3841,10 +3841,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 6595.381132525764,
-          "predicted_slo_attainment": 0.037905315094998934,
+          "predicted_p95_ttft_ms": 6564.308617416134,
+          "predicted_slo_attainment": 0.03808474198435933,
           "predicted_utilization": 1.0713249964174805,
-          "rejection_reason": "upper forecast predicts 6595.4ms TTFT at 1.07 utilization",
+          "rejection_reason": "upper forecast predicts 6564.3ms TTFT at 1.07 utilization",
           "safe": false
         },
         {
@@ -3857,10 +3857,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 667.4537019665639,
-          "predicted_slo_attainment": 0.37455781466700705,
+          "predicted_p95_ttft_ms": 664.3091581073687,
+          "predicted_slo_attainment": 0.376330804639598,
           "predicted_utilization": 0.7575411698214544,
-          "rejection_reason": "upper forecast predicts 667.5ms TTFT at 0.76 utilization",
+          "rejection_reason": "upper forecast predicts 664.3ms TTFT at 0.76 utilization",
           "safe": false
         },
         {
@@ -3873,10 +3873,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3889,10 +3889,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 719.9534139622498,
-          "predicted_slo_attainment": 0.34724468993643604,
+          "predicted_p95_ttft_ms": 716.561530629951,
+          "predicted_slo_attainment": 0.3488883917340879,
           "predicted_utilization": 0.8034937473131105,
-          "rejection_reason": "upper forecast predicts 720.0ms TTFT at 0.80 utilization",
+          "rejection_reason": "upper forecast predicts 716.6ms TTFT at 0.80 utilization",
           "safe": false
         },
         {
@@ -3905,10 +3905,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 346.42606704007426,
-          "predicted_slo_attainment": 0.7216547014953127,
+          "predicted_p95_ttft_ms": 344.7939658792502,
+          "predicted_slo_attainment": 0.7250706936314313,
           "predicted_utilization": 0.5681558773660906,
-          "rejection_reason": "upper forecast predicts 346.4ms TTFT at 0.57 utilization",
+          "rejection_reason": "upper forecast predicts 344.8ms TTFT at 0.57 utilization",
           "safe": false
         }
       ],
@@ -3931,14 +3931,14 @@
         "lower_rps": 5.057297334426984,
         "upper_rps": 17.057297334426984
       },
-      "generated_at": "2026-08-02T02:56:39.646968+00:00",
+      "generated_at": "2026-08-02T07:51:03.647181+00:00",
       "observed": {
         "arrival_rate_rps": 8.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.625,
         "long_context_fraction": 0.375,
-        "observed_p95_ttft_ms": 217.01804595336364,
+        "observed_p95_ttft_ms": 215.995618837106,
         "output_p95": 156.75,
         "prompt_p95": 1785.1499999999996,
         "replicas": 4,
@@ -3956,7 +3956,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 209.84708954770244,
+      "actual_outcome_p95_ttft_ms": 208.85844662780707,
       "alternatives": [
         {
           "action": {
@@ -3968,10 +3968,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -3984,10 +3984,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -4000,10 +4000,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 2.2,
-          "predicted_p95_ttft_ms": 11254.291319946893,
-          "predicted_slo_attainment": 0.02221374877304844,
+          "predicted_p95_ttft_ms": 11201.26949602793,
+          "predicted_slo_attainment": 0.022318898772023317,
           "predicted_utilization": 1.2934905042290619,
-          "rejection_reason": "upper forecast predicts 11254.3ms TTFT at 1.29 utilization",
+          "rejection_reason": "upper forecast predicts 11201.3ms TTFT at 1.29 utilization",
           "safe": false
         },
         {
@@ -4016,10 +4016,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 12768.101720776185,
-          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_p95_ttft_ms": 12707.94795169625,
+          "predicted_slo_attainment": 0.01967272772522098,
           "predicted_utilization": 1.5,
-          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "rejection_reason": "upper forecast predicts 12707.9ms TTFT at 1.50 utilization",
           "safe": false
         },
         {
@@ -4032,10 +4032,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 1814.3962117369274,
-          "predicted_slo_attainment": 0.13778688380344126,
+          "predicted_p95_ttft_ms": 1805.8481305007997,
+          "predicted_slo_attainment": 0.13843910558008538,
           "predicted_utilization": 0.9146359069407763,
-          "rejection_reason": "upper forecast predicts 1814.4ms TTFT at 0.91 utilization",
+          "rejection_reason": "upper forecast predicts 1805.8ms TTFT at 0.91 utilization",
           "safe": false
         },
         {
@@ -4048,10 +4048,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 4.4,
-          "predicted_p95_ttft_ms": 432.9740876897838,
-          "predicted_slo_attainment": 0.5774017593845463,
+          "predicted_p95_ttft_ms": 430.9342368287817,
+          "predicted_slo_attainment": 0.5801349223021464,
           "predicted_utilization": 0.6467452521145309,
-          "rejection_reason": "upper forecast predicts 433.0ms TTFT at 0.65 utilization",
+          "rejection_reason": "upper forecast predicts 430.9ms TTFT at 0.65 utilization",
           "safe": false
         },
         {
@@ -4064,10 +4064,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 8496.475719296048,
-          "predicted_slo_attainment": 0.029423964507099547,
+          "predicted_p95_ttft_ms": 8456.446664892435,
+          "predicted_slo_attainment": 0.02956324445796998,
           "predicted_utilization": 1.2195145425877016,
-          "rejection_reason": "upper forecast predicts 8496.5ms TTFT at 1.22 utilization",
+          "rejection_reason": "upper forecast predicts 8456.4ms TTFT at 1.22 utilization",
           "safe": false
         },
         {
@@ -4080,10 +4080,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 328.06468685952194,
-          "predicted_slo_attainment": 0.7620448344903716,
+          "predicted_p95_ttft_ms": 326.51909082275813,
+          "predicted_slo_attainment": 0.7656520155377549,
           "predicted_utilization": 0.6097572712938508,
-          "rejection_reason": "upper forecast predicts 328.1ms TTFT at 0.61 utilization",
+          "rejection_reason": "upper forecast predicts 326.5ms TTFT at 0.61 utilization",
           "safe": false
         },
         {
@@ -4096,10 +4096,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 263.0290872297287,
-          "predicted_slo_attainment": 0.9504652228126043,
+          "predicted_p95_ttft_ms": 261.78989041562613,
+          "predicted_slo_attainment": 0.954964302109191,
           "predicted_utilization": 0.43116350140968734,
-          "rejection_reason": "upper forecast predicts 263.0ms TTFT at 0.43 utilization",
+          "rejection_reason": "upper forecast predicts 261.8ms TTFT at 0.43 utilization",
           "safe": false
         },
         {
@@ -4112,10 +4112,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 1814.3962117369274,
-          "predicted_slo_attainment": 0.13778688380344126,
+          "predicted_p95_ttft_ms": 1805.8481305007997,
+          "predicted_slo_attainment": 0.13843910558008538,
           "predicted_utilization": 0.9146359069407763,
-          "rejection_reason": "upper forecast predicts 1814.4ms TTFT at 0.91 utilization",
+          "rejection_reason": "upper forecast predicts 1805.8ms TTFT at 0.91 utilization",
           "safe": false
         },
         {
@@ -4128,10 +4128,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 232.7459739300117,
+          "predicted_p95_ttft_ms": 231.64944855167073,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.45731795347038817,
-          "rejection_reason": "upper forecast predicts 232.7ms TTFT at 0.46 utilization",
+          "rejection_reason": "upper forecast predicts 231.6ms TTFT at 0.46 utilization",
           "safe": false
         },
         {
@@ -4144,10 +4144,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 228.87896421085392,
+          "predicted_p95_ttft_ms": 227.8006572971495,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.32337262605726547,
-          "rejection_reason": "upper forecast predicts 228.9ms TTFT at 0.32 utilization",
+          "rejection_reason": "upper forecast predicts 227.8ms TTFT at 0.32 utilization",
           "safe": false
         }
       ],
@@ -4170,14 +4170,14 @@
         "lower_rps": 7.943205420442929,
         "upper_rps": 9.708362180541357
       },
-      "generated_at": "2026-08-02T02:56:39.647044+00:00",
+      "generated_at": "2026-08-02T07:51:03.647254+00:00",
       "observed": {
         "arrival_rate_rps": 7.0,
         "backend_error_rate": 0.0,
         "concurrency": 8,
         "interactive_fraction": 0.7142857142857143,
         "long_context_fraction": 0.2857142857142857,
-        "observed_p95_ttft_ms": 209.84708954770244,
+        "observed_p95_ttft_ms": 208.85844662780707,
         "output_p95": 121.59999999999997,
         "prompt_p95": 1116.5999999999997,
         "replicas": 4,
@@ -4197,7 +4197,7 @@
     "action_count": 2,
     "cold_start_exposure": 1,
     "controller": "reactive",
-    "estimated_cost_usd": 0.03548068037502083,
+    "estimated_cost_usd": 0.03550133138967708,
     "recovery_windows": 2,
     "replica_oscillations": 1,
     "rollback_count": 0,
@@ -4205,7 +4205,7 @@
   },
   "reactive_decisions": [
     {
-      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "actual_outcome_p95_ttft_ms": 206.8114649638145,
       "alternatives": [
         {
           "action": {
@@ -4217,10 +4217,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 226.49155603818812,
+          "predicted_p95_ttft_ms": 225.42449681055783,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2564102564102564,
-          "rejection_reason": "upper forecast predicts 226.5ms TTFT at 0.26 utilization",
+          "rejection_reason": "upper forecast predicts 225.4ms TTFT at 0.26 utilization",
           "safe": false
         }
       ],
@@ -4243,14 +4243,14 @@
         "lower_rps": 5.0,
         "upper_rps": 5.0
       },
-      "generated_at": "2026-08-02T02:56:39.647116+00:00",
+      "generated_at": "2026-08-02T07:51:03.647315+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.6,
         "long_context_fraction": 0.4,
-        "observed_p95_ttft_ms": 207.79041838365882,
+        "observed_p95_ttft_ms": 206.8114649638145,
         "output_p95": 193.0,
         "prompt_p95": 1265.2,
         "replicas": 3,
@@ -4267,7 +4267,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 201.01671537615712,
+      "actual_outcome_p95_ttft_ms": 200.06967459105212,
       "alternatives": [
         {
           "action": {
@@ -4279,10 +4279,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 219.10821976001128,
+          "predicted_p95_ttft_ms": 218.07594530424683,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.20512820512820512,
-          "rejection_reason": "upper forecast predicts 219.1ms TTFT at 0.21 utilization",
+          "rejection_reason": "upper forecast predicts 218.1ms TTFT at 0.21 utilization",
           "safe": false
         }
       ],
@@ -4305,14 +4305,14 @@
         "lower_rps": 4.0,
         "upper_rps": 4.0
       },
-      "generated_at": "2026-08-02T02:56:39.647139+00:00",
+      "generated_at": "2026-08-02T07:51:03.647337+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 201.01671537615712,
+        "observed_p95_ttft_ms": 200.06967459105212,
         "output_p95": 68.0,
         "prompt_p95": 165.09999999999997,
         "replicas": 3,
@@ -4329,7 +4329,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "actual_outcome_p95_ttft_ms": 206.8114649638145,
       "alternatives": [
         {
           "action": {
@@ -4341,10 +4341,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 226.49155603818812,
+          "predicted_p95_ttft_ms": 225.42449681055783,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2564102564102564,
-          "rejection_reason": "upper forecast predicts 226.5ms TTFT at 0.26 utilization",
+          "rejection_reason": "upper forecast predicts 225.4ms TTFT at 0.26 utilization",
           "safe": false
         }
       ],
@@ -4367,14 +4367,14 @@
         "lower_rps": 5.0,
         "upper_rps": 5.0
       },
-      "generated_at": "2026-08-02T02:56:39.647159+00:00",
+      "generated_at": "2026-08-02T07:51:03.647388+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.4,
         "long_context_fraction": 0.6,
-        "observed_p95_ttft_ms": 207.79041838365882,
+        "observed_p95_ttft_ms": 206.8114649638145,
         "output_p95": 213.2,
         "prompt_p95": 978.0,
         "replicas": 3,
@@ -4391,7 +4391,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 191.43981659897415,
+      "actual_outcome_p95_ttft_ms": 190.5378950156223,
       "alternatives": [
         {
           "action": {
@@ -4403,7 +4403,7 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 208.66940009288183,
+          "predicted_p95_ttft_ms": 207.6863055670283,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.05128205128205128,
           "rejection_reason": null,
@@ -4429,14 +4429,14 @@
         "lower_rps": 1.0,
         "upper_rps": 1.0
       },
-      "generated_at": "2026-08-02T02:56:39.647176+00:00",
+      "generated_at": "2026-08-02T07:51:03.647410+00:00",
       "observed": {
         "arrival_rate_rps": 1.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 191.43981659897415,
+        "observed_p95_ttft_ms": 190.5378950156223,
         "output_p95": 51.0,
         "prompt_p95": 157.0,
         "replicas": 3,
@@ -4453,7 +4453,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 321.90901563587374,
+      "actual_outcome_p95_ttft_ms": 323.0991881266509,
       "alternatives": [
         {
           "action": {
@@ -4465,10 +4465,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 350.8808270431024,
-          "predicted_slo_attainment": 0.7124926206620286,
+          "predicted_p95_ttft_ms": 352.1781150580495,
+          "predicted_slo_attainment": 0.7098680733150966,
           "predicted_utilization": 0.2564102564102564,
-          "rejection_reason": "upper forecast predicts 350.9ms TTFT at 0.26 utilization",
+          "rejection_reason": "upper forecast predicts 352.2ms TTFT at 0.26 utilization",
           "safe": false
         }
       ],
@@ -4491,14 +4491,14 @@
         "lower_rps": 5.0,
         "upper_rps": 5.0
       },
-      "generated_at": "2026-08-02T02:56:39.647193+00:00",
+      "generated_at": "2026-08-02T07:51:03.647428+00:00",
       "observed": {
         "arrival_rate_rps": 5.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.4,
         "long_context_fraction": 0.6,
-        "observed_p95_ttft_ms": 321.90901563587374,
+        "observed_p95_ttft_ms": 323.0991881266509,
         "output_p95": 191.99999999999997,
         "prompt_p95": 3271.7999999999997,
         "replicas": 3,
@@ -4515,7 +4515,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 1214.1209851222004,
+      "actual_outcome_p95_ttft_ms": 1207.1790739287462,
       "alternatives": [
         {
           "action": {
@@ -4527,10 +4527,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 741.6632513321986,
-          "predicted_slo_attainment": 0.33708020392131094,
+          "predicted_p95_ttft_ms": 738.1690874438333,
+          "predicted_slo_attainment": 0.3386757915665526,
           "predicted_utilization": 0.7692307692307693,
-          "rejection_reason": "upper forecast predicts 741.7ms TTFT at 0.77 utilization",
+          "rejection_reason": "upper forecast predicts 738.2ms TTFT at 0.77 utilization",
           "safe": false
         }
       ],
@@ -4553,14 +4553,14 @@
         "lower_rps": 20.0,
         "upper_rps": 20.0
       },
-      "generated_at": "2026-08-02T02:56:39.647215+00:00",
+      "generated_at": "2026-08-02T07:51:03.647450+00:00",
       "observed": {
         "arrival_rate_rps": 20.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.7,
         "long_context_fraction": 0.3,
-        "observed_p95_ttft_ms": 6885.124483559548,
+        "observed_p95_ttft_ms": 6852.686913956173,
         "output_p95": 227.20000000000005,
         "prompt_p95": 1603.7500000000002,
         "replicas": 3,
@@ -4577,7 +4577,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 225.89649321151765,
+      "actual_outcome_p95_ttft_ms": 224.8322374759527,
       "alternatives": [
         {
           "action": {
@@ -4589,10 +4589,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 246.22717760055426,
+          "predicted_p95_ttft_ms": 245.06713884878846,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.34615384615384615,
-          "rejection_reason": "upper forecast predicts 246.2ms TTFT at 0.35 utilization",
+          "rejection_reason": "upper forecast predicts 245.1ms TTFT at 0.35 utilization",
           "safe": false
         }
       ],
@@ -4615,14 +4615,14 @@
         "lower_rps": 9.0,
         "upper_rps": 9.0
       },
-      "generated_at": "2026-08-02T02:56:39.647238+00:00",
+      "generated_at": "2026-08-02T07:51:03.647473+00:00",
       "observed": {
         "arrival_rate_rps": 9.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.7777777777777778,
         "long_context_fraction": 0.2222222222222222,
-        "observed_p95_ttft_ms": 225.89649321151765,
+        "observed_p95_ttft_ms": 224.8322374759527,
         "output_p95": 240.39999999999995,
         "prompt_p95": 1504.7999999999995,
         "replicas": 4,
@@ -4639,7 +4639,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 217.175529740466,
+      "actual_outcome_p95_ttft_ms": 216.3261832182597,
       "alternatives": [
         {
           "action": {
@@ -4651,10 +4651,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 236.72132741710797,
+          "predicted_p95_ttft_ms": 235.7955397079031,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.2692307692307692,
-          "rejection_reason": "upper forecast predicts 236.7ms TTFT at 0.27 utilization",
+          "rejection_reason": "upper forecast predicts 235.8ms TTFT at 0.27 utilization",
           "safe": false
         }
       ],
@@ -4677,14 +4677,14 @@
         "lower_rps": 7.0,
         "upper_rps": 7.0
       },
-      "generated_at": "2026-08-02T02:56:39.647257+00:00",
+      "generated_at": "2026-08-02T07:51:03.647495+00:00",
       "observed": {
         "arrival_rate_rps": 7.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.5714285714285714,
         "long_context_fraction": 0.42857142857142855,
-        "observed_p95_ttft_ms": 217.175529740466,
+        "observed_p95_ttft_ms": 216.3261832182597,
         "output_p95": 215.79999999999995,
         "prompt_p95": 2083.3999999999996,
         "replicas": 4,
@@ -4701,7 +4701,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -4713,10 +4713,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_p95_ttft_ms": 212.9055379743168,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.15384615384615385,
-          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "rejection_reason": "upper forecast predicts 212.9ms TTFT at 0.15 utilization",
           "safe": false
         }
       ],
@@ -4739,14 +4739,14 @@
         "lower_rps": 4.0,
         "upper_rps": 4.0
       },
-      "generated_at": "2026-08-02T02:56:39.647275+00:00",
+      "generated_at": "2026-08-02T07:51:03.647515+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.5,
         "long_context_fraction": 0.5,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 214.39999999999998,
         "prompt_p95": 1245.2,
         "replicas": 4,
@@ -4763,7 +4763,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -4775,10 +4775,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_p95_ttft_ms": 212.9055379743168,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.15384615384615385,
-          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "rejection_reason": "upper forecast predicts 212.9ms TTFT at 0.15 utilization",
           "safe": false
         }
       ],
@@ -4801,14 +4801,14 @@
         "lower_rps": 4.0,
         "upper_rps": 4.0
       },
-      "generated_at": "2026-08-02T02:56:39.647291+00:00",
+      "generated_at": "2026-08-02T07:51:03.647535+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 88.89999999999998,
         "prompt_p95": 180.95,
         "replicas": 4,
@@ -4825,7 +4825,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "actual_outcome_p95_ttft_ms": 195.32618162781355,
       "alternatives": [
         {
           "action": {
@@ -4837,10 +4837,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_p95_ttft_ms": 212.9055379743168,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.15384615384615385,
-          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "rejection_reason": "upper forecast predicts 212.9ms TTFT at 0.15 utilization",
           "safe": false
         }
       ],
@@ -4863,14 +4863,14 @@
         "lower_rps": 4.0,
         "upper_rps": 4.0
       },
-      "generated_at": "2026-08-02T02:56:39.647308+00:00",
+      "generated_at": "2026-08-02T07:51:03.647549+00:00",
       "observed": {
         "arrival_rate_rps": 4.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 1.0,
         "long_context_fraction": 0.0,
-        "observed_p95_ttft_ms": 196.25076882863985,
+        "observed_p95_ttft_ms": 195.32618162781355,
         "output_p95": 107.74999999999999,
         "prompt_p95": 193.54999999999998,
         "replicas": 4,
@@ -4887,7 +4887,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 204.1275003666601,
+      "actual_outcome_p95_ttft_ms": 203.16580388362377,
       "alternatives": [
         {
           "action": {
@@ -4899,10 +4899,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 222.4989753996595,
+          "predicted_p95_ttft_ms": 221.4507262331499,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.23076923076923078,
-          "rejection_reason": "upper forecast predicts 222.5ms TTFT at 0.23 utilization",
+          "rejection_reason": "upper forecast predicts 221.5ms TTFT at 0.23 utilization",
           "safe": false
         }
       ],
@@ -4925,14 +4925,14 @@
         "lower_rps": 6.0,
         "upper_rps": 6.0
       },
-      "generated_at": "2026-08-02T02:56:39.647324+00:00",
+      "generated_at": "2026-08-02T07:51:03.647564+00:00",
       "observed": {
         "arrival_rate_rps": 6.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.6666666666666666,
         "long_context_fraction": 0.3333333333333333,
-        "observed_p95_ttft_ms": 204.1275003666601,
+        "observed_p95_ttft_ms": 203.16580388362377,
         "output_p95": 177.5,
         "prompt_p95": 871.5,
         "replicas": 4,
@@ -4949,7 +4949,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 250.14185296729812,
+      "actual_outcome_p95_ttft_ms": 248.96337118592746,
       "alternatives": [
         {
           "action": {
@@ -4961,10 +4961,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 272.654619734355,
-          "predicted_slo_attainment": 0.9169109265178519,
+          "predicted_p95_ttft_ms": 271.37007459266096,
+          "predicted_slo_attainment": 0.9212511747113663,
           "predicted_utilization": 0.4230769230769231,
-          "rejection_reason": "upper forecast predicts 272.7ms TTFT at 0.42 utilization",
+          "rejection_reason": "upper forecast predicts 271.4ms TTFT at 0.42 utilization",
           "safe": false
         }
       ],
@@ -4987,14 +4987,14 @@
         "lower_rps": 11.0,
         "upper_rps": 11.0
       },
-      "generated_at": "2026-08-02T02:56:39.647343+00:00",
+      "generated_at": "2026-08-02T07:51:03.647579+00:00",
       "observed": {
         "arrival_rate_rps": 11.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.5454545454545454,
         "long_context_fraction": 0.45454545454545453,
-        "observed_p95_ttft_ms": 250.14185296729812,
+        "observed_p95_ttft_ms": 248.96337118592746,
         "output_p95": 245.0,
         "prompt_p95": 1521.5,
         "replicas": 4,
@@ -5011,7 +5011,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 739.668855107771,
+      "actual_outcome_p95_ttft_ms": 737.5892863728969,
       "alternatives": [
         {
           "action": {
@@ -5023,10 +5023,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 8.8,
-          "predicted_p95_ttft_ms": 806.2390520674705,
-          "predicted_slo_attainment": 0.31008172992726557,
+          "predicted_p95_ttft_ms": 803.9723221464577,
+          "predicted_slo_attainment": 0.3109559783507797,
           "predicted_utilization": 0.7692307692307693,
-          "rejection_reason": "upper forecast predicts 806.2ms TTFT at 0.77 utilization",
+          "rejection_reason": "upper forecast predicts 804.0ms TTFT at 0.77 utilization",
           "safe": false
         }
       ],
@@ -5049,14 +5049,14 @@
         "lower_rps": 20.0,
         "upper_rps": 20.0
       },
-      "generated_at": "2026-08-02T02:56:39.647365+00:00",
+      "generated_at": "2026-08-02T07:51:03.647598+00:00",
       "observed": {
         "arrival_rate_rps": 20.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.75,
         "long_context_fraction": 0.25,
-        "observed_p95_ttft_ms": 739.668855107771,
+        "observed_p95_ttft_ms": 737.5892863728969,
         "output_p95": 261.55,
         "prompt_p95": 2203.9000000000005,
         "replicas": 4,
@@ -5073,7 +5073,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 245.39569171385577,
+      "actual_outcome_p95_ttft_ms": 244.2395703032199,
       "alternatives": [
         {
           "action": {
@@ -5085,10 +5085,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 267.4813039681028,
-          "predicted_slo_attainment": 0.9346447631712329,
+          "predicted_p95_ttft_ms": 266.2211316305097,
+          "predicted_slo_attainment": 0.9390689554538325,
           "predicted_utilization": 0.41025641025641024,
-          "rejection_reason": "upper forecast predicts 267.5ms TTFT at 0.41 utilization",
+          "rejection_reason": "upper forecast predicts 266.2ms TTFT at 0.41 utilization",
           "safe": false
         }
       ],
@@ -5111,14 +5111,14 @@
         "lower_rps": 8.0,
         "upper_rps": 8.0
       },
-      "generated_at": "2026-08-02T02:56:39.647386+00:00",
+      "generated_at": "2026-08-02T07:51:03.647616+00:00",
       "observed": {
         "arrival_rate_rps": 8.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.625,
         "long_context_fraction": 0.375,
-        "observed_p95_ttft_ms": 217.01804595336364,
+        "observed_p95_ttft_ms": 215.995618837106,
         "output_p95": 156.75,
         "prompt_p95": 1785.1499999999996,
         "replicas": 4,
@@ -5135,7 +5135,7 @@
       ]
     },
     {
-      "actual_outcome_p95_ttft_ms": 229.28853998020045,
+      "actual_outcome_p95_ttft_ms": 228.20830345105367,
       "alternatives": [
         {
           "action": {
@@ -5147,10 +5147,10 @@
             "variant": "balanced"
           },
           "predicted_cost_per_hour_usd": 6.6000000000000005,
-          "predicted_p95_ttft_ms": 249.9245085784185,
+          "predicted_p95_ttft_ms": 248.74705076164852,
           "predicted_slo_attainment": 1.0,
           "predicted_utilization": 0.358974358974359,
-          "rejection_reason": "upper forecast predicts 249.9ms TTFT at 0.36 utilization",
+          "rejection_reason": "upper forecast predicts 248.7ms TTFT at 0.36 utilization",
           "safe": false
         }
       ],
@@ -5173,14 +5173,14 @@
         "lower_rps": 7.0,
         "upper_rps": 7.0
       },
-      "generated_at": "2026-08-02T02:56:39.647404+00:00",
+      "generated_at": "2026-08-02T07:51:03.647633+00:00",
       "observed": {
         "arrival_rate_rps": 7.0,
         "backend_error_rate": 0.0,
         "concurrency": 6,
         "interactive_fraction": 0.7142857142857143,
         "long_context_fraction": 0.2857142857142857,
-        "observed_p95_ttft_ms": 229.28853998020045,
+        "observed_p95_ttft_ms": 228.20830345105367,
         "output_p95": 121.59999999999997,
         "prompt_p95": 1116.5999999999997,
         "replicas": 3,
@@ -5205,7 +5205,7 @@
       "concurrency": 6,
       "interactive_fraction": 0.6,
       "long_context_fraction": 0.4,
-      "observed_p95_ttft_ms": 207.79041838365882,
+      "observed_p95_ttft_ms": 206.8114649638145,
       "output_p95": 193.0,
       "prompt_p95": 1265.2,
       "replicas": 3,
@@ -5220,7 +5220,7 @@
       "concurrency": 6,
       "interactive_fraction": 1.0,
       "long_context_fraction": 0.0,
-      "observed_p95_ttft_ms": 201.01671537615712,
+      "observed_p95_ttft_ms": 200.06967459105212,
       "output_p95": 68.0,
       "prompt_p95": 165.09999999999997,
       "replicas": 3,
@@ -5235,7 +5235,7 @@
       "concurrency": 6,
       "interactive_fraction": 0.4,
       "long_context_fraction": 0.6,
-      "observed_p95_ttft_ms": 207.79041838365882,
+      "observed_p95_ttft_ms": 206.8114649638145,
       "output_p95": 213.2,
       "prompt_p95": 978.0,
       "replicas": 3,
@@ -5250,7 +5250,7 @@
       "concurrency": 6,
       "interactive_fraction": 1.0,
       "long_context_fraction": 0.0,
-      "observed_p95_ttft_ms": 191.43981659897415,
+      "observed_p95_ttft_ms": 190.5378950156223,
       "output_p95": 51.0,
       "prompt_p95": 157.0,
       "replicas": 3,
@@ -5265,7 +5265,7 @@
       "concurrency": 6,
       "interactive_fraction": 0.4,
       "long_context_fraction": 0.6,
-      "observed_p95_ttft_ms": 321.90901563587374,
+      "observed_p95_ttft_ms": 323.0991881266509,
       "output_p95": 191.99999999999997,
       "prompt_p95": 3271.7999999999997,
       "replicas": 3,
@@ -5280,7 +5280,7 @@
       "concurrency": 6,
       "interactive_fraction": 0.7,
       "long_context_fraction": 0.3,
-      "observed_p95_ttft_ms": 6885.124483559548,
+      "observed_p95_ttft_ms": 6852.686913956173,
       "output_p95": 227.20000000000005,
       "prompt_p95": 1603.7500000000002,
       "replicas": 3,
@@ -5295,7 +5295,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.7777777777777778,
       "long_context_fraction": 0.2222222222222222,
-      "observed_p95_ttft_ms": 225.89649321151765,
+      "observed_p95_ttft_ms": 224.8322374759527,
       "output_p95": 240.39999999999995,
       "prompt_p95": 1504.7999999999995,
       "replicas": 4,
@@ -5310,7 +5310,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.5714285714285714,
       "long_context_fraction": 0.42857142857142855,
-      "observed_p95_ttft_ms": 217.175529740466,
+      "observed_p95_ttft_ms": 216.3261832182597,
       "output_p95": 215.79999999999995,
       "prompt_p95": 2083.3999999999996,
       "replicas": 4,
@@ -5325,7 +5325,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.5,
       "long_context_fraction": 0.5,
-      "observed_p95_ttft_ms": 196.25076882863985,
+      "observed_p95_ttft_ms": 195.32618162781355,
       "output_p95": 214.39999999999998,
       "prompt_p95": 1245.2,
       "replicas": 4,
@@ -5340,7 +5340,7 @@
       "concurrency": 8,
       "interactive_fraction": 1.0,
       "long_context_fraction": 0.0,
-      "observed_p95_ttft_ms": 196.25076882863985,
+      "observed_p95_ttft_ms": 195.32618162781355,
       "output_p95": 88.89999999999998,
       "prompt_p95": 180.95,
       "replicas": 4,
@@ -5355,7 +5355,7 @@
       "concurrency": 8,
       "interactive_fraction": 1.0,
       "long_context_fraction": 0.0,
-      "observed_p95_ttft_ms": 196.25076882863985,
+      "observed_p95_ttft_ms": 195.32618162781355,
       "output_p95": 107.74999999999999,
       "prompt_p95": 193.54999999999998,
       "replicas": 4,
@@ -5370,7 +5370,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.6666666666666666,
       "long_context_fraction": 0.3333333333333333,
-      "observed_p95_ttft_ms": 204.1275003666601,
+      "observed_p95_ttft_ms": 203.16580388362377,
       "output_p95": 177.5,
       "prompt_p95": 871.5,
       "replicas": 4,
@@ -5385,7 +5385,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.5454545454545454,
       "long_context_fraction": 0.45454545454545453,
-      "observed_p95_ttft_ms": 250.14185296729812,
+      "observed_p95_ttft_ms": 248.96337118592746,
       "output_p95": 245.0,
       "prompt_p95": 1521.5,
       "replicas": 4,
@@ -5400,7 +5400,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.75,
       "long_context_fraction": 0.25,
-      "observed_p95_ttft_ms": 739.668855107771,
+      "observed_p95_ttft_ms": 737.5892863728969,
       "output_p95": 261.55,
       "prompt_p95": 2203.9000000000005,
       "replicas": 4,
@@ -5415,7 +5415,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.625,
       "long_context_fraction": 0.375,
-      "observed_p95_ttft_ms": 217.01804595336364,
+      "observed_p95_ttft_ms": 215.995618837106,
       "output_p95": 156.75,
       "prompt_p95": 1785.1499999999996,
       "replicas": 4,
@@ -5430,7 +5430,7 @@
       "concurrency": 8,
       "interactive_fraction": 0.7142857142857143,
       "long_context_fraction": 0.2857142857142857,
-      "observed_p95_ttft_ms": 209.84708954770244,
+      "observed_p95_ttft_ms": 208.85844662780707,
       "output_p95": 121.59999999999997,
       "prompt_p95": 1116.5999999999997,
       "replicas": 4,

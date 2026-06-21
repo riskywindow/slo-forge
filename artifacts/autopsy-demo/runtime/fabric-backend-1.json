@@ -1,0 +1,16 @@
+{
+  "bind": "127.0.0.1:55070",
+  "decode_per_token_ms": 2,
+  "failure_rate": 0.0,
+  "fault_api_enabled": true,
+  "max_concurrency": 4,
+  "max_output_tokens": 32,
+  "name": "fabric-backend-1",
+  "prefill_base_ms": 3,
+  "prefill_per_token_us": 25,
+  "price_per_hour_usd": 1.25,
+  "seed": 411,
+  "startup_every_n_requests": 0,
+  "startup_jitter_ms": 1,
+  "startup_ms": 8
+}

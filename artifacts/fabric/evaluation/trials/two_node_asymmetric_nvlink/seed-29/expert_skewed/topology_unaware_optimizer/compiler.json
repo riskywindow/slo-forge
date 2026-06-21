@@ -41,13 +41,13 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-01d021a4f407",
-      "communication_us": 6362.344704173443,
+      "communication_us": 8306.028287383466,
       "cost_per_million_tokens": 193.23671497584542,
       "data_parallel": 2,
       "disaggregated": true,
       "expert_parallel": 2,
       "failure_exposure_score": 0.0009994999999999865,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -67,13 +67,11 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 403.1080859289077,
-      "p95_ttft_ms": 108.76234470417344,
-      "p99_tpot_ms": 10.001480084444445,
+      "objective_score": 413.3030723950568,
+      "p95_ttft_ms": 110.74602828738347,
+      "p99_tpot_ms": 10.001480084444443,
       "pipeline_parallel": 8,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
@@ -144,7 +142,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-080b998e8616",
-      "communication_us": 166.4008987654321,
+      "communication_us": 188.10089876543498,
       "cost_per_million_tokens": 22.222222222222225,
       "data_parallel": 4,
       "disaggregated": true,
@@ -158,8 +156,8 @@
         "host-0/gpu/2",
         "host-0/gpu/3"
       ],
-      "objective_score": 225.78862312098767,
-      "p95_ttft_ms": 102.56640089876544,
+      "objective_score": 226.0034240197531,
+      "p95_ttft_ms": 102.59310089876543,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -258,7 +256,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-0bc19eba1239",
-      "communication_us": 2583.910153846154,
+      "communication_us": 2670.7101538461575,
       "cost_per_million_tokens": 22.222222222222225,
       "data_parallel": 8,
       "disaggregated": true,
@@ -276,8 +274,8 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 228.20613237606838,
-      "p95_ttft_ms": 104.98391015384615,
+      "objective_score": 230.96864252991455,
+      "p95_ttft_ms": 105.07571015384616,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -465,7 +463,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-12a95ee426a9",
-      "communication_us": 6480.751459728998,
+      "communication_us": 8145.927388617885,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 4,
       "disaggregated": true,
@@ -491,8 +489,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 82.48127489170966,
-      "p95_ttft_ms": 32.080751459729,
+      "objective_score": 92.09924604921642,
+      "p95_ttft_ms": 33.76592738861788,
       "p99_tpot_ms": 2.50333019,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -699,7 +697,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-286171d72a3a",
-      "communication_us": 6457.070108617887,
+      "communication_us": 8145.927388617914,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 4,
       "disaggregated": true,
@@ -725,8 +723,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 157.18480135035702,
-      "p95_ttft_ms": 57.65707010861789,
+      "objective_score": 166.85013521008605,
+      "p95_ttft_ms": 59.36592738861791,
       "p99_tpot_ms": 5.0029601688888885,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -942,7 +940,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-32f33100cf7d",
-      "communication_us": 7196.546648788827,
+      "communication_us": 13161.947629453567,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -968,8 +966,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.72470826811992,
-      "p95_ttft_ms": 19.99654664878883,
+      "objective_score": 76.96312952917839,
+      "p95_ttft_ms": 26.00194762945357,
       "p99_tpot_ms": 1.26451448982906,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -1144,7 +1142,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-371bd383cf37",
-      "communication_us": 6267.619299728998,
+      "communication_us": 6621.019299729,
       "cost_per_million_tokens": 88.8888888888889,
       "data_parallel": 4,
       "disaggregated": true,
@@ -1170,8 +1168,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 298.5560081886179,
-      "p95_ttft_ms": 108.667619299729,
+      "objective_score": 305.55042748834694,
+      "p95_ttft_ms": 109.041019299729,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 4,
       "rejection_codes": [],
@@ -1180,7 +1178,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-38c1660ca7bc",
-      "communication_us": 2797.0423138461542,
+      "communication_us": 4195.6182427350395,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -1198,8 +1196,8 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 78.79806574582683,
-      "p95_ttft_ms": 28.397042313846157,
+      "objective_score": 84.19912775745075,
+      "p95_ttft_ms": 29.815618242735038,
       "p99_tpot_ms": 2.50333019,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -1246,7 +1244,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-3ab506a3f521",
-      "communication_us": 2702.31690940171,
+      "communication_us": 3184.6128501424646,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -1264,8 +1262,8 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 78.59381409249349,
-      "p95_ttft_ms": 28.30231690940171,
+      "objective_score": 82.16231612782116,
+      "p95_ttft_ms": 28.804612850142465,
       "p99_tpot_ms": 2.5018501055555555,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -1430,7 +1428,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-4055cc511ea9",
-      "communication_us": 7220.227999899938,
+      "communication_us": 14509.954819577044,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -1456,8 +1454,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.77577118145325,
-      "p95_ttft_ms": 20.020227999899937,
+      "objective_score": 79.66284412053645,
+      "p95_ttft_ms": 27.34995481957704,
       "p99_tpot_ms": 1.264884510940171,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -1494,7 +1492,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-4306abf66001",
-      "communication_us": 7936.023188959767,
+      "communication_us": 50128.29337836147,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -1520,8 +1518,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 60.3192045578635,
-      "p95_ttft_ms": 20.736023188959766,
+      "objective_score": 151.0113642363959,
+      "p95_ttft_ms": 62.96829337836147,
       "p99_tpot_ms": 1.2760688107692308,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -1659,7 +1657,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-48ed22776325",
-      "communication_us": 6362.344704173443,
+      "communication_us": 6963.621097259893,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 8,
       "disaggregated": true,
@@ -1685,9 +1683,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 132.82596032504298,
-      "p95_ttft_ms": 57.56234470417345,
-      "p99_tpot_ms": 5.001480084444444,
+      "objective_score": 140.30613241094488,
+      "p95_ttft_ms": 58.17362109725989,
+      "p99_tpot_ms": 5.001480084444443,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -1695,7 +1693,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-49ba219882a5",
-      "communication_us": 6267.619299728998,
+      "communication_us": 6621.019299729,
       "cost_per_million_tokens": 177.7777777777778,
       "data_parallel": 2,
       "disaggregated": true,
@@ -1721,8 +1719,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 387.4448970775068,
-      "p95_ttft_ms": 108.667619299729,
+      "objective_score": 394.45931637723584,
+      "p95_ttft_ms": 109.061019299729,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 8,
       "rejection_codes": [],
@@ -2166,7 +2164,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-5d938c211a13",
-      "communication_us": 6480.751459728998,
+      "communication_us": 9156.932781210548,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 4,
       "disaggregated": true,
@@ -2192,9 +2190,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 157.23586426369033,
-      "p95_ttft_ms": 57.680751459729,
-      "p99_tpot_ms": 5.00333019,
+      "objective_score": 168.87584620638242,
+      "p95_ttft_ms": 60.37693278121055,
+      "p99_tpot_ms": 5.003330190000001,
       "pipeline_parallel": 2,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -2294,7 +2292,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-697c93d9e368",
-      "communication_us": 261.12630320987654,
+      "communication_us": 530.7026962963282,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -2308,8 +2306,8 @@
         "host-0/gpu/2",
         "host-0/gpu/3"
       ],
-      "objective_score": 126.72524192407944,
-      "p95_ttft_ms": 51.46112630320988,
+      "objective_score": 127.44079560901777,
+      "p95_ttft_ms": 51.74070269629633,
       "p99_tpot_ms": 5.001480084444444,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -2356,7 +2354,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-6c6f71cd82c9",
-      "communication_us": 6267.619299728998,
+      "communication_us": 6621.019299729,
       "cost_per_million_tokens": 44.44444444444445,
       "data_parallel": 8,
       "disaggregated": true,
@@ -2382,8 +2380,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 254.11156374417342,
-      "p95_ttft_ms": 108.667619299729,
+      "objective_score": 261.0959830439025,
+      "p95_ttft_ms": 109.031019299729,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -2418,7 +2416,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-6d5b06a5b74a",
-      "communication_us": 6457.070108617887,
+      "communication_us": 9162.532781210524,
       "cost_per_million_tokens": 96.61835748792271,
       "data_parallel": 2,
       "disaggregated": true,
@@ -2444,8 +2442,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 205.49398009431837,
-      "p95_ttft_ms": 57.65707010861789,
+      "objective_score": 217.21252473923263,
+      "p95_ttft_ms": 60.402532781210525,
       "p99_tpot_ms": 5.0029601688888885,
       "pipeline_parallel": 4,
       "rejection_codes": [],
@@ -2454,7 +2452,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-6e50d22fd55b",
-      "communication_us": 6386.026055284554,
+      "communication_us": 7134.92199602531,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 4,
       "disaggregated": true,
@@ -2480,8 +2478,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 82.27702323837633,
-      "p95_ttft_ms": 31.986026055284555,
+      "objective_score": 90.06243441958684,
+      "p95_ttft_ms": 32.75492199602531,
       "p99_tpot_ms": 2.5018501055555555,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -2851,13 +2849,13 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-812132a1ddd3",
-      "communication_us": 6386.026055284554,
+      "communication_us": 9654.035477506783,
       "cost_per_million_tokens": 193.23671497584542,
       "data_parallel": 2,
       "disaggregated": true,
       "expert_parallel": 4,
       "failure_exposure_score": 0.0009994999999999865,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -2877,13 +2875,11 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 403.1591488422411,
-      "p95_ttft_ms": 108.78602605528455,
-      "p99_tpot_ms": 10.001850105555556,
+      "objective_score": 416.00278698641455,
+      "p95_ttft_ms": 112.09403547750678,
+      "p99_tpot_ms": 10.001850105555553,
       "pipeline_parallel": 8,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
@@ -2940,7 +2936,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-86e0fc226f9b",
-      "communication_us": 6362.344704173443,
+      "communication_us": 7295.022894790716,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 8,
       "disaggregated": true,
@@ -2966,8 +2962,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 258.1805496970237,
-      "p95_ttft_ms": 108.76234470417344,
+      "objective_score": 266.3235253779872,
+      "p95_ttft_ms": 109.70502289479072,
       "p99_tpot_ms": 10.001480084444445,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -2976,7 +2972,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-88ef68c7fcec",
-      "communication_us": 6480.751459728998,
+      "communication_us": 10510.539971334016,
       "cost_per_million_tokens": 96.61835748792271,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3002,9 +2998,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 205.54504300765169,
-      "p95_ttft_ms": 57.680751459729,
-      "p99_tpot_ms": 5.00333019,
+      "objective_score": 219.91223933059072,
+      "p95_ttft_ms": 61.750539971334014,
+      "p99_tpot_ms": 5.003330190000001,
       "pipeline_parallel": 4,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -3056,7 +3052,7 @@
       "disaggregated": true,
       "expert_parallel": 2,
       "failure_exposure_score": 0.0010000000000000009,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -3068,15 +3064,13 @@
       "p95_ttft_ms": 102.66112630320988,
       "p99_tpot_ms": 10.001480084444445,
       "pipeline_parallel": 2,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
       "availability": 0.998001,
       "candidate_id": "physical-8c9b0e15ab60",
-      "communication_us": 6362.344704173443,
+      "communication_us": 7632.024692321633,
       "cost_per_million_tokens": 96.61835748792271,
       "data_parallel": 4,
       "disaggregated": true,
@@ -3102,8 +3096,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 306.48972844098506,
-      "p95_ttft_ms": 108.76234470417344,
+      "objective_score": 315.31670771701044,
+      "p95_ttft_ms": 110.05202469232164,
       "p99_tpot_ms": 10.001480084444445,
       "pipeline_parallel": 4,
       "rejection_codes": [],
@@ -3168,7 +3162,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-901f42ac4d58",
-      "communication_us": 6267.619299728998,
+      "communication_us": 6621.019299729,
       "cost_per_million_tokens": 22.222222222222225,
       "data_parallel": 16,
       "disaggregated": true,
@@ -3194,8 +3188,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 231.8893415219512,
-      "p95_ttft_ms": 108.667619299729,
+      "objective_score": 238.8687608216802,
+      "p95_ttft_ms": 109.026019299729,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -3248,7 +3242,7 @@
       "disaggregated": true,
       "expert_parallel": 2,
       "failure_exposure_score": 0.0010000000000000009,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -3264,15 +3258,13 @@
       "p95_ttft_ms": 105.0786355582906,
       "p99_tpot_ms": 10.001480084444445,
       "pipeline_parallel": 4,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
       "availability": 0.998001,
       "candidate_id": "physical-939ce73979ab",
-      "communication_us": 6504.43281084011,
+      "communication_us": 10424.889521951234,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3298,8 +3290,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 106.68692717702366,
-      "p95_ttft_ms": 32.10443281084011,
+      "objective_score": 120.83545989897492,
+      "p95_ttft_ms": 36.06488952195124,
       "p99_tpot_ms": 2.503700211111111,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -3618,7 +3610,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-a07b971b65b3",
-      "communication_us": 166.4008987654321,
+      "communication_us": 188.10089876543498,
       "cost_per_million_tokens": 44.44444444444445,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3632,8 +3624,8 @@
         "host-0/gpu/2",
         "host-0/gpu/3"
       ],
-      "objective_score": 248.0108453432099,
-      "p95_ttft_ms": 102.56640089876544,
+      "objective_score": 248.23064624197534,
+      "p95_ttft_ms": 102.59810089876544,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -3736,7 +3728,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-b06e3d4d69de",
-      "communication_us": 2820.723664957265,
+      "communication_us": 5206.623635327644,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3754,8 +3746,8 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 78.84912865916016,
-      "p95_ttft_ms": 28.42072366495727,
+      "objective_score": 86.22483875374708,
+      "p95_ttft_ms": 30.826623635327646,
       "p99_tpot_ms": 2.503700211111111,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -3824,7 +3816,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-b1ccd6fc725c",
-      "communication_us": 355.85170765432093,
+      "communication_us": 1204.7062913580448,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3838,8 +3830,8 @@
         "host-0/gpu/2",
         "host-0/gpu/3"
       ],
-      "objective_score": 126.92949357741277,
-      "p95_ttft_ms": 51.55585170765432,
+      "objective_score": 128.80360364358566,
+      "p95_ttft_ms": 52.414706291358044,
       "p99_tpot_ms": 5.0029601688888885,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -3848,7 +3840,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-b42e74f1d7ed",
-      "communication_us": 6362.344704173443,
+      "communication_us": 7477.523793556233,
       "cost_per_million_tokens": 96.61835748792271,
       "data_parallel": 2,
       "disaggregated": true,
@@ -3874,9 +3866,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 205.28972844098502,
-      "p95_ttft_ms": 57.56234470417345,
-      "p99_tpot_ms": 5.001480084444444,
+      "objective_score": 213.8277059194796,
+      "p95_ttft_ms": 58.71752379355623,
+      "p99_tpot_ms": 5.001480084444443,
       "pipeline_parallel": 4,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -3952,7 +3944,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-b6eb9104984a",
-      "communication_us": 2678.6355582905985,
+      "communication_us": 3013.3119513770434,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 4,
       "disaggregated": true,
@@ -3970,9 +3962,9 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 129.14275117916014,
-      "p95_ttft_ms": 53.878635558290604,
-      "p99_tpot_ms": 5.001480084444444,
+      "objective_score": 132.4060141191792,
+      "p95_ttft_ms": 54.22331195137705,
+      "p99_tpot_ms": 5.001480084444443,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -4175,7 +4167,7 @@
       "disaggregated": true,
       "expert_parallel": 8,
       "failure_exposure_score": 0.0009994999999999865,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -4199,15 +4191,13 @@
       "p95_ttft_ms": 109.50182124434438,
       "p99_tpot_ms": 10.013034405384616,
       "pipeline_parallel": 8,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
       "availability": 0.998001,
       "candidate_id": "physical-bc6845f1c24d",
-      "communication_us": 6362.344704173443,
+      "communication_us": 7134.9219960253395,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 4,
       "disaggregated": true,
@@ -4233,9 +4223,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 156.98054969702366,
-      "p95_ttft_ms": 57.56234470417345,
-      "p99_tpot_ms": 5.001480084444444,
+      "objective_score": 164.81332358045643,
+      "p95_ttft_ms": 58.35492199602534,
+      "p99_tpot_ms": 5.001480084444443,
       "pipeline_parallel": 2,
       "rejection_codes": [],
       "tensor_parallel": 2
@@ -4527,7 +4517,7 @@
       "disaggregated": true,
       "expert_parallel": 4,
       "failure_exposure_score": 0.0010000000000000009,
-      "feasible": false,
+      "feasible": true,
       "goodput_tokens_per_second": 92.0,
       "gpu_ids": [
         "host-0/gpu/0",
@@ -4543,9 +4533,7 @@
       "p95_ttft_ms": 105.10231690940171,
       "p99_tpot_ms": 10.001850105555556,
       "pipeline_parallel": 4,
-      "rejection_codes": [
-        "minimum_goodput"
-      ],
+      "rejection_codes": [],
       "tensor_parallel": 1
     },
     {
@@ -4797,7 +4785,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-d7d5d806494b",
-      "communication_us": 6504.43281084011,
+      "communication_us": 9156.93278121049,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 4,
       "disaggregated": true,
@@ -4823,8 +4811,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 82.53233780504299,
-      "p95_ttft_ms": 32.10443281084011,
+      "objective_score": 94.12495704551274,
+      "p95_ttft_ms": 34.77693278121049,
       "p99_tpot_ms": 2.503700211111111,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -5003,7 +4991,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-dd812d4ce0d2",
-      "communication_us": 6480.751459728998,
+      "communication_us": 9076.882331827743,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 2,
       "disaggregated": true,
@@ -5029,8 +5017,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 106.63586426369034,
-      "p95_ttft_ms": 32.080751459729,
+      "objective_score": 118.13574530761683,
+      "p95_ttft_ms": 34.71688233182774,
       "p99_tpot_ms": 2.50333019,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -5146,7 +5134,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-e49cd237faa4",
-      "communication_us": 6457.070108617887,
+      "communication_us": 7637.6246923216095,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 8,
       "disaggregated": true,
@@ -5172,8 +5160,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 133.03021197837631,
-      "p95_ttft_ms": 57.65707010861789,
+      "objective_score": 141.66894044551276,
+      "p95_ttft_ms": 58.84762469232161,
       "p99_tpot_ms": 5.0029601688888885,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -5236,7 +5224,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-e7fc4e6b1530",
-      "communication_us": 6386.026055284554,
+      "communication_us": 8643.03008491415,
       "cost_per_million_tokens": 96.61835748792271,
       "data_parallel": 4,
       "disaggregated": true,
@@ -5262,9 +5250,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 306.5407913543184,
-      "p95_ttft_ms": 108.78602605528455,
-      "p99_tpot_ms": 10.001850105555556,
+      "objective_score": 317.34241871330653,
+      "p95_ttft_ms": 111.06303008491415,
+      "p99_tpot_ms": 10.001850105555555,
       "pipeline_parallel": 4,
       "rejection_codes": [],
       "tensor_parallel": 1
@@ -5395,7 +5383,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-f9d9c52ff25c",
-      "communication_us": 6386.026055284554,
+      "communication_us": 7391.873344173451,
       "cost_per_million_tokens": 48.309178743961354,
       "data_parallel": 2,
       "disaggregated": true,
@@ -5421,8 +5409,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 106.431612610357,
-      "p95_ttft_ms": 31.986026055284555,
+      "objective_score": 114.7509264878638,
+      "p95_ttft_ms": 33.03187334417345,
       "p99_tpot_ms": 2.5018501055555555,
       "pipeline_parallel": 2,
       "rejection_codes": [],
@@ -5456,7 +5444,7 @@
     {
       "availability": 0.999,
       "candidate_id": "physical-fb1c70810753",
-      "communication_us": 2773.360962735043,
+      "communication_us": 3687.3155464387673,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 4,
       "disaggregated": true,
@@ -5474,8 +5462,8 @@
         "host-0/gpu/6",
         "host-0/gpu/7"
       ],
-      "objective_score": 129.3470028324935,
-      "p95_ttft_ms": 53.97336096273504,
+      "objective_score": 133.76882215374707,
+      "p95_ttft_ms": 54.89731554643877,
       "p99_tpot_ms": 5.0029601688888885,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -5484,7 +5472,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-fbb503b34530",
-      "communication_us": 7101.821244344383,
+      "communication_us": 11476.938641799272,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -5510,9 +5498,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.52045661478658,
-      "p95_ttft_ms": 19.901821244344383,
-      "p99_tpot_ms": 1.2630344053846154,
+      "objective_score": 73.57831070942535,
+      "p95_ttft_ms": 24.316938641799272,
+      "p99_tpot_ms": 1.2630344053846156,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
@@ -5548,11 +5536,12 @@
       "tensor_parallel": 1
     }
   ],
+  "deterministic_solver_work_units": 3300,
   "pareto_frontier": [
     {
       "availability": 0.998001,
       "candidate_id": "physical-fbb503b34530",
-      "communication_us": 7101.821244344383,
+      "communication_us": 11476.938641799272,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -5578,17 +5567,169 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.52045661478658,
-      "p95_ttft_ms": 19.901821244344383,
-      "p99_tpot_ms": 1.2630344053846154,
+      "objective_score": 73.57831070942535,
+      "p95_ttft_ms": 24.316938641799272,
+      "p99_tpot_ms": 1.2630344053846156,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
     },
     {
       "availability": 0.999,
+      "candidate_id": "physical-3ab506a3f521",
+      "communication_us": 3184.6128501424646,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 2,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0010000000000000009,
+      "feasible": true,
+      "goodput_tokens_per_second": 368.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/5",
+        "host-0/gpu/6",
+        "host-0/gpu/7"
+      ],
+      "objective_score": 82.16231612782116,
+      "p95_ttft_ms": 28.804612850142465,
+      "p99_tpot_ms": 2.5018501055555555,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 4
+    },
+    {
+      "availability": 0.998001,
+      "candidate_id": "physical-6e50d22fd55b",
+      "communication_us": 7134.92199602531,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 4,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0009994999999999865,
+      "feasible": true,
+      "goodput_tokens_per_second": 736.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/5",
+        "host-0/gpu/6",
+        "host-0/gpu/7",
+        "host-1/gpu/0",
+        "host-1/gpu/1",
+        "host-1/gpu/2",
+        "host-1/gpu/3",
+        "host-1/gpu/4",
+        "host-1/gpu/5",
+        "host-1/gpu/6",
+        "host-1/gpu/7"
+      ],
+      "objective_score": 90.06243441958684,
+      "p95_ttft_ms": 32.75492199602531,
+      "p99_tpot_ms": 2.5018501055555555,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 4
+    },
+    {
+      "availability": 0.999,
+      "candidate_id": "physical-697c93d9e368",
+      "communication_us": 530.7026962963282,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 2,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0010000000000000009,
+      "feasible": true,
+      "goodput_tokens_per_second": 184.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3"
+      ],
+      "objective_score": 127.44079560901777,
+      "p95_ttft_ms": 51.74070269629633,
+      "p99_tpot_ms": 5.001480084444444,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 2
+    },
+    {
+      "availability": 0.999,
+      "candidate_id": "physical-b6eb9104984a",
+      "communication_us": 3013.3119513770434,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 4,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0010000000000000009,
+      "feasible": true,
+      "goodput_tokens_per_second": 368.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/5",
+        "host-0/gpu/6",
+        "host-0/gpu/7"
+      ],
+      "objective_score": 132.4060141191792,
+      "p95_ttft_ms": 54.22331195137705,
+      "p99_tpot_ms": 5.001480084444443,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 2
+    },
+    {
+      "availability": 0.998001,
+      "candidate_id": "physical-48ed22776325",
+      "communication_us": 6963.621097259893,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 8,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0009994999999999865,
+      "feasible": true,
+      "goodput_tokens_per_second": 736.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/5",
+        "host-0/gpu/6",
+        "host-0/gpu/7",
+        "host-1/gpu/0",
+        "host-1/gpu/1",
+        "host-1/gpu/2",
+        "host-1/gpu/3",
+        "host-1/gpu/4",
+        "host-1/gpu/5",
+        "host-1/gpu/6",
+        "host-1/gpu/7"
+      ],
+      "objective_score": 140.30613241094488,
+      "p95_ttft_ms": 58.17362109725989,
+      "p99_tpot_ms": 5.001480084444443,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 2
+    },
+    {
+      "availability": 0.999,
       "candidate_id": "physical-080b998e8616",
-      "communication_us": 166.4008987654321,
+      "communication_us": 188.10089876543498,
       "cost_per_million_tokens": 22.222222222222225,
       "data_parallel": 4,
       "disaggregated": true,
@@ -5602,8 +5743,36 @@
         "host-0/gpu/2",
         "host-0/gpu/3"
       ],
-      "objective_score": 225.78862312098767,
-      "p95_ttft_ms": 102.56640089876544,
+      "objective_score": 226.0034240197531,
+      "p95_ttft_ms": 102.59310089876543,
+      "p99_tpot_ms": 10.0,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 1
+    },
+    {
+      "availability": 0.999,
+      "candidate_id": "physical-0bc19eba1239",
+      "communication_us": 2670.7101538461575,
+      "cost_per_million_tokens": 22.222222222222225,
+      "data_parallel": 8,
+      "disaggregated": true,
+      "expert_parallel": 1,
+      "failure_exposure_score": 0.0010000000000000009,
+      "feasible": true,
+      "goodput_tokens_per_second": 400.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/1",
+        "host-0/gpu/2",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/5",
+        "host-0/gpu/6",
+        "host-0/gpu/7"
+      ],
+      "objective_score": 230.96864252991455,
+      "p95_ttft_ms": 105.07571015384616,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -5612,7 +5781,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-901f42ac4d58",
-      "communication_us": 6267.619299728998,
+      "communication_us": 6621.019299729,
       "cost_per_million_tokens": 22.222222222222225,
       "data_parallel": 16,
       "disaggregated": true,
@@ -5638,8 +5807,8 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 231.8893415219512,
-      "p95_ttft_ms": 108.667619299729,
+      "objective_score": 238.8687608216802,
+      "p95_ttft_ms": 109.026019299729,
       "p99_tpot_ms": 10.0,
       "pipeline_parallel": 1,
       "rejection_codes": [],
@@ -6988,7 +7157,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "75a65d8d9da9e872ead7a06d209dbc7391889aca557da4c305906f420137eee9"
+      "value": "8358d2818aa4d199269f64b6e1db431e86326e2f68edb4a244e141a84b1ee2c3"
     },
     "failure_exposure": [
       {
@@ -7002,7 +7171,7 @@
           6,
           7
         ],
-        "expected_slo_impact_ms": 19.901821244344383,
+        "expected_slo_impact_ms": 24.316938641799272,
         "fault_domain": "host-0",
         "probability": 0.0010000000000000009
       },
@@ -7017,12 +7186,12 @@
           14,
           15
         ],
-        "expected_slo_impact_ms": 19.901821244344383,
+        "expected_slo_impact_ms": 24.316938641799272,
         "fault_domain": "host-1",
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "git_commit": "ca39d5e7859d26cd7bcac96e439e23825aff6d76",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 134217728,
@@ -7050,7 +7219,7 @@
           "expected_cost_usd": 0.0,
           "expected_latency_us": 6267.619299728998,
           "fallback": "recompute",
-          "maximum_inflight_chunks": 4,
+          "maximum_inflight_chunks": 32,
           "overlap_with_decode": true,
           "producer_rank_ids": [
             0,
@@ -7063,7 +7232,7 @@
             7
           ],
           "retry_limit": 1,
-          "route_id": "kv-prefill-decode-0",
+          "route_id": "kv-prefill-0-decode-0",
           "serialization_format": "nixl",
           "transport_adapter": "sloforge.infiniband"
         }
@@ -7341,11 +7510,11 @@
       {
         "candidate_id": "physical-01d021a4f407",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 1,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.164
       },
       {
         "candidate_id": "physical-0350ca379b2f",
@@ -7368,11 +7537,11 @@
       {
         "candidate_id": "physical-080b998e8616",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 4,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.012
       },
       {
         "candidate_id": "physical-083b9d88b321",
@@ -7404,11 +7573,11 @@
       {
         "candidate_id": "physical-0bc19eba1239",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 8,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.012
       },
       {
         "candidate_id": "physical-0ea596ae69e0",
@@ -7448,9 +7617,9 @@
       },
       {
         "candidate_id": "physical-0fb0edd896ab",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 13,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -7466,18 +7635,18 @@
       },
       {
         "candidate_id": "physical-12a95ee426a9",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 15,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.102
       },
       {
         "candidate_id": "physical-179a0012fb97",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 16,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -7538,12 +7707,12 @@
       },
       {
         "candidate_id": "physical-286171d72a3a",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 23,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.128
       },
       {
         "candidate_id": "physical-29572c395371",
@@ -7601,12 +7770,12 @@
       },
       {
         "candidate_id": "physical-32f33100cf7d",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 30,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.174
       },
       {
         "candidate_id": "physical-339a917b7953",
@@ -7655,21 +7824,21 @@
       },
       {
         "candidate_id": "physical-371bd383cf37",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 36,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.036
       },
       {
         "candidate_id": "physical-38c1660ca7bc",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 37,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.102
       },
       {
         "candidate_id": "physical-3a73ac321093",
@@ -7683,11 +7852,11 @@
       {
         "candidate_id": "physical-3ab506a3f521",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 39,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.054
       },
       {
         "candidate_id": "physical-3b8177c12fa8",
@@ -7718,9 +7887,9 @@
       },
       {
         "candidate_id": "physical-3f788cec683b",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 43,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -7736,30 +7905,30 @@
       },
       {
         "candidate_id": "physical-4055cc511ea9",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 45,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.126
       },
       {
         "candidate_id": "physical-42d99ff30375",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 46,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
       },
       {
         "candidate_id": "physical-4306abf66001",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 47,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.102
       },
       {
         "candidate_id": "physical-45932dfcead8",
@@ -7800,20 +7969,20 @@
       {
         "candidate_id": "physical-48ed22776325",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 52,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.042
       },
       {
         "candidate_id": "physical-49ba219882a5",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 53,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.068
       },
       {
         "candidate_id": "physical-4a38440a974b",
@@ -7880,9 +8049,9 @@
       },
       {
         "candidate_id": "physical-5847dd66da9b",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 61,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -7934,12 +8103,12 @@
       },
       {
         "candidate_id": "physical-5d938c211a13",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 67,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.104
       },
       {
         "candidate_id": "physical-5dfe4e676d42",
@@ -7952,9 +8121,9 @@
       },
       {
         "candidate_id": "physical-6032af8fc4af",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 69,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -7971,11 +8140,11 @@
       {
         "candidate_id": "physical-697c93d9e368",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 71,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.042
       },
       {
         "candidate_id": "physical-6b5762a6f1bf",
@@ -7988,12 +8157,12 @@
       },
       {
         "candidate_id": "physical-6c6f71cd82c9",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 73,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.02
       },
       {
         "candidate_id": "physical-6cee658741ff",
@@ -8006,21 +8175,21 @@
       },
       {
         "candidate_id": "physical-6d5b06a5b74a",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 75,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.252
       },
       {
         "candidate_id": "physical-6e50d22fd55b",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 76,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.054
       },
       {
         "candidate_id": "physical-72ee1e06f78a",
@@ -8123,9 +8292,9 @@
       },
       {
         "candidate_id": "physical-7f18d1d35344",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 88,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -8133,11 +8302,11 @@
       {
         "candidate_id": "physical-812132a1ddd3",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 89,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.116
       },
       {
         "candidate_id": "physical-86331e518bff",
@@ -8159,21 +8328,21 @@
       },
       {
         "candidate_id": "physical-86e0fc226f9b",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 92,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.044
       },
       {
         "candidate_id": "physical-88ef68c7fcec",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 93,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.204
       },
       {
         "candidate_id": "physical-8b846b96c8d3",
@@ -8187,20 +8356,20 @@
       {
         "candidate_id": "physical-8c5a57cb13b4",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "lower_bound",
+        "reason_code": "dominated_objective",
         "sequence": 95,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
       },
       {
         "candidate_id": "physical-8c9b0e15ab60",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 96,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.084
       },
       {
         "candidate_id": "physical-8ce6623f93a8",
@@ -8223,11 +8392,11 @@
       {
         "candidate_id": "physical-901f42ac4d58",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 99,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.012
       },
       {
         "candidate_id": "physical-920fb73cacf2",
@@ -8241,20 +8410,20 @@
       {
         "candidate_id": "physical-92f7e8e9cb4c",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "lower_bound",
+        "reason_code": "dominated_objective",
         "sequence": 101,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
       },
       {
         "candidate_id": "physical-939ce73979ab",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 102,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.152
       },
       {
         "candidate_id": "physical-943b055e0e9d",
@@ -8348,12 +8517,12 @@
       },
       {
         "candidate_id": "physical-a07b971b65b3",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 113,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.02
       },
       {
         "candidate_id": "physical-a552a40fad60",
@@ -8384,12 +8553,12 @@
       },
       {
         "candidate_id": "physical-b06e3d4d69de",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 117,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.078
       },
       {
         "candidate_id": "physical-b08e173dba2a",
@@ -8411,21 +8580,21 @@
       },
       {
         "candidate_id": "physical-b1ccd6fc725c",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 120,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.066
       },
       {
         "candidate_id": "physical-b42e74f1d7ed",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 121,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.156
       },
       {
         "candidate_id": "physical-b4a2c6de0bc3",
@@ -8448,17 +8617,17 @@
       {
         "candidate_id": "physical-b6eb9104984a",
         "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_pareto_candidate",
         "sequence": 124,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.042
       },
       {
         "candidate_id": "physical-b72d593b41bf",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 125,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -8474,9 +8643,9 @@
       },
       {
         "candidate_id": "physical-b99712606df7",
-        "decision": "promote",
+        "decision": "reject",
         "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "reason_code": "dominated_objective",
         "sequence": 127,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -8511,20 +8680,20 @@
       {
         "candidate_id": "physical-bc0ac558c9b1",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "lower_bound",
+        "reason_code": "dominated_objective",
         "sequence": 131,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
       },
       {
         "candidate_id": "physical-bc6845f1c24d",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 132,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.08
       },
       {
         "candidate_id": "physical-bd6db12627d2",
@@ -8610,8 +8779,8 @@
       {
         "candidate_id": "physical-cd0915788e7b",
         "decision": "reject",
-        "phase": "feasibility",
-        "reason_code": "minimum_goodput",
+        "phase": "lower_bound",
+        "reason_code": "dominated_objective",
         "sequence": 142,
         "simulator_calls": 0,
         "solver_time_ms": 0.0
@@ -8690,12 +8859,12 @@
       },
       {
         "candidate_id": "physical-d7d5d806494b",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 151,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.078
       },
       {
         "candidate_id": "physical-d7f117690124",
@@ -8744,12 +8913,12 @@
       },
       {
         "candidate_id": "physical-dd812d4ce0d2",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 157,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.2
       },
       {
         "candidate_id": "physical-df8c658f0e52",
@@ -8789,12 +8958,12 @@
       },
       {
         "candidate_id": "physical-e49cd237faa4",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 162,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.066
       },
       {
         "candidate_id": "physical-e4cc5241b71d",
@@ -8816,12 +8985,12 @@
       },
       {
         "candidate_id": "physical-e7fc4e6b1530",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 165,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.06
       },
       {
         "candidate_id": "physical-e87a7f8b60cd",
@@ -8861,12 +9030,12 @@
       },
       {
         "candidate_id": "physical-f9d9c52ff25c",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 170,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.104
       },
       {
         "candidate_id": "physical-faa131cbf935",
@@ -8879,21 +9048,21 @@
       },
       {
         "candidate_id": "physical-fb1c70810753",
-        "decision": "promote",
-        "phase": "lower_bound",
-        "reason_code": "pareto_candidate",
+        "decision": "reject",
+        "phase": "simulation",
+        "reason_code": "dominated_objective",
         "sequence": 172,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.066
       },
       {
         "candidate_id": "physical-fbb503b34530",
         "decision": "select",
-        "phase": "lower_bound",
-        "reason_code": "minimum_robust_objective",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_minimum_robust_objective",
         "sequence": 173,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.078
       },
       {
         "candidate_id": "physical-fde05c39e49e",
@@ -9065,7 +9234,7 @@
       ],
       "tensor_parallel_degree": 8
     },
-    "plan_id": "physical-plan-4cc07a7ca291e13a",
+    "plan_id": "physical-plan-a5f83d9bba1f80bb",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -9076,10 +9245,10 @@
       },
       "communication_overhead_fraction": {
         "confidence": 0.9,
-        "estimate": 0.07049932109214643,
-        "lower": 0.06344938898293179,
+        "estimate": 0.1091470675238883,
+        "lower": 0.09823236077149947,
         "unit": "fraction",
-        "upper": 0.07754925320136108
+        "upper": 0.12006177427627712
       },
       "cost_usd_per_million_tokens": {
         "confidence": 0.9,
@@ -9097,24 +9266,24 @@
       },
       "p95_end_to_end_ms": {
         "confidence": 0.9,
-        "estimate": 100.73602318895976,
-        "lower": 90.66242087006378,
+        "estimate": 105.15114058641467,
+        "lower": 94.6360265277732,
         "unit": "ms",
-        "upper": 110.80962550785574
+        "upper": 115.66625464505614
       },
       "p95_ttft_ms": {
         "confidence": 0.9,
-        "estimate": 19.901821244344383,
-        "lower": 17.911639119909946,
+        "estimate": 24.316938641799272,
+        "lower": 21.885244777619345,
         "unit": "ms",
-        "upper": 21.89200336877882
+        "upper": 26.7486325059792
       },
       "p99_tpot_ms": {
         "confidence": 0.9,
-        "estimate": 1.2630344053846154,
-        "lower": 1.1367309648461539,
+        "estimate": 1.2630344053846156,
+        "lower": 1.136730964846154,
         "unit": "ms",
-        "upper": 1.389337845923077
+        "upper": 1.3893378459230772
       },
       "throughput_tokens_per_second": {
         "confidence": 0.9,
@@ -11384,7 +11553,7 @@
               "expected_cost_usd": 0.0,
               "expected_latency_us": 6267.619299728998,
               "fallback": "recompute",
-              "maximum_inflight_chunks": 4,
+              "maximum_inflight_chunks": 32,
               "overlap_with_decode": true,
               "producer_rank_ids": [
                 0,
@@ -11397,7 +11566,7 @@
                 7
               ],
               "retry_limit": 1,
-              "route_id": "kv-prefill-decode-0",
+              "route_id": "kv-prefill-0-decode-0",
               "serialization_format": "nixl",
               "transport_adapter": "sloforge.infiniband"
             }
@@ -11838,10 +12007,10 @@
           },
           "communication_overhead_fraction": {
             "confidence": 0.9,
-            "estimate": 0.07130555214377521,
-            "lower": 0.06417499692939768,
+            "estimate": 0.12308837491602231,
+            "lower": 0.11077953742442008,
             "unit": "fraction",
-            "upper": 0.07843610735815273
+            "upper": 0.13539721240762453
           },
           "cost_usd_per_million_tokens": {
             "confidence": 0.9,
@@ -11859,17 +12028,17 @@
           },
           "p95_end_to_end_ms": {
             "confidence": 0.9,
-            "estimate": 100.92547399784866,
-            "lower": 90.83292659806379,
+            "estimate": 106.9308749785134,
+            "lower": 96.23778748066206,
             "unit": "ms",
-            "upper": 111.01802139763352
+            "upper": 117.62396247636474
           },
           "p95_ttft_ms": {
             "confidence": 0.9,
-            "estimate": 19.99654664878883,
-            "lower": 17.996891983909947,
+            "estimate": 26.00194762945357,
+            "lower": 23.401752866508215,
             "unit": "ms",
-            "upper": 21.99620131366771
+            "upper": 28.602142392398928
           },
           "p99_tpot_ms": {
             "confidence": 0.9,
@@ -13353,7 +13522,7 @@
               "expected_cost_usd": 0.0,
               "expected_latency_us": 6267.619299728998,
               "fallback": "recompute",
-              "maximum_inflight_chunks": 4,
+              "maximum_inflight_chunks": 32,
               "overlap_with_decode": true,
               "producer_rank_ids": [
                 0,
@@ -13366,7 +13535,7 @@
                 7
               ],
               "retry_limit": 1,
-              "route_id": "kv-prefill-decode-0",
+              "route_id": "kv-prefill-0-decode-0",
               "serialization_format": "nixl",
               "transport_adapter": "sloforge.infiniband"
             }
@@ -13783,10 +13952,10 @@
           },
           "communication_overhead_fraction": {
             "confidence": 0.9,
-            "estimate": 0.07150663718943405,
-            "lower": 0.06435597347049064,
+            "estimate": 0.1339760975919216,
+            "lower": 0.12057848783272945,
             "unit": "fraction",
-            "upper": 0.07865730090837746
+            "upper": 0.14737370735111377
           },
           "cost_usd_per_million_tokens": {
             "confidence": 0.9,
@@ -13804,17 +13973,17 @@
           },
           "p95_end_to_end_ms": {
             "confidence": 0.9,
-            "estimate": 100.97283670007087,
-            "lower": 90.87555303006378,
+            "estimate": 108.30256351974798,
+            "lower": 97.47230716777318,
             "unit": "ms",
-            "upper": 111.07012037007796
+            "upper": 119.13281987172277
           },
           "p95_ttft_ms": {
             "confidence": 0.9,
-            "estimate": 20.020227999899937,
-            "lower": 18.018205199909943,
+            "estimate": 27.34995481957704,
+            "lower": 24.614959337619336,
             "unit": "ms",
-            "upper": 22.02225079988993
+            "upper": 30.084950301534743
           },
           "p99_tpot_ms": {
             "confidence": 0.9,
@@ -13848,9 +14017,9 @@
           "operations": [
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -13861,31 +14030,23 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 13.156306172839507,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -13893,104 +14054,80 @@
               "operation_id": "collective-0001",
               "overlap_window_id": "overlap-0001",
               "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
-              "algorithm": "pairwise",
-              "channel_count": 8,
+              "algorithm": "ring",
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
+              "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
+              "operation": "all_reduce",
               "operation_id": "collective-0002",
               "overlap_window_id": "overlap-0002",
               "participating_ranks": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
+                3
+              ],
+              "transport": "nvlink",
+              "uncertainty_us": 1.0
+            },
+            {
+              "algorithm": "ring",
+              "channel_count": 4,
+              "depends_on": [],
+              "expected_duration_us": 13.156306172839507,
+              "fallback": "host_staged",
+              "message_size_bytes_per_token": 4096.0,
+              "message_size_intercept_bytes": 0,
+              "operation": "all_reduce",
+              "operation_id": "collective-0003",
+              "overlap_window_id": "overlap-0003",
+              "participating_ranks": [
                 4,
                 5,
                 6,
                 7
               ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0003",
-              "overlap_window_id": "overlap-0003",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14001,31 +14138,23 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 13.156306172839507,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14033,104 +14162,80 @@
               "operation_id": "collective-0005",
               "overlap_window_id": "overlap-0005",
               "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
-              "algorithm": "pairwise",
-              "channel_count": 8,
+              "algorithm": "ring",
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
+              "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
+              "operation": "all_reduce",
               "operation_id": "collective-0006",
               "overlap_window_id": "overlap-0006",
               "participating_ranks": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
+                3
+              ],
+              "transport": "nvlink",
+              "uncertainty_us": 1.0
+            },
+            {
+              "algorithm": "ring",
+              "channel_count": 4,
+              "depends_on": [],
+              "expected_duration_us": 13.156306172839507,
+              "fallback": "host_staged",
+              "message_size_bytes_per_token": 4096.0,
+              "message_size_intercept_bytes": 0,
+              "operation": "all_reduce",
+              "operation_id": "collective-0007",
+              "overlap_window_id": "overlap-0007",
+              "participating_ranks": [
                 4,
                 5,
                 6,
                 7
               ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0007",
-              "overlap_window_id": "overlap-0007",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14141,31 +14246,23 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 13.156306172839507,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14173,104 +14270,80 @@
               "operation_id": "collective-0009",
               "overlap_window_id": "overlap-0009",
               "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
-              "algorithm": "pairwise",
-              "channel_count": 8,
+              "algorithm": "ring",
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
+              "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
+              "operation": "all_reduce",
               "operation_id": "collective-0010",
               "overlap_window_id": "overlap-0010",
               "participating_ranks": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
+                3
+              ],
+              "transport": "nvlink",
+              "uncertainty_us": 1.0
+            },
+            {
+              "algorithm": "ring",
+              "channel_count": 4,
+              "depends_on": [],
+              "expected_duration_us": 13.156306172839507,
+              "fallback": "host_staged",
+              "message_size_bytes_per_token": 4096.0,
+              "message_size_intercept_bytes": 0,
+              "operation": "all_reduce",
+              "operation_id": "collective-0011",
+              "overlap_window_id": "overlap-0011",
+              "participating_ranks": [
                 4,
                 5,
                 6,
                 7
               ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0011",
-              "overlap_window_id": "overlap-0011",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14281,31 +14354,23 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
               "algorithm": "ring",
-              "channel_count": 8,
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 13.156306172839507,
               "fallback": "host_staged",
               "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
@@ -14313,115 +14378,60 @@
               "operation_id": "collective-0013",
               "overlap_window_id": "overlap-0013",
               "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
               "rail_ids": [],
               "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
-              "algorithm": "pairwise",
-              "channel_count": 8,
+              "algorithm": "ring",
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 16.445382716049384,
               "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
+              "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
+              "operation": "all_reduce",
               "operation_id": "collective-0014",
               "overlap_window_id": "overlap-0014",
               "participating_ranks": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
               "rail_ids": [],
               "rank_order": [
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             },
             {
-              "algorithm": "pairwise",
-              "channel_count": 8,
+              "algorithm": "ring",
+              "channel_count": 4,
               "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
+              "expected_duration_us": 13.156306172839507,
               "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
+              "message_size_bytes_per_token": 4096.0,
               "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
+              "operation": "all_reduce",
               "operation_id": "collective-0015",
               "overlap_window_id": "overlap-0015",
               "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0016",
-              "overlap_window_id": "overlap-0016",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
                 4,
                 5,
                 6,
@@ -14429,541 +14439,12 @@
               ],
               "rail_ids": [],
               "rank_order": [
-                0,
-                1,
-                2,
-                3,
                 4,
                 5,
                 6,
                 7
               ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0017",
-              "overlap_window_id": "overlap-0017",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0018",
-              "overlap_window_id": "overlap-0018",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0019",
-              "overlap_window_id": "overlap-0019",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0020",
-              "overlap_window_id": "overlap-0020",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0021",
-              "overlap_window_id": "overlap-0021",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0022",
-              "overlap_window_id": "overlap-0022",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0023",
-              "overlap_window_id": "overlap-0023",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0024",
-              "overlap_window_id": "overlap-0024",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0025",
-              "overlap_window_id": "overlap-0025",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0026",
-              "overlap_window_id": "overlap-0026",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0027",
-              "overlap_window_id": "overlap-0027",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0028",
-              "overlap_window_id": "overlap-0028",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "ring",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 4096.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_reduce",
-              "operation_id": "collective-0029",
-              "overlap_window_id": "overlap-0029",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0030",
-              "overlap_window_id": "overlap-0030",
-              "participating_ranks": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7
-              ],
-              "transport": "pcie",
-              "uncertainty_us": 1.0
-            },
-            {
-              "algorithm": "pairwise",
-              "channel_count": 8,
-              "depends_on": [],
-              "expected_duration_us": 115.86138119658119,
-              "fallback": "host_staged",
-              "message_size_bytes_per_token": 8192.0,
-              "message_size_intercept_bytes": 0,
-              "operation": "all_to_all",
-              "operation_id": "collective-0031",
-              "overlap_window_id": "overlap-0031",
-              "participating_ranks": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "rail_ids": [],
-              "rank_order": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "transport": "pcie",
+              "transport": "nvlink",
               "uncertainty_us": 1.0
             }
           ]
@@ -14975,48 +14456,38 @@
               "cache_owner": "decode",
               "chunk_bytes": 2097152,
               "consumer_rank_ids": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
-              ],
-              "edge_path": [
-                "gpu-nic:host-0/gpu/0:host-0/nic/0",
-                "nic-network:host-0/nic/0:rail-0",
-                "nic-network:host-1/nic/0:rail-0",
-                "gpu-nic:host-1/gpu/0:host-1/nic/0"
-              ],
-              "eviction_policy": "deadline",
-              "expected_cost_usd": 0.0,
-              "expected_latency_us": 6267.619299728998,
-              "fallback": "recompute",
-              "maximum_inflight_chunks": 4,
-              "overlap_with_decode": true,
-              "producer_rank_ids": [
-                0,
-                1,
-                2,
-                3,
                 4,
                 5,
                 6,
                 7
               ],
+              "edge_path": [
+                "pcie:host-0/pcie-switch/0:host-0/gpu/0",
+                "pcie:host-0/pcie-switch/0:host-0/gpu/4"
+              ],
+              "eviction_policy": "deadline",
+              "expected_cost_usd": 0.0,
+              "expected_latency_us": 2583.910153846154,
+              "fallback": "recompute",
+              "maximum_inflight_chunks": 32,
+              "overlap_with_decode": true,
+              "producer_rank_ids": [
+                0,
+                1,
+                2,
+                3
+              ],
               "retry_limit": 1,
-              "route_id": "kv-prefill-decode-0",
-              "serialization_format": "nixl",
-              "transport_adapter": "sloforge.infiniband"
+              "route_id": "kv-prefill-0-decode-0",
+              "serialization_format": "paged",
+              "transport_adapter": "sloforge.pcie"
             }
           ]
         },
         "alternate_parallelism": {
           "context_parallel_degree": 1,
           "data_parallel_degree": 2,
-          "expert_parallel_degree": 8,
+          "expert_parallel_degree": 1,
           "groups": [
             {
               "group_id": "tp-0-0",
@@ -15025,25 +14496,17 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ]
             },
             {
               "group_id": "tp-1-0",
               "kind": "tensor",
               "rank_ids": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ]
             },
             {
@@ -15051,7 +14514,7 @@
               "kind": "data",
               "rank_ids": [
                 0,
-                8
+                4
               ]
             },
             {
@@ -15059,7 +14522,7 @@
               "kind": "data",
               "rank_ids": [
                 1,
-                9
+                5
               ]
             },
             {
@@ -15067,7 +14530,7 @@
               "kind": "data",
               "rank_ids": [
                 2,
-                10
+                6
               ]
             },
             {
@@ -15075,67 +14538,7 @@
               "kind": "data",
               "rank_ids": [
                 3,
-                11
-              ]
-            },
-            {
-              "group_id": "dp-4",
-              "kind": "data",
-              "rank_ids": [
-                4,
-                12
-              ]
-            },
-            {
-              "group_id": "dp-5",
-              "kind": "data",
-              "rank_ids": [
-                5,
-                13
-              ]
-            },
-            {
-              "group_id": "dp-6",
-              "kind": "data",
-              "rank_ids": [
-                6,
-                14
-              ]
-            },
-            {
-              "group_id": "dp-7",
-              "kind": "data",
-              "rank_ids": [
-                7,
-                15
-              ]
-            },
-            {
-              "group_id": "ep-0-0",
-              "kind": "expert",
-              "rank_ids": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
                 7
-              ]
-            },
-            {
-              "group_id": "ep-1-0",
-              "kind": "expert",
-              "rank_ids": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
               ]
             },
             {
@@ -15145,25 +14548,17 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ]
             },
             {
               "group_id": "decode-pool",
               "kind": "decode",
               "rank_ids": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ]
             }
           ],
@@ -15177,29 +14572,21 @@
                 0,
                 1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7
+                3
               ]
             },
             {
               "group_id": "replica-1",
               "kind": "data",
               "rank_ids": [
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15
+                4,
+                5,
+                6,
+                7
               ]
             }
           ],
-          "tensor_parallel_degree": 8
+          "tensor_parallel_degree": 4
         },
         "alternate_rank_placement": {
           "bindings": [
@@ -15260,8 +14647,8 @@
               "numa_domain_id": "host-0/numa/0",
               "process_cpu_affinity": "0-31",
               "rank_id": 4,
-              "replica_id": "replica-0",
-              "worker_role": "prefill"
+              "replica_id": "replica-1",
+              "worker_role": "decode"
             },
             {
               "fault_domain": "host-0",
@@ -15272,8 +14659,8 @@
               "numa_domain_id": "host-0/numa/1",
               "process_cpu_affinity": "32-63",
               "rank_id": 5,
-              "replica_id": "replica-0",
-              "worker_role": "prefill"
+              "replica_id": "replica-1",
+              "worker_role": "decode"
             },
             {
               "fault_domain": "host-0",
@@ -15284,8 +14671,8 @@
               "numa_domain_id": "host-0/numa/0",
               "process_cpu_affinity": "0-31",
               "rank_id": 6,
-              "replica_id": "replica-0",
-              "worker_role": "prefill"
+              "replica_id": "replica-1",
+              "worker_role": "decode"
             },
             {
               "fault_domain": "host-0",
@@ -15296,102 +14683,6 @@
               "numa_domain_id": "host-0/numa/1",
               "process_cpu_affinity": "32-63",
               "rank_id": 7,
-              "replica_id": "replica-0",
-              "worker_role": "prefill"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/0",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/0",
-              "process_cpu_affinity": "0-31",
-              "rank_id": 8,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/1",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/1",
-              "process_cpu_affinity": "32-63",
-              "rank_id": 9,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/2",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/0",
-              "process_cpu_affinity": "0-31",
-              "rank_id": 10,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/3",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/1",
-              "process_cpu_affinity": "32-63",
-              "rank_id": 11,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/4",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/0",
-              "process_cpu_affinity": "0-31",
-              "rank_id": 12,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/5",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/1",
-              "process_cpu_affinity": "32-63",
-              "rank_id": 13,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/6",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/0",
-              "process_cpu_affinity": "0-31",
-              "rank_id": 14,
-              "replica_id": "replica-1",
-              "worker_role": "decode"
-            },
-            {
-              "fault_domain": "host-1",
-              "gpu_id": "host-1/gpu/7",
-              "host_id": "host-1",
-              "network_rail_id": "rail-0",
-              "nic_id": "host-1/nic/0",
-              "numa_domain_id": "host-1/numa/1",
-              "process_cpu_affinity": "32-63",
-              "rank_id": 15,
               "replica_id": "replica-1",
               "worker_role": "decode"
             }
@@ -15405,17 +14696,17 @@
         "expected_degraded_metrics": {
           "availability": {
             "confidence": 0.95,
-            "estimate": 0.998001,
-            "lower": 0.94810095,
+            "estimate": 0.999,
+            "lower": 0.94905,
             "unit": "probability",
-            "upper": 1.0479010500000001
+            "upper": 1.04895
           },
           "communication_overhead_fraction": {
             "confidence": 0.9,
-            "estimate": 0.07749687601787221,
-            "lower": 0.06974718841608499,
+            "estimate": 0.016856669223205743,
+            "lower": 0.015171002300885169,
             "unit": "fraction",
-            "upper": 0.08524656361965943
+            "upper": 0.018542336145526316
           },
           "cost_usd_per_million_tokens": {
             "confidence": 0.9,
@@ -15426,38 +14717,38 @@
           },
           "goodput_tokens_per_second": {
             "confidence": 0.9,
-            "estimate": 736.0,
-            "lower": 662.4,
+            "estimate": 368.0,
+            "lower": 331.2,
             "unit": "tokens/s",
-            "upper": 809.6
+            "upper": 404.8
           },
           "p95_end_to_end_ms": {
             "confidence": 0.9,
-            "estimate": 102.40442707819054,
-            "lower": 92.16398437037148,
+            "estimate": 188.92301960569802,
+            "lower": 170.03071764512822,
             "unit": "ms",
-            "upper": 112.6448697860096
+            "upper": 207.8153215662678
           },
           "p95_ttft_ms": {
             "confidence": 0.9,
-            "estimate": 20.736023188959766,
-            "lower": 18.66242087006379,
+            "estimate": 28.804612850142465,
+            "lower": 25.92415156512822,
             "unit": "ms",
-            "upper": 22.809625507855742
+            "upper": 31.68507413515671
           },
           "p99_tpot_ms": {
             "confidence": 0.9,
-            "estimate": 1.2760688107692308,
-            "lower": 1.1484619296923078,
+            "estimate": 2.5018501055555555,
+            "lower": 2.251665095,
             "unit": "ms",
-            "upper": 1.403675691846154
+            "upper": 2.752035116111111
           },
           "throughput_tokens_per_second": {
             "confidence": 0.9,
-            "estimate": 800.0,
-            "lower": 720.0,
+            "estimate": 400.0,
+            "lower": 360.0,
             "unit": "tokens/s",
-            "upper": 880.0
+            "upper": 440.0
           }
         },
         "rebuild_required": true,
@@ -15470,7 +14761,7 @@
             "minimum_duration_seconds": 5.0
           }
         ],
-        "variant_id": "recovery-2-physical-4306abf66001"
+        "variant_id": "recovery-2-physical-3ab506a3f521"
       }
     ],
     "rejected_alternatives": [
@@ -15524,13 +14815,6 @@
         ]
       },
       {
-        "candidate_id": "physical-0fb0edd896ab",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-e75ce1c2d4c8",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -15565,13 +14849,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-080b998e8616",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-1d8689586f4c",
@@ -15610,13 +14887,6 @@
         ]
       },
       {
-        "candidate_id": "physical-0bc19eba1239",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-2c38e140a81e",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -15651,13 +14921,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-901f42ac4d58",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-36e246a54b04",
@@ -15744,22 +15007,6 @@
         ]
       },
       {
-        "candidate_id": "physical-a07b971b65b3",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-8c5a57cb13b4",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
-        ]
-      },
-      {
         "candidate_id": "physical-181245a2a340",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -15787,20 +15034,6 @@
         ]
       },
       {
-        "candidate_id": "physical-6032af8fc4af",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-b99712606df7",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-23459ab2bc1b",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -15826,20 +15059,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-6c6f71cd82c9",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-86e0fc226f9b",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-d8c014b6b17b",
@@ -15916,31 +15135,6 @@
         ]
       },
       {
-        "candidate_id": "physical-5847dd66da9b",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-92f7e8e9cb4c",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
-        ]
-      },
-      {
-        "candidate_id": "physical-cd0915788e7b",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
-        ]
-      },
-      {
         "candidate_id": "physical-7db187616de5",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -15957,27 +15151,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-371bd383cf37",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-8c9b0e15ab60",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-e7fc4e6b1530",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-45932dfcead8",
@@ -16041,40 +15214,6 @@
         "violated_constraints": [
           "disaggregation_requires_two_data_replicas",
           "expert_parallelism_not_divisible"
-        ]
-      },
-      {
-        "candidate_id": "physical-49ba219882a5",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-01d021a4f407",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
-        ]
-      },
-      {
-        "candidate_id": "physical-812132a1ddd3",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
-        ]
-      },
-      {
-        "candidate_id": "physical-bc0ac558c9b1",
-        "explanation": "candidate violated hard constraints",
-        "reason_code": "minimum_goodput",
-        "stage": "constraint_check",
-        "violated_constraints": [
-          "minimum_goodput"
         ]
       },
       {
@@ -16181,20 +15320,6 @@
         ]
       },
       {
-        "candidate_id": "physical-697c93d9e368",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-b1ccd6fc725c",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-c28f91ccc7dd",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -16222,20 +15347,6 @@
         ]
       },
       {
-        "candidate_id": "physical-b6eb9104984a",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-fb1c70810753",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-e4386a5581c6",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -16261,20 +15372,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-48ed22776325",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-e49cd237faa4",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-b67522c2309d",
@@ -16351,27 +15448,6 @@
         ]
       },
       {
-        "candidate_id": "physical-42d99ff30375",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-7f18d1d35344",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-179a0012fb97",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-bd6db12627d2",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -16388,27 +15464,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-bc6845f1c24d",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-286171d72a3a",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-5d938c211a13",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-ba19c4a5efc0",
@@ -16473,34 +15528,6 @@
           "disaggregation_requires_two_data_replicas",
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-b42e74f1d7ed",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-6d5b06a5b74a",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-88ef68c7fcec",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-3f788cec683b",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-94b5de2d9ca3",
@@ -16605,27 +15632,6 @@
         ]
       },
       {
-        "candidate_id": "physical-3ab506a3f521",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-38c1660ca7bc",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-b06e3d4d69de",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
         "candidate_id": "physical-c312db2d3db8",
         "explanation": "candidate violated hard constraints",
         "reason_code": "expert_parallelism_not_divisible",
@@ -16642,27 +15648,6 @@
         "violated_constraints": [
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-6e50d22fd55b",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-12a95ee426a9",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-d7d5d806494b",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-cd9efad36f89",
@@ -16727,34 +15712,6 @@
           "disaggregation_requires_two_data_replicas",
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-f9d9c52ff25c",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-dd812d4ce0d2",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-939ce73979ab",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-b72d593b41bf",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-9b50c10b99ce",
@@ -16856,27 +15813,6 @@
           "disaggregation_requires_two_data_replicas",
           "expert_parallelism_not_divisible"
         ]
-      },
-      {
-        "candidate_id": "physical-32f33100cf7d",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-4055cc511ea9",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
-      },
-      {
-        "candidate_id": "physical-4306abf66001",
-        "explanation": "candidate was feasible but not selected by the requested objective",
-        "reason_code": "dominated_objective",
-        "stage": "objective_ranking",
-        "violated_constraints": []
       },
       {
         "candidate_id": "physical-2c68866e5999",
@@ -16983,6 +15919,349 @@
           "expert_parallelism_not_divisible",
           "tensor_parallelism_not_divisible"
         ]
+      },
+      {
+        "candidate_id": "physical-01d021a4f407",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-080b998e8616",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-0bc19eba1239",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-0fb0edd896ab",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-12a95ee426a9",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-179a0012fb97",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-286171d72a3a",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-32f33100cf7d",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-371bd383cf37",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-38c1660ca7bc",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-3ab506a3f521",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-3f788cec683b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-4055cc511ea9",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-42d99ff30375",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-4306abf66001",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-48ed22776325",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-49ba219882a5",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-5847dd66da9b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-5d938c211a13",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-6032af8fc4af",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-697c93d9e368",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-6c6f71cd82c9",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-6d5b06a5b74a",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-6e50d22fd55b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-7f18d1d35344",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-812132a1ddd3",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-86e0fc226f9b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-88ef68c7fcec",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-8c5a57cb13b4",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-8c9b0e15ab60",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-901f42ac4d58",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-92f7e8e9cb4c",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-939ce73979ab",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-a07b971b65b3",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b06e3d4d69de",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b1ccd6fc725c",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b42e74f1d7ed",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b6eb9104984a",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b72d593b41bf",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-b99712606df7",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-bc0ac558c9b1",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-bc6845f1c24d",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-cd0915788e7b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-d7d5d806494b",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-dd812d4ce0d2",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-e49cd237faa4",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-e7fc4e6b1530",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-f9d9c52ff25c",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
+      },
+      {
+        "candidate_id": "physical-fb1c70810753",
+        "explanation": "candidate was feasible but not selected by the requested objective",
+        "reason_code": "dominated_objective",
+        "stage": "objective_ranking",
+        "violated_constraints": []
       }
     ],
     "reproducibility": {
@@ -16993,7 +16272,7 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+        "value": "292286086b0826cee4b83c10fda822b0417b8f96fce45466568fa4ff0c7fcd41"
       },
       "generated_at": "2026-01-01T00:00:29Z",
       "seed": 29
@@ -17004,7 +16283,46 @@
       "value": "621891bd3aa5795663dba351e72a660ab13401f43290a740813556490e95ec60"
     }
   },
-  "simulator_calls": 0,
-  "solver_time_ms": 0.0,
+  "simulator_calls": 37,
+  "simulator_validated_candidate_ids": [
+    "physical-01d021a4f407",
+    "physical-080b998e8616",
+    "physical-0bc19eba1239",
+    "physical-12a95ee426a9",
+    "physical-286171d72a3a",
+    "physical-32f33100cf7d",
+    "physical-371bd383cf37",
+    "physical-38c1660ca7bc",
+    "physical-3ab506a3f521",
+    "physical-4055cc511ea9",
+    "physical-4306abf66001",
+    "physical-48ed22776325",
+    "physical-49ba219882a5",
+    "physical-5d938c211a13",
+    "physical-697c93d9e368",
+    "physical-6c6f71cd82c9",
+    "physical-6d5b06a5b74a",
+    "physical-6e50d22fd55b",
+    "physical-812132a1ddd3",
+    "physical-86e0fc226f9b",
+    "physical-88ef68c7fcec",
+    "physical-8c9b0e15ab60",
+    "physical-901f42ac4d58",
+    "physical-939ce73979ab",
+    "physical-a07b971b65b3",
+    "physical-b06e3d4d69de",
+    "physical-b1ccd6fc725c",
+    "physical-b42e74f1d7ed",
+    "physical-b6eb9104984a",
+    "physical-bc6845f1c24d",
+    "physical-d7d5d806494b",
+    "physical-dd812d4ce0d2",
+    "physical-e49cd237faa4",
+    "physical-e7fc4e6b1530",
+    "physical-f9d9c52ff25c",
+    "physical-fb1c70810753",
+    "physical-fbb503b34530"
+  ],
+  "solver_time_ms": 2804.40475,
   "strategy": "topology_unaware"
 }

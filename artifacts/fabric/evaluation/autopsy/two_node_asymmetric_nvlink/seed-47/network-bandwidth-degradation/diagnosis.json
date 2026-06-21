@@ -8,18 +8,18 @@
     {
       "artifact_uri": "artifacts/fabric/evaluation/autopsy/two_node_asymmetric_nvlink/seed-47/network-bandwidth-degradation/degraded-simulation.json.gz",
       "record_index": null,
-      "sha256": "26b22b8aa5d1ff6d5b8b5eb2fefb1a5ce5d6e7dea0502bbc1c3e4436fbe96fb0",
+      "sha256": "73e49431b9ddcdd9fc6b392b78d4b3f453635ca1071d7206a070c17f9e4b4ef1",
       "source": "sloforge-fabric-sim"
     },
     {
       "artifact_uri": "artifacts/fabric/evaluation/trials/two_node_asymmetric_nvlink/seed-47/mixed_bursty/hierarchical_compiler/simulation.json.gz",
       "record_index": null,
-      "sha256": "3a8b1525bb8918673b658658893ebc446d32c0e1d0c7ddde3d84411f858efb2a",
+      "sha256": "ff1487feedd52599a750b4920e29d2dc29787d89baf559bf732ba60d256ccfb9",
       "source": "sloforge-fabric-sim"
     }
   ],
   "first_divergence_event_id": "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0",
-  "first_divergence_ns": 54337222,
+  "first_divergence_ns": 53299635,
   "hypotheses": [
     {
       "confidence": 0.95,
@@ -33,9 +33,9 @@
           "event_ids": [
             "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "network_bandwidth_drop=0.899413 exceeds 0.15",
+          "explanation": "network_bandwidth_drop=0.898156 exceeds 0.15",
           "metric": "network_bandwidth_drop",
-          "observed": 0.8994125994700978,
+          "observed": 0.8981558645762932,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.15
@@ -55,59 +55,15 @@
           "event_ids": [
             "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "kv_transfer_delta=10.5788 exceeds 0.2",
+          "explanation": "kv_transfer_delta=19.3657 exceeds 0.2",
           "metric": "kv_transfer_delta",
-          "observed": 10.578807781115742,
+          "observed": 19.365708970759826,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
         }
       ],
       "target": "kv_transfer"
-    },
-    {
-      "confidence": 0.87,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-13-nvlink_degradation",
-      "kind": "nvlink_degradation",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
-          ],
-          "explanation": "nvlink_delta=0.565569 exceeds 0.2",
-          "metric": "nvlink_delta",
-          "observed": 0.5655688973854801,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 0.2
-        }
-      ],
-      "target": "nvlink_path"
-    },
-    {
-      "confidence": 0.679489020570788,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-16-rank_straggler",
-      "kind": "rank_straggler",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
-          ],
-          "explanation": "rank_skew=1.51796 exceeds 1.2",
-          "metric": "rank_skew",
-          "observed": 1.5179560822831517,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 1.2
-        }
-      ],
-      "target": "rank_group"
     },
     {
       "confidence": 0.2,
@@ -130,6 +86,50 @@
       "rejected_reason": "primary signal did not cross its threshold",
       "supporting_evidence": [],
       "target": "deployment"
+    },
+    {
+      "confidence": 0.18524495234936655,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
+          ],
+          "explanation": "rank_skew=1.11147 does not exceed 1.2",
+          "metric": "rank_skew",
+          "observed": 1.111469714096199,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 1.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "kind": "rank_straggler",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "rank_group"
+    },
+    {
+      "confidence": 0.13821324755590103,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
+          ],
+          "explanation": "nvlink_delta=0.138213 does not exceed 0.2",
+          "metric": "nvlink_delta",
+          "observed": 0.13821324755590103,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-13-nvlink_degradation",
+      "kind": "nvlink_degradation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "nvlink_path"
     },
     {
       "confidence": 0.01,
@@ -248,9 +248,9 @@
           "event_ids": [
             "degraded-two_node_asymmetric_nvlink-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "decode_delta=0 does not exceed 0.2",
+          "explanation": "decode_delta=3.30838e-08 does not exceed 0.2",
           "metric": "decode_delta",
-          "observed": 0.0,
+          "observed": 3.3083759411724325e-08,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -622,7 +622,9 @@
   "top_three": [
     "network_bandwidth_degradation",
     "kv_transfer_bottleneck",
-    "nvlink_degradation"
+    "arrival_overload"
   ],
-  "warnings": []
+  "warnings": [
+    "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+  ]
 }

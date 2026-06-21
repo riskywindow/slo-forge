@@ -3,7 +3,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-4055cc511ea9",
-      "communication_us": 75991.27759469669,
+      "communication_us": 161078.79312381346,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -29,19 +29,20 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 268.24490942274576,
-      "p95_ttft_ms": 229.5912775946967,
-      "p99_tpot_ms": 1.2594296458119658,
+      "objective_score": 513.5459720777272,
+      "p95_ttft_ms": 314.71879312381344,
+      "p99_tpot_ms": 1.2594296458119654,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
     }
   ],
+  "deterministic_solver_work_units": 126,
   "pareto_frontier": [
     {
       "availability": 0.998001,
       "candidate_id": "physical-4055cc511ea9",
-      "communication_us": 75991.27759469669,
+      "communication_us": 161078.79312381346,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -67,9 +68,9 @@
         "host-1/gpu/6",
         "host-1/gpu/7"
       ],
-      "objective_score": 268.24490942274576,
-      "p95_ttft_ms": 229.5912775946967,
-      "p99_tpot_ms": 1.2594296458119658,
+      "objective_score": 513.5459720777272,
+      "p95_ttft_ms": 314.71879312381344,
+      "p99_tpot_ms": 1.2594296458119654,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
@@ -2601,7 +2602,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "aac8885388adc21174c721246585c24114d313b13a9441951324eef87a1ccfa6"
+      "value": "19490dd388bac1f751d34efc6702ba8aafee7bb580cabb3609be30af50d4e764"
     },
     "failure_exposure": [
       {
@@ -2615,7 +2616,7 @@
           6,
           7
         ],
-        "expected_slo_impact_ms": 229.5912775946967,
+        "expected_slo_impact_ms": 314.71879312381344,
         "fault_domain": "host-0",
         "probability": 0.0010000000000000009
       },
@@ -2630,12 +2631,12 @@
           14,
           15
         ],
-        "expected_slo_impact_ms": 229.5912775946967,
+        "expected_slo_impact_ms": 314.71879312381344,
         "fault_domain": "host-1",
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "git_commit": "ca39d5e7859d26cd7bcac96e439e23825aff6d76",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 1610612736,
@@ -2663,7 +2664,7 @@
           "expected_cost_usd": 0.0,
           "expected_latency_us": 75086.03159674797,
           "fallback": "recompute",
-          "maximum_inflight_chunks": 4,
+          "maximum_inflight_chunks": 384,
           "overlap_with_decode": true,
           "producer_rank_ids": [
             0,
@@ -2676,7 +2677,7 @@
             7
           ],
           "retry_limit": 1,
-          "route_id": "kv-prefill-decode-0",
+          "route_id": "kv-prefill-0-decode-0",
           "serialization_format": "nixl",
           "transport_adapter": "sloforge.infiniband"
         }
@@ -2945,11 +2946,11 @@
       {
         "candidate_id": "physical-4055cc511ea9",
         "decision": "select",
-        "phase": "lower_bound",
-        "reason_code": "minimum_robust_objective",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_minimum_robust_objective",
         "sequence": 0,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.126
       }
     ],
     "parallelism": {
@@ -3152,7 +3153,7 @@
       ],
       "tensor_parallel_degree": 8
     },
-    "plan_id": "physical-plan-994a49e1192b2ce2",
+    "plan_id": "physical-plan-9f86ca5f85d138dc",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -3163,10 +3164,10 @@
       },
       "communication_overhead_fraction": {
         "confidence": 0.9,
-        "estimate": 0.21681036038752663,
-        "lower": 0.19512932434877397,
+        "estimate": 0.36976562048447936,
+        "lower": 0.3327890584360314,
         "unit": "fraction",
-        "upper": 0.23849139642627928
+        "upper": 0.4067421825329273
       },
       "cost_usd_per_million_tokens": {
         "confidence": 0.9,
@@ -3184,24 +3185,24 @@
       },
       "p95_end_to_end_ms": {
         "confidence": 0.9,
-        "estimate": 350.4965235926454,
-        "lower": 315.4468712333809,
+        "estimate": 435.6240391217621,
+        "lower": 392.0616352095859,
         "unit": "ms",
-        "upper": 385.54617595190996
+        "upper": 479.1864430339383
       },
       "p95_ttft_ms": {
         "confidence": 0.9,
-        "estimate": 229.5912775946967,
-        "lower": 206.632149835227,
+        "estimate": 314.71879312381344,
+        "lower": 283.2469138114321,
         "unit": "ms",
-        "upper": 252.55040535416637
+        "upper": 346.1906724361948
       },
       "p99_tpot_ms": {
         "confidence": 0.9,
-        "estimate": 1.2594296458119658,
-        "lower": 1.1334866812307691,
+        "estimate": 1.2594296458119654,
+        "lower": 1.133486681230769,
         "unit": "ms",
-        "upper": 1.3853726103931625
+        "upper": 1.3853726103931618
       },
       "throughput_tokens_per_second": {
         "confidence": 0.9,
@@ -3417,7 +3418,7 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+        "value": "292286086b0826cee4b83c10fda822b0417b8f96fce45466568fa4ff0c7fcd41"
       },
       "generated_at": "2026-01-01T00:00:29Z",
       "seed": 29
@@ -3428,7 +3429,10 @@
       "value": "a2aa126d593f073e8a8969ee15a9d2e8542efc652f8635f819865d42fb111468"
     }
   },
-  "simulator_calls": 0,
-  "solver_time_ms": 0.0,
+  "simulator_calls": 1,
+  "simulator_validated_candidate_ids": [
+    "physical-4055cc511ea9"
+  ],
+  "solver_time_ms": 88.056917,
   "strategy": "topology_unaware"
 }

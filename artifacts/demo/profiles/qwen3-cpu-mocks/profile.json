@@ -2,8 +2,8 @@
   "budget": {
     "max_cost_usd": 0.2,
     "max_duration_s": 180.0,
-    "measured_seconds": 40.97163121300001,
-    "spent_cost_usd": 0.013176693305694449
+    "measured_seconds": 41.07891888000002,
+    "spent_cost_usd": 0.013155604773680551
   },
   "candidates": [
     {
@@ -95,12 +95,12 @@
       "rejection_reason": null,
       "summaries": {
         "availability": 1.0,
-        "e2e_p95_ms": 504.77421434999997,
-        "itl_p99_ms": 5.171799319999995,
+        "e2e_p95_ms": 499.15919369999995,
+        "itl_p99_ms": 5.165355909999999,
         "measured_goodput_tokens_s": 48.725918737349026,
-        "startup_p95_ms": 247.624175,
-        "ttft_p50_ms": 69.405479,
-        "ttft_p95_ms": 358.02188305
+        "startup_p95_ms": 245.87530900000002,
+        "ttft_p50_ms": 56.7669375,
+        "ttft_p95_ms": 351.15611244999997
       }
     },
     {
@@ -192,12 +192,12 @@
       "rejection_reason": null,
       "summaries": {
         "availability": 1.0,
-        "e2e_p95_ms": 306.48937234999994,
-        "itl_p99_ms": 3.920949479999996,
+        "e2e_p95_ms": 308.27623934999997,
+        "itl_p99_ms": 3.9554365700000043,
         "measured_goodput_tokens_s": 48.725918737349026,
-        "startup_p95_ms": 533.6959839,
-        "ttft_p50_ms": 37.118041500000004,
-        "ttft_p95_ms": 193.46462060000002
+        "startup_p95_ms": 529.95972765,
+        "ttft_p50_ms": 38.306667,
+        "ttft_p95_ms": 191.57358305
       }
     },
     {
@@ -285,17 +285,17 @@
       "rejection_reason": null,
       "summaries": {
         "availability": 1.0,
-        "e2e_p95_ms": 735.9716063000001,
-        "itl_p99_ms": 7.801919160000005,
+        "e2e_p95_ms": 736.8612276,
+        "itl_p99_ms": 7.739955159999999,
         "measured_goodput_tokens_s": 48.725918737349026,
-        "startup_p95_ms": 145.99063485,
-        "ttft_p50_ms": 77.30166650000001,
-        "ttft_p95_ms": 504.58178935
+        "startup_p95_ms": 141.11992494999998,
+        "ttft_p50_ms": 86.586979,
+        "ttft_p95_ms": 514.0854812
       }
     }
   ],
   "environment": {
-    "captured_at": "2026-08-02T02:56:22.782549+00:00",
+    "captured_at": "2026-08-02T07:50:46.878234+00:00",
     "cpu_count": 12,
     "executable": "python3",
     "machine": "arm64",
@@ -418,9 +418,9 @@
     "platform": "macOS-15.6.1-arm64-i386-64bit",
     "python": "3.12.7"
   },
-  "generated_at": "2026-08-02T02:56:22.782139+00:00",
-  "hardware_sha256": "c632adbcbfcff3da8f7a375e965eba8dd7fe40c433b963d5e74ffc370ff67466",
-  "profile_id": "http-profile-41-1785639382",
+  "generated_at": "2026-08-02T07:50:46.876515+00:00",
+  "hardware_sha256": "47ccea47fe1ea1728de4098c15a9eeb62e89e239dc28afd0a23114e23fa552d4",
+  "profile_id": "http-profile-41-1785657046",
   "schema_version": "sloforge.profile/v1",
   "seed": 41,
   "workload_sha256": "cefef52050e51049d4562e38aed554cd2ddbc9c32c1bb64c6266c086cbb34e52"

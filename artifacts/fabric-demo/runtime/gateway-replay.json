@@ -1,90 +1,90 @@
 {
-  "physical_plan_id": "physical-plan-75732ff902f1c340",
+  "physical_plan_id": "physical-plan-8a3f2a36f5e5233b",
   "request_count": 12,
   "samples": [
     {
-      "end_to_end_ms": 53.398792,
+      "end_to_end_ms": 50.459416,
       "priority": "normal",
       "request_id": "request-000000",
       "stream_bytes": 634,
-      "ttft_ms": 47.180875
+      "ttft_ms": 43.874291
     },
     {
-      "end_to_end_ms": 26.962333,
+      "end_to_end_ms": 27.596417,
       "priority": "high",
       "request_id": "request-000001",
       "stream_bytes": 634,
-      "ttft_ms": 20.255583
+      "ttft_ms": 19.685292
     },
     {
-      "end_to_end_ms": 24.632709,
+      "end_to_end_ms": 26.1165,
       "priority": "high",
       "request_id": "request-000002",
       "stream_bytes": 634,
-      "ttft_ms": 17.94675
+      "ttft_ms": 18.268792
     },
     {
-      "end_to_end_ms": 46.853792,
+      "end_to_end_ms": 46.789333,
       "priority": "low",
       "request_id": "request-000003",
       "stream_bytes": 634,
-      "ttft_ms": 40.349625
+      "ttft_ms": 39.699417
     },
     {
-      "end_to_end_ms": 45.585459,
+      "end_to_end_ms": 46.472209,
       "priority": "normal",
       "request_id": "request-000004",
       "stream_bytes": 634,
-      "ttft_ms": 38.698167
+      "ttft_ms": 40.283667
     },
     {
-      "end_to_end_ms": 25.665875,
+      "end_to_end_ms": 25.154583,
       "priority": "high",
       "request_id": "request-000005",
       "stream_bytes": 634,
-      "ttft_ms": 18.879375
+      "ttft_ms": 19.579875
     },
     {
-      "end_to_end_ms": 42.419542,
+      "end_to_end_ms": 47.338,
       "priority": "low",
       "request_id": "request-000006",
       "stream_bytes": 634,
-      "ttft_ms": 36.93975
+      "ttft_ms": 39.208708
     },
     {
-      "end_to_end_ms": 30.009709,
+      "end_to_end_ms": 28.5945,
       "priority": "high",
       "request_id": "request-000007",
       "stream_bytes": 634,
-      "ttft_ms": 22.683625
+      "ttft_ms": 21.257458
     },
     {
-      "end_to_end_ms": 48.812375,
+      "end_to_end_ms": 57.909042,
       "priority": "normal",
       "request_id": "request-000008",
       "stream_bytes": 634,
-      "ttft_ms": 41.581458
+      "ttft_ms": 49.90625
     },
     {
-      "end_to_end_ms": 45.016167,
+      "end_to_end_ms": 48.215625,
       "priority": "low",
       "request_id": "request-000009",
       "stream_bytes": 634,
-      "ttft_ms": 39.685959
+      "ttft_ms": 39.976375
     },
     {
-      "end_to_end_ms": 25.053458,
+      "end_to_end_ms": 28.572959,
       "priority": "high",
       "request_id": "request-000010",
       "stream_bytes": 638,
-      "ttft_ms": 19.541583
+      "ttft_ms": 21.560959
     },
     {
-      "end_to_end_ms": 27.413167,
+      "end_to_end_ms": 28.014875,
       "priority": "high",
       "request_id": "request-000011",
       "stream_bytes": 638,
-      "ttft_ms": 19.278042
+      "ttft_ms": 21.044292
     }
   ],
   "schema_version": "sloforge.fabric.gateway-replay/v1"

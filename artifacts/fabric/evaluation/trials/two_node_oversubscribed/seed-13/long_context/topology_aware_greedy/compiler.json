@@ -3,7 +3,7 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-6871c998ae94",
-      "communication_us": 183365.45999469666,
+      "communication_us": 268452.97552381345,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -29,19 +29,20 @@
         "host-1/gpu/5",
         "host-1/gpu/7"
       ],
-      "objective_score": 375.6190918227457,
-      "p95_ttft_ms": 336.96545999469663,
-      "p99_tpot_ms": 1.2594296458119658,
+      "objective_score": 728.2943368777272,
+      "p95_ttft_ms": 422.0929755238134,
+      "p99_tpot_ms": 1.2594296458119654,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
     }
   ],
+  "deterministic_solver_work_units": 126,
   "pareto_frontier": [
     {
       "availability": 0.998001,
       "candidate_id": "physical-6871c998ae94",
-      "communication_us": 183365.45999469666,
+      "communication_us": 268452.97552381345,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -67,9 +68,9 @@
         "host-1/gpu/5",
         "host-1/gpu/7"
       ],
-      "objective_score": 375.6190918227457,
-      "p95_ttft_ms": 336.96545999469663,
-      "p99_tpot_ms": 1.2594296458119658,
+      "objective_score": 728.2943368777272,
+      "p95_ttft_ms": 422.0929755238134,
+      "p99_tpot_ms": 1.2594296458119654,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
@@ -2601,7 +2602,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "5cf2669e662c69d875781c8f9026320e43aaf3bab7a2f8dd7c164270b5fe987f"
+      "value": "3abaec67691b08ad0d34ebfde8cb6fae7858b647dfd26bd14c1beae0f62934dc"
     },
     "failure_exposure": [
       {
@@ -2615,7 +2616,7 @@
           6,
           7
         ],
-        "expected_slo_impact_ms": 336.96545999469663,
+        "expected_slo_impact_ms": 422.0929755238134,
         "fault_domain": "host-0",
         "probability": 0.0010000000000000009
       },
@@ -2630,12 +2631,12 @@
           14,
           15
         ],
-        "expected_slo_impact_ms": 336.96545999469663,
+        "expected_slo_impact_ms": 422.0929755238134,
         "fault_domain": "host-1",
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "git_commit": "ca39d5e7859d26cd7bcac96e439e23825aff6d76",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 1610612736,
@@ -2663,7 +2664,7 @@
           "expected_cost_usd": 0.0,
           "expected_latency_us": 182460.21399674795,
           "fallback": "recompute",
-          "maximum_inflight_chunks": 4,
+          "maximum_inflight_chunks": 384,
           "overlap_with_decode": true,
           "producer_rank_ids": [
             0,
@@ -2676,7 +2677,7 @@
             7
           ],
           "retry_limit": 1,
-          "route_id": "kv-prefill-decode-0",
+          "route_id": "kv-prefill-0-decode-0",
           "serialization_format": "nixl",
           "transport_adapter": "sloforge.infiniband"
         }
@@ -2945,11 +2946,11 @@
       {
         "candidate_id": "physical-6871c998ae94",
         "decision": "select",
-        "phase": "lower_bound",
-        "reason_code": "minimum_robust_objective",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_minimum_robust_objective",
         "sequence": 0,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.126
       }
     ],
     "parallelism": {
@@ -3152,7 +3153,7 @@
       ],
       "tensor_parallel_degree": 8
     },
-    "plan_id": "physical-plan-f25d094069175d3f",
+    "plan_id": "physical-plan-badf2dcd2901c9ed",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -3163,10 +3164,10 @@
       },
       "communication_overhead_fraction": {
         "confidence": 0.9,
-        "estimate": 0.4004743207957969,
-        "lower": 0.3604268887162172,
+        "estimate": 0.49439015614354914,
+        "lower": 0.4449511405291942,
         "unit": "fraction",
-        "upper": 0.44052175287537665
+        "upper": 0.543829171757904
       },
       "cost_usd_per_million_tokens": {
         "confidence": 0.9,
@@ -3184,24 +3185,24 @@
       },
       "p95_end_to_end_ms": {
         "confidence": 0.9,
-        "estimate": 457.87070599264536,
-        "lower": 412.0836353933808,
+        "estimate": 542.998221521762,
+        "lower": 488.69839936958584,
         "unit": "ms",
-        "upper": 503.6577765919099
+        "upper": 597.2980436739383
       },
       "p95_ttft_ms": {
         "confidence": 0.9,
-        "estimate": 336.96545999469663,
-        "lower": 303.26891399522697,
+        "estimate": 422.0929755238134,
+        "lower": 379.883677971432,
         "unit": "ms",
-        "upper": 370.6620059941663
+        "upper": 464.30227307619475
       },
       "p99_tpot_ms": {
         "confidence": 0.9,
-        "estimate": 1.2594296458119658,
-        "lower": 1.1334866812307691,
+        "estimate": 1.2594296458119654,
+        "lower": 1.133486681230769,
         "unit": "ms",
-        "upper": 1.3853726103931625
+        "upper": 1.3853726103931618
       },
       "throughput_tokens_per_second": {
         "confidence": 0.9,
@@ -3417,7 +3418,7 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+        "value": "292286086b0826cee4b83c10fda822b0417b8f96fce45466568fa4ff0c7fcd41"
       },
       "generated_at": "2026-01-01T00:00:13Z",
       "seed": 13
@@ -3428,7 +3429,10 @@
       "value": "c420f1d3bbe7740fb66a6591014b083ef5b54d189b17ba7df57c5273f45116e7"
     }
   },
-  "simulator_calls": 0,
-  "solver_time_ms": 0.0,
+  "simulator_calls": 1,
+  "simulator_validated_candidate_ids": [
+    "physical-6871c998ae94"
+  ],
+  "solver_time_ms": 286.796667,
   "strategy": "greedy_topology_aware"
 }

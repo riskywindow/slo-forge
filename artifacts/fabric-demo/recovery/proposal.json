@@ -9,79 +9,60 @@
   ],
   "actions": [
     {
-      "action_id": "action-00-stop_routing",
-      "idempotency_key": "recovery-1ecc3a327a5d96ce/0/stop_routing",
-      "kind": "stop_routing",
+      "action_id": "action-00-quarantine_rail",
+      "idempotency_key": "recovery-82b97ac58e2a8183/0/quarantine_rail",
+      "kind": "quarantine_rail",
       "order": 0,
       "requires_external_mutation": false,
       "rollback_action_id": null,
-      "scope": "request_path",
+      "scope": "replica_local",
       "target_ids": [
-        "rank_group",
-        "recovery-0-physical-17ebc4cb030e"
+        "network_rail"
       ],
-      "timeout_seconds": 10.0
+      "timeout_seconds": 30.0
     },
     {
-      "action_id": "action-01-drain_worker",
-      "idempotency_key": "recovery-1ecc3a327a5d96ce/1/drain_worker",
-      "kind": "drain_worker",
+      "action_id": "action-01-change_nic_affinity",
+      "idempotency_key": "recovery-82b97ac58e2a8183/1/change_nic_affinity",
+      "kind": "change_nic_affinity",
       "order": 1,
-      "requires_external_mutation": false,
-      "rollback_action_id": null,
-      "scope": "worker_local",
-      "target_ids": [
-        "rank_group",
-        "recovery-0-physical-17ebc4cb030e"
-      ],
-      "timeout_seconds": 120.0
-    },
-    {
-      "action_id": "action-02-restart_worker",
-      "idempotency_key": "recovery-1ecc3a327a5d96ce/2/restart_worker",
-      "kind": "restart_worker",
-      "order": 2,
-      "requires_external_mutation": false,
-      "rollback_action_id": null,
-      "scope": "worker_local",
-      "target_ids": [
-        "rank_group",
-        "recovery-0-physical-17ebc4cb030e"
-      ],
-      "timeout_seconds": 120.0
-    },
-    {
-      "action_id": "action-03-change_rank_placement",
-      "idempotency_key": "recovery-1ecc3a327a5d96ce/3/change_rank_placement",
-      "kind": "change_rank_placement",
-      "order": 3,
       "requires_external_mutation": false,
       "rollback_action_id": null,
       "scope": "new_replica",
       "target_ids": [
-        "rank_group",
-        "recovery-0-physical-17ebc4cb030e"
+        "network_rail"
       ],
-      "timeout_seconds": 30.0
+      "timeout_seconds": 120.0
+    },
+    {
+      "action_id": "action-02-change_rank_placement",
+      "idempotency_key": "recovery-82b97ac58e2a8183/2/change_rank_placement",
+      "kind": "change_rank_placement",
+      "order": 2,
+      "requires_external_mutation": false,
+      "rollback_action_id": null,
+      "scope": "new_replica",
+      "target_ids": [
+        "network_rail"
+      ],
+      "timeout_seconds": 180.0
     }
   ],
   "api_version": "sloforge.io/fabric/v1",
   "compatibility_constraints": [
     "same-model-digest",
-    "preserve-started-streams",
-    "healthy-topology-path",
-    "recovery-variant:recovery-0-physical-17ebc4cb030e"
+    "preserve-started-streams"
   ],
-  "confidence": 0.9,
+  "confidence": 0.8341378014115949,
   "diagnosis": {
     "api_version": "sloforge.autopsy.diagnosis/v1",
     "digest": {
       "algorithm": "sha256",
-      "value": "3587cf4ce38d55d7157c48abd921f5a9e7bef7eee4ae5af58486e7c9aa41160b"
+      "value": "972f08e4c91102077b05ef2a5406222688a11bf77ba4e575af73710d643dbc84"
     },
     "generation": 1,
     "kind": "DiagnosisRecord",
-    "uid": "diagnosis-9540d986a8a317da",
+    "uid": "diagnosis-cb7c905c387c51e0",
     "uri": "artifacts/autopsy/degraded-run/diagnosis.json"
   },
   "evidence": [
@@ -89,7 +70,7 @@
       "api_version": "sloforge.autopsy.event/v1",
       "digest": {
         "algorithm": "sha256",
-        "value": "f16134495a26c91e8c79746a83e357d34389505b1a721c87efda93b7277ee786"
+        "value": "ccddae8206cd06635482bf8a9f4f0d412029d9df94e4f6c13c5fcae73e184693"
       },
       "generation": null,
       "kind": "AutopsyEvidence",
@@ -100,7 +81,7 @@
       "api_version": "sloforge.autopsy.event/v1",
       "digest": {
         "algorithm": "sha256",
-        "value": "a31a1cad1cc7a4c71ea45482fbfd41b8a9731428faf196cacaefe35241a523b9"
+        "value": "5819e1dfa8a23e0fbd15390531e8e4d808ccb006ce0e50fd282335a19790d351"
       },
       "generation": null,
       "kind": "AutopsyEvidence",
@@ -108,65 +89,65 @@
       "uri": "artifacts/fabric-demo/simulations/healthy.json"
     }
   ],
-  "expected_build_seconds": 10.0,
-  "expected_cost_usd": 0.022222222222222227,
-  "expected_disruption_seconds": 1.0,
+  "expected_build_seconds": 180.0,
+  "expected_cost_usd": 0.0,
+  "expected_disruption_seconds": 0.0,
   "expected_slo_improvement": {
     "availability": {
-      "confidence": 0.9,
+      "confidence": 0.8341378014115949,
       "estimate": 0.001998999999999973,
-      "lower": 0.0017990999999999758,
+      "lower": 0.0016674414650217557,
       "unit": "ratio",
-      "upper": 0.0021988999999999702
+      "upper": 0.00233055853497819
     },
     "communication_overhead_fraction": {
-      "confidence": 0.9,
-      "estimate": 6.950615571512842e-05,
-      "lower": 6.255554014361559e-05,
+      "confidence": 0.8341378014115949,
+      "estimate": 0.16171301522016956,
+      "lower": 0.13489093897539203,
       "unit": "ratio",
-      "upper": 7.645677128664126e-05
+      "upper": 0.1885350914649471
     },
     "cost_usd_per_million_tokens": {
-      "confidence": 0.9,
+      "confidence": 0.8341378014115949,
       "estimate": 0.0,
       "lower": 0.0,
       "unit": "USD/Mtoken",
       "upper": 0.0
     },
     "goodput_tokens_per_second": {
-      "confidence": 0.9,
-      "estimate": 640.0,
-      "lower": 576.0,
+      "confidence": 0.8341378014115949,
+      "estimate": 588.8000000000001,
+      "lower": 491.1403374711471,
       "unit": "tokens/s",
-      "upper": 704.0
+      "upper": 686.459662528853
     },
     "p95_end_to_end_ms": {
-      "confidence": 0.9,
-      "estimate": 104.96912,
-      "lower": 94.47220800000001,
+      "confidence": 0.8341378014115949,
+      "estimate": 212.7145949647093,
+      "lower": 177.43328457202054,
       "unit": "ms",
-      "upper": 115.466032
+      "upper": 247.99590535739807
     },
     "p95_ttft_ms": {
-      "confidence": 0.9,
-      "estimate": 40.969120000000004,
-      "lower": 36.872208,
+      "confidence": 0.8341378014115949,
+      "estimate": 83.9903981663503,
+      "lower": 70.0595660661639,
       "unit": "ms",
-      "upper": 45.06603200000001
+      "upper": 97.92123026653671
     },
     "p99_tpot_ms": {
-      "confidence": 0.9,
-      "estimate": 1.0,
-      "lower": 0.9,
+      "confidence": 0.8341378014115949,
+      "estimate": 1.0056577874871795,
+      "lower": 0.8388571758270048,
       "unit": "ms",
-      "upper": 1.1
+      "upper": 1.172458399147354
     },
     "throughput_tokens_per_second": {
-      "confidence": 0.9,
-      "estimate": 695.6521739130435,
-      "lower": 626.0869565217391,
+      "confidence": 0.8341378014115949,
+      "estimate": 640.0,
+      "lower": 533.8481929034207,
       "unit": "tokens/s",
-      "upper": 765.2173913043479
+      "upper": 746.1518070965793
     }
   },
   "extensions": {},
@@ -176,24 +157,24 @@
     "api_version": "sloforge.io/fabric/v1",
     "digest": {
       "algorithm": "sha256",
-      "value": "f7c98f63e603047f4e26e4d54c4d9503d646106d7edf946bf893645d5fc5b4dc"
+      "value": "1572567d60c1f7bb8c2bb13820a992ade23faa5be872d970e957b7175ee96b47"
     },
     "generation": 1,
     "kind": "PhysicalExecutionPlan",
-    "uid": "physical-plan-75732ff902f1c340",
-    "uri": "artifacts/physical-plans/physical-plan-75732ff902f1c340.json"
+    "uid": "physical-plan-8a3f2a36f5e5233b",
+    "uri": "artifacts/physical-plans/physical-plan-8a3f2a36f5e5233b.json"
   },
   "promotion_criteria": [
     {
       "comparator": "le",
       "metric": "p99_tpot_ms",
-      "threshold": 1.3750000000000009,
+      "threshold": 1.382779457794876,
       "window_seconds": 30.0
     },
     {
       "comparator": "le",
       "metric": "p95_ttft_ms",
-      "threshold": 1051.4707653267544,
+      "threshold": 1267.9849226426713,
       "window_seconds": 30.0
     },
     {
@@ -203,7 +184,7 @@
       "window_seconds": 30.0
     }
   ],
-  "recovery_id": "recovery-1ecc3a327a5d96ce",
+  "recovery_id": "recovery-82b97ac58e2a8183",
   "rollback_criteria": [
     {
       "comparator": "gt",
@@ -214,7 +195,7 @@
     {
       "comparator": "gt",
       "metric": "p99_tpot_ms",
-      "threshold": 1.650000000000001,
+      "threshold": 1.6593353493538512,
       "window_seconds": 30.0
     }
   ],

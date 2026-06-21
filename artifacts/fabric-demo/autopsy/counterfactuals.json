@@ -1,26 +1,26 @@
 {
   "degraded": {
-    "makespan_us": 5627629.373107173,
+    "makespan_us": 7129752.3699276205,
     "operation_count": 588,
-    "output_sha256": "ff4579fb48020b6bf9e58a2916e25f9053dfbc5b372fb7958ed67f2763179f6b",
-    "predicted_lower_us": 5349963.640832606,
-    "predicted_upper_us": 5905295.105381739,
-    "processed_events": 1272
+    "output_sha256": "b49040ae216f7e7562d23b693e82225e4e1450230282d6a751e201bc9a0322e6",
+    "predicted_lower_us": 6925108.867421635,
+    "predicted_upper_us": 7334395.872433606,
+    "processed_events": 1536
   },
-  "diagnosis_id": "diagnosis-9540d986a8a317da",
+  "diagnosis_id": "diagnosis-cb7c905c387c51e0",
   "evaluations": [
     {
-      "confidence": 0.005724820193760724,
-      "expected_improvement_ms": 1487.269741423205,
-      "healthy_reference_residual_ms": 3100.939517750555,
-      "lower_improvement_ms": 931.938276874071,
+      "confidence": 0.8327462604058866,
+      "expected_improvement_ms": 5813.583840247169,
+      "healthy_reference_residual_ms": 79.6542765235051,
+      "lower_improvement_ms": 5404.296835235199,
       "observation": {
-        "makespan_us": 4140359.6316839675,
+        "makespan_us": 1316168.5296804511,
         "operation_count": 588,
-        "output_sha256": "dd8257bf58ffd484aa7b832782db9a236a4cecdc9d9d82e979419bdafc3b7291",
-        "predicted_lower_us": 3862693.8994094008,
-        "predicted_upper_us": 4418025.363958535,
-        "processed_events": 1272
+        "output_sha256": "1310600f3e0d2b3cea47b97fd962d20c7568d749bfa2bde4c6178fd59453bd6c",
+        "predicted_lower_us": 1111525.0271744663,
+        "predicted_upper_us": 1520812.032186436,
+        "processed_events": 1536
       },
       "rejected_reason": null,
       "scenario": {
@@ -37,20 +37,20 @@
         "scenario_id": "move-network-resource"
       },
       "status": "supported",
-      "upper_improvement_ms": 2042.6012059723384
+      "upper_improvement_ms": 6222.870845259139
     },
     {
-      "confidence": 0.0080510829293839,
-      "expected_improvement_ms": 4588.209259173759,
+      "confidence": 0.8341378014115949,
+      "expected_improvement_ms": 5893.238116770674,
       "healthy_reference_residual_ms": 0.0,
-      "lower_improvement_ms": 4032.8777946246255,
+      "lower_improvement_ms": 5483.951111758704,
       "observation": {
-        "makespan_us": 1039420.113933413,
+        "makespan_us": 1236514.253156946,
         "operation_count": 588,
-        "output_sha256": "bf0d27f449a4810c0e49db75ed4ce3f0807d0e222436f76b233c9b641934fedb",
-        "predicted_lower_us": 761754.3816588462,
-        "predicted_upper_us": 1317085.84620798,
-        "processed_events": 1236
+        "output_sha256": "c93561d346e3994923dea3683ef38b7596e629112b501f2525538431ebb865e8",
+        "predicted_lower_us": 1031870.7506509612,
+        "predicted_upper_us": 1441157.755662931,
+        "processed_events": 1524
       },
       "rejected_reason": null,
       "scenario": {
@@ -70,20 +70,20 @@
         "scenario_id": "remove-both-faults"
       },
       "status": "supported",
-      "upper_improvement_ms": 5143.540723722893
+      "upper_improvement_ms": 6302.525121782644
     },
     {
-      "confidence": 0.005705252171838031,
-      "expected_improvement_ms": 1475.4328640361107,
-      "healthy_reference_residual_ms": 3112.776395137649,
-      "lower_improvement_ms": 920.1013994869767,
+      "confidence": 0.8327462604058866,
+      "expected_improvement_ms": 5813.583840247169,
+      "healthy_reference_residual_ms": 79.6542765235051,
+      "lower_improvement_ms": 5404.296835235199,
       "observation": {
-        "makespan_us": 4152196.509071062,
+        "makespan_us": 1316168.5296804511,
         "operation_count": 588,
-        "output_sha256": "3ac32c9a9cb5a8bae784e82cf01d3bd92e8a321bc046f666175399564563144a",
-        "predicted_lower_us": 3874530.776796495,
-        "predicted_upper_us": 4429862.241345629,
-        "processed_events": 1272
+        "output_sha256": "9d8824b60f330af29f8a7913c42d5b20578d1782e4cda56a64aaaa24a6eded16",
+        "predicted_lower_us": 1111525.0271744663,
+        "predicted_upper_us": 1520812.032186436,
+        "processed_events": 1536
       },
       "rejected_reason": null,
       "scenario": {
@@ -99,22 +99,22 @@
         "scenario_id": "remove-network-fault"
       },
       "status": "supported",
-      "upper_improvement_ms": 2030.7643285852444
+      "upper_improvement_ms": 6222.870845259139
     },
     {
-      "confidence": 0.7137045115347533,
-      "expected_improvement_ms": 4254.988404830379,
-      "healthy_reference_residual_ms": 333.2208543433801,
-      "lower_improvement_ms": 3699.656940281246,
+      "confidence": 0.03423209644933691,
+      "expected_improvement_ms": -146.88794047903457,
+      "healthy_reference_residual_ms": 6040.126057249709,
+      "lower_improvement_ms": -556.1749454910048,
       "observation": {
-        "makespan_us": 1372640.9682767931,
+        "makespan_us": 7276640.310406655,
         "operation_count": 588,
-        "output_sha256": "ac7ac1e3ea7814645841d3207d12a2326337442e6f16f91a7092dd061d9d9918",
-        "predicted_lower_us": 1094975.2360022264,
-        "predicted_upper_us": 1650306.70055136,
-        "processed_events": 1236
+        "output_sha256": "64bf05a4985cf8b055ef6eeff00c2433b95a5de85be6b58fc158fa7ed9830322",
+        "predicted_lower_us": 7071996.80790067,
+        "predicted_upper_us": 7481283.81291264,
+        "processed_events": 1524
       },
-      "rejected_reason": null,
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
       "scenario": {
         "hypothesis_id": "hypothesis-16-rank_straggler",
         "hypothesis_kind": "rank_straggler",
@@ -127,23 +127,23 @@
         "rationale": "remove the rank-specific service-rate degradation",
         "scenario_id": "remove-rank-fault"
       },
-      "status": "supported",
-      "upper_improvement_ms": 4810.319869379513
+      "status": "inconclusive",
+      "upper_improvement_ms": 262.3990645329356
     },
     {
-      "confidence": 0.0015235044684069716,
-      "expected_improvement_ms": 340.0182442666665,
-      "healthy_reference_residual_ms": 4248.191014907093,
-      "lower_improvement_ms": -215.31300298017916,
+      "confidence": 0.593224974310793,
+      "expected_improvement_ms": 1360.072977066666,
+      "healthy_reference_residual_ms": 4533.165139704009,
+      "lower_improvement_ms": 951.0881126854028,
       "observation": {
-        "makespan_us": 5287611.128840506,
+        "makespan_us": 5769679.392860955,
         "operation_count": 588,
-        "output_sha256": "f78acf129a69d6f0950baa97d3fe1ecb7a6f31891f6fbd507ff8275c831d3348",
-        "predicted_lower_us": 5009945.613868227,
-        "predicted_upper_us": 5565276.643812785,
-        "processed_events": 1272
+        "output_sha256": "acee69d2156e4dab4a4915e8b295a957bba1d08ad0887f03af0772e7b438eb7a",
+        "predicted_lower_us": 5565338.030985677,
+        "predicted_upper_us": 5974020.754736233,
+        "processed_events": 1536
       },
-      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
+      "rejected_reason": null,
       "scenario": {
         "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
         "hypothesis_kind": "network_bandwidth_degradation",
@@ -158,23 +158,23 @@
         "rationale": "restore calibrated bandwidth while retaining the fault interval",
         "scenario_id": "restore-network-curve"
       },
-      "status": "inconclusive",
-      "upper_improvement_ms": 895.3494915135121
+      "status": "supported",
+      "upper_improvement_ms": 1769.057841447929
     },
     {
-      "confidence": 0.715908157298632,
-      "expected_improvement_ms": 4254.988404830379,
-      "healthy_reference_residual_ms": 333.2208543433801,
-      "lower_improvement_ms": 3707.9149791874365,
+      "confidence": 0.03428451683286285,
+      "expected_improvement_ms": -146.88794047903457,
+      "healthy_reference_residual_ms": 6040.126057249709,
+      "lower_improvement_ms": -555.4368588793166,
       "observation": {
-        "makespan_us": 1372640.9682767931,
+        "makespan_us": 7276640.310406655,
         "operation_count": 588,
-        "output_sha256": "e50351c53bd3912f22eb74f3a7f261a921cb947dc38bf19c20aa967f3cce6272",
-        "predicted_lower_us": 1103233.2749084167,
-        "predicted_upper_us": 1642048.6616451696,
-        "processed_events": 1236
+        "output_sha256": "eed065d0a2d09e659c78c8ef21d0d7ea4b42892c425c6eb58c6d3679a4a25c59",
+        "predicted_lower_us": 7072734.894512358,
+        "predicted_upper_us": 7480545.726300952,
+        "processed_events": 1524
       },
-      "rejected_reason": null,
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
       "scenario": {
         "hypothesis_id": "hypothesis-16-rank_straggler",
         "hypothesis_kind": "rank_straggler",
@@ -188,21 +188,21 @@
         "rationale": "counteract the measured rank service-time multiplier",
         "scenario_id": "restore-rank-rate"
       },
-      "status": "supported",
-      "upper_improvement_ms": 4802.0618304733225
+      "status": "inconclusive",
+      "upper_improvement_ms": 261.6609779212475
     },
     {
-      "confidence": 0.05889816018428441,
-      "expected_improvement_ms": -397.2624079837408,
-      "healthy_reference_residual_ms": 4985.4716671575,
-      "lower_improvement_ms": -957.4328500591758,
+      "confidence": 2.745716742021928e-07,
+      "expected_improvement_ms": 0.0,
+      "healthy_reference_residual_ms": 5893.238116770674,
+      "lower_improvement_ms": -409.72858194876557,
       "observation": {
-        "makespan_us": 6024891.781090913,
+        "makespan_us": 7129752.3699276205,
         "operation_count": 588,
-        "output_sha256": "71da2b715579aa540129c1afbbbbc74766b15937016ed77cc3632d320c011e4f",
-        "predicted_lower_us": 5742387.071290045,
-        "predicted_upper_us": 6307396.490891782,
-        "processed_events": 1307
+        "output_sha256": "6d1e8066ca2ecf9705152dd0d17a7f05d2c864141ef112dc0429a31eeebfae99",
+        "predicted_lower_us": 6924667.29048484,
+        "predicted_upper_us": 7334837.449370401,
+        "processed_events": 1548
       },
       "rejected_reason": "counterfactual prediction interval crosses zero improvement",
       "scenario": {
@@ -219,10 +219,10 @@
         "scenario_id": "wrong-rank-control"
       },
       "status": "inconclusive",
-      "upper_improvement_ms": 162.90803409169428
+      "upper_improvement_ms": 409.72858194876557
     }
   ],
-  "healthy_reference_us": 1039420.113933413,
+  "healthy_reference_us": 1236514.253156946,
   "rejected_scenario_ids": [
     "move-network-resource",
     "remove-network-fault",
@@ -233,5 +233,5 @@
   ],
   "schema_version": "sloforge.autopsy.counterfactual/v1",
   "selected_scenario_id": "remove-both-faults",
-  "simulation_input_sha256": "8c8b0b8927c669ab05587a6e752675704c75589508b2c928d3c98f8c149e30aa"
+  "simulation_input_sha256": "b0137363d76a0b3980f81dbe72a94095366951b8feebeb5b1d161b76c156fc48"
 }

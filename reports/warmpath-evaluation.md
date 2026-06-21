@@ -4,18 +4,18 @@ This CPU-only comparison resamples measured local startup stages across 11 deter
 
 | Strategy | p50 ready (ms) | p95 ready (ms) | 95% CI of seed p95 (ms) | Hourly cost (USD) | Failure rate | Eviction p95 (ms) |
 |---|---:|---:|---:|---:|---:|---:|
-| cold_uncached | 3.0046 | 3.1084 | [3.1084, 3.1084] | 0.000002 | 2.97% | 3.1084 |
-| local_disk_cache | 0.9089 | 1.0813 | [1.0775, 1.1337] | 0.000002 | 3.60% | 1.0808 |
-| page_cache | 0.7848 | 0.9630 | [0.9565, 0.9603] | 0.000000 | 2.88% | 1.0313 |
-| pinned_host_memory_modeled | 0.7766 | 0.9476 | [0.9428, 0.9600] | 0.000010 | 2.70% | 1.0305 |
-| warmpath | 0.7798 | 0.9554 | [0.9487, 0.9555] | 0.000000 | 3.33% | 1.0303 |
-| warm_replica | 0.0000 | 0.0000 | [0.0000, 0.0000] | 0.420000 | 0.18% | 3.0267 |
+| cold_uncached | 2.9226 | 3.0850 | [3.0849, 3.0850] | 0.000002 | 2.97% | 3.0850 |
+| local_disk_cache | 0.8217 | 0.9987 | [0.9878, 1.0032] | 0.000002 | 3.60% | 0.9989 |
+| page_cache | 0.7270 | 0.9082 | [0.9069, 0.9092] | 0.000000 | 2.88% | 0.9338 |
+| pinned_host_memory_modeled | 0.7663 | 0.9467 | [0.9414, 0.9468] | 0.000010 | 2.70% | 0.9415 |
+| warmpath | 0.7151 | 0.8984 | [0.8976, 0.8993] | 0.000000 | 3.33% | 0.9438 |
+| warm_replica | 0.0000 | 0.0000 | [0.0000, 0.0000] | 0.420000 | 0.18% | 2.9929 |
 
 ## Findings
 
-- WarmPath changed p95 readiness by +11.64% relative to the local-disk baseline (positive means faster).
-- The best non-warm strategy was `pinned_host_memory_modeled`; WarmPath changed p95 by -0.82% relative to it.
-- Under the configured eviction pressure, WarmPath p95 changed by +0.0748 ms.
+- WarmPath changed p95 readiness by +10.04% relative to the local-disk baseline (positive means faster).
+- The best non-warm strategy was `page_cache`; WarmPath changed p95 by +1.08% relative to it.
+- Under the configured eviction pressure, WarmPath p95 changed by +0.0453 ms.
 
 ## Measurement basis and limitations
 

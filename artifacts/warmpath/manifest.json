@@ -7,29 +7,29 @@
     },
     {
       "path": "profile/profile.json",
-      "sha256": "80928d16ec522bb74527da42a45a7f454b75d4ef7085617dca56ab682bd99f5d"
+      "sha256": "d39d28f527dfc3fe581a7c6c7254b61877db32320ed660940e0abc96eebc9efb"
     },
     {
       "path": "plan.json",
-      "sha256": "d09bfdbc04fcd6add9011dcbf86d332c1341ec2171ca6deb199db42b86b6249a"
+      "sha256": "814073edc1a85871e086bf3feec1ca443efc060352a8200f757ab5f029a6dc76"
     },
     {
       "path": "simulation.json",
-      "sha256": "9a702eaf3b17b1758327069048f472867ddaab8b255b103090add079bf28e237"
+      "sha256": "e7b33a6991be51c156120dd9423e7c832e4af0a7ba37e88b2c13e99c9cae13a5"
     },
     {
       "path": "execution/warmpath-execution.json",
-      "sha256": "7d5c0302253dd12cc274acff321f9f06e94c9e987d8391b922e7450b6d037325"
+      "sha256": "0879b333c512728f0ad4ad233723bbe7c1ab2ac9e2b420ddc2dfc98edda9635d"
     }
   ],
   "candidates_evaluated": 243,
   "checksum_verified": true,
   "deferred_artifact_count": 1,
-  "measured_ready_ms": 4.367792,
+  "measured_ready_ms": 3.86425,
   "optimizer": "exhaustive",
-  "plan_id": "warmpath-eb19aa057c17b1bc",
-  "predicted_p50_ready_ms": 0.9602924525878037,
-  "predicted_p95_ready_ms": 1.1124290987711072,
+  "plan_id": "warmpath-18c7910b4c2e3467",
+  "predicted_p50_ready_ms": 0.8786048633520626,
+  "predicted_p95_ready_ms": 0.9041873257969582,
   "profile_source": "measured",
   "restore_success": true,
   "schema_version": "sloforge.warmpath.demo/v1",

@@ -2,7 +2,7 @@
   "admission_capacity": 256,
   "backends": [
     {
-      "base_url": "http://127.0.0.1:50678",
+      "base_url": "http://127.0.0.1:54663",
       "capacity": 6,
       "estimated_service_ms": 16.8,
       "health_path": "/health",
@@ -11,7 +11,7 @@
       "weight": 1
     },
     {
-      "base_url": "http://127.0.0.1:50943",
+      "base_url": "http://127.0.0.1:54963",
       "capacity": 6,
       "estimated_service_ms": 16.8,
       "health_path": "/health",
@@ -20,7 +20,7 @@
       "weight": 1
     },
     {
-      "base_url": "http://127.0.0.1:50945",
+      "base_url": "http://127.0.0.1:54965",
       "capacity": 6,
       "estimated_service_ms": 16.8,
       "health_path": "/health",
@@ -29,7 +29,7 @@
       "weight": 1
     }
   ],
-  "bind": "127.0.0.1:50947",
+  "bind": "127.0.0.1:54967",
   "breaker_cooldown_ms": 500,
   "breaker_failures": 2,
   "connect_timeout_ms": 1000,
@@ -38,8 +38,8 @@
   "max_request_bytes": 1048576,
   "max_trace_events": 100000,
   "provenance": {
-    "plan_id": "opt-0c27332ab6ce05d9",
-    "profile_id": "http-profile-41-1785639382"
+    "plan_id": "opt-6bc8aed6c3b3caee",
+    "profile_id": "http-profile-41-1785657046"
   },
   "queue_timeout_ms": 800,
   "request_timeout_ms": 15000,

@@ -3,14 +3,14 @@
     {
       "availability": 0.998001,
       "candidate_id": "physical-3b3934b379d0",
-      "communication_us": 28769.881344508838,
-      "cost_per_million_tokens": 24.154589371980677,
+      "communication_us": 213932.32572265077,
+      "cost_per_million_tokens": 28.365521060696327,
       "data_parallel": 2,
       "disaggregated": true,
       "expert_parallel": 4,
       "failure_exposure_score": 0.0009994999999999865,
       "feasible": true,
-      "goodput_tokens_per_second": 736.0,
+      "goodput_tokens_per_second": 626.7389814464195,
       "gpu_ids": [
         "host-0/gpu/7",
         "host-1/gpu/1",
@@ -29,26 +29,27 @@
         "host-1/gpu/2",
         "host-1/gpu/0"
       ],
-      "objective_score": 109.3090988664957,
-      "p95_ttft_ms": 41.569881344508836,
-      "p99_tpot_ms": 1.6565557858108946,
+      "objective_score": 486.0102781026396,
+      "p95_ttft_ms": 226.75732572265076,
+      "p99_tpot_ms": 1.5955605596641684,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
     }
   ],
+  "deterministic_solver_work_units": 128,
   "pareto_frontier": [
     {
       "availability": 0.998001,
       "candidate_id": "physical-3b3934b379d0",
-      "communication_us": 28769.881344508838,
-      "cost_per_million_tokens": 24.154589371980677,
+      "communication_us": 213932.32572265077,
+      "cost_per_million_tokens": 28.365521060696327,
       "data_parallel": 2,
       "disaggregated": true,
       "expert_parallel": 4,
       "failure_exposure_score": 0.0009994999999999865,
       "feasible": true,
-      "goodput_tokens_per_second": 736.0,
+      "goodput_tokens_per_second": 626.7389814464195,
       "gpu_ids": [
         "host-0/gpu/7",
         "host-1/gpu/1",
@@ -67,9 +68,9 @@
         "host-1/gpu/2",
         "host-1/gpu/0"
       ],
-      "objective_score": 109.3090988664957,
-      "p95_ttft_ms": 41.569881344508836,
-      "p99_tpot_ms": 1.6565557858108946,
+      "objective_score": 486.0102781026396,
+      "p95_ttft_ms": 226.75732572265076,
+      "p99_tpot_ms": 1.5955605596641684,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
@@ -84,7 +85,7 @@
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -115,13 +116,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -152,13 +153,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -181,13 +182,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -210,13 +211,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -239,13 +240,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -268,13 +269,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -305,13 +306,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -342,13 +343,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -371,13 +372,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -400,13 +401,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -429,13 +430,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -458,13 +459,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -495,13 +496,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -532,13 +533,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -561,13 +562,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -590,13 +591,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -619,13 +620,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -648,13 +649,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -685,13 +686,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -722,13 +723,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -751,13 +752,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -780,13 +781,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -809,13 +810,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -838,13 +839,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -875,13 +876,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -912,13 +913,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -941,13 +942,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -970,13 +971,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -999,13 +1000,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1028,13 +1029,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1065,13 +1066,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1102,13 +1103,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1131,13 +1132,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1160,13 +1161,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1189,13 +1190,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1218,13 +1219,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1255,13 +1256,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1292,13 +1293,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1321,13 +1322,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1350,13 +1351,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1379,13 +1380,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1408,13 +1409,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1445,13 +1446,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "ring",
           "channel_count": 8,
           "depends_on": [],
-          "expected_duration_us": 1381.526462891482,
+          "expected_duration_us": 1141.5845750869742,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 4096.0,
           "message_size_intercept_bytes": 0,
@@ -1482,13 +1483,13 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 65.58812663380218
+          "uncertainty_us": 38.0236737252836
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1511,13 +1512,13 @@
             3
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1540,13 +1541,13 @@
             7
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1569,13 +1570,13 @@
             11
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         },
         {
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 2232.3027443164697,
+          "expected_duration_us": 1930.0648441500816,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1598,7 +1599,7 @@
             15
           ],
           "transport": "infiniband",
-          "uncertainty_us": 82.78508631091927
+          "uncertainty_us": 65.78680509891444
         }
       ]
     },
@@ -2697,7 +2698,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "4f3426ca8238f5d235cc63b689c26293dad1bbaba42018ed102e85ca616bd892"
+      "value": "836427f8fd541cc4b8ef5f00e70dd65c35d34528a045150919c3388692cc9cd0"
     },
     "failure_exposure": [
       {
@@ -2711,7 +2712,7 @@
           12,
           13
         ],
-        "expected_slo_impact_ms": 41.569881344508836,
+        "expected_slo_impact_ms": 226.75732572265076,
         "fault_domain": "host-0",
         "probability": 0.0010000000000000009
       },
@@ -2726,12 +2727,12 @@
           14,
           15
         ],
-        "expected_slo_impact_ms": 41.569881344508836,
+        "expected_slo_impact_ms": 226.75732572265076,
         "fault_domain": "host-1",
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "git_commit": "ca39d5e7859d26cd7bcac96e439e23825aff6d76",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 134217728,
@@ -2758,7 +2759,7 @@
           "expected_cost_usd": 0.0,
           "expected_latency_us": 2750.311052611586,
           "fallback": "recompute",
-          "maximum_inflight_chunks": 4,
+          "maximum_inflight_chunks": 32,
           "overlap_with_decode": true,
           "producer_rank_ids": [
             0,
@@ -2771,7 +2772,7 @@
             7
           ],
           "retry_limit": 1,
-          "route_id": "kv-prefill-decode-0",
+          "route_id": "kv-prefill-0-decode-0",
           "serialization_format": "paged",
           "transport_adapter": "sloforge.pcie"
         }
@@ -3040,11 +3041,11 @@
       {
         "candidate_id": "physical-3b3934b379d0",
         "decision": "select",
-        "phase": "lower_bound",
-        "reason_code": "minimum_robust_objective",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_minimum_robust_objective",
         "sequence": 0,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.128
       }
     ],
     "parallelism": {
@@ -3247,7 +3248,7 @@
       ],
       "tensor_parallel_degree": 8
     },
-    "plan_id": "physical-plan-df49891c86f8a714",
+    "plan_id": "physical-plan-67e9b249fd881c07",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -3258,52 +3259,52 @@
       },
       "communication_overhead_fraction": {
         "confidence": 0.9,
-        "estimate": 0.19493182626211566,
-        "lower": 0.1754386436359041,
+        "estimate": 0.650500936896428,
+        "lower": 0.5854508432067852,
         "unit": "fraction",
-        "upper": 0.21442500888832722
+        "upper": 0.7155510305860707
       },
       "cost_usd_per_million_tokens": {
         "confidence": 0.9,
-        "estimate": 24.154589371980677,
-        "lower": 21.73913043478261,
+        "estimate": 28.365521060696327,
+        "lower": 25.528968954626695,
         "unit": "USD/1M_tokens",
-        "upper": 26.570048309178745
+        "upper": 31.20207316676596
       },
       "goodput_tokens_per_second": {
         "confidence": 0.9,
-        "estimate": 736.0,
-        "lower": 662.4,
+        "estimate": 626.7389814464195,
+        "lower": 564.0650833017776,
         "unit": "tokens/s",
-        "upper": 809.6
+        "upper": 689.4128795910615
       },
       "p95_end_to_end_ms": {
         "confidence": 0.9,
-        "estimate": 147.5894516364061,
-        "lower": 132.83050647276548,
+        "estimate": 328.8732015411575,
+        "lower": 295.9858813870418,
         "unit": "ms",
-        "upper": 162.34839680004671
+        "upper": 361.76052169527327
       },
       "p95_ttft_ms": {
         "confidence": 0.9,
-        "estimate": 41.569881344508836,
-        "lower": 37.41289321005795,
+        "estimate": 226.75732572265076,
+        "lower": 204.0815931503857,
         "unit": "ms",
-        "upper": 45.72686947895972
+        "upper": 249.43305829491584
       },
       "p99_tpot_ms": {
         "confidence": 0.9,
-        "estimate": 1.6565557858108946,
-        "lower": 1.4909002072298052,
+        "estimate": 1.5955605596641684,
+        "lower": 1.4360045036977516,
         "unit": "ms",
-        "upper": 1.822211364391984
+        "upper": 1.7551166156305853
       },
       "throughput_tokens_per_second": {
         "confidence": 0.9,
-        "estimate": 800.0,
-        "lower": 720.0,
+        "estimate": 681.2380233113255,
+        "lower": 613.114220980193,
         "unit": "tokens/s",
-        "upper": 880.0
+        "upper": 749.361825642458
       }
     },
     "rank_placement": {
@@ -3512,7 +3513,7 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+        "value": "292286086b0826cee4b83c10fda822b0417b8f96fce45466568fa4ff0c7fcd41"
       },
       "generated_at": "2026-01-01T00:00:29Z",
       "seed": 29
@@ -3523,7 +3524,10 @@
       "value": "c420f1d3bbe7740fb66a6591014b083ef5b54d189b17ba7df57c5273f45116e7"
     }
   },
-  "simulator_calls": 0,
-  "solver_time_ms": 0.0,
+  "simulator_calls": 1,
+  "simulator_validated_candidate_ids": [
+    "physical-3b3934b379d0"
+  ],
+  "solver_time_ms": 141.994166,
   "strategy": "random_placement"
 }
