@@ -1,0 +1,226 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+from sloforge.genesis.sandbox import (
+    IsolationStatus,
+    SandboxBackend,
+    SandboxLimits,
+    SandboxRequest,
+    SandboxTermination,
+    detect_capabilities,
+    execute_sandboxed,
+)
+
+
+def _request(
+    source: Path,
+    output: Path,
+    script: Path,
+    *,
+    wall_time: float = 3.0,
+    output_bytes: int = 4096,
+) -> SandboxRequest:
+    return SandboxRequest(
+        argv=(sys.executable, str(script)),
+        working_directory=source,
+        read_only_paths=(source,),
+        artifact_output_directory=output,
+        seed=73129,
+        limits=SandboxLimits(
+            wall_time_seconds=wall_time,
+            cpu_time_seconds=2,
+            memory_bytes=2 * 1024 * 1024 * 1024,
+            process_count=8,
+            output_bytes=output_bytes,
+            artifact_bytes=1024 * 1024,
+            artifact_entries=128,
+            open_files=32,
+        ),
+    )
+
+
+def test_sandbox_capabilities_are_explicit() -> None:
+    capabilities = detect_capabilities()
+    assert capabilities.environment_sanitization is IsolationStatus.ENFORCED
+    assert capabilities.output_limit is IsolationStatus.ENFORCED
+    assert capabilities.limitations
+
+
+def test_sandbox_sanitizes_environment_and_is_deterministic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "environment.py"
+    script.write_text(
+        "import os\n"
+        "print(os.environ.get('AWS_SECRET_ACCESS_KEY', 'absent'))\n"
+        "print(os.environ['PYTHONHASHSEED'])\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "must-not-leak")
+    result = execute_sandboxed(_request(source, output, script))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SUCCESS, result.stderr
+    assert result.stdout.splitlines() == ["absent", "73129"]
+    assert "AWS_SECRET_ACCESS_KEY" not in result.sanitized_environment_names
+
+
+def test_sandbox_denies_network_and_undeclared_reads(tmp_path: Path) -> None:
+    capabilities = detect_capabilities()
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    secret = tmp_path / "credential.txt"
+    secret.write_text("secret", encoding="utf-8")
+    script = source / "adversary.py"
+    script.write_text(
+        "import pathlib, socket\n"
+        "try:\n"
+        f"    pathlib.Path({str(secret)!r}).read_text()\n"
+        "except OSError:\n"
+        "    print('read-blocked')\n"
+        "else:\n"
+        "    print('read-leaked')\n"
+        "sock = socket.socket()\n"
+        "try:\n"
+        "    sock.connect(('127.0.0.1', 9))\n"
+        "except OSError:\n"
+        "    print('network-blocked')\n"
+        "else:\n"
+        "    print('network-open')\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, output, script))
+    if capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        assert "not executed" in result.stderr
+        return
+    assert result.termination is SandboxTermination.SUCCESS, result.stderr
+    assert result.stdout.splitlines() == ["read-blocked", "network-blocked"]
+
+
+def test_sandbox_kills_timed_out_process_group(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "forever.py"
+    script.write_text("while True:\n    1 + 1\n", encoding="utf-8")
+    result = execute_sandboxed(_request(source, output, script, wall_time=0.2))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.TIMEOUT
+    assert result.process_group_cleaned
+
+
+def test_sandbox_stops_output_flood(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "flood.py"
+    script.write_text("import os\nos.write(1, b'x' * 1000000)\n", encoding="utf-8")
+    result = execute_sandboxed(_request(source, output, script, output_bytes=128))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.OUTPUT_LIMIT
+    assert len(result.stdout.encode()) <= 128
+    assert result.output_bytes > 128
+    assert result.process_group_cleaned
+
+
+def test_sandbox_rejects_credential_environment_name(tmp_path: Path) -> None:
+    from sloforge.genesis.sandbox import EnvironmentVariable
+
+    source = tmp_path / "source"
+    source.mkdir()
+    script = source / "ok.py"
+    script.write_text("print('ok')\n", encoding="utf-8")
+    request = _request(source, tmp_path / "output", script).model_copy(
+        update={"environment": (EnvironmentVariable(name="API_TOKEN", value="secret"),)}
+    )
+    result = execute_sandboxed(request)
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+    else:
+        assert result.termination is SandboxTermination.SETUP_ERROR
+        assert "forbidden" in result.stderr
+
+
+def test_sandbox_writes_only_to_artifact_directory(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "writes.py"
+    script.write_text(
+        "import os, pathlib\n"
+        "try:\n"
+        "    pathlib.Path('forbidden').write_text('bad')\n"
+        "except OSError:\n"
+        "    print('source-write-blocked')\n"
+        "target = pathlib.Path(os.environ['HOME']).parent / 'result.txt'\n"
+        "target.write_text('accepted artifact')\n"
+        "print('artifact-written')\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, output, script))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SUCCESS, result.stderr
+    assert result.stdout.splitlines() == ["source-write-blocked", "artifact-written"]
+    assert (output / "result.txt").read_text(encoding="utf-8") == "accepted artifact"
+    assert not (source / "forbidden").exists()
+
+
+def test_macos_sandbox_denies_generated_child_process(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "spawn.py"
+    script.write_text(
+        "import subprocess\n"
+        "try:\n"
+        "    subprocess.run(['/usr/bin/true'], check=False)\n"
+        "except OSError:\n"
+        "    print('spawn-blocked')\n"
+        "else:\n"
+        "    print('spawn-allowed')\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, output, script))
+    if result.capabilities.backend is not SandboxBackend.MACOS_SANDBOX_EXEC:
+        assert result.capabilities.process_limit in {
+            IsolationStatus.BEST_EFFORT,
+            IsolationStatus.ENFORCED,
+        }
+        return
+    assert result.termination is SandboxTermination.SUCCESS, result.stderr
+    assert result.stdout.strip() == "spawn-blocked"
+
+
+def test_sandbox_rejects_symlink_artifact(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "symlink.py"
+    script.write_text(
+        "import os, pathlib\n"
+        "target = pathlib.Path(os.environ['HOME']).parent / 'link'\n"
+        "target.symlink_to('/etc/passwd')\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, output, script))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SANDBOX_VIOLATION
+    assert "symlink" in result.stderr
