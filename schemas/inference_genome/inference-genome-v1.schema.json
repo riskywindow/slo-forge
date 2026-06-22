@@ -806,11 +806,17 @@
     },
     "Precision": {
       "enum": [
+        "bool",
+        "float64",
         "float32",
         "bfloat16",
         "float16",
         "fp8",
+        "int64",
+        "int32",
+        "int16",
         "int8",
+        "uint8",
         "int4"
       ],
       "title": "Precision",
@@ -1499,7 +1505,9 @@
         "autoregressive",
         "kv",
         "recurrent",
+        "convolutional",
         "speculative",
+        "custom",
         "tool",
         "workflow"
       ],
@@ -1519,6 +1527,7 @@
     "StateOwnership": {
       "enum": [
         "request",
+        "session",
         "worker",
         "replica",
         "shared_replicated"

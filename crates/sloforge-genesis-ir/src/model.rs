@@ -153,12 +153,15 @@ string_enum!(StateKind {
     Autoregressive,
     Kv,
     Recurrent,
+    Convolutional,
     Speculative,
+    Custom,
     Tool,
     Workflow
 });
 string_enum!(StateOwnership {
     Request,
+    Session,
     Worker,
     Replica,
     SharedReplicated
@@ -170,11 +173,17 @@ string_enum!(StateLayout {
     Sharded
 });
 string_enum!(Precision {
+    Bool,
+    Float64,
     Float32,
     Bfloat16,
     Float16,
     Fp8,
+    Int64,
+    Int32,
+    Int16,
     Int8,
+    Uint8,
     Int4
 });
 string_enum!(RetentionPolicy {

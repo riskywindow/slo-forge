@@ -381,13 +381,16 @@ class StateKind(StrEnum):
     AUTOREGRESSIVE = "autoregressive"
     KV = "kv"
     RECURRENT = "recurrent"
+    CONVOLUTIONAL = "convolutional"
     SPECULATIVE = "speculative"
+    CUSTOM = "custom"
     TOOL = "tool"
     WORKFLOW = "workflow"
 
 
 class StateOwnership(StrEnum):
     REQUEST = "request"
+    SESSION = "session"
     WORKER = "worker"
     REPLICA = "replica"
     SHARED_REPLICATED = "shared_replicated"
@@ -401,11 +404,17 @@ class StateLayout(StrEnum):
 
 
 class Precision(StrEnum):
+    BOOL = "bool"
+    FLOAT64 = "float64"
     FLOAT32 = "float32"
     BFLOAT16 = "bfloat16"
     FLOAT16 = "float16"
     FP8 = "fp8"
+    INT64 = "int64"
+    INT32 = "int32"
+    INT16 = "int16"
     INT8 = "int8"
+    UINT8 = "uint8"
     INT4 = "int4"
 
 
