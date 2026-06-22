@@ -1,0 +1,35 @@
+{
+  "schema_version": "genesis.modelcheck.request.v1",
+  "model_version": "genesis-streaming-protocol.v1",
+  "seed": 73129,
+  "bounds": {
+    "max_requests": 1,
+    "queue_capacity": 1,
+    "max_tokens_per_request": 1,
+    "worker_count": 2,
+    "max_worker_failures": 1,
+    "max_depth": 48,
+    "max_states": 250000,
+    "fairness_window": 2
+  },
+  "protocol": {
+    "queue_overflow": "reject",
+    "token_delivery": "reliable",
+    "retry_after_output": "idempotent_continuation",
+    "cancellation_release": "guaranteed",
+    "state_transfer_enabled": true,
+    "replicated_state_declared": false,
+    "state_ownership": "atomic_handoff",
+    "partial_state_read": "rejected",
+    "state_compatibility": "compatible",
+    "rollout_enabled": true,
+    "promotion": "drain_active",
+    "rollback": "restore_previous",
+    "worker_failure_enabled": true,
+    "controller_crash_enabled": true,
+    "recovery": "guaranteed"
+  },
+  "assumptions": [
+    "one logical token is sufficient to cover commit and streaming interleavings in this smoke scope"
+  ]
+}
