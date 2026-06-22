@@ -1,0 +1,2212 @@
+{
+  "$defs": {
+    "AdmissionControl": {
+      "enum": [
+        "bounded_fifo",
+        "deadline_aware",
+        "token_budget",
+        "reject"
+      ],
+      "title": "AdmissionControl",
+      "type": "string"
+    },
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "CancellationBehavior": {
+      "enum": [
+        "immediate",
+        "safe_point",
+        "drain",
+        "ignore"
+      ],
+      "title": "CancellationBehavior",
+      "type": "string"
+    },
+    "CollectiveKind": {
+      "enum": [
+        "all_reduce",
+        "all_gather",
+        "reduce_scatter",
+        "all_to_all",
+        "send_recv"
+      ],
+      "title": "CollectiveKind",
+      "type": "string"
+    },
+    "CollectiveStep": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "minLength": 1,
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "chunk_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Chunk Bytes",
+          "type": "integer"
+        },
+        "dependencies": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "kind": {
+          "$ref": "#/$defs/CollectiveKind"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "overlap_group": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Overlap Group"
+        },
+        "ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Ranks",
+          "type": "array"
+        },
+        "step_id": {
+          "minLength": 1,
+          "title": "Step Id",
+          "type": "string"
+        },
+        "transport": {
+          "minLength": 1,
+          "title": "Transport",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "step_id",
+        "kind",
+        "dependencies",
+        "algorithm",
+        "transport",
+        "ranks",
+        "chunk_bytes"
+      ],
+      "title": "CollectiveStep",
+      "type": "object"
+    },
+    "ConsistencyModel": {
+      "enum": [
+        "exclusive",
+        "versioned",
+        "read_only_replicated"
+      ],
+      "title": "ConsistencyModel",
+      "type": "string"
+    },
+    "DecodeScheduling": {
+      "enum": [
+        "round_robin",
+        "deadline_aware",
+        "slo_slack",
+        "workflow_aware"
+      ],
+      "title": "DecodeScheduling",
+      "type": "string"
+    },
+    "DistributedGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "collective_dag": {
+          "items": {
+            "$ref": "#/$defs/CollectiveStep"
+          },
+          "title": "Collective Dag",
+          "type": "array"
+        },
+        "expert_placement": {
+          "items": {
+            "$ref": "#/$defs/ExpertPlacement"
+          },
+          "title": "Expert Placement",
+          "type": "array"
+        },
+        "failure_domains": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Failure Domains",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "parallelism": {
+          "$ref": "#/$defs/ParallelismSpec"
+        },
+        "prefill_decode_transfer": {
+          "enum": [
+            "none",
+            "host",
+            "peer",
+            "rdma"
+          ],
+          "title": "Prefill Decode Transfer",
+          "type": "string"
+        },
+        "rank_placement": {
+          "items": {
+            "$ref": "#/$defs/Placement"
+          },
+          "title": "Rank Placement",
+          "type": "array"
+        },
+        "recovery_variant_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Recovery Variant Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node",
+        "parallelism",
+        "rank_placement",
+        "expert_placement",
+        "collective_dag",
+        "prefill_decode_transfer",
+        "failure_domains",
+        "recovery_variant_ids"
+      ],
+      "title": "DistributedGenome",
+      "type": "object"
+    },
+    "EvidenceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "claim_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "artifact_uri",
+        "digest"
+      ],
+      "title": "EvidenceReference",
+      "type": "object"
+    },
+    "ExpertPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "expert_id": {
+          "minimum": 0,
+          "title": "Expert Id",
+          "type": "integer"
+        },
+        "logical_ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Logical Ranks",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        }
+      },
+      "required": [
+        "node",
+        "expert_id",
+        "logical_ranks"
+      ],
+      "title": "ExpertPlacement",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The sole extension namespace; keys identify their owning organization.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "FallbackBehavior": {
+      "enum": [
+        "reject",
+        "lower_quality_tier",
+        "reference_runtime",
+        "retry_compatible"
+      ],
+      "title": "FallbackBehavior",
+      "type": "string"
+    },
+    "GenomeNodeMetadata": {
+      "additionalProperties": false,
+      "description": "Obligations and provenance carried by every mutable genome region.",
+      "properties": {
+        "evidence_references": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceReference"
+          },
+          "title": "Evidence References",
+          "type": "array"
+        },
+        "expected_performance": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PerformanceEstimate"
+          },
+          "title": "Expected Performance",
+          "type": "array"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "frozen": {
+          "default": false,
+          "title": "Frozen",
+          "type": "boolean"
+        },
+        "hardware_preconditions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/HardwarePrecondition"
+          },
+          "title": "Hardware Preconditions",
+          "type": "array"
+        },
+        "hot_swap_category": {
+          "$ref": "#/$defs/HotSwapCategory"
+        },
+        "legal_rewrite_rules": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Legal Rewrite Rules",
+          "type": "array"
+        },
+        "lineage_references": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LineageReference"
+          },
+          "title": "Lineage References",
+          "type": "array"
+        },
+        "proof_obligations": {
+          "items": {
+            "$ref": "#/$defs/ProofObligation"
+          },
+          "title": "Proof Obligations",
+          "type": "array"
+        },
+        "quality_implications": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QualityImplication"
+          },
+          "title": "Quality Implications",
+          "type": "array"
+        },
+        "resource_requirements": {
+          "$ref": "#/$defs/ResourceRequirements"
+        },
+        "semantic_contract": {
+          "$ref": "#/$defs/SemanticContract"
+        },
+        "software_preconditions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SoftwarePrecondition"
+          },
+          "title": "Software Preconditions",
+          "type": "array"
+        },
+        "stable_id": {
+          "minLength": 1,
+          "title": "Stable Id",
+          "type": "string"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/Uncertainty"
+        }
+      },
+      "required": [
+        "stable_id",
+        "semantic_contract",
+        "resource_requirements",
+        "legal_rewrite_rules",
+        "proof_obligations",
+        "uncertainty",
+        "hot_swap_category"
+      ],
+      "title": "GenomeNodeMetadata",
+      "type": "object"
+    },
+    "HardwarePrecondition": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Architecture"
+        },
+        "forbidden_features": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Forbidden Features",
+          "type": "array"
+        },
+        "minimum_device_memory_bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum Device Memory Bytes",
+          "type": "integer"
+        },
+        "required_features": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Features",
+          "type": "array"
+        }
+      },
+      "title": "HardwarePrecondition",
+      "type": "object"
+    },
+    "HotSwapCategory": {
+      "enum": [
+        "policy_only",
+        "request_boundary",
+        "worker_restart",
+        "new_replica",
+        "state_compatible_migration",
+        "state_conversion_migration",
+        "full_deployment_rebuild",
+        "operator_required"
+      ],
+      "title": "HotSwapCategory",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "KernelBackend": {
+      "enum": [
+        "pytorch",
+        "triton",
+        "cuda",
+        "cute",
+        "cpp"
+      ],
+      "title": "KernelBackend",
+      "type": "string"
+    },
+    "KernelGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "kernels": {
+          "items": {
+            "$ref": "#/$defs/KernelSpec"
+          },
+          "title": "Kernels",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        }
+      },
+      "required": [
+        "node",
+        "kernels"
+      ],
+      "title": "KernelGenome",
+      "type": "object"
+    },
+    "KernelSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "$ref": "#/$defs/KernelBackend"
+        },
+        "benchmark_evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceReference"
+          },
+          "title": "Benchmark Evidence",
+          "type": "array"
+        },
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "fallback_kernel_id": {
+          "minLength": 1,
+          "title": "Fallback Kernel Id",
+          "type": "string"
+        },
+        "kernel_id": {
+          "minLength": 1,
+          "title": "Kernel Id",
+          "type": "string"
+        },
+        "launch": {
+          "$ref": "#/$defs/LaunchConfiguration"
+        },
+        "layout_assumptions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Layout Assumptions",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "numerical_tolerance": {
+          "minimum": 0.0,
+          "title": "Numerical Tolerance",
+          "type": "number"
+        },
+        "register_estimate": {
+          "minimum": 0,
+          "title": "Register Estimate",
+          "type": "integer"
+        },
+        "shared_memory_bytes": {
+          "minimum": 0,
+          "title": "Shared Memory Bytes",
+          "type": "integer"
+        },
+        "source_artifact": {
+          "$ref": "#/$defs/EvidenceReference"
+        },
+        "supported_dtypes": {
+          "items": {
+            "$ref": "#/$defs/Precision"
+          },
+          "title": "Supported Dtypes",
+          "type": "array"
+        },
+        "supported_shapes": {
+          "$ref": "#/$defs/ShapeDomain"
+        },
+        "target_architecture": {
+          "minLength": 1,
+          "title": "Target Architecture",
+          "type": "string"
+        },
+        "tile_shape": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "title": "Tile Shape",
+          "type": "array"
+        },
+        "vector_width": {
+          "exclusiveMinimum": 0,
+          "title": "Vector Width",
+          "type": "integer"
+        },
+        "warp_strategy": {
+          "minLength": 1,
+          "title": "Warp Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "kernel_id",
+        "source_artifact",
+        "backend",
+        "target_architecture",
+        "launch",
+        "tile_shape",
+        "warp_strategy",
+        "shared_memory_bytes",
+        "register_estimate",
+        "vector_width",
+        "layout_assumptions",
+        "supported_shapes",
+        "supported_dtypes",
+        "deterministic",
+        "numerical_tolerance",
+        "benchmark_evidence",
+        "fallback_kernel_id"
+      ],
+      "title": "KernelSpec",
+      "type": "object"
+    },
+    "LaunchConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "block_x": {
+          "exclusiveMinimum": 0,
+          "title": "Block X",
+          "type": "integer"
+        },
+        "block_y": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Block Y",
+          "type": "integer"
+        },
+        "block_z": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Block Z",
+          "type": "integer"
+        },
+        "pipeline_stages": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Pipeline Stages",
+          "type": "integer"
+        },
+        "warps": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Warps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_x"
+      ],
+      "title": "LaunchConfiguration",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "lineage_id": {
+          "minLength": 1,
+          "title": "Lineage Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "parent",
+            "derived_from",
+            "reused",
+            "constrained_by",
+            "invalidated_by"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lineage_id",
+        "relation"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "ParallelismSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Context",
+          "type": "integer"
+        },
+        "data": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Data",
+          "type": "integer"
+        },
+        "expert": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Expert",
+          "type": "integer"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "pipeline": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Pipeline",
+          "type": "integer"
+        },
+        "tensor": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Tensor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "node"
+      ],
+      "title": "ParallelismSpec",
+      "type": "object"
+    },
+    "PerformanceEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_delta": {
+          "title": "Expected Delta",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "model_id": {
+          "minLength": 1,
+          "title": "Model Id",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "expected_delta",
+        "unit",
+        "model_id"
+      ],
+      "title": "PerformanceEstimate",
+      "type": "object"
+    },
+    "Placement": {
+      "additionalProperties": false,
+      "properties": {
+        "device_id": {
+          "minLength": 1,
+          "title": "Device Id",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "logical_rank": {
+          "minimum": 0,
+          "title": "Logical Rank",
+          "type": "integer"
+        },
+        "network_rail": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Network Rail"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "numa_domain": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain"
+        }
+      },
+      "required": [
+        "node",
+        "logical_rank",
+        "host_id",
+        "device_id"
+      ],
+      "title": "Placement",
+      "type": "object"
+    },
+    "Precision": {
+      "enum": [
+        "float32",
+        "bfloat16",
+        "float16",
+        "fp8",
+        "int8",
+        "int4"
+      ],
+      "title": "Precision",
+      "type": "string"
+    },
+    "PrefillPolicy": {
+      "enum": [
+        "whole_prompt",
+        "chunked",
+        "incremental"
+      ],
+      "title": "PrefillPolicy",
+      "type": "string"
+    },
+    "ProofObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "minimum_level": {
+          "$ref": "#/$defs/VerificationLevel"
+        },
+        "obligation_id": {
+          "minLength": 1,
+          "title": "Obligation Id",
+          "type": "string"
+        },
+        "property": {
+          "minLength": 1,
+          "title": "Property",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "obligation_id",
+        "property",
+        "minimum_level",
+        "scope"
+      ],
+      "title": "ProofObligation",
+      "type": "object"
+    },
+    "QualityImplication": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_contract_id": {
+          "minLength": 1,
+          "title": "Evaluation Contract Id",
+          "type": "string"
+        },
+        "expected_delta": {
+          "title": "Expected Delta",
+          "type": "number"
+        },
+        "maximum_regression": {
+          "minimum": 0.0,
+          "title": "Maximum Regression",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "expected_delta",
+        "maximum_regression",
+        "evaluation_contract_id"
+      ],
+      "title": "QualityImplication",
+      "type": "object"
+    },
+    "QueueDiscipline": {
+      "enum": [
+        "fifo",
+        "earliest_deadline",
+        "shortest_remaining",
+        "weighted_fair"
+      ],
+      "title": "QueueDiscipline",
+      "type": "string"
+    },
+    "RecoveryGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "canary_mode": {
+          "title": "Canary Mode",
+          "type": "boolean"
+        },
+        "degraded_mode_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Degraded Mode Ids",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "shadow_mode": {
+          "title": "Shadow Mode",
+          "type": "boolean"
+        },
+        "transitions": {
+          "items": {
+            "$ref": "#/$defs/RecoveryTransition"
+          },
+          "title": "Transitions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node",
+        "transitions",
+        "shadow_mode",
+        "canary_mode",
+        "degraded_mode_ids"
+      ],
+      "title": "RecoveryGenome",
+      "type": "object"
+    },
+    "RecoveryTransition": {
+      "additionalProperties": false,
+      "properties": {
+        "active_stream_behavior": {
+          "enum": [
+            "preserve",
+            "drain",
+            "restart",
+            "reject"
+          ],
+          "title": "Active Stream Behavior",
+          "type": "string"
+        },
+        "failure_invariants": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Failure Invariants",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "operator_action_required": {
+          "title": "Operator Action Required",
+          "type": "boolean"
+        },
+        "rollback_transition_id": {
+          "minLength": 1,
+          "title": "Rollback Transition Id",
+          "type": "string"
+        },
+        "safe_point": {
+          "$ref": "#/$defs/TransitionPoint"
+        },
+        "source_state_contract": {
+          "minLength": 1,
+          "title": "Source State Contract",
+          "type": "string"
+        },
+        "state_conversion_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state_transfer": {
+          "enum": [
+            "none",
+            "copy",
+            "move",
+            "recompute"
+          ],
+          "title": "State Transfer",
+          "type": "string"
+        },
+        "target_state_contract": {
+          "minLength": 1,
+          "title": "Target State Contract",
+          "type": "string"
+        },
+        "transition_id": {
+          "minLength": 1,
+          "title": "Transition Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "transition_id",
+        "safe_point",
+        "source_state_contract",
+        "target_state_contract",
+        "state_conversion_artifact",
+        "state_transfer",
+        "active_stream_behavior",
+        "rollback_transition_id",
+        "failure_invariants",
+        "operator_action_required"
+      ],
+      "title": "RecoveryTransition",
+      "type": "object"
+    },
+    "RequestGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "admission_control": {
+          "$ref": "#/$defs/AdmissionControl"
+        },
+        "batching_eligible": {
+          "title": "Batching Eligible",
+          "type": "boolean"
+        },
+        "cancellation_behavior": {
+          "$ref": "#/$defs/CancellationBehavior"
+        },
+        "default_deadline_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Default Deadline Ms"
+        },
+        "default_priority": {
+          "title": "Default Priority",
+          "type": "integer"
+        },
+        "fallback_behavior": {
+          "$ref": "#/$defs/FallbackBehavior"
+        },
+        "maximum_queue_depth": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Queue Depth",
+          "type": "integer"
+        },
+        "maximum_retries": {
+          "minimum": 0,
+          "title": "Maximum Retries",
+          "type": "integer"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "quality_tiers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Quality Tiers",
+          "type": "array"
+        },
+        "queue_discipline": {
+          "$ref": "#/$defs/QueueDiscipline"
+        },
+        "request_classes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Request Classes",
+          "type": "array"
+        },
+        "routing": {
+          "$ref": "#/$defs/RoutingPolicy"
+        },
+        "streaming_semantics": {
+          "$ref": "#/$defs/StreamingSemantics"
+        },
+        "tenant_isolation": {
+          "title": "Tenant Isolation",
+          "type": "boolean"
+        },
+        "workflow_identity_required": {
+          "title": "Workflow Identity Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "node",
+        "admission_control",
+        "maximum_queue_depth",
+        "default_priority",
+        "default_deadline_ms",
+        "batching_eligible",
+        "routing",
+        "queue_discipline",
+        "cancellation_behavior",
+        "maximum_retries",
+        "streaming_semantics",
+        "request_classes",
+        "tenant_isolation",
+        "workflow_identity_required",
+        "quality_tiers",
+        "fallback_behavior"
+      ],
+      "title": "RequestGenome",
+      "type": "object"
+    },
+    "ResourceRequirements": {
+      "additionalProperties": false,
+      "properties": {
+        "communication_buffer_bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Communication Buffer Bytes",
+          "type": "integer"
+        },
+        "peak_device_bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Peak Device Bytes",
+          "type": "integer"
+        },
+        "peak_host_bytes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Peak Host Bytes",
+          "type": "integer"
+        },
+        "queue_entries": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Queue Entries",
+          "type": "integer"
+        },
+        "worker_processes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Worker Processes",
+          "type": "integer"
+        }
+      },
+      "title": "ResourceRequirements",
+      "type": "object"
+    },
+    "RetentionPolicy": {
+      "enum": [
+        "request_lifetime",
+        "session",
+        "lru",
+        "deadline_aware"
+      ],
+      "title": "RetentionPolicy",
+      "type": "string"
+    },
+    "RewriteRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "source_hash": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "target_hash": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "transformation_id": {
+          "minLength": 1,
+          "title": "Transformation Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "transformation_id",
+        "source_hash",
+        "target_hash"
+      ],
+      "title": "RewriteRecord",
+      "type": "object"
+    },
+    "RoutingPolicy": {
+      "enum": [
+        "round_robin",
+        "least_loaded",
+        "cache_affinity",
+        "workflow_affinity"
+      ],
+      "title": "RoutingPolicy",
+      "type": "string"
+    },
+    "SemanticCategory": {
+      "enum": [
+        "exact",
+        "approximate",
+        "policy",
+        "resource",
+        "implementation",
+        "experimental"
+      ],
+      "title": "SemanticCategory",
+      "type": "string"
+    },
+    "SemanticContract": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/SemanticCategory"
+        },
+        "contract_id": {
+          "minLength": 1,
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "input_domain": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Input Domain",
+          "type": "array"
+        },
+        "numerical_contract": {
+          "minLength": 1,
+          "title": "Numerical Contract",
+          "type": "string"
+        },
+        "output_guarantees": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Output Guarantees",
+          "type": "array"
+        },
+        "state_invariants": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "State Invariants",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract_id",
+        "category",
+        "input_domain",
+        "output_guarantees",
+        "numerical_contract",
+        "deterministic"
+      ],
+      "title": "SemanticContract",
+      "type": "object"
+    },
+    "ServingGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "continuous_batching": {
+          "title": "Continuous Batching",
+          "type": "boolean"
+        },
+        "decode_chunk_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Decode Chunk Tokens",
+          "type": "integer"
+        },
+        "decode_scheduling": {
+          "$ref": "#/$defs/DecodeScheduling"
+        },
+        "draft_model_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Draft Model Id"
+        },
+        "incremental_prefill": {
+          "title": "Incremental Prefill",
+          "type": "boolean"
+        },
+        "maximum_batch_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Batch Tokens",
+          "type": "integer"
+        },
+        "model_cascade": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Model Cascade",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "prefill_chunk_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Prefill Chunk Tokens",
+          "type": "integer"
+        },
+        "prefill_policy": {
+          "$ref": "#/$defs/PrefillPolicy"
+        },
+        "request_migration": {
+          "title": "Request Migration",
+          "type": "boolean"
+        },
+        "speculative_decoding": {
+          "title": "Speculative Decoding",
+          "type": "boolean"
+        },
+        "topology": {
+          "$ref": "#/$defs/ServingTopology"
+        },
+        "verification_policy": {
+          "minLength": 1,
+          "title": "Verification Policy",
+          "type": "string"
+        },
+        "worker_roles": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Worker Roles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node",
+        "topology",
+        "prefill_policy",
+        "incremental_prefill",
+        "prefill_chunk_tokens",
+        "decode_scheduling",
+        "continuous_batching",
+        "maximum_batch_tokens",
+        "speculative_decoding",
+        "draft_model_id",
+        "verification_policy",
+        "model_cascade",
+        "decode_chunk_tokens",
+        "request_migration",
+        "worker_roles"
+      ],
+      "title": "ServingGenome",
+      "type": "object"
+    },
+    "ServingTopology": {
+      "enum": [
+        "aggregated",
+        "disaggregated"
+      ],
+      "title": "ServingTopology",
+      "type": "string"
+    },
+    "ShapeDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "constraints": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "constraints"
+      ],
+      "title": "ShapeDomain",
+      "type": "object"
+    },
+    "SoftwarePrecondition": {
+      "additionalProperties": false,
+      "properties": {
+        "requirements": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SoftwareRequirement"
+          },
+          "title": "Requirements",
+          "type": "array"
+        }
+      },
+      "title": "SoftwarePrecondition",
+      "type": "object"
+    },
+    "SoftwareRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "package": {
+          "minLength": 1,
+          "title": "Package",
+          "type": "string"
+        },
+        "version_range": {
+          "minLength": 1,
+          "title": "Version Range",
+          "type": "string"
+        }
+      },
+      "required": [
+        "package",
+        "version_range"
+      ],
+      "title": "SoftwareRequirement",
+      "type": "object"
+    },
+    "StateGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "conversion_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "migration_chunk_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Migration Chunk Bytes",
+          "type": "integer"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "prefetch_enabled": {
+          "title": "Prefetch Enabled",
+          "type": "boolean"
+        },
+        "states": {
+          "items": {
+            "$ref": "#/$defs/StateSpec"
+          },
+          "title": "States",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node",
+        "states",
+        "migration_chunk_bytes",
+        "prefetch_enabled"
+      ],
+      "title": "StateGenome",
+      "type": "object"
+    },
+    "StateKind": {
+      "enum": [
+        "autoregressive",
+        "kv",
+        "recurrent",
+        "speculative",
+        "tool",
+        "workflow"
+      ],
+      "title": "StateKind",
+      "type": "string"
+    },
+    "StateLayout": {
+      "enum": [
+        "contiguous",
+        "paged",
+        "interleaved",
+        "sharded"
+      ],
+      "title": "StateLayout",
+      "type": "string"
+    },
+    "StateOwnership": {
+      "enum": [
+        "request",
+        "worker",
+        "replica",
+        "shared_replicated"
+      ],
+      "title": "StateOwnership",
+      "type": "string"
+    },
+    "StateSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key_fields": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Cache Key Fields",
+          "type": "array"
+        },
+        "checkpoint_interval_tokens": {
+          "minimum": 0,
+          "title": "Checkpoint Interval Tokens",
+          "type": "integer"
+        },
+        "consistency": {
+          "$ref": "#/$defs/ConsistencyModel"
+        },
+        "eviction_policy": {
+          "minLength": 1,
+          "title": "Eviction Policy",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/StateKind"
+        },
+        "layout": {
+          "$ref": "#/$defs/StateLayout"
+        },
+        "maximum_bytes_per_request": {
+          "minimum": 0,
+          "title": "Maximum Bytes Per Request",
+          "type": "integer"
+        },
+        "migratable": {
+          "title": "Migratable",
+          "type": "boolean"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "offload_tier": {
+          "enum": [
+            "none",
+            "host",
+            "peer",
+            "remote"
+          ],
+          "title": "Offload Tier",
+          "type": "string"
+        },
+        "ownership": {
+          "$ref": "#/$defs/StateOwnership"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "recomputable": {
+          "title": "Recomputable",
+          "type": "boolean"
+        },
+        "recovery_behavior": {
+          "minLength": 1,
+          "title": "Recovery Behavior",
+          "type": "string"
+        },
+        "replication_factor": {
+          "exclusiveMinimum": 0,
+          "title": "Replication Factor",
+          "type": "integer"
+        },
+        "retention": {
+          "$ref": "#/$defs/RetentionPolicy"
+        },
+        "state_id": {
+          "minLength": 1,
+          "title": "State Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "state_id",
+        "kind",
+        "cache_key_fields",
+        "ownership",
+        "layout",
+        "precision",
+        "retention",
+        "replication_factor",
+        "migratable",
+        "offload_tier",
+        "checkpoint_interval_tokens",
+        "eviction_policy",
+        "recomputable",
+        "consistency",
+        "recovery_behavior",
+        "maximum_bytes_per_request"
+      ],
+      "title": "StateSpec",
+      "type": "object"
+    },
+    "StreamingSemantics": {
+      "enum": [
+        "token_commit",
+        "chunk_commit",
+        "atomic_response"
+      ],
+      "title": "StreamingSemantics",
+      "type": "string"
+    },
+    "SymbolicDimension": {
+      "additionalProperties": false,
+      "properties": {
+        "divisible_by": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Divisible By",
+          "type": "integer"
+        },
+        "maximum": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum",
+          "type": "integer"
+        },
+        "minimum": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        }
+      },
+      "required": [
+        "node",
+        "name",
+        "minimum",
+        "maximum"
+      ],
+      "title": "SymbolicDimension",
+      "type": "object"
+    },
+    "TensorGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "graph_inputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Graph Inputs",
+          "type": "array"
+        },
+        "graph_outputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Graph Outputs",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "operators": {
+          "items": {
+            "$ref": "#/$defs/TensorOperator"
+          },
+          "title": "Operators",
+          "type": "array"
+        },
+        "rewrite_history": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RewriteRecord"
+          },
+          "title": "Rewrite History",
+          "type": "array"
+        },
+        "symbolic_dimensions": {
+          "items": {
+            "$ref": "#/$defs/SymbolicDimension"
+          },
+          "title": "Symbolic Dimensions",
+          "type": "array"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/TensorValue"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node",
+        "symbolic_dimensions",
+        "values",
+        "operators",
+        "graph_inputs",
+        "graph_outputs"
+      ],
+      "title": "TensorGenome",
+      "type": "object"
+    },
+    "TensorOperator": {
+      "additionalProperties": false,
+      "properties": {
+        "decomposition": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Decomposition",
+          "type": "array"
+        },
+        "fused_operators": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Fused Operators",
+          "type": "array"
+        },
+        "inputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "numerical_contract": {
+          "minLength": 1,
+          "title": "Numerical Contract",
+          "type": "string"
+        },
+        "operator": {
+          "minLength": 1,
+          "title": "Operator",
+          "type": "string"
+        },
+        "operator_id": {
+          "minLength": 1,
+          "title": "Operator Id",
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "quantization": {
+          "default": "none",
+          "minLength": 1,
+          "title": "Quantization",
+          "type": "string"
+        },
+        "sparse": {
+          "default": false,
+          "title": "Sparse",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "node",
+        "operator_id",
+        "operator",
+        "inputs",
+        "outputs",
+        "numerical_contract"
+      ],
+      "title": "TensorOperator",
+      "type": "object"
+    },
+    "TensorValue": {
+      "additionalProperties": false,
+      "properties": {
+        "alias_group": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias Group"
+        },
+        "dtype": {
+          "$ref": "#/$defs/Precision"
+        },
+        "layout": {
+          "minLength": 1,
+          "title": "Layout",
+          "type": "string"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "shape": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Shape",
+          "type": "array"
+        },
+        "state_dependency": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State Dependency"
+        },
+        "strides": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Strides",
+          "type": "array"
+        },
+        "value_id": {
+          "minLength": 1,
+          "title": "Value Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "value_id",
+        "shape",
+        "dtype",
+        "strides",
+        "layout"
+      ],
+      "title": "TensorValue",
+      "type": "object"
+    },
+    "TransitionPoint": {
+      "enum": [
+        "immediate",
+        "token_boundary",
+        "request_boundary",
+        "drained"
+      ],
+      "title": "TransitionPoint",
+      "type": "string"
+    },
+    "Uncertainty": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "method": {
+          "minLength": 1,
+          "title": "Method",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "method",
+        "confidence",
+        "lower",
+        "upper"
+      ],
+      "title": "Uncertainty",
+      "type": "object"
+    },
+    "VerificationLevel": {
+      "enum": [
+        "level_0_build",
+        "level_1_differential",
+        "level_2_property",
+        "level_3_bounded_exhaustive",
+        "level_4_solver_backed",
+        "level_5_hardware_operational"
+      ],
+      "title": "VerificationLevel",
+      "type": "string"
+    },
+    "WorkflowEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "target_id": {
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "source_id",
+        "target_id",
+        "condition",
+        "probability"
+      ],
+      "title": "WorkflowEdge",
+      "type": "object"
+    },
+    "WorkflowGenome": {
+      "additionalProperties": false,
+      "properties": {
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/WorkflowEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "entry_step_id": {
+          "minLength": 1,
+          "title": "Entry Step Id",
+          "type": "string"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/WorkflowStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "workflow_deadline_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workflow Deadline Ms"
+        }
+      },
+      "required": [
+        "node",
+        "steps",
+        "edges",
+        "entry_step_id"
+      ],
+      "title": "WorkflowGenome",
+      "type": "object"
+    },
+    "WorkflowStep": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Branch Probability",
+          "type": "number"
+        },
+        "cancellation_behavior": {
+          "$ref": "#/$defs/CancellationBehavior",
+          "default": "safe_point"
+        },
+        "deadline_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline Ms"
+        },
+        "expected_future_requests": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Expected Future Requests",
+          "type": "number"
+        },
+        "expected_latency_ms": {
+          "minimum": 0.0,
+          "title": "Expected Latency Ms",
+          "type": "number"
+        },
+        "kind": {
+          "$ref": "#/$defs/WorkflowStepKind"
+        },
+        "maximum_iterations": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Maximum Iterations",
+          "type": "integer"
+        },
+        "model_cascade_targets": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Model Cascade Targets",
+          "type": "array"
+        },
+        "node": {
+          "$ref": "#/$defs/GenomeNodeMetadata"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "shared_prefix_group": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shared Prefix Group"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node",
+        "kind",
+        "target",
+        "branch_probability",
+        "expected_latency_ms"
+      ],
+      "title": "WorkflowStep",
+      "type": "object"
+    },
+    "WorkflowStepKind": {
+      "enum": [
+        "model_invocation",
+        "tool_call",
+        "verification_pass",
+        "branch",
+        "loop"
+      ],
+      "title": "WorkflowStepKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/genesis/v1",
+      "default": "sloforge.io/genesis/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "distributed": {
+      "$ref": "#/$defs/DistributedGenome"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "genome_id": {
+      "minLength": 1,
+      "title": "Genome Id",
+      "type": "string"
+    },
+    "kernel": {
+      "$ref": "#/$defs/KernelGenome"
+    },
+    "kind": {
+      "const": "InferenceGenome",
+      "default": "InferenceGenome",
+      "title": "Kind",
+      "type": "string"
+    },
+    "recovery": {
+      "$ref": "#/$defs/RecoveryGenome"
+    },
+    "request": {
+      "$ref": "#/$defs/RequestGenome"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "serving": {
+      "$ref": "#/$defs/ServingGenome"
+    },
+    "source_model": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "state": {
+      "$ref": "#/$defs/StateGenome"
+    },
+    "tensor": {
+      "$ref": "#/$defs/TensorGenome"
+    },
+    "workflow": {
+      "$ref": "#/$defs/WorkflowGenome"
+    }
+  },
+  "required": [
+    "genome_id",
+    "seed",
+    "source_model",
+    "workflow",
+    "request",
+    "serving",
+    "state",
+    "distributed",
+    "tensor",
+    "kernel",
+    "recovery"
+  ],
+  "title": "InferenceGenome",
+  "type": "object"
+}

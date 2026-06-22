@@ -1,0 +1,637 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "BehaviorObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "BehaviorObservation",
+      "type": "object"
+    },
+    "CounterexampleScope": {
+      "enum": [
+        "candidate_specific",
+        "transformation_family",
+        "hardware_specific",
+        "dependency_version",
+        "universal_precondition_violation"
+      ],
+      "title": "CounterexampleScope",
+      "type": "string"
+    },
+    "DependencyCase": {
+      "additionalProperties": false,
+      "properties": {
+        "hardware_architecture": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hardware Architecture"
+        },
+        "package": {
+          "minLength": 1,
+          "title": "Package",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "package",
+        "version"
+      ],
+      "title": "DependencyCase",
+      "type": "object"
+    },
+    "DependencyCounterexamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "dependency": {
+          "$ref": "#/$defs/DependencyCase"
+        },
+        "kind": {
+          "const": "dependency",
+          "default": "dependency",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dependency"
+      ],
+      "title": "DependencyCounterexamplePayload",
+      "type": "object"
+    },
+    "EnvironmentFact": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "EnvironmentFact",
+      "type": "object"
+    },
+    "EvidenceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "claim_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "artifact_uri",
+        "digest"
+      ],
+      "title": "EvidenceReference",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The sole extension namespace; keys identify their owning organization.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "lineage_id": {
+          "minLength": 1,
+          "title": "Lineage Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "parent",
+            "derived_from",
+            "reused",
+            "constrained_by",
+            "invalidated_by"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lineage_id",
+        "relation"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "Precision": {
+      "enum": [
+        "float32",
+        "bfloat16",
+        "float16",
+        "fp8",
+        "int8",
+        "int4"
+      ],
+      "title": "Precision",
+      "type": "string"
+    },
+    "ReproductionCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Arguments",
+          "type": "array"
+        },
+        "executable": {
+          "minLength": 1,
+          "title": "Executable",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "executable",
+        "arguments",
+        "timeout_seconds",
+        "seed"
+      ],
+      "title": "ReproductionCommand",
+      "type": "object"
+    },
+    "RequestEventCase": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "admit",
+            "schedule",
+            "prefill",
+            "decode",
+            "emit",
+            "cancel",
+            "disconnect",
+            "fail",
+            "retry"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "at_step": {
+          "minimum": 0,
+          "title": "At Step",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "worker_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Worker Id"
+        }
+      },
+      "required": [
+        "at_step",
+        "request_id",
+        "action"
+      ],
+      "title": "RequestEventCase",
+      "type": "object"
+    },
+    "RequestTraceCounterexamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "items": {
+            "$ref": "#/$defs/RequestEventCase"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "kind": {
+          "const": "request_trace",
+          "default": "request_trace",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "events"
+      ],
+      "title": "RequestTraceCounterexamplePayload",
+      "type": "object"
+    },
+    "ResourceCase": {
+      "additionalProperties": false,
+      "properties": {
+        "device_bytes": {
+          "minimum": 0,
+          "title": "Device Bytes",
+          "type": "integer"
+        },
+        "host_bytes": {
+          "minimum": 0,
+          "title": "Host Bytes",
+          "type": "integer"
+        },
+        "process_count": {
+          "minimum": 0,
+          "title": "Process Count",
+          "type": "integer"
+        },
+        "queue_depth": {
+          "minimum": 0,
+          "title": "Queue Depth",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "device_bytes",
+        "host_bytes",
+        "queue_depth",
+        "process_count"
+      ],
+      "title": "ResourceCase",
+      "type": "object"
+    },
+    "ResourceCounterexamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "resource",
+          "default": "resource",
+          "title": "Kind",
+          "type": "string"
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceCase"
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "title": "ResourceCounterexamplePayload",
+      "type": "object"
+    },
+    "TensorCounterexamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/TensorInputCase"
+        },
+        "kind": {
+          "const": "tensor",
+          "default": "tensor",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input"
+      ],
+      "title": "TensorCounterexamplePayload",
+      "type": "object"
+    },
+    "TensorInputCase": {
+      "additionalProperties": false,
+      "properties": {
+        "dtype": {
+          "$ref": "#/$defs/Precision"
+        },
+        "non_contiguous": {
+          "title": "Non Contiguous",
+          "type": "boolean"
+        },
+        "shape": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "title": "Shape",
+          "type": "array"
+        },
+        "strides": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Strides",
+          "type": "array"
+        },
+        "values_hex": {
+          "minLength": 1,
+          "title": "Values Hex",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shape",
+        "strides",
+        "dtype",
+        "values_hex",
+        "non_contiguous"
+      ],
+      "title": "TensorInputCase",
+      "type": "object"
+    },
+    "TopologyCase": {
+      "additionalProperties": false,
+      "properties": {
+        "degraded_links": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Degraded Links",
+          "type": "array"
+        },
+        "devices_per_host": {
+          "exclusiveMinimum": 0,
+          "title": "Devices Per Host",
+          "type": "integer"
+        },
+        "failed_links": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Failed Links",
+          "type": "array"
+        },
+        "hosts": {
+          "exclusiveMinimum": 0,
+          "title": "Hosts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hosts",
+        "devices_per_host",
+        "failed_links",
+        "degraded_links"
+      ],
+      "title": "TopologyCase",
+      "type": "object"
+    },
+    "TopologyCounterexamplePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "topology",
+          "default": "topology",
+          "title": "Kind",
+          "type": "string"
+        },
+        "topology": {
+          "$ref": "#/$defs/TopologyCase"
+        }
+      },
+      "required": [
+        "topology"
+      ],
+      "title": "TopologyCounterexamplePayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/genesis/v1",
+      "default": "sloforge.io/genesis/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "counterexample_id": {
+      "minLength": 1,
+      "title": "Counterexample Id",
+      "type": "string"
+    },
+    "environment": {
+      "items": {
+        "$ref": "#/$defs/EnvironmentFact"
+      },
+      "title": "Environment",
+      "type": "array"
+    },
+    "expected": {
+      "$ref": "#/$defs/BehaviorObservation"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "kind": {
+      "const": "Counterexample",
+      "default": "Counterexample",
+      "title": "Kind",
+      "type": "string"
+    },
+    "lineage_references": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/LineageReference"
+      },
+      "title": "Lineage References",
+      "type": "array"
+    },
+    "minimized": {
+      "title": "Minimized",
+      "type": "boolean"
+    },
+    "observed": {
+      "$ref": "#/$defs/BehaviorObservation"
+    },
+    "parent_counterexample_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Counterexample Id"
+    },
+    "payload": {
+      "discriminator": {
+        "mapping": {
+          "dependency": "#/$defs/DependencyCounterexamplePayload",
+          "request_trace": "#/$defs/RequestTraceCounterexamplePayload",
+          "resource": "#/$defs/ResourceCounterexamplePayload",
+          "tensor": "#/$defs/TensorCounterexamplePayload",
+          "topology": "#/$defs/TopologyCounterexamplePayload"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TensorCounterexamplePayload"
+        },
+        {
+          "$ref": "#/$defs/RequestTraceCounterexamplePayload"
+        },
+        {
+          "$ref": "#/$defs/TopologyCounterexamplePayload"
+        },
+        {
+          "$ref": "#/$defs/DependencyCounterexamplePayload"
+        },
+        {
+          "$ref": "#/$defs/ResourceCounterexamplePayload"
+        }
+      ],
+      "title": "Payload"
+    },
+    "reproduction": {
+      "$ref": "#/$defs/ReproductionCommand"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/CounterexampleScope"
+    },
+    "transformation_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Transformation Id"
+    },
+    "violated_contract": {
+      "minLength": 1,
+      "title": "Violated Contract",
+      "type": "string"
+    }
+  },
+  "required": [
+    "counterexample_id",
+    "candidate_id",
+    "transformation_id",
+    "violated_contract",
+    "scope",
+    "payload",
+    "reproduction",
+    "environment",
+    "expected",
+    "observed",
+    "minimized"
+  ],
+  "title": "Counterexample",
+  "type": "object"
+}

@@ -1,0 +1,442 @@
+{
+  "$defs": {
+    "EstimatedChange": {
+      "additionalProperties": false,
+      "properties": {
+        "expected": {
+          "title": "Expected",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric",
+        "lower",
+        "expected",
+        "upper",
+        "unit"
+      ],
+      "title": "EstimatedChange",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The sole extension namespace; keys identify their owning organization.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "GenomePattern": {
+      "additionalProperties": false,
+      "properties": {
+        "node_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Node Ids",
+          "type": "array"
+        },
+        "region": {
+          "enum": [
+            "workflow",
+            "request",
+            "serving",
+            "state",
+            "distributed",
+            "tensor",
+            "kernel",
+            "recovery"
+          ],
+          "title": "Region",
+          "type": "string"
+        },
+        "structural_constraints": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Structural Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "region",
+        "node_ids",
+        "structural_constraints"
+      ],
+      "title": "GenomePattern",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LearnedConstraint": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "counterexample_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Counterexample Ids",
+          "type": "array"
+        },
+        "expression": {
+          "minLength": 1,
+          "title": "Expression",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "candidate",
+            "family",
+            "hardware",
+            "dependency",
+            "universal_precondition"
+          ],
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "expression",
+        "scope",
+        "counterexample_ids"
+      ],
+      "title": "LearnedConstraint",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "lineage_id": {
+          "minLength": 1,
+          "title": "Lineage Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "parent",
+            "derived_from",
+            "reused",
+            "constrained_by",
+            "invalidated_by"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lineage_id",
+        "relation"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "ProofObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "minimum_level": {
+          "$ref": "#/$defs/VerificationLevel"
+        },
+        "obligation_id": {
+          "minLength": 1,
+          "title": "Obligation Id",
+          "type": "string"
+        },
+        "property": {
+          "minLength": 1,
+          "title": "Property",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "obligation_id",
+        "property",
+        "minimum_level",
+        "scope"
+      ],
+      "title": "ProofObligation",
+      "type": "object"
+    },
+    "SemanticCategory": {
+      "enum": [
+        "exact",
+        "approximate",
+        "policy",
+        "resource",
+        "implementation",
+        "experimental"
+      ],
+      "title": "SemanticCategory",
+      "type": "string"
+    },
+    "TransformationDesignation": {
+      "enum": [
+        "semantics_preserving",
+        "approximate_within_quality_budget",
+        "policy",
+        "resource_only",
+        "runtime_implementation",
+        "experimental_operator_review"
+      ],
+      "title": "TransformationDesignation",
+      "type": "string"
+    },
+    "TransformationFamily": {
+      "enum": [
+        "algebraic_rewrite",
+        "tensor_decomposition",
+        "operator_fusion",
+        "layout_transformation",
+        "precision_transformation",
+        "quantization_transformation",
+        "scheduler_transformation",
+        "batching_transformation",
+        "cache_policy_transformation",
+        "state_layout_transformation",
+        "distributed_plan_transformation",
+        "communication_transformation",
+        "kernel_transformation",
+        "workflow_transformation",
+        "recovery_transformation",
+        "runtime_code_patch"
+      ],
+      "title": "TransformationFamily",
+      "type": "string"
+    },
+    "VerificationLevel": {
+      "enum": [
+        "level_0_build",
+        "level_1_differential",
+        "level_2_property",
+        "level_3_bounded_exhaustive",
+        "level_4_solver_backed",
+        "level_5_hardware_operational"
+      ],
+      "title": "VerificationLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "affected_regions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Affected Regions",
+      "type": "array"
+    },
+    "api_version": {
+      "const": "sloforge.io/genesis/v1",
+      "default": "sloforge.io/genesis/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "counterexample_references": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Counterexample References",
+      "type": "array"
+    },
+    "designation": {
+      "$ref": "#/$defs/TransformationDesignation"
+    },
+    "expected_performance_change": {
+      "items": {
+        "$ref": "#/$defs/EstimatedChange"
+      },
+      "title": "Expected Performance Change",
+      "type": "array"
+    },
+    "expected_quality_cost": {
+      "items": {
+        "$ref": "#/$defs/EstimatedChange"
+      },
+      "title": "Expected Quality Cost",
+      "type": "array"
+    },
+    "expected_resource_change": {
+      "items": {
+        "$ref": "#/$defs/EstimatedChange"
+      },
+      "title": "Expected Resource Change",
+      "type": "array"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "family": {
+      "$ref": "#/$defs/TransformationFamily"
+    },
+    "kind": {
+      "const": "Transformation",
+      "default": "Transformation",
+      "title": "Kind",
+      "type": "string"
+    },
+    "learned_constraints": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/LearnedConstraint"
+      },
+      "title": "Learned Constraints",
+      "type": "array"
+    },
+    "lineage_references": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/LineageReference"
+      },
+      "title": "Lineage References",
+      "type": "array"
+    },
+    "parent_transformations": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Parent Transformations",
+      "type": "array"
+    },
+    "postconditions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Postconditions",
+      "type": "array"
+    },
+    "preconditions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Preconditions",
+      "type": "array"
+    },
+    "proposal_source": {
+      "minLength": 1,
+      "title": "Proposal Source",
+      "type": "string"
+    },
+    "required_benchmark_stages": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Required Benchmark Stages",
+      "type": "array"
+    },
+    "required_verifier_stages": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Required Verifier Stages",
+      "type": "array"
+    },
+    "rollback_strategy": {
+      "minLength": 1,
+      "title": "Rollback Strategy",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "semantic_category": {
+      "$ref": "#/$defs/SemanticCategory"
+    },
+    "source_pattern": {
+      "$ref": "#/$defs/GenomePattern"
+    },
+    "target_pattern": {
+      "$ref": "#/$defs/GenomePattern"
+    },
+    "transformation_id": {
+      "minLength": 1,
+      "title": "Transformation Id",
+      "type": "string"
+    },
+    "verification_obligations": {
+      "items": {
+        "$ref": "#/$defs/ProofObligation"
+      },
+      "title": "Verification Obligations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "transformation_id",
+    "family",
+    "source_pattern",
+    "target_pattern",
+    "semantic_category",
+    "designation",
+    "preconditions",
+    "postconditions",
+    "expected_quality_cost",
+    "expected_resource_change",
+    "expected_performance_change",
+    "affected_regions",
+    "verification_obligations",
+    "required_verifier_stages",
+    "required_benchmark_stages",
+    "rollback_strategy",
+    "proposal_source"
+  ],
+  "title": "Transformation",
+  "type": "object"
+}
