@@ -1,0 +1,57 @@
+"""Proof-gated, restart-safe Genesis champion/challenger evolution."""
+
+from .controller import CapsuleValidator, EvolutionController, EvolutionError, classify_trigger
+from .fixture import run_local_evolution_fixture
+from .models import (
+    EVOLUTION_SCHEMA_VERSION,
+    PERSISTENCE_SCHEMA_VERSION,
+    CapsuleReference,
+    ChallengerRecord,
+    ChallengerSpec,
+    ChallengerStatus,
+    EvolutionAuditRecord,
+    EvolutionConfig,
+    EvolutionPhase,
+    EvolutionSnapshot,
+    EvolutionTrigger,
+    ExecutionTarget,
+    GateObservation,
+    GateStage,
+    IsolationContract,
+    IsolationMode,
+    PersistedEvolutionState,
+    StreamLease,
+    TransitionCategory,
+    TriggerObservation,
+)
+from .store import EvolutionPersistenceError, EvolutionStore
+
+__all__ = [
+    "EVOLUTION_SCHEMA_VERSION",
+    "PERSISTENCE_SCHEMA_VERSION",
+    "CapsuleReference",
+    "CapsuleValidator",
+    "ChallengerRecord",
+    "ChallengerSpec",
+    "ChallengerStatus",
+    "EvolutionAuditRecord",
+    "EvolutionConfig",
+    "EvolutionController",
+    "EvolutionError",
+    "EvolutionPersistenceError",
+    "EvolutionPhase",
+    "EvolutionSnapshot",
+    "EvolutionStore",
+    "EvolutionTrigger",
+    "ExecutionTarget",
+    "GateObservation",
+    "GateStage",
+    "IsolationContract",
+    "IsolationMode",
+    "PersistedEvolutionState",
+    "StreamLease",
+    "TransitionCategory",
+    "TriggerObservation",
+    "classify_trigger",
+    "run_local_evolution_fixture",
+]
