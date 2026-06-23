@@ -14,6 +14,9 @@ from rich.console import Console
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import InspectionResult, inspect_reference_package
 from sloforge.genesis.frontend.package import load_reference_package
+from sloforge.genesis.ir import canonical_hash, load_candidate, load_inference_genome
+from sloforge.genesis.search import CandidateDesign
+from sloforge.genesis.synthesis import CancellationPolicyVerifier, synthesize_local_run
 from sloforge.util import sha256_file
 
 genesis_app = typer.Typer(
@@ -200,6 +203,117 @@ def initialize_command(
             "seed": seed,
         }
     )
+
+
+def _validated_run(run: Path) -> tuple[dict[str, object], str]:
+    manifest_path = run / "run_manifest.json"
+    genome_path = run / "inference_genome.json"
+    if not manifest_path.is_file() or not genome_path.is_file():
+        raise typer.BadParameter("run is missing run_manifest.json or inference_genome.json")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict):
+        raise typer.BadParameter("run_manifest.json must be an object")
+    genome_hash = canonical_hash(load_inference_genome(genome_path))
+    if manifest.get("genome_hash") != genome_hash:
+        raise typer.BadParameter("run genome hash does not match its manifest")
+    return manifest, genome_hash
+
+
+@genesis_app.command("synthesize")
+def synthesize_command(
+    run: Annotated[Path, typer.Option("--run", exists=True, file_okay=False)],
+    budget_usd: Annotated[float, typer.Option("--budget-usd", min=0.0)] = 0.0,
+    objectives: Annotated[
+        Path | None, typer.Option("--objectives", exists=True, dir_okay=False)
+    ] = None,
+    seed: Annotated[int, typer.Option("--seed", min=0)] = 73129,
+) -> None:
+    """Run deterministic local synthesis; paid and external proposal engines remain off."""
+
+    _manifest, genome_hash = _validated_run(run)
+    requested_external = os.environ.get("SLOFORGE_GENESIS_ALLOW_EXTERNAL_SYNTHESIS") == "1"
+    if requested_external:
+        raise typer.BadParameter(
+            "external synthesis is not implemented by this deterministic local command"
+        )
+    request = {
+        "schema_version": "1.0.0",
+        "seed": seed,
+        "baseline_genome_hash": genome_hash,
+        "budget_usd_ceiling": budget_usd,
+        "spent_usd": 0.0,
+        "proposal_engine": "deterministic-local-cegis",
+        "external_synthesis": False,
+        "hardware_execution": False,
+        "objectives": None
+        if objectives is None
+        else {"path": str(objectives.resolve()), "sha256": sha256_file(objectives)},
+    }
+    request_path = run / "synthesis/request.json"
+    if request_path.exists():
+        existing = json.loads(request_path.read_text(encoding="utf-8"))
+        if existing != request:
+            raise typer.BadParameter("synthesis request already exists with different inputs")
+    else:
+        _atomic_json(request_path, request)
+    try:
+        result = synthesize_local_run(run, seed=seed, budget_usd=budget_usd)
+    except FileExistsError as error:
+        raise typer.BadParameter(str(error)) from error
+    payload = result.model_dump(mode="json")
+    payload["run"] = str(run.resolve())
+    payload["spent_usd"] = 0.0
+    _json_result(payload)
+    if result.accepted_candidate_id is None:
+        raise typer.Exit(code=1)
+
+
+@genesis_app.command("verify")
+def verify_command(
+    candidate: Annotated[Path, typer.Option("--candidate", exists=True)],
+) -> None:
+    """Independently recheck a synthesized candidate's scoped integrity and protocol claim."""
+
+    candidate_directory = candidate if candidate.is_dir() else candidate.parent
+    candidate_path = candidate_directory / "candidate.json" if candidate.is_dir() else candidate
+    design_path = candidate_directory / "candidate_design.json"
+    genome_path = candidate_directory / "inference_genome.json"
+    if not design_path.is_file() or not genome_path.is_file():
+        raise typer.BadParameter("candidate is missing design or genome evidence")
+    candidate_ir = load_candidate(candidate_path)
+    design = CandidateDesign.model_validate_json(
+        design_path.read_text(encoding="utf-8"), strict=True
+    )
+    genome = load_inference_genome(genome_path)
+    integrity_errors: list[str] = []
+    if candidate_ir.candidate_id != design.candidate_id:
+        integrity_errors.append("candidate identity mismatch")
+    if candidate_ir.genome_hash.value != canonical_hash(genome):
+        integrity_errors.append("candidate genome hash mismatch")
+    if candidate_ir.transformation_ids != tuple(
+        mutation.transformation_id for mutation in design.mutations
+    ):
+        integrity_errors.append("candidate transformation sequence mismatch")
+    outcome = CancellationPolicyVerifier().verify(design, None, seed=design.seed)
+    passed = not integrity_errors and outcome.passed
+    _json_result(
+        {
+            "candidate_id": candidate_ir.candidate_id,
+            "passed": passed,
+            "verification_level": "level-3-bounded-protocol-fixture",
+            "claim": "cancelled requests emit no subsequent committed token",
+            "scope": {
+                "protocol": "deadline batching cancellation fixture",
+                "seed": design.seed,
+                "universal_proof": False,
+            },
+            "integrity_errors": integrity_errors,
+            "evidence_id": outcome.evidence_id,
+            "failure": None if outcome.failure is None else outcome.failure.model_dump(mode="json"),
+        }
+    )
+    if not passed:
+        raise typer.Exit(code=1)
 
 
 __all__ = ["genesis_app"]
