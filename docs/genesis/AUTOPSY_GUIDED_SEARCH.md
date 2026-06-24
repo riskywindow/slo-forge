@@ -21,3 +21,9 @@ deltas without manufacturing missing measurements.
 This is causal search guidance, not correctness evidence. Every guided candidate still traverses
 the normal static, differential, property, model-check, resource, performance, capsule, and rollout
 gates. A changed bottleneck requires a new diagnosis and mutation budget.
+
+Focused tests exercise diagnosis confidence/alignment admission, network-bottleneck attribution,
+recursive freezing, mutation rejection and comparison metrics derived from supplied run summaries.
+They do not execute a real guided-versus-unguided hardware campaign, and the comparison API does
+not create benchmark measurements. Next-bottleneck and upside fields are populated only from the
+diagnosis evidence available to the caller.

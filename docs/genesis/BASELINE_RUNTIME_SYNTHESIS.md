@@ -50,3 +50,5 @@ PYTHONPATH=python pytest -q tests/python/test_genesis_runtime.py
 Reference code and generated bundles remain untrusted. Import and execution must occur inside the Genesis sandbox; runtime generation alone does not authorize traffic or promotion. The application does not open a network listener. A deployment adapter may expose HTTP/SSE only after sandbox, capsule, and promotion validation.
 
 Python cannot safely preempt an arbitrary native or Python operator in the worker thread. Request deadlines are enforced at every operator boundary, while the outer Genesis sandbox supplies the hard wall-clock and process cleanup boundary for a hung operator. The baseline supports request-owned state and explicitly rejects unsupported semantic recovery; state migration, distributed execution, and optimized kernels belong to later verified synthesis stages.
+
+The generated CPU runtime, subprocess correctness harness, streaming, cancellation, bounded queues, tamper detection and clean shutdown are exercised by focused tests. HTTP/SSE serving, GPU device execution, state migration, distributed workers and external deployment are not exercised by this baseline-runtime suite.

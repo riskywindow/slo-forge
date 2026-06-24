@@ -16,3 +16,9 @@ This surface does not claim that a structurally valid plan is fast, correct on u
 or deployable. It deliberately preserves the existing topology fingerprint and limits placement
 mutations to devices already present in the source plan. New hardware or parallelism degrees must
 go through the full Fabric compiler and profiler rather than this focused mutation path.
+
+Focused tests exercise collective algorithm/rank-order mutation, rank placement with aligned memory
+capacity records, stable hashes, Fabric schema revalidation, and rejection of an invalid rank
+permutation. KV-transfer, overlap, expert-placement and rank-placement types are implemented; the
+focused suite does not execute them on a real multi-GPU fabric or establish performance benefit.
+The local whole-run synthesis fixture does not currently include a distributed mutation.

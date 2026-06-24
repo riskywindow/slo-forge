@@ -50,3 +50,5 @@ The tests also prove that default inspection does not execute a source file whos
 ## Limits
 
 AST recovery is conservative. It does not prove numerical equivalence, resolve arbitrary Python reflection, infer mutation through opaque native extensions, or treat dynamic control flow as safe. Such cases remain obligations or unsupported diagnostics. `torch.export` provides additional graph evidence but does not replace the semantic and streaming contracts.
+
+The static path and HybridDecoder fixture are exercised in CPU tests. The optional `torch.export` path is exercised only when compatible PyTorch is installed and the fixture declares it. Inspection of arbitrary third-party packages, GPU export graphs, and opaque extension operators is unexercised unless a run artifact explicitly records it.
