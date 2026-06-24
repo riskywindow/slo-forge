@@ -22,6 +22,7 @@ from sloforge.synthbench import (
     generate_tasks,
     load_hidden_cases,
     run_cpu_benchmark,
+    run_synthbench_demo,
 )
 
 runner = CliRunner()
@@ -293,3 +294,13 @@ def test_synthbench_cli_generates_runs_and_compares_cpu_artifacts(tmp_path: Path
     comparison = json.loads((tmp_path / "comparison/comparison.json").read_text(encoding="utf-8"))
     assert comparison["source"] == "validated_synthbench_reports"
     assert comparison["hardware_comparison"] == "not_measured_in_cpu_profile"
+
+
+def test_synthbench_demo_produces_artifact_derived_cpu_summary(tmp_path: Path) -> None:
+    result = run_synthbench_demo(tmp_path / "demo", seed=73129, count=2)
+    assert result.task_count == 2
+    assert result.valid_system_rate == 1.0
+    assert result.exact_request_rate == 1.0
+    assert result.measured_cpu_seconds > 0
+    assert result.hardware_backed is False
+    assert Path(result.report_path).is_file()
