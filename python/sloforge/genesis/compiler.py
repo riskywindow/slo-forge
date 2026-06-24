@@ -5,7 +5,9 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, TypeAlias
+from typing import Any, Literal, TypeAlias, cast
+
+from pydantic import JsonValue
 
 from sloforge.genesis.frontend import InspectionResult, load_reference_package
 from sloforge.genesis.frontend.models import DiagnosticSeverity, StateFieldContract, TensorDomain
@@ -532,59 +534,33 @@ def compile_inference_genome(
                 layout="scalar",
             ),
         )
+    # Static AST inspection recovers a typed call inventory, but it does not
+    # recover SSA value bindings or output tensor metadata.  Treating source
+    # order as a linear data-flow graph would invent dependencies and make
+    # tensor rewrites unsound.  The baseline therefore keeps the declared
+    # input graph executable and records every unresolved operation as an
+    # explicit obligation.  A future/export-backed frontend may populate
+    # TensorOperator only after it supplies resolvable value bindings, shapes,
+    # dtypes, layouts, and aliasing.
     values = list(input_values)
     operators: list[TensorOperator] = []
-    previous_value_id = input_values[0].value_id
-    previous_value = input_values[0]
-    declared_states = {item.state_id for item in states}
-    for index, recovered in enumerate(inspection.graph.operators):
-        output_id = f"op-value-{index:05d}"
-        state_dependency = next(
-            (
-                state_id
-                for state_id in (*recovered.state_writes, *recovered.state_reads)
-                if state_id in declared_states
+    unresolved_operators: list[dict[str, Any]] = [
+        {
+            "operator_id": recovered.operator_id,
+            "symbol": recovered.symbol,
+            "category": recovered.category,
+            "declared_inputs": list(recovered.inputs),
+            "declared_outputs": list(recovered.outputs),
+            "location": recovered.location.model_dump(mode="json"),
+            "state_reads": list(recovered.state_reads),
+            "state_writes": list(recovered.state_writes),
+            "obligation": (
+                "recover SSA input/output bindings and tensor metadata before enabling "
+                "algebraic rewrites"
             ),
-            None,
-        )
-        values.append(
-            TensorValue(
-                node=_metadata(f"tensor.value.{output_id}", inspection, resource=resource),
-                value_id=output_id,
-                shape=previous_value.shape,
-                dtype=previous_value.dtype,
-                strides=previous_value.strides,
-                layout=previous_value.layout,
-                state_dependency=state_dependency,
-            )
-        )
-        operators.append(
-            TensorOperator(
-                node=_metadata(
-                    f"tensor.operator.{recovered.operator_id}",
-                    inspection,
-                    resource=resource,
-                    extensions=Extensions(
-                        root={
-                            "sloforge.dev/recovered-operation": {
-                                "category": recovered.category,
-                                "declared_inputs": list(recovered.inputs),
-                                "location": recovered.location.model_dump(mode="json"),
-                                "state_reads": list(recovered.state_reads),
-                                "state_writes": list(recovered.state_writes),
-                            }
-                        }
-                    ),
-                ),
-                operator_id=recovered.operator_id,
-                operator=recovered.symbol,
-                inputs=(previous_value_id,),
-                outputs=(output_id,),
-                numerical_contract="preserve reference Python evaluation order and dtype",
-            )
-        )
-        previous_value_id = output_id
-        previous_value = values[-1]
+        }
+        for recovered in inspection.graph.operators
+    ]
     tensor = TensorGenome(
         node=_metadata(
             "tensor",
@@ -594,6 +570,8 @@ def compile_inference_genome(
             extensions=Extensions(
                 root={
                     "sloforge.dev/recovered-graph": {
+                        "algebraic_graph_status": "unresolved_static_call_inventory",
+                        "unresolved_operators": cast(JsonValue, unresolved_operators),
                         "aliases": [
                             alias.model_dump(mode="json") for alias in inspection.graph.aliases
                         ],
@@ -608,7 +586,7 @@ def compile_inference_genome(
         values=tuple(values),
         operators=tuple(operators),
         graph_inputs=tuple(value.value_id for value in input_values),
-        graph_outputs=(previous_value_id,),
+        graph_outputs=tuple(value.value_id for value in input_values),
     )
 
     reference_hash = dict(package.source_hashes)[package.manifest.reference_module]
