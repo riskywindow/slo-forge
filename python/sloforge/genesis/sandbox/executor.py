@@ -57,13 +57,13 @@ def detect_capabilities() -> SandboxCapabilities:
             filesystem_write_isolation=IsolationStatus.ENFORCED,
             environment_sanitization=IsolationStatus.ENFORCED,
             cpu_limit=IsolationStatus.ENFORCED,
-            memory_limit=IsolationStatus.BEST_EFFORT,
+            memory_limit=IsolationStatus.UNAVAILABLE,
             process_limit=IsolationStatus.ENFORCED,
             output_limit=IsolationStatus.ENFORCED,
             child_cleanup=IsolationStatus.ENFORCED,
             limitations=(
                 "sandbox-exec is deprecated by Apple and must be revalidated after OS updates",
-                "RLIMIT_AS behavior varies across macOS runtime implementations",
+                "macOS interpreter mappings make RLIMIT_AS/DATA unsafe; use an outer container for memory isolation",
             ),
         )
     if system == "Linux" and shutil.which("bwrap") is not None:
@@ -94,7 +94,9 @@ def detect_capabilities() -> SandboxCapabilities:
         process_limit=IsolationStatus.BEST_EFFORT,
         output_limit=IsolationStatus.ENFORCED,
         child_cleanup=IsolationStatus.ENFORCED,
-        limitations=("no supported kernel sandbox backend was found; strict execution fails closed",),
+        limitations=(
+            "no supported kernel sandbox backend was found; strict execution fails closed",
+        ),
     )
 
 
@@ -128,7 +130,13 @@ def _canonical_paths(request: SandboxRequest) -> tuple[Path, tuple[Path, ...], P
     output = request.artifact_output_directory
     if output.exists() and output.is_symlink():
         raise ValueError("artifact output directory must not be a symlink")
-    output.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        if not output.is_dir():
+            raise ValueError("artifact output path must be a directory")
+        if any(output.iterdir()):
+            raise ValueError("artifact output directory must be empty")
+    else:
+        output.mkdir(parents=True)
     output = output.resolve(strict=True)
     (output / "tmp").mkdir(mode=0o700, exist_ok=True)
     (output / "home").mkdir(mode=0o700, exist_ok=True)
@@ -152,14 +160,18 @@ def _sandbox_string(path: Path) -> str:
 
 
 def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) -> str:
-    runtime_roots = tuple(
+    runtime_roots = list(
         dict.fromkeys(
             path
             for path in (
                 Path("/System"),
+                Path("/Library/Frameworks"),
+                Path("/Library/Preferences"),
                 Path("/usr/lib"),
                 Path("/usr/share"),
                 Path("/private/etc/localtime"),
+                Path("/private/var/db"),
+                Path("/private/var/select"),
                 Path(sys.base_prefix).resolve(),
                 Path(sys.prefix).resolve(),
                 executable.absolute(),
@@ -170,31 +182,61 @@ def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) 
             if path.exists()
         )
     )
-    reads = "\n".join(f"(allow file-read* (subpath {_sandbox_string(path)}))" for path in runtime_roots)
-    common = Path(os.path.commonpath([*(str(item) for item in read_only), str(output)]))
-    protected_roots = tuple(
-        dict.fromkeys(
-            path
-            for path in (Path.home().resolve(), common)
-            if path != Path("/") and path.exists()
-        )
+    # macOS presents /var and /tmp through /private firmlinks. Sandbox filters
+    # may receive either spelling even when pathlib.resolve() preserves the
+    # public spelling, so both must be explicit.
+    for path in tuple(runtime_roots):
+        spelling = str(path)
+        if (
+            spelling == "/var"
+            or spelling.startswith("/var/")
+            or spelling == "/tmp"
+            or spelling.startswith("/tmp/")
+        ):
+            runtime_roots.append(Path(f"/private{spelling}"))
+    runtime_roots = list(dict.fromkeys(runtime_roots))
+
+    read_exemptions = [
+        *(f"    (require-not (subpath {_sandbox_string(path)}))" for path in runtime_roots),
+    ]
+    ancestors = {Path("/")}
+    for path in runtime_roots:
+        ancestors.update(path.parents)
+    ancestors.update({Path("/dev/null"), Path("/dev/urandom")})
+    read_exemptions.extend(
+        f"    (require-not (literal {_sandbox_string(path)}))"
+        for path in sorted(ancestors, key=str)
     )
-    read_denials = "\n".join(
-        f"(deny file-read* (subpath {_sandbox_string(path)}))" for path in protected_roots
-    )
+
+    write_roots = [output]
+    output_spelling = str(output)
+    if (
+        output_spelling == "/var"
+        or output_spelling.startswith("/var/")
+        or output_spelling == "/tmp"
+        or output_spelling.startswith("/tmp/")
+    ):
+        write_roots.append(Path(f"/private{output_spelling}"))
+    write_exemptions = [
+        *(f"    (require-not (subpath {_sandbox_string(path)}))" for path in write_roots),
+        '    (require-not (literal "/dev/null"))',
+    ]
     return "\n".join(
         (
             "(version 1)",
             "(allow default)",
             "(deny network*)",
             "(deny process-fork)",
-            "(deny file-write*)",
-            read_denials,
-            reads,
-            f"(allow file-read* (subpath {_sandbox_string(output)}))",
-            f"(allow file-write* (subpath {_sandbox_string(output)}))",
-            "(allow file-read* file-write* (literal \"/dev/null\"))",
-            "(allow file-read* (literal \"/dev/urandom\"))",
+            "(deny file-write*",
+            "  (require-all",
+            *write_exemptions,
+            "  )",
+            ")",
+            "(deny file-read*",
+            "  (require-all",
+            *read_exemptions,
+            "  )",
+            ")",
         )
     )
 
@@ -265,7 +307,13 @@ def _limit_resources(request: SandboxRequest) -> None:
             return
 
     apply_required_limit(resource.RLIMIT_CPU, limits.cpu_time_seconds)
-    apply_best_effort_limit(resource.RLIMIT_AS, limits.memory_bytes)
+    # RLIMIT_AS/DATA on macOS counts large interpreter mappings and can abort a
+    # small Python workload before its first instruction. The capability report
+    # therefore declares memory isolation unavailable on macOS; callers that
+    # require it must add an outer VM/container instead of receiving a false
+    # assurance. Linux retains the address-space limit.
+    if platform.system() != "Darwin":
+        apply_best_effort_limit(resource.RLIMIT_AS, limits.memory_bytes)
     # macOS RLIMIT_NPROC is per-user; lowering it below the host's current
     # process count prevents sandbox-exec itself from starting its target.
     # The macOS policy denies process-fork outright, which is stronger.
