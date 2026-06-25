@@ -568,7 +568,7 @@ def capsule_validate_command(
             "hardware_backed": False,
         }
     )
-    if not report.promotion_eligible:
+    if not report.local_evolution_eligible:
         raise typer.Exit(code=1)
 
 
@@ -588,8 +588,8 @@ def benchmark_command(
     if not verified:
         detail = "; ".join(integrity_errors) or "bounded protocol verification failed"
         raise typer.BadParameter(f"candidate failed independent verification: {detail}")
-    if candidate_ir.state is not CandidateSuccessState.PROPERTY_TESTED:
-        raise typer.BadParameter("benchmarking requires a property-tested candidate")
+    if candidate_ir.state is not CandidateSuccessState.SIMULATED:
+        raise typer.BadParameter("benchmarking requires a model-checked and simulated candidate")
     try:
         suite_document = yaml.safe_load(suite.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError) as error:
@@ -713,11 +713,11 @@ def _capsule_reference(
     manifest_path: Path,
 ) -> CapsuleReference:
     if (
-        not report.promotion_eligible
+        not report.local_evolution_eligible
         or report.capsule_digest is None
         or report.candidate_genome_hash is None
     ):
-        raise typer.BadParameter("capsule is not independently promotion-eligible")
+        raise typer.BadParameter("capsule is not independently eligible for local evolution")
     return CapsuleReference(
         capsule_id=f"capsule-{report.capsule_digest.value[:16]}",
         capsule_digest=report.capsule_digest.value,
@@ -882,6 +882,8 @@ def _trigger_observation(trigger: str, *, event_id: str, observed_at_ms: int) ->
 def evolve_command(
     deployment: Annotated[str, typer.Option("--deployment")],
     trigger: Annotated[str, typer.Option("--trigger")],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
     budget_usd: Annotated[float, typer.Option("--budget-usd", min=0.0)] = 0.0,
     controller_state: Annotated[Path | None, typer.Option("--controller-state")] = None,
     event_id: Annotated[str, typer.Option("--event-id")] = "cli-evolve",
@@ -896,12 +898,17 @@ def evolve_command(
     if not state_path.is_file():
         raise typer.BadParameter(f"local controller state does not exist: {state_path}")
 
-    def unavailable_validator(_path: Path) -> CapsuleValidationReport:
-        raise ValueError("capsule validation is unavailable during trigger-only evolution")
+    def validator(path: Path) -> CapsuleValidationReport:
+        _document, _root, report = _validated_capsule(
+            path,
+            context=context,
+            expected_digest=expected_digest,
+        )
+        return report
 
     controller = EvolutionController.restore(
         store=EvolutionStore(state_path),
-        capsule_validator=unavailable_validator,
+        capsule_validator=validator,
         config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
     )
     if controller.snapshot.deployment_id != deployment:
@@ -947,7 +954,10 @@ def compare_command(
     challenger_document, _challenger_root, challenger_report = _validated_capsule(
         challenger, context=challenger_context, expected_digest=challenger_digest
     )
-    if not champion_report.promotion_eligible or not challenger_report.promotion_eligible:
+    if not (
+        champion_report.local_evolution_eligible
+        and challenger_report.local_evolution_eligible
+    ):
         raise typer.BadParameter("both capsules must pass independent validation")
     champion_evidence = {item.evidence_id for item in champion_document.evidence}
     challenger_evidence = {item.evidence_id for item in challenger_document.evidence}
@@ -1013,7 +1023,7 @@ def replay_command(
     document, root, report = _validated_capsule(
         capsule, context=context, expected_digest=expected_digest
     )
-    if not report.promotion_eligible:
+    if not report.local_evolution_eligible:
         raise typer.BadParameter("capsule failed independent validation")
     with tempfile.TemporaryDirectory(prefix="sloforge-genesis-replay-") as temporary:
         temporary_root = Path(temporary)

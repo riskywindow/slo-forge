@@ -497,6 +497,8 @@ class CapsuleValidationReport(CapsuleModel):
     promotion_eligible: bool
     checked_at: AwareDatetime
     issues: tuple[ValidationIssue, ...]
+    local_evolution_eligible: bool = False
+    external_production_eligible: bool = False
 
 
 def verification_level_rank(level: VerificationLevel) -> int:

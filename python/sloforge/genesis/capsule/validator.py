@@ -11,6 +11,8 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytecode_document
+
 from .canonical import calculate_capsule_digest, canonical_json
 from .models import (
     ArtifactRef,
@@ -28,6 +30,7 @@ from .models import (
     ValidationContext,
     ValidationIssue,
     ValidationIssueCode,
+    VerificationLevel,
     verification_level_rank,
 )
 from .statistics import bootstrap_median_interval, paired_regression_probability
@@ -179,6 +182,8 @@ def _validate_runtime_bundle(
                 != config["policy_bytecode_sha256"]
             ):
                 raise ValueError("runtime policy dependency digest mismatch")
+            policy = load_bytecode_document(archive.read(policy_path))
+            authenticate_bytecode_source(policy, archive.read("policy.slo"))
             tokenizer = f"reference_package/{package_manifest['tokenizer_module']}"
             if tokenizer not in actual_entries or hashlib.sha256(
                 archive.read(tokenizer)
@@ -190,6 +195,23 @@ def _validate_runtime_bundle(
             ValidationIssueCode.ARTIFACT_TAMPERED,
             prefix,
             f"generated runtime bundle is incomplete or inconsistent: {error}",
+        )
+
+
+def _validate_policy_artifacts(resolved: dict[str, Path], issues: list[ValidationIssue]) -> None:
+    bytecode_path = resolved.get("generated-policy-bytecode")
+    source_path = resolved.get("generated-policy")
+    if bytecode_path is None or source_path is None:
+        return
+    try:
+        program = load_bytecode_document(bytecode_path.read_bytes())
+        authenticate_bytecode_source(program, source_path.read_bytes())
+    except (OSError, ValueError) as error:
+        _append(
+            issues,
+            ValidationIssueCode.ARTIFACT_TAMPERED,
+            "artifacts.generated-policy-bytecode",
+            f"generated policy is malformed or unauthenticated: {error}",
         )
 
 
@@ -497,6 +519,8 @@ def validate_capsule(
             and artifact.media_type == "application/zip"
         ):
             _validate_runtime_bundle(capsule, artifact, path, issues)
+
+    _validate_policy_artifacts(resolved, issues)
 
     evidence = {record.evidence_id: record for record in capsule.evidence}
     trust_anchors = {item.evidence_id: item for item in context.trusted_evidence_anchors}
@@ -879,6 +903,21 @@ def validate_capsule(
         if promotion_claims
         else None
     )
+    local_evolution_eligible = not issues
+    production_categories = {ClaimCategory.PERFORMANCE, ClaimCategory.OPERATIONAL}
+    production_claims = tuple(
+        claim
+        for claim in promotion_claims
+        if claim.category in production_categories
+    )
+    external_production_eligible = bool(
+        local_evolution_eligible
+        and {claim.category for claim in production_claims} == production_categories
+        and all(
+            claim.level is VerificationLevel.HARDWARE_OPERATIONAL
+            for claim in production_claims
+        )
+    )
     return CapsuleValidationReport(
         capsule_digest=capsule.capsule_digest,
         candidate_genome_hash=capsule.identity.candidate_genome_hash,
@@ -886,7 +925,9 @@ def validate_capsule(
         integrity_valid=integrity_valid,
         contract_compatible=contract_compatible,
         evidence_complete=evidence_complete,
-        promotion_eligible=not issues,
+        promotion_eligible=external_production_eligible,
         checked_at=context.now,
         issues=tuple(issues),
+        local_evolution_eligible=local_evolution_eligible,
+        external_production_eligible=external_production_eligible,
     )

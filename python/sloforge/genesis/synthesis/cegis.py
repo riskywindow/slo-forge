@@ -167,6 +167,7 @@ def _counterexample(
     seed: int,
     minimized: bool,
     parent_id: str | None,
+    counterexample_directory: Path,
 ) -> Counterexample:
     identity = hashlib.sha256(
         canonical_json(
@@ -180,8 +181,9 @@ def _counterexample(
             }
         )
     ).hexdigest()
+    counterexample_id = f"counterexample-{identity[:24]}"
     return Counterexample(
-        counterexample_id=f"counterexample-{identity[:24]}",
+        counterexample_id=counterexample_id,
         candidate_id=candidate.candidate_id,
         transformation_id=failure.transformation_id,
         violated_contract=failure.violated_contract,
@@ -196,6 +198,8 @@ def _counterexample(
                 candidate.candidate_id,
                 "--seed",
                 str(candidate.seed),
+                "--counterexample",
+                str((counterexample_directory / f"{counterexample_id}.json").resolve()),
             ),
             timeout_seconds=30,
             seed=candidate.seed,
@@ -289,6 +293,7 @@ class CegisRunner:
                 seed=seed,
                 minimized=False,
                 parent_id=None,
+                counterexample_directory=self.output_directory / "counterexamples",
             )
             counterexample_directory = self.output_directory / "counterexamples"
             write_canonical(
@@ -316,6 +321,7 @@ class CegisRunner:
                 seed=seed,
                 minimized=True,
                 parent_id=original.counterexample_id,
+                counterexample_directory=counterexample_directory,
             )
             write_canonical(compact, counterexample_directory / f"{compact.counterexample_id}.json")
             counterexample_ids.append(compact.counterexample_id)
@@ -326,6 +332,17 @@ class CegisRunner:
                 counterexample_id=compact.counterexample_id,
             )
             learned = self.verifier.generalize(candidate, failure, compact)
+            relevant_families = {
+                mutation.family
+                for mutation in candidate.mutations
+                if mutation.transformation_id == failure.transformation_id
+            }
+            if relevant_families != {learned.family}:
+                raise ValueError("generalized constraint family does not match the failure")
+            if learned.learned.counterexample_ids != (compact.counterexample_id,):
+                raise ValueError("generalized constraint must cite the minimized counterexample")
+            if not learned.rejects(candidate):
+                raise ValueError("generalized constraint does not reject its failing candidate")
             self.constraints.add(learned)
             constraint_ids.append(learned.learned.constraint_id)
             self._event(

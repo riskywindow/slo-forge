@@ -12,10 +12,12 @@ from typer.testing import CliRunner
 
 from sloforge.cli.main import app
 from sloforge.genesis.capsule import (
+    Digest,
     RawBenchmarkSamples,
     ValidationContext,
     build_local_capsule,
     load_capsule,
+    seal_capsule,
     validate_capsule,
 )
 from sloforge.genesis.runtime import load_generated_runtime
@@ -87,7 +89,9 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     observed_at = datetime(2026, 8, 2, 12, 0, tzinfo=UTC)
     result = build_local_capsule(candidate, output, observed_at=observed_at)
 
-    assert result.promotion_eligible
+    assert result.local_evolution_eligible
+    assert not result.promotion_eligible
+    assert not result.external_production_eligible
     assert result.hardware_backed is False
     assert Path(result.context_path).parent == output.parent
     assert not Path(result.context_path).is_relative_to(output)
@@ -96,7 +100,9 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
         Path(result.context_path).read_bytes(), strict=True
     )
     report = validate_capsule(capsule, output, context)
-    assert report.promotion_eligible
+    assert report.local_evolution_eligible
+    assert not report.promotion_eligible
+    assert not report.external_production_eligible
     assert report.issues == ()
     assert capsule.unverified_assumptions
     assert all(
@@ -154,6 +160,18 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     policy_path.write_bytes(policy_path.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="policy bytecode digest"):
         load_generated_runtime(extracted / "runtime_config.json", seed=73129)
+    hostile_runtime_policy = json.loads(policy_path.read_bytes())
+    hostile_runtime_policy["instructions"][-1]["opcode"] = "dynamic_import"
+    hostile_runtime_payload = json.dumps(
+        hostile_runtime_policy, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    policy_path.write_bytes(hostile_runtime_payload)
+    runtime_config_path = extracted / "runtime_config.json"
+    runtime_config = json.loads(runtime_config_path.read_bytes())
+    runtime_config["policy_bytecode_sha256"] = hashlib.sha256(hostile_runtime_payload).hexdigest()
+    runtime_config_path.write_text(json.dumps(runtime_config), encoding="utf-8")
+    with pytest.raises(ValueError, match="forbidden opcode"):
+        load_generated_runtime(runtime_config_path, seed=73129)
 
     quality = json.loads((output / by_id["quality-evidence"].path).read_text())
     assert quality["observed"] == 1.0
@@ -225,7 +243,8 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
         ],
     )
     assert validated.exit_code == 0, validated.output
-    assert '"promotion_eligible": true' in validated.output
+    assert '"local_evolution_eligible": true' in validated.output
+    assert '"promotion_eligible": false' in validated.output
 
     comparison = runner.invoke(
         app,
@@ -279,6 +298,10 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
             "workload-drift",
             "--controller-state",
             str(controller_state),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
             "--budget-usd",
             "25",
         ],
@@ -417,3 +440,69 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
         ],
     )
     assert rejected_replay.exit_code != 0
+
+
+def test_hostile_policy_bytecode_is_rejected_at_build_and_capsule_validation(
+    tmp_path: Path,
+) -> None:
+    candidate = _accepted_candidate(tmp_path)
+    policy_path = candidate / "policy.bytecode.json"
+    original = policy_path.read_bytes()
+    hostile_document = json.loads(original)
+    hostile_document["instructions"][-1]["opcode"] = "dynamic_import"
+    hostile = json.dumps(
+        hostile_document, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    policy_path.write_bytes(hostile)
+    with pytest.raises(ValueError, match="forbidden opcode"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "rejected-capsule",
+            observed_at=datetime(2026, 8, 2, 12, 0, tzinfo=UTC),
+        )
+    policy_path.write_bytes(original)
+
+    output = tmp_path / "valid-capsule"
+    result = build_local_capsule(
+        candidate,
+        output,
+        observed_at=datetime(2026, 8, 2, 12, 0, tzinfo=UTC),
+    )
+    capsule = load_capsule(Path(result.capsule_path))
+    context = ValidationContext.model_validate_json(
+        Path(result.context_path).read_bytes(), strict=True
+    )
+    policy_artifact = next(
+        item for item in capsule.artifacts if item.artifact_id == "generated-policy-bytecode"
+    )
+    capsule_policy_path = output / policy_artifact.path
+    capsule_policy_path.chmod(0o644)
+    capsule_policy_path.write_bytes(hostile)
+    hostile_ref = policy_artifact.model_copy(
+        update={
+            "digest": Digest(value=hashlib.sha256(hostile).hexdigest()),
+            "size_bytes": len(hostile),
+        }
+    )
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "artifacts": tuple(
+                    hostile_ref if item.artifact_id == hostile_ref.artifact_id else item
+                    for item in capsule.artifacts
+                ),
+            }
+        )
+    )
+    assert resealed.capsule_digest is not None
+    report = validate_capsule(
+        resealed,
+        output,
+        context.model_copy(update={"expected_capsule_digest": resealed.capsule_digest}),
+    )
+    assert not report.promotion_eligible
+    assert any(
+        issue.path == "artifacts.generated-policy-bytecode" and "forbidden opcode" in issue.message
+        for issue in report.issues
+    )
