@@ -4,6 +4,15 @@ set -euo pipefail
 repository_root="$(git rev-parse --show-toplevel)"
 revision="$(git -C "$repository_root" rev-parse HEAD)"
 image="sloforge-genesis-smoke:${revision:0:12}"
+cleanup() {
+  docker image rm --force "$image" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT INT TERM
+
+if ! docker info >/dev/null 2>&1; then
+  echo "error: Docker daemon is unavailable; Genesis Docker smoke was not exercised" >&2
+  exit 1
+fi
 
 docker build \
   --file "$repository_root/deploy/docker/Genesis.Dockerfile" \

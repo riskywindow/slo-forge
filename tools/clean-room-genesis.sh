@@ -4,6 +4,7 @@ set -euo pipefail
 repository_root="$(git rev-parse --show-toplevel)"
 revision="$(git -C "$repository_root" rev-parse HEAD)"
 clean_root="$(mktemp -d "${TMPDIR:-/tmp}/sloforge-genesis-clean.XXXXXX")"
+result_root="${SLOFORGE_GENESIS_CLEANROOM_RESULT_ROOT:-$repository_root/artifacts/genesis/clean-room}"
 cleanup() {
   rm -rf -- "$clean_root"
 }
@@ -11,13 +12,16 @@ trap cleanup EXIT INT TERM
 
 git -C "$repository_root" archive "$revision" | tar -x -C "$clean_root"
 printf '%s\n' "$revision" > "$clean_root/.sloforge-source-commit"
-make -C "$clean_root" bootstrap
-make -C "$clean_root" genesis-check
-make -C "$clean_root" genesis-demo
-make -C "$clean_root" synthbench-smoke
-make -C "$clean_root" package
+{
+  make -C "$clean_root" bootstrap
+  make -C "$clean_root" genesis-check
+  make -C "$clean_root" genesis-demo
+  make -C "$clean_root" synthbench-smoke
+  make -C "$clean_root" package
+} 2>&1 | tee "$clean_root/genesis-clean-room.log"
 
 python3 - "$clean_root" "$revision" <<'PY'
+import hashlib
 import json
 import pathlib
 import sys
@@ -37,6 +41,9 @@ assert synthbench["exact_request_rate"] == 1.0
     json.dumps(
         {
             "revision": revision,
+            "log_sha256": hashlib.sha256(
+                (root / "genesis-clean-room.log").read_bytes()
+            ).hexdigest(),
             "genesis_check": "passed",
             "genesis_demo": "passed",
             "synthbench_smoke": "passed",
@@ -50,4 +57,7 @@ assert synthbench["exact_request_rate"] == 1.0
     encoding="utf-8",
 )
 PY
+mkdir -p "$result_root"
+cp "$clean_root/artifacts/genesis/clean-room-result.json" "$result_root/result.json"
+cp "$clean_root/genesis-clean-room.log" "$result_root/run.log"
 echo "Genesis clean-room validation passed for $revision"
