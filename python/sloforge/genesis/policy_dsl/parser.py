@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Iterator
 
+from .limits import (
+    MAX_POLICY_DOCUMENT_BYTES,
+    MAX_POLICY_FLOAT_ABS,
+    MAX_POLICY_INTEGER_ABS,
+    MAX_POLICY_NAME_BYTES,
+    MAX_POLICY_VARIABLES,
+)
 from .model import (
     Binary,
     Clamp,
@@ -20,7 +28,7 @@ from .model import (
     VariableSpec,
 )
 
-_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
+_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _TOKEN = re.compile(
     r"\s*(?:(?P<number>-?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+))|"
     r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)|(?P<open>\()|(?P<close>\)))"
@@ -46,12 +54,20 @@ _BINARY = {
 
 def _scalar(text: str, scalar_type: ScalarType | None = None) -> Scalar:
     lowered = text.lower()
+    if lowered in {"nan", "inf", "+inf", "-inf", "infinity", "+infinity", "-infinity"}:
+        raise PolicyError("non-finite numbers are forbidden")
     if lowered in {"true", "false"}:
         value: Scalar = lowered == "true"
     elif "." in text:
         value = float(text)
+        if not math.isfinite(value) or abs(value) > MAX_POLICY_FLOAT_ABS:
+            raise PolicyError("float must be a bounded finite number")
     else:
+        if len(text.removeprefix("-")) > 19:
+            raise PolicyError("integer exceeds the absolute policy bound")
         value = int(text)
+        if abs(value) > MAX_POLICY_INTEGER_ABS:
+            raise PolicyError("integer exceeds the absolute policy bound")
     if scalar_type is ScalarType.BOOL and type(value) is not bool:
         raise PolicyError(f"expected boolean bound, got {text!r}")
     if scalar_type is ScalarType.INT and type(value) is not int:
@@ -92,6 +108,8 @@ class _TokenStream:
 def _parse_expr(stream: _TokenStream) -> Expr:
     token = stream.pop()
     if token != "(":
+        if token.lower() in {"nan", "inf", "infinity"}:
+            raise PolicyError("non-finite numbers are forbidden")
         if token in {"true", "false"}:
             return Literal(token == "true")
         if token[0].isdigit() or token[0] in {"-", "."}:
@@ -123,20 +141,34 @@ def _meaningful_lines(source: str) -> Iterator[str]:
 
 
 def parse_policy(source: str) -> PolicyProgram:
+    if not 1 <= len(source.encode("utf-8")) <= MAX_POLICY_DOCUMENT_BYTES:
+        raise PolicyError("policy source exceeds the absolute document bound")
     lines = list(_meaningful_lines(source))
     if len(lines) < 3:
         raise PolicyError("policy requires a header, output, and return expression")
     header = lines.pop(0).split()
-    if len(header) != 2 or header[0] != "policy" or _NAME.fullmatch(header[1]) is None:
+    if (
+        len(header) != 2
+        or header[0] != "policy"
+        or _NAME.fullmatch(header[1]) is None
+        or len(header[1].encode("utf-8")) > MAX_POLICY_NAME_BYTES
+    ):
         raise PolicyError("first line must be 'policy <name>'")
     inputs: list[VariableSpec] = []
     output: VariableSpec | None = None
     return_source: str | None = None
     maximum_operations = 256
+    output_seen = False
+    return_seen = False
     for line in lines:
         fields = line.split()
         if fields[0] == "input" and len(fields) == 5:
-            scalar_type = ScalarType(fields[2])
+            try:
+                scalar_type = ScalarType(fields[2])
+            except ValueError as error:
+                raise PolicyError(f"unknown scalar type {fields[2]!r}") from error
+            if len(inputs) >= MAX_POLICY_VARIABLES:
+                raise PolicyError(f"policy has more than {MAX_POLICY_VARIABLES} inputs")
             inputs.append(
                 VariableSpec(
                     name=fields[1],
@@ -146,7 +178,13 @@ def parse_policy(source: str) -> PolicyProgram:
                 )
             )
         elif fields[0] == "output" and len(fields) == 4:
-            scalar_type = ScalarType(fields[1])
+            if output_seen:
+                raise PolicyError("policy has more than one output declaration")
+            output_seen = True
+            try:
+                scalar_type = ScalarType(fields[1])
+            except ValueError as error:
+                raise PolicyError(f"unknown scalar type {fields[1]!r}") from error
             output = VariableSpec(
                 name="output",
                 scalar_type=scalar_type,
@@ -154,15 +192,23 @@ def parse_policy(source: str) -> PolicyProgram:
                 upper=_scalar(fields[3], scalar_type),
             )
         elif fields[0] == "limit" and len(fields) == 2:
-            maximum_operations = int(fields[1])
+            parsed_limit = _scalar(fields[1], ScalarType.INT)
+            assert type(parsed_limit) is int
+            maximum_operations = parsed_limit
         elif line.startswith("return "):
+            if return_seen:
+                raise PolicyError("policy has more than one return declaration")
+            return_seen = True
             return_source = line.removeprefix("return ").strip()
         else:
             raise PolicyError(f"invalid policy declaration {line!r}")
     if output is None or return_source is None:
         raise PolicyError("policy requires exactly one output and return declaration")
     tokens = _TokenStream(_tokens(return_source))
-    expression = _parse_expr(tokens)
+    try:
+        expression = _parse_expr(tokens)
+    except RecursionError as error:
+        raise PolicyError("policy expression nesting exceeds the parser bound") from error
     if not tokens.at_end():
         raise PolicyError("trailing tokens after return expression")
     return PolicyProgram(

@@ -4,17 +4,21 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections import deque
 from dataclasses import asdict, replace
 
 from .model import (
     DType,
+    OperatorParameters,
     RewriteApplication,
     RewriteCandidate,
     RewriteError,
     RewriteKind,
     RewriteRule,
     SemanticCategory,
+    StateAtomicityEvidence,
+    StateOwnershipEvidence,
     TensorGraph,
     TensorNode,
     TensorSpec,
@@ -54,6 +58,19 @@ def validate_graph(graph: TensorGraph) -> None:
                 raise RewriteError("cast requires one input and target_dtype")
             if node.output.dtype is not node.parameters.target_dtype:
                 raise RewriteError("cast output dtype must equal target_dtype")
+        if node.operator == "quantize":
+            if len(node.inputs) != 1 or node.parameters.target_dtype is None:
+                raise RewriteError("quantize requires one input and target_dtype")
+            source = known[node.inputs[0]].output
+            if source.dtype not in _FLOAT_DTYPES:
+                raise RewriteError("quantize source must have a floating dtype")
+            expected = replace(
+                source,
+                dtype=node.parameters.target_dtype,
+                alias_group=None,
+            )
+            if node.output != expected:
+                raise RewriteError("quantize output must preserve the full source contract")
         if node.operator == "transpose":
             permutation = node.parameters.permutation
             if len(node.inputs) != 1 or permutation is None:
@@ -159,10 +176,10 @@ def _apply_at(
         return None
     if rule.kind is RewriteKind.REDUNDANT_CAST and node.operator == "cast":
         source = by_id[node.inputs[0]]
-        if source.output.dtype is node.output.dtype and source.output.shape == node.output.shape:
+        if source.output == node.output:
             return (
                 _replace_reference(graph, node.node_id, source.node_id, remove={node.node_id}),
-                _application(rule, (node.node_id,), 0.0, ("dtype_equal", "shape_equal")),
+                _application(rule, (node.node_id,), 0.0, ("full_output_contract_equal",)),
             )
     if rule.kind is RewriteKind.DOUBLE_TRANSPOSE and node.operator == "transpose":
         inner = by_id[node.inputs[0]]
@@ -181,7 +198,7 @@ def _apply_at(
                     rule,
                     (inner.node_id, node.node_id),
                     0.0,
-                    ("inverse_permutations", "shape_and_layout_equal"),
+                    ("inverse_permutations", "full_output_contract_equal"),
                 ),
             )
     if rule.kind in {RewriteKind.ADD_ZERO, RewriteKind.MUL_ONE} and node.operator in {
@@ -203,13 +220,15 @@ def _apply_at(
             and node.output.numerical.preserve_signed_zero
         ):
             return None
+        if source.output != node.output:
+            return None
         return (
             _replace_reference(graph, node.node_id, source.node_id, remove={node.node_id}),
             _application(
                 rule,
                 (constant.node_id, node.node_id),
                 0.0,
-                ("identity_constant", "dtype_contract", "shape_equal"),
+                ("identity_constant", "full_output_contract_equal"),
             ),
         )
     if rule.kind is RewriteKind.REASSOCIATE_ADD and node.operator == "add":
@@ -223,8 +242,13 @@ def _apply_at(
             return None
         right = TensorNode(right_id, "add", (b, c), node.output)
         rewritten = replace(node, inputs=(a, right_id))
-        nodes = tuple(right if item.node_id == node.node_id else item for item in graph.nodes)
-        nodes += (rewritten,)
+        ordered: list[TensorNode] = []
+        for item in graph.nodes:
+            if item.node_id == node.node_id:
+                ordered.extend((right, rewritten))
+            else:
+                ordered.append(item)
+        nodes = tuple(ordered)
         candidate = _prune(TensorGraph(nodes, graph.outputs))
         return (
             candidate,
@@ -243,6 +267,10 @@ def _apply_at(
             return None
         if node.parameters.state_key != node.output.state_dependency:
             return None
+        if node.parameters.state_ownership is not StateOwnershipEvidence.EXCLUSIVE:
+            return None
+        if node.parameters.state_atomicity is not StateAtomicityEvidence.PER_TOKEN:
+            return None
         fused = replace(node, operator="fused_state_add", inputs=update.inputs)
         candidate = _prune(
             TensorGraph(
@@ -256,31 +284,44 @@ def _apply_at(
                 rule,
                 (update.node_id, node.node_id),
                 0.0,
-                ("exclusive_state_dependency", "state_key_equal"),
+                (
+                    "exclusive_state_ownership_evidence",
+                    "per_token_atomicity_evidence",
+                    "state_key_equal",
+                ),
             ),
         )
     if rule.kind is RewriteKind.QUANTIZE_OUTPUT and node.node_id in graph.outputs:
         if (
             node.output.dtype not in _FLOAT_DTYPES
             or node.output.numerical.maximum_absolute_error <= 0
+            or rule.maximum_quality_cost
+            > node.output.numerical.maximum_absolute_error
+            or node.output.numerical.preserve_nan
+            or node.output.numerical.preserve_infinity
+            or node.output.numerical.preserve_signed_zero
         ):
             return None
-        quantized = replace(
-            node,
+        quantized_id = f"{node.node_id}.quantized"
+        if quantized_id in by_id:
+            return None
+        quantized = TensorNode(
+            node_id=quantized_id,
             operator="quantize",
-            output=replace(node.output, dtype=DType.INT8),
-            parameters=replace(node.parameters, target_dtype=DType.INT8),
+            inputs=(node.node_id,),
+            output=replace(node.output, dtype=DType.INT8, alias_group=None),
+            parameters=OperatorParameters(target_dtype=DType.INT8),
         )
         candidate = TensorGraph(
-            tuple(quantized if item.node_id == node.node_id else item for item in graph.nodes),
-            graph.outputs,
+            (*graph.nodes, quantized),
+            tuple(quantized_id if output == node.node_id else output for output in graph.outputs),
         )
         validate_graph(candidate)
         return (
             candidate,
             _application(
                 rule,
-                (node.node_id,),
+                (node.node_id, quantized_id),
                 rule.maximum_quality_cost,
                 ("quality_tolerance_nonzero", "int8_domain"),
             ),
@@ -295,8 +336,18 @@ def apply_rule(
     quality_budget: float = 0.0,
 ) -> tuple[tuple[TensorGraph, RewriteApplication], ...]:
     validate_graph(graph)
-    if quality_budget < 0:
-        raise RewriteError("quality budget must be non-negative")
+    if not math.isfinite(quality_budget) or quality_budget < 0:
+        raise RewriteError("quality budget must be finite and non-negative")
+    if (
+        not rule.rule_id
+        or not rule.supported_dtypes
+        or not rule.verification_obligations
+        or not math.isfinite(rule.maximum_quality_cost)
+        or rule.maximum_quality_cost < 0
+    ):
+        raise RewriteError("rewrite rule metadata is incomplete or invalid")
+    if rule.semantic_category is SemanticCategory.EXACT and rule.maximum_quality_cost != 0:
+        raise RewriteError("exact rewrite rules cannot declare quality cost")
     results: list[tuple[TensorGraph, RewriteApplication]] = []
     seen: set[str] = set()
     for node in graph.nodes:
@@ -319,6 +370,8 @@ def explore_rewrites(
     maximum_depth: int = 4,
 ) -> tuple[RewriteCandidate, ...]:
     validate_graph(graph)
+    if not math.isfinite(quality_budget) or quality_budget < 0:
+        raise RewriteError("quality budget must be finite and non-negative")
     if maximum_candidates <= 0 or maximum_depth < 0:
         raise RewriteError("candidate and depth bounds must be valid")
     root_key = structural_key(graph)
@@ -329,8 +382,16 @@ def explore_rewrites(
         current, history, depth = queue.popleft()
         if depth >= maximum_depth:
             continue
+        spent = math.fsum(application.quality_cost for application in history)
+        remaining_quality = max(0.0, quality_budget - spent)
         for rule in rules:
-            for candidate, application in apply_rule(current, rule, quality_budget=quality_budget):
+            for candidate, application in apply_rule(
+                current,
+                rule,
+                quality_budget=remaining_quality,
+            ):
+                if spent + application.quality_cost > quality_budget + 1e-15:
+                    continue
                 key = structural_key(candidate)
                 if key in seen:
                     continue

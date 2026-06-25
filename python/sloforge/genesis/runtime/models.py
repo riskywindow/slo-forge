@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import StrEnum
-from threading import Event, Lock
+from threading import Event, Lock, RLock
 from time import monotonic
 
 
@@ -131,13 +131,22 @@ class RequestControl:
     cancellation: Event = field(default_factory=Event)
     finished: Event = field(default_factory=Event)
     lifecycle_lock: Lock = field(default_factory=Lock)
-    commit_lock: Lock = field(default_factory=Lock)
+    commit_lock: RLock = field(default_factory=RLock)
 
-    def cancel(self) -> None:
+    def cancel(self) -> bool:
         """Publish cancellation atomically with respect to token commitment."""
 
         with self.commit_lock:
+            with self.lifecycle_lock:
+                if self.lifecycle in {
+                    RequestLifecycle.COMPLETED,
+                    RequestLifecycle.CANCELLED,
+                    RequestLifecycle.TIMED_OUT,
+                    RequestLifecycle.FAILED,
+                }:
+                    return False
             self.cancellation.set()
+            return True
 
     def transition(self, target: RequestLifecycle) -> None:
         allowed = {
@@ -146,6 +155,7 @@ class RequestControl:
                 RequestLifecycle.PREFILLING,
                 RequestLifecycle.CANCELLED,
                 RequestLifecycle.TIMED_OUT,
+                RequestLifecycle.FAILED,
             },
             RequestLifecycle.PREFILLING: {
                 RequestLifecycle.DECODING,
@@ -191,6 +201,7 @@ class RuntimeMetrics:
     emitted_tokens: int = 0
     batches: int = 0
     maximum_observed_batch: int = 0
+    deadline_reorders: int = 0
     state_allocations: int = 0
     state_releases: int = 0
 
@@ -205,6 +216,7 @@ class RuntimeMetrics:
             "emitted_tokens": self.emitted_tokens,
             "batches": self.batches,
             "maximum_observed_batch": self.maximum_observed_batch,
+            "deadline_reorders": self.deadline_reorders,
             "state_allocations": self.state_allocations,
             "state_releases": self.state_releases,
         }

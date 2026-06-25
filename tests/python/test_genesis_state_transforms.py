@@ -7,9 +7,11 @@ import pytest
 from sloforge.genesis.state_transforms import (
     Consistency,
     Ownership,
+    RollbackStrategy,
     StateAction,
     StateEvent,
     StateLayout,
+    StatePrecondition,
     StateRegion,
     StateTransformation,
     StateTransformError,
@@ -38,6 +40,7 @@ def _region() -> StateRegion:
         mutable=True,
         checkpointed=True,
         compatible_genome_hashes=("genome-b",),
+        migration_target_owners=("worker-1",),
     )
 
 
@@ -53,9 +56,9 @@ def test_compile_state_transition_checks_coexistence_and_swap_category() -> None
         expected_quality_cost=0.0,
         expected_memory_delta_bytes=0,
         migration_chunk_bytes=256,
-        preconditions=("request_boundary",),
+        preconditions=(StatePrecondition.REQUEST_BOUNDARY,),
         proof_obligations=("differential_state", "rollback"),
-        rollback_strategy="retain_source_until_commit",
+        rollback_strategy=RollbackStrategy.RETAIN_SOURCE_UNTIL_COMMIT,
     )
     compiled = compile_transformation(
         transformation, memory_capacity_bytes=8192, safety_margin_fraction=0.25
@@ -120,3 +123,125 @@ def test_ambiguous_region_ownership_is_rejected() -> None:
     invalid = replace(_region(), owners=("worker-0", "worker-1"))
     with pytest.raises(StateTransformError, match="exactly one owner"):
         verify_state_trace(invalid, (), memory_capacity_bytes=1024)
+
+
+def test_writes_require_leases_and_post_cancel_is_cleanup_only() -> None:
+    events = (
+        StateEvent(0, StateAction.ALLOCATE, "decoder-state", "r1", "worker-0", 1, 2),
+        StateEvent(1, StateAction.WRITE, "decoder-state", "r1", "worker-0", 1),
+        StateEvent(2, StateAction.ACQUIRE, "decoder-state", "r1", "worker-0", 1),
+        StateEvent(3, StateAction.CANCEL_REQUEST, "decoder-state", "r1", "worker-0", 1),
+        StateEvent(4, StateAction.CHECKPOINT, "decoder-state", "r1", "worker-0", 1),
+        StateEvent(5, StateAction.RELEASE, "decoder-state", "r1", "worker-0", 1),
+    )
+    result = verify_state_trace(_region(), events, memory_capacity_bytes=1024)
+    invariants = {item.invariant for item in result.violations}
+    assert "acquire_before_write" in invariants
+    assert "post_cancel_action" in invariants
+    assert "bounded_release" not in invariants
+
+
+def test_migration_target_must_be_an_explicit_allowed_owner() -> None:
+    events = (
+        StateEvent(0, StateAction.ALLOCATE, "decoder-state", "r1", "worker-0", 1, 2),
+        StateEvent(
+            1,
+            StateAction.BEGIN_MIGRATION,
+            "decoder-state",
+            "r1",
+            "worker-0",
+            1,
+            target_actor="worker-unknown",
+            target_genome_hash="genome-b",
+        ),
+        StateEvent(2, StateAction.RELEASE, "decoder-state", "r1", "worker-0", 1),
+    )
+    result = verify_state_trace(_region(), events, memory_capacity_bytes=1024)
+    assert "migration_target_owner" in {item.invariant for item in result.violations}
+
+
+def test_compiler_validates_kind_preconditions_rollback_and_resource_delta() -> None:
+    source = _region()
+    target = replace(source, layout=StateLayout.PAGED)
+
+    def transformation(**updates: object) -> StateTransformation:
+        values: dict[str, object] = {
+            "transformation_id": "state/layout/v2",
+            "kind": TransformationKind.LAYOUT,
+            "source": source,
+            "target": target,
+            "exact": True,
+            "expected_quality_cost": 0.0,
+            "expected_memory_delta_bytes": 0,
+            "migration_chunk_bytes": 256,
+            "preconditions": (StatePrecondition.REQUEST_BOUNDARY,),
+            "proof_obligations": ("differential_state", "rollback"),
+            "rollback_strategy": RollbackStrategy.RETAIN_SOURCE_UNTIL_COMMIT,
+        }
+        values.update(updates)
+        return StateTransformation(**values)  # type: ignore[arg-type]
+
+    with pytest.raises(StateTransformError, match="no matching change"):
+        compile_transformation(transformation(target=source), memory_capacity_bytes=8192)
+    with pytest.raises(StateTransformError, match="unknown precondition"):
+        compile_transformation(
+            transformation(preconditions=("invented_precondition",)),
+            memory_capacity_bytes=8192,
+        )
+    with pytest.raises(StateTransformError, match="request-boundary"):
+        compile_transformation(
+            transformation(preconditions=(StatePrecondition.EXCLUSIVE_OWNERSHIP,)),
+            memory_capacity_bytes=8192,
+        )
+    with pytest.raises(StateTransformError, match="rollback strategy"):
+        compile_transformation(
+            transformation(rollback_strategy="copy_and_hope"),
+            memory_capacity_bytes=8192,
+        )
+    with pytest.raises(StateTransformError, match="memory delta"):
+        compile_transformation(
+            transformation(expected_memory_delta_bytes=1),
+            memory_capacity_bytes=8192,
+        )
+
+
+def test_dtype_conversion_requires_evidence_and_respects_quality_budget() -> None:
+    source = _region()
+    target = replace(source, dtype="int8", bytes_per_item=16)
+    expected_delta = (16 - 64) * source.maximum_items
+    base = StateTransformation(
+        "state/precision-int8/v1",
+        TransformationKind.PRECISION,
+        source,
+        target,
+        exact=False,
+        expected_quality_cost=0.02,
+        expected_memory_delta_bytes=expected_delta,
+        migration_chunk_bytes=256,
+        preconditions=(
+            StatePrecondition.REQUEST_BOUNDARY,
+            StatePrecondition.STATE_CONVERSION_VERIFIED,
+            StatePrecondition.QUALITY_CONTRACT,
+        ),
+        proof_obligations=("conversion_differential", "quality_contract", "rollback"),
+        rollback_strategy=RollbackStrategy.REVERSE_CONVERSION,
+        conversion_evidence=("evidence:state-conversion-int8",),
+    )
+    with pytest.raises(StateTransformError, match="quality budget"):
+        compile_transformation(base, memory_capacity_bytes=8192, quality_budget=0.01)
+    with pytest.raises(StateTransformError, match="conversion evidence"):
+        compile_transformation(
+            replace(base, conversion_evidence=()),
+            memory_capacity_bytes=8192,
+            quality_budget=0.02,
+        )
+    compiled = compile_transformation(base, memory_capacity_bytes=8192, quality_budget=0.02)
+    assert "conversion_evidence" in compiled.checked_preconditions
+    assert compiled.requires_request_boundary
+
+    with pytest.raises(StateTransformError, match="precision transformation kind"):
+        compile_transformation(
+            replace(base, kind=TransformationKind.LAYOUT),
+            memory_capacity_bytes=8192,
+            quality_budget=0.02,
+        )

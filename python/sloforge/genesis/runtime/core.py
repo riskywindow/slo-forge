@@ -8,7 +8,7 @@ from queue import Empty, Full, Queue
 from threading import Lock, Thread
 from time import monotonic
 
-from sloforge.genesis.policy_dsl import BytecodeProgram, execute_bytecode
+from sloforge.genesis.policy_dsl import BytecodeProgram, ScalarType, execute_bytecode
 
 from .adapter import ReferenceRuntimeAdapter
 from .models import (
@@ -40,16 +40,24 @@ class StreamHandle:
         with self._control.lifecycle_lock:
             return self._control.lifecycle
 
-    def cancel(self) -> None:
-        self._control.cancel()
+    def cancel(self) -> bool:
+        return self._control.cancel()
 
     def next_event(self, timeout_seconds: float) -> StreamEvent:
         if timeout_seconds <= 0:
             raise ValueError("stream timeout must be positive")
         try:
-            return self._events.get(timeout=timeout_seconds)
+            event = self._events.get(timeout=timeout_seconds)
         except Empty as error:
             raise TimeoutError(f"no event received for request {self.request_id}") from error
+        if event.kind is not EventKind.TOKEN:
+            # The producer publishes the terminal event and lifecycle while
+            # holding this lock. This barrier prevents a consumer from seeing
+            # the event before the matching lifecycle/finished state.
+            with self._control.commit_lock:
+                if not self._control.finished.is_set():
+                    raise RuntimeError("terminal event was published without terminal lifecycle")
+        return event
 
     def events(self, timeout_seconds: float) -> Iterator[StreamEvent]:
         while True:
@@ -123,6 +131,7 @@ class BaselineStreamingRuntime:
                 raise RuntimeError("runtime has already been started")
             if self._stopping:
                 raise RuntimeError("a stopped runtime cannot be restarted")
+            self._validate_policy_contract()
             self._started = True
             self._worker = Thread(target=self._worker_loop, name="genesis-baseline", daemon=False)
             self._worker.start()
@@ -144,6 +153,8 @@ class BaselineStreamingRuntime:
         with self._lifecycle_lock:
             if not self._started or self._stopping:
                 raise RuntimeError("runtime is not accepting requests")
+            if self._worker is None or not self._worker.is_alive():
+                raise RuntimeError("runtime worker is unavailable")
             with self._active_lock:
                 if request.request_id in self._active:
                     raise ValueError(f"request identifier is already active: {request.request_id}")
@@ -186,7 +197,12 @@ class BaselineStreamingRuntime:
 
     def health(self) -> dict[str, object]:
         with self._lifecycle_lock:
-            accepting = self._started and not self._stopping
+            accepting = (
+                self._started
+                and not self._stopping
+                and self._worker is not None
+                and self._worker.is_alive()
+            )
         return {
             "status": "ready" if accepting else "stopped",
             "accepting_requests": accepting,
@@ -217,10 +233,44 @@ class BaselineStreamingRuntime:
             worker.join(timeout)
             if worker.is_alive():
                 raise TimeoutError("baseline runtime worker did not stop before its deadline")
+        self._terminalize_abandoned_requests()
         with self._lifecycle_lock:
             self._started = False
         if self._state_owners.count() != 0:
             raise RuntimeError("runtime shutdown left owned request state")
+        with self._active_lock:
+            if self._active:
+                raise RuntimeError("runtime shutdown left active requests")
+        if not self._admission.empty():
+            raise RuntimeError("runtime shutdown left queued requests")
+
+    def _terminalize_abandoned_requests(self) -> None:
+        """Cancel queued work if a worker exited before consuming it."""
+
+        while True:
+            try:
+                control, events = self._admission.get_nowait()
+            except Empty:
+                return
+            try:
+                if control.lifecycle not in {
+                    RequestLifecycle.COMPLETED,
+                    RequestLifecycle.CANCELLED,
+                    RequestLifecycle.TIMED_OUT,
+                    RequestLifecycle.FAILED,
+                }:
+                    self._terminal(
+                        control,
+                        events,
+                        lifecycle=RequestLifecycle.CANCELLED,
+                        kind=EventKind.CANCELLED,
+                        sequence=0,
+                        message="runtime shutdown cancelled queued request",
+                    )
+                with self._active_lock:
+                    self._active.pop(control.request.request_id, None)
+            finally:
+                self._admission.task_done()
 
     def _worker_loop(self) -> None:
         pending: tuple[RequestControl, Queue[StreamEvent]] | None = None
@@ -237,7 +287,21 @@ class BaselineStreamingRuntime:
                             return
                     continue
             batch = [first]
-            batch_limit = self._batch_limit(first[0])
+            try:
+                batch_limit = self._batch_limit(first[0])
+            except BaseException as error:
+                self._terminal(
+                    first[0],
+                    first[1],
+                    lifecycle=RequestLifecycle.FAILED,
+                    kind=EventKind.ERROR,
+                    sequence=0,
+                    message=f"{type(error).__name__}: {error}",
+                )
+                with self._active_lock:
+                    self._active.pop(first[0].request.request_id, None)
+                self._admission.task_done()
+                continue
             if first[0].request.batching_eligible and batch_limit > 1:
                 deadline = monotonic() + self._limits.batch_wait_seconds
                 while len(batch) < batch_limit:
@@ -252,6 +316,20 @@ class BaselineStreamingRuntime:
                         pending = candidate
                         break
                     batch.append(candidate)
+            if self._policy is not None and self._policy.name in {
+                "deadline_batch",
+                "deadline_cancel_batch",
+            }:
+                original_order = tuple(item[0].request.request_id for item in batch)
+                batch.sort(
+                    key=lambda item: (
+                        item[0].created_at + item[0].request.timeout_seconds,
+                        item[0].request.request_id,
+                    )
+                )
+                if original_order != tuple(item[0].request.request_id for item in batch):
+                    with self._metrics_lock:
+                        self._metrics.deadline_reorders += 1
             with self._metrics_lock:
                 self._metrics.batches += 1
                 self._metrics.maximum_observed_batch = max(
@@ -285,6 +363,26 @@ class BaselineStreamingRuntime:
             raise RuntimeError("runtime batching policy must return an integer")
         return max(1, min(self._limits.maximum_batch_size, result))
 
+    def _validate_policy_contract(self) -> None:
+        if self._policy is None:
+            return
+        supported = {
+            "queue_length": ScalarType.INT,
+            "slo_slack_ms": ScalarType.INT,
+            "cancellation_pending": ScalarType.BOOL,
+        }
+        inputs = {item.name: item.scalar_type for item in self._policy.inputs}
+        unsupported = inputs.keys() - supported.keys()
+        if unsupported:
+            raise RuntimeError(f"runtime policy requires unsupported inputs: {sorted(unsupported)}")
+        mismatched = sorted(
+            name for name, scalar_type in inputs.items() if supported[name] is not scalar_type
+        )
+        if mismatched:
+            raise RuntimeError(f"runtime policy input types are incompatible: {mismatched}")
+        if self._policy.output.scalar_type is not ScalarType.INT:
+            raise RuntimeError("runtime batching policy must return an integer")
+
     def _seed(self, request: RuntimeRequest, phase: str, position: int) -> int:
         identity = (
             f"{self._runtime_seed}\0{request.seed}\0{request.request_id}\0{phase}\0{position}"
@@ -309,16 +407,24 @@ class BaselineStreamingRuntime:
         sequence: int,
         message: str | None = None,
     ) -> None:
-        control.transition(lifecycle)
-        self._emit(
-            events,
-            StreamEvent(
-                request_id=control.request.request_id,
-                kind=kind,
-                sequence=sequence,
-                message=message,
-            ),
-        )
+        with control.commit_lock:
+            if lifecycle is RequestLifecycle.COMPLETED:
+                if control.cancellation.is_set():
+                    lifecycle = RequestLifecycle.CANCELLED
+                    kind = EventKind.CANCELLED
+                elif control.expired():
+                    lifecycle = RequestLifecycle.TIMED_OUT
+                    kind = EventKind.TIMED_OUT
+            self._emit(
+                events,
+                StreamEvent(
+                    request_id=control.request.request_id,
+                    kind=kind,
+                    sequence=sequence,
+                    message=message,
+                ),
+            )
+            control.transition(lifecycle)
         with self._metrics_lock:
             if lifecycle == RequestLifecycle.COMPLETED:
                 self._metrics.completed += 1
@@ -443,7 +549,7 @@ class BaselineStreamingRuntime:
                 kind=EventKind.COMPLETED,
                 sequence=sequence,
             )
-        except Exception as error:
+        except BaseException as error:
             if control.lifecycle not in {
                 RequestLifecycle.COMPLETED,
                 RequestLifecycle.CANCELLED,

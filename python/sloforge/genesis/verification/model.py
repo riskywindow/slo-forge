@@ -41,6 +41,7 @@ class OperatorContract:
     maximum_relative_error: float
     preserve_nan: bool
     preserve_infinity: bool
+    preserve_signed_zero: bool
     deterministic: bool
     maximum_cases: int
 

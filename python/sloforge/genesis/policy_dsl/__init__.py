@@ -1,6 +1,15 @@
 """Restricted deterministic policy language used by Genesis synthesis."""
 
+from .bytecode import authenticate_bytecode_source, load_bytecode_document, validate_bytecode
 from .checker import analyze_expression, check_policy
+from .limits import (
+    MAX_POLICY_DOCUMENT_BYTES,
+    MAX_POLICY_FLOAT_ABS,
+    MAX_POLICY_INSTRUCTIONS,
+    MAX_POLICY_INTEGER_ABS,
+    MAX_POLICY_NAME_BYTES,
+    MAX_POLICY_VARIABLES,
+)
 from .model import (
     Analysis,
     Binary,
@@ -27,6 +36,12 @@ from .runtime import compile_policy, evaluate, execute_bytecode, policy_graph
 from .search import check_equivalent, mutate_policy, simplify_expression, simplify_policy
 
 __all__ = [
+    "MAX_POLICY_DOCUMENT_BYTES",
+    "MAX_POLICY_FLOAT_ABS",
+    "MAX_POLICY_INSTRUCTIONS",
+    "MAX_POLICY_INTEGER_ABS",
+    "MAX_POLICY_NAME_BYTES",
+    "MAX_POLICY_VARIABLES",
     "Analysis",
     "Binary",
     "BytecodeProgram",
@@ -47,6 +62,7 @@ __all__ = [
     "Variable",
     "VariableSpec",
     "analyze_expression",
+    "authenticate_bytecode_source",
     "check_equivalent",
     "check_policy",
     "compile_policy",
@@ -54,9 +70,11 @@ __all__ = [
     "execute_bytecode",
     "format_expression",
     "format_policy",
+    "load_bytecode_document",
     "mutate_policy",
     "parse_policy",
     "policy_graph",
     "simplify_expression",
     "simplify_policy",
+    "validate_bytecode",
 ]

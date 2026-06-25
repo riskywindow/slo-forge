@@ -48,6 +48,11 @@ def verify_state_trace(
     current_bytes = 0
     peak_bytes = 0
     previous_sequence = -1
+    cleanup_actions = {
+        StateAction.ABORT_MIGRATION,
+        StateAction.CANCEL_REQUEST,
+        StateAction.RELEASE,
+    }
     for event in events:
         if event.sequence <= previous_sequence:
             violations.append(_violation(event, "event_order", "sequence is not increasing"))
@@ -57,6 +62,15 @@ def verify_state_trace(
             continue
         key = (event.request_id, event.region_id)
         allocation = allocations.get(key)
+        if event.request_id in cancelled and event.action not in cleanup_actions:
+            violations.append(
+                _violation(
+                    event,
+                    "post_cancel_action",
+                    "cancelled requests may perform cleanup actions only",
+                )
+            )
+            continue
         if event.action is StateAction.ALLOCATE:
             if allocation is not None and not allocation.released:
                 violations.append(_violation(event, "single_allocation", "state already allocated"))
@@ -90,7 +104,18 @@ def verify_state_trace(
                 violations.append(
                     _violation(event, "cancelled_request", "cancelled request reacquired state")
                 )
-            allocation.acquired_by.add((event.request_id, event.actor))
+            elif (
+                region.ownership is Ownership.EXCLUSIVE
+                and event.actor != allocation.owner
+            ) or (
+                region.ownership is not Ownership.EXCLUSIVE
+                and event.actor not in region.owners
+            ):
+                violations.append(
+                    _violation(event, "lease_owner", "actor is not an authorized state owner")
+                )
+            else:
+                allocation.acquired_by.add((event.request_id, event.actor))
         elif event.action is StateAction.READ:
             if allocation.pending_target is not None:
                 violations.append(
@@ -99,6 +124,8 @@ def verify_state_trace(
             if (event.request_id, event.actor) not in allocation.acquired_by:
                 violations.append(_violation(event, "acquire_before_read", "actor has no lease"))
         elif event.action is StateAction.WRITE:
+            if (event.request_id, event.actor) not in allocation.acquired_by:
+                violations.append(_violation(event, "acquire_before_write", "actor has no lease"))
             if not region.mutable:
                 violations.append(_violation(event, "immutability", "write to immutable state"))
             if region.ownership is Ownership.EXCLUSIVE and event.actor != allocation.owner:
@@ -115,6 +142,14 @@ def verify_state_trace(
             elif event.target_actor is None or event.target_genome_hash is None:
                 violations.append(
                     _violation(event, "migration_target", "target metadata is incomplete")
+                )
+            elif event.target_actor not in region.migration_target_owners:
+                violations.append(
+                    _violation(
+                        event,
+                        "migration_target_owner",
+                        "target actor is not in the migration owner allowlist",
+                    )
                 )
             elif event.target_genome_hash not in region.compatible_genome_hashes:
                 violations.append(
