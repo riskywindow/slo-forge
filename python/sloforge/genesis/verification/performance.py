@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import random
+import math
 import statistics
 
 import numpy as np
@@ -44,6 +44,7 @@ def evaluate_performance(
     candidate_samples: tuple[float, ...],
     *,
     seed: int,
+    run_order: tuple[str, ...],
 ) -> PerformanceEvidence:
     if not contract.benchmark_id or not contract.workload_fingerprint:
         raise VerificationError("benchmark identity and workload fingerprint are required")
@@ -51,12 +52,34 @@ def evaluate_performance(
         raise VerificationError("hardware and software provenance are required")
     if len(baseline_samples) < 7 or len(candidate_samples) < 7:
         raise VerificationError("at least seven measured samples per alternative are required")
+    if seed < 0:
+        raise VerificationError("performance seed must be non-negative")
+    if any(not math.isfinite(value) or value <= 0 for value in baseline_samples):
+        raise VerificationError("baseline performance samples must be finite and positive")
+    if any(not math.isfinite(value) or value <= 0 for value in candidate_samples):
+        raise VerificationError("candidate performance samples must be finite and positive")
+    expected_order_length = len(baseline_samples) + len(candidate_samples)
+    if len(run_order) != expected_order_length:
+        raise VerificationError("run order must account for every measured sample")
+    if run_order.count("baseline") != len(baseline_samples):
+        raise VerificationError("run order has the wrong baseline sample count")
+    if run_order.count("candidate") != len(candidate_samples):
+        raise VerificationError("run order has the wrong candidate sample count")
+    if any(item not in {"baseline", "candidate"} for item in run_order):
+        raise VerificationError("run order contains an unknown alternative")
     if contract.warmup_count <= 0:
         raise VerificationError("warmup policy must be explicit and positive")
     if not 100 <= contract.bootstrap_rounds <= 1_000_000:
         raise VerificationError("bootstrap rounds must be in [100, 1000000]")
     if not 0.5 < contract.confidence < 1:
         raise VerificationError("confidence must be in (0.5, 1)")
+    if (
+        not math.isfinite(contract.practical_significance_percent)
+        or contract.practical_significance_percent < 0
+        or not math.isfinite(contract.noise_floor_percent)
+        or contract.noise_floor_percent < 0
+    ):
+        raise VerificationError("performance thresholds must be finite and non-negative")
     baseline = float(statistics.median(baseline_samples))
     candidate = float(statistics.median(candidate_samples))
     improvement = _improvement(baseline, candidate, contract.direction)
@@ -82,15 +105,13 @@ def evaluate_performance(
     else:
         status = EvidenceStatus.INCONCLUSIVE
         rationale = "confidence interval overlaps the practical or noise threshold"
-    run_order = ["baseline"] * len(baseline_samples) + ["candidate"] * len(candidate_samples)
-    random.Random(seed).shuffle(run_order)
     return PerformanceEvidence(
         status=status,
         seed=seed,
         contract=contract,
         baseline_samples=baseline_samples,
         candidate_samples=candidate_samples,
-        run_order=tuple(run_order),
+        run_order=run_order,
         baseline_median=baseline,
         candidate_median=candidate,
         improvement_percent=improvement,

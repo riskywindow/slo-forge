@@ -11,8 +11,10 @@ from sloforge.genesis.frontend import (
     DiagnosticSeverity,
     inspect_reference_package,
     load_reference_package,
+    torch_adapter,
     unsupported_obligations,
 )
+from sloforge.genesis.sandbox import SandboxRequest
 
 ROOT = Path(__file__).resolve().parents[2]
 HYBRID = ROOT / "models" / "reference_tasks" / "hybrid_decoder"
@@ -55,6 +57,30 @@ def test_default_inspection_does_not_execute_reference_source(tmp_path: Path) ->
 
     assert result.package_id == "hybrid-decoder-zero-day"
     assert result.torch_export is None
+
+
+def test_torch_export_dispatches_hostile_reference_only_to_sandbox(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package = tmp_path / "package"
+    shutil.copytree(HYBRID, package)
+    source = ROOT / "tests" / "fixtures" / "genesis_reference" / "hostile_import.py"
+    shutil.copyfile(source, package / "reference.py")
+
+    class SandboxCalled(RuntimeError):
+        pass
+
+    def intercept(request: SandboxRequest) -> None:
+        assert request.require_network_isolation
+        assert request.require_filesystem_isolation
+        assert package.resolve() in request.read_only_paths
+        assert request.environment == ()
+        assert "sloforge.genesis.frontend.torch_export_runner" in request.argv
+        raise SandboxCalled
+
+    monkeypatch.setattr(torch_adapter, "execute_sandboxed", intercept)
+    with pytest.raises(SandboxCalled):
+        inspect_reference_package(package, use_torch_export=True)
 
 
 def test_undeclared_control_flow_becomes_unsupported_diagnostic(tmp_path: Path) -> None:

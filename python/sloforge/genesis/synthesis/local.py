@@ -248,6 +248,7 @@ def _candidate_ir(
 def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, str]:
     runtime_directory = run_directory / "generated_runtime"
     config = json.loads((runtime_directory / "runtime_config.json").read_text(encoding="utf-8"))
+    runtime_seed = int(config["generation_seed"])
     package = load_reference_package(Path(config["reference_package_root"]))
     samples = package.resolve(package.manifest.quality_contract.final_evaluation_corpus)
     sandbox_output = run_directory / "synthesis/runtime-differential-sandbox"
@@ -260,14 +261,14 @@ def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, 
                 "--samples",
                 str(samples),
                 "--seed",
-                str(seed),
+                str(runtime_seed),
                 "--timeout-seconds",
                 "3",
             ),
             working_directory=runtime_directory,
             read_only_paths=(runtime_directory, package.root, repository_python),
             artifact_output_directory=sandbox_output,
-            seed=seed,
+            seed=runtime_seed,
             limits=SandboxLimits(
                 wall_time_seconds=15.0,
                 cpu_time_seconds=10,
@@ -280,7 +281,32 @@ def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, 
             ),
         )
     )
-    passed = result.succeeded and '"passed": true' in result.stdout
+    try:
+        harness = json.loads(result.stdout)
+    except (json.JSONDecodeError, TypeError):
+        harness = None
+    cases = harness.get("cases") if isinstance(harness, dict) else None
+    passed = bool(
+        result.succeeded
+        and isinstance(cases, list)
+        and cases
+        and harness.get("passed") is True
+        and all(isinstance(case, dict) and case.get("exact_match") is True for case in cases)
+    )
+    evidence = {
+        "schema_version": "1.0.0",
+        "seed": seed,
+        "corpus_path": str(samples.resolve()),
+        "corpus_sha256": hashlib.sha256(samples.read_bytes()).hexdigest(),
+        "sandbox_termination": result.termination.value,
+        "passed": passed,
+        "cases": cases if isinstance(cases, list) else [],
+        "failures": harness.get("failures", []) if isinstance(harness, dict) else [],
+    }
+    _atomic_write(
+        run_directory / "synthesis/runtime-differential-result.json",
+        json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
+    )
     return passed, result.termination.value
 
 

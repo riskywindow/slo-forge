@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import Barrier
 
 import pytest
 
-from sloforge.genesis.capsule import CapsuleValidationReport, Digest
+from sloforge.genesis.capsule import CapsuleValidationReport, Digest, VerificationLevel
 from sloforge.genesis.evolution import (
     CapsuleReference,
     ChallengerSpec,
@@ -31,19 +34,33 @@ from sloforge.genesis.evolution import (
 
 
 class RecordingValidator:
-    def __init__(self, digest: str, *, eligible: bool = True) -> None:
+    def __init__(
+        self,
+        digest: str,
+        *,
+        eligible: bool = True,
+        champion_eligible: bool = True,
+        verification_level: VerificationLevel = VerificationLevel.PROPERTY,
+    ) -> None:
         self.digest = digest
         self.eligible = eligible
+        self.champion_eligible = champion_eligible
+        self.verification_level = verification_level
         self.paths: list[Path] = []
 
     def __call__(self, path: Path) -> CapsuleValidationReport:
         self.paths.append(path)
+        champion = path.name == "champion"
+        eligible = self.champion_eligible if champion else self.eligible
+        digest = "a" * 64 if champion else self.digest
         return CapsuleValidationReport(
-            capsule_digest=Digest(value=self.digest),
-            integrity_valid=self.eligible,
-            contract_compatible=self.eligible,
-            evidence_complete=self.eligible,
-            promotion_eligible=self.eligible,
+            capsule_digest=Digest(value=digest),
+            candidate_genome_hash=Digest(value="f" * 64),
+            promotion_verification_level=(self.verification_level if eligible else None),
+            integrity_valid=eligible,
+            contract_compatible=eligible,
+            evidence_complete=eligible,
+            promotion_eligible=eligible,
             checked_at=datetime(2026, 8, 2, tzinfo=UTC),
             issues=(),
         )
@@ -99,12 +116,25 @@ def _controller(
     validator: RecordingValidator | None = None,
 ) -> tuple[EvolutionController, CapsuleReference, RecordingValidator, EvolutionStore]:
     champion = _capsule(tmp_path, "champion", "a")
-    validator = validator or RecordingValidator("b" * 64)
+    resolved_config = config or _config()
+    validator = validator or RecordingValidator(
+        "b" * 64,
+        verification_level=(
+            VerificationLevel.HARDWARE_OPERATIONAL
+            if resolved_config.execution_target is ExecutionTarget.EXTERNAL
+            else VerificationLevel.PROPERTY
+        ),
+    )
     store = EvolutionStore(tmp_path / "controller-state.json")
     controller = EvolutionController.initialize(
         store=store,
         capsule_validator=validator,
-        config=config or _config(),
+        gate_evidence_validator=(
+            (lambda _observation, _challenger: True)
+            if resolved_config.execution_target is ExecutionTarget.EXTERNAL
+            else None
+        ),
+        config=resolved_config,
         deployment_id="genesis-test",
         champion=champion,
         seed=73129,
@@ -138,9 +168,28 @@ def _gate(
         if stage is GateStage.SHADOW
         else controller.config.minimum_canary_samples
     )
+    selected = next(
+        item
+        for item in controller.snapshot.challengers
+        if item.spec.candidate_id == controller.snapshot.selected_candidate_id
+    )
+    evidence_digest = hashlib.sha256(
+        (
+            f"{controller.snapshot.seed}:{selected.spec.candidate_id}:"
+            f"{selected.spec.capsule.capsule_digest}:{stage.value}:{event_id}"
+        ).encode()
+    ).hexdigest()
     return GateObservation(
         event_id=event_id,
+        candidate_id=selected.spec.candidate_id,
+        capsule_digest=selected.spec.capsule.capsule_digest,
+        evidence_digest=evidence_digest,
         stage=stage,
+        verification_level=(
+            VerificationLevel.HARDWARE_OPERATIONAL
+            if controller.config.execution_target is ExecutionTarget.EXTERNAL
+            else VerificationLevel.PROPERTY
+        ),
         observed_at_ms=observed_at_ms,
         deterministic_seed=controller.snapshot.seed,
         sample_count=minimum,
@@ -210,6 +259,102 @@ def test_capsule_validator_rejects_challenger_before_shadow(tmp_path: Path) -> N
     assert snapshot.challengers[0].status is ChallengerStatus.CAPSULE_REJECTED
     with pytest.raises(EvolutionError, match="capsule-validated"):
         controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+
+
+def test_gate_observation_is_bound_to_candidate_capsule_seed_and_evidence(tmp_path: Path) -> None:
+    controller, _, _, _ = _controller(tmp_path)
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
+    controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+    observation = _gate(
+        controller,
+        GateStage.SHADOW,
+        event_id="shadow-pass",
+        observed_at_ms=40,
+    )
+    for update, message in (
+        ({"candidate_id": "candidate-other"}, "another candidate"),
+        ({"capsule_digest": "c" * 64}, "another capsule"),
+        ({"deterministic_seed": 7}, "controller seed"),
+    ):
+        with pytest.raises(EvolutionError, match=message):
+            controller.record_gate(observation.model_copy(update=update))
+    assert controller.record_gate(observation).phase is EvolutionPhase.SHADOW_VALIDATED
+
+
+def test_external_evolution_requires_level_five_and_trusted_gate_evidence(
+    tmp_path: Path,
+) -> None:
+    config = _config(
+        execution_target=ExecutionTarget.EXTERNAL,
+        live_traffic=True,
+        live_promotion_authorized=True,
+    )
+    champion = _capsule(tmp_path, "champion", "a")
+    validator = RecordingValidator(
+        "b" * 64, verification_level=VerificationLevel.HARDWARE_OPERATIONAL
+    )
+    with pytest.raises(EvolutionError, match="gate-evidence validator"):
+        EvolutionController.initialize(
+            store=EvolutionStore(tmp_path / "missing-gate-validator.json"),
+            capsule_validator=validator,
+            config=config,
+            deployment_id="external-test",
+            champion=champion,
+            seed=73129,
+            now_ms=0,
+        )
+
+    controller = EvolutionController.initialize(
+        store=EvolutionStore(tmp_path / "external-controller.json"),
+        capsule_validator=validator,
+        gate_evidence_validator=lambda _observation, _challenger: False,
+        config=config,
+        deployment_id="external-test",
+        champion=champion,
+        seed=73129,
+        now_ms=0,
+    )
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    validator.verification_level = VerificationLevel.PROPERTY
+    rejected = controller.register_challenger(
+        challenger, event_id="register-low-level", observed_at_ms=20
+    )
+    assert rejected.challengers[-1].status is ChallengerStatus.CAPSULE_REJECTED
+
+    validator.verification_level = VerificationLevel.HARDWARE_OPERATIONAL
+    accepted = _challenger(tmp_path, _capsule(tmp_path, "challenger-level-five", "b"))
+    controller.register_challenger(accepted, event_id="register-level-five", observed_at_ms=30)
+    controller.begin_shadow(event_id="shadow-level-five", observed_at_ms=40)
+    observation = _gate(
+        controller,
+        GateStage.SHADOW,
+        event_id="untrusted-shadow-evidence",
+        observed_at_ms=50,
+    )
+    with pytest.raises(EvolutionError, match="trusted validation"):
+        controller.record_gate(observation)
+
+
+def test_controller_refuses_an_unvalidated_bootstrap_champion(tmp_path: Path) -> None:
+    champion = _capsule(tmp_path, "champion", "a")
+    validator = RecordingValidator("b" * 64, champion_eligible=False)
+    store = EvolutionStore(tmp_path / "controller-state.json")
+
+    with pytest.raises(EvolutionError, match="initial champion"):
+        EvolutionController.initialize(
+            store=store,
+            capsule_validator=validator,
+            config=_config(),
+            deployment_id="genesis-test",
+            champion=champion,
+            seed=73129,
+            now_ms=0,
+        )
+
+    assert not store.exists
 
 
 @pytest.mark.parametrize(
@@ -290,6 +435,21 @@ def test_rollback_restores_champion_and_preserves_new_stream(tmp_path: Path) -> 
     assert rolled_back.challengers[0].status is ChallengerStatus.ROLLED_BACK
 
 
+def test_rollback_revalidates_the_previous_champion(tmp_path: Path) -> None:
+    controller, _, validator, _ = _controller(tmp_path)
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _ready_to_promote(controller, challenger)
+    controller.promote(event_id="promote", observed_at_ms=70)
+    validator.champion_eligible = False
+
+    with pytest.raises(EvolutionError, match="rollback champion"):
+        controller.rollback(
+            event_id="rollback", observed_at_ms=80, reason="post-promotion regression"
+        )
+
+    assert controller.snapshot.phase is EvolutionPhase.PROMOTED
+
+
 def test_restart_transition_requires_active_stream_drain(tmp_path: Path) -> None:
     controller, _, _, _ = _controller(tmp_path)
     challenger = _challenger(
@@ -323,6 +483,83 @@ def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None
     assert EvolutionStore(store.path).load() == advanced
 
 
+def test_idempotency_key_is_bound_to_the_exact_event_payload(tmp_path: Path) -> None:
+    controller, _, _, _ = _controller(tmp_path)
+    original = TriggerObservation(
+        event_id="observation",
+        observed_at_ms=1,
+        detail="below threshold",
+    )
+    snapshot = controller.observe_trigger(original)
+    assert controller.observe_trigger(original) == snapshot
+
+    with pytest.raises(EvolutionError, match="different event payload"):
+        controller.observe_trigger(
+            original.model_copy(update={"detail": "same key, altered payload"})
+        )
+
+
+def test_concurrent_stream_opens_are_serialized_without_lost_updates(tmp_path: Path) -> None:
+    controller, _, _, store = _controller(tmp_path)
+    worker_count = 8
+    barrier = Barrier(worker_count + 1)
+
+    def open_stream(index: int) -> None:
+        barrier.wait()
+        controller.open_stream(
+            f"stream-{index}",
+            event_id=f"open-{index}",
+            observed_at_ms=1,
+        )
+
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = [executor.submit(open_stream, index) for index in range(worker_count)]
+        barrier.wait()
+        for future in futures:
+            future.result(timeout=5.0)
+
+    assert len(controller.snapshot.active_streams) == worker_count
+    assert controller.snapshot.sequence == worker_count
+    assert store.load() == controller.snapshot
+
+
+def test_two_restored_controllers_cannot_overwrite_the_same_sequence(tmp_path: Path) -> None:
+    controller, _, validator, store = _controller(tmp_path)
+    first = EvolutionController.restore(
+        store=store, capsule_validator=validator, config=controller.config
+    )
+    stale = EvolutionController.restore(
+        store=store, capsule_validator=validator, config=controller.config
+    )
+    first.observe_trigger(
+        TriggerObservation(event_id="first", observed_at_ms=1, detail="first writer")
+    )
+
+    with pytest.raises(EvolutionPersistenceError, match="sequence mismatch"):
+        stale.observe_trigger(
+            TriggerObservation(event_id="stale", observed_at_ms=1, detail="stale writer")
+        )
+
+    assert store.load() == first.snapshot
+    assert stale.snapshot.sequence == 0
+
+
+def test_idempotency_registry_fails_closed_instead_of_forgetting_old_keys(
+    tmp_path: Path,
+) -> None:
+    controller, _, _, _ = _controller(
+        tmp_path,
+        config=_config(maximum_processed_events=32),
+    )
+    for index in range(31):
+        controller.open_stream(f"stream-{index}", event_id=f"open-{index}", observed_at_ms=1)
+    snapshot = controller.snapshot
+
+    assert controller.open_stream("stream-0", event_id="open-0", observed_at_ms=1) == snapshot
+    with pytest.raises(EvolutionError, match="idempotency registry is full"):
+        controller.open_stream("overflow", event_id="overflow", observed_at_ms=1)
+
+
 def test_capsule_is_revalidated_immediately_before_promotion(tmp_path: Path) -> None:
     controller, champion, validator, _ = _controller(tmp_path)
     challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
@@ -332,7 +569,7 @@ def test_capsule_is_revalidated_immediately_before_promotion(tmp_path: Path) -> 
     assert rejected.phase is EvolutionPhase.EVOLVING
     assert rejected.champion == champion
     assert rejected.challengers[0].status is ChallengerStatus.CAPSULE_REJECTED
-    assert len(validator.paths) == 2
+    assert len(validator.paths) == 3
 
 
 def test_external_live_canary_requires_both_opt_ins(
@@ -370,6 +607,32 @@ def test_persisted_state_tampering_is_detected(tmp_path: Path) -> None:
         store.load()
 
 
+def test_evolution_store_rejects_symlink_and_predictable_temp_attacks(tmp_path: Path) -> None:
+    controller, _, _, store = _controller(tmp_path)
+    victim = tmp_path / "victim.json"
+    victim.write_text("preserve", encoding="utf-8")
+    predictable = store.path.with_name(f".{store.path.name}.tmp")
+    predictable.symlink_to(victim)
+
+    controller.observe_trigger(
+        TriggerObservation(
+            event_id="safe-random-temp",
+            observed_at_ms=1,
+            detail="no material change",
+        )
+    )
+    assert victim.read_text(encoding="utf-8") == "preserve"
+
+    snapshot = controller.snapshot
+    store.path.unlink()
+    store.path.symlink_to(victim)
+    with pytest.raises(EvolutionPersistenceError, match="must not be a symlink"):
+        store.save(snapshot, expected_sequence=snapshot.sequence)
+    with pytest.raises(EvolutionPersistenceError, match="must not be a symlink"):
+        store.load()
+    assert victim.read_text(encoding="utf-8") == "preserve"
+
+
 def test_deterministic_local_fixture_produces_artifact_backed_promotion(tmp_path: Path) -> None:
     controller, champion, validator, store = _controller(tmp_path)
     challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
@@ -377,6 +640,6 @@ def test_deterministic_local_fixture_produces_artifact_backed_promotion(tmp_path
     assert snapshot.phase is EvolutionPhase.PROMOTED
     assert snapshot.champion == challenger.capsule
     assert snapshot.previous_champion == champion
-    assert len(validator.paths) == 2
+    assert len(validator.paths) == 3
     assert store.load() == snapshot
     assert [record.sequence for record in snapshot.audit] == list(range(len(snapshot.audit)))

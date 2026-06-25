@@ -1,6 +1,12 @@
 """Proof-gated, restart-safe Genesis champion/challenger evolution."""
 
-from .controller import CapsuleValidator, EvolutionController, EvolutionError, classify_trigger
+from .controller import (
+    CapsuleValidator,
+    EvolutionController,
+    EvolutionError,
+    GateEvidenceValidator,
+    classify_trigger,
+)
 from .fixture import run_local_evolution_fixture
 from .models import (
     EVOLUTION_SCHEMA_VERSION,
@@ -20,6 +26,7 @@ from .models import (
     IsolationContract,
     IsolationMode,
     PersistedEvolutionState,
+    ProcessedEventRecord,
     StreamLease,
     TransitionCategory,
     TriggerObservation,
@@ -44,11 +51,13 @@ __all__ = [
     "EvolutionStore",
     "EvolutionTrigger",
     "ExecutionTarget",
+    "GateEvidenceValidator",
     "GateObservation",
     "GateStage",
     "IsolationContract",
     "IsolationMode",
     "PersistedEvolutionState",
+    "ProcessedEventRecord",
     "StreamLease",
     "TransitionCategory",
     "TriggerObservation",

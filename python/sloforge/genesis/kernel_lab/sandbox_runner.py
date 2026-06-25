@@ -36,7 +36,10 @@ def _reference_value(previous: int, activation: float) -> int:
         raise ValueError("previous state outside symmetric int8 domain")
     if not math.isfinite(activation):
         raise ValueError("activation must be finite")
-    return max(-127, min(127, round(previous * 0.625 + activation * 31.0)))
+    combined = previous * 0.625 + activation * 31.0
+    if math.isinf(combined):
+        return 127 if combined > 0 else -127
+    return max(-127, min(127, round(combined)))
 
 
 def _reference(case: dict[str, Any]) -> list[int]:
@@ -67,13 +70,30 @@ def _candidate(function: Callable[..., list[int]], case: dict[str, Any]) -> list
 def _correctness(function: Callable[..., list[int]], cases: list[dict[str, Any]]) -> dict[str, Any]:
     results = []
     for case in cases:
+        previous, activations = _decode_case(case)
         try:
-            observed = _candidate(function, case)
+            observed = function(
+                previous,
+                activations,
+                case["count"],
+                case["previous_offset"],
+                case["previous_stride"],
+                case["activation_offset"],
+                case["activation_stride"],
+                case["output_alias_previous"],
+            )
             error_type = None
         except (ArithmeticError, IndexError, TypeError, ValueError) as error:
             observed = None
             error_type = type(error).__name__
-        results.append({"case_id": case["case_id"], "observed": observed, "error_type": error_type})
+        results.append(
+            {
+                "case_id": case["case_id"],
+                "observed": observed,
+                "error_type": error_type,
+                "previous_storage_after": previous,
+            }
+        )
     return {"case_results": results, "samples": []}
 
 

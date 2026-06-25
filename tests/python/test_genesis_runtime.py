@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -121,7 +122,11 @@ def test_generated_correctness_harness_executes_reference_fixture(tmp_path: Path
     )
 
     assert completed.returncode == 0, completed.stderr
-    assert json.loads(completed.stdout) == {"failures": [], "passed": True}
+    evidence = json.loads(completed.stdout)
+    assert evidence["failures"] == []
+    assert evidence["passed"] is True
+    assert evidence["cases"]
+    assert all(case["exact_match"] for case in evidence["cases"])
 
 
 def test_runtime_detects_reference_source_tampering(tmp_path: Path) -> None:
@@ -137,6 +142,31 @@ def test_runtime_detects_reference_source_tampering(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="changed after runtime generation"):
         load_generated_runtime(output / "runtime_config.json", seed=5)
+
+
+@pytest.mark.parametrize(
+    "runtime_request",
+    [
+        RuntimeRequest("bad-timeout", (1,), 1, 7, math.inf),
+        RuntimeRequest("bad-timeout", (1,), 1, 7, math.nan),
+        RuntimeRequest("bad-count", (1,), True, 7, 1.0),
+        RuntimeRequest("bad-seed", (1,), 1, True, 1.0),
+        RuntimeRequest("bad-token", (True,), 1, 7, 1.0),
+        RuntimeRequest("bad-batching", (1,), 1, 7, 1.0, batching_eligible=1),
+    ],
+)
+def test_runtime_rejects_unbounded_or_coerced_request_fields(
+    runtime_request: RuntimeRequest,
+) -> None:
+    with pytest.raises(ValueError):
+        runtime_request.validate(maximum_prompt_tokens=8, maximum_generated_tokens=2)
+
+
+def test_runtime_limits_reject_non_finite_timeouts_and_non_integer_bounds() -> None:
+    with pytest.raises(ValueError, match="finite and positive"):
+        RuntimeLimits(worker_poll_seconds=math.inf)
+    with pytest.raises(ValueError, match="integer limits"):
+        RuntimeLimits(maximum_queue_depth=1.5)  # type: ignore[arg-type]
 
 
 class _BlockingAdapter:
@@ -166,6 +196,22 @@ class _BlockingAdapter:
 
     def sample(self, logits: tuple[float, ...], seed: int) -> int:
         return 1
+
+
+class _EmissionRaceAdapter(_BlockingAdapter):
+    def __init__(self) -> None:
+        super().__init__()
+        self.detokenize_entered = Event()
+        self.release_detokenize = Event()
+
+    def prefill(self, prompt_tokens: tuple[int, ...], state: object, seed: int) -> object:
+        return state
+
+    def detokenize(self, token_id: int) -> str:
+        self.detokenize_entered.set()
+        if not self.release_detokenize.wait(2.0):
+            raise TimeoutError("test detokenize release was not signalled")
+        return str(token_id)
 
 
 def _blocking_runtime(adapter: _BlockingAdapter) -> BaselineStreamingRuntime:
@@ -201,6 +247,23 @@ def test_cancellation_before_commit_releases_state_and_shuts_down() -> None:
     assert first.lifecycle == RequestLifecycle.CANCELLED
     assert runtime.metrics()["emitted_tokens"] == 0
     assert runtime.metrics()["state_allocations"] == runtime.metrics()["state_releases"] == 1
+
+
+def test_cancellation_racing_final_emit_check_cannot_publish_a_token() -> None:
+    adapter = _EmissionRaceAdapter()
+    runtime = _blocking_runtime(adapter)
+    runtime.start()
+    handle = runtime.submit(RuntimeRequest("emit-race", (1,), 1, 7, 1.0))
+    assert adapter.detokenize_entered.wait(1.0)
+
+    handle.cancel()
+    adapter.release_detokenize.set()
+    events = list(handle.events(2.0))
+    runtime.shutdown()
+
+    assert [event.kind for event in events] == [EventKind.CANCELLED]
+    assert handle.lifecycle is RequestLifecycle.CANCELLED
+    assert runtime.metrics()["emitted_tokens"] == 0
 
 
 def test_bounded_admission_queue_rejects_saturation() -> None:

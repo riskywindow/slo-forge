@@ -207,6 +207,10 @@ def execute_correctness(
     mismatches: list[CorrectnessMismatch] = []
     for case in cases:
         item = observed.get(case.case_id)
+        expected_storage = list(case.previous_storage)
+        if case.output_alias_previous and case.expected is not None:
+            for index, value in enumerate(case.expected):
+                expected_storage[case.previous_offset + index * case.previous_stride] = value
         if item is None:
             mismatches.append(
                 CorrectnessMismatch(
@@ -223,6 +227,15 @@ def execute_correctness(
                     category=case.category,
                     expected=f"values={case.expected!r}, error={case.expected_error!r}",
                     observed=f"values={item.observed!r}, error={item.error_type!r}",
+                )
+            )
+        elif item.previous_storage_after != tuple(expected_storage):
+            mismatches.append(
+                CorrectnessMismatch(
+                    case_id=case.case_id,
+                    category="alias_atomicity",
+                    expected=f"previous_storage_after={tuple(expected_storage)!r}",
+                    observed=f"previous_storage_after={item.previous_storage_after!r}",
                 )
             )
     if len(observed) != len(cases):

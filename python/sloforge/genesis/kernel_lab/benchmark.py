@@ -201,7 +201,14 @@ def benchmark_candidate(
             confidence=config.confidence,
         )
         statistical = evaluate_performance(
-            contract, reference, current, seed=config.deterministic_seed + len(evidence)
+            contract,
+            reference,
+            current,
+            seed=config.deterministic_seed + len(evidence),
+            run_order=tuple(
+                "baseline" if sample.alternative == "reference" else "candidate"
+                for sample in regime_samples
+            ),
         )
         status = {
             EvidenceStatus.PASSED: LabStatus.PASSED,
@@ -265,6 +272,8 @@ def decide_candidate(
         reasons.append("intended microbenchmark confidence gate did not pass")
     if end_to_end_status is not LabStatus.PASSED:
         reasons.append("end-to-end token-loop confidence gate did not pass")
+    if any(item.status is not LabStatus.PASSED for item in benchmark.regimes):
+        reasons.append("not every declared supported benchmark regime passed")
     if any(item.status is LabStatus.FAILED for item in benchmark.regimes):
         reasons.append("at least one declared supported benchmark regime established a regression")
     if correctness.status is LabStatus.UNAVAILABLE or benchmark.status is LabStatus.UNAVAILABLE:

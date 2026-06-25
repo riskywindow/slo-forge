@@ -74,11 +74,17 @@ def _callable(module: ModuleType, name: str) -> Callable[..., object]:
 
 
 class _Executor:
-    def __init__(self, task_directory: Path, descriptor: TaskDescriptor) -> None:
+    def __init__(
+        self,
+        task_directory: Path,
+        descriptor: TaskDescriptor,
+        *,
+        identity_suffix: str = "reference",
+    ) -> None:
         self.descriptor = descriptor
         module = _load_module(
             task_directory / descriptor.public_package_path / "reference.py",
-            f"synthbench_{descriptor.task_id}",
+            f"synthbench_{descriptor.task_id}_{identity_suffix}",
         )
         self.load_model = _callable(module, "load_model")
         self.allocate_state = _callable(module, "allocate_state")
@@ -237,7 +243,14 @@ def _summary_from_artifact(
     return BaselineSummary(
         baseline=baseline,
         status=BaselineStatus.MEASURED,
-        reason="summary derived from complete raw measured CPU samples",
+        reason=(
+            "direct dependency-free eager reference execution; summary derived from complete "
+            "raw CPU samples"
+            if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+            else f"CPU smoke request-order surrogate for {baseline.value}; uses the same "
+            "dependency-free reference executor and does not represent an independent engine, "
+            "kernel, or full ablation implementation"
+        ),
         raw_samples_path=str(path.resolve()),
         sample_count=len(samples),
         valid_request_rate=(sum(sample.exact_match for sample in samples) / len(samples)),
@@ -311,9 +324,17 @@ def _run_task(
     workload_fingerprint = _sha(workload_path.read_bytes())
     environment = _environment_fingerprint()
     task_hash = _sha(canonical_json(descriptor))
-    executor = _Executor(task_directory, descriptor)
+    executors = {
+        baseline: _Executor(
+            task_directory,
+            descriptor,
+            identity_suffix=f"{run_seed}_{baseline.value}",
+        )
+        for baseline in _MEASURED_BASELINES
+    }
     deadline_ns = time.perf_counter_ns() + int(configuration.maximum_runtime_seconds * 1e9)
     for baseline in _MEASURED_BASELINES:
+        executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for _ in range(configuration.warmup_count):
             for request in selected:
@@ -328,6 +349,7 @@ def _run_task(
         baseline: [] for baseline in _MEASURED_BASELINES
     }
     for repetition, baseline in run_order:
+        executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for request in selected:
             observed, latency, ttft, intervals = executor.execute(request, deadline_ns=deadline_ns)
@@ -375,8 +397,13 @@ def _run_task(
         selected_hidden, _ = _selected_order(baseline, hidden_requests)
         case_by_request = {case.request.request_id: case for case in hidden_cases}
         hidden_results: list[HiddenCaseResult] = []
+        hidden_executor = _Executor(
+            task_directory,
+            descriptor,
+            identity_suffix=f"{run_seed}_{baseline.value}_hidden",
+        )
         for request in selected_hidden:
-            observed, _, _, _ = executor.execute(request, deadline_ns=deadline_ns)
+            observed, _, _, _ = hidden_executor.execute(request, deadline_ns=deadline_ns)
             hidden_results.append(
                 HiddenCaseResult(
                     case_id=case_by_request[request.request_id].case_id,
@@ -454,9 +481,12 @@ def run_cpu_benchmark(
         for baseline in report.baselines
         if baseline.status is BaselineStatus.NOT_APPLICABLE
     ]
-    sample_count = sum(baseline.sample_count for baseline in measured)
+    system_measured = [
+        baseline for baseline in measured if baseline.baseline is BaselineKind.GENESIS_FULL
+    ]
+    sample_count = sum(baseline.sample_count for baseline in system_measured)
     exact_count = sum(
-        round(baseline.valid_request_rate * baseline.sample_count) for baseline in measured
+        round(baseline.valid_request_rate * baseline.sample_count) for baseline in system_measured
     )
     metrics = AggregateMetrics(
         measured_baseline_runs=len(measured),
@@ -473,9 +503,10 @@ def run_cpu_benchmark(
                 for report in reports
                 for baseline in report.baselines
                 if baseline.status is BaselineStatus.MEASURED
+                and baseline.baseline is BaselineKind.GENESIS_FULL
             )
-            / len(measured)
-            if measured
+            / len(system_measured)
+            if system_measured
             else 0.0
         ),
         exact_request_rate=exact_count / sample_count if sample_count else 0.0,

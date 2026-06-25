@@ -4,7 +4,10 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from sloforge.genesis.demo import run_genesis_demo
+from sloforge.genesis.evaluation import run_genesis_evaluation
 
 
 def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> None:
@@ -32,3 +35,27 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> 
     timeline = json.loads((tmp_path / "demo/evolution/timeline.json").read_text(encoding="utf-8"))
     assert timeline["source"] == "controller_audit_records"
     assert any(item["action"] == "promote" for item in timeline["events"])
+
+
+def test_demo_reset_rejects_symlink_output(tmp_path: Path) -> None:
+    target = tmp_path / "existing-target"
+    target.mkdir()
+    marker = target / "preserve.txt"
+    marker.write_text("preserve", encoding="utf-8")
+    output = tmp_path / "linked-output"
+    output.symlink_to(target, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlinked output"):
+        run_genesis_demo(output, seed=73129, reset=True)
+    assert marker.read_text(encoding="utf-8") == "preserve"
+
+
+def test_demo_and_evaluation_reject_symlink_output_without_reset(tmp_path: Path) -> None:
+    target = tmp_path / "empty-target"
+    target.mkdir()
+    output = tmp_path / "linked-output"
+    output.symlink_to(target, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlinked output"):
+        run_genesis_demo(output, seed=73129)
+    with pytest.raises(ValueError, match="symlinked evaluation"):
+        run_genesis_evaluation(output, seed=73129, count=2)
+    assert not any(target.iterdir())

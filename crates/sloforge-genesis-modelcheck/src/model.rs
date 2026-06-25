@@ -395,6 +395,7 @@ pub struct TraceStep {
 pub enum Action {
     Admit { request: u8 },
     Start { request: u8, worker: u8 },
+    CommitAndEmitToken { request: u8, token: u8 },
     CommitToken { request: u8, token: u8 },
     EmitToken { request: u8, token: u8 },
     DropCommittedToken { request: u8, token: u8 },
@@ -424,6 +425,7 @@ impl Action {
         match self {
             Self::Admit { .. } => "admit",
             Self::Start { .. } => "start",
+            Self::CommitAndEmitToken { .. } => "commit_and_emit_token",
             Self::CommitToken { .. } => "commit_token",
             Self::EmitToken { .. } => "emit_token",
             Self::DropCommittedToken { .. } => "drop_committed_token",

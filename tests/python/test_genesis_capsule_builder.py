@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import stat
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from sloforge.cli.main import app
@@ -14,6 +18,7 @@ from sloforge.genesis.capsule import (
     load_capsule,
     validate_capsule,
 )
+from sloforge.genesis.runtime import load_generated_runtime
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "models/reference_tasks/hybrid_decoder"
@@ -38,7 +43,14 @@ def _accepted_candidate(tmp_path: Path) -> Path:
     assert result.exit_code == 0, result.output
     hardware = tmp_path / "hardware.json"
     hardware.write_text(
-        json.dumps({"schema_version": "1.0.0", "architecture": "cpu", "memory_bytes": 8 << 30}),
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "architecture": "cpu",
+                "memory_bytes": 8 << 30,
+                "measured_fingerprint": hashlib.sha256(b"capsule-builder-cpu").hexdigest(),
+            }
+        ),
         encoding="utf-8",
     )
     run = tmp_path / "run"
@@ -102,6 +114,65 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     )
     assert len(samples.samples) == 7
     assert benchmark.summary.unit == "simulated_milliseconds"
+    assert benchmark.randomized_run_order
+    by_id = {item.artifact_id: item for item in capsule.artifacts}
+    bundle_path = output / by_id["generated-runtime"].path
+    extracted = tmp_path / "runtime-bundle"
+    with zipfile.ZipFile(bundle_path) as archive:
+        archive.extractall(extracted)
+        names = set(archive.namelist())
+    assert {
+        "runtime.py",
+        "runtime_config.json",
+        "correctness_harness.py",
+        "policy.slo",
+        "policy.bytecode.json",
+        "bundle_manifest.json",
+        "reference_package/reference.py",
+        "reference_package/reference_package.json",
+    }.issubset(names)
+    bundle_manifest = json.loads((extracted / "bundle_manifest.json").read_text())
+    for name, digest in bundle_manifest["entries"].items():
+        assert hashlib.sha256((extracted / name).read_bytes()).hexdigest() == digest
+    runtime = load_generated_runtime(extracted / "runtime_config.json", seed=73129)
+    runtime.start()
+    try:
+        assert runtime.health()["policy"] == "deadline_cancel_batch"
+        handle = runtime.submit_text(
+            request_id="capsule-policy-execution",
+            text="hybrid",
+            maximum_new_tokens=1,
+            seed=73,
+            timeout_seconds=2.0,
+        )
+        assert list(handle.events(2.0))[-1].kind.value == "completed"
+    finally:
+        runtime.shutdown()
+    policy_path = extracted / "policy.bytecode.json"
+    policy_path.write_bytes(policy_path.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="policy bytecode digest"):
+        load_generated_runtime(extracted / "runtime_config.json", seed=73129)
+
+    quality = json.loads((output / by_id["quality-evidence"].path).read_text())
+    assert quality["observed"] == 1.0
+    assert quality["case_count"] == len(quality["cases"]) > 0
+    assert all(case["exact_match"] for case in quality["cases"])
+    resource = json.loads((output / by_id["resource-evidence"].path).read_text())
+    assert resource["method"] == "runtime-config-genome-state-contract-upper-bound"
+    assert resource["runtime_queue_depth"] == 32
+    assert (
+        resource["champion_challenger_coexistence_bytes"]
+        == 2 * resource["single_runtime_peak_bytes"]
+    )
+    for artifact in capsule.artifacts:
+        assert not (stat.S_IMODE((output / artifact.path).stat().st_mode) & stat.S_IWUSR)
+
+    symlink_target = tmp_path / "capsule-symlink-target"
+    symlink_target.mkdir()
+    symlink_output = tmp_path / "capsule-symlink"
+    symlink_output.symlink_to(symlink_target, target_is_directory=True)
+    with pytest.raises(ValueError, match="must not be a symlink"):
+        build_local_capsule(candidate, symlink_output, observed_at=observed_at)
 
     cli_output = tmp_path / "capsule-cli"
     built = runner.invoke(
@@ -119,9 +190,36 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
         ],
     )
     assert built.exit_code == 0, built.output
+    manifest = next((cli_output / "manifests").glob("*.json"))
+    bundled_context = cli_output / "validation_context.json"
+    rejected_context = runner.invoke(
+        app,
+        [
+            "genesis",
+            "capsule",
+            "validate",
+            str(cli_output),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
+        ],
+    )
+    assert rejected_context.exit_code != 0
+    trusted_context = tmp_path / "operator-trusted-validation-context.json"
+    trusted_context.write_bytes(bundled_context.read_bytes())
     validated = runner.invoke(
         app,
-        ["genesis", "capsule", "validate", str(cli_output)],
+        [
+            "genesis",
+            "capsule",
+            "validate",
+            str(cli_output),
+            "--context",
+            str(trusted_context),
+            "--expected-digest",
+            manifest.stem,
+        ],
     )
     assert validated.exit_code == 0, validated.output
     assert '"promotion_eligible": true' in validated.output

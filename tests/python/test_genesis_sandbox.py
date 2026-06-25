@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -105,6 +106,49 @@ def test_sandbox_denies_network_and_undeclared_reads(tmp_path: Path) -> None:
         return
     assert result.termination is SandboxTermination.SUCCESS, result.stderr
     assert result.stdout.splitlines() == ["read-blocked", "network-blocked"]
+
+
+def test_macos_sandbox_denies_undeclared_system_reads(tmp_path: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="sloforge-undeclared-") as unrelated:
+        secret = Path(unrelated) / "secret.txt"
+        secret.write_text("secret", encoding="utf-8")
+        source = tmp_path / "source"
+        source.mkdir()
+        script = source / "system_read.py"
+        script.write_text(
+            "import pathlib\n"
+            "try:\n"
+            f"    pathlib.Path({str(secret)!r}).read_text()\n"
+            "except OSError:\n"
+            "    print('read-blocked')\n"
+            "else:\n"
+            "    print('read-leaked')\n",
+            encoding="utf-8",
+        )
+        result = execute_sandboxed(_request(source, tmp_path / "output", script))
+        if result.capabilities.backend is not SandboxBackend.MACOS_SANDBOX_EXEC:
+            return
+        assert result.termination is SandboxTermination.SUCCESS, result.stderr
+        assert result.stdout.strip() == "read-blocked"
+
+
+def test_sandbox_refuses_nonempty_artifact_directory(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    script = source / "ok.py"
+    script.write_text("print('must-not-run')\n", encoding="utf-8")
+    output = tmp_path / "output"
+    output.mkdir()
+    marker = output / "trusted-evidence.json"
+    marker.write_text("preserve", encoding="utf-8")
+    result = execute_sandboxed(_request(source, output, script))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SETUP_ERROR
+    assert "must be empty" in result.stderr
+    assert marker.read_text(encoding="utf-8") == "preserve"
+    assert "must-not-run" not in result.stdout
 
 
 def test_sandbox_kills_timed_out_process_group(tmp_path: Path) -> None:

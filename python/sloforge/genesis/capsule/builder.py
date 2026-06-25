@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import math
+import os
 import platform
-import shutil
+import random
 import statistics
 import subprocess
 import sys
+import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -44,9 +47,12 @@ from .models import (
     RawBenchmarkSample,
     RawBenchmarkSamples,
     ScopedClaim,
+    TrustedArtifactAnchor,
+    TrustedEvidenceAnchor,
     ValidationContext,
     VerificationLevel,
 )
+from .statistics import bootstrap_median_interval, paired_regression_probability
 from .validator import validate_capsule
 
 
@@ -78,9 +84,14 @@ def _read_object(path: Path) -> dict[str, Any]:
 
 def _write_once(path: Path, payload: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        raise FileExistsError(f"refusing to overwrite capsule artifact: {path}")
-    path.write_bytes(payload)
+    try:
+        with path.open("xb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        path.chmod(0o444)
+    except FileExistsError as exc:
+        raise FileExistsError(f"refusing to overwrite capsule artifact: {path}") from exc
 
 
 def _artifact(
@@ -128,12 +139,137 @@ def _copy_artifact(
         suffix=suffix,
         media_type=media_type,
     )
-    # Preserve byte-for-byte provenance while avoiding source permissions.
-    shutil.copymode(source, root / result.path, follow_symlinks=False)
     return result
 
 
+def _runtime_bundle_bytes(
+    run_directory: Path,
+    candidate_directory: Path,
+    package_root: Path,
+    *,
+    candidate_id: str,
+    candidate_genome_hash: str,
+) -> bytes:
+    runtime_root = run_directory / "generated_runtime"
+    policy = (candidate_directory / "policy.bytecode.json").read_bytes()
+    config = _read_object(runtime_root / "runtime_config.json")
+    config.update(
+        {
+            "reference_package_root": "reference_package",
+            "genome_hash": candidate_genome_hash,
+            "policy_bytecode_path": "policy.bytecode.json",
+            "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+        }
+    )
+    entries: dict[str, bytes] = {
+        "runtime.py": (runtime_root / "runtime.py").read_bytes(),
+        "correctness_harness.py": (runtime_root / "correctness_harness.py").read_bytes(),
+        "runtime_config.json": canonical_json(config) + b"\n",
+        "policy.slo": (candidate_directory / "policy.slo").read_bytes(),
+        "policy.bytecode.json": policy,
+    }
+    for path in sorted(package_root.rglob("*")):
+        if path.is_file() and not path.is_symlink() and "__pycache__" not in path.parts:
+            entries[f"reference_package/{path.relative_to(package_root).as_posix()}"] = (
+                path.read_bytes()
+            )
+    manifest = {
+        "schema_version": "1.0.0",
+        "candidate_id": candidate_id,
+        "candidate_genome_hash": candidate_genome_hash,
+        "entries": {
+            name: hashlib.sha256(payload).hexdigest() for name, payload in sorted(entries.items())
+        },
+        "launch": ["python", "runtime.py", "--seed", "<required>"],
+    }
+    entries["bundle_manifest.json"] = canonical_json(manifest) + b"\n"
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, mode="w", compression=zipfile.ZIP_STORED) as archive:
+        for name, payload in sorted(entries.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o444 << 16
+            archive.writestr(info, payload)
+    return output.getvalue()
+
+
+def _resource_evidence(
+    runtime_config: dict[str, Any],
+    genome: dict[str, Any],
+    package_manifest: dict[str, Any],
+    *,
+    capacity_bytes: int,
+    bundle_size_bytes: int,
+) -> dict[str, object]:
+    limits = runtime_config["limits"]
+    queue_depth = int(limits["maximum_queue_depth"])
+    prompt_tokens = int(limits["maximum_prompt_tokens"])
+    generated_tokens = int(limits["maximum_generated_tokens"])
+    output_events = int(limits["maximum_output_events_per_request"])
+    dtype_bytes = {"int8": 1, "int32": 4, "int64": 8, "float32": 4, "float64": 8}
+    state_bytes = 0
+    for field in package_manifest["state_contract"]["fields"]:
+        elements = 1
+        for dimension in field["shape"]:
+            elements *= int(dimension["maximum"])
+        state_bytes += elements * dtype_bytes[str(field["dtype"])]
+    declared_host_bytes = 0
+    declared_queue_entries = 0
+
+    def visit(value: object) -> None:
+        nonlocal declared_host_bytes, declared_queue_entries
+        if isinstance(value, dict):
+            resource = value.get("resource_requirements")
+            if isinstance(resource, dict):
+                declared_host_bytes += int(resource.get("peak_host_bytes", 0))
+                declared_queue_entries += int(resource.get("queue_entries", 0))
+            for child in value.values():
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    visit(genome)
+    request_bytes = (prompt_tokens + generated_tokens) * 8 + output_events * 128 + state_bytes + 512
+    queue_bytes = queue_depth * request_bytes
+    interpreter_and_model_reserve = 128 * 1024**2
+    single_runtime_peak = max(
+        declared_host_bytes,
+        interpreter_and_model_reserve + queue_bytes + bundle_size_bytes,
+    )
+    coexistence = single_runtime_peak * 2
+    usable = int(capacity_bytes * 0.8)
+    return {
+        "schema_version": "1.0.0",
+        "method": "runtime-config-genome-state-contract-upper-bound",
+        "capacity_bytes": capacity_bytes,
+        "usable_capacity_bytes": usable,
+        "safety_margin_fraction": 0.20,
+        "runtime_queue_depth": queue_depth,
+        "genome_declared_queue_entries": declared_queue_entries,
+        "maximum_prompt_tokens": prompt_tokens,
+        "maximum_generated_tokens": generated_tokens,
+        "maximum_output_events_per_request": output_events,
+        "persistent_state_bytes_per_request": state_bytes,
+        "bounded_request_bytes": request_bytes,
+        "bounded_queue_bytes": queue_bytes,
+        "runtime_bundle_bytes": bundle_size_bytes,
+        "genome_declared_peak_host_bytes": declared_host_bytes,
+        "interpreter_and_model_reserve_bytes": interpreter_and_model_reserve,
+        "single_runtime_peak_bytes": single_runtime_peak,
+        "champion_challenger_coexistence_bytes": coexistence,
+        "maximum_processes": 2,
+        "passed": usable >= coexistence,
+        "unresolved_risk": "Python allocator behavior is covered only by the declared 20 percent margin",
+    }
+
+
 def _git_commit(repository: Path) -> str:
+    marker = repository / ".sloforge-source-commit"
+    if marker.is_file() and not marker.is_symlink():
+        value = marker.read_text(encoding="utf-8").strip()
+        if 7 <= len(value) <= 64 and all(character in "0123456789abcdef" for character in value):
+            return value
+        raise ValueError(".sloforge-source-commit is not a lowercase Git object identifier")
     return subprocess.run(
         ("git", "rev-parse", "HEAD"),
         cwd=repository,
@@ -179,26 +315,36 @@ def _completion_objective(service: tuple[float, ...]) -> float:
 
 def _simulated_samples(
     workload_path: Path, *, seed: int
-) -> tuple[tuple[float, ...], tuple[float, ...]]:
+) -> tuple[tuple[float, ...], tuple[float, ...], tuple[tuple[str, int], ...]]:
     """Run an explicit deterministic scheduling/state-cost model for seven regimes."""
 
     base_work = _work_items(workload_path)
-    baseline: list[float] = []
-    candidate: list[float] = []
-    for trial in range(7):
+    execution = [
+        (alternative, trial) for trial in range(7) for alternative in ("baseline", "candidate")
+    ]
+    random.Random(seed ^ 0xC4A5_51E).shuffle(execution)
+    baseline: dict[int, float] = {}
+    candidate: dict[int, float] = {}
+    for alternative, trial in execution:
         # This deterministic regime variation is declared in the benchmark definition.
         varied = tuple(
             value * (1.0 + (((seed + trial * 17 + index * 11) % 9) - 4) / 100.0)
             for index, value in enumerate(base_work)
         )
-        baseline.append(_completion_objective(varied))
-        deadline_order = tuple(sorted(varied))
-        # Candidate model combines shortest-deadline scheduling with one shared
-        # state-allocation setup per batch; the 8% factor is an explicit modeled
-        # assumption, never described as a hardware measurement.
-        shared_state_cost = tuple(value * 0.92 for value in deadline_order)
-        candidate.append(_completion_objective(shared_state_cost))
-    return tuple(baseline), tuple(candidate)
+        if alternative == "baseline":
+            baseline[trial] = _completion_objective(varied)
+        else:
+            deadline_order = tuple(sorted(varied))
+            # Candidate model combines shortest-deadline scheduling with one shared
+            # state-allocation setup per batch; the 8% factor is an explicit modeled
+            # assumption, never described as a hardware measurement.
+            shared_state_cost = tuple(value * 0.92 for value in deadline_order)
+            candidate[trial] = _completion_objective(shared_state_cost)
+    return (
+        tuple(baseline[trial] for trial in range(7)),
+        tuple(candidate[trial] for trial in range(7)),
+        tuple(execution),
+    )
 
 
 def _percentile(values: tuple[float, ...], probability: float) -> float:
@@ -221,6 +367,8 @@ def build_local_capsule(
     if observed_at.tzinfo is None or observed_at.utcoffset() is None:
         raise ValueError("observed_at must be timezone-aware")
     observed_at = observed_at.astimezone(UTC)
+    if output_directory.exists() and output_directory.is_symlink():
+        raise ValueError("capsule output directory must not be a symlink")
     if output_directory.exists() and any(output_directory.iterdir()):
         raise FileExistsError(f"capsule output directory is not empty: {output_directory}")
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -255,6 +403,10 @@ def build_local_capsule(
         raise ValueError("hardware contract changed after synthesis")
     hardware_document = _read_object(hardware_path)
     architecture = str(hardware_document.get("architecture", "cpu"))
+    measured_fingerprint = hardware_document.get("measured_fingerprint")
+    if not isinstance(measured_fingerprint, str):
+        raise ValueError("hardware contract requires a measured_fingerprint distinct from its hash")
+    hardware_fingerprint = Digest(value=measured_fingerprint)
     package_root = Path(
         str(
             _read_object(run_directory / "generated_runtime/runtime_config.json")[
@@ -266,21 +418,29 @@ def build_local_capsule(
     tokenizer_path = package_root / str(package_manifest["tokenizer_module"])
     tokenizer_digest = _digest(tokenizer_path.read_bytes())
     source_digest = Digest(value=str(manifest["package_hash"]))
-    if candidate.genome_hash.value != canonical_hash(
-        json.loads((candidate_directory / "inference_genome.json").read_text(encoding="utf-8"))
-    ):
+    genome_document = json.loads(
+        (candidate_directory / "inference_genome.json").read_text(encoding="utf-8")
+    )
+    if candidate.genome_hash.value != canonical_hash(genome_document):
         raise ValueError("candidate genome changed after acceptance")
 
     artifacts: list[ArtifactRef] = []
+    runtime_bundle = _runtime_bundle_bytes(
+        run_directory,
+        candidate_directory,
+        package_root,
+        candidate_id=candidate.candidate_id,
+        candidate_genome_hash=candidate.genome_hash.value,
+    )
     artifacts.append(
-        _copy_artifact(
+        _artifact(
             output_directory,
             "generated-runtime",
             ArtifactRole.GENERATED_RUNTIME,
-            run_directory / "generated_runtime/runtime.py",
+            runtime_bundle,
             origin=ArtifactOrigin.GENERATED_UNTRUSTED,
-            suffix=".py",
-            media_type="text/x-python",
+            suffix=".zip",
+            media_type="application/zip",
         )
     )
     artifacts.append(
@@ -292,6 +452,17 @@ def build_local_capsule(
             origin=ArtifactOrigin.GENERATED_UNTRUSTED,
             suffix=".slo",
             media_type="text/plain",
+        )
+    )
+    artifacts.append(
+        _copy_artifact(
+            output_directory,
+            "generated-policy-bytecode",
+            ArtifactRole.GENERATED_POLICY,
+            candidate_directory / "policy.bytecode.json",
+            origin=ArtifactOrigin.GENERATED_UNTRUSTED,
+            suffix=".json",
+            media_type="application/json",
         )
     )
     deployment_payload = canonical_json(
@@ -359,15 +530,28 @@ def build_local_capsule(
         origin=ArtifactOrigin.VERIFIED_EVIDENCE,
     )
     artifacts.append(semantic)
+    differential_path = run_directory / "synthesis/runtime-differential-result.json"
+    differential = _read_object(differential_path)
+    final_corpus = package_root / str(
+        package_manifest["quality_contract"]["final_evaluation_corpus"]
+    )
+    if differential.get("corpus_sha256") != hashlib.sha256(final_corpus.read_bytes()).hexdigest():
+        raise ValueError("differential evidence corpus digest mismatch")
+    cases = differential.get("cases")
+    if not isinstance(cases, list) or not cases:
+        raise ValueError("differential evidence has no replayable cases")
+    exact_count = sum(isinstance(case, dict) and case.get("exact_match") is True for case in cases)
+    observed_quality = exact_count / len(cases)
+    if differential.get("passed") is not True or observed_quality != 1.0:
+        raise ValueError("differential quality evidence did not satisfy exact match")
     quality_payload = canonical_json(
         {
-            "schema_version": "1.0.0",
+            **differential,
             "metric": "exact_token_match",
             "threshold": 1.0,
-            "observed": 1.0,
-            "corpus": str(package_manifest["quality_contract"]["final_evaluation_corpus"]),
+            "observed": observed_quality,
+            "case_count": len(cases),
             "search_data_separate": True,
-            "seed": design.seed,
         }
     )
     quality = _artifact(
@@ -379,21 +563,16 @@ def build_local_capsule(
     )
     artifacts.append(quality)
     memory_capacity = int(hardware_document.get("memory_bytes", 8 * 1024**3))
-    resource_payload = canonical_json(
-        {
-            "schema_version": "1.0.0",
-            "method": "conservative-static-upper-bound",
-            "capacity_bytes": memory_capacity,
-            "safety_margin_fraction": 0.20,
-            "bounded_queue_requests": 128,
-            "maximum_processes": 1,
-            "estimated_peak_bytes": 256 * 1024**2,
-            "champion_challenger_coexistence_bytes": 512 * 1024**2,
-            "passed": int(memory_capacity * 0.8) >= 512 * 1024**2,
-            "unresolved_risk": "Python allocator fragmentation modeled by fixed safety margin",
-        }
+    runtime_config = _read_object(run_directory / "generated_runtime/runtime_config.json")
+    resource_document = _resource_evidence(
+        runtime_config,
+        genome_document,
+        package_manifest,
+        capacity_bytes=memory_capacity,
+        bundle_size_bytes=len(runtime_bundle),
     )
-    if json.loads(resource_payload)["passed"] is not True:
+    resource_payload = canonical_json(resource_document)
+    if resource_document["passed"] is not True:
         raise ValueError("conservative resource analysis rejected the candidate")
     resource = _artifact(
         output_directory,
@@ -457,6 +636,9 @@ def build_local_capsule(
     )
     artifacts.append(corpus)
 
+    baseline_values, candidate_values, execution = _simulated_samples(
+        workload_path, seed=design.seed
+    )
     definition_payload = canonical_json(
         {
             "schema_version": "1.0.0",
@@ -470,6 +652,12 @@ def build_local_capsule(
             "candidate": "deadline-order and shared batched state setup",
             "modeled_candidate_state_cost_factor": 0.92,
             "hardware_backed": False,
+            "execution_order": [
+                {"alternative": alternative, "trial": trial} for alternative, trial in execution
+            ],
+            "bootstrap_rounds": 2_000,
+            "confidence": 0.95,
+            "statistical_seed": design.seed ^ 0xB005_7A9,
         }
     )
     definition = _artifact(
@@ -498,16 +686,19 @@ def build_local_capsule(
         origin=ArtifactOrigin.TRUSTED,
     )
     artifacts.append(software)
-    baseline_values, candidate_values = _simulated_samples(workload_path, seed=design.seed)
 
     def samples_document(values: tuple[float, ...]) -> RawBenchmarkSamples:
         return RawBenchmarkSamples(
             benchmark_definition_digest=definition.digest,
             workload_fingerprint=workload_digest,
-            hardware_fingerprint=hardware_digest,
+            hardware_fingerprint=hardware_fingerprint,
             software_manifest_digest=software.digest,
             samples=tuple(
-                RawBenchmarkSample(trial=index, seed=design.seed + index, value=value)
+                RawBenchmarkSample(
+                    trial=index,
+                    seed=design.seed + index,
+                    value=value,
+                )
                 for index, value in enumerate(values)
             ),
         )
@@ -532,6 +723,22 @@ def build_local_capsule(
     artifacts.append(sample_artifact)
     candidate_median = float(statistics.median(candidate_values))
     baseline_median = float(statistics.median(baseline_values))
+    statistical_seed = design.seed ^ 0xB005_7A9
+    bootstrap_rounds = 2_000
+    confidence = 0.95
+    confidence_low, confidence_high = bootstrap_median_interval(
+        candidate_values,
+        seed=statistical_seed,
+        rounds=bootstrap_rounds,
+        confidence=confidence,
+    )
+    effect_size = (baseline_median - candidate_median) / baseline_median
+    regression_probability = paired_regression_probability(
+        baseline_values, candidate_values, objective="minimize"
+    )
+    practical_threshold = 0.05
+    if effect_size <= practical_threshold or regression_probability > 0.05:
+        raise ValueError("modeled performance evidence did not pass its declared acceptance gate")
     performance = BenchmarkEvidence(
         benchmark_id="local-service-model",
         definition_artifact_id=definition.artifact_id,
@@ -539,7 +746,7 @@ def build_local_capsule(
         software_manifest_artifact_id=software.artifact_id,
         baseline_artifact_id=baseline_artifact.artifact_id,
         workload_fingerprint=workload_digest,
-        hardware_fingerprint=hardware_digest,
+        hardware_fingerprint=hardware_fingerprint,
         sample_count=len(candidate_values),
         warmup_iterations=1,
         repetitions=len(candidate_values),
@@ -552,17 +759,11 @@ def build_local_capsule(
             tail_quantile=0.95,
             median=candidate_median,
             tail_percentile=_percentile(candidate_values, 0.95),
-            confidence_low=min(candidate_values),
-            confidence_high=max(candidate_values),
-            effect_size=(baseline_median - candidate_median) / baseline_median,
-            regression_probability=(
-                sum(
-                    right >= left
-                    for left, right in zip(baseline_values, candidate_values, strict=True)
-                )
-                / len(candidate_values)
-            ),
-            practical_significance_threshold=0.05,
+            confidence_low=confidence_low,
+            confidence_high=confidence_high,
+            effect_size=effect_size,
+            regression_probability=regression_probability,
+            practical_significance_threshold=practical_threshold,
         ),
     )
 
@@ -664,7 +865,7 @@ def build_local_capsule(
             dependencies=(dependency,),
             hardware=HardwareCompatibility(
                 hardware_contract_hash=hardware_digest,
-                allowed_fingerprints=(hardware_digest,),
+                allowed_fingerprints=(hardware_fingerprint,),
                 architectures=(architecture,),
                 restrictions=("CPU-only local evidence; CUDA and multi-node paths unexercised",),
             ),
@@ -683,15 +884,34 @@ def build_local_capsule(
     if capsule.capsule_digest is None:  # defensive: seal_capsule must always address the manifest
         raise RuntimeError("sealed capsule has no digest")
     context = ValidationContext(
+        expected_capsule_digest=capsule.capsule_digest,
         source_model_hash=source_digest,
         tokenizer_hash=tokenizer_digest,
         workload_contract_hash=workload_digest,
         hardware_contract_hash=hardware_digest,
-        hardware_fingerprint=hardware_digest,
+        hardware_fingerprint=hardware_fingerprint,
         hardware_architecture=architecture,
         device_count=1,
         dependency_lock_hash=lock.digest,
         dependencies=(CurrentDependency(name="sloforge", version="0.1.0"),),
+        trusted_evidence_anchors=tuple(
+            TrustedEvidenceAnchor(
+                evidence_id=record.evidence_id,
+                evidence_record_digest=_digest(canonical_json(record)),
+                issuer=record.issuer,
+                issuer_version=record.issuer_version,
+                artifacts=tuple(
+                    TrustedArtifactAnchor(
+                        artifact_id=artifact_id,
+                        digest=next(
+                            item.digest for item in artifacts if item.artifact_id == artifact_id
+                        ),
+                    )
+                    for artifact_id in record.artifact_ids
+                ),
+            )
+            for record in evidence
+        ),
         trusted_verifier_version="1.0.0",
         now=observed_at,
         require_promotion_evidence=True,

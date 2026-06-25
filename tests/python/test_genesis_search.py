@@ -8,6 +8,7 @@ import pytest
 from sloforge.genesis.ir import (
     ArtifactDigest,
     BudgetUsage,
+    CandidateFailureState,
     CandidateSuccessState,
     SearchBudget,
     TransformationFamily,
@@ -69,6 +70,24 @@ def _usage(**overrides: float | int) -> BudgetUsage:
     }
     values.update(overrides)
     return BudgetUsage.model_validate(values)
+
+
+def test_stage_result_rejects_lifecycle_failure_from_an_unrelated_stage() -> None:
+    with pytest.raises(ValueError, match="incompatible with the fidelity stage"):
+        StageResult(
+            stage=FidelityStage.STATIC_PRUNING,
+            passed=False,
+            reason="not a canary observation",
+            failure_state=CandidateFailureState.CANARY_REJECTED,
+        )
+
+    valid = StageResult(
+        stage=FidelityStage.MODEL_CHECK,
+        passed=False,
+        reason="bounded protocol counterexample",
+        failure_state=CandidateFailureState.MODEL_CHECK_REJECTED,
+    )
+    assert valid.failure_state is CandidateFailureState.MODEL_CHECK_REJECTED
 
 
 def _mutation(

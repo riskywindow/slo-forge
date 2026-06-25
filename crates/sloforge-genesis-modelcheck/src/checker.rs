@@ -411,22 +411,7 @@ fn running_successors(
 ) {
     let request_id = bounded_request_id(request_index);
     let request_state = &state.requests[request_index];
-    if request_state.pending.is_empty()
-        && request_state.next_token < request.bounds.max_tokens_per_request
-    {
-        let token = request_state.next_token;
-        let mut next = state.clone();
-        next.requests[request_index].next_token = token.saturating_add(1);
-        next.requests[request_index].committed.push(token);
-        next.requests[request_index].pending.push(token);
-        transitions.push((
-            Action::CommitToken {
-                request: request_id,
-                token,
-            },
-            next,
-        ));
-    }
+    token_commit_successor(request, state, request_index, transitions);
     if let Some(token) = request_state.pending.first().copied() {
         let mut next = state.clone();
         next.requests[request_index].pending.remove(0);
@@ -479,16 +464,14 @@ fn running_successors(
             next,
         ));
     }
-    if request_state.pending.is_empty() {
-        let mut cancelled = state.clone();
-        cancelled.requests[request_index].phase = RequestPhase::Cancelling;
-        transitions.push((
-            Action::Cancel {
-                request: request_id,
-            },
-            cancelled,
-        ));
-    }
+    let mut cancelled = state.clone();
+    cancelled.requests[request_index].phase = RequestPhase::Cancelling;
+    transitions.push((
+        Action::Cancel {
+            request: request_id,
+        },
+        cancelled,
+    ));
     if request.protocol.worker_failure_enabled
         && state.worker_failures < request.bounds.max_worker_failures
         && request_state.transfer.is_none()
@@ -504,6 +487,46 @@ fn running_successors(
         ));
     }
     state_transfer_successors(request, state, request_index, transitions);
+}
+
+fn token_commit_successor(
+    request: &ModelCheckRequest,
+    state: &ProtocolState,
+    request_index: usize,
+    transitions: &mut Vec<(Action, ProtocolState)>,
+) {
+    let request_state = &state.requests[request_index];
+    if request_state.pending.is_empty()
+        && request_state.next_token < request.bounds.max_tokens_per_request
+    {
+        let request_id = bounded_request_id(request_index);
+        let token = request_state.next_token;
+        let mut next = state.clone();
+        next.requests[request_index].next_token = token.saturating_add(1);
+        next.requests[request_index].committed.push(token);
+        if request.protocol.token_delivery == TokenDelivery::Reliable {
+            // The generated runtime publishes cancellation and token enqueue
+            // under one commit lock. Model that boundary as one transition so
+            // the checker does not imply an unmodeled cancellation gap.
+            next.requests[request_index].emitted.push(token);
+            transitions.push((
+                Action::CommitAndEmitToken {
+                    request: request_id,
+                    token,
+                },
+                next,
+            ));
+        } else {
+            next.requests[request_index].pending.push(token);
+            transitions.push((
+                Action::CommitToken {
+                    request: request_id,
+                    token,
+                },
+                next,
+            ));
+        }
+    }
 }
 
 fn state_transfer_successors(
@@ -801,12 +824,14 @@ fn violated_invariants(
             RequestPhase::Completed | RequestPhase::Cancelled
         );
         if request_state.committed.iter().any(|token| {
-            let pending = request_state.pending.iter().fold(0_usize, |count, item| {
-                count + usize::from(item == token)
-            });
-            let emitted = request_state.emitted.iter().fold(0_usize, |count, item| {
-                count + usize::from(item == token)
-            });
+            let pending = request_state
+                .pending
+                .iter()
+                .fold(0_usize, |count, item| count + usize::from(item == token));
+            let emitted = request_state
+                .emitted
+                .iter()
+                .fold(0_usize, |count, item| count + usize::from(item == token));
             emitted == 0 && (pending == 0 || terminal)
         }) {
             violated.insert(InvariantId::NoCommittedTokenDisappears);
@@ -988,7 +1013,7 @@ mod tests {
         assert!(result.invariants.iter().all(|outcome| outcome.passed));
         for required in [
             "admit",
-            "commit_token",
+            "commit_and_emit_token",
             "cancel",
             "fail_worker",
             "begin_state_transfer",
@@ -1005,6 +1030,41 @@ mod tests {
                 "missing transition coverage for {required}"
             );
         }
+    }
+
+    #[test]
+    fn cancellation_between_non_atomic_commit_and_delivery_is_rejected() {
+        let mut request = ModelCheckRequest::safe(73);
+        request.protocol.token_delivery = TokenDelivery::MayDuplicateCommitted;
+        request.protocol.worker_failure_enabled = false;
+        request.protocol.state_transfer_enabled = false;
+        request.protocol.rollout_enabled = false;
+        request.protocol.controller_crash_enabled = false;
+        let result = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
+        let outcome = result
+            .invariants
+            .iter()
+            .find(|outcome| outcome.invariant == InvariantId::NoCommittedTokenDisappears)
+            .unwrap_or_else(|| panic!("missing committed-token invariant"));
+        assert_eq!(outcome.status, CheckStatus::Failed);
+        let trace = outcome
+            .counterexample
+            .as_ref()
+            .unwrap_or_else(|| panic!("missing cancellation counterexample"));
+        assert!(
+            trace
+                .steps
+                .iter()
+                .any(|step| { matches!(step.action, Action::CommitToken { .. }) })
+        );
+        assert!(
+            trace
+                .steps
+                .iter()
+                .any(|step| { matches!(step.action, Action::Cancel { .. }) })
+        );
+        replay_counterexample(&request, trace)
+            .unwrap_or_else(|error| panic!("counterexample did not replay: {error}"));
     }
 
     #[test]

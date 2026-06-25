@@ -132,7 +132,12 @@ def test_cases_cover_stride_alias_boundary_and_nonfinite_domains() -> None:
     assert any(case.previous_stride > 1 for case in cases)
     assert any(case.activation_stride > 1 for case in cases)
     assert any(case.output_alias_previous for case in cases)
-    assert sum(case.expected_error == "ValueError" for case in cases) == 3
+    assert sum(case.expected_error == "ValueError" for case in cases) == 4
+    overflow = next(case for case in cases if case.case_id == "edge-finite-overflow")
+    assert overflow.expected == (127, -127)
+    atomic = next(case for case in cases if case.case_id == "alias-invalid-late-is-atomic")
+    assert atomic.output_alias_previous
+    assert atomic.expected_error == "ValueError"
     assert any(case.count == 1 for case in cases)
     assert any(case.count == 32 for case in cases)
     enumerated = {
@@ -166,6 +171,37 @@ def test_generated_candidate_executes_only_in_sandbox_and_passes_correctness(
     assert result.nonfinite_cases == 3
     assert result.alias_cases >= 1
     assert not result.mismatches
+
+
+def test_correctness_gate_rejects_partial_alias_mutation_on_late_error(
+    tmp_path: Path,
+) -> None:
+    candidate, source = generate_candidates(seed=SEED)[0]
+    unsafe = source.replace(
+        "            logical[position] = rounded\n",
+        "            if output_alias_previous:\n"
+        "                previous_storage[previous_offset + position * previous_stride] = rounded\n"
+        "            logical[position] = rounded\n",
+    ).replace(
+        "    if output_alias_previous:\n"
+        "        for position in range(count):\n"
+        "            previous_storage[previous_offset + position * previous_stride] = logical[position]\n",
+        "",
+    )
+    unsafe_candidate = candidate.model_copy(
+        update={"source_sha256": hashlib.sha256(unsafe.encode()).hexdigest()}
+    )
+    result = execute_correctness(
+        unsafe_candidate,
+        unsafe,
+        generate_correctness_cases(seed=SEED, randomized_cases=1),
+        output_root=tmp_path / "unsafe-alias",
+        seed=SEED,
+        timeout_seconds=10.0,
+    )
+
+    assert result.status is LabStatus.FAILED
+    assert any(item.category == "alias_atomicity" for item in result.mismatches)
 
 
 def test_static_rejection_prevents_generated_code_execution(tmp_path: Path) -> None:
@@ -257,6 +293,34 @@ def test_inconclusive_end_to_end_result_cannot_claim_speedup(tmp_path: Path) -> 
     assert decision.claim.startswith("no speedup claim")
 
 
+def test_inconclusive_declared_regime_cannot_claim_speedup(tmp_path: Path) -> None:
+    candidate, source = generate_candidates(seed=SEED)[0]
+    correctness = execute_correctness(
+        candidate,
+        source,
+        generate_correctness_cases(seed=SEED, randomized_cases=1),
+        output_root=tmp_path / "correctness",
+        seed=SEED,
+    )
+    report = benchmark_candidate(
+        candidate,
+        source,
+        correctness,
+        output_root=tmp_path / "benchmark",
+        config=_small_benchmark_config(),
+    )
+    regimes = tuple(
+        item.model_copy(update={"status": LabStatus.INCONCLUSIVE})
+        if item.regime == "micro_batch_1"
+        else item
+        for item in report.regimes
+    )
+    inconclusive = report.model_copy(update={"status": LabStatus.INCONCLUSIVE, "regimes": regimes})
+    decision = decide_candidate(correctness, inconclusive)
+    assert decision.status is not AcceptanceStatus.ACCEPTED
+    assert decision.claim.startswith("no speedup claim")
+
+
 def test_triton_adapter_is_fail_closed_and_never_claims_execution(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -292,3 +356,11 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
         "accepted within the declared CPU, shape, numerical, and measured workload scope",
         "no speedup claim; candidate retained with negative or inconclusive evidence",
     }
+    with pytest.raises(FileExistsError, match="must be empty"):
+        run_kernel_lab_demo(
+            evidence=_evidence(tmp_path),
+            output_root=output,
+            seed=SEED,
+            candidate_limit=1,
+            benchmark_config=_small_benchmark_config(),
+        )

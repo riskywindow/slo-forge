@@ -15,7 +15,10 @@ def reference_quantized_state_update(previous: int, activation: float) -> int:
         raise ValueError("previous state outside symmetric int8 domain")
     if not math.isfinite(activation):
         raise ValueError("activation must be finite")
-    return max(-127, min(127, round(previous * 0.625 + activation * 31.0)))
+    combined = previous * 0.625 + activation * 31.0
+    if math.isinf(combined):
+        return 127 if combined > 0 else -127
+    return max(-127, min(127, round(combined)))
 
 
 def _storage(
@@ -95,6 +98,17 @@ def generate_correctness_cases(*, seed: int, randomized_cases: int = 24) -> tupl
             category="edge",
         ),
         _case(
+            case_id="edge-finite-overflow",
+            previous=[0, 0],
+            activations=[1.0e308, -1.0e308],
+            previous_offset=0,
+            previous_stride=1,
+            activation_offset=0,
+            activation_stride=1,
+            alias=False,
+            category="edge",
+        ),
+        _case(
             case_id="stride-noncontiguous",
             previous=[-41, 0, 41, 126],
             activations=[-1.5, -0.5, 0.5, 1.5],
@@ -113,6 +127,17 @@ def generate_correctness_cases(*, seed: int, randomized_cases: int = 24) -> tupl
             previous_stride=2,
             activation_offset=1,
             activation_stride=2,
+            alias=True,
+            category="alias",
+        ),
+        _case(
+            case_id="alias-invalid-late-is-atomic",
+            previous=[1, 2, 3],
+            activations=[0.0, 0.0, math.nan],
+            previous_offset=1,
+            previous_stride=2,
+            activation_offset=0,
+            activation_stride=1,
             alias=True,
             category="alias",
         ),

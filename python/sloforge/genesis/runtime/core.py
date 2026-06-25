@@ -8,6 +8,8 @@ from queue import Empty, Full, Queue
 from threading import Lock, Thread
 from time import monotonic
 
+from sloforge.genesis.policy_dsl import BytecodeProgram, execute_bytecode
+
 from .adapter import ReferenceRuntimeAdapter
 from .models import (
     EventKind,
@@ -39,7 +41,7 @@ class StreamHandle:
             return self._control.lifecycle
 
     def cancel(self) -> None:
-        self._control.cancellation.set()
+        self._control.cancel()
 
     def next_event(self, timeout_seconds: float) -> StreamEvent:
         if timeout_seconds <= 0:
@@ -96,10 +98,12 @@ class BaselineStreamingRuntime:
         *,
         limits: RuntimeLimits,
         runtime_seed: int,
+        policy: BytecodeProgram | None = None,
     ) -> None:
         self._adapter = adapter
         self._limits = limits
         self._runtime_seed = runtime_seed
+        self._policy = policy
         self._admission: Queue[tuple[RequestControl, Queue[StreamEvent]]] = Queue(
             maxsize=limits.maximum_queue_depth
         )
@@ -189,6 +193,7 @@ class BaselineStreamingRuntime:
             "queue_depth": self._admission.qsize(),
             "queue_capacity": self._limits.maximum_queue_depth,
             "owned_state_count": self._state_owners.count(),
+            "policy": self._policy.name if self._policy is not None else None,
         }
 
     def metrics(self) -> dict[str, int]:
@@ -206,7 +211,7 @@ class BaselineStreamingRuntime:
         with self._active_lock:
             controls = tuple(self._active.values())
         for control in controls:
-            control.cancellation.set()
+            control.cancel()
         worker = self._worker
         if worker is not None:
             worker.join(timeout)
@@ -232,9 +237,10 @@ class BaselineStreamingRuntime:
                             return
                     continue
             batch = [first]
-            if first[0].request.batching_eligible:
+            batch_limit = self._batch_limit(first[0])
+            if first[0].request.batching_eligible and batch_limit > 1:
                 deadline = monotonic() + self._limits.batch_wait_seconds
-                while len(batch) < self._limits.maximum_batch_size:
+                while len(batch) < batch_limit:
                     remaining = deadline - monotonic()
                     if remaining <= 0:
                         break
@@ -257,6 +263,27 @@ class BaselineStreamingRuntime:
             with self._lifecycle_lock:
                 if self._stopping and self._admission.empty() and pending is None:
                     return
+
+    def _batch_limit(self, control: RequestControl) -> int:
+        if self._policy is None:
+            return self._limits.maximum_batch_size
+        elapsed = monotonic() - control.created_at
+        remaining_ms = int(
+            max(0.0, min(1000.0, (control.request.timeout_seconds - elapsed) * 1000.0))
+        )
+        available: dict[str, int | bool] = {
+            "queue_length": min(32, self._admission.qsize() + 1),
+            "slo_slack_ms": remaining_ms,
+            "cancellation_pending": control.cancellation.is_set(),
+        }
+        names = {item.name for item in self._policy.inputs}
+        unsupported = names - available.keys()
+        if unsupported:
+            raise RuntimeError(f"runtime policy requires unsupported inputs: {sorted(unsupported)}")
+        result = execute_bytecode(self._policy, {name: available[name] for name in names})
+        if type(result) is not int:
+            raise RuntimeError("runtime batching policy must return an integer")
+        return max(1, min(self._limits.maximum_batch_size, result))
 
     def _seed(self, request: RuntimeRequest, phase: str, position: int) -> int:
         identity = (
@@ -328,6 +355,25 @@ class BaselineStreamingRuntime:
             return True
         return False
 
+    def _commit_token(
+        self,
+        control: RequestControl,
+        events: Queue[StreamEvent],
+        event: StreamEvent,
+    ) -> bool:
+        """Atomically choose token emission or cancellation/deadline termination.
+
+        A cancellation that returns before this method acquires the commit lock
+        wins and produces a terminal event. If token enqueue wins, it completes
+        before a concurrent cancellation call can return.
+        """
+
+        with control.commit_lock:
+            if self._abort_if_needed(control, events, event.sequence):
+                return False
+            self._emit(events, event)
+            return True
+
     def _process(self, control: RequestControl, events: Queue[StreamEvent]) -> None:
         request = control.request
         owner = f"worker:{request.request_id}"
@@ -373,16 +419,19 @@ class BaselineStreamingRuntime:
                 )
                 if self._abort_if_needed(control, events, sequence):
                     return
-                self._emit(
-                    events,
-                    StreamEvent(
-                        request_id=request.request_id,
-                        kind=EventKind.TOKEN,
-                        sequence=sequence,
-                        token_id=token,
-                        text=self._adapter.detokenize(token),
-                    ),
+                token_event = StreamEvent(
+                    request_id=request.request_id,
+                    kind=EventKind.TOKEN,
+                    sequence=sequence,
+                    token_id=token,
+                    text=self._adapter.detokenize(token),
                 )
+                if not self._commit_token(
+                    control,
+                    events,
+                    token_event,
+                ):
+                    return
                 sequence += 1
                 previous = token
                 with self._metrics_lock:

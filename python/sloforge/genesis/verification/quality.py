@@ -32,6 +32,38 @@ def evaluate_quality(
         raise VerificationError("quality token arrays must be matching vectors")
     if reference_logits.shape[0] != reference_tokens.shape[0] or not reference_tokens.size:
         raise VerificationError("quality dataset must be non-empty and aligned")
+    if not np.issubdtype(reference_logits.dtype, np.floating) or not np.issubdtype(
+        candidate_logits.dtype, np.floating
+    ):
+        raise VerificationError("quality logits must use floating-point dtypes")
+    if not np.all(np.isfinite(reference_logits)) or not np.all(np.isfinite(candidate_logits)):
+        raise VerificationError("quality logits must be finite")
+    if not np.issubdtype(reference_tokens.dtype, np.integer) or not np.issubdtype(
+        candidate_tokens.dtype, np.integer
+    ):
+        raise VerificationError("quality tokens must use integer dtypes")
+    vocabulary = reference_logits.shape[1]
+    if (
+        np.any(reference_tokens < 0)
+        or np.any(reference_tokens >= vocabulary)
+        or np.any(candidate_tokens < 0)
+        or np.any(candidate_tokens >= vocabulary)
+    ):
+        raise VerificationError("quality tokens must lie inside the logits vocabulary")
+    agreement_thresholds = (
+        contract.exact_token_match_minimum,
+        contract.top1_agreement_minimum,
+        contract.topk_agreement_minimum,
+    )
+    if any(not np.isfinite(value) or not 0.0 <= value <= 1.0 for value in agreement_thresholds):
+        raise VerificationError("quality agreement thresholds must be finite probabilities")
+    divergence_bounds = (
+        contract.maximum_kl_divergence,
+        contract.maximum_js_divergence,
+        contract.maximum_absolute_error,
+    )
+    if any(not np.isfinite(value) or value < 0.0 for value in divergence_bounds):
+        raise VerificationError("quality error bounds must be finite and non-negative")
     if not 1 <= contract.topk <= reference_logits.shape[1]:
         raise VerificationError("top-k quality domain is invalid")
     reference_probability = _probabilities(reference_logits)

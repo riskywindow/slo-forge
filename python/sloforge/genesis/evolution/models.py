@@ -15,7 +15,7 @@ from pydantic import (
     model_validator,
 )
 
-from ..capsule.models import CapsuleValidationReport
+from ..capsule.models import CapsuleValidationReport, VerificationLevel
 
 EVOLUTION_SCHEMA_VERSION: Final = "sloforge.genesis.evolution/v1"
 PERSISTENCE_SCHEMA_VERSION: Final = "sloforge.genesis.evolution.persistence/v1"
@@ -157,7 +157,11 @@ class ChallengerSpec(EvolutionModel):
 
 class GateObservation(EvolutionModel):
     event_id: Identifier
+    candidate_id: Identifier
+    capsule_digest: str
+    evidence_digest: str
     stage: GateStage
+    verification_level: VerificationLevel
     observed_at_ms: int = Field(ge=0)
     deterministic_seed: int = Field(ge=0)
     sample_count: int = Field(ge=0)
@@ -166,6 +170,13 @@ class GateObservation(EvolutionModel):
     p99_tpot_ratio: float = Field(gt=0.0)
     quality_regression: float = Field(ge=0.0)
     interrupted_streams: int = Field(ge=0)
+
+    @field_validator("capsule_digest", "evidence_digest")
+    @classmethod
+    def validate_evidence_digest(cls, value: str) -> str:
+        if _DIGEST.fullmatch(value) is None:
+            raise ValueError("gate capsule and evidence digests must be lowercase sha256")
+        return value
 
 
 class TriggerObservation(EvolutionModel):
@@ -238,6 +249,20 @@ class EvolutionAuditRecord(EvolutionModel):
     candidate_id: str | None = None
 
 
+class ProcessedEventRecord(EvolutionModel):
+    """Bound one idempotency key to the exact event payload it represented."""
+
+    event_id: Identifier
+    payload_sha256: str
+
+    @field_validator("payload_sha256")
+    @classmethod
+    def validate_payload_digest(cls, value: str) -> str:
+        if _DIGEST.fullmatch(value) is None:
+            raise ValueError("processed event payload digest must be lowercase sha256")
+        return value
+
+
 class EvolutionSnapshot(EvolutionModel):
     schema_version: Literal["sloforge.genesis.evolution/v1"] = EVOLUTION_SCHEMA_VERSION
     deployment_id: Identifier
@@ -252,6 +277,7 @@ class EvolutionSnapshot(EvolutionModel):
     active_streams: tuple[StreamLease, ...] = ()
     retained_capsule_ids: tuple[Identifier, ...] = ()
     processed_event_ids: tuple[Identifier, ...] = ()
+    processed_events: tuple[ProcessedEventRecord, ...] = ()
     audit: tuple[EvolutionAuditRecord, ...]
     last_observed_at_ms: int = Field(ge=0)
 
@@ -265,6 +291,11 @@ class EvolutionSnapshot(EvolutionModel):
             raise ValueError("active stream identifiers must be unique")
         if len(self.processed_event_ids) != len(set(self.processed_event_ids)):
             raise ValueError("processed event identifiers must be unique")
+        processed_ids = [item.event_id for item in self.processed_events]
+        if len(processed_ids) != len(set(processed_ids)):
+            raise ValueError("processed event records must have unique identifiers")
+        if self.processed_events and tuple(processed_ids) != self.processed_event_ids:
+            raise ValueError("processed event ids and payload records must remain aligned")
         if len(self.retained_capsule_ids) != len(set(self.retained_capsule_ids)):
             raise ValueError("retained capsule identifiers must be unique")
         if (

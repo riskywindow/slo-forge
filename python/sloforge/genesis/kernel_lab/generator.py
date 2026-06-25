@@ -104,7 +104,6 @@ def _candidate_source(parameters: KernelParameters) -> str:
         "    if previous_stride not in (1, 2, 3) or activation_stride not in (1, 2, 3):\n"
         "        raise ValueError('stride outside supported domain')\n"
         f"{coefficient_setup}"
-        "    output = previous_storage if output_alias_previous else [0] * count\n"
         "    logical = [0] * count\n"
         "    position = 0\n"
         "    while position < count:\n"
@@ -116,14 +115,17 @@ def _candidate_source(parameters: KernelParameters) -> str:
         "                raise ValueError('previous state outside symmetric int8 domain')\n"
         "            if not math.isfinite(activation):\n"
         "                raise ValueError('activation must be finite')\n"
-        f"            rounded = round({previous_expression} + {activation_expression})\n"
-        f"{clamp}"
-        "            if output_alias_previous:\n"
-        "                output[previous_offset + position * previous_stride] = rounded\n"
+        f"            combined = {previous_expression} + {activation_expression}\n"
+        "            if math.isinf(combined):\n"
+        "                rounded = 127 if combined > 0 else -127\n"
         "            else:\n"
-        "                output[position] = rounded\n"
+        "                rounded = round(combined)\n"
+        f"{clamp}"
         "            logical[position] = rounded\n"
         "            position += 1\n"
+        "    if output_alias_previous:\n"
+        "        for position in range(count):\n"
+        "            previous_storage[previous_offset + position * previous_stride] = logical[position]\n"
         "    return logical\n"
     )
 
@@ -227,7 +229,7 @@ def validate_generated_source(candidate: KernelCandidate, source: str) -> tuple[
                 isinstance(node.ctx, ast.Load)
                 and isinstance(node.value, ast.Name)
                 and node.value.id == "math"
-                and node.attr == "isfinite"
+                and node.attr in {"isfinite", "isinf"}
             )
             if not allowed_attribute:
                 diagnostics.append("forbidden_attribute_access")
@@ -238,7 +240,7 @@ def validate_generated_source(candidate: KernelCandidate, source: str) -> tuple[
             elif isinstance(node.func, ast.Attribute) and not (
                 isinstance(node.func.value, ast.Name)
                 and node.func.value.id == "math"
-                and node.func.attr == "isfinite"
+                and node.func.attr in {"isfinite", "isinf"}
             ):
                 diagnostics.append("forbidden_call:attribute")
     return tuple(sorted(set(diagnostics)))

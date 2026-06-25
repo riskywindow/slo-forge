@@ -74,9 +74,7 @@ class EnvironmentVariable(SandboxModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, value: str) -> str:
-        if not value.replace("_", "").isalnum() or not (
-            value[0].isalpha() or value[0] == "_"
-        ):
+        if not value.replace("_", "").isalnum() or not (value[0].isalpha() or value[0] == "_"):
             raise ValueError("environment variable name is invalid")
         return value
 
