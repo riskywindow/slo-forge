@@ -1,0 +1,208 @@
+{
+  "configuration": {
+    "activation_stride": 1,
+    "count": 32,
+    "iterations_per_sample": 2000,
+    "output_alias_previous": false,
+    "previous_stride": 1,
+    "repetitions": 11,
+    "warmup": 3
+  },
+  "correctness": {
+    "exact_match_before_measurement": true
+  },
+  "environment": {
+    "implementation": "CPython",
+    "machine": "arm64",
+    "platform": "macOS-15.6.1-arm64-i386-64bit",
+    "python": "3.12.7",
+    "timer": "time.perf_counter_ns"
+  },
+  "raw_samples": [
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17050500,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8525,
+      "ordinal": 0,
+      "repetition": 0
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25731333,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12865,
+      "ordinal": 1,
+      "repetition": 0
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 16864750,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8432,
+      "ordinal": 0,
+      "repetition": 1
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25479667,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12739,
+      "ordinal": 1,
+      "repetition": 1
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25514250,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12757,
+      "ordinal": 0,
+      "repetition": 2
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17351458,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8675,
+      "ordinal": 1,
+      "repetition": 2
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25562750,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12781,
+      "ordinal": 0,
+      "repetition": 3
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 16882625,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8441,
+      "ordinal": 1,
+      "repetition": 3
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17058125,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8529,
+      "ordinal": 0,
+      "repetition": 4
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25645875,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12822,
+      "ordinal": 1,
+      "repetition": 4
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25457500,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12728,
+      "ordinal": 0,
+      "repetition": 5
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17471167,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8735,
+      "ordinal": 1,
+      "repetition": 5
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25257208,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12628,
+      "ordinal": 0,
+      "repetition": 6
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 16810125,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8405,
+      "ordinal": 1,
+      "repetition": 6
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17255708,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8627,
+      "ordinal": 0,
+      "repetition": 7
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25270292,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12635,
+      "ordinal": 1,
+      "repetition": 7
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25240209,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12620,
+      "ordinal": 0,
+      "repetition": 8
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17218541,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8609,
+      "ordinal": 1,
+      "repetition": 8
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25478666,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12739,
+      "ordinal": 0,
+      "repetition": 9
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 16937958,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8468,
+      "ordinal": 1,
+      "repetition": 9
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 17225083,
+      "implementation": "reference",
+      "nanoseconds_per_iteration": 8612,
+      "ordinal": 0,
+      "repetition": 10
+    },
+    {
+      "checksum": -398000,
+      "elapsed_ns": 25666375,
+      "implementation": "candidate",
+      "nanoseconds_per_iteration": 12833,
+      "ordinal": 1,
+      "repetition": 10
+    }
+  ],
+  "schema_version": "hybrid-quantized-state-update-benchmark/v1",
+  "seed": 73129,
+  "source": "measured_cpu_perf_counter_ns",
+  "summary": {
+    "acceptance": "not_evaluated_single_machine_point_estimate_only",
+    "candidate_median_ns_per_iteration": 12739.0,
+    "candidate_point_improvement_percent": -49.361003634658225,
+    "reference_median_ns_per_iteration": 8529.0
+  }
+}
