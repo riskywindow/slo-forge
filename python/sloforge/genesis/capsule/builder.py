@@ -361,6 +361,7 @@ def build_local_capsule(
     output_directory: Path,
     *,
     observed_at: datetime,
+    trust_output: Path | None = None,
 ) -> CapsuleBuildResult:
     """Build and immediately independently validate a local CPU/simulation capsule."""
 
@@ -369,6 +370,19 @@ def build_local_capsule(
     observed_at = observed_at.astimezone(UTC)
     if output_directory.exists() and output_directory.is_symlink():
         raise ValueError("capsule output directory must not be a symlink")
+    context_path = trust_output or output_directory.with_name(
+        f"{output_directory.name}.validation-context.json"
+    )
+    if context_path.exists() and context_path.is_symlink():
+        raise ValueError("capsule trust output must not be a symlink")
+    try:
+        context_path.resolve().relative_to(output_directory.resolve())
+    except ValueError:
+        pass
+    else:
+        raise ValueError("capsule trust output must be outside the untrusted capsule directory")
+    if context_path.exists():
+        raise FileExistsError(f"refusing to overwrite capsule trust output: {context_path}")
     if output_directory.exists() and any(output_directory.iterdir()):
         raise FileExistsError(f"capsule output directory is not empty: {output_directory}")
     output_directory.mkdir(parents=True, exist_ok=True)
@@ -921,7 +935,6 @@ def build_local_capsule(
         issues = "; ".join(f"{item.code.value}:{item.path}" for item in report.issues)
         raise ValueError(f"newly built capsule failed independent validation: {issues}")
     manifest_path = publish_capsule(capsule, output_directory / "manifests")
-    context_path = output_directory / "validation_context.json"
     _write_once(context_path, canonical_json(context) + b"\n")
     return CapsuleBuildResult(
         capsule_path=str(manifest_path.resolve()),

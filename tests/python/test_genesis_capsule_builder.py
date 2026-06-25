@@ -89,6 +89,8 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
 
     assert result.promotion_eligible
     assert result.hardware_backed is False
+    assert Path(result.context_path).parent == output.parent
+    assert not Path(result.context_path).is_relative_to(output)
     capsule = load_capsule(Path(result.capsule_path))
     context = ValidationContext.model_validate_json(
         Path(result.context_path).read_bytes(), strict=True
@@ -191,8 +193,25 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     )
     assert built.exit_code == 0, built.output
     manifest = next((cli_output / "manifests").glob("*.json"))
-    bundled_context = cli_output / "validation_context.json"
+    bundled_context = cli_output.with_name("capsule-cli.validation-context.json")
+    assert bundled_context.is_file()
+    inside_context = cli_output / "validation_context.json"
+    inside_context.write_bytes(bundled_context.read_bytes())
     rejected_context = runner.invoke(
+        app,
+        [
+            "genesis",
+            "capsule",
+            "validate",
+            str(cli_output),
+            "--context",
+            str(inside_context),
+            "--expected-digest",
+            manifest.stem,
+        ],
+    )
+    assert rejected_context.exit_code != 0
+    validated = runner.invoke(
         app,
         [
             "genesis",
@@ -205,21 +224,196 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
             manifest.stem,
         ],
     )
-    assert rejected_context.exit_code != 0
-    trusted_context = tmp_path / "operator-trusted-validation-context.json"
-    trusted_context.write_bytes(bundled_context.read_bytes())
-    validated = runner.invoke(
+    assert validated.exit_code == 0, validated.output
+    assert '"promotion_eligible": true' in validated.output
+
+    comparison = runner.invoke(
         app,
         [
             "genesis",
-            "capsule",
-            "validate",
+            "compare",
+            "--champion",
             str(cli_output),
-            "--context",
-            str(trusted_context),
-            "--expected-digest",
+            "--challenger",
+            str(cli_output),
+            "--champion-context",
+            str(bundled_context),
+            "--challenger-context",
+            str(bundled_context),
+            "--champion-digest",
+            manifest.stem,
+            "--challenger-digest",
             manifest.stem,
         ],
     )
-    assert validated.exit_code == 0, validated.output
-    assert '"promotion_eligible": true' in validated.output
+    assert comparison.exit_code == 0, comparison.output
+    assert '"same_source_model": true' in comparison.output
+
+    controller_state = tmp_path / "deployment-state.json"
+    deployed = runner.invoke(
+        app,
+        [
+            "genesis",
+            "deploy",
+            "--capsule",
+            str(cli_output),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
+            "--deployment",
+            "capsule-cli-test",
+            "--output",
+            str(controller_state),
+        ],
+    )
+    assert deployed.exit_code == 0, deployed.output
+    evolved = runner.invoke(
+        app,
+        [
+            "genesis",
+            "evolve",
+            "--deployment",
+            "capsule-cli-test",
+            "--trigger",
+            "workload-drift",
+            "--controller-state",
+            str(controller_state),
+            "--budget-usd",
+            "25",
+        ],
+    )
+    assert evolved.exit_code == 0, evolved.output
+    assert '"spent_usd": 0.0' in evolved.output
+    denied_promotion = runner.invoke(
+        app,
+        [
+            "genesis",
+            "promote",
+            "--capsule",
+            str(cli_output),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
+            "--controller-state",
+            str(controller_state),
+        ],
+    )
+    assert denied_promotion.exit_code != 0
+    assert "proof-gated challenger" in denied_promotion.output
+
+    suite = tmp_path / "benchmark-suite.json"
+    suite.write_text(json.dumps({"repetitions": 2}), encoding="utf-8")
+    benchmark = runner.invoke(
+        app,
+        [
+            "genesis",
+            "benchmark",
+            "--candidate",
+            str(candidate),
+            "--suite",
+            str(suite),
+            "--output",
+            str(tmp_path / "benchmark"),
+            "--seed",
+            "73129",
+        ],
+    )
+    assert benchmark.exit_code == 0, benchmark.output
+    assert '"hardware_backed": false' in benchmark.output
+    raw_samples = [
+        json.loads(line)
+        for line in (tmp_path / "benchmark/raw_samples.jsonl").read_text().splitlines()
+    ]
+    assert [item["input_seed"] for item in raw_samples] == [73129, 73129]
+    assert [item["sandbox_environment_seed"] for item in raw_samples] == [73129, 73130]
+
+    design_path = candidate / "candidate_design.json"
+    original_design = design_path.read_bytes()
+    tampered_design = json.loads(original_design)
+    tampered_design["candidate_id"] = "candidate-tampered"
+    design_path.write_text(json.dumps(tampered_design), encoding="utf-8")
+    rejected_benchmark = runner.invoke(
+        app,
+        [
+            "genesis",
+            "benchmark",
+            "--candidate",
+            str(candidate),
+            "--suite",
+            str(suite),
+            "--output",
+            str(tmp_path / "benchmark-tampered"),
+        ],
+    )
+    design_path.write_bytes(original_design)
+    assert rejected_benchmark.exit_code != 0
+    assert "failed independent verification" in rejected_benchmark.output
+
+    trace = tmp_path / "replay.jsonl"
+    trace.write_text(
+        json.dumps(
+            {
+                "request_id": "capsule-replay",
+                "text": "hybrid",
+                "maximum_new_tokens": 1,
+                "seed": 73,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    replay_output = tmp_path / "replay-evidence.json"
+    replay = runner.invoke(
+        app,
+        [
+            "genesis",
+            "replay",
+            "--capsule",
+            str(cli_output),
+            "--trace",
+            str(trace),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
+            "--output",
+            str(replay_output),
+            "--seed",
+            "73129",
+        ],
+    )
+    assert replay.exit_code == 0, replay.output
+    assert json.loads(replay_output.read_text(encoding="utf-8"))["passed"] is True
+
+    oversized_trace = tmp_path / "replay-oversized.jsonl"
+    oversized_trace.write_text(
+        json.dumps(
+            {
+                "request_id": "capsule-replay-oversized",
+                "text": "hybrid",
+                "maximum_new_tokens": 257,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    rejected_replay = runner.invoke(
+        app,
+        [
+            "genesis",
+            "replay",
+            "--capsule",
+            str(cli_output),
+            "--trace",
+            str(oversized_trace),
+            "--context",
+            str(bundled_context),
+            "--expected-digest",
+            manifest.stem,
+            "--output",
+            str(tmp_path / "replay-rejected.json"),
+        ],
+    )
+    assert rejected_replay.exit_code != 0

@@ -13,6 +13,20 @@ PACKAGE = ROOT / "models/reference_tasks/hybrid_decoder"
 runner = CliRunner()
 
 
+def test_genesis_cli_exposes_complete_local_release_surface() -> None:
+    result = runner.invoke(app, ["genesis", "--help"])
+    assert result.exit_code == 0, result.output
+    for command in (
+        "benchmark",
+        "compare",
+        "deploy",
+        "evolve",
+        "promote",
+        "replay",
+    ):
+        assert command in result.output
+
+
 def test_inspect_and_initialize_zero_day_runtime(tmp_path: Path) -> None:
     inspection_dir = tmp_path / "inspection"
     inspected = runner.invoke(

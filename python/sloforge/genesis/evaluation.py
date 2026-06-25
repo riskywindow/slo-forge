@@ -89,10 +89,9 @@ def _write(path: Path, value: BaseModel | dict[str, object]) -> None:
 def _tamper_gate(run: GenesisDemoResult, output: Path) -> dict[str, object]:
     capsule_path = Path(run.capsule_path)
     root = capsule_path.parent.parent
+    context_path = root.with_name(f"{root.name}.validation-context.json")
     capsule = load_capsule(capsule_path)
-    context = ValidationContext.model_validate_json(
-        (root / "validation_context.json").read_bytes(), strict=True
-    )
+    context = ValidationContext.model_validate_json(context_path.read_bytes(), strict=True)
     tests: dict[str, list[str]] = {}
 
     def codes(document: GenesisCapsule, current: ValidationContext) -> list[str]:
