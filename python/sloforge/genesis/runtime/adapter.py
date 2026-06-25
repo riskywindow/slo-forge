@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from types import ModuleType
 from typing import Protocol, cast
 
 from sloforge.genesis.frontend.models import EntryPointContract
+
+_SOURCE_IMPORT_LOCK = RLock()
 
 
 class CallableEntryPoint(Protocol):
@@ -28,7 +32,19 @@ def _load_source(path: Path, identity: str) -> ModuleType:
     if specification is None or specification.loader is None:
         raise RuntimeError(f"cannot load generated runtime source: {path}")
     module = importlib.util.module_from_spec(specification)
-    specification.loader.exec_module(module)
+    package_root = str(path.parent.resolve(strict=True))
+    with _SOURCE_IMPORT_LOCK:
+        previous_bytecode = sys.dont_write_bytecode
+        sys.dont_write_bytecode = True
+        sys.path.insert(0, package_root)
+        try:
+            specification.loader.exec_module(module)
+        finally:
+            if sys.path[0] == package_root:
+                sys.path.pop(0)
+            else:
+                sys.path.remove(package_root)
+            sys.dont_write_bytecode = previous_bytecode
     return module
 
 

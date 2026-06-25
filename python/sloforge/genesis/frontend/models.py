@@ -198,6 +198,7 @@ class ReferencePackageManifest(FrontendModel):
     tokenizer_module: NonEmpty
     sample_generator_module: NonEmpty
     sample_corpus: NonEmpty
+    auxiliary_modules: tuple[NonEmpty, ...] = ()
     entry_points: EntryPointContract
     state_contract: StateContract
     semantic_contract: SemanticContract
@@ -214,12 +215,17 @@ class ReferencePackageManifest(FrontendModel):
             self.tokenizer_module,
             self.sample_generator_module,
             self.sample_corpus,
+            *self.auxiliary_modules,
             self.quality_contract.final_evaluation_corpus,
             self.quality_contract.search_corpus,
         ):
             path = PurePosixPath(value)
             if path.is_absolute() or any(part in ("", ".", "..") for part in path.parts):
                 raise ValueError(f"package path must be normalized and relative: {value!r}")
+        if len(self.auxiliary_modules) != len(set(self.auxiliary_modules)):
+            raise ValueError("auxiliary module paths must be unique")
+        if any(not value.endswith(".py") for value in self.auxiliary_modules):
+            raise ValueError("auxiliary modules must be Python source files")
         fields = {field.field_id for field in self.state_contract.fields}
         for operator in self.custom_operators:
             unknown = (set(operator.state_reads) | set(operator.state_writes)) - fields

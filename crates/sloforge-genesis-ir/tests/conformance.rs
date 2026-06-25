@@ -112,6 +112,69 @@ fn unknown_fields_and_unnamespaced_extensions_are_rejected() {
 }
 
 #[test]
+fn shared_python_rust_wire_accept_reject_corpus() {
+    let cases: Vec<Value> = serde_json::from_slice(&fixture("wire-conformance-cases-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    for case in cases {
+        let document = case["document"]
+            .as_str()
+            .unwrap_or_else(|| panic!("case document must be a string"));
+        let pointer = case["pointer"]
+            .as_str()
+            .unwrap_or_else(|| panic!("case pointer must be a string"));
+        let mut value: Value =
+            serde_json::from_slice(&fixture(document)).unwrap_or_else(|error| panic!("{error}"));
+        *value
+            .pointer_mut(pointer)
+            .unwrap_or_else(|| panic!("invalid case pointer {pointer}")) =
+            case["replacement"].clone();
+        let payload = serde_json::to_vec(&value).unwrap_or_else(|error| panic!("{error}"));
+        let accepted = match document {
+            "inference-genome-v1.json" => from_json::<InferenceGenome>(&payload).is_ok(),
+            "transformation-v1.json" => from_json::<Transformation>(&payload).is_ok(),
+            "candidate-v1.json" => from_json::<Candidate>(&payload).is_ok(),
+            "counterexample-v1.json" => from_json::<Counterexample>(&payload).is_ok(),
+            other => panic!("unsupported shared corpus document {other}"),
+        };
+        assert_eq!(
+            accepted,
+            case["accepted"]
+                .as_bool()
+                .unwrap_or_else(|| panic!("accepted must be boolean")),
+            "case {}",
+            case["case_id"]
+        );
+    }
+}
+
+#[test]
+fn stable_unknown_kind_migration_fails_closed() {
+    let source = json!({"schema_version": "1.0.0", "kind": "UnknownGenesisDocument"});
+    assert!(migrate_document(&source).is_err());
+}
+
+#[test]
+fn genome_structural_closure_is_enforced() {
+    let mut genome: Value = serde_json::from_slice(&fixture("inference-genome-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    genome["distributed"]["collective_dag"][0]["dependencies"] = json!(["local"]);
+    let payload = serde_json::to_vec(&genome).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<InferenceGenome>(&payload).is_err());
+
+    let mut genome: Value = serde_json::from_slice(&fixture("inference-genome-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    genome["tensor"]["values"][1]["state_dependency"] = json!("missing-state");
+    let payload = serde_json::to_vec(&genome).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<InferenceGenome>(&payload).is_err());
+
+    let mut genome: Value = serde_json::from_slice(&fixture("inference-genome-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    genome["kernel"]["kernels"][0]["fallback_kernel_id"] = json!("missing-kernel");
+    let payload = serde_json::to_vec(&genome).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<InferenceGenome>(&payload).is_err());
+}
+
+#[test]
 fn alpha_migration_renames_all_genome_regions_without_mutation() {
     let mut alpha: Value = serde_json::from_slice(&fixture("inference-genome-v1.json"))
         .unwrap_or_else(|error| panic!("{error}"));
