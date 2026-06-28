@@ -38,8 +38,25 @@ def _validate_spec(spec: TensorSpec) -> None:
     if spec.strides is not None and len(spec.strides) != len(spec.shape):
         raise RewriteError("stride rank must match shape rank")
     numerical = spec.numerical
-    if numerical.maximum_absolute_error < 0 or numerical.maximum_relative_error < 0:
-        raise RewriteError("numerical tolerances must be non-negative")
+    tolerances = (
+        numerical.maximum_absolute_error,
+        numerical.maximum_relative_error,
+    )
+    if any(not math.isfinite(value) or value < 0 for value in tolerances):
+        raise RewriteError("numerical tolerances must be finite and non-negative")
+    value_domain = (numerical.minimum_finite_value, numerical.maximum_finite_value)
+    if (value_domain[0] is None) != (value_domain[1] is None):
+        raise RewriteError("finite value-domain bounds must be declared together")
+    if (
+        value_domain[0] is not None
+        and value_domain[1] is not None
+        and (
+            not math.isfinite(value_domain[0])
+            or not math.isfinite(value_domain[1])
+            or value_domain[0] > value_domain[1]
+        )
+    ):
+        raise RewriteError("finite value-domain bounds must be finite and ordered")
 
 
 def validate_graph(graph: TensorGraph) -> None:
@@ -59,11 +76,22 @@ def validate_graph(graph: TensorGraph) -> None:
             if node.output.dtype is not node.parameters.target_dtype:
                 raise RewriteError("cast output dtype must equal target_dtype")
         if node.operator == "quantize":
-            if len(node.inputs) != 1 or node.parameters.target_dtype is None:
-                raise RewriteError("quantize requires one input and target_dtype")
+            if len(node.inputs) != 1 or node.parameters.target_dtype is not DType.INT8:
+                raise RewriteError("quantize requires one input and an int8 target")
             source = known[node.inputs[0]].output
             if source.dtype not in _FLOAT_DTYPES:
                 raise RewriteError("quantize source must have a floating dtype")
+            scale = node.parameters.scale
+            if scale is None or not math.isfinite(scale) or scale <= 0:
+                raise RewriteError("quantize requires a finite positive symmetric scale")
+            lower = source.numerical.minimum_finite_value
+            upper = source.numerical.maximum_finite_value
+            if lower is None or upper is None:
+                raise RewriteError("quantize requires a declared finite source value domain")
+            if lower < -127 * scale or upper > 127 * scale:
+                raise RewriteError("quantize source value domain exceeds the int8 scale domain")
+            if scale / 2 > source.numerical.maximum_absolute_error:
+                raise RewriteError("quantize scale exceeds the numerical error contract")
             expected = replace(
                 source,
                 dtype=node.parameters.target_dtype,
@@ -292,10 +320,17 @@ def _apply_at(
             ),
         )
     if rule.kind is RewriteKind.QUANTIZE_OUTPUT and node.node_id in graph.outputs:
+        quantization_scale = 2 * rule.maximum_quality_cost
+        value_lower = node.output.numerical.minimum_finite_value
+        value_upper = node.output.numerical.maximum_finite_value
         if (
             node.output.dtype not in _FLOAT_DTYPES
+            or value_lower is None
+            or value_upper is None
             or node.output.numerical.maximum_absolute_error <= 0
             or rule.maximum_quality_cost > node.output.numerical.maximum_absolute_error
+            or value_lower < -127 * quantization_scale
+            or value_upper > 127 * quantization_scale
             or node.output.numerical.preserve_nan
             or node.output.numerical.preserve_infinity
             or node.output.numerical.preserve_signed_zero
@@ -309,7 +344,10 @@ def _apply_at(
             operator="quantize",
             inputs=(node.node_id,),
             output=replace(node.output, dtype=DType.INT8, alias_group=None),
-            parameters=OperatorParameters(target_dtype=DType.INT8),
+            parameters=OperatorParameters(
+                target_dtype=DType.INT8,
+                scale=quantization_scale,
+            ),
         )
         candidate = TensorGraph(
             (*graph.nodes, quantized),
@@ -322,7 +360,11 @@ def _apply_at(
                 rule,
                 (node.node_id, quantized_id),
                 rule.maximum_quality_cost,
-                ("quality_tolerance_nonzero", "int8_domain"),
+                (
+                    "quality_tolerance_nonzero",
+                    "calibrated_finite_value_domain",
+                    "explicit_symmetric_int8_scale",
+                ),
             ),
         )
     return None

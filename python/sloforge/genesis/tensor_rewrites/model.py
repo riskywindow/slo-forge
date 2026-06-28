@@ -55,6 +55,8 @@ Dimension: TypeAlias = int | str
 class NumericalContract:
     maximum_absolute_error: float = 0.0
     maximum_relative_error: float = 0.0
+    minimum_finite_value: float | None = None
+    maximum_finite_value: float | None = None
     preserve_nan: bool = True
     preserve_infinity: bool = True
     preserve_signed_zero: bool = True
