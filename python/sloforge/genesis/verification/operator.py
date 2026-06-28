@@ -116,9 +116,7 @@ def _compare(expected: Array, observed: Array, contract: OperatorContract) -> st
         expected_zero = expected == 0
         observed_zero = observed == 0
         shared_zero = expected_zero & observed_zero
-        if not np.array_equal(
-            np.signbit(expected)[shared_zero], np.signbit(observed)[shared_zero]
-        ):
+        if not np.array_equal(np.signbit(expected)[shared_zero], np.signbit(observed)[shared_zero]):
             return "signed_zero_behavior"
     if contract.exact:
         if not np.array_equal(expected, observed, equal_nan=True):

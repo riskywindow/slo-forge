@@ -109,15 +109,15 @@ def _validate_kind(transformation: StateTransformation) -> TransformationKind:
         TransformationKind.EVICTION: (
             target.maximum_items < source.maximum_items or source.storage != target.storage
         ),
-        TransformationKind.CHECKPOINT: (
-            not source.checkpointed and target.checkpointed
-        ),
+        TransformationKind.CHECKPOINT: (not source.checkpointed and target.checkpointed),
         TransformationKind.RECOMPUTE: (
             region_capacity_bytes(target) < region_capacity_bytes(source)
         ),
     }
     if not meaningful[kind]:
-        raise StateTransformError(f"state transformation kind {kind.value!r} has no matching change")
+        raise StateTransformError(
+            f"state transformation kind {kind.value!r} has no matching change"
+        )
     return kind
 
 
@@ -149,7 +149,10 @@ def compile_transformation(
         raise StateTransformError("exact state transformations cannot declare quality loss")
     if transformation.expected_quality_cost > quality_budget:
         raise StateTransformError("state transformation exceeds the quality budget")
-    if not transformation.exact and StatePrecondition.QUALITY_CONTRACT not in declared_preconditions:
+    if (
+        not transformation.exact
+        and StatePrecondition.QUALITY_CONTRACT not in declared_preconditions
+    ):
         raise StateTransformError("approximate state transformations require a quality contract")
     if transformation.migration_chunk_bytes <= 0:
         raise StateTransformError("migration chunk size must be positive")
@@ -188,7 +191,9 @@ def compile_transformation(
         and transformation.source.replication_factor == transformation.target.replication_factor
     )
     if not active_compatible and StatePrecondition.REQUEST_BOUNDARY not in declared_preconditions:
-        raise StateTransformError("incompatible state changes require a request-boundary precondition")
+        raise StateTransformError(
+            "incompatible state changes require a request-boundary precondition"
+        )
     ownership_changed = (
         transformation.source.ownership != transformation.target.ownership
         or transformation.source.owners != transformation.target.owners

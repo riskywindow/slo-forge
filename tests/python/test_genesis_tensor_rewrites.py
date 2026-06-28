@@ -308,7 +308,9 @@ def test_search_enforces_cumulative_quality_and_preserves_topological_order() ->
         quality_budget=0.01,
         maximum_depth=2,
     )
-    assert all(sum(item.quality_cost for item in candidate.history) <= 0.01 for candidate in bounded)
+    assert all(
+        sum(item.quality_cost for item in candidate.history) <= 0.01 for candidate in bounded
+    )
     assert all(len(candidate.history) <= 1 for candidate in bounded)
     expanded = explore_rewrites(
         multi_output,

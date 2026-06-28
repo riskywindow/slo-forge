@@ -72,8 +72,9 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     assert runtime_evidence["candidate_id"] == accepted.candidate_id
     assert runtime_evidence["candidate_genome_hash"] == accepted.genome_hash.value
     assert runtime_evidence["passed"] is True
-    assert runtime_evidence["runtime_artifact_hashes"]["policy.bytecode.json"] == (
-        runtime_evidence["policy_bytecode_sha256"]
+    assert (
+        runtime_evidence["runtime_artifact_hashes"]["policy.bytecode.json"]
+        == (runtime_evidence["policy_bytecode_sha256"])
     )
     modelcheck_evidence = json.loads(
         (accepted_directory / "evidence/modelcheck-result.json").read_text(encoding="utf-8")

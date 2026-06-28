@@ -285,8 +285,7 @@ def _materialize_candidate_runtime(
     )
     _atomic_write(
         runtime_directory / "runtime_config.json",
-        json.dumps(config, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
-        + b"\n",
+        json.dumps(config, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n",
     )
     hashes = {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
@@ -397,9 +396,7 @@ def _bounded_candidate_modelcheck(
     maximum_depth = 4
     maximum_tokens = 2
     initial = (False, False, 0)
-    queue: deque[tuple[tuple[bool, bool, int], int, tuple[str, ...]]] = deque(
-        [(initial, 0, ())]
-    )
+    queue: deque[tuple[tuple[bool, bool, int], int, tuple[str, ...]]] = deque([(initial, 0, ())])
     visited = {(initial, 0)}
     transition_count = 0
     counterexample: tuple[str, ...] | None = None
@@ -481,9 +478,7 @@ def _run_candidate_simulation(
         workload_path = Path(manifest["workload_contract"]["path"])
     else:
         runtime_config = json.loads(
-            (run_directory / "generated_runtime/runtime_config.json").read_text(
-                encoding="utf-8"
-            )
+            (run_directory / "generated_runtime/runtime_config.json").read_text(encoding="utf-8")
         )
         package = load_reference_package(Path(runtime_config["reference_package_root"]))
         workload_path = package.resolve(package.manifest.sample_corpus)
@@ -495,8 +490,7 @@ def _run_candidate_simulation(
     raw = [
         {
             "ordinal": index,
-            "modeled_service_units": len(str(item["text"]))
-            + int(item["maximum_new_tokens"]),
+            "modeled_service_units": len(str(item["text"])) + int(item["maximum_new_tokens"]),
             "deadline_rank": int(item["maximum_new_tokens"]),
         }
         for index, item in enumerate(requests)
