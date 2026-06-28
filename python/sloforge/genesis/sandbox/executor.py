@@ -159,6 +159,17 @@ def _sandbox_string(path: Path) -> str:
     return json.dumps(str(path))
 
 
+def _macos_firmlink_alias(path: Path) -> Path | None:
+    spelling = str(path)
+    for public in ("/var", "/tmp"):
+        private = f"/private{public}"
+        if spelling == public or spelling.startswith(f"{public}/"):
+            return Path(f"/private{spelling}")
+        if spelling == private or spelling.startswith(f"{private}/"):
+            return Path(spelling.removeprefix("/private"))
+    return None
+
+
 def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) -> str:
     runtime_roots = list(
         dict.fromkeys(
@@ -186,14 +197,9 @@ def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) 
     # may receive either spelling even when pathlib.resolve() preserves the
     # public spelling, so both must be explicit.
     for path in tuple(runtime_roots):
-        spelling = str(path)
-        if (
-            spelling == "/var"
-            or spelling.startswith("/var/")
-            or spelling == "/tmp"
-            or spelling.startswith("/tmp/")
-        ):
-            runtime_roots.append(Path(f"/private{spelling}"))
+        alias = _macos_firmlink_alias(path)
+        if alias is not None:
+            runtime_roots.append(alias)
     runtime_roots = list(dict.fromkeys(runtime_roots))
 
     read_exemptions = [
@@ -209,14 +215,9 @@ def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) 
     )
 
     write_roots = [output]
-    output_spelling = str(output)
-    if (
-        output_spelling == "/var"
-        or output_spelling.startswith("/var/")
-        or output_spelling == "/tmp"
-        or output_spelling.startswith("/tmp/")
-    ):
-        write_roots.append(Path(f"/private{output_spelling}"))
+    output_alias = _macos_firmlink_alias(output)
+    if output_alias is not None:
+        write_roots.append(output_alias)
     write_exemptions = [
         *(f"    (require-not (subpath {_sandbox_string(path)}))" for path in write_roots),
         '    (require-not (literal "/dev/null"))',

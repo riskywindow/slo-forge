@@ -15,6 +15,19 @@ from sloforge.genesis.sandbox import (
     detect_capabilities,
     execute_sandboxed,
 )
+from sloforge.genesis.sandbox.executor import _macos_firmlink_alias
+
+
+def test_macos_firmlink_aliases_are_symmetric() -> None:
+    assert _macos_firmlink_alias(Path("/tmp/genesis")) == Path("/private/tmp/genesis")
+    assert _macos_firmlink_alias(Path("/private/tmp/genesis")) == Path("/tmp/genesis")
+    assert _macos_firmlink_alias(Path("/var/folders/genesis")) == Path(
+        "/private/var/folders/genesis"
+    )
+    assert _macos_firmlink_alias(Path("/private/var/folders/genesis")) == Path(
+        "/var/folders/genesis"
+    )
+    assert _macos_firmlink_alias(Path("/Users/genesis")) is None
 
 
 def _request(
