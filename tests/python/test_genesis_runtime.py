@@ -27,6 +27,11 @@ from sloforge.genesis.runtime import (
     generate_baseline_runtime,
     load_generated_runtime,
 )
+from sloforge.genesis.runtime.models import RequestControl
+from sloforge.genesis.synthesis import (
+    cancellation_fixture_candidates,
+    compiled_candidate_policy,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 HYBRID = ROOT / "models" / "reference_tasks" / "hybrid_decoder"
@@ -460,6 +465,29 @@ def test_synthesized_deadline_policy_changes_request_order_and_batch_behavior() 
     metrics = runtime.metrics()
     assert metrics["maximum_observed_batch"] == 2
     assert metrics["deadline_reorders"] == 1
+
+
+def test_runtime_executes_cegis_cancellation_policy_with_identical_zero_semantics() -> None:
+    unsafe, _repeat, corrected = cancellation_fixture_candidates(73129)
+    _source, unsafe_policy, _payload = compiled_candidate_policy(unsafe)
+    _source, corrected_policy, _payload = compiled_candidate_policy(corrected)
+    control = RequestControl(RuntimeRequest("cancelled-before-schedule", (1,), 1, 7, 1.0))
+    control.cancellation.set()
+    limits = RuntimeLimits(maximum_queue_depth=4, maximum_batch_size=4)
+    unsafe_runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, object()),
+        limits=limits,
+        runtime_seed=1,
+        policy=unsafe_policy,
+    )
+    corrected_runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, object()),
+        limits=limits,
+        runtime_seed=1,
+        policy=corrected_policy,
+    )
+    assert unsafe_runtime._batch_limit(control) == 1
+    assert corrected_runtime._batch_limit(control) == 0
 
 
 def test_wait_cannot_observe_terminal_state_before_terminal_event_publication() -> None:
