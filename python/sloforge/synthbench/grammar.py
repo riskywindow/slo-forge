@@ -120,6 +120,8 @@ def execute_architecture(
 ) -> tuple[int, ...]:
     """Independent generator-side reference used to commit public and hidden cases."""
 
+    del request_seed
+
     model_digest = hashlib.sha256(f"model:{architecture.seed}".encode()).digest()
     biases = tuple(
         (model_digest[index % len(model_digest)] / 255.0) - 0.5
@@ -130,7 +132,7 @@ def execute_architecture(
         "recurrent": 0.0,
         "quantized": 0,
         "expert_loads": [0] * max(block.expert_count for block in architecture.blocks),
-        "speculative": _seed(request_seed, request_id) % 17,
+        "speculative": _seed(architecture.seed, request_id) % 17,
         "prompt_checksum": sum(prompt_tokens) % 257,
     }
 
@@ -149,16 +151,14 @@ def execute_architecture(
     generated: list[int] = []
     for position in range(maximum_new_tokens):
         value = advance(previous)
-        jitter = _seed(request_seed, position, previous) % architecture.vocabulary_size
+        jitter = _seed(architecture.seed, position, previous) % architecture.vocabulary_size
         center = int(abs(value) * 1009 + state["quantized"] + jitter) % architecture.vocabulary_size
         logits = tuple(
             -abs(index - center) + value * ((index % 3) - 1)
             for index in range(architecture.vocabulary_size)
         )
         ordered = sorted(range(len(logits)), key=lambda index: (-logits[index], index))
-        token = (
-            ordered[_seed(request_seed, "sample", position) % 2] if custom_sampler else ordered[0]
-        )
+        token = ordered[1] if custom_sampler else ordered[0]
         generated.append(token)
         previous = token
     return tuple(generated)
@@ -269,12 +269,13 @@ def load_model(*, seed):
 
 
 def allocate_state(*, request_id, prompt_tokens, seed):
+    del seed
     return {{
         "history": [],
         "recurrent": 0.0,
         "quantized": 0,
         "expert_loads": [0] * max(block[3] for block in BLOCKS),
-        "speculative": _seed(seed, request_id) % 17,
+        "speculative": _seed(ARCHITECTURE_SEED, request_id) % 17,
         "prompt_checksum": sum(prompt_tokens) % 257,
     }}
 
@@ -340,17 +341,19 @@ def prefill(*, model, prompt_tokens, state, seed):
 
 
 def decode_step(*, model, previous_token, state, position, seed):
+    del seed
     value = _advance(model, previous_token, state)
-    jitter = _seed(seed, position, previous_token) % VOCABULARY_SIZE
+    jitter = _seed(ARCHITECTURE_SEED, position, previous_token) % VOCABULARY_SIZE
     center = int(abs(value) * 1009 + state["quantized"] + jitter) % VOCABULARY_SIZE
     logits = tuple(-abs(index - center) + value * ((index % 3) - 1) for index in range(VOCABULARY_SIZE))
     return {{"logits": logits, "state": state}}
 
 
 def custom_sampler(*, logits, seed):
+    del seed
     ordered = sorted(range(len(logits)), key=lambda index: (-logits[index], index))
     if any(block[0] == "custom_sampler" for block in BLOCKS):
-        return ordered[int(seed) % 2]
+        return ordered[1]
     return ordered[0]
 '''
 
@@ -559,6 +562,9 @@ def _package_hash(directory: Path) -> str:
         (path.relative_to(directory).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
         for path in sorted(directory.rglob("*"))
         if path.is_file()
+        and not path.is_symlink()
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
     ]
     return _hash_bytes(json.dumps(entries, sort_keys=True, separators=(",", ":")).encode())
 
@@ -701,6 +707,14 @@ def generate_tasks(
 
 def load_task(path: Path) -> TaskDescriptor:
     return TaskDescriptor.model_validate_json(path.read_bytes(), strict=True)
+
+
+def verify_public_package(task_directory: Path, descriptor: TaskDescriptor) -> None:
+    """Reject a task whose public reference package changed after generation."""
+
+    public = task_directory / descriptor.public_package_path
+    if _package_hash(public) != descriptor.public_package_hash:
+        raise ValueError("public reference package does not match its task descriptor")
 
 
 def load_workload(task_directory: Path, descriptor: TaskDescriptor) -> tuple[WorkloadRequest, ...]:

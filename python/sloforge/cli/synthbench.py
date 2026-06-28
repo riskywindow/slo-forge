@@ -17,6 +17,7 @@ from sloforge.synthbench import (
     SynthBenchReport,
     generate_tasks,
     run_cpu_benchmark,
+    validate_cpu_benchmark_report,
 )
 
 synthbench_app = typer.Typer(
@@ -84,7 +85,6 @@ def run_command(
 ) -> None:
     """Run the dependency-free CPU profile with complete raw sample retention."""
 
-    del system
     configuration = CpuRunConfiguration(
         seeds=_parse_seeds(seeds),
         warmup_count=warmup_count,
@@ -102,6 +102,7 @@ def run_command(
             "exact_request_rate": report.metrics.exact_request_rate,
             "measured_cpu_seconds": report.metrics.measured_cpu_seconds,
             "hardware_backed": False,
+            "system": system,
         }
     )
 
@@ -111,7 +112,7 @@ def compare_command(
     runs: Annotated[Path, typer.Option("--runs", exists=True, file_okay=False)],
     output: Annotated[Path, typer.Option("--output", "-o")],
 ) -> None:
-    """Compare completed reports without recomputing or altering their raw evidence."""
+    """Compare reports after reopening and recomputing their raw evidence."""
 
     paths = tuple(sorted(runs.rglob("report.json")))
     if not paths:
@@ -120,6 +121,7 @@ def compare_command(
     for path in paths:
         payload = path.read_bytes()
         report = SynthBenchReport.model_validate_json(payload, strict=True)
+        validate_cpu_benchmark_report(report)
         entries.append(
             {
                 "report": str(path.resolve()),
