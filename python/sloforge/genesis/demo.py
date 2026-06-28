@@ -47,7 +47,9 @@ from sloforge.genesis.kernel_lab import (
     reference_quantized_state_update,
     run_kernel_lab_demo,
 )
+from sloforge.genesis.reports import export_genesis_ui_bundle
 from sloforge.genesis.synthesis import synthesize_local_run
+from sloforge.lineage.demo import run_lineage_transfer_demo
 from sloforge.redteam import run_demo as run_redteam_demo
 from sloforge.util import sha256_file
 
@@ -81,6 +83,7 @@ class GenesisDemoResult(BaseModel):
     physical_degradation_triggered: bool
     hardware_backed: bool
     report_path: str
+    ui_bundle_path: str
 
 
 def _write(path: Path, value: BaseModel | dict[str, object]) -> None:
@@ -375,6 +378,8 @@ def run_genesis_demo(
             execution_target=ExecutionTarget.LOCAL,
             minimum_shadow_samples=2,
             minimum_canary_samples=3,
+            maximum_p95_ttft_ratio=10.0,
+            maximum_p99_tpot_ratio=10.0,
         ),
         deployment_id="genesis-demo",
         champion=champion,
@@ -387,7 +392,12 @@ def run_genesis_demo(
         observed_at_ms=1,
         externally_visible_output=True,
     )
-    promoted = run_local_evolution_fixture(controller, spec, start_at_ms=10)
+    promoted = run_local_evolution_fixture(
+        controller,
+        spec,
+        start_at_ms=10,
+        evidence_directory=output / "evolution/runtime-gates",
+    )
     active_preserved = any(
         stream.stream_id == "active-stream-before-promotion"
         and stream.capsule_id == champion.capsule_id
@@ -411,8 +421,10 @@ def run_genesis_demo(
             "events": [item.model_dump(mode="json") for item in degraded.audit],
         },
     )
+    run_lineage_transfer_demo(output / "lineage", seed=seed)
 
     report_path = output / "GENESIS_DEMO_REPORT.json"
+    ui_bundle_path = output / "genesis-ui-bundle.json"
     result = GenesisDemoResult(
         seed=seed,
         output_directory=str(output.resolve()),
@@ -441,8 +453,10 @@ def run_genesis_demo(
         physical_degradation_triggered=degraded.active_trigger is not None,
         hardware_backed=False,
         report_path=str(report_path.resolve()),
+        ui_bundle_path=str(ui_bundle_path.resolve()),
     )
     _write(report_path, result)
+    export_genesis_ui_bundle(output, ui_bundle_path)
     return result
 
 

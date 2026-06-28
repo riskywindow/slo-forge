@@ -27,6 +27,7 @@ from sloforge.genesis.evolution import (
     IsolationContract,
     IsolationMode,
     TransitionCategory,
+    TransitionCompatibility,
     TriggerObservation,
     classify_trigger,
     run_local_evolution_fixture,
@@ -63,6 +64,10 @@ class RecordingValidator:
             promotion_eligible=eligible,
             checked_at=datetime(2026, 8, 2, tzinfo=UTC),
             issues=(),
+            local_evolution_eligible=eligible,
+            external_production_eligible=(
+                eligible and self.verification_level is VerificationLevel.HARDWARE_OPERATIONAL
+            ),
         )
 
 
@@ -133,6 +138,20 @@ def _controller(
             (lambda _observation, _challenger: True)
             if resolved_config.execution_target is ExecutionTarget.EXTERNAL
             else None
+        ),
+        transition_compatibility_validator=lambda _champion, _challenger, category: (
+            TransitionCompatibility(
+                compatible=category
+                in {
+                    TransitionCategory.POLICY_ONLY_HOT_SWAP,
+                    TransitionCategory.REQUEST_BOUNDARY_SWAP,
+                    TransitionCategory.NEW_REPLICA,
+                },
+                behavior="pin_existing_streams",
+                reason="trusted test fixture permits only request-pinning categories",
+                champion_recovery_digest="a" * 64,
+                challenger_recovery_digest="b" * 64,
+            )
         ),
         config=resolved_config,
         deployment_id="genesis-test",
@@ -464,6 +483,49 @@ def test_restart_transition_requires_active_stream_drain(tmp_path: Path) -> None
     assert controller.snapshot.phase is EvolutionPhase.READY_TO_PROMOTE
 
 
+def test_proposal_boolean_cannot_authorize_state_migration_with_active_stream(
+    tmp_path: Path,
+) -> None:
+    controller, _, _, _ = _controller(tmp_path)
+    challenger = _challenger(
+        tmp_path,
+        _capsule(tmp_path, "challenger", "b"),
+        category=TransitionCategory.STATE_COMPATIBLE_MIGRATION,
+        active_stream_compatible=True,
+    )
+    controller.open_stream("active", event_id="open", observed_at_ms=1)
+    _ready_to_promote(controller, challenger)
+
+    with pytest.raises(EvolutionError, match="drain is required"):
+        controller.promote(event_id="promote", observed_at_ms=70)
+
+
+def test_challenger_is_revalidated_at_shadow_boundary(tmp_path: Path) -> None:
+    controller, _, validator, _ = _controller(tmp_path)
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
+    validator.eligible = False
+
+    with pytest.raises(EvolutionError, match="before shadowing"):
+        controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+
+
+def test_challenger_is_revalidated_at_canary_boundary(tmp_path: Path) -> None:
+    controller, _, validator, _ = _controller(tmp_path)
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
+    controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+    controller.record_gate(
+        _gate(controller, GateStage.SHADOW, event_id="shadow-pass", observed_at_ms=40)
+    )
+    validator.eligible = False
+
+    with pytest.raises(EvolutionError, match="before canarying"):
+        controller.begin_canary(event_id="canary", observed_at_ms=50)
+
+
 def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None:
     controller, _, validator, store = _controller(tmp_path)
     challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
@@ -481,6 +543,18 @@ def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None
     )
     assert advanced.phase is EvolutionPhase.SHADOW_VALIDATED
     assert EvolutionStore(store.path).load() == advanced
+
+
+def test_restore_fails_closed_when_champion_cannot_be_revalidated(tmp_path: Path) -> None:
+    controller, _, validator, store = _controller(tmp_path)
+    validator.champion_eligible = False
+
+    with pytest.raises(EvolutionError, match="restored champion"):
+        EvolutionController.restore(
+            store=store,
+            capsule_validator=validator,
+            config=controller.config,
+        )
 
 
 def test_idempotency_key_is_bound_to_the_exact_event_payload(tmp_path: Path) -> None:
@@ -569,7 +643,7 @@ def test_capsule_is_revalidated_immediately_before_promotion(tmp_path: Path) -> 
     assert rejected.phase is EvolutionPhase.EVOLVING
     assert rejected.champion == champion
     assert rejected.challengers[0].status is ChallengerStatus.CAPSULE_REJECTED
-    assert len(validator.paths) == 3
+    assert len(validator.paths) == 5
 
 
 def test_external_live_canary_requires_both_opt_ins(
@@ -640,6 +714,6 @@ def test_deterministic_local_fixture_produces_artifact_backed_promotion(tmp_path
     assert snapshot.phase is EvolutionPhase.PROMOTED
     assert snapshot.champion == challenger.capsule
     assert snapshot.previous_champion == champion
-    assert len(validator.paths) == 3
+    assert len(validator.paths) == 6
     assert store.load() == snapshot
     assert [record.sequence for record in snapshot.audit] == list(range(len(snapshot.audit)))
