@@ -1,4 +1,5 @@
 import { parseReportArtifact } from "./parser";
+import { parseGenesisArtifactBundle } from "./genesis-parser";
 import type {
   ArtifactDocument,
   FabricArtifactBundle,
@@ -782,6 +783,9 @@ export async function fetchFabricBundleFromManifest(
 export function parseArtifactDocument(input: unknown): ArtifactDocument {
   if (isRecord(input) && input["artifact_type"] === "sloforge.fabric.ui-bundle/v1") {
     return { kind: "fabric", value: parseFabricArtifactBundle(input) };
+  }
+  if (isRecord(input) && input["artifact_type"] === "sloforge.genesis.ui-bundle/v1") {
+    return { kind: "genesis", value: parseGenesisArtifactBundle(input) };
   }
   return { kind: "logical", value: parseReportArtifact(input) };
 }

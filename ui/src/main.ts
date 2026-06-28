@@ -1,6 +1,7 @@
 import "./styles.css";
 import { renderDashboard } from "./components";
 import { renderFabricDashboard } from "./fabric-components";
+import { renderGenesisDashboard } from "./genesis-components";
 import {
   FabricArtifactValidationError,
   fetchArtifactDocument,
@@ -9,6 +10,7 @@ import {
 import {
   ArtifactValidationError,
 } from "./parser";
+import { GenesisArtifactValidationError } from "./genesis-parser";
 import type { ArtifactDocument } from "./fabric-types";
 
 const appNode = document.querySelector<HTMLDivElement>("#app");
@@ -24,9 +26,12 @@ const initialSource =
 function shell(content: string, source: string, kind: ArtifactDocument["kind"] = "logical"): string {
   const navigation = kind === "fabric"
     ? '<a href="#fabric-topology">Topology</a><a href="#fabric-placement">Placement</a><a href="#fabric-communication">Communication</a><a href="#fabric-autopsy">Autopsy</a><a href="#fabric-recovery">Recovery</a>'
-    : '<a href="#plan">Plan</a><a href="#evidence">Evidence</a><a href="#frontier">Frontier</a><a href="#runtime">Runtime</a><a href="#faults">Faults</a>';
+    : kind === "genesis"
+      ? '<a href="#genesis-genome">Genome</a><a href="#genesis-search">Search</a><a href="#genesis-verification">Verification</a><a href="#genesis-evolution">Evolution</a><a href="#genesis-lineage">Lineage</a>'
+      : '<a href="#plan">Plan</a><a href="#evidence">Evidence</a><a href="#frontier">Frontier</a><a href="#runtime">Runtime</a><a href="#faults">Faults</a>';
+  const explorer = kind === "fabric" ? "fabric explorer" : kind === "genesis" ? "genesis explorer" : "artifact explorer";
   return `<header class="app-bar">
-    <a class="brand" href="#dashboard" aria-label="SLOForge artifact explorer home"><span class="brand-mark">S</span><span><strong>SLOForge</strong><small>${kind === "fabric" ? "fabric explorer" : "artifact explorer"}</small></span></a>
+    <a class="brand" href="#dashboard" aria-label="SLOForge artifact explorer home"><span class="brand-mark">S</span><span><strong>SLOForge</strong><small>${explorer}</small></span></a>
     <nav aria-label="Evidence sections">${navigation}</nav>
     <details class="source-control"><summary>Load artifact</summary><form id="source-form"><label for="source-url">Artifact URL</label><div><input id="source-url" name="source" type="text" value="${escapeAttribute(source)}" spellcheck="false" autocomplete="off"/><button type="submit">Load</button></div><label class="file-label" for="artifact-file">or choose local JSON<input id="artifact-file" type="file" accept="application/json,.json"/></label><p>Tip: append <code>?data=/path/report-data.json</code> to configure a static deployment.</p></form></details>
   </header>${content}<footer><p>Rendered locally from validated SLOForge evidence. No data leaves this browser.</p></footer>`;
@@ -63,7 +68,9 @@ function bindShell(source: string): void {
 function renderDocument(document: ArtifactDocument, source: string): void {
   const dashboard = document.kind === "fabric"
     ? renderFabricDashboard(document.value)
-    : renderDashboard(document.value);
+    : document.kind === "genesis"
+      ? renderGenesisDashboard(document.value)
+      : renderDashboard(document.value);
   app.innerHTML = shell(dashboard, source, document.kind);
   bindShell(source);
 }
@@ -79,7 +86,9 @@ function renderLoading(source: string): void {
 function renderError(error: unknown, source: string): void {
   const message = error instanceof Error ? error.message : String(error);
   const details =
-    error instanceof ArtifactValidationError || error instanceof FabricArtifactValidationError
+    error instanceof ArtifactValidationError ||
+      error instanceof FabricArtifactValidationError ||
+      error instanceof GenesisArtifactValidationError
       ? `<ul>${error.problems.map((problem) => `<li>${escapeAttribute(problem)}</li>`).join("")}</ul>`
       : "";
   app.innerHTML = shell(
