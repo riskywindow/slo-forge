@@ -3,16 +3,21 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+from sloforge.genesis.capsule.builder import _validate_transformation_chain
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.genesis.ir import (
     CandidateSuccessState,
+    GenomeNodeMetadata,
     RequestTraceCounterexamplePayload,
     canonical_hash,
     load_candidate,
     load_counterexample,
     load_inference_genome,
     load_transformation,
+    write_canonical,
 )
 from sloforge.genesis.policy_dsl import execute_bytecode
 from sloforge.genesis.synthesis import (
@@ -20,6 +25,7 @@ from sloforge.genesis.synthesis import (
     compiled_candidate_policy,
     synthesize_local_run,
 )
+from sloforge.genesis.synthesis.lowering import lower_candidate
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "models/reference_tasks/hybrid_decoder"
@@ -88,6 +94,12 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     )
     assert simulation_evidence["result"] == "pass"
     assert simulation_evidence["comparison_permitted"] is False
+    assert simulation_evidence["candidate_id"] == accepted.candidate_id
+    assert simulation_evidence["candidate_genome_hash"] == accepted.genome_hash.value
+    assert (
+        simulation_evidence["policy_bytecode_sha256"] == runtime_evidence["policy_bytecode_sha256"]
+    )
+    assert simulation_evidence["queue_policy"] == "deadline_cancel_batch"
 
     unsafe, _repeat, corrected = cancellation_fixture_candidates(73129)
     _source, unsafe_bytecode, _payload = compiled_candidate_policy(unsafe)
@@ -114,3 +126,89 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
         (run.output_directory / "synthesis/cegis/constraints.json").read_text(encoding="utf-8")
     )
     assert constraints["constraints"][0]["parameter_key"] == "cancel_check_before_emit"
+
+
+def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path) -> None:
+    baseline = load_inference_genome(ROOT / "tests/fixtures/genesis/inference-genome-v1.json")
+
+    def allow_policy_lowering(node: GenomeNodeMetadata) -> GenomeNodeMetadata:
+        return node.model_copy(
+            update={
+                "legal_rewrite_rules": (
+                    *node.legal_rewrite_rules,
+                    "genesis.rules/baseline-exact-v1",
+                )
+            }
+        )
+
+    baseline = baseline.model_copy(
+        update={
+            "request": baseline.request.model_copy(
+                update={"node": allow_policy_lowering(baseline.request.node)}
+            ),
+            "serving": baseline.serving.model_copy(
+                update={"node": allow_policy_lowering(baseline.serving.node)}
+            ),
+        }
+    )
+    design = cancellation_fixture_candidates(73129)[2]
+    second = design.mutations[0].model_copy(
+        update={"transformation_id": "deadline-batch-finalize", "expected_upside": 0.01}
+    )
+    design = design.model_copy(update={"mutations": (*design.mutations, second)})
+
+    lowered = lower_candidate(baseline, design)
+
+    assert len(lowered.transformations) == 2
+    first, second_transformation = lowered.transformations
+    first_delta = first.extensions.root["sloforge.dev/applied-delta"]
+    second_delta = second_transformation.extensions.root["sloforge.dev/applied-delta"]
+    assert isinstance(first_delta, dict)
+    assert isinstance(second_delta, dict)
+    assert first_delta["source_genome_hash"] == canonical_hash(baseline)
+    assert first_delta["target_genome_hash"] == second_delta["source_genome_hash"]
+    assert second_delta["target_genome_hash"] == canonical_hash(lowered.genome)
+    assert first.parent_transformations == ()
+    assert second_transformation.parent_transformations == (first.transformation_id,)
+    synthesis_extension = lowered.genome.extensions.root["sloforge.dev/synthesis-candidate"]
+    assert isinstance(synthesis_extension, dict)
+    assert synthesis_extension["parent_genome_hash"] == canonical_hash(baseline)
+    assert synthesis_extension["immediate_parent_genome_hash"] == second_delta["source_genome_hash"]
+    assert synthesis_extension["transformation_ids"] == [
+        first.transformation_id,
+        second_transformation.transformation_id,
+    ]
+
+    first_path = tmp_path / "first.json"
+    second_path = tmp_path / "second.json"
+    write_canonical(first, first_path)
+    write_canonical(second_transformation, second_path)
+    ordered = _validate_transformation_chain(
+        [second_path, first_path],
+        transformation_ids=(
+            first.transformation_id,
+            second_transformation.transformation_id,
+        ),
+        baseline_genome_hash=canonical_hash(baseline),
+        candidate_genome_hash=canonical_hash(lowered.genome),
+    )
+    assert [transformation.transformation_id for _path, transformation in ordered] == [
+        first.transformation_id,
+        second_transformation.transformation_id,
+    ]
+
+    broken_path = tmp_path / "broken-second.json"
+    write_canonical(
+        second_transformation.model_copy(update={"parent_transformations": ()}),
+        broken_path,
+    )
+    with pytest.raises(ValueError, match="parent does not match"):
+        _validate_transformation_chain(
+            [first_path, broken_path],
+            transformation_ids=(
+                first.transformation_id,
+                second_transformation.transformation_id,
+            ),
+            baseline_genome_hash=canonical_hash(baseline),
+            candidate_genome_hash=canonical_hash(lowered.genome),
+        )

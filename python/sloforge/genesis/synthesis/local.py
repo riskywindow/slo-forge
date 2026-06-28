@@ -9,7 +9,7 @@ import sys
 import tempfile
 from collections import deque
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -472,6 +472,8 @@ def _run_candidate_simulation(
     *,
     seed: int,
 ) -> tuple[bool, Path]:
+    """Exercise the compiled policy in a candidate-bound, non-comparative service model."""
+
     manifest_path = run_directory / "run_manifest.json"
     if manifest_path.is_file():
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -487,15 +489,52 @@ def _run_candidate_simulation(
         for line in workload_path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    raw = [
-        {
-            "ordinal": index,
-            "modeled_service_units": len(str(item["text"])) + int(item["maximum_new_tokens"]),
-            "deadline_rank": int(item["maximum_new_tokens"]),
+    _source, policy, policy_payload = compiled_candidate_policy(design)
+    policy_digest = hashlib.sha256(policy_payload).hexdigest()
+    runtime_manifest_path = (
+        candidate_directory / "generated_runtime/candidate_runtime_manifest.json"
+    )
+    runtime_manifest = json.loads(runtime_manifest_path.read_text(encoding="utf-8"))
+    if (
+        runtime_manifest.get("candidate_id") != design.candidate_id
+        or runtime_manifest.get("candidate_genome_hash") != design.genome_hash.value
+        or runtime_manifest.get("policy_bytecode_sha256") != policy_digest
+    ):
+        raise ValueError("candidate runtime manifest is not bound to simulation inputs")
+    raw: list[dict[str, Any]] = []
+    for index, item in enumerate(requests):
+        prompt = item.get("text", item.get("prompt_tokens", ""))
+        prompt_units = len(prompt) if isinstance(prompt, (str, list)) else 0
+        output_units = item.get("maximum_new_tokens", item.get("output_tokens", 1))
+        if not isinstance(output_units, int) or isinstance(output_units, bool):
+            raise ValueError("simulation workload output bound must be an integer")
+        deadline = item.get("deadline_ms")
+        if deadline is not None and not isinstance(deadline, (int, float)):
+            raise ValueError("simulation workload deadline must be numeric")
+        slack_ms = 1000 if deadline is None else max(0, min(1000, int(deadline)))
+        available: dict[str, int | bool] = {
+            "queue_length": min(32, len(requests) - index),
+            "slo_slack_ms": slack_ms,
+            "cancellation_pending": False,
         }
-        for index, item in enumerate(requests)
-    ]
-    ordered = sorted(raw, key=lambda item: (item["deadline_rank"], item["ordinal"]))
+        names = {specification.name for specification in policy.inputs}
+        decision = execute_bytecode(policy, {name: available[name] for name in names})
+        if type(decision) is not int or decision <= 0:
+            raise ValueError("compiled candidate policy produced an invalid live-request decision")
+        raw.append(
+            {
+                "ordinal": index,
+                "modeled_service_units": prompt_units + output_units,
+                "deadline_ms": deadline,
+                "policy_batch_limit": decision,
+            }
+        )
+    deadline_declared = all(item["deadline_ms"] is not None for item in raw)
+    ordered = (
+        sorted(raw, key=lambda item: (float(item["deadline_ms"]), int(item["ordinal"])))
+        if deadline_declared and policy.name == "deadline_cancel_batch"
+        else raw
+    )
     clock = 0
     events: list[dict[str, int]] = []
     for item in ordered:
@@ -505,10 +544,14 @@ def _run_candidate_simulation(
     evidence = {
         "schema_version": "genesis.candidate-simulation.v1",
         "candidate_id": design.candidate_id,
+        "candidate_genome_hash": design.genome_hash.value,
+        "policy_bytecode_sha256": policy_digest,
+        "runtime_manifest_sha256": hashlib.sha256(runtime_manifest_path.read_bytes()).hexdigest(),
         "seed": seed,
         "workload_path": str(workload_path.resolve()),
         "workload_sha256": hashlib.sha256(workload_path.read_bytes()).hexdigest(),
-        "queue_policy": "earliest_deadline",
+        "queue_policy": policy.name,
+        "deadline_order_exercised": deadline_declared,
         "raw_requests": raw,
         "events": events,
         "result": "pass" if passed else "inconclusive",

@@ -246,6 +246,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--verification-seed", type=int)
     parser.add_argument("--counterexample", type=Path)
     arguments = parser.parse_args()
     candidate = next(
@@ -266,7 +267,10 @@ def main() -> int:
         if not isinstance(counterexample.payload, RequestTraceCounterexamplePayload):
             raise SystemExit("counterexample is not a request-trace witness")
         witness = ProtocolWitness(events=counterexample.payload.events)
-    outcome = CancellationPolicyVerifier().verify(candidate, witness, seed=arguments.seed)
+    verification_seed = (
+        arguments.seed if arguments.verification_seed is None else arguments.verification_seed
+    )
+    outcome = CancellationPolicyVerifier().verify(candidate, witness, seed=verification_seed)
     print(outcome.model_dump_json())
     return 0 if outcome.passed else 1
 
