@@ -128,11 +128,16 @@ artifact directory writable. If a required isolation capability is missing, the 
 `policy_unavailable` and no candidate code runs.
 
 Both paths enforce wall and CPU time, file and descriptor bounds, output byte limits, deterministic
-environment metadata, and process-group cleanup. Address-space and Linux per-user process limits
-are marked best-effort because their semantics vary without cgroups. macOS denies generated child
-forking outright. Output is drained incrementally; an output flood is killed rather than first
-buffered without bound. Before accepting a result, the executor walks the artifact tree with entry
-and aggregate byte bounds and rejects symlinks, devices, and other non-regular output.
+environment metadata, and process-group cleanup. Linux retains an address-space limit. macOS uses
+a parent-owned process-group RSS watchdog because interpreter mappings make `RLIMIT_AS` unreliable;
+that limit is explicitly best-effort rather than a kernel/cgroup guarantee. macOS denies generated
+child forking outright. Output is drained incrementally, and the artifact tree is rescanned during
+execution; output, memory, entry, or aggregate-byte floods kill the process group. Final acceptance
+rechecks that the artifact tree contains only bounded regular files.
+
+Generated runtime imports additionally require the sandbox launch marker. Direct in-process loading
+is rejected unless a caller uses the explicitly named test-only opt-in. The deployment and capsule
+manifests advertise the trusted sandbox launcher and set direct launch support to false.
 
 ### Capability limitations
 
@@ -141,8 +146,9 @@ and aggregate byte bounds and rejects symlinks, devices, and other non-regular o
   failure remains fail-closed.
 - OS/runtime files required to start the interpreter remain readable. The workspace/user trust
   roots and undeclared sibling files are denied, but this is not a virtual machine boundary.
-- `RLIMIT_AS` and `RLIMIT_NPROC` are not portable cgroup substitutes. Capability records identify
-  them as best-effort.
+- `RLIMIT_AS`, `RLIMIT_NPROC`, and a userspace RSS watchdog are not cgroup substitutes. Capability
+  records identify best-effort boundaries, and production deployment still requires an outer
+  container/VM memory boundary.
 - Windows has no accepted backend and therefore cannot execute with strict defaults.
 - Linux bubblewrap supplies a private minimal `/dev`. The macOS profile does not create a device
   namespace, so it must not be described as proof that all readable device nodes or ioctls are
@@ -153,7 +159,7 @@ and aggregate byte bounds and rejects symlinks, devices, and other non-regular o
 
 | Boundary | Status in this workspace | Evidence scope |
 | --- | --- | --- |
-| macOS `sandbox-exec` | Implemented and exercised on Darwin on 2026-08-02 | Environment sanitization, deterministic seed, blocked undeclared workspace read, blocked loopback connection, blocked source write, artifact write, child-fork denial, timeout cleanup, output cap, credential-name rejection, and symlink-output rejection |
+| macOS `sandbox-exec` | Implemented and exercised on Darwin on 2026-08-02 | Environment sanitization, deterministic seed, blocked undeclared workspace read, blocked loopback connection, blocked source write, artifact write, child-fork denial, timeout cleanup, output cap, active artifact-entry flood termination, RSS observation, credential-name rejection, and symlink-output rejection |
 | Linux bubblewrap | Implemented but unexercised in this workspace | Command construction and fail-closed capability reporting exist; no Linux kernel/user-namespace execution result is claimed |
 | No supported backend | Implemented as a fail-closed path | Strict requests return `policy_unavailable`; generated code is not run |
 | Windows | Not implemented | Strict generated-code execution is unavailable |
@@ -177,7 +183,7 @@ Windows, GPU isolation, container escape resistance, or protection against kerne
 | Malicious or accidental generated code | Network denial, filesystem policy, sanitized environment, no shell, bounded resources, process cleanup | Kernel/runtime sandbox flaws |
 | Credential theft | No inherited environment; user/workspace roots denied; isolated `HOME` | Credentials stored in OS-readable locations outside protected roots |
 | Fork bomb or orphan | Fork denial on macOS; PID namespace and kill-on-parent on Linux; process group kill | Linux process limit is best-effort without cgroups |
-| Output or disk flood | Incremental output cap and `RLIMIT_FSIZE`; explicit artifact directory | Filesystem-wide quotas are deployment-environment responsibilities |
+| Output, disk or memory flood | Incremental output cap, `RLIMIT_FSIZE`, active artifact-tree scan, Linux address-space limit and macOS RSS watchdog | Filesystem-wide quotas and kernel-enforced macOS memory isolation are deployment-environment responsibilities |
 | Capsule or artifact tampering | Pinned canonical manifest digest plus per-file size/SHA-256 | Hashes do not authenticate an unpinned replacement manifest |
 | Stale proof/evidence | Required validity horizon, exact verifier/dependency/hardware/contract match | Issuer compromise before expiry |
 | Benchmark manipulation | Raw samples, definition/software/workload/hardware binding, statistic recomputation, randomized-order requirement | Validator cannot independently detect malicious timers without a trusted harness |

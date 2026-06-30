@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := check
+CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0
 
 .PHONY: bootstrap check demo benchmark-cpu benchmark-gpu docker-smoke package \
 	fabric-check fabric-demo autopsy-demo forgeci-demo warmpath-demo \
@@ -14,7 +15,7 @@ bootstrap:
 	@if test -f ui/package-lock.json; then command -v npm >/dev/null 2>&1 || { echo "error: Node.js/npm is required for ui/" >&2; exit 127; }; fi
 	uv sync --locked --extra dev --extra deploy
 	cargo fetch --locked
-	cargo build --workspace --locked
+	$(CARGO_BOUNDED_ENV) cargo build --workspace --locked
 	@if test -f ui/package-lock.json; then npm ci --prefix ui --cache "$(CURDIR)/.cache/npm"; fi
 
 check:
@@ -23,8 +24,8 @@ check:
 	uv run --locked mypy python/sloforge
 	uv run --locked pytest
 	cargo fmt --all --check
-	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-	cargo test --workspace --all-features --locked
+	$(CARGO_BOUNDED_ENV) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	$(CARGO_BOUNDED_ENV) cargo test --workspace --all-features --locked
 	@if test -f ui/package.json; then \
 	  npm run typecheck --prefix ui && \
 	  npm run lint --prefix ui && \
@@ -41,8 +42,8 @@ fabric-check:
 	uv run --locked mypy python/sloforge
 	uv run --locked pytest -q tests/python/test_fabric*.py tests/python/test_autopsy*.py tests/python/test_forgeci*.py tests/python/test_warmpath*.py
 	cargo fmt --all --check
-	cargo clippy -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-targets --all-features --locked -- -D warnings
-	cargo test -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-features --locked
+	$(CARGO_BOUNDED_ENV) cargo clippy -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-targets --all-features --locked -- -D warnings
+	$(CARGO_BOUNDED_ENV) cargo test -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-features --locked
 
 fabric-demo:
 	uv run --locked python -m sloforge.fabric.demo --artifact-dir artifacts/fabric-demo --report-dir reports/fabric-demo --reset
@@ -67,8 +68,8 @@ genesis-check:
 	uv run --locked mypy python/sloforge
 	uv run --locked pytest -q tests/python/test_genesis*.py tests/python/test_synthbench.py
 	cargo fmt --all --check
-	cargo clippy -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-targets --all-features --locked -- -D warnings
-	cargo test -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-features --locked
+	$(CARGO_BOUNDED_ENV) cargo clippy -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-targets --all-features --locked -- -D warnings
+	$(CARGO_BOUNDED_ENV) cargo test -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-features --locked
 
 genesis-demo:
 	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/demo --seed 73129 --reset

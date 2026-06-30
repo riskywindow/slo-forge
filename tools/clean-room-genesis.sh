@@ -36,9 +36,30 @@ genesis = json.loads((root / "artifacts/genesis/demo/GENESIS_DEMO_REPORT.json").
 synthbench = json.loads((root / "artifacts/synthbench/smoke/summary.json").read_text())
 assert genesis["runtime_differential_passed"] is True
 assert genesis["cross_layer_accepted"] is True
-assert genesis["capsule_promotion_eligible"] is True
+assert genesis["capsule_promotion_eligible"] is False
+assert genesis["capsule_local_evolution_eligible"] is True
+assert genesis["capsule_external_production_eligible"] is False
+assert genesis["evolution_promoted"] is True
 assert genesis["active_stream_preserved"] is True
 assert genesis["hardware_backed"] is False
+assert genesis["kernel_speedup_claim_count"] == 0
+capsule_root = pathlib.Path(genesis["capsule_path"])
+manifest_paths = list((capsule_root / "manifests").glob("*.json"))
+assert len(manifest_paths) == 1
+capsule = json.loads(manifest_paths[0].read_text())
+assert capsule["benchmarks"] == []
+performance_claims = [
+    claim for claim in capsule["claims"] if claim["category"] == "performance"
+]
+assert len(performance_claims) == 1
+assert performance_claims[0]["promotion_required"] is False
+assert "no performance improvement is accepted" in performance_claims[0]["statement"]
+simulation_ref = next(
+    artifact for artifact in capsule["artifacts"]
+    if artifact["artifact_id"] == "candidate-simulation"
+)
+simulation = json.loads((capsule_root / simulation_ref["path"]).read_text())
+assert simulation["comparison_permitted"] is False
 assert synthbench["valid_system_rate"] == 1.0
 assert synthbench["exact_request_rate"] == 1.0
 (root / "artifacts/genesis/clean-room-result.json").write_text(

@@ -29,9 +29,12 @@ names are rejected, `HOME` and `TMPDIR` are isolated under the output directory,
 are disabled, stdin is closed, and `PYTHONHASHSEED` is explicit.
 
 Wall time, CPU time, open files, output bytes, artifact bytes, artifact entries, and process cleanup
-are bounded. Address-space and Linux process-count limits are best effort without cgroups. Output is
-drained incrementally, and timeout/output-limit termination kills the process group. Accepted output
-trees contain only bounded regular files; symlinks and device/special files are rejected.
+are bounded. Linux applies an address-space limit; macOS uses a parent-owned process-group RSS
+watchdog and reports it as best effort without cgroups. Output is drained and the artifact tree is
+checked while the process runs, so output, memory, entry, or aggregate-byte floods kill the process
+group before final validation. Accepted trees contain only bounded regular files; symlinks and
+device/special files are rejected. Generated runtime imports also fail unless launched by the
+sandbox executor or an explicit test-only in-process opt-in.
 
 Network and filesystem isolation require a supported OS backend. The macOS backend uses
 `sandbox-exec`; it was exercised in this workspace for network denial, protected-root read denial,
