@@ -8,6 +8,7 @@ import shutil
 import stat
 import sys
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -15,8 +16,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..capsule import ArtifactRole, VerificationLevel, load_capsule
 from ..ir import canonical_json
-from ..sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
-from .models import CapsuleReference, GateObservation, GateStage
+from ..sandbox import (
+    IsolationStatus,
+    SandboxCapabilities,
+    SandboxLimits,
+    SandboxRequest,
+    execute_sandboxed,
+)
+from .models import CapsuleReference, ChallengerSpec, GateObservation, GateStage
 
 
 class _ObservationCase(BaseModel):
@@ -74,6 +81,12 @@ def _artifact_path(capsule_path: Path, relative: str) -> Path:
 def _extract_runtime(reference: CapsuleReference, destination: Path) -> tuple[Path, str]:
     manifest_path = Path(reference.path)
     capsule = load_capsule(manifest_path)
+    if (
+        capsule.capsule_digest is None
+        or capsule.capsule_digest.value != reference.capsule_digest
+        or capsule.identity.candidate_genome_hash.value != reference.genome_hash
+    ):
+        raise ValueError("capsule manifest does not match the gate-evidence reference")
     runtime_refs = [
         item for item in capsule.artifacts if item.role is ArtifactRole.GENERATED_RUNTIME
     ]
@@ -326,3 +339,161 @@ def collect_local_gate_evidence(
         quality_regression=len(mismatches) / sample_count,
         interrupted_streams=interrupted,
     )
+
+
+def local_gate_evidence_validator(
+    evidence_root: Path,
+) -> Callable[[GateObservation, ChallengerSpec], bool]:
+    """Return a fail-closed validator for artifacts emitted by local gate replay.
+
+    The callback independently derives every gate metric from the bounded raw
+    runtime observations. The summary embedded in the evidence file is checked,
+    never trusted as the source of the controller decision.
+    """
+
+    root = evidence_root.resolve()
+
+    def validate(observation: GateObservation, challenger: ChallengerSpec) -> bool:
+        try:
+            candidate_id = challenger.candidate_id
+            capsule_digest = challenger.capsule.capsule_digest
+            path = root / observation.stage.value / "gate-evidence.json"
+            if path.is_symlink() or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024:
+                return False
+            payload = path.read_bytes()
+            if _sha256(payload) != observation.evidence_digest:
+                return False
+            document = json.loads(payload)
+            if not isinstance(document, dict):
+                return False
+            comparison = document.get("comparison")
+            champion_document = document.get("champion_observation")
+            candidate_document = document.get("challenger_observation")
+            champion_sandbox = document.get("champion_sandbox")
+            challenger_sandbox = document.get("challenger_sandbox")
+            if not all(
+                isinstance(item, dict)
+                for item in (
+                    comparison,
+                    champion_document,
+                    candidate_document,
+                    champion_sandbox,
+                    challenger_sandbox,
+                )
+            ):
+                return False
+            assert isinstance(comparison, dict)
+            assert isinstance(champion_document, dict)
+            assert isinstance(candidate_document, dict)
+            assert isinstance(champion_sandbox, dict)
+            assert isinstance(challenger_sandbox, dict)
+            champion = _RuntimeObservation.model_validate_json(
+                canonical_json(champion_document), strict=True
+            )
+            candidate = _RuntimeObservation.model_validate_json(
+                canonical_json(candidate_document), strict=True
+            )
+            champion_capabilities = SandboxCapabilities.model_validate_json(
+                canonical_json(champion_sandbox["capabilities"]), strict=True
+            )
+            challenger_capabilities = SandboxCapabilities.model_validate_json(
+                canonical_json(challenger_sandbox["capabilities"]), strict=True
+            )
+            count = int(document["trace_request_count"])
+            if (
+                document.get("schema_version")
+                != "sloforge.genesis.evolution.gate-evidence/v1"
+                or document.get("stage") != observation.stage.value
+                or int(document["seed"]) != observation.deterministic_seed
+                or document.get("candidate_id") != candidate_id
+                or candidate_id != observation.candidate_id
+                or document.get("challenger_capsule_digest") != capsule_digest
+                or capsule_digest != observation.capsule_digest
+                or document.get("hardware_backed") is not False
+                or count != observation.sample_count
+                or champion.seed != observation.deterministic_seed
+                or candidate.seed != observation.deterministic_seed
+                or champion.request_count != count
+                or candidate.request_count != count
+                or champion_sandbox.get("termination") != "success"
+                or challenger_sandbox.get("termination") != "success"
+                or champion_sandbox.get("process_group_cleaned") is not True
+                or challenger_sandbox.get("process_group_cleaned") is not True
+                or any(
+                    capability.network_isolation is not IsolationStatus.ENFORCED
+                    or capability.filesystem_read_isolation is not IsolationStatus.ENFORCED
+                    or capability.filesystem_write_isolation is not IsolationStatus.ENFORCED
+                    or capability.environment_sanitization is not IsolationStatus.ENFORCED
+                    or capability.child_cleanup is not IsolationStatus.ENFORCED
+                    for capability in (champion_capabilities, challenger_capabilities)
+                )
+            ):
+                return False
+            champion_cases = {item.request_id: item for item in champion.cases}
+            candidate_cases = {item.request_id: item for item in candidate.cases}
+            if (
+                len(champion_cases) != count
+                or len(candidate_cases) != count
+                or set(champion_cases) != set(candidate_cases)
+                or any(item.token_count != len(item.token_ids) for item in champion.cases)
+                or any(item.token_count != len(item.token_ids) for item in candidate.cases)
+            ):
+                return False
+            errors = 0
+            interrupted = 0
+            mismatches: list[dict[str, object]] = []
+            for request_id in sorted(champion_cases):
+                expected_case = champion_cases[request_id]
+                observed_case = candidate_cases[request_id]
+                if expected_case.error is not None or observed_case.error is not None:
+                    errors += 1
+                    interrupted += 1
+                if expected_case.token_ids != observed_case.token_ids:
+                    mismatches.append(
+                        {
+                            "request_id": request_id,
+                            "champion_token_ids": list(expected_case.token_ids),
+                            "challenger_token_ids": list(observed_case.token_ids),
+                        }
+                    )
+            champion_ttft = _percentile(
+                [item.ttft_ns for item in champion.cases], 0.95
+            )
+            challenger_ttft = _percentile(
+                [item.ttft_ns for item in candidate.cases], 0.95
+            )
+            champion_tpot = _percentile(
+                [item.mean_tpot_ns for item in champion.cases], 0.99
+            )
+            challenger_tpot = _percentile(
+                [item.mean_tpot_ns for item in candidate.cases], 0.99
+            )
+            if comparison != {
+                "mismatches": mismatches,
+                "error_count": errors,
+                "interrupted_streams": interrupted,
+                "champion_p95_ttft_ns": champion_ttft,
+                "challenger_p95_ttft_ns": challenger_ttft,
+                "champion_p99_mean_tpot_ns": champion_tpot,
+                "challenger_p99_mean_tpot_ns": challenger_tpot,
+            }:
+                return False
+            expected = (
+                errors / count,
+                challenger_ttft / champion_ttft,
+                challenger_tpot / champion_tpot,
+                len(mismatches) / count,
+                interrupted,
+            )
+            observed = (
+                observation.error_rate,
+                observation.p95_ttft_ratio,
+                observation.p99_tpot_ratio,
+                observation.quality_regression,
+                observation.interrupted_streams,
+            )
+            return observed == expected
+        except (KeyError, OSError, TypeError, ValueError, ZeroDivisionError):
+            return False
+
+    return validate

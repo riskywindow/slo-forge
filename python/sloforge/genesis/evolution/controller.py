@@ -190,6 +190,7 @@ class EvolutionController:
             sequence=0,
             phase=EvolutionPhase.IDLE,
             champion=champion,
+            retained_capsules=(champion,),
             processed_event_ids=("controller-initialized",),
             processed_events=(
                 ProcessedEventRecord(
@@ -259,6 +260,18 @@ class EvolutionController:
                 require_level_five=config.execution_target is ExecutionTarget.EXTERNAL,
             ):
                 raise EvolutionError("restored challenger failed independent capsule revalidation")
+        references = cls._snapshot_capsule_references(snapshot)
+        for lease in snapshot.active_streams:
+            reference = references.get(lease.capsule_id)
+            if reference is None:
+                raise EvolutionError("restored active stream has no complete capsule reference")
+            lease_report = capsule_validator(Path(reference.path))
+            if not cls._capsule_reference_is_eligible(
+                reference,
+                lease_report,
+                require_level_five=config.execution_target is ExecutionTarget.EXTERNAL,
+            ):
+                raise EvolutionError("restored active-stream capsule failed revalidation")
         return cls(
             store=store,
             capsule_validator=capsule_validator,
@@ -267,6 +280,24 @@ class EvolutionController:
             config=config,
             snapshot=snapshot,
         )
+
+    @staticmethod
+    def _snapshot_capsule_references(
+        snapshot: EvolutionSnapshot,
+    ) -> dict[str, CapsuleReference]:
+        references = (
+            snapshot.champion,
+            *((snapshot.previous_champion,) if snapshot.previous_champion is not None else ()),
+            *(item.spec.capsule for item in snapshot.challengers),
+            *snapshot.retained_capsules,
+        )
+        by_id: dict[str, CapsuleReference] = {}
+        for reference in references:
+            existing = by_id.get(reference.capsule_id)
+            if existing is not None and existing != reference:
+                raise EvolutionError("capsule identifier resolves to conflicting references")
+            by_id[reference.capsule_id] = reference
+        return by_id
 
     def _already_processed(self, event_id: str, payload_sha256: str) -> bool:
         for record in self.snapshot.processed_events:
@@ -336,6 +367,8 @@ class EvolutionController:
             raise EvolutionError("challenger population exceeds its configured bound")
         if len(next_snapshot.active_streams) > self.config.maximum_active_streams:
             raise EvolutionError("active stream registry exceeds its configured bound")
+        if len(next_snapshot.retained_capsules) > self.config.maximum_challengers + 2:
+            raise EvolutionError("retained capsule registry exceeds its configured bound")
         self.store.save(next_snapshot, expected_sequence=self.snapshot.sequence)
         self.snapshot = next_snapshot
         return next_snapshot
@@ -425,14 +458,34 @@ class EvolutionController:
         }
         if observation.evidence_digest in consumed:
             raise EvolutionError("gate evidence digest has already been consumed")
-        if self.config.execution_target is not ExecutionTarget.EXTERNAL:
+        if self.config.execution_target is ExecutionTarget.SIMULATED:
             return
-        if observation.verification_level is not VerificationLevel.HARDWARE_OPERATIONAL:
+        if (
+            self.config.execution_target is ExecutionTarget.EXTERNAL
+            and observation.verification_level is not VerificationLevel.HARDWARE_OPERATIONAL
+        ):
             raise EvolutionError("external gate observations require Level-5 evidence")
         if self.gate_evidence_validator is None or not self.gate_evidence_validator(
             observation, record.spec
         ):
-            raise EvolutionError("external gate evidence failed trusted validation")
+            raise EvolutionError(
+                f"{self.config.execution_target.value} gate evidence failed trusted validation"
+            )
+
+    def _revalidate_recorded_gates(self, record: ChallengerRecord) -> None:
+        if self.config.execution_target is ExecutionTarget.SIMULATED:
+            return
+        if self.gate_evidence_validator is None:
+            raise EvolutionError("promotion requires a trusted gate-evidence validator")
+        observations = (record.shadow_observation, record.canary_observation)
+        if any(item is None for item in observations):
+            raise EvolutionError("promotion requires persisted shadow and canary observations")
+        for observation in observations:
+            assert observation is not None
+            if not self.gate_evidence_validator(observation, record.spec):
+                raise EvolutionError(
+                    f"persisted {observation.stage.value} evidence failed trusted revalidation"
+                )
 
     @_serialized
     def register_challenger(
@@ -640,30 +693,44 @@ class EvolutionController:
             updates={"challengers": self._replace_challenger(index, replacement)},
         )
 
+    def _route_request_locked(self, request_id: str) -> CapsuleReference:
+        existing = next(
+            (item for item in self.snapshot.active_streams if item.stream_id == request_id), None
+        )
+        if existing is not None:
+            reference = self._snapshot_capsule_references(self.snapshot).get(existing.capsule_id)
+            if reference is None:
+                raise EvolutionError("active stream has no complete capsule reference")
+            return reference
+        if self.snapshot.phase is not EvolutionPhase.CANARYING:
+            return self.snapshot.champion
+        _, challenger = self._selected()
+        digest = hashlib.sha256(f"{self.snapshot.seed}:{request_id}".encode()).digest()
+        fraction = int.from_bytes(digest[:8], "big") / float(2**64)
+        return (
+            challenger.spec.capsule
+            if fraction < self.config.canary_fraction
+            else self.snapshot.champion
+        )
+
     def route_request(self, request_id: str) -> CapsuleReference:
-        """Choose a runtime deterministically without mutating controller state."""
+        """Route unary work or recover the immutable assignment of an open stream.
+
+        Streaming callers must use :meth:`open_stream_and_route` before starting
+        execution; separate route-then-open calls cannot establish a lease.
+        """
 
         with self._mutation_lock:
-            if self.snapshot.phase is not EvolutionPhase.CANARYING:
-                return self.snapshot.champion
-            _, challenger = self._selected()
-            digest = hashlib.sha256(f"{self.snapshot.seed}:{request_id}".encode()).digest()
-            fraction = int.from_bytes(digest[:8], "big") / float(2**64)
-            return (
-                challenger.spec.capsule
-                if fraction < self.config.canary_fraction
-                else self.snapshot.champion
-            )
+            return self._route_request_locked(request_id)
 
-    @_serialized
-    def open_stream(
+    def _open_stream_locked(
         self,
         stream_id: str,
         *,
         event_id: str,
         observed_at_ms: int,
         externally_visible_output: bool = False,
-    ) -> EvolutionSnapshot:
+    ) -> tuple[EvolutionSnapshot, CapsuleReference]:
         payload_sha256 = _event_digest(
             "open_stream",
             {
@@ -674,17 +741,25 @@ class EvolutionController:
             },
         )
         if self._already_processed(event_id, payload_sha256):
-            return self.snapshot
+            existing = next(
+                (item for item in self.snapshot.active_streams if item.stream_id == stream_id), None
+            )
+            if existing is None:
+                raise EvolutionError("closed stream assignment cannot be replayed as active")
+            reference = self._snapshot_capsule_references(self.snapshot).get(existing.capsule_id)
+            if reference is None:
+                raise EvolutionError("replayed stream has no complete capsule reference")
+            return self.snapshot, reference
         if any(stream.stream_id == stream_id for stream in self.snapshot.active_streams):
             raise EvolutionError("stream identifier is already active")
-        capsule = self.route_request(stream_id)
+        capsule = self._route_request_locked(stream_id)
         lease = StreamLease(
             stream_id=stream_id,
             capsule_id=capsule.capsule_id,
             opened_sequence=self.snapshot.sequence + 1,
             externally_visible_output=externally_visible_output,
         )
-        return self._commit(
+        snapshot = self._commit(
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="open_stream",
@@ -692,6 +767,43 @@ class EvolutionController:
             reason=f"stream is pinned to capsule {capsule.capsule_id} until completion",
             updates={"active_streams": (*self.snapshot.active_streams, lease)},
         )
+        return snapshot, capsule
+
+    def open_stream_and_route(
+        self,
+        stream_id: str,
+        *,
+        event_id: str,
+        observed_at_ms: int,
+        externally_visible_output: bool = False,
+    ) -> tuple[EvolutionSnapshot, CapsuleReference]:
+        """Atomically persist a stream lease and return its assigned capsule."""
+
+        with self._mutation_lock:
+            return self._open_stream_locked(
+                stream_id,
+                event_id=event_id,
+                observed_at_ms=observed_at_ms,
+                externally_visible_output=externally_visible_output,
+            )
+
+    def open_stream(
+        self,
+        stream_id: str,
+        *,
+        event_id: str,
+        observed_at_ms: int,
+        externally_visible_output: bool = False,
+    ) -> EvolutionSnapshot:
+        """Compatibility wrapper; new streaming integrations use the atomic API."""
+
+        snapshot, _capsule = self.open_stream_and_route(
+            stream_id,
+            event_id=event_id,
+            observed_at_ms=observed_at_ms,
+            externally_visible_output=externally_visible_output,
+        )
+        return snapshot
 
     @_serialized
     def close_stream(
@@ -719,13 +831,24 @@ class EvolutionController:
             for capsule_id in self.snapshot.retained_capsule_ids
             if capsule_id in leased or capsule_id == rollback_capsule
         )
+        retained_references = tuple(
+            reference
+            for reference in self.snapshot.retained_capsules
+            if reference.capsule_id in retained
+            or reference.capsule_id == self.snapshot.champion.capsule_id
+            or reference.capsule_id == rollback_capsule
+        )
         return self._commit(
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="close_stream",
             payload_sha256=payload_sha256,
             reason="stream lease released without interrupting visible output",
-            updates={"active_streams": active, "retained_capsule_ids": retained},
+            updates={
+                "active_streams": active,
+                "retained_capsule_ids": retained,
+                "retained_capsules": retained_references,
+            },
         )
 
     @_serialized
@@ -764,6 +887,7 @@ class EvolutionController:
                     "selected_candidate_id": None,
                 },
             )
+        self._revalidate_recorded_gates(record)
         champion_report = self.capsule_validator(Path(self.snapshot.champion.path))
         if not self._capsule_reference_is_eligible(
             self.snapshot.champion,
@@ -798,6 +922,16 @@ class EvolutionController:
         retained = tuple(
             dict.fromkeys((*self.snapshot.retained_capsule_ids, self.snapshot.champion.capsule_id))
         )
+        retained_references = tuple(
+            {
+                item.capsule_id: item
+                for item in (
+                    *self.snapshot.retained_capsules,
+                    self.snapshot.champion,
+                    record.spec.capsule,
+                )
+            }.values()
+        )
         return self._commit(
             event_id=event_id,
             observed_at_ms=observed_at_ms,
@@ -814,6 +948,7 @@ class EvolutionController:
                 "previous_champion": self.snapshot.champion,
                 "challengers": self._replace_challenger(index, replacement),
                 "retained_capsule_ids": retained,
+                "retained_capsules": retained_references,
             },
         )
 
@@ -858,6 +993,13 @@ class EvolutionController:
                 )
             )
         )
+        retained_references = tuple(
+            {
+                item.capsule_id: item
+                for item in (*self.snapshot.retained_capsules, previous, current)
+                if item.capsule_id in {*retained, previous.capsule_id, current.capsule_id}
+            }.values()
+        )
         return self._commit(
             event_id=event_id,
             observed_at_ms=observed_at_ms,
@@ -870,6 +1012,7 @@ class EvolutionController:
                 "previous_champion": current,
                 "challengers": tuple(records),
                 "retained_capsule_ids": retained,
+                "retained_capsules": retained_references,
                 "selected_candidate_id": None,
             },
         )

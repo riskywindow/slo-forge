@@ -372,6 +372,7 @@ class RawBenchmarkSample(CapsuleModel):
     trial: NonNegativeInt
     seed: int
     value: NonNegativeFloat
+    execution_ordinal: NonNegativeInt | None = None
 
 
 class RawBenchmarkSamples(CapsuleModel):
@@ -445,6 +446,7 @@ class ValidationContext(CapsuleModel):
     dependency_lock_hash: Digest
     dependencies: tuple[CurrentDependency, ...]
     trusted_evidence_anchors: tuple[TrustedEvidenceAnchor, ...]
+    trusted_artifact_anchors: tuple[TrustedArtifactAnchor, ...] = ()
     trusted_verifier_version: NonEmptyString
     now: AwareDatetime
     require_promotion_evidence: bool = True
@@ -454,6 +456,9 @@ class ValidationContext(CapsuleModel):
         evidence_ids = [item.evidence_id for item in self.trusted_evidence_anchors]
         if len(evidence_ids) != len(set(evidence_ids)):
             raise ValueError("trusted evidence anchors must have unique evidence identifiers")
+        artifact_ids = [item.artifact_id for item in self.trusted_artifact_anchors]
+        if len(artifact_ids) != len(set(artifact_ids)):
+            raise ValueError("trusted artifact anchors must have unique artifact identifiers")
         return self
 
 

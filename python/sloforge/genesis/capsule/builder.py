@@ -5,13 +5,8 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import math
 import os
-import platform
-import random
-import statistics
 import subprocess
-import sys
 import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -21,6 +16,7 @@ from pydantic import BaseModel, ConfigDict
 
 from sloforge.genesis.ir import (
     CandidateSuccessState,
+    Transformation,
     canonical_hash,
     load_candidate,
     load_transformation,
@@ -35,8 +31,6 @@ from .models import (
     ArtifactOrigin,
     ArtifactRef,
     ArtifactRole,
-    BenchmarkEvidence,
-    BenchmarkSummary,
     CapsuleIdentity,
     ClaimCategory,
     ClaimScope,
@@ -50,15 +44,12 @@ from .models import (
     EvidenceResult,
     GenesisCapsule,
     HardwareCompatibility,
-    RawBenchmarkSample,
-    RawBenchmarkSamples,
     ScopedClaim,
     TrustedArtifactAnchor,
     TrustedEvidenceAnchor,
     ValidationContext,
     VerificationLevel,
 )
-from .statistics import bootstrap_median_interval, paired_regression_probability
 from .validator import validate_capsule
 
 
@@ -191,7 +182,9 @@ def _runtime_bundle_bytes(
         "entries": {
             name: hashlib.sha256(payload).hexdigest() for name, payload in sorted(entries.items())
         },
-        "launch": ["python", "runtime.py", "--seed", "<required>"],
+        "trusted_launcher": "sloforge.genesis.sandbox.execute_sandboxed",
+        "sandbox_argv": ["python", "runtime.py", "--seed", "<required>"],
+        "direct_launch_supported": False,
     }
     entries["bundle_manifest.json"] = canonical_json(manifest) + b"\n"
     output = io.BytesIO()
@@ -291,80 +284,57 @@ def _git_commit(repository: Path) -> str:
     ).stdout.strip()
 
 
-def _work_items(workload_path: Path) -> tuple[float, ...]:
-    items: list[float] = []
-    for line in workload_path.read_bytes().splitlines():
-        if not line:
-            continue
-        value = json.loads(line)
-        if not isinstance(value, dict):
-            raise ValueError("workload records must be JSON objects")
-        prompt = value.get("text", value.get("prompt_tokens", ""))
-        if isinstance(prompt, list):
-            prompt_size = len(prompt)
-        elif isinstance(prompt, str):
-            prompt_size = len(prompt.encode())
-        else:
-            raise ValueError("workload prompt must be text or a token list")
-        maximum_new = value.get("maximum_new_tokens", 1)
-        if not isinstance(maximum_new, int) or isinstance(maximum_new, bool) or maximum_new <= 0:
-            raise ValueError("maximum_new_tokens must be a positive integer")
-        items.append(float(5 + prompt_size * 3 + maximum_new * 10))
-    if not items:
-        raise ValueError("workload must contain at least one request")
-    return tuple(items)
-
-
-def _completion_objective(service: tuple[float, ...]) -> float:
-    elapsed = 0.0
-    completion = 0.0
-    for value in service:
-        elapsed += value
-        completion += elapsed
-    return completion / len(service)
-
-
-def _simulated_samples(
-    workload_path: Path, *, seed: int
-) -> tuple[tuple[float, ...], tuple[float, ...], tuple[tuple[str, int], ...]]:
-    """Run an explicit deterministic scheduling/state-cost model for seven regimes."""
-
-    base_work = _work_items(workload_path)
-    execution = [
-        (alternative, trial) for trial in range(7) for alternative in ("baseline", "candidate")
+def _validate_transformation_chain(
+    transformation_paths: list[Path],
+    *,
+    transformation_ids: tuple[str, ...],
+    baseline_genome_hash: str,
+    candidate_genome_hash: str,
+) -> list[tuple[Path, Transformation]]:
+    if len(transformation_paths) != len(transformation_ids):
+        raise ValueError("candidate transformation artifact set is incomplete")
+    loaded_transformations = [(path, load_transformation(path)) for path in transformation_paths]
+    transformations_by_id = {
+        transformation.transformation_id: (path, transformation)
+        for path, transformation in loaded_transformations
+    }
+    if len(transformations_by_id) != len(loaded_transformations) or set(
+        transformations_by_id
+    ) != set(transformation_ids):
+        raise ValueError("candidate transformation artifacts do not match lifecycle identifiers")
+    ordered_transformations = [
+        transformations_by_id[transformation_id] for transformation_id in transformation_ids
     ]
-    random.Random(seed ^ 0xC4A5_51E).shuffle(execution)
-    baseline: dict[int, float] = {}
-    candidate: dict[int, float] = {}
-    for alternative, trial in execution:
-        # This deterministic regime variation is declared in the benchmark definition.
-        varied = tuple(
-            value * (1.0 + (((seed + trial * 17 + index * 11) % 9) - 4) / 100.0)
-            for index, value in enumerate(base_work)
+    expected_source_hash = baseline_genome_hash
+    previous_transformation_id: str | None = None
+    for _path, transformation in ordered_transformations:
+        delta = transformation.extensions.root.get("sloforge.dev/applied-delta")
+        if not isinstance(delta, dict):
+            raise ValueError("transformation is missing its canonical applied delta")
+        source_hash = delta.get("source_genome_hash")
+        target_hash = delta.get("target_genome_hash")
+        if not isinstance(source_hash, str) or not isinstance(target_hash, str):
+            raise ValueError("transformation applied delta is missing source or target hashes")
+        source_constraint = f"source_genome_sha256 == {source_hash}"
+        target_constraint = f"target_genome_sha256 == {target_hash}"
+        if source_hash != expected_source_hash:
+            raise ValueError("transformation source does not continue the derivation chain")
+        if source_constraint not in transformation.source_pattern.structural_constraints:
+            raise ValueError("transformation source pattern does not match its applied delta")
+        if target_constraint not in transformation.target_pattern.structural_constraints:
+            raise ValueError("transformation target pattern does not match its applied delta")
+        expected_parents = (
+            () if previous_transformation_id is None else (previous_transformation_id,)
         )
-        if alternative == "baseline":
-            baseline[trial] = _completion_objective(varied)
-        else:
-            deadline_order = tuple(sorted(varied))
-            # Candidate model combines shortest-deadline scheduling with one shared
-            # state-allocation setup per batch; the 8% factor is an explicit modeled
-            # assumption, never described as a hardware measurement.
-            shared_state_cost = tuple(value * 0.92 for value in deadline_order)
-            candidate[trial] = _completion_objective(shared_state_cost)
-    return (
-        tuple(baseline[trial] for trial in range(7)),
-        tuple(candidate[trial] for trial in range(7)),
-        tuple(execution),
-    )
-
-
-def _percentile(values: tuple[float, ...], probability: float) -> float:
-    ordered = sorted(values)
-    position = (len(ordered) - 1) * probability
-    lower = math.floor(position)
-    upper = math.ceil(position)
-    fraction = position - lower
-    return ordered[lower] * (1.0 - fraction) + ordered[upper] * fraction
+        if transformation.parent_transformations != expected_parents:
+            raise ValueError("transformation parent does not match the derivation chain")
+        if not transformation.verification_obligations:
+            raise ValueError("transformation is missing verification obligations")
+        expected_source_hash = target_hash
+        previous_transformation_id = transformation.transformation_id
+    if expected_source_hash != candidate_genome_hash:
+        raise ValueError("transformation derivation does not terminate at the accepted genome")
+    return ordered_transformations
 
 
 def build_local_capsule(
@@ -448,20 +418,13 @@ def build_local_capsule(
         raise ValueError("candidate genome changed after acceptance")
 
     transformation_paths = sorted((candidate_directory / "transformations").glob("*.json"))
-    if len(transformation_paths) != len(candidate.transformation_ids):
-        raise ValueError("candidate transformation artifact set is incomplete")
-    transformations = [load_transformation(path) for path in transformation_paths]
-    if tuple(item.transformation_id for item in transformations) != candidate.transformation_ids:
-        raise ValueError("candidate transformation artifacts do not match lifecycle identifiers")
-    source_constraint = f"source_genome_sha256 == {synthesis['baseline_genome_hash']}"
-    target_constraint = f"target_genome_sha256 == {candidate.genome_hash.value}"
-    for transformation in transformations:
-        if source_constraint not in transformation.source_pattern.structural_constraints:
-            raise ValueError("transformation source hash does not match synthesis baseline")
-        if target_constraint not in transformation.target_pattern.structural_constraints:
-            raise ValueError("transformation target hash does not match accepted candidate")
-        if not transformation.verification_obligations:
-            raise ValueError("transformation is missing verification obligations")
+    ordered_transformations = _validate_transformation_chain(
+        transformation_paths,
+        transformation_ids=candidate.transformation_ids,
+        baseline_genome_hash=str(synthesis["baseline_genome_hash"]),
+        candidate_genome_hash=candidate.genome_hash.value,
+    )
+    transformation_paths = [path for path, _transformation in ordered_transformations]
 
     artifacts: list[ArtifactRef] = []
     runtime_bundle = _runtime_bundle_bytes(
@@ -542,15 +505,14 @@ def build_local_capsule(
             "external_execution": False,
         }
     )
-    artifacts.append(
-        _artifact(
-            output_directory,
-            "rollback",
-            ArtifactRole.ROLLBACK,
-            rollback_payload,
-            origin=ArtifactOrigin.TRUSTED,
-        )
+    rollback = _artifact(
+        output_directory,
+        "rollback",
+        ArtifactRole.ROLLBACK,
+        rollback_payload,
+        origin=ArtifactOrigin.TRUSTED,
     )
+    artifacts.append(rollback)
     lock = _copy_artifact(
         output_directory,
         "dependency-lock",
@@ -675,24 +637,28 @@ def build_local_capsule(
     artifacts.append(operational)
     simulation_path = candidate_directory / "evidence/simulation-result.json"
     simulation_document = _read_object(simulation_path)
+    runtime_manifest_path = candidate_runtime / "candidate_runtime_manifest.json"
     if (
         simulation_document.get("candidate_id") != candidate.candidate_id
+        or simulation_document.get("candidate_genome_hash") != candidate.genome_hash.value
+        or simulation_document.get("policy_bytecode_sha256") != policy_digest
+        or simulation_document.get("runtime_manifest_sha256")
+        != _digest(runtime_manifest_path.read_bytes()).value
         or simulation_document.get("result") != "pass"
         or simulation_document.get("comparison_permitted") is not False
         or simulation_document.get("workload_sha256") != workload_digest.value
     ):
         raise ValueError("candidate simulation evidence is invalid or misbound")
-    artifacts.append(
-        _copy_artifact(
-            output_directory,
-            "candidate-simulation",
-            ArtifactRole.PERFORMANCE_SAMPLES,
-            simulation_path,
-            origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
-            suffix=".json",
-            media_type="application/json",
-        )
+    simulation_artifact = _copy_artifact(
+        output_directory,
+        "candidate-simulation",
+        ArtifactRole.PERFORMANCE_SAMPLES,
+        simulation_path,
+        origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
+        suffix=".json",
+        media_type="application/json",
     )
+    artifacts.append(simulation_artifact)
 
     counterexample_refs: list[str] = []
     counterexample_directory = run_directory / "synthesis/cegis/counterexamples"
@@ -727,142 +693,11 @@ def build_local_capsule(
     )
     artifacts.append(corpus)
 
-    baseline_values, candidate_values, execution = _simulated_samples(
-        workload_path, seed=design.seed
-    )
-    definition_payload = canonical_json(
-        {
-            "schema_version": "1.0.0",
-            "benchmark_id": "local-service-model",
-            "metric": "mean_request_completion_time",
-            "unit": "simulated_milliseconds",
-            "warmup": 1,
-            "repetitions": 7,
-            "randomized_regimes": "seeded +/-4 percent per-request service variation",
-            "baseline": "FIFO and per-request state setup",
-            "candidate": "deadline-order and shared batched state setup",
-            "modeled_candidate_state_cost_factor": 0.92,
-            "hardware_backed": False,
-            "execution_order": [
-                {"alternative": alternative, "trial": trial} for alternative, trial in execution
-            ],
-            "bootstrap_rounds": 2_000,
-            "confidence": 0.95,
-            "statistical_seed": design.seed ^ 0xB005_7A9,
-        }
-    )
-    definition = _artifact(
-        output_directory,
-        "benchmark-definition",
-        ArtifactRole.BENCHMARK_DEFINITION,
-        definition_payload,
-        origin=ArtifactOrigin.TRUSTED,
-    )
-    artifacts.append(definition)
-    software_payload = canonical_json(
-        {
-            "schema_version": "1.0.0",
-            "python": sys.version,
-            "platform": platform.platform(),
-            "machine": platform.machine(),
-            "git_commit": _git_commit(repository),
-            "dependency_lock_sha256": lock.digest.value,
-        }
-    )
-    software = _artifact(
-        output_directory,
-        "software-manifest",
-        ArtifactRole.SOFTWARE_MANIFEST,
-        software_payload,
-        origin=ArtifactOrigin.TRUSTED,
-    )
-    artifacts.append(software)
-
-    def samples_document(values: tuple[float, ...]) -> RawBenchmarkSamples:
-        return RawBenchmarkSamples(
-            benchmark_definition_digest=definition.digest,
-            workload_fingerprint=workload_digest,
-            hardware_fingerprint=hardware_fingerprint,
-            software_manifest_digest=software.digest,
-            samples=tuple(
-                RawBenchmarkSample(
-                    trial=index,
-                    seed=design.seed + index,
-                    value=value,
-                )
-                for index, value in enumerate(values)
-            ),
-        )
-
-    baseline_samples = samples_document(baseline_values)
-    baseline_artifact = _artifact(
-        output_directory,
-        "baseline-samples",
-        ArtifactRole.PERFORMANCE_SAMPLES,
-        baseline_samples.model_dump_json().encode(),
-        origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
-    )
-    artifacts.append(baseline_artifact)
-    candidate_samples = samples_document(candidate_values)
-    sample_artifact = _artifact(
-        output_directory,
-        "candidate-samples",
-        ArtifactRole.PERFORMANCE_SAMPLES,
-        candidate_samples.model_dump_json().encode(),
-        origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
-    )
-    artifacts.append(sample_artifact)
-    candidate_median = float(statistics.median(candidate_values))
-    baseline_median = float(statistics.median(baseline_values))
-    statistical_seed = design.seed ^ 0xB005_7A9
-    bootstrap_rounds = 2_000
-    confidence = 0.95
-    confidence_low, confidence_high = bootstrap_median_interval(
-        candidate_values,
-        seed=statistical_seed,
-        rounds=bootstrap_rounds,
-        confidence=confidence,
-    )
-    effect_size = (baseline_median - candidate_median) / baseline_median
-    regression_probability = paired_regression_probability(
-        baseline_values, candidate_values, objective="minimize"
-    )
-    practical_threshold = 0.05
-    if effect_size <= practical_threshold or regression_probability > 0.05:
-        raise ValueError("modeled performance evidence did not pass its declared acceptance gate")
-    performance = BenchmarkEvidence(
-        benchmark_id="local-service-model",
-        definition_artifact_id=definition.artifact_id,
-        raw_samples_artifact_id=sample_artifact.artifact_id,
-        software_manifest_artifact_id=software.artifact_id,
-        baseline_artifact_id=baseline_artifact.artifact_id,
-        workload_fingerprint=workload_digest,
-        hardware_fingerprint=hardware_fingerprint,
-        sample_count=len(candidate_values),
-        warmup_iterations=1,
-        repetitions=len(candidate_values),
-        randomized_run_order=True,
-        noise_floor=0.0,
-        summary=BenchmarkSummary(
-            metric="mean_request_completion_time",
-            unit="simulated_milliseconds",
-            objective="minimize",
-            tail_quantile=0.95,
-            median=candidate_median,
-            tail_percentile=_percentile(candidate_values, 0.95),
-            confidence_low=confidence_low,
-            confidence_high=confidence_high,
-            effect_size=effect_size,
-            regression_probability=regression_probability,
-            practical_significance_threshold=practical_threshold,
-        ),
-    )
-
     evidence_artifacts = {
         EvidenceClass.SEMANTIC: semantic,
         EvidenceClass.QUALITY: quality,
         EvidenceClass.RESOURCE: resource,
-        EvidenceClass.PERFORMANCE: sample_artifact,
+        EvidenceClass.PERFORMANCE: simulation_artifact,
         EvidenceClass.OPERATIONAL: operational,
     }
     issuers = {
@@ -888,7 +723,11 @@ def build_local_capsule(
             result=EvidenceResult.PASS,
             issuer=issuers[evidence_class],
             issuer_version="1.0.0",
-            artifact_ids=(artifact.artifact_id,),
+            artifact_ids=(
+                (artifact.artifact_id, rollback.artifact_id)
+                if evidence_class is EvidenceClass.OPERATIONAL
+                else (artifact.artifact_id,)
+            ),
             observed_at=observed_at,
             valid_until=valid_until,
             deterministic_seed=design.seed,
@@ -904,7 +743,7 @@ def build_local_capsule(
         ClaimCategory.SEMANTIC: "generated runtime matches the reference corpus and cancellation policy",
         ClaimCategory.QUALITY: "generated runtime achieves exact token match on the final local corpus",
         ClaimCategory.RESOURCE: "declared local champion/challenger coexistence fits the CPU memory contract",
-        ClaimCategory.PERFORMANCE: "candidate improves modeled completion latency in the declared deterministic simulator",
+        ClaimCategory.PERFORMANCE: "candidate-bound deterministic simulation completed; no performance improvement is accepted",
         ClaimCategory.OPERATIONAL: "candidate cancellation policy passes the declared bounded event schedule",
     }
     category_class = {
@@ -933,6 +772,7 @@ def build_local_capsule(
             level=levels[evidence_class],
             result=EvidenceResult.PASS,
             evidence_ids=(f"evidence:{evidence_class.value}",),
+            promotion_required=False,
         )
         for category, evidence_class in category_class.items()
     )
@@ -962,13 +802,13 @@ def build_local_capsule(
             ),
             evidence=evidence,
             claims=claims,
-            benchmarks=(performance,),
+            benchmarks=(),
             known_unsupported_cases=(
                 "hardware performance is not established by this local capsule",
                 "multi-node state transfer is not exercised",
             ),
             unverified_assumptions=(
-                "modeled 8 percent shared-state cost reduction requires hardware remeasurement",
+                "policy performance effects require independent repeated hardware or service benchmarking",
             ),
         )
     )
@@ -1003,9 +843,14 @@ def build_local_capsule(
             )
             for record in evidence
         ),
+        trusted_artifact_anchors=tuple(
+            TrustedArtifactAnchor(artifact_id=item.artifact_id, digest=item.digest)
+            for item in artifacts
+            if item.origin is ArtifactOrigin.TRUSTED
+        ),
         trusted_verifier_version="1.0.0",
         now=observed_at,
-        require_promotion_evidence=True,
+        require_promotion_evidence=False,
     )
     report = validate_capsule(capsule, output_directory, context)
     if not report.local_evolution_eligible:
@@ -1024,7 +869,7 @@ def build_local_capsule(
         promotion_eligible=False,
         local_evolution_eligible=True,
         external_production_eligible=False,
-        performance_scope="deterministic local service-model simulation",
+        performance_scope="candidate-bound deterministic simulation; no improvement claim",
         hardware_backed=False,
     )
 

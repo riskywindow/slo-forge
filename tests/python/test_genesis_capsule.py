@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -34,6 +36,7 @@ from sloforge.genesis.capsule import (
     TrustedArtifactAnchor,
     TrustedEvidenceAnchor,
     ValidationContext,
+    ValidationIssue,
     ValidationIssueCode,
     VerificationLevel,
     canonical_json,
@@ -42,6 +45,8 @@ from sloforge.genesis.capsule import (
     seal_capsule,
     validate_capsule,
 )
+from sloforge.genesis.capsule.validator import _validate_runtime_bundle
+from sloforge.genesis.capsule.validator import _performance_acceptance_failures
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
 OBSERVED = datetime(2025, 12, 1, tzinfo=UTC)
@@ -110,8 +115,8 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         hardware_fingerprint=hardware_hash,
         software_manifest_digest=software.digest,
         samples=(
-            RawBenchmarkSample(trial=0, seed=11, value=12.0),
-            RawBenchmarkSample(trial=1, seed=12, value=14.0),
+            RawBenchmarkSample(trial=0, seed=11, value=12.0, execution_ordinal=0),
+            RawBenchmarkSample(trial=1, seed=12, value=14.0, execution_ordinal=3),
         ),
     )
     baseline = _add_artifact(
@@ -127,8 +132,8 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         hardware_fingerprint=hardware_hash,
         software_manifest_digest=software.digest,
         samples=(
-            RawBenchmarkSample(trial=0, seed=11, value=9.0),
-            RawBenchmarkSample(trial=1, seed=12, value=11.0),
+            RawBenchmarkSample(trial=0, seed=11, value=9.0, execution_ordinal=2),
+            RawBenchmarkSample(trial=1, seed=12, value=11.0, execution_ordinal=1),
         ),
     )
     samples = _add_artifact(
@@ -146,7 +151,13 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         origin=ArtifactOrigin.GENERATED_UNTRUSTED,
     )
     deployment = _add_artifact(root, "deployment", ArtifactRole.DEPLOYMENT, b"deployment")
-    rollback = _add_artifact(root, "rollback", ArtifactRole.ROLLBACK, b"rollback")
+    rollback = _add_artifact(
+        root,
+        "rollback",
+        ArtifactRole.ROLLBACK,
+        b"rollback",
+        origin=ArtifactOrigin.TRUSTED,
+    )
     evidence_artifacts: dict[EvidenceClass, ArtifactRef] = {}
     role_by_class = {
         EvidenceClass.SEMANTIC: ArtifactRole.SEMANTIC_EVIDENCE,
@@ -366,6 +377,9 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
             )
             for record in evidence
         ),
+        trusted_artifact_anchors=(
+            TrustedArtifactAnchor(artifact_id=rollback.artifact_id, digest=rollback.digest),
+        ),
         trusted_verifier_version="1.0.0",
         now=NOW,
     )
@@ -384,6 +398,61 @@ def test_complete_capsule_is_promotion_eligible(tmp_path: Path) -> None:
     assert report.evidence_complete
     assert report.promotion_eligible
     assert report.issues == ()
+
+
+def test_truthful_high_regression_probability_cannot_pass_performance_gate() -> None:
+    summary = BenchmarkSummary(
+        metric="latency",
+        unit="milliseconds",
+        objective="minimize",
+        tail_quantile=0.95,
+        median=50.0,
+        tail_percentile=200.0,
+        confidence_low=50.0,
+        confidence_high=50.0,
+        effect_size=0.5,
+        regression_probability=2 / 7,
+        practical_significance_threshold=0.1,
+    )
+    failures = _performance_acceptance_failures(
+        summary,
+        baseline_median=100.0,
+        regression_probability=2 / 7,
+        threshold=0.1,
+    )
+    assert "paired regression probability gate" in failures
+
+
+def test_trusted_artifact_origin_requires_external_anchor(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    unanchored = context.model_copy(update={"trusted_artifact_anchors": ()})
+    report = validate_capsule(capsule, tmp_path, unanchored)
+    assert ValidationIssueCode.EVIDENCE_UNTRUSTED in {item.code for item in report.issues}
+    assert not report.local_evolution_eligible
+
+
+def test_runtime_bundle_entry_count_is_bounded_before_extraction(tmp_path: Path) -> None:
+    capsule, _context = _complete_capsule(tmp_path)
+    payload = io.BytesIO()
+    with zipfile.ZipFile(payload, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for index in range(4_097):
+            archive.writestr(f"entry-{index:04d}", b"")
+    path = tmp_path / "oversized-runtime.zip"
+    path.write_bytes(payload.getvalue())
+    artifact = ArtifactRef(
+        artifact_id="oversized-runtime",
+        role=ArtifactRole.GENERATED_RUNTIME,
+        origin=ArtifactOrigin.GENERATED_UNTRUSTED,
+        digest=_digest(payload.getvalue()),
+        size_bytes=len(payload.getvalue()),
+        path=path.name,
+        media_type="application/zip",
+    )
+    issues: list[ValidationIssue] = []
+    _validate_runtime_bundle(capsule, artifact, path, issues)
+    assert len(issues) == 1
+    assert issues[0].code is ValidationIssueCode.ARTIFACT_TAMPERED
+    assert "entry count" in issues[0].message
 
 
 def test_manifest_and_artifact_tampering_are_detected(tmp_path: Path) -> None:

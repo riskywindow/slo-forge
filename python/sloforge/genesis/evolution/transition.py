@@ -11,6 +11,7 @@ from ..capsule import (
     ArtifactOrigin,
     ArtifactRole,
     ClaimCategory,
+    EvidenceClass,
     EvidenceResult,
     GenesisCapsule,
     load_capsule,
@@ -50,6 +51,19 @@ def _resolved_artifact(
         raise ValueError(f"{role.value} artifact digest changed after capsule validation")
     if role is ArtifactRole.ROLLBACK and artifact.origin is not ArtifactOrigin.TRUSTED:
         raise ValueError("rollback artifact must be issued by the trusted compiler boundary")
+    if role is ArtifactRole.ROLLBACK and not any(
+        record.evidence_class is EvidenceClass.OPERATIONAL
+        and record.result is EvidenceResult.PASS
+        and artifact.artifact_id in record.artifact_ids
+        for record in capsule.evidence
+    ):
+        raise ValueError("rollback artifact is not bound to passing operational evidence")
+    if role is ArtifactRole.STATE_CONVERSION and not any(
+        record.result is EvidenceResult.PASS
+        and artifact.artifact_id in record.artifact_ids
+        for record in capsule.evidence
+    ):
+        raise ValueError("state conversion is not bound to passing verification evidence")
     return payload, digest
 
 
@@ -57,7 +71,6 @@ def _passed_claim(capsule: GenesisCapsule, category: ClaimCategory) -> bool:
     return any(
         claim.category is category
         and claim.result is EvidenceResult.PASS
-        and claim.promotion_required
         for claim in capsule.claims
     )
 
