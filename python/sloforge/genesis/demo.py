@@ -35,11 +35,13 @@ from sloforge.genesis.evolution import (
     IsolationMode,
     TransitionCategory,
     TriggerObservation,
+    local_gate_evidence_validator,
     run_local_evolution_fixture,
 )
 from sloforge.genesis.frontend import inspect_reference_package, load_reference_package
 from sloforge.genesis.ir import canonical_json, write_canonical
 from sloforge.genesis.kernel_lab import (
+    AttributionScope,
     BottleneckEvidence,
     EvidenceSource,
     KernelBenchmarkConfig,
@@ -74,10 +76,14 @@ class GenesisDemoResult(BaseModel):
     capsule_path: str
     capsule_digest: str
     capsule_promotion_eligible: bool
+    capsule_local_evolution_eligible: bool
+    capsule_external_production_eligible: bool
     redteam_finding_count: int
     redteam_replayed_count: int
     kernel_candidate_count: int
     kernel_speedup_claim_count: int
+    kernel_measurement_scope: str
+    kernel_causal_attribution: bool
     evolution_promoted: bool
     active_stream_preserved: bool
     physical_degradation_triggered: bool
@@ -140,14 +146,17 @@ def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
     raw = RawBottleneckRecord(
         operator_id="quantized-state-update",
         inclusive_cpu_time_ns=tuple(samples),
-        token_loop_fraction=fraction,
+        comparison_work_time_ns=tuple(other_samples),
+        operator_probe_fraction=fraction,
         seed=seed,
     )
     _write(path, raw)
     hardware_fingerprint = _local_hardware_fingerprint()
     return BottleneckEvidence(
-        evidence_id="cpu-profile-hybrid-quantized-state",
+        evidence_id="cpu-microprobe-hybrid-quantized-state",
         source=EvidenceSource.CPU_PROFILE_MEASURED,
+        attribution_scope=AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE,
+        causal_attribution=False,
         operator_id="quantized-state-update",
         genome_region="state.quantized_state",
         observed_fraction=fraction,
@@ -156,8 +165,10 @@ def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
         raw_evidence_path=str(path.resolve()),
         raw_evidence_sha256=sha256_file(path),
         hardware_fingerprint=f"cpu-{hardware_fingerprint[:12]}",
-        workload_fingerprint=hashlib.sha256(b"hybrid-quantized-state-token-loop").hexdigest(),
-        synthetic=False,
+        workload_fingerprint=hashlib.sha256(
+            b"synthetic-hybrid-quantized-state-operator-microprobe"
+        ).hexdigest(),
+        synthetic=True,
     )
 
 
@@ -371,9 +382,11 @@ def run_genesis_demo(
         ),
         active_stream_compatible=False,
     )
+    gate_evidence_root = output / "evolution/runtime-gates"
     controller = EvolutionController.initialize(
         store=EvolutionStore(output / "evolution/controller-state.json"),
         capsule_validator=validator,
+        gate_evidence_validator=local_gate_evidence_validator(gate_evidence_root),
         config=EvolutionConfig(
             execution_target=ExecutionTarget.LOCAL,
             minimum_shadow_samples=2,
@@ -396,7 +409,7 @@ def run_genesis_demo(
         controller,
         spec,
         start_at_ms=10,
-        evidence_directory=output / "evolution/runtime-gates",
+        evidence_directory=gate_evidence_root,
     )
     active_preserved = any(
         stream.stream_id == "active-stream-before-promotion"
@@ -442,12 +455,16 @@ def run_genesis_demo(
         capsule_path=capsule_result.capsule_path,
         capsule_digest=capsule_result.capsule_digest,
         capsule_promotion_eligible=capsule_result.promotion_eligible,
+        capsule_local_evolution_eligible=capsule_result.local_evolution_eligible,
+        capsule_external_production_eligible=capsule_result.external_production_eligible,
         redteam_finding_count=redteam.finding_count,
         redteam_replayed_count=redteam.reproduced_regressions,
         kernel_candidate_count=len(kernel.candidates),
         kernel_speedup_claim_count=sum(
             decision.status.value == "accepted" for decision in kernel.decisions
         ),
+        kernel_measurement_scope="isolated_operator_only_not_end_to_end_serving",
+        kernel_causal_attribution=bottleneck.causal_attribution,
         evolution_promoted=promoted.phase is EvolutionPhase.PROMOTED,
         active_stream_preserved=active_preserved,
         physical_degradation_triggered=degraded.active_trigger is not None,

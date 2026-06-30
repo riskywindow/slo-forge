@@ -24,9 +24,13 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> 
     assert result.minimized_counterexample_ids
     assert result.learned_constraint_ids
     assert not result.capsule_promotion_eligible
+    assert result.capsule_local_evolution_eligible
+    assert not result.capsule_external_production_eligible
     assert result.redteam_finding_count == result.redteam_replayed_count
     assert result.kernel_candidate_count == 2
     assert result.kernel_speedup_claim_count == 0
+    assert result.kernel_measurement_scope == "isolated_operator_only_not_end_to_end_serving"
+    assert not result.kernel_causal_attribution
     assert result.evolution_promoted
     assert result.active_stream_preserved
     assert result.physical_degradation_triggered

@@ -8,6 +8,7 @@ import os
 import platform
 import sys
 from pathlib import Path
+from typing import Literal
 
 from ..sandbox import SandboxTermination
 from ..verification import (
@@ -28,6 +29,21 @@ from .models import (
     KernelBenchmarkReport,
     KernelCandidate,
     LabStatus,
+)
+
+_REGIMES: tuple[
+    tuple[
+        str,
+        Literal[
+            "isolated_operator_microbenchmark",
+            "repeated_operator_loop_not_serving_end_to_end",
+        ],
+    ],
+    ...,
+] = (
+    ("micro_batch_1", "isolated_operator_microbenchmark"),
+    ("micro_noncontiguous", "isolated_operator_microbenchmark"),
+    ("operator_loop_batch_32", "repeated_operator_loop_not_serving_end_to_end"),
 )
 
 
@@ -58,7 +74,7 @@ def _benchmark_configuration(config: KernelBenchmarkConfig) -> dict[str, object]
             "token_steps": 0,
         },
         {
-            "regime": "token_loop_batch_32",
+            "regime": "operator_loop_batch_32",
             "case": batch_32.model_dump(mode="json"),
             "iterations": config.token_loop_iterations,
             "token_steps": config.token_steps,
@@ -73,8 +89,17 @@ def _benchmark_configuration(config: KernelBenchmarkConfig) -> dict[str, object]
     }
 
 
-def _fingerprints(configuration: dict[str, object]) -> tuple[str, str, tuple[str, ...]]:
-    encoded = json.dumps(configuration, sort_keys=True, separators=(",", ":")).encode()
+def _fingerprints(
+    configuration: dict[str, object], config: KernelBenchmarkConfig
+) -> tuple[str, str, tuple[str, ...]]:
+    encoded = json.dumps(
+        {
+            "execution": configuration,
+            "analysis": config.model_dump(mode="json"),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
     workload = hashlib.sha256(encoded).hexdigest()
     affinity = (
         ",".join(str(cpu) for cpu in sorted(os.sched_getaffinity(0)))
@@ -91,8 +116,19 @@ def _fingerprints(configuration: dict[str, object]) -> tuple[str, str, tuple[str
         f"cpu_affinity={affinity}",
         "timer=perf_counter_ns",
     )
-    hardware = "cpu:" + hashlib.sha256("|".join(manifest[2:4]).encode()).hexdigest()
+    hardware = _hardware_fingerprint_from_manifest(manifest)
     return workload, hardware, manifest
+
+
+def _hardware_fingerprint_from_manifest(manifest: tuple[str, ...]) -> str:
+    hardware_items = tuple(
+        item
+        for item in manifest
+        if item.startswith(("machine=", "system=", "logical_cpu_count=", "cpu_affinity="))
+    )
+    if len(hardware_items) != 4:
+        raise ValueError("CPU benchmark manifest is missing hardware provenance")
+    return "cpu:" + hashlib.sha256("|".join(hardware_items).encode()).hexdigest()
 
 
 def raw_samples_bytes(samples: tuple[BenchmarkSample, ...]) -> bytes:
@@ -101,91 +137,56 @@ def raw_samples_bytes(samples: tuple[BenchmarkSample, ...]) -> bytes:
     ).encode()
 
 
-def benchmark_candidate(
-    candidate: KernelCandidate,
-    source: str,
-    correctness: CorrectnessEvidence,
+def _regime_samples(
+    samples: tuple[BenchmarkSample, ...],
     *,
-    output_root: Path,
+    regime: str,
     config: KernelBenchmarkConfig,
-) -> KernelBenchmarkReport:
-    configuration = _benchmark_configuration(config)
-    workload, hardware, manifest = _fingerprints(configuration)
-    if correctness.status is not LabStatus.PASSED:
-        return KernelBenchmarkReport(
-            status=(
-                LabStatus.UNAVAILABLE
-                if correctness.status is LabStatus.UNAVAILABLE
-                else LabStatus.FAILED
-            ),
-            candidate=candidate,
-            deterministic_seed=config.deterministic_seed,
-            hardware_fingerprint=hardware,
-            software_manifest=manifest,
-            workload_fingerprint=workload,
-            raw_samples=(),
-            raw_samples_sha256=None,
-            regimes=(),
-            sandbox_termination="not_run_correctness_gate",
-            sandbox_backend=correctness.sandbox_backend,
+) -> tuple[tuple[BenchmarkSample, ...], tuple[float, ...], tuple[float, ...]]:
+    selected = tuple(
+        sorted(
+            (item for item in samples if item.regime == regime),
+            key=lambda item: item.order_index,
         )
-    termination, backend, raw = execute_benchmark_payload(
-        candidate,
-        source,
-        configuration,
-        output_root=output_root,
-        seed=config.deterministic_seed,
-        timeout_seconds=config.wall_time_seconds,
     )
-    if termination is not SandboxTermination.SUCCESS:
-        return KernelBenchmarkReport(
-            status=(
-                LabStatus.UNAVAILABLE
-                if termination is SandboxTermination.POLICY_UNAVAILABLE
-                else LabStatus.FAILED
-            ),
-            candidate=candidate,
-            deterministic_seed=config.deterministic_seed,
-            hardware_fingerprint=hardware,
-            software_manifest=manifest,
-            workload_fingerprint=workload,
-            raw_samples=(),
-            raw_samples_sha256=None,
-            regimes=(),
-            sandbox_termination=termination.value,
-            sandbox_backend=backend,
-        )
-    try:
-        samples = tuple(BenchmarkSample.model_validate(item, strict=True) for item in raw)
-    except ValueError:
-        samples = ()
-    if not samples:
-        return KernelBenchmarkReport(
-            status=LabStatus.FAILED,
-            candidate=candidate,
-            deterministic_seed=config.deterministic_seed,
-            hardware_fingerprint=hardware,
-            software_manifest=manifest,
-            workload_fingerprint=workload,
-            raw_samples=(),
-            raw_samples_sha256=None,
-            regimes=(),
-            sandbox_termination="invalid_benchmark_output",
-            sandbox_backend=backend,
-        )
+    expected_iterations = (
+        config.token_loop_iterations
+        if regime == "operator_loop_batch_32"
+        else config.micro_iterations
+    )
+    if len(selected) != config.repetitions * 2:
+        raise ValueError(f"{regime} does not contain every required raw sample")
+    if [item.order_index for item in selected] != list(range(config.repetitions * 2)):
+        raise ValueError(f"{regime} raw sample order is incomplete or duplicated")
+    if any(item.iterations != expected_iterations for item in selected):
+        raise ValueError(f"{regime} raw sample iteration count changed")
+    for alternative in ("reference", "candidate"):
+        trials = sorted(item.trial_index for item in selected if item.alternative == alternative)
+        if trials != list(range(config.repetitions)):
+            raise ValueError(f"{regime} {alternative} trial set is incomplete or duplicated")
+    reference = tuple(
+        float(item.duration_ns) for item in selected if item.alternative == "reference"
+    )
+    candidate = tuple(
+        float(item.duration_ns) for item in selected if item.alternative == "candidate"
+    )
+    return selected, reference, candidate
+
+
+def _build_regimes(
+    samples: tuple[BenchmarkSample, ...],
+    *,
+    config: KernelBenchmarkConfig,
+    workload: str,
+    hardware: str,
+    manifest: tuple[str, ...],
+) -> tuple[BenchmarkRegimeEvidence, ...]:
+    declared = {name for name, _scope in _REGIMES}
+    if {item.regime for item in samples} != declared:
+        raise ValueError("raw samples do not contain exactly the declared operator regimes")
     evidence: list[BenchmarkRegimeEvidence] = []
-    for regime in ("micro_batch_1", "micro_noncontiguous", "token_loop_batch_32"):
-        regime_samples = tuple(sample for sample in samples if sample.regime == regime)
-        reference = tuple(
-            float(sample.duration_ns)
-            for sample in regime_samples
-            if sample.alternative == "reference"
-        )
-        current = tuple(
-            float(sample.duration_ns)
-            for sample in regime_samples
-            if sample.alternative == "candidate"
-        )
+    for regime, scope in _REGIMES:
+        regime_samples, reference, current = _regime_samples(samples, regime=regime, config=config)
         contract = BenchmarkContract(
             benchmark_id=f"hybrid-qstate-{regime}",
             metric="duration_ns",
@@ -219,6 +220,7 @@ def benchmark_candidate(
         evidence.append(
             BenchmarkRegimeEvidence(
                 regime=regime,
+                measurement_scope=scope,
                 status=status,
                 warmup_count=config.warmup_count,
                 repetitions=config.repetitions,
@@ -235,66 +237,212 @@ def benchmark_candidate(
                 rationale=statistical.rationale,
             )
         )
-    aggregate = (
+    return tuple(evidence)
+
+
+def _aggregate_status(regimes: tuple[BenchmarkRegimeEvidence, ...]) -> LabStatus:
+    return (
         LabStatus.FAILED
-        if any(item.status is LabStatus.FAILED for item in evidence)
+        if any(item.status is LabStatus.FAILED for item in regimes)
         else LabStatus.PASSED
-        if all(item.status is LabStatus.PASSED for item in evidence)
+        if regimes and all(item.status is LabStatus.PASSED for item in regimes)
         else LabStatus.INCONCLUSIVE
     )
-    return KernelBenchmarkReport(
-        status=aggregate,
+
+
+def validate_benchmark_report(report: KernelBenchmarkReport) -> None:
+    """Independently reconstruct all statistical claims from embedded raw samples."""
+
+    config = report.benchmark_config
+    if report.deterministic_seed != config.deterministic_seed:
+        raise ValueError("benchmark report and analysis seeds differ")
+    configuration = _benchmark_configuration(config)
+    expected_workload, _current_hardware, _current_manifest = _fingerprints(configuration, config)
+    if report.workload_fingerprint != expected_workload:
+        raise ValueError("benchmark workload fingerprint is not reproducible")
+    recorded_hardware = _hardware_fingerprint_from_manifest(report.software_manifest)
+    if report.hardware_fingerprint != recorded_hardware:
+        raise ValueError("benchmark hardware fingerprint is not derived from its manifest")
+    if not report.raw_samples:
+        if report.regimes or report.raw_samples_sha256 is not None:
+            raise ValueError("unmeasured benchmark contains derived evidence")
+        if report.status in {LabStatus.PASSED, LabStatus.INCONCLUSIVE}:
+            raise ValueError("unmeasured benchmark cannot pass or be inconclusive")
+        return
+    digest = hashlib.sha256(raw_samples_bytes(report.raw_samples)).hexdigest()
+    if digest != report.raw_samples_sha256:
+        raise ValueError("benchmark raw sample digest mismatch")
+    rebuilt = _build_regimes(
+        report.raw_samples,
+        config=config,
+        workload=report.workload_fingerprint,
+        hardware=report.hardware_fingerprint,
+        manifest=report.software_manifest,
+    )
+    if rebuilt != report.regimes:
+        raise ValueError("benchmark regime claims are not derived from raw samples")
+    if _aggregate_status(rebuilt) is not report.status:
+        raise ValueError("benchmark aggregate status is not derived from its regimes")
+
+
+def benchmark_candidate(
+    candidate: KernelCandidate,
+    source: str,
+    correctness: CorrectnessEvidence,
+    *,
+    output_root: Path,
+    config: KernelBenchmarkConfig,
+) -> KernelBenchmarkReport:
+    configuration = _benchmark_configuration(config)
+    workload, hardware, manifest = _fingerprints(configuration, config)
+    if correctness.status is not LabStatus.PASSED:
+        return KernelBenchmarkReport(
+            status=(
+                LabStatus.UNAVAILABLE
+                if correctness.status is LabStatus.UNAVAILABLE
+                else LabStatus.FAILED
+            ),
+            candidate=candidate,
+            deterministic_seed=config.deterministic_seed,
+            benchmark_config=config,
+            hardware_fingerprint=hardware,
+            software_manifest=manifest,
+            workload_fingerprint=workload,
+            raw_samples=(),
+            raw_samples_sha256=None,
+            regimes=(),
+            sandbox_termination="not_run_correctness_gate",
+            sandbox_backend=correctness.sandbox_backend,
+        )
+    termination, backend, raw = execute_benchmark_payload(
+        candidate,
+        source,
+        configuration,
+        output_root=output_root,
+        seed=config.deterministic_seed,
+        timeout_seconds=config.wall_time_seconds,
+    )
+    if termination is not SandboxTermination.SUCCESS:
+        return KernelBenchmarkReport(
+            status=(
+                LabStatus.UNAVAILABLE
+                if termination is SandboxTermination.POLICY_UNAVAILABLE
+                else LabStatus.FAILED
+            ),
+            candidate=candidate,
+            deterministic_seed=config.deterministic_seed,
+            benchmark_config=config,
+            hardware_fingerprint=hardware,
+            software_manifest=manifest,
+            workload_fingerprint=workload,
+            raw_samples=(),
+            raw_samples_sha256=None,
+            regimes=(),
+            sandbox_termination=termination.value,
+            sandbox_backend=backend,
+        )
+    try:
+        samples = tuple(BenchmarkSample.model_validate(item, strict=True) for item in raw)
+    except ValueError:
+        samples = ()
+    if not samples:
+        return KernelBenchmarkReport(
+            status=LabStatus.FAILED,
+            candidate=candidate,
+            deterministic_seed=config.deterministic_seed,
+            benchmark_config=config,
+            hardware_fingerprint=hardware,
+            software_manifest=manifest,
+            workload_fingerprint=workload,
+            raw_samples=(),
+            raw_samples_sha256=None,
+            regimes=(),
+            sandbox_termination="invalid_benchmark_output",
+            sandbox_backend=backend,
+        )
+    try:
+        evidence = _build_regimes(
+            samples,
+            config=config,
+            workload=workload,
+            hardware=hardware,
+            manifest=manifest,
+        )
+    except ValueError:
+        return KernelBenchmarkReport(
+            status=LabStatus.FAILED,
+            candidate=candidate,
+            deterministic_seed=config.deterministic_seed,
+            benchmark_config=config,
+            hardware_fingerprint=hardware,
+            software_manifest=manifest,
+            workload_fingerprint=workload,
+            raw_samples=(),
+            raw_samples_sha256=None,
+            regimes=(),
+            sandbox_termination="invalid_benchmark_output",
+            sandbox_backend=backend,
+        )
+    report = KernelBenchmarkReport(
+        status=_aggregate_status(evidence),
         candidate=candidate,
         deterministic_seed=config.deterministic_seed,
+        benchmark_config=config,
         hardware_fingerprint=hardware,
         software_manifest=manifest,
         workload_fingerprint=workload,
         raw_samples=samples,
         raw_samples_sha256=hashlib.sha256(raw_samples_bytes(samples)).hexdigest(),
-        regimes=tuple(evidence),
+        regimes=evidence,
         sandbox_termination=termination.value,
         sandbox_backend=backend,
     )
+    validate_benchmark_report(report)
+    return report
 
 
 def decide_candidate(
     correctness: CorrectnessEvidence, benchmark: KernelBenchmarkReport
 ) -> CandidateDecision:
+    if correctness.candidate != benchmark.candidate:
+        raise ValueError("correctness and benchmark evidence refer to different candidates")
+    validate_benchmark_report(benchmark)
     by_name = {item.regime: item for item in benchmark.regimes}
     micro = by_name.get("micro_noncontiguous")
-    end_to_end = by_name.get("token_loop_batch_32")
+    operator_loop = by_name.get("operator_loop_batch_32")
     micro_status = micro.status if micro is not None else LabStatus.UNAVAILABLE
-    end_to_end_status = end_to_end.status if end_to_end is not None else LabStatus.UNAVAILABLE
+    operator_loop_status = (
+        operator_loop.status if operator_loop is not None else LabStatus.UNAVAILABLE
+    )
+    full_stack_status = LabStatus.UNAVAILABLE
     reasons = []
     if correctness.status is not LabStatus.PASSED:
         reasons.append("independent correctness gate did not pass")
     if micro_status is not LabStatus.PASSED:
         reasons.append("intended microbenchmark confidence gate did not pass")
-    if end_to_end_status is not LabStatus.PASSED:
-        reasons.append("end-to-end token-loop confidence gate did not pass")
+    if operator_loop_status is not LabStatus.PASSED:
+        reasons.append("repeated operator-loop confidence gate did not pass")
     if any(item.status is not LabStatus.PASSED for item in benchmark.regimes):
         reasons.append("not every declared supported benchmark regime passed")
     if any(item.status is LabStatus.FAILED for item in benchmark.regimes):
         reasons.append("at least one declared supported benchmark regime established a regression")
+    reasons.append(
+        "no end-to-end serving benchmark was executed; isolated operator evidence cannot promote"
+    )
     if correctness.status is LabStatus.UNAVAILABLE or benchmark.status is LabStatus.UNAVAILABLE:
         status = AcceptanceStatus.UNAVAILABLE
     elif correctness.status is LabStatus.FAILED or benchmark.status is LabStatus.FAILED:
         status = AcceptanceStatus.REJECTED
-    elif not reasons:
-        status = AcceptanceStatus.ACCEPTED
     else:
         status = AcceptanceStatus.INCONCLUSIVE
-    claim = (
-        "accepted within the declared CPU, shape, numerical, and measured workload scope"
-        if status is AcceptanceStatus.ACCEPTED
-        else "no speedup claim; candidate retained with negative or inconclusive evidence"
-    )
+    claim = "no speedup claim; isolated operator evidence is not end-to-end serving evidence"
     return CandidateDecision(
         candidate_id=correctness.candidate.candidate_id,
         status=status,
         correctness_status=correctness.status,
         microbenchmark_status=micro_status,
-        end_to_end_status=end_to_end_status,
+        operator_loop_status=operator_loop_status,
+        full_stack_status=full_stack_status,
         claim=claim,
-        reasons=tuple(reasons) or ("all promotion gates passed",),
+        reasons=tuple(reasons),
     )

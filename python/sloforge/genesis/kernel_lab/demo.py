@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
-from .benchmark import benchmark_candidate, decide_candidate, raw_samples_bytes
+from .benchmark import (
+    benchmark_candidate,
+    decide_candidate,
+    raw_samples_bytes,
+    validate_benchmark_report,
+)
 from .cases import generate_correctness_cases
 from .evidence import validate_bottleneck_evidence
 from .executor import execute_correctness
@@ -71,6 +77,12 @@ def run_kernel_lab_demo(
         )
         raw_path = candidate_root / "raw_samples.jsonl"
         raw_path.write_bytes(raw_samples_bytes(benchmark.raw_samples))
+        if (
+            benchmark.raw_samples_sha256 is not None
+            and hashlib.sha256(raw_path.read_bytes()).hexdigest() != benchmark.raw_samples_sha256
+        ):
+            raise RuntimeError("persisted kernel raw samples do not match their report")
+        validate_benchmark_report(benchmark)
     report = KernelLabReport(
         evidence=evidence,
         operator_schema=hybrid_quantized_state_schema(),
