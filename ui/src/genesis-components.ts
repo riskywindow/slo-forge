@@ -111,10 +111,30 @@ function verificationPanel(bundle: GenesisArtifactBundle): string {
 
 function benchmarkPanel(bundle: GenesisArtifactBundle): string {
   const benchmark = bundle.capsule.benchmarks[0];
-  if (benchmark === undefined) return "";
-  const baselineMedian = median(bundle.baseline_samples.samples.map(({ value }) => value));
-  const candidateMedian = median(bundle.candidate_samples.samples.map(({ value }) => value));
+  if (benchmark === undefined) {
+    const claim = bundle.capsule.claims.find(
+      ({ category, result }) => category === "performance" && result === "pass",
+    );
+    const simulation = bundle.performance_simulation;
+    const assumptions = claim?.scope.assumptions.join("; ") ?? "No performance scope supplied";
+    const completion = simulation?.events.at(-1)?.completion_units;
+    return `<section id="genesis-benchmark" class="panel-section">
+      ${heading("Performance evidence", "No accepted performance claim", claim?.statement ?? "This capsule carries no accepted benchmark comparison.")}
+      <article class="card benchmark-summary">
+        <span class="status-pill">Simulation only</span>
+        <dl class="definition-grid"><div><dt>Comparison</dt><dd>Not permitted</dd></div><div><dt>Hardware backed</dt><dd>No</dd></div><div><dt>Raw benchmark samples</dt><dd>None</dd></div><div><dt>Simulation events</dt><dd>${simulation?.events.length ?? 0}</dd></div><div><dt>Queue policy</dt><dd>${escapeHtml(simulation?.queue_policy ?? "unavailable")}</dd></div><div><dt>Completion units</dt><dd>${completion ?? "unavailable"}</dd></div></dl>
+        <p>${escapeHtml(assumptions)}. Capsule eligibility: ${bundle.summary.capsule_local_evolution_eligible ? "local evolution" : "not local-evolution eligible"}; ${bundle.summary.capsule_external_production_eligible ? "external production" : "not external-production eligible"}.</p>
+      </article>
+    </section>`;
+  }
+  const baselineSamples = bundle.baseline_samples;
+  const candidateSamples = bundle.candidate_samples;
   const definition = bundle.benchmark_definition;
+  if (baselineSamples === null || candidateSamples === null || definition === null) {
+    return `<section id="genesis-benchmark" class="panel-section">${heading("Performance evidence", "Benchmark evidence unavailable", "The capsule declares a benchmark but the required definition or raw samples are absent; no performance result is rendered.")}</section>`;
+  }
+  const baselineMedian = median(baselineSamples.samples.map(({ value }) => value));
+  const candidateMedian = median(candidateSamples.samples.map(({ value }) => value));
   const plot = intervalPlot([{
     label: "Candidate",
     lower: benchmark.summary.confidence_low,
@@ -125,7 +145,7 @@ function benchmarkPanel(bundle: GenesisArtifactBundle): string {
   return `<section id="genesis-benchmark" class="panel-section">
     ${heading("Performance evidence", "Raw samples and uncertainty stay attached", `${definition.benchmark_id} uses ${definition.repetitions} randomized-order repetitions after ${definition.warmup} warmup; it is ${definition.hardware_backed ? "hardware-backed" : "a deterministic simulator result, not hardware timing"}.`)}
     <div class="split-grid benchmark-evidence"><article class="card chart-card">${plot}</article><article class="card benchmark-summary">
-      <dl class="definition-grid"><div><dt>Baseline median</dt><dd>${baselineMedian.toFixed(3)}</dd></div><div><dt>Candidate median</dt><dd>${candidateMedian.toFixed(3)}</dd></div><div><dt>Effect size</dt><dd>${(benchmark.summary.effect_size * 100).toFixed(1)}%</dd></div><div><dt>Confidence</dt><dd>${(definition.confidence * 100).toFixed(0)}%</dd></div><div><dt>Raw samples</dt><dd>${bundle.baseline_samples.samples.length + bundle.candidate_samples.samples.length}</dd></div><div><dt>Unit</dt><dd>${escapeHtml(definition.unit)}</dd></div></dl>
+      <dl class="definition-grid"><div><dt>Baseline median</dt><dd>${baselineMedian.toFixed(3)}</dd></div><div><dt>Candidate median</dt><dd>${candidateMedian.toFixed(3)}</dd></div><div><dt>Effect size</dt><dd>${(benchmark.summary.effect_size * 100).toFixed(1)}%</dd></div><div><dt>Confidence</dt><dd>${(definition.confidence * 100).toFixed(0)}%</dd></div><div><dt>Raw samples</dt><dd>${baselineSamples.samples.length + candidateSamples.samples.length}</dd></div><div><dt>Unit</dt><dd>${escapeHtml(definition.unit)}</dd></div></dl>
       <p>${escapeHtml(bundle.capsule.hardware.restrictions.join("; "))}</p>
     </article></div>
   </section>`;

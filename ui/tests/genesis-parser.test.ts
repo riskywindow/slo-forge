@@ -14,6 +14,9 @@ describe("Genesis artifact parser", () => {
   it("accepts a cross-referenced artifact bundle", () => {
     const parsed = parseGenesisArtifactBundle(copyFixture());
     expect(parsed.summary.accepted_candidate_id).toBe("candidate-corrected");
+    expect(parsed.capsule.benchmarks).toEqual([]);
+    expect(parsed.baseline_samples).toBeNull();
+    expect(parsed.performance_simulation?.comparison_permitted).toBe(false);
     expect(parseArtifactDocument(copyFixture()).kind).toBe("genesis");
   });
 
@@ -48,23 +51,37 @@ describe("Genesis artifact parser", () => {
     );
   });
 
-  it("rejects benchmark provenance mismatches", () => {
+  it("rejects simulation identity mismatches", () => {
     const input = copyFixture() as {
-      candidate_samples: { hardware_fingerprint: { value: string } };
+      performance_simulation: { candidate_genome_hash: string };
     };
-    input.candidate_samples.hardware_fingerprint.value = "9".repeat(64);
+    input.performance_simulation.candidate_genome_hash = "9".repeat(64);
     expect(() => parseGenesisArtifactBundle(input)).toThrow(
-      "baseline and candidate hardware fingerprints must match",
+      "performance_simulation.candidate_genome_hash must match the accepted genome",
     );
   });
 
-  it("rejects workload provenance mismatches", () => {
+  it("rejects invented samples for an unbenchmarked capsule", () => {
     const input = copyFixture() as {
-      candidate_samples: { workload_fingerprint: { value: string } };
+      candidate_samples: unknown;
     };
-    input.candidate_samples.workload_fingerprint.value = "9".repeat(64);
+    input.candidate_samples = { samples: [] };
     expect(() => parseGenesisArtifactBundle(input)).toThrow(
-      "baseline and candidate workload fingerprints must match",
+      "unbenchmarked capsule must not expose benchmark definitions or samples",
+    );
+  });
+
+  it("rejects external eligibility without local eligibility", () => {
+    const input = copyFixture() as {
+      summary: {
+        capsule_external_production_eligible: boolean;
+        capsule_local_evolution_eligible: boolean;
+      };
+    };
+    input.summary.capsule_external_production_eligible = true;
+    input.summary.capsule_local_evolution_eligible = false;
+    expect(() => parseGenesisArtifactBundle(input)).toThrow(
+      "external capsule eligibility requires local evolution eligibility",
     );
   });
 });
