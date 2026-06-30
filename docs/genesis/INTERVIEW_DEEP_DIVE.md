@@ -32,7 +32,7 @@ An optional synthesis agent could propose code, but the implemented local path d
 
 ## The real counterexample story
 
-The local synthesis fixture proposes a high-upside deadline batching policy that checks cancellation too early. An independent simulator executes an actual request schedule and observes a committed token emitted after cancellation. Deterministic delta debugging reduces the failure to `admit, cancel, emit`. Genesis learns `cancel_check_before_emit == true`, persists the constraint, suppresses another member of the same unsafe family, and verifies a corrected candidate that changes both request and serving regions.
+The local synthesis fixture proposes a high-upside deadline batching policy that checks cancellation too early. An independent policy simulator executes an actual request schedule and observes cancelled work being scheduled for token commitment. Deterministic delta debugging reduces the failure to `admit, cancel, emit`. Genesis learns `cancel_check_before_emit == true`, persists the constraint, suppresses another member of the same unsafe family, and verifies a corrected candidate that changes both request and serving regions.
 
 The scope matters: this is bounded cancellation-protocol evidence, not universal program correctness or a claim of global algorithmic novelty.
 
@@ -44,9 +44,9 @@ This model abstracts packet networks, native memory ordering, tensor numerics, C
 
 ## GPU and performance position
 
-Kernel synthesis is evidence-targeted rather than an attempt to rewrite attention. The focused CPU lab targets the HybridDecoder quantized persistent-state update, generates restricted candidates, checks strides/aliasing/non-finite/boundary cases in the sandbox, retains randomized raw benchmark samples, and requires end-to-end token-loop improvement before a speed claim.
+Kernel synthesis is evidence-targeted rather than an attempt to rewrite attention. The focused CPU lab targets the HybridDecoder quantized persistent-state update from a measured synthetic microprobe, generates restricted candidates, checks strides/aliasing/non-finite/boundary cases in the sandbox, and retains randomized raw operator samples. The repeated operator loop is not end-to-end serving, so the CPU lab cannot promote a speedup claim without a separate full-stack gate.
 
-The standalone upstream-ready bundle preserves a negative local CPU benchmark: its validation-first implementation is slower than the scalar reference on the measured host. The capsule's positive performance statement is separate and explicitly modeled in a deterministic service simulator. Neither is a hardware-backed serving speedup. GPU/Triton paths remain fail-closed and unexercised without real hardware and opt-in.
+The standalone upstream-ready bundle preserves a negative local CPU microbenchmark: its validation-first implementation is slower than the scalar reference on the measured host. The local capsule records a candidate-bound deterministic feasibility simulation but explicitly accepts no performance-improvement claim. Neither artifact is a hardware-backed serving speedup. GPU/Triton paths remain fail-closed and unexercised without real hardware and opt-in.
 
 The multi-seed evaluation therefore leaves H2 (whole-stack performance), H4 (Autopsy-guided search efficiency), and H5 (lineage transfer efficiency) unevaluated. H7 and H9 have only local/scoped evidence. The mechanism demos are useful, but they do not substitute for the missing comparative campaigns.
 

@@ -191,6 +191,7 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
         ),
         baseline_genome_hash=canonical_hash(baseline),
         candidate_genome_hash=canonical_hash(lowered.genome),
+        trusted_transformations=lowered.transformations,
     )
     assert [transformation.transformation_id for _path, transformation in ordered] == [
         first.transformation_id,
@@ -202,7 +203,7 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
         second_transformation.model_copy(update={"parent_transformations": ()}),
         broken_path,
     )
-    with pytest.raises(ValueError, match="parent does not match"):
+    with pytest.raises(ValueError, match="trusted lowering derivation"):
         _validate_transformation_chain(
             [first_path, broken_path],
             transformation_ids=(
@@ -211,4 +212,5 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
             ),
             baseline_genome_hash=canonical_hash(baseline),
             candidate_genome_hash=canonical_hash(lowered.genome),
+            trusted_transformations=lowered.transformations,
         )

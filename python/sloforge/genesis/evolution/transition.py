@@ -59,8 +59,7 @@ def _resolved_artifact(
     ):
         raise ValueError("rollback artifact is not bound to passing operational evidence")
     if role is ArtifactRole.STATE_CONVERSION and not any(
-        record.result is EvidenceResult.PASS
-        and artifact.artifact_id in record.artifact_ids
+        record.result is EvidenceResult.PASS and artifact.artifact_id in record.artifact_ids
         for record in capsule.evidence
     ):
         raise ValueError("state conversion is not bound to passing verification evidence")
@@ -69,8 +68,7 @@ def _resolved_artifact(
 
 def _passed_claim(capsule: GenesisCapsule, category: ClaimCategory) -> bool:
     return any(
-        claim.category is category
-        and claim.result is EvidenceResult.PASS
+        claim.category is category and claim.result is EvidenceResult.PASS
         for claim in capsule.claims
     )
 

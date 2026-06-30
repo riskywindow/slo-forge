@@ -401,8 +401,7 @@ def local_gate_evidence_validator(
             )
             count = int(document["trace_request_count"])
             if (
-                document.get("schema_version")
-                != "sloforge.genesis.evolution.gate-evidence/v1"
+                document.get("schema_version") != "sloforge.genesis.evolution.gate-evidence/v1"
                 or document.get("stage") != observation.stage.value
                 or int(document["seed"]) != observation.deterministic_seed
                 or document.get("candidate_id") != candidate_id
@@ -456,18 +455,10 @@ def local_gate_evidence_validator(
                             "challenger_token_ids": list(observed_case.token_ids),
                         }
                     )
-            champion_ttft = _percentile(
-                [item.ttft_ns for item in champion.cases], 0.95
-            )
-            challenger_ttft = _percentile(
-                [item.ttft_ns for item in candidate.cases], 0.95
-            )
-            champion_tpot = _percentile(
-                [item.mean_tpot_ns for item in champion.cases], 0.99
-            )
-            challenger_tpot = _percentile(
-                [item.mean_tpot_ns for item in candidate.cases], 0.99
-            )
+            champion_ttft = _percentile([item.ttft_ns for item in champion.cases], 0.95)
+            challenger_ttft = _percentile([item.ttft_ns for item in candidate.cases], 0.95)
+            champion_tpot = _percentile([item.mean_tpot_ns for item in champion.cases], 0.99)
+            challenger_tpot = _percentile([item.mean_tpot_ns for item in candidate.cases], 0.99)
             if comparison != {
                 "mismatches": mismatches,
                 "error_count": errors,

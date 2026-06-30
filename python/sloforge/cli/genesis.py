@@ -32,12 +32,19 @@ from sloforge.genesis.capsule import (
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.evolution import (
     CapsuleReference,
+    ChallengerSpec,
     EvolutionConfig,
     EvolutionController,
     EvolutionPhase,
     EvolutionStore,
     ExecutionTarget,
+    GateStage,
+    IsolationContract,
+    IsolationMode,
+    TransitionCategory,
     TriggerObservation,
+    collect_local_gate_evidence,
+    local_gate_evidence_validator,
 )
 from sloforge.genesis.frontend import InspectionResult, inspect_reference_package
 from sloforge.genesis.frontend.package import load_reference_package
@@ -726,6 +733,25 @@ def _capsule_reference(
     )
 
 
+def _local_cli_evolution_config() -> EvolutionConfig:
+    return EvolutionConfig(
+        execution_target=ExecutionTarget.LOCAL,
+        minimum_shadow_samples=2,
+        minimum_canary_samples=3,
+        maximum_p95_ttft_ratio=10.0,
+        maximum_p99_tpot_ratio=10.0,
+    )
+
+
+def _default_capsule_context(manifest_path: Path) -> Path:
+    root = (
+        manifest_path.parent.parent
+        if manifest_path.parent.name == "manifests"
+        else manifest_path.parent
+    )
+    return root.with_name(f"{root.name}.validation-context.json")
+
+
 @genesis_app.command("deploy")
 def deploy_command(
     capsule: Annotated[Path, typer.Option("--capsule", exists=True)],
@@ -755,7 +781,7 @@ def deploy_command(
     controller = EvolutionController.initialize(
         store=EvolutionStore(state_path),
         capsule_validator=validator,
-        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+        config=_local_cli_evolution_config(),
         deployment_id=deployment_id,
         champion=reference,
         seed=seed,
@@ -786,8 +812,9 @@ def promote_command(
     mode: Annotated[Literal["canary"], typer.Option("--mode")] = "canary",
     event_id: Annotated[str, typer.Option("--event-id")] = "cli-promote",
     observed_at_ms: Annotated[int | None, typer.Option("--observed-at-ms", min=0)] = None,
+    gate_evidence_root: Annotated[Path | None, typer.Option("--gate-evidence-root")] = None,
 ) -> None:
-    """Promote only a locally persisted challenger with accepted shadow/canary gates."""
+    """Run or revalidate bounded local gates before a local-only promotion."""
 
     del mode
     document, _root, report = _validated_capsule(
@@ -796,15 +823,40 @@ def promote_command(
     manifest_path = _capsule_manifest(capsule)[0]
     reference = _capsule_reference(document, report, manifest_path)
 
+    store = EvolutionStore(controller_state)
+    persisted = store.load()
+    known_references = {
+        Path(item.path).resolve(): item
+        for item in (
+            persisted.champion,
+            *persisted.retained_capsules,
+            *(record.spec.capsule for record in persisted.challengers),
+        )
+    }
+    known_references[manifest_path.resolve()] = reference
+
     def validator(path: Path) -> CapsuleValidationReport:
-        if path.resolve() != manifest_path.resolve():
+        resolved = path.resolve()
+        if resolved == manifest_path.resolve():
+            return report
+        known = known_references.get(resolved)
+        if known is None:
             raise ValueError("promotion attempted to validate an untrusted capsule path")
-        return report
+        default_context = _default_capsule_context(resolved)
+        _document, _root, known_report = _validated_capsule(
+            resolved,
+            context=default_context,
+            expected_digest=known.capsule_digest,
+        )
+        return known_report
+
+    evidence_root = gate_evidence_root or controller_state.parent / "runtime-gates"
 
     controller = EvolutionController.restore(
-        store=EvolutionStore(controller_state),
+        store=store,
         capsule_validator=validator,
-        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+        gate_evidence_validator=local_gate_evidence_validator(evidence_root),
+        config=_local_cli_evolution_config(),
     )
     if controller.snapshot.phase is EvolutionPhase.PROMOTED:
         if controller.snapshot.champion.capsule_digest != reference.capsule_digest:
@@ -819,16 +871,85 @@ def promote_command(
             ),
             None,
         )
-        if selected is None or selected.spec.capsule.capsule_digest != reference.capsule_digest:
-            raise typer.BadParameter("capsule is not the controller's proof-gated challenger")
-        timestamp = (
-            controller.snapshot.last_observed_at_ms + 1
-            if observed_at_ms is None
-            else observed_at_ms
-        )
         try:
+            timestamp = (
+                controller.snapshot.last_observed_at_ms + 1
+                if observed_at_ms is None
+                else observed_at_ms
+            )
+            if selected is None:
+                if controller.snapshot.phase is EvolutionPhase.IDLE:
+                    controller.observe_trigger(
+                        TriggerObservation(
+                            event_id=f"{event_id}-trigger",
+                            observed_at_ms=timestamp,
+                            workload_js_divergence=1.0,
+                            detail="operator requested bounded local proof-gated promotion",
+                        )
+                    )
+                    timestamp += 1
+                if controller.snapshot.phase is not EvolutionPhase.EVOLVING:
+                    raise RuntimeError("controller cannot register a challenger in this phase")
+                isolation = controller_state.parent / "challenger-isolation"
+                isolation.mkdir(parents=True, exist_ok=True)
+                controller.register_challenger(
+                    ChallengerSpec(
+                        candidate_id=f"cli-{reference.capsule_id}",
+                        capsule=reference,
+                        transition_category=TransitionCategory.REQUEST_BOUNDARY_SWAP,
+                        isolation=IsolationContract(
+                            mode=IsolationMode.SANDBOX,
+                            writable_artifact_root=str(isolation.resolve()),
+                        ),
+                        active_stream_compatible=False,
+                    ),
+                    event_id=f"{event_id}-register",
+                    observed_at_ms=timestamp,
+                )
+                timestamp += 1
+                selected = next(
+                    item
+                    for item in controller.snapshot.challengers
+                    if item.spec.candidate_id == controller.snapshot.selected_candidate_id
+                )
+            if selected.spec.capsule.capsule_digest != reference.capsule_digest:
+                raise RuntimeError("capsule is not the controller's selected challenger")
+            if controller.snapshot.phase is EvolutionPhase.CHALLENGER_READY:
+                controller.begin_shadow(event_id=f"{event_id}-shadow", observed_at_ms=timestamp)
+                timestamp += 1
+            if controller.snapshot.phase is EvolutionPhase.SHADOWING:
+                shadow = collect_local_gate_evidence(
+                    champion=controller.snapshot.champion,
+                    challenger=selected.spec.capsule,
+                    candidate_id=selected.spec.candidate_id,
+                    stage=GateStage.SHADOW,
+                    sample_count=controller.config.minimum_shadow_samples,
+                    seed=controller.snapshot.seed,
+                    observed_at_ms=timestamp,
+                    output_directory=evidence_root / GateStage.SHADOW.value,
+                )
+                controller.record_gate(shadow)
+                timestamp += 1
+            if controller.snapshot.phase is EvolutionPhase.SHADOW_VALIDATED:
+                controller.begin_canary(event_id=f"{event_id}-canary", observed_at_ms=timestamp)
+                timestamp += 1
+            if controller.snapshot.phase is EvolutionPhase.CANARYING:
+                canary = collect_local_gate_evidence(
+                    champion=controller.snapshot.champion,
+                    challenger=selected.spec.capsule,
+                    candidate_id=selected.spec.candidate_id,
+                    stage=GateStage.CANARY,
+                    sample_count=controller.config.minimum_canary_samples,
+                    seed=controller.snapshot.seed,
+                    observed_at_ms=timestamp,
+                    output_directory=evidence_root / GateStage.CANARY.value,
+                )
+                controller.record_gate(canary)
+                timestamp += 1
+            if controller.snapshot.phase is not EvolutionPhase.READY_TO_PROMOTE:
+                raise RuntimeError("challenger did not reach the proof-gated promotion state")
             snapshot = controller.promote(event_id=event_id, observed_at_ms=timestamp)
-        except RuntimeError as error:
+        except (FileExistsError, RuntimeError, ValueError) as error:
             raise typer.BadParameter(str(error)) from error
     _json_result(
         {

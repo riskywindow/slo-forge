@@ -21,7 +21,7 @@ assert demo["runtime_differential_passed"] is True
 assert demo["cross_layer_accepted"] is True
 assert demo["rejected_candidate_ids"]
 assert demo["minimized_counterexample_ids"]
-assert demo["capsule_promotion_eligible"] is True
+assert demo["capsule_promotion_eligible"] is False
 assert demo["evolution_promoted"] is True
 assert demo["active_stream_preserved"] is True
 assert demo["hardware_backed"] is False
@@ -54,9 +54,13 @@ The headline artifacts are:
 - `artifacts/synthbench/smoke/summary.json`
 - `artifacts/synthbench/smoke/run/report.json`
 
-The demo's performance claim is a deterministic service-model simulation. Local CPU timing is
+The capsule records that its candidate-bound deterministic service-model simulation completed; it
+explicitly prohibits performance comparison and accepts no improvement claim. Local CPU timing is
 retained for the focused kernel experiment, but it does not become a serving speedup claim. The
-flagship report deliberately records `hardware_backed=false`.
+flagship report deliberately records `hardware_backed=false` and the capsule contains no fabricated
+benchmark samples.
+`capsule_promotion_eligible=false` means the capsule lacks Level-5 hardware-operational evidence;
+the separate local evolution flow remains eligible for isolated CPU shadow/canary replay only.
 
 ## Inspect, compile, and synthesize manually
 
@@ -158,7 +162,7 @@ else
 fi
 ```
 
-The verifier actually executes the unsafe request schedule, observes an emission after cancellation,
+The verifier actually executes the unsafe policy schedule, observes cancelled work being scheduled for token commitment,
 and minimizes the schedule to `admit, cancel, emit`. The learned
 `cancel_check_before_emit == true` precondition suppresses a repeated family member before Genesis
 selects the corrected request/serving candidate.
@@ -176,12 +180,9 @@ CAPSULE_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 uv run --locked sloforge genesis capsule build \
   --candidate "${DEMO_ROOT}/run/candidates/${ACCEPTED_ID}" \
   --timestamp "${CAPSULE_TIME}" \
+  --trust-output "${DEMO_ROOT}/operator-trust/validation_context.json" \
   --output "${DEMO_ROOT}/capsule" \
   > "${DEMO_ROOT}/capsule-build.json"
-
-mkdir -p "${DEMO_ROOT}/operator-trust"
-cp "${DEMO_ROOT}/capsule/validation_context.json" \
-  "${DEMO_ROOT}/operator-trust/validation_context.json"
 
 EXPECTED_CAPSULE_DIGEST=$(python - "${DEMO_ROOT}/capsule-build.json" <<'PY'
 import json
@@ -205,11 +206,12 @@ builder output is only a reproducible offline fixture.
 ## Evolution and evaluation scope
 
 The flagship demo evolves between two real, separately synthesized and independently validated
-capsules. It registers the second as an isolated challenger, supplies deterministic local shadow and
-canary observations bound to candidate/capsule/evidence digests and controller seed, revalidates
-immediately before promotion, preserves the active stream lease on the original champion, and retains
-the old capsule for rollback. It then records a **simulated** fabric-degradation trigger. This is not
-external traffic, physical link failure, or hardware state migration.
+capsules. It registers the second as an isolated challenger and runs each local shadow/canary trace
+against champion and challenger runtimes in the strict sandbox. The controller independently derives
+the gate metrics from the hashed raw observations, revalidates both gate artifacts immediately before
+promotion, preserves the active stream lease on the original champion, and retains the old capsule
+for rollback. It then records a **simulated** fabric-degradation trigger. This is not external traffic,
+physical link failure, or hardware state migration.
 
 Run the multi-seed hypothesis report with:
 
