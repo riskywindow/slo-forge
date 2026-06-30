@@ -154,6 +154,7 @@ def _runtime_bundle_bytes(
     policy_source = (candidate_directory / "policy.slo").read_bytes()
     admitted_policy = load_bytecode_document(policy)
     authenticate_bytecode_source(admitted_policy, policy_source)
+    tested_config_payload = (runtime_root / "runtime_config.json").read_bytes()
     config = _read_object(runtime_root / "runtime_config.json")
     config.update(
         {
@@ -166,7 +167,9 @@ def _runtime_bundle_bytes(
     entries: dict[str, bytes] = {
         "runtime.py": (runtime_root / "runtime.py").read_bytes(),
         "correctness_harness.py": (runtime_root / "correctness_harness.py").read_bytes(),
+        "deployment_manifest.json": (runtime_root / "deployment_manifest.json").read_bytes(),
         "runtime_config.json": canonical_json(config) + b"\n",
+        "tested_runtime_config.json": tested_config_payload,
         "policy.slo": policy_source,
         "policy.bytecode.json": policy,
     }
@@ -185,6 +188,7 @@ def _runtime_bundle_bytes(
         "trusted_launcher": "sloforge.genesis.sandbox.execute_sandboxed",
         "sandbox_argv": ["python", "runtime.py", "--seed", "<required>"],
         "direct_launch_supported": False,
+        "tested_runtime_config_sha256": hashlib.sha256(tested_config_payload).hexdigest(),
     }
     entries["bundle_manifest.json"] = canonical_json(manifest) + b"\n"
     output = io.BytesIO()

@@ -173,7 +173,9 @@ def _validate_runtime_bundle(
             required = {
                 "runtime.py",
                 "runtime_config.json",
+                "tested_runtime_config.json",
                 "correctness_harness.py",
+                "deployment_manifest.json",
                 "policy.slo",
                 "policy.bytecode.json",
                 "bundle_manifest.json",
@@ -183,6 +185,7 @@ def _validate_runtime_bundle(
                 raise ValueError(f"bundle is missing {sorted(required - set(names))}")
             manifest = json.loads(archive.read("bundle_manifest.json"))
             config = json.loads(archive.read("runtime_config.json"))
+            tested_config = json.loads(archive.read("tested_runtime_config.json"))
             package_manifest = json.loads(archive.read("reference_package/reference_package.json"))
             declared = manifest["entries"]
             actual_entries = set(names) - {"bundle_manifest.json"}
@@ -195,6 +198,16 @@ def _validate_runtime_bundle(
                 raise ValueError("bundle candidate genome does not match capsule identity")
             if config["genome_hash"] != capsule.identity.candidate_genome_hash.value:
                 raise ValueError("runtime config genome does not match capsule identity")
+            if manifest.get("direct_launch_supported") is not False:
+                raise ValueError("runtime bundle permits an untrusted direct launch")
+            if hashlib.sha256(
+                archive.read("tested_runtime_config.json")
+            ).hexdigest() != manifest.get("tested_runtime_config_sha256"):
+                raise ValueError("tested runtime configuration digest mismatch")
+            expected_config = dict(tested_config)
+            expected_config["reference_package_root"] = "reference_package"
+            if config != expected_config:
+                raise ValueError("packaged runtime configuration is not an audited root rewrite")
             if config["package_hash"] != capsule.identity.source_model_hash.value:
                 raise ValueError("runtime source package does not match capsule identity")
             policy_path = str(config["policy_bytecode_path"])
@@ -235,6 +248,56 @@ def _validate_policy_artifacts(resolved: dict[str, Path], issues: list[Validatio
             ValidationIssueCode.ARTIFACT_TAMPERED,
             "artifacts.generated-policy-bytecode",
             f"generated policy is malformed or unauthenticated: {error}",
+        )
+
+
+def _validate_runtime_test_binding(
+    capsule: GenesisCapsule,
+    resolved: dict[str, Path],
+    issues: list[ValidationIssue],
+) -> None:
+    """Bind packaged runtime bytes to the independently anchored differential run."""
+
+    bundles = [
+        artifact
+        for artifact in capsule.artifacts
+        if artifact.role is ArtifactRole.GENERATED_RUNTIME
+        and artifact.media_type == "application/zip"
+        and artifact.artifact_id in resolved
+    ]
+    quality_artifacts = [
+        artifact
+        for artifact in capsule.artifacts
+        if artifact.role is ArtifactRole.QUALITY_EVIDENCE and artifact.artifact_id in resolved
+    ]
+    if len(bundles) != 1 or len(quality_artifacts) != 1:
+        return
+    try:
+        quality = json.loads(resolved[quality_artifacts[0].artifact_id].read_text(encoding="utf-8"))
+        tested_hashes = quality["runtime_artifact_hashes"]
+        if not isinstance(tested_hashes, dict) or quality.get("passed") is not True:
+            raise ValueError("quality evidence omits a passing tested-runtime manifest")
+        entry_mapping = {
+            "runtime.py": "runtime.py",
+            "correctness_harness.py": "correctness_harness.py",
+            "deployment_manifest.json": "deployment_manifest.json",
+            "policy.bytecode.json": "policy.bytecode.json",
+            "policy.slo": "policy.slo",
+            "runtime_config.json": "tested_runtime_config.json",
+        }
+        with zipfile.ZipFile(resolved[bundles[0].artifact_id]) as archive:
+            for tested_name, bundle_name in entry_mapping.items():
+                expected = tested_hashes.get(tested_name)
+                if not isinstance(expected, str):
+                    raise ValueError(f"differential evidence omits {tested_name}")
+                if hashlib.sha256(archive.read(bundle_name)).hexdigest() != expected:
+                    raise ValueError(f"packaged {bundle_name} differs from tested {tested_name}")
+    except (KeyError, OSError, TypeError, ValueError, zipfile.BadZipFile) as error:
+        _append(
+            issues,
+            ValidationIssueCode.ARTIFACT_TAMPERED,
+            "artifacts.generated-runtime",
+            f"generated runtime is not the independently tested implementation: {error}",
         )
 
 
@@ -648,6 +711,7 @@ def validate_capsule(
             )
 
     _validate_policy_artifacts(resolved, issues)
+    _validate_runtime_test_binding(capsule, resolved, issues)
 
     evidence = {record.evidence_id: record for record in capsule.evidence}
     trust_anchors = {item.evidence_id: item for item in context.trusted_evidence_anchors}
