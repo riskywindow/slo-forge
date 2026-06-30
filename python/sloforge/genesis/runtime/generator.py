@@ -408,8 +408,18 @@ def load_generated_runtime(
     config_path: Path,
     *,
     seed: int,
+    allow_untrusted_in_process: bool = False,
 ) -> BaselineStreamingRuntime:
-    """Load a generated runtime after revalidating its source package hash."""
+    """Load a generated runtime only inside the sandbox or explicit test-only opt-in."""
+
+    if (
+        os.environ.get("SLOFORGE_GENESIS_SANDBOX_LAUNCH") != "sandbox-executor-v1"
+        and not allow_untrusted_in_process
+    ):
+        raise PermissionError(
+            "generated runtimes may be imported only by the Genesis sandbox executor; "
+            "allow_untrusted_in_process is reserved for explicit trusted tests"
+        )
 
     config = _load_config(config_path)
     package_root = Path(str(config["reference_package_root"]))

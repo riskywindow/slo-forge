@@ -61,8 +61,8 @@ def _tokens(runtime: BaselineStreamingRuntime, request_id: str) -> list[int]:
 def test_generated_runtime_streams_deterministically_and_releases_state(tmp_path: Path) -> None:
     output = _generated(tmp_path)
     config = output / "runtime_config.json"
-    first = load_generated_runtime(config, seed=73129)
-    second = load_generated_runtime(config, seed=73129)
+    first = load_generated_runtime(config, seed=73129, allow_untrusted_in_process=True)
+    second = load_generated_runtime(config, seed=73129, allow_untrusted_in_process=True)
     first.start()
     second.start()
     try:
@@ -80,7 +80,9 @@ def test_generated_runtime_streams_deterministically_and_releases_state(tmp_path
 
 def test_generated_application_exposes_health_metrics_and_bounded_manifest(tmp_path: Path) -> None:
     output = _generated(tmp_path)
-    runtime = load_generated_runtime(output / "runtime_config.json", seed=3)
+    runtime = load_generated_runtime(
+        output / "runtime_config.json", seed=3, allow_untrusted_in_process=True
+    )
     application = GeneratedRuntimeApplication(runtime)
     application.start()
     try:
@@ -127,7 +129,11 @@ def test_generated_correctness_harness_executes_reference_fixture(tmp_path: Path
         capture_output=True,
         text=True,
         timeout=15,
-        env={**os.environ, "PYTHONPATH": str(ROOT / "python")},
+        env={
+            **os.environ,
+            "PYTHONPATH": str(ROOT / "python"),
+            "SLOFORGE_GENESIS_SANDBOX_LAUNCH": "sandbox-executor-v1",
+        },
     )
 
     assert completed.returncode == 0, completed.stderr
@@ -153,6 +159,14 @@ def test_generated_runtime_refuses_untrusted_direct_launch(tmp_path: Path) -> No
     )
     assert completed.returncode == 78
     assert "trusted Genesis sandbox executor" in completed.stderr
+
+
+def test_generated_runtime_loader_requires_explicit_in_process_test_opt_in(
+    tmp_path: Path,
+) -> None:
+    output = _generated(tmp_path)
+    with pytest.raises(PermissionError, match="sandbox executor"):
+        load_generated_runtime(output / "runtime_config.json", seed=73129)
 
 
 def test_generated_subprocess_multiplexes_requests_and_cancellation(tmp_path: Path) -> None:
@@ -234,7 +248,9 @@ def test_runtime_detects_reference_source_tampering(tmp_path: Path) -> None:
     reference.write_text(reference.read_text(encoding="utf-8") + "\n# tampered\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="changed after runtime generation"):
-        load_generated_runtime(output / "runtime_config.json", seed=5)
+        load_generated_runtime(
+            output / "runtime_config.json", seed=5, allow_untrusted_in_process=True
+        )
 
 
 @pytest.mark.parametrize(
