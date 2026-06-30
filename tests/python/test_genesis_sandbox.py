@@ -15,8 +15,7 @@ from sloforge.genesis.sandbox import (
     detect_capabilities,
     execute_sandboxed,
 )
-from sloforge.genesis.sandbox.executor import _macos_firmlink_alias
-from sloforge.genesis.sandbox.executor import _process_group_rss_bytes
+from sloforge.genesis.sandbox.executor import _macos_firmlink_alias, _process_group_rss_bytes
 
 
 def test_macos_firmlink_aliases_are_symmetric() -> None:
