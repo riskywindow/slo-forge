@@ -32,6 +32,11 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 revision = sys.argv[2]
+final_report = root / "GENESIS_FINAL_REPORT.md"
+assert final_report.is_file()
+final_report_text = final_report.read_text(encoding="utf-8")
+assert "435a04799a831c3d19fce18eb816b206d23778d7" in final_report_text
+assert "## Known limitations and unmet evaluation gates" in final_report_text
 genesis = json.loads((root / "artifacts/genesis/demo/GENESIS_DEMO_REPORT.json").read_text())
 synthbench = json.loads((root / "artifacts/synthbench/smoke/summary.json").read_text())
 assert genesis["runtime_differential_passed"] is True
