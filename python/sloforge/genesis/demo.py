@@ -258,7 +258,10 @@ def run_genesis_demo(
     )
     synthesis = synthesize_local_run(run_directory, seed=seed, budget_usd=0.0)
     if synthesis.accepted_candidate_id is None or synthesis.accepted_genome_hash is None:
-        raise RuntimeError("local CEGIS produced no accepted candidate")
+        raise RuntimeError(
+            "local synthesis produced no candidate accepted by all downstream runtime, "
+            "model-check, and simulation gates"
+        )
     candidate_directory = run_directory / "candidates" / synthesis.accepted_candidate_id
     default_timestamp = datetime(2026, 1, 1, tzinfo=UTC) + timedelta(
         seconds=seed % (366 * 24 * 60 * 60)
@@ -481,11 +484,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=73129)
+    parser.add_argument(
+        "--runtime-seed",
+        type=int,
+        default=73129,
+        help="reference-model initialization seed bound to the fixed quality corpus",
+    )
     parser.add_argument("--reset", action="store_true")
     arguments = parser.parse_args(argv)
     result = run_genesis_demo(
         arguments.output,
         seed=arguments.seed,
+        runtime_seed=arguments.runtime_seed,
         reset=arguments.reset,
     )
     print(json.dumps(result.model_dump(mode="json"), sort_keys=True))

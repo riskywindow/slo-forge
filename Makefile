@@ -81,7 +81,7 @@ genesis-redteam-demo:
 	uv run --locked python -m sloforge.redteam.demo --output artifacts/genesis/redteam-demo --seed 73129
 
 genesis-evolution-demo:
-	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/evolution-demo --seed 73131 --reset
+	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/evolution-demo --seed 73131 --runtime-seed 73129 --reset
 
 synthbench-smoke:
 	uv run --locked python -m sloforge.synthbench.demo --output artifacts/synthbench/smoke --seed 73129 --count 2 --reset

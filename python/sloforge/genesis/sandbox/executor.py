@@ -105,7 +105,7 @@ def _is_credential_name(name: str) -> bool:
     return any(marker in upper for marker in _BLOCKED_ENVIRONMENT_MARKERS)
 
 
-def _sanitized_environment(request: SandboxRequest) -> dict[str, str]:
+def _sanitized_environment(request: SandboxRequest, output: Path) -> dict[str, str]:
     environment = {
         "PATH": "/usr/bin:/bin",
         "LANG": "C.UTF-8",
@@ -115,8 +115,8 @@ def _sanitized_environment(request: SandboxRequest) -> dict[str, str]:
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONNOUSERSITE": "1",
         "SLOFORGE_GENESIS_SANDBOX_LAUNCH": "sandbox-executor-v1",
-        "HOME": str(request.artifact_output_directory / "home"),
-        "TMPDIR": str(request.artifact_output_directory / "tmp"),
+        "HOME": str(output / "home"),
+        "TMPDIR": str(output / "tmp"),
     }
     for item in request.environment:
         if _is_credential_name(item.name):
@@ -515,7 +515,7 @@ def execute_sandboxed(request: SandboxRequest) -> SandboxResult:
         )
     try:
         working, read_only, output = _canonical_paths(request)
-        environment = _sanitized_environment(request)
+        environment = _sanitized_environment(request, output)
         command = _build_command(request, capabilities, working, read_only, output)
     except (OSError, ValueError) as exc:
         return _failure_result(

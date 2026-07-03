@@ -23,6 +23,7 @@ from sloforge.synthbench import (
     load_hidden_cases,
     run_cpu_benchmark,
     run_synthbench_demo,
+    validate_cpu_benchmark_report,
 )
 
 runner = CliRunner()
@@ -149,12 +150,13 @@ def test_special_case_detector_rejects_task_seed_commitment_and_hidden_shapes(
 
 
 def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_artifacts(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.chdir(tmp_path)
     tasks_root = tmp_path / "tasks"
     descriptors = generate_tasks(_configuration(count=2), tasks_root)
     task_directories = tuple(tasks_root / descriptor.task_id for descriptor in descriptors)
-    output = tmp_path / "run"
+    output = Path("run")
     configuration = CpuRunConfiguration(
         seeds=(101, 202),
         warmup_count=1,
@@ -222,6 +224,28 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
         (output / "report.json").read_bytes(), strict=True
     )
     assert reloaded == report
+    sandbox_requests = tuple((tmp_path / "run/sandbox").rglob("request-*.json"))
+    assert sandbox_requests
+    for request_path in sandbox_requests:
+        request_document = json.loads(request_path.read_text(encoding="utf-8"))
+        assert set(request_document) == {
+            "request_id",
+            "prompt_tokens",
+            "maximum_new_tokens",
+            "seed",
+        }
+    genesis_summary = next(
+        item for item in report.tasks[0].baselines if item.baseline is BaselineKind.GENESIS_FULL
+    )
+    assert genesis_summary.raw_samples_path is not None
+    generated_sample = RawCpuSample.model_validate_json(
+        Path(genesis_summary.raw_samples_path).read_bytes().splitlines()[0], strict=True
+    )
+    assert generated_sample.execution_evidence_path is not None
+    execution_evidence = Path(generated_sample.execution_evidence_path)
+    execution_evidence.write_bytes(execution_evidence.read_bytes() + b" ")
+    with pytest.raises(ValueError, match="execution evidence"):
+        validate_cpu_benchmark_report(report)
 
 
 def test_integrity_auditor_detects_discarded_sample(tmp_path: Path) -> None:
