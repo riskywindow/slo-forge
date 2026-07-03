@@ -120,7 +120,8 @@ def _controller(
     *,
     config: EvolutionConfig | None = None,
     validator: RecordingValidator | None = None,
-    gate_validator: Callable[[GateObservation, ChallengerSpec], bool] | None = None,
+    gate_validator: Callable[[GateObservation, ChallengerSpec, CapsuleReference], bool]
+    | None = None,
 ) -> tuple[EvolutionController, CapsuleReference, RecordingValidator, EvolutionStore]:
     champion = _capsule(tmp_path, "champion", "a")
     resolved_config = config or _config()
@@ -136,7 +137,8 @@ def _controller(
     controller = EvolutionController.initialize(
         store=store,
         capsule_validator=validator,
-        gate_evidence_validator=gate_validator or (lambda _observation, _challenger: True),
+        gate_evidence_validator=gate_validator
+        or (lambda _observation, _challenger, _champion: True),
         transition_compatibility_validator=lambda _champion, _challenger, category: (
             TransitionCompatibility(
                 compatible=category
@@ -326,7 +328,7 @@ def test_external_evolution_requires_level_five_and_trusted_gate_evidence(
     controller = EvolutionController.initialize(
         store=EvolutionStore(tmp_path / "external-controller.json"),
         capsule_validator=validator,
-        gate_evidence_validator=lambda _observation, _challenger: False,
+        gate_evidence_validator=lambda _observation, _challenger, _champion: False,
         config=config,
         deployment_id="external-test",
         champion=champion,
@@ -359,7 +361,7 @@ def test_local_evolution_rejects_untrusted_and_changed_gate_evidence(tmp_path: P
     accepted_digests: set[str] = set()
     controller, _, _, _ = _controller(
         tmp_path,
-        gate_validator=lambda observation, _challenger: (
+        gate_validator=lambda observation, _challenger, _champion: (
             observation.evidence_digest in accepted_digests
         ),
     )
@@ -379,6 +381,25 @@ def test_local_evolution_rejects_untrusted_and_changed_gate_evidence(tmp_path: P
     accepted_digests.remove(shadow.evidence_digest)
     with pytest.raises(EvolutionError, match="shadow evidence failed trusted revalidation"):
         controller.promote(event_id="promote", observed_at_ms=70)
+
+
+def test_promotion_revalidates_gates_against_current_champion(tmp_path: Path) -> None:
+    champion_digests: list[str] = []
+
+    def validate_gate(
+        _observation: GateObservation,
+        _challenger: ChallengerSpec,
+        champion: CapsuleReference,
+    ) -> bool:
+        champion_digests.append(champion.capsule_digest)
+        return True
+
+    controller, champion, _, _ = _controller(tmp_path, gate_validator=validate_gate)
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _ready_to_promote(controller, challenger)
+    controller.promote(event_id="promote", observed_at_ms=70)
+
+    assert champion_digests == [champion.capsule_digest] * 4
 
 
 def test_controller_refuses_an_unvalidated_bootstrap_champion(tmp_path: Path) -> None:
@@ -487,7 +508,7 @@ def test_restore_revalidates_every_active_stream_capsule(tmp_path: Path) -> None
         EvolutionController.restore(
             store=store,
             capsule_validator=validator,
-            gate_evidence_validator=lambda _observation, _challenger: True,
+            gate_evidence_validator=lambda _observation, _challenger, _champion: True,
             config=controller.config,
         )
 
@@ -616,7 +637,7 @@ def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None
     restored = EvolutionController.restore(
         store=store,
         capsule_validator=validator,
-        gate_evidence_validator=lambda _observation, _challenger: True,
+        gate_evidence_validator=lambda _observation, _challenger, _champion: True,
         config=controller.config,
     )
     duplicate = restored.begin_shadow(event_id="shadow", observed_at_ms=30)

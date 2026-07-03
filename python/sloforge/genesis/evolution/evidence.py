@@ -7,6 +7,7 @@ import json
 import shutil
 import stat
 import sys
+import tempfile
 import zipfile
 from collections.abc import Callable
 from pathlib import Path
@@ -172,7 +173,7 @@ def _execute_runtime(
     output: Path,
     *,
     seed: int,
-) -> tuple[_RuntimeObservation, dict[str, object]]:
+) -> tuple[_RuntimeObservation, dict[str, object], str]:
     runner = Path(__file__).with_name("runtime_evidence_runner.py").resolve(strict=True)
     repository_python = Path(__file__).resolve().parents[3]
     canonical_bundle = bundle.resolve(strict=True)
@@ -220,7 +221,8 @@ def _execute_runtime(
         raise RuntimeError(
             f"sandboxed capsule runtime evidence failed: {result.termination.value}: {result.stderr}"
         )
-    observation = _RuntimeObservation.model_validate_json(result_path.read_bytes(), strict=True)
+    observation_payload = result_path.read_bytes()
+    observation = _RuntimeObservation.model_validate_json(observation_payload, strict=True)
     if observation.seed != seed or observation.request_count != len(observation.cases):
         raise RuntimeError("runtime observation is inconsistent with its trusted invocation")
     sandbox: dict[str, object] = {
@@ -232,7 +234,32 @@ def _execute_runtime(
         "capabilities": result.capabilities.model_dump(mode="json"),
         "stderr": result.stderr,
     }
-    return observation, sandbox
+    return observation, sandbox, _sha256(observation_payload)
+
+
+def _semantic_observation(
+    observation: _RuntimeObservation,
+) -> tuple[tuple[str, int, tuple[int, ...], int, str | None], ...]:
+    """Return deterministic runtime semantics without host timing measurements."""
+
+    return tuple(
+        (
+            item.request_id,
+            item.request_seed,
+            item.token_ids,
+            item.token_count,
+            item.error,
+        )
+        for item in observation.cases
+    )
+
+
+def _read_bounded_regular_file(path: Path, *, maximum_bytes: int) -> bytes:
+    if path.is_symlink() or not path.is_file():
+        raise ValueError(f"evolution evidence must be a regular file: {path}")
+    if path.stat().st_size > maximum_bytes:
+        raise ValueError(f"evolution evidence exceeds its trusted bound: {path}")
+    return path.read_bytes()
 
 
 def _percentile(values: list[int], quantile: float) -> int:
@@ -269,10 +296,10 @@ def collect_local_gate_evidence(
     trace_payload = _trace_from_bundle(champion_bundle, count=sample_count, seed=seed, stage=stage)
     trace_path = output_directory / "trace.json"
     _write_once(trace_path, trace_payload)
-    champion_observation, champion_sandbox = _execute_runtime(
+    champion_observation, champion_sandbox, champion_observation_digest = _execute_runtime(
         champion_bundle, trace_path, output_directory / "champion", seed=seed
     )
-    challenger_observation, challenger_sandbox = _execute_runtime(
+    challenger_observation, challenger_sandbox, challenger_observation_digest = _execute_runtime(
         challenger_bundle, trace_path, output_directory / "challenger", seed=seed
     )
     champion_cases = {item.request_id: item for item in champion_observation.cases}
@@ -311,6 +338,8 @@ def collect_local_gate_evidence(
         "challenger_runtime_bundle_digest": challenger_bundle_digest,
         "trace_sha256": _sha256(trace_payload),
         "trace_request_count": sample_count,
+        "champion_observation_sha256": champion_observation_digest,
+        "challenger_observation_sha256": challenger_observation_digest,
         "champion_observation": champion_observation.model_dump(mode="json"),
         "challenger_observation": challenger_observation.model_dump(mode="json"),
         "champion_sandbox": champion_sandbox,
@@ -351,7 +380,7 @@ def collect_local_gate_evidence(
 
 def local_gate_evidence_validator(
     evidence_root: Path,
-) -> Callable[[GateObservation, ChallengerSpec], bool]:
+) -> Callable[[GateObservation, ChallengerSpec, CapsuleReference], bool]:
     """Return a fail-closed validator for artifacts emitted by local gate replay.
 
     The callback independently derives every gate metric from the bounded raw
@@ -361,14 +390,19 @@ def local_gate_evidence_validator(
 
     root = evidence_root.resolve()
 
-    def validate(observation: GateObservation, challenger: ChallengerSpec) -> bool:
+    def validate(
+        observation: GateObservation,
+        challenger: ChallengerSpec,
+        champion_reference: CapsuleReference,
+    ) -> bool:
         try:
             candidate_id = challenger.candidate_id
             capsule_digest = challenger.capsule.capsule_digest
-            path = root / observation.stage.value / "gate-evidence.json"
-            if path.is_symlink() or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024:
+            stage_root = root / observation.stage.value
+            if stage_root.is_symlink() or not stage_root.is_dir():
                 return False
-            payload = path.read_bytes()
+            path = stage_root / "gate-evidence.json"
+            payload = _read_bounded_regular_file(path, maximum_bytes=16 * 1024 * 1024)
             if _sha256(payload) != observation.evidence_digest:
                 return False
             document = json.loads(payload)
@@ -408,12 +442,39 @@ def local_gate_evidence_validator(
                 canonical_json(challenger_sandbox["capabilities"]), strict=True
             )
             count = int(document["trace_request_count"])
+            champion_observation_payload = _read_bounded_regular_file(
+                stage_root / "champion/runtime-observation.json",
+                maximum_bytes=8 * 1024 * 1024,
+            )
+            challenger_observation_payload = _read_bounded_regular_file(
+                stage_root / "challenger/runtime-observation.json",
+                maximum_bytes=8 * 1024 * 1024,
+            )
+            trace_payload = _read_bounded_regular_file(
+                stage_root / "trace.json", maximum_bytes=8 * 1024 * 1024
+            )
+            if (
+                _sha256(champion_observation_payload) != document.get("champion_observation_sha256")
+                or _sha256(challenger_observation_payload)
+                != document.get("challenger_observation_sha256")
+                or _sha256(trace_payload) != document.get("trace_sha256")
+            ):
+                return False
+            raw_champion = _RuntimeObservation.model_validate_json(
+                champion_observation_payload, strict=True
+            )
+            raw_challenger = _RuntimeObservation.model_validate_json(
+                challenger_observation_payload, strict=True
+            )
+            if raw_champion != champion or raw_challenger != candidate:
+                return False
             if (
                 document.get("schema_version") != "sloforge.genesis.evolution.gate-evidence/v1"
                 or document.get("stage") != observation.stage.value
                 or int(document["seed"]) != observation.deterministic_seed
                 or document.get("candidate_id") != candidate_id
                 or candidate_id != observation.candidate_id
+                or document.get("champion_capsule_digest") != champion_reference.capsule_digest
                 or document.get("challenger_capsule_digest") != capsule_digest
                 or capsule_digest != observation.capsule_digest
                 or document.get("hardware_backed") is not False
@@ -446,6 +507,47 @@ def local_gate_evidence_validator(
                 or any(item.token_count != len(item.token_ids) for item in candidate.cases)
             ):
                 return False
+            with tempfile.TemporaryDirectory(prefix="sloforge-gate-revalidation-") as temporary:
+                validation_root = Path(temporary)
+                current_champion_bundle, champion_bundle_digest = _extract_runtime(
+                    champion_reference, validation_root / "champion-bundle"
+                )
+                current_challenger_bundle, challenger_bundle_digest = _extract_runtime(
+                    challenger.capsule, validation_root / "challenger-bundle"
+                )
+                if (
+                    document.get("champion_runtime_bundle_digest") != champion_bundle_digest
+                    or document.get("challenger_runtime_bundle_digest") != challenger_bundle_digest
+                ):
+                    return False
+                expected_trace = _trace_from_bundle(
+                    current_champion_bundle,
+                    count=count,
+                    seed=observation.deterministic_seed,
+                    stage=observation.stage,
+                )
+                if trace_payload != expected_trace:
+                    return False
+                replayed_champion, _champion_replay_sandbox, _champion_replay_digest = (
+                    _execute_runtime(
+                        current_champion_bundle,
+                        stage_root / "trace.json",
+                        validation_root / "champion-replay",
+                        seed=observation.deterministic_seed,
+                    )
+                )
+                replayed_challenger, _challenger_replay_sandbox, _challenger_replay_digest = (
+                    _execute_runtime(
+                        current_challenger_bundle,
+                        stage_root / "trace.json",
+                        validation_root / "challenger-replay",
+                        seed=observation.deterministic_seed,
+                    )
+                )
+                if _semantic_observation(replayed_champion) != _semantic_observation(
+                    champion
+                ) or _semantic_observation(replayed_challenger) != _semantic_observation(candidate):
+                    return False
             errors = 0
             interrupted = 0
             mismatches: list[dict[str, object]] = []
@@ -492,7 +594,15 @@ def local_gate_evidence_validator(
                 observation.interrupted_streams,
             )
             return observed == expected
-        except (KeyError, OSError, TypeError, ValueError, ZeroDivisionError):
+        except (
+            KeyError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+            ZeroDivisionError,
+            zipfile.BadZipFile,
+        ):
             return False
 
     return validate
