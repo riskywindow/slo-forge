@@ -100,7 +100,7 @@ def run_command(
             "run_seeds": list(report.run_seeds),
             "valid_system_rate": report.metrics.valid_system_rate,
             "exact_request_rate": report.metrics.exact_request_rate,
-            "measured_cpu_seconds": report.metrics.measured_cpu_seconds,
+            "observed_request_wall_seconds": report.metrics.observed_request_wall_seconds,
             "hardware_backed": False,
             "system": system,
         }

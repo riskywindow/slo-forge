@@ -7,6 +7,8 @@ import io
 import json
 import os
 import subprocess
+import sys
+import tempfile
 import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -14,6 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from sloforge.genesis.frontend import load_reference_package
 from sloforge.genesis.ir import (
     CandidateSuccessState,
     Transformation,
@@ -23,11 +26,14 @@ from sloforge.genesis.ir import (
     load_transformation,
 )
 from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytecode_document
+from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
 from sloforge.genesis.search import CandidateDesign
 from sloforge.genesis.synthesis import (
     CancellationPolicyVerifier,
     CegisRunResult,
     ConstraintDocument,
+    bounded_candidate_modelcheck_document,
+    bounded_candidate_policy_property_document,
 )
 from sloforge.genesis.synthesis.lowering import lower_candidate
 
@@ -277,6 +283,75 @@ def _resource_evidence(
     }
 
 
+def _independent_runtime_differential(
+    runtime_directory: Path,
+    package_root: Path,
+    final_corpus: Path,
+    *,
+    seed: int,
+) -> dict[str, Any]:
+    """Replay the tested runtime and corpus through a fresh bounded sandbox."""
+
+    repository_python = Path(__file__).resolve().parents[3]
+    with tempfile.TemporaryDirectory(prefix="sloforge-capsule-replay-") as temporary:
+        sandbox_output = Path(temporary) / "artifacts"
+        result = execute_sandboxed(
+            SandboxRequest(
+                argv=(
+                    sys.executable,
+                    "correctness_harness.py",
+                    "--samples",
+                    str(final_corpus.resolve(strict=True)),
+                    "--seed",
+                    str(seed),
+                    "--timeout-seconds",
+                    "3",
+                ),
+                working_directory=runtime_directory.resolve(strict=True),
+                read_only_paths=(
+                    runtime_directory.resolve(strict=True),
+                    package_root.resolve(strict=True),
+                    repository_python,
+                    Path(sys.prefix),
+                    Path(sys.base_prefix),
+                ),
+                artifact_output_directory=sandbox_output,
+                seed=seed,
+                limits=SandboxLimits(
+                    wall_time_seconds=15.0,
+                    cpu_time_seconds=10,
+                    memory_bytes=2 * 1024 * 1024 * 1024,
+                    process_count=1,
+                    output_bytes=64 * 1024,
+                    artifact_bytes=1024 * 1024,
+                    artifact_entries=16,
+                    open_files=64,
+                ),
+            )
+        )
+        if not result.succeeded:
+            raise ValueError(
+                f"independent differential replay failed in the sandbox: {result.termination.value}"
+            )
+        try:
+            document = json.loads(result.stdout)
+        except (json.JSONDecodeError, TypeError) as error:
+            raise ValueError("independent differential replay returned invalid JSON") from error
+        if not isinstance(document, dict):
+            raise ValueError("independent differential replay must return an object")
+        cases = document.get("cases")
+        if (
+            document.get("passed") is not True
+            or not isinstance(cases, list)
+            or not cases
+            or any(
+                not isinstance(case, dict) or case.get("exact_match") is not True for case in cases
+            )
+        ):
+            raise ValueError("independent differential replay did not pass exact matching")
+        return document
+
+
 def _git_commit(repository: Path) -> str:
     marker = repository / ".sloforge-source-commit"
     if marker.is_file() and not marker.is_symlink():
@@ -427,17 +502,21 @@ def build_local_capsule(
     if not isinstance(measured_fingerprint, str):
         raise ValueError("hardware contract requires a measured_fingerprint distinct from its hash")
     hardware_fingerprint = Digest(value=measured_fingerprint)
-    package_root = Path(
-        str(
-            _read_object(run_directory / "generated_runtime/runtime_config.json")[
-                "reference_package_root"
-            ]
+    baseline_runtime_config = _read_object(run_directory / "generated_runtime/runtime_config.json")
+    package_root = Path(str(baseline_runtime_config["reference_package_root"]))
+    package = load_reference_package(package_root)
+    persisted_package_hashes = {
+        str(manifest.get("package_hash")),
+        str(baseline_runtime_config.get("package_hash")),
+    }
+    if persisted_package_hashes != {package.package_hash}:
+        raise ValueError(
+            "reference package identity changed after inspection or runtime generation"
         )
-    )
     package_manifest = _read_object(package_root / "reference_package.json")
     tokenizer_path = package_root / str(package_manifest["tokenizer_module"])
     tokenizer_digest = _digest(tokenizer_path.read_bytes())
-    source_digest = Digest(value=str(manifest["package_hash"]))
+    source_digest = Digest(value=package.package_hash)
     genome_document = json.loads(
         (candidate_directory / "inference_genome.json").read_text(encoding="utf-8")
     )
@@ -624,6 +703,41 @@ def build_local_capsule(
     cases = differential.get("cases")
     if not isinstance(cases, list) or not cases:
         raise ValueError("differential evidence has no replayable cases")
+    runtime_config = _read_object(candidate_runtime / "runtime_config.json")
+    if (
+        runtime_config.get("package_hash") != package.package_hash
+        or Path(str(runtime_config.get("reference_package_root"))).resolve()
+        != package_root.resolve()
+    ):
+        raise ValueError("candidate runtime is bound to another reference package")
+    replay = _independent_runtime_differential(
+        candidate_runtime,
+        package_root,
+        final_corpus,
+        seed=int(runtime_config["generation_seed"]),
+    )
+    if replay.get("cases") != cases or replay.get("failures", []) != differential.get(
+        "failures", []
+    ):
+        raise ValueError("differential evidence does not match independent sandbox replay")
+    corpus_cases = [
+        json.loads(line)
+        for line in final_corpus.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    if len(corpus_cases) != len(cases):
+        raise ValueError("differential evidence does not cover the complete final corpus")
+    for ordinal, (case, corpus_case) in enumerate(zip(cases, corpus_cases, strict=True), start=1):
+        if (
+            not isinstance(case, dict)
+            or not isinstance(corpus_case, dict)
+            or case.get("line") != ordinal
+            or case.get("request_seed") != corpus_case.get("seed")
+            or case.get("expected") != corpus_case.get("expected_tokens")
+            or case.get("observed") != corpus_case.get("expected_tokens")
+            or case.get("exact_match") is not True
+        ):
+            raise ValueError("differential case is not bound to its final-corpus oracle")
     exact_count = sum(isinstance(case, dict) and case.get("exact_match") is True for case in cases)
     observed_quality = exact_count / len(cases)
     if differential.get("passed") is not True or observed_quality != 1.0:
@@ -647,7 +761,6 @@ def build_local_capsule(
     )
     artifacts.append(quality)
     memory_capacity = int(hardware_document.get("memory_bytes", 8 * 1024**3))
-    runtime_config = _read_object(candidate_runtime / "runtime_config.json")
     resource_document = _resource_evidence(
         runtime_config,
         genome_document,
@@ -668,15 +781,13 @@ def build_local_capsule(
     artifacts.append(resource)
     modelcheck_path = candidate_directory / "evidence/modelcheck-result.json"
     modelcheck_document = _read_object(modelcheck_path)
-    if (
-        modelcheck_document.get("candidate_id") != candidate.candidate_id
-        or modelcheck_document.get("policy_bytecode_sha256") != policy_digest
-        or modelcheck_document.get("result") != "pass"
-        or modelcheck_document.get("universal_proof") is not False
-        or not isinstance(modelcheck_document.get("state_count"), int)
-        or int(modelcheck_document["state_count"]) <= 0
-    ):
-        raise ValueError("candidate bounded model-check evidence is invalid or misbound")
+    expected_modelcheck = bounded_candidate_modelcheck_document(design, seed=int(synthesis["seed"]))
+    if canonical_json(modelcheck_document) != canonical_json(expected_modelcheck):
+        raise ValueError(
+            "model-check evidence does not match the independently recomputed bounded result"
+        )
+    if modelcheck_document.get("result") != "pass":
+        raise ValueError("candidate bounded model-check result is not passing")
     operational = _copy_artifact(
         output_directory,
         "operational-evidence",
@@ -687,6 +798,27 @@ def build_local_capsule(
         media_type="application/json",
     )
     artifacts.append(operational)
+    property_path = candidate_directory / "evidence/property-result.json"
+    property_document = _read_object(property_path)
+    expected_property = bounded_candidate_policy_property_document(
+        design, seed=int(synthesis["seed"])
+    )
+    if canonical_json(property_document) != canonical_json(expected_property):
+        raise ValueError(
+            "policy property evidence does not match the independently recomputed result"
+        )
+    if property_document.get("result") != "pass":
+        raise ValueError("candidate bounded property result is not passing")
+    property_artifact = _copy_artifact(
+        output_directory,
+        "policy-property-evidence",
+        ArtifactRole.PROPERTY_TEST_RESULT,
+        property_path,
+        origin=ArtifactOrigin.FORMAL_OR_BOUNDED_EVIDENCE,
+        suffix=".json",
+        media_type="application/json",
+    )
+    artifacts.append(property_artifact)
     simulation_path = candidate_directory / "evidence/simulation-result.json"
     simulation_document = _read_object(simulation_path)
     runtime_manifest_path = candidate_runtime / "candidate_runtime_manifest.json"
@@ -751,6 +883,7 @@ def build_local_capsule(
         EvidenceClass.RESOURCE: resource,
         EvidenceClass.PERFORMANCE: simulation_artifact,
         EvidenceClass.OPERATIONAL: operational,
+        EvidenceClass.PROPERTY_TEST: property_artifact,
     }
     issuers = {
         EvidenceClass.SEMANTIC: EvidenceIssuer.OPERATOR_VERIFIER,
@@ -758,13 +891,15 @@ def build_local_capsule(
         EvidenceClass.RESOURCE: EvidenceIssuer.RESOURCE_ANALYZER,
         EvidenceClass.PERFORMANCE: EvidenceIssuer.BENCHMARK_HARNESS,
         EvidenceClass.OPERATIONAL: EvidenceIssuer.MODEL_CHECKER,
+        EvidenceClass.PROPERTY_TEST: EvidenceIssuer.PROPERTY_HARNESS,
     }
     levels = {
         EvidenceClass.SEMANTIC: VerificationLevel.DIFFERENTIAL,
         EvidenceClass.QUALITY: VerificationLevel.DIFFERENTIAL,
         EvidenceClass.RESOURCE: VerificationLevel.PROPERTY,
         EvidenceClass.PERFORMANCE: VerificationLevel.PROPERTY,
-        EvidenceClass.OPERATIONAL: VerificationLevel.PROPERTY,
+        EvidenceClass.OPERATIONAL: VerificationLevel.BOUNDED_EXHAUSTIVE,
+        EvidenceClass.PROPERTY_TEST: VerificationLevel.BOUNDED_EXHAUSTIVE,
     }
     valid_until = observed_at + timedelta(days=30)
     evidence = tuple(

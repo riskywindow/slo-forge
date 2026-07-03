@@ -170,6 +170,7 @@ class BaselineKind(StrEnum):
 
 class BaselineStatus(StrEnum):
     MEASURED = "measured"
+    SURROGATE = "surrogate"
     FAILED = "failed"
     NOT_APPLICABLE = "not_applicable"
 
@@ -231,18 +232,18 @@ class BaselineSummary(SynthBenchModel):
     p95_latency_ns: NonNegativeFloat
     median_ttft_ns: NonNegativeFloat
     median_inter_token_ns: NonNegativeFloat
-    measured_cpu_seconds: NonNegativeFloat
+    observed_request_wall_seconds: NonNegativeFloat
     candidate_count: NonNegativeInt
     human_authored_model_specific_lines: NonNegativeInt
 
     @model_validator(mode="after")
     def evidence_matches_status(self) -> Self:
-        measured = self.status is BaselineStatus.MEASURED
-        if measured != (self.raw_samples_path is not None):
-            raise ValueError("measured baseline status and raw sample path must agree")
-        if measured != (self.raw_samples_sha256 is not None):
-            raise ValueError("measured baseline status and raw sample digest must agree")
-        if measured == (self.execution_surface == "not_applicable"):
+        executed = self.status in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}
+        if executed != (self.raw_samples_path is not None):
+            raise ValueError("executed baseline status and raw sample path must agree")
+        if executed != (self.raw_samples_sha256 is not None):
+            raise ValueError("executed baseline status and raw sample digest must agree")
+        if executed == (self.execution_surface == "not_applicable"):
             raise ValueError("baseline execution surface does not match its status")
         return self
 
@@ -308,17 +309,19 @@ class HiddenEvaluationSummary(SynthBenchModel):
 
     @model_validator(mode="after")
     def evidence_matches_status(self) -> Self:
-        measured = self.status is BaselineStatus.MEASURED
-        if measured != (self.evidence_path is not None):
-            raise ValueError("measured hidden status and evidence path must agree")
-        if measured != (self.evidence_sha256 is not None):
-            raise ValueError("measured hidden status and evidence digest must agree")
+        executed = self.status in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}
+        if executed != (self.evidence_path is not None):
+            raise ValueError("executed hidden status and evidence path must agree")
+        if executed != (self.evidence_sha256 is not None):
+            raise ValueError("executed hidden status and evidence digest must agree")
         return self
 
 
 class TaskRunReport(SynthBenchModel):
     task_id: Identifier
     task_hash: Sha256
+    task_descriptor_path: NonEmpty
+    task_descriptor_sha256: Sha256
     public_package_hash: Sha256
     reference_package_hash: Sha256
     task_generation_seed: NonNegativeInt
@@ -335,10 +338,11 @@ class TaskRunReport(SynthBenchModel):
 
 class AggregateMetrics(SynthBenchModel):
     measured_baseline_runs: NonNegativeInt
+    surrogate_baseline_runs: NonNegativeInt
     unavailable_baseline_runs: NonNegativeInt
     valid_system_rate: Annotated[float, Field(ge=0.0, le=1.0)]
     exact_request_rate: Annotated[float, Field(ge=0.0, le=1.0)]
-    measured_cpu_seconds: NonNegativeFloat
+    observed_request_wall_seconds: NonNegativeFloat
     task_count: NonNegativeInt
     distinct_task_seeds: NonNegativeInt
 
@@ -355,7 +359,7 @@ class SynthBenchReport(SynthBenchModel):
         values = (
             self.metrics.valid_system_rate,
             self.metrics.exact_request_rate,
-            self.metrics.measured_cpu_seconds,
+            self.metrics.observed_request_wall_seconds,
         )
         if not all(math.isfinite(value) for value in values):
             raise ValueError("aggregate metrics must be finite")

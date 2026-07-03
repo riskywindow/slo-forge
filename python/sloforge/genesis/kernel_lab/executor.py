@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -34,7 +36,7 @@ def _write_bundle(
     candidate: KernelCandidate,
     source: str,
     configuration: dict[str, object],
-) -> tuple[Path, Path, Path]:
+) -> tuple[Path, Path, Path, Path]:
     source_root = root / "source"
     source_root.mkdir(parents=True, exist_ok=True)
     candidate_path = source_root / "candidate.py"
@@ -46,7 +48,7 @@ def _write_bundle(
     config_path.write_text(
         json.dumps(configuration, sort_keys=True, separators=(",", ":")), encoding="utf-8"
     )
-    return source_root, candidate_path, config_path
+    return source_root, candidate_path, config_path, runner_path
 
 
 def _sandbox_request(
@@ -144,7 +146,7 @@ def execute_correctness(
         "mode": "correctness",
         "cases": [case.model_dump(mode="json") for case in cases],
     }
-    source_root, candidate_path, config_path = _write_bundle(
+    source_root, candidate_path, config_path, runner_path = _write_bundle(
         output_root, candidate, source, configuration
     )
     sandbox_output = output_root / "artifacts"
@@ -270,7 +272,82 @@ def execute_correctness(
         sandbox_termination=result.termination.value,
         sandbox_backend=result.capabilities.backend.value,
         assumptions=assumptions,
+        candidate_source_path=str(candidate_path.resolve()),
+        candidate_source_sha256=hashlib.sha256(candidate_path.read_bytes()).hexdigest(),
+        cases_config_path=str(config_path.resolve()),
+        cases_config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+        runner_path=str(runner_path.resolve()),
+        runner_sha256=hashlib.sha256(runner_path.read_bytes()).hexdigest(),
+        runner_output_path=str(result_path.resolve()),
+        runner_output_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
     )
+
+
+def validate_correctness_evidence(evidence: CorrectnessEvidence) -> None:
+    """Reopen and independently replay passing generated-kernel correctness evidence."""
+
+    if evidence.status is not LabStatus.PASSED:
+        return
+    identities = (
+        (evidence.candidate_source_path, evidence.candidate_source_sha256),
+        (evidence.cases_config_path, evidence.cases_config_sha256),
+        (evidence.runner_path, evidence.runner_sha256),
+        (evidence.runner_output_path, evidence.runner_output_sha256),
+    )
+    paths: list[Path] = []
+    for path_value, digest in identities:
+        if path_value is None or digest is None:
+            raise ValueError("passing kernel correctness evidence omits raw artifact identity")
+        path = Path(path_value)
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("kernel correctness raw artifact is unavailable")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError("kernel correctness raw artifact changed after execution")
+        paths.append(path)
+    source_path, config_path, runner_path, result_path = paths
+    source = source_path.read_text(encoding="utf-8")
+    if hashlib.sha256(source.encode()).hexdigest() != evidence.candidate.source_sha256:
+        raise ValueError("kernel correctness source is not bound to its candidate")
+    trusted_runner = Path(__file__).with_name("sandbox_runner.py")
+    if runner_path.read_bytes() != trusted_runner.read_bytes():
+        raise ValueError("kernel correctness used an unrecognized sandbox runner")
+    configuration = json.loads(config_path.read_text(encoding="utf-8"))
+    if not isinstance(configuration, dict) or configuration.get("mode") != "correctness":
+        raise ValueError("kernel correctness configuration has an invalid mode")
+    cases_value = configuration.get("cases")
+    if not isinstance(cases_value, list):
+        raise ValueError("kernel correctness configuration omits cases")
+    cases = tuple(
+        KernelCase.model_validate_json(json.dumps(item), strict=True) for item in cases_value
+    )
+    _RunnerOutput.model_validate_json(result_path.read_bytes(), strict=True)
+    with tempfile.TemporaryDirectory(prefix="sloforge-kernel-replay-") as temporary:
+        replay = execute_correctness(
+            evidence.candidate,
+            source,
+            cases,
+            output_root=Path(temporary),
+            seed=evidence.deterministic_seed,
+        )
+    semantic_fields = (
+        "status",
+        "candidate",
+        "deterministic_seed",
+        "source_allowlist_valid",
+        "cases_executed",
+        "edge_cases",
+        "randomized_cases",
+        "stride_cases",
+        "noncontiguous_cases",
+        "nonfinite_cases",
+        "alias_cases",
+        "mismatches",
+        "sandbox_termination",
+        "sandbox_backend",
+        "assumptions",
+    )
+    if any(getattr(replay, field) != getattr(evidence, field) for field in semantic_fields):
+        raise ValueError("kernel correctness evidence does not match independent replay")
 
 
 def execute_benchmark_payload(
@@ -285,7 +362,7 @@ def execute_benchmark_payload(
     diagnostics = validate_generated_source(candidate, source)
     if diagnostics:
         return SandboxTermination.SANDBOX_VIOLATION, "not_run", ()
-    source_root, candidate_path, config_path = _write_bundle(
+    source_root, candidate_path, config_path, _runner_path = _write_bundle(
         output_root, candidate, source, configuration
     )
     request, result_path = _sandbox_request(

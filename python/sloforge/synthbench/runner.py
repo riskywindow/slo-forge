@@ -228,6 +228,12 @@ class _GenesisExecutor:
                 "sandboxed generated runtime failed: "
                 f"{result.termination.value}: {result.stderr.strip()}"
             )
+        stdout_path = output / "runner-stdout.json"
+        stderr_path = output / "runner-stderr.txt"
+        stdout_payload = result.stdout.encode()
+        stderr_payload = result.stderr.encode()
+        stdout_path.write_bytes(stdout_payload)
+        stderr_path.write_bytes(stderr_payload)
         runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
         execution_record = {
             "schema_version": "sloforge.synthbench.sandbox-execution/v1",
@@ -240,6 +246,8 @@ class _GenesisExecutor:
             "runner_sha256": _sha(runner_path.read_bytes()),
             "stdout_sha256": _sha(result.stdout.encode()),
             "stderr_sha256": _sha(result.stderr.encode()),
+            "stdout_path": str(stdout_path.resolve()),
+            "stderr_path": str(stderr_path.resolve()),
             "termination": result.termination.value,
             "return_code": result.return_code,
             "sandbox_backend": result.capabilities.backend.value,
@@ -366,7 +374,11 @@ def _summary_from_artifact(
     surface = samples[0].execution_surface
     return BaselineSummary(
         baseline=baseline,
-        status=BaselineStatus.MEASURED,
+        status=(
+            BaselineStatus.MEASURED
+            if baseline in {BaselineKind.PYTHON_EAGER_REFERENCE, BaselineKind.GENESIS_FULL}
+            else BaselineStatus.SURROGATE
+        ),
         reason=(
             "direct dependency-free eager reference execution; summary derived from complete "
             "raw CPU samples"
@@ -387,7 +399,7 @@ def _summary_from_artifact(
         p95_latency_ns=_percentile(latencies, 0.95),
         median_ttft_ns=float(statistics.median(ttfts)),
         median_inter_token_ns=float(statistics.median(intervals)) if intervals else 0.0,
-        measured_cpu_seconds=sum(latencies) / 1_000_000_000,
+        observed_request_wall_seconds=sum(latencies) / 1_000_000_000,
         candidate_count=candidate_count,
         human_authored_model_specific_lines=0,
     )
@@ -407,7 +419,7 @@ def _unavailable(baseline: BaselineKind, reason: str) -> BaselineSummary:
         p95_latency_ns=0.0,
         median_ttft_ns=0.0,
         median_inter_token_ns=0.0,
-        measured_cpu_seconds=0.0,
+        observed_request_wall_seconds=0.0,
         candidate_count=0,
         human_authored_model_specific_lines=0,
     )
@@ -422,7 +434,11 @@ def _hidden_summary_from_artifact(baseline: BaselineKind, path: Path) -> HiddenE
     exact = sum(result.exact_match for result in results)
     return HiddenEvaluationSummary(
         baseline=baseline,
-        status=BaselineStatus.MEASURED,
+        status=(
+            BaselineStatus.MEASURED
+            if baseline in {BaselineKind.PYTHON_EAGER_REFERENCE, BaselineKind.GENESIS_FULL}
+            else BaselineStatus.SURROGATE
+        ),
         evidence_path=str(path.resolve()),
         evidence_sha256=_sha(path.read_bytes()),
         case_count=len(results),
@@ -458,10 +474,13 @@ def _validate_sandbox_execution_evidence(
     path_value: str | None,
     digest: str | None,
     *,
-    request_id: str,
-    request_seed: int,
+    expected_request: WorkloadRequest,
     run_seed: int,
     config_sha256: str,
+    observed_tokens: tuple[int, ...],
+    latency_ns: int | None,
+    ttft_ns: int | None,
+    inter_token_ns: tuple[int, ...] | None,
 ) -> None:
     if path_value is None or digest is None:
         raise ValueError("generated execution is missing sandbox evidence")
@@ -473,8 +492,8 @@ def _validate_sandbox_execution_evidence(
         raise ValueError("sandbox execution evidence must be an object")
     if (
         document.get("schema_version") != "sloforge.synthbench.sandbox-execution/v1"
-        or document.get("request_id") != request_id
-        or document.get("request_seed") != request_seed
+        or document.get("request_id") != expected_request.request_id
+        or document.get("request_seed") != expected_request.seed
         or document.get("run_seed") != run_seed
         or document.get("config_sha256") != config_sha256
         or document.get("termination") != "success"
@@ -498,9 +517,61 @@ def _validate_sandbox_execution_evidence(
         "seed",
     }:
         raise ValueError("sandbox request contains undeclared or evaluator-only fields")
+    if request_document != {
+        "request_id": expected_request.request_id,
+        "prompt_tokens": list(expected_request.prompt_tokens),
+        "maximum_new_tokens": expected_request.maximum_new_tokens,
+        "seed": expected_request.seed,
+    }:
+        raise ValueError("sandbox request does not match the benchmark task input")
+    stdout_path_value = document.get("stdout_path")
+    stdout_digest = document.get("stdout_sha256")
+    if not isinstance(stdout_path_value, str) or not isinstance(stdout_digest, str):
+        raise ValueError("sandbox evidence omits the retained runner response")
+    stdout_path = Path(stdout_path_value)
+    if not stdout_path.is_file() or _sha(stdout_path.read_bytes()) != stdout_digest:
+        raise ValueError("sandbox runner response is unavailable or changed")
+    response = json.loads(stdout_path.read_text(encoding="utf-8"))
+    if not isinstance(response, dict) or set(response) != {
+        "tokens",
+        "latency_ns",
+        "ttft_ns",
+        "inter_token_ns",
+    }:
+        raise ValueError("sandbox runner response has an invalid schema")
+    if tuple(response["tokens"]) != observed_tokens:
+        raise ValueError("raw observed tokens do not match the sandbox runner response")
+    if latency_ns is not None and response["latency_ns"] != latency_ns:
+        raise ValueError("raw latency does not match the sandbox runner response")
+    if ttft_ns is not None and response["ttft_ns"] != ttft_ns:
+        raise ValueError("raw TTFT does not match the sandbox runner response")
+    if inter_token_ns is not None and tuple(response["inter_token_ns"]) != inter_token_ns:
+        raise ValueError("raw inter-token timings do not match the sandbox runner response")
     runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
     if document.get("runner_sha256") != _sha(runner_path.read_bytes()):
         raise ValueError("sandbox execution used an unrecognized trusted runner")
+
+
+def _validate_runtime_manifest(path: Path) -> None:
+    document = json.loads(path.read_text(encoding="utf-8"))
+    artifacts = document.get("artifacts") if isinstance(document, dict) else None
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError("generated runtime manifest has no artifact identities")
+    for item in artifacts:
+        if (
+            not isinstance(item, list)
+            or len(item) != 2
+            or not isinstance(item[0], str)
+            or not isinstance(item[1], str)
+        ):
+            raise ValueError("generated runtime manifest contains an invalid artifact identity")
+        artifact = path.parent / item[0]
+        if (
+            not artifact.is_file()
+            or artifact.is_symlink()
+            or _sha(artifact.read_bytes()) != item[1]
+        ):
+            raise ValueError("generated runtime artifact is unavailable or changed")
 
 
 def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
@@ -516,6 +587,12 @@ def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
         for baseline in report.baselines
         if baseline.status is BaselineStatus.NOT_APPLICABLE
     ]
+    surrogates = [
+        baseline
+        for report in reports
+        for baseline in report.baselines
+        if baseline.status is BaselineStatus.SURROGATE
+    ]
     genesis = [
         (report, baseline)
         for report in reports
@@ -529,6 +606,7 @@ def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
     )
     return AggregateMetrics(
         measured_baseline_runs=len(measured),
+        surrogate_baseline_runs=len(surrogates),
         unavailable_baseline_runs=len(unavailable),
         valid_system_rate=(
             sum(
@@ -546,7 +624,9 @@ def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
             else 0.0
         ),
         exact_request_rate=exact_count / sample_count if sample_count else 0.0,
-        measured_cpu_seconds=sum(baseline.measured_cpu_seconds for baseline in measured),
+        observed_request_wall_seconds=sum(
+            baseline.observed_request_wall_seconds for baseline in (*measured, *surrogates)
+        ),
         task_count=len({report.task_id for report in reports}),
         distinct_task_seeds=len({report.task_generation_seed for report in reports}),
     )
@@ -581,6 +661,27 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             raise ValueError("report baseline set is incomplete")
         if {item.baseline for item in task.hidden_evaluations} != expected_baselines:
             raise ValueError("report hidden-evaluation set is incomplete")
+        descriptor_path = Path(task.task_descriptor_path)
+        if (
+            not descriptor_path.is_file()
+            or _sha(descriptor_path.read_bytes()) != task.task_descriptor_sha256
+        ):
+            raise ValueError("SynthBench task descriptor is unavailable or changed")
+        descriptor = load_task(descriptor_path)
+        task_directory = descriptor_path.parent
+        if (
+            descriptor.task_id != task.task_id
+            or _sha(canonical_json(descriptor)) != task.task_hash
+            or descriptor.public_package_hash != task.public_package_hash
+            or descriptor.seed != task.task_generation_seed
+        ):
+            raise ValueError("report task identity does not match its descriptor")
+        verify_public_package(task_directory, descriptor)
+        workload_by_id = {
+            request.request_id: request for request in load_workload(task_directory, descriptor)
+        }
+        hidden_cases = load_hidden_cases(task_directory, descriptor)
+        hidden_by_id = {case.case_id: case for case in hidden_cases}
         manifest_path = Path(task.genesis_runtime_manifest_path)
         if (
             not manifest_path.is_file()
@@ -593,13 +694,14 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             or manifest.get("package_hash") != task.reference_package_hash
         ):
             raise ValueError("generated runtime is bound to another public package")
+        _validate_runtime_manifest(manifest_path)
         runtime_config_path = manifest_path.parent / "runtime_config.json"
         if not runtime_config_path.is_file():
             raise ValueError("generated runtime configuration is unavailable")
         runtime_config_sha256 = _sha(runtime_config_path.read_bytes())
         all_samples: list[RawCpuSample] = []
         for summary in task.baselines:
-            if summary.status is not BaselineStatus.MEASURED:
+            if summary.status not in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}:
                 continue
             if summary.raw_samples_path is None or summary.raw_samples_sha256 is None:
                 raise ValueError("measured baseline is missing raw evidence")
@@ -617,18 +719,30 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                 if line
             )
             for sample in loaded_samples:
+                expected_request = workload_by_id.get(sample.request_id)
+                if expected_request is None:
+                    raise ValueError("raw sample request is absent from the bound workload")
+                if (
+                    sample.request_seed != expected_request.seed
+                    or sample.expected_tokens != expected_request.expected_tokens
+                    or sample.exact_match != (sample.observed_tokens == sample.expected_tokens)
+                ):
+                    raise ValueError("raw sample is not bound to the workload oracle")
                 if sample.execution_surface == "genesis_generated_runtime":
                     _validate_sandbox_execution_evidence(
                         sample.execution_evidence_path,
                         sample.execution_evidence_sha256,
-                        request_id=sample.request_id,
-                        request_seed=sample.request_seed,
+                        expected_request=expected_request,
                         run_seed=sample.run_seed,
                         config_sha256=runtime_config_sha256,
+                        observed_tokens=sample.observed_tokens,
+                        latency_ns=sample.latency_ns,
+                        ttft_ns=sample.ttft_ns,
+                        inter_token_ns=sample.inter_token_ns,
                     )
             all_samples.extend(loaded_samples)
         for hidden in task.hidden_evaluations:
-            if hidden.status is not BaselineStatus.MEASURED:
+            if hidden.status not in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}:
                 continue
             if hidden.evidence_path is None or hidden.evidence_sha256 is None:
                 raise ValueError("measured hidden evaluation is missing evidence")
@@ -643,14 +757,27 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                 if line
             )
             for result in hidden_results:
+                expected_case = hidden_by_id.get(result.case_id)
+                if expected_case is None or expected_case.request.request_id != result.request_id:
+                    raise ValueError("hidden result is absent from the bound hidden corpus")
+                expected_request = expected_case.request
+                if (
+                    result.request_seed != expected_request.seed
+                    or result.expected_tokens != expected_request.expected_tokens
+                    or result.exact_match != (result.observed_tokens == result.expected_tokens)
+                ):
+                    raise ValueError("hidden result is not bound to its evaluator oracle")
                 if result.execution_surface == "genesis_generated_runtime":
                     _validate_sandbox_execution_evidence(
                         result.execution_evidence_path,
                         result.execution_evidence_sha256,
-                        request_id=result.request_id,
-                        request_seed=result.request_seed,
+                        expected_request=expected_request,
                         run_seed=task.run_seed,
                         config_sha256=runtime_config_sha256,
+                        observed_tokens=result.observed_tokens,
+                        latency_ns=None,
+                        ttft_ns=None,
+                        inter_token_ns=None,
                     )
         rebuilt_integrity = audit_raw_samples(
             tuple(all_samples),
@@ -868,6 +995,8 @@ def _run_task(
     return TaskRunReport(
         task_id=descriptor.task_id,
         task_hash=task_hash,
+        task_descriptor_path=str((task_directory / "task.json").resolve()),
+        task_descriptor_sha256=_sha((task_directory / "task.json").read_bytes()),
         public_package_hash=descriptor.public_package_hash,
         reference_package_hash=inspection.package_hash,
         task_generation_seed=descriptor.seed,
