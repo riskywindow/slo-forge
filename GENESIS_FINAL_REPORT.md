@@ -10,6 +10,9 @@ Final core implementation commit: `e52868bd76b486365c9c2360c88fcd996eb317a1`
 
 Clean-room validated release commit: `46814c0f1c29301ff4220c3b56bf663c18ed9301`
 
+Current report commit: resolve with `git log -1 --format=%H -- GENESIS_FINAL_REPORT.md`; later
+report-only evidence-scope corrections do not change the validated implementation.
+
 This report distinguishes exercised CPU evidence, synthetic evidence, and unexercised optional
 hardware/external paths. It does not claim universal correctness, GPU performance, globally novel
 algorithms, or a measured speedup.
@@ -110,7 +113,7 @@ equal-but-forged observations are rejected.
 
 The final CPU release sequence exercised:
 
-- `make check`: passed on the final source/report revision; Python, Rust workspace formatting,
+- `make check`: passed on clean-room release revision `46814c0`; Python, Rust workspace formatting,
   Clippy with warnings denied, Rust tests/doc tests, and UI type/lint/test/build all passed;
 - `make genesis-check`: 270 Python tests passed, one optional PyTorch test skipped, four intentional
   numerical-overflow warnings; nine Genesis IR conformance tests and 17 model-check tests passed;
