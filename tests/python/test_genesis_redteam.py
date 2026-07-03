@@ -218,6 +218,12 @@ def test_demo_artifacts_are_canonical_reproducible_and_loadable(tmp_path: Path) 
     assert loaded.counterexample_id.startswith("cex-")
     with pytest.raises(FileExistsError, match="must be empty"):
         run_demo(tmp_path / "first", seed=1234)
+    reset = run_demo(tmp_path / "first", seed=1234, reset=True)
+    assert Path(reset.report_path).read_bytes() == first_report
+    linked = tmp_path / "linked"
+    linked.symlink_to(tmp_path / "first", target_is_directory=True)
+    with pytest.raises(ValueError, match="symlinked"):
+        run_demo(linked, seed=1234, reset=True)
 
 
 def test_redteam_models_reject_untyped_extensions() -> None:

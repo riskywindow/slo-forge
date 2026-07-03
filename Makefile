@@ -78,7 +78,7 @@ genesis-zero-day-demo:
 	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/zero-day-demo --seed 73129 --reset
 
 genesis-redteam-demo:
-	uv run --locked python -m sloforge.redteam.demo --output artifacts/genesis/redteam-demo --seed 73129
+	uv run --locked python -m sloforge.redteam.demo --output artifacts/genesis/redteam-demo --seed 73129 --reset
 
 genesis-evolution-demo:
 	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/evolution-demo --seed 73131 --runtime-seed 73129 --reset
