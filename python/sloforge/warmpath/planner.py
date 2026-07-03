@@ -291,7 +291,7 @@ def compile_warmpath(
                 graph=graph,
                 placements=candidate.placements,
                 profile=profile,
-                seed=seed + index,
+                seed=seed,
                 trial_count=simulation_trials,
             )
         except RuntimeError as error:
