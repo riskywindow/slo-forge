@@ -347,7 +347,42 @@ def _validate_resource_artifact(path: Path, *, runtime_bundle_bytes: int | None)
         usable = int(
             int(document["capacity_bytes"]) * (1.0 - float(document["safety_margin_fraction"]))
         )
-        passed = usable >= coexistence
+        allocator_valid = True
+        if document.get("schema_version") == "1.1.0":
+            allocator_layout = str(document["state_allocator_layout"])
+            page_bytes = int(document["state_allocator_page_bytes"])
+            allocator_request_bytes = int(document["genome_state_bytes_per_request"])
+            if allocator_layout == "paged":
+                reserved = ((allocator_request_bytes + page_bytes - 1) // page_bytes) * page_bytes
+            elif allocator_layout == "contiguous":
+                reserved = allocator_request_bytes
+            else:
+                reserved = -1
+            layout_match = document["genome_state_layouts"] == [allocator_layout]
+            bound_match = (
+                int(document["reference_state_bytes_per_request"])
+                == allocator_request_bytes
+                == int(document["state_allocator_reserved_bytes_per_request"])
+                if allocator_layout == "contiguous"
+                else int(document["reference_state_bytes_per_request"]) == allocator_request_bytes
+            )
+            capacity_valid = (
+                page_bytes > 0
+                and page_bytes & (page_bytes - 1) == 0
+                and int(document["state_allocator_total_bytes"])
+                >= int(document["runtime_queue_depth"]) * reserved
+            )
+            allocator_valid = (
+                int(document["persistent_state_bytes_per_request"]) == reserved
+                and int(document["state_allocator_reserved_bytes_per_request"]) == reserved
+                and layout_match
+                and bound_match
+                and capacity_valid
+                and document["state_allocator_layout_matches_genome"] is layout_match
+                and document["state_allocator_bound_matches_genome"] is bound_match
+                and document["state_allocator_capacity_valid"] is capacity_valid
+            )
+        passed = usable >= coexistence and allocator_valid
         if (
             int(document["bounded_request_bytes"]) != request_bytes
             or int(document["bounded_queue_bytes"]) != queue_bytes

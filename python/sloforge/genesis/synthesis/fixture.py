@@ -95,14 +95,31 @@ def _design(identifier: str, *, safe: bool, upside: float, seed: int) -> Candida
         invalidity_risk=0.05,
         feature_delta=(upside, 1.0 if safe else 0.0, 1.0),
     )
-    digest = _digest(f"{identifier}:{safe}:{upside}:{seed}")
+    mutations = (mutation,)
+    if safe:
+        state_mutation = MutationChoice(
+            transformation_id=f"paged-state-{identifier}",
+            family=TransformationFamily.STATE_LAYOUT,
+            regions=("state",),
+            parameters=(
+                ParameterValue(key="layout", value="paged"),
+                ParameterValue(key="page_bytes", value="64"),
+            ),
+            expected_upside=0.03,
+            invalidity_risk=0.02,
+            feature_delta=(0.03, 1.0, 0.0),
+        )
+        mutations = (mutation, state_mutation)
+    digest = _digest(f"{identifier}:{safe}:{upside}:{seed}:{len(mutations)}")
     return CandidateDesign(
         candidate_id=f"candidate-{identifier}-{digest[:12]}",
         seed=seed,
         genome_hash=ArtifactDigest(value=digest),
         parent_candidate_ids=(),
-        mutations=(mutation,),
-        feature_vector=mutation.feature_delta,
+        mutations=mutations,
+        feature_vector=tuple(
+            sum(values) for values in zip(*(item.feature_delta for item in mutations), strict=True)
+        ),
         proposal_engine="fixture",
     )
 

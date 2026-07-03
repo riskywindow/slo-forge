@@ -18,6 +18,8 @@ from .models import (
     RuntimeLimits,
     RuntimeMetrics,
     RuntimeRequest,
+    StateAllocatorConfig,
+    StateAllocatorLayout,
     StreamEvent,
 )
 
@@ -73,28 +75,51 @@ class StreamHandle:
 
 
 class _StateOwners:
-    def __init__(self) -> None:
-        self._owners: dict[str, str] = {}
+    def __init__(self, config: StateAllocatorConfig) -> None:
+        self._config = config
+        self._owners: dict[str, tuple[str, int, int]] = {}
+        self._reserved_bytes = 0
+        self._pages = 0
         self._lock = Lock()
 
-    def allocate(self, request_id: str, owner: str) -> None:
+    def allocate(self, request_id: str, owner: str) -> tuple[int, int]:
         with self._lock:
             if request_id in self._owners:
                 raise RuntimeError(f"state for request {request_id!r} already has an owner")
-            self._owners[request_id] = owner
+            requested = self._config.maximum_bytes_per_request
+            if self._config.layout is StateAllocatorLayout.PAGED:
+                pages = (requested + self._config.page_bytes - 1) // self._config.page_bytes
+                reserved = pages * self._config.page_bytes
+            else:
+                pages = 0
+                reserved = requested
+            if self._reserved_bytes + reserved > self._config.maximum_total_bytes:
+                raise RuntimeError("bounded request state allocator is exhausted")
+            self._owners[request_id] = (owner, reserved, pages)
+            self._reserved_bytes += reserved
+            self._pages += pages
+            return self._reserved_bytes, self._pages
 
-    def release(self, request_id: str, owner: str) -> None:
+    def release(self, request_id: str, owner: str) -> tuple[int, int]:
         with self._lock:
-            actual = self._owners.get(request_id)
-            if actual != owner:
+            allocation = self._owners.get(request_id)
+            actual = allocation[0] if allocation is not None else None
+            if actual != owner or allocation is None:
                 raise RuntimeError(
                     f"state owner mismatch for {request_id!r}: expected {owner!r}, got {actual!r}"
                 )
             del self._owners[request_id]
+            self._reserved_bytes -= allocation[1]
+            self._pages -= allocation[2]
+            return self._reserved_bytes, self._pages
 
     def count(self) -> int:
         with self._lock:
             return len(self._owners)
+
+    def usage(self) -> tuple[int, int]:
+        with self._lock:
+            return self._reserved_bytes, self._pages
 
 
 class BaselineStreamingRuntime:
@@ -107,6 +132,7 @@ class BaselineStreamingRuntime:
         limits: RuntimeLimits,
         runtime_seed: int,
         policy: BytecodeProgram | None = None,
+        state_allocator: StateAllocatorConfig | None = None,
     ) -> None:
         self._adapter = adapter
         self._limits = limits
@@ -115,7 +141,8 @@ class BaselineStreamingRuntime:
         self._admission: Queue[tuple[RequestControl, Queue[StreamEvent]]] = Queue(
             maxsize=limits.maximum_queue_depth
         )
-        self._state_owners = _StateOwners()
+        self._state_allocator = state_allocator or StateAllocatorConfig()
+        self._state_owners = _StateOwners(self._state_allocator)
         self._metrics = RuntimeMetrics()
         self._metrics_lock = Lock()
         self._active: dict[str, RequestControl] = {}
@@ -203,12 +230,16 @@ class BaselineStreamingRuntime:
                 and self._worker is not None
                 and self._worker.is_alive()
             )
+        reserved_bytes, pages = self._state_owners.usage()
         return {
             "status": "ready" if accepting else "stopped",
             "accepting_requests": accepting,
             "queue_depth": self._admission.qsize(),
             "queue_capacity": self._limits.maximum_queue_depth,
             "owned_state_count": self._state_owners.count(),
+            "state_allocator_layout": self._state_allocator.layout.value,
+            "state_reserved_bytes": reserved_bytes,
+            "state_pages": pages,
             "policy": self._policy.name if self._policy is not None else None,
         }
 
@@ -506,10 +537,14 @@ class BaselineStreamingRuntime:
             if self._abort_if_needed(control, events, sequence):
                 return
             control.transition(RequestLifecycle.PREFILLING)
-            self._state_owners.allocate(request.request_id, owner)
+            reserved_bytes, pages = self._state_owners.allocate(request.request_id, owner)
             owns_state = True
             with self._metrics_lock:
                 self._metrics.state_allocations += 1
+                self._metrics.state_reserved_bytes_peak = max(
+                    self._metrics.state_reserved_bytes_peak, reserved_bytes
+                )
+                self._metrics.state_pages_peak = max(self._metrics.state_pages_peak, pages)
             state = self._adapter.allocate_state(
                 request.request_id,
                 request.prompt_tokens,

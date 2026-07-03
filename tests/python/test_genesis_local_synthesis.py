@@ -58,18 +58,36 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     accepted_directory = run.output_directory / "candidates" / result.accepted_candidate_id
     genome = load_inference_genome(accepted_directory / "inference_genome.json")
     assert canonical_hash(genome) == accepted.genome_hash.value
-    transformation = load_transformation(
-        next((accepted_directory / "transformations").glob("*.json"))
+    transformations = [
+        load_transformation(path)
+        for path in (accepted_directory / "transformations").glob("*.json")
+    ]
+    transformation = next(
+        item
+        for item in transformations
+        if item.source_pattern.structural_constraints
+        == (f"source_genome_sha256 == {result.baseline_genome_hash}",)
     )
     assert (
         f"source_genome_sha256 == {result.baseline_genome_hash}"
         in transformation.source_pattern.structural_constraints
     )
-    assert (
+    assert any(
         f"target_genome_sha256 == {accepted.genome_hash.value}"
-        in transformation.target_pattern.structural_constraints
+        in item.target_pattern.structural_constraints
+        for item in transformations
     )
     assert transformation.verification_obligations
+    assert {state.layout.value for state in genome.state.states} == {"paged"}
+    runtime_config = json.loads(
+        (accepted_directory / "generated_runtime/runtime_config.json").read_text(encoding="utf-8")
+    )
+    assert runtime_config["state_allocator"] == {
+        "layout": "paged",
+        "page_bytes": 64,
+        "maximum_bytes_per_request": 73,
+        "maximum_total_bytes": 4096,
+    }
     runtime_evidence = json.loads(
         (accepted_directory / "evidence/runtime-differential-result.json").read_text(
             encoding="utf-8"
@@ -78,6 +96,7 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     assert runtime_evidence["candidate_id"] == accepted.candidate_id
     assert runtime_evidence["candidate_genome_hash"] == accepted.genome_hash.value
     assert runtime_evidence["passed"] is True
+    assert runtime_evidence["state_allocator"] == runtime_config["state_allocator"]
     assert (
         runtime_evidence["runtime_artifact_hashes"]["policy.bytecode.json"]
         == (runtime_evidence["policy_bytecode_sha256"])
@@ -162,6 +181,7 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
         }
     )
     design = cancellation_fixture_candidates(73129)[2]
+    design = design.model_copy(update={"mutations": (design.mutations[0],)})
     second = design.mutations[0].model_copy(
         update={"transformation_id": "deadline-batch-finalize", "expected_upside": 0.01}
     )
