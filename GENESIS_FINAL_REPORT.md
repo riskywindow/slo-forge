@@ -6,7 +6,9 @@ Baseline commit: `435a04799a831c3d19fce18eb816b206d23778d7`
 
 Baseline tag: `sloforge-genesis-baseline-435a047`
 
-Final implementation commit: `e52868bd76b486365c9c2360c88fcd996eb317a1`
+Final core implementation commit: `e52868bd76b486365c9c2360c88fcd996eb317a1`
+
+Clean-room validated release commit: `46814c0f1c29301ff4220c3b56bf663c18ed9301`
 
 This report distinguishes exercised CPU evidence, synthetic evidence, and unexercised optional
 hardware/external paths. It does not claim universal correctness, GPU performance, globally novel
@@ -73,9 +75,9 @@ the candidate runtime without a hand-written production adapter.
 Candidate `candidate-corrected-9e080dc3ce26` reached `SIMULATED`; its genome hash is
 `f44d18e98b1001c9e528d61d707ffe1f364ed918e298179a61dbc6ca905d8860`. The runtime passed exact
 final-corpus differential replay, streaming, cancellation, queue bounds, state ownership,
-deterministic seed, and clean-shutdown checks. The accepted candidate modifies request/serving
-policy plus state behavior and is structurally cross-layer. It does not establish a performance
-improvement.
+deterministic seed, and clean-shutdown checks. The accepted candidate modifies the RequestGenome
+and ServingGenome through one policy transformation and is structurally cross-layer within those
+two regions. Its StateGenome is unchanged. It does not establish a performance improvement.
 
 The resulting local capsule is
 `2051608ce0df253e1454c0a1a249d0bdb0ace5e6f6ffbae6cbfd813d31476e07`; it contains 16 artifacts,
@@ -84,8 +86,9 @@ but is intentionally ineligible for external production and carries no benchmark
 
 ## Verification and counterexample case study
 
-The intentionally faster unsafe batching candidate `candidate-fast-c5f24ba72a3a` scheduled work
-after cancellation. The independent verifier rejected it with real counterexample
+The higher modeled expected-upside unsafe batching candidate `candidate-fast-c5f24ba72a3a`
+scheduled work after cancellation. It had no benchmark evidence. The independent verifier rejected
+it with real counterexample
 `counterexample-f1a82ff1eae24eb0395f3581`; minimization retained the smallest reproducing schedule,
 and generalized constraint `constraint-d4cb57a99c1875a2fe18708b` suppressed the repeated unsafe
 family before the corrected candidate was selected.
@@ -159,10 +162,11 @@ unseeded candidates for diversity, required reverification, ignored unrelated li
 suppressed the related seed after its dependency was invalidated. It explicitly sets
 `performance_hypothesis_evaluated: false`; no transfer speedup is claimed.
 
-The local evolution fixture injected workload drift and physical degradation, generated an
-isolated challenger, validated its capsule, ran bound shadow and canary gates, preserved an active
-stream, promoted the challenger, and retained the old champion for rollback. External live
-promotion remains opt-in and was not exercised.
+The local workload-drift fixture generated an isolated challenger, validated its capsule, ran bound
+shadow and canary gates, preserved an active stream, promoted the challenger, and retained the old
+champion for rollback. After that promotion the demo classified a physical-degradation trigger and
+entered `evolving`; it did not synthesize, verify, or promote a second degradation-specific
+challenger. External live promotion remains opt-in and was not exercised.
 
 ## Hardware-backed versus synthetic evidence
 
@@ -178,8 +182,10 @@ Truss, or external-engine result is claimed.
   frontend and generated Python task grammar were exercised.
 - Arbitrary tensor rewrites are represented, checked, and costed, but the flagship generated
   runtime does not lower an arbitrary selected rewrite into model code.
-- The flagship evaluates executable policy/state behavior, Fabric plan mutations, and kernel-lab
-  experiments, but does not constitute a complete measured four-category whole-stack search.
+- The flagship evaluates executable request/serving policy behavior and kernel-lab experiments,
+  and records a physical-degradation trigger classification. State, tensor, and distributed
+  transformation surfaces have focused tests but are not selected by the accepted flagship
+  candidate; this is not a complete measured four-category whole-stack search.
 - The local capsule is not externally promotable because it lacks repeated provenance-complete
   hardware/service benchmarks and production shadow/canary evidence.
 - ServingSynthBench keeps unavailable engines and explicit request-order surrogates in the schema;
@@ -210,7 +216,7 @@ Truss, or external-engine result is claimed.
 - Related work: `docs/GENESIS_RELATED_WORK.md`
 - ADRs: `docs/adr/`
 - Paper-style system report: `paper/genesis/README.md`
-- Generated upstream-review bundle: `generated/patches/quantized-state-update/`
+- Generated upstream-review bundle: `generated/patches/hybrid-quantized-state-update/`
 
 All numeric claims above are sourced from the named JSON/JSONL artifacts. Hardware and missing
 campaign limitations are repeated deliberately to prevent a CPU fixture from being presented as a
