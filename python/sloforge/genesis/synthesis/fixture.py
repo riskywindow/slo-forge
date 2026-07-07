@@ -95,7 +95,7 @@ def _design(identifier: str, *, safe: bool, upside: float, seed: int) -> Candida
         invalidity_risk=0.05,
         feature_delta=(upside, 1.0 if safe else 0.0, 1.0),
     )
-    mutations = (mutation,)
+    mutations: tuple[MutationChoice, ...] = (mutation,)
     if safe:
         state_mutation = MutationChoice(
             transformation_id=f"paged-state-{identifier}",

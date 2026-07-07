@@ -337,9 +337,10 @@ def _materialize_candidate_runtime(
     page_bytes = 64
     layout_record = genome.state.node.extensions.root.get("sloforge.dev/synthesized-state-layout")
     if layout == "paged":
-        if not isinstance(layout_record, dict) or type(layout_record.get("page_bytes")) is not int:
+        page_value = layout_record.get("page_bytes") if isinstance(layout_record, dict) else None
+        if type(page_value) is not int:
             raise ValueError("paged StateGenome is missing its typed allocator page size")
-        page_bytes = int(layout_record["page_bytes"])
+        page_bytes = page_value
         reserved_per_request = (
             (maximum_bytes_per_request + page_bytes - 1) // page_bytes
         ) * page_bytes
