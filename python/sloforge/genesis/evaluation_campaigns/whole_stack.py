@@ -285,7 +285,7 @@ def _simulate(
         for observation in observations
     )
     objective = weighted_tardiness + mean_completion
-    reservation = 80 if paged else 73
+    reservation = 128 if paged else 73
     return VariantObservation(
         variant=variant,
         policy_enabled=policy_enabled,
