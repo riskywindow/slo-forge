@@ -13,6 +13,12 @@ from .lineage import (
     run_h5_lineage_campaign,
     validate_h5_lineage_campaign,
 )
+from .redteam import (
+    RedTeamCampaignReport,
+    RedTeamCampaignValidationError,
+    run_redteam_campaign,
+    validate_redteam_campaign,
+)
 from .unseen import (
     H1CampaignConfiguration,
     H1CampaignReport,
@@ -33,15 +39,19 @@ __all__ = [
     "H1CampaignReport",
     "H5LineageCampaignReport",
     "LineageScenario",
+    "RedTeamCampaignReport",
+    "RedTeamCampaignValidationError",
     "SearchStrategy",
     "WholeStackCampaignReport",
     "WholeStackValidationError",
     "run_autopsy_guided_campaign",
     "run_h1_unseen_campaign",
     "run_h5_lineage_campaign",
+    "run_redteam_campaign",
     "run_whole_stack_campaign",
     "validate_autopsy_guided_campaign",
     "validate_h1_unseen_campaign",
     "validate_h5_lineage_campaign",
+    "validate_redteam_campaign",
     "validate_whole_stack_campaign",
 ]
