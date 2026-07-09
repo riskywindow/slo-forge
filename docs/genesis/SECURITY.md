@@ -71,6 +71,11 @@ unsafe paths, incomplete evidence, altered benchmark statistics, and absent coun
 Hash addressing is not publisher authentication: deployment control must pin the expected digest,
 and signatures are not yet implemented.
 
+Promotion-required claims have separate external anchors over the complete canonical claim, not
+only their evidence records. The anchor covers the statement, level, evidence references,
+assumptions, exclusions, and input/shape/dtype/hardware scope. This prevents an otherwise re-sealed
+capsule from broadening the scope of authentic evidence.
+
 Benchmark-integrity attacks are independently searched by the executable red team, including
 missing synchronization, timer misuse, warmup/input/cache differences, hidden fallback, precision or
 quality mismatch, omitted failures, clock/affinity/background-process changes, discarded samples,
@@ -96,6 +101,9 @@ a new temporary tree, reapplies the mutation, and compares the complete typed is
 records bind before/after file hashes plus changed manifest and context paths. Re-sealed-manifest
 attacks may supply their new digest to exercise controls behind content addressing, while the real
 deployment boundary still requires an independently pinned expected digest.
+
+The model-check-scope mutation also changes the whole-claim digest, so the trusted claim anchor
+rejects scope tampering independently of the current-hardware containment check.
 
 This campaign records zero hardware-backed runs and zero GPU hours; it neither deploys candidates
 nor reports performance measurements. Its model-check case demonstrates hardware-scope enforcement

@@ -997,6 +997,53 @@ pub fn replay_counterexample(
     }
 }
 
+/// Validate a serialized result against its request by deterministic
+/// recomputation and counterexample replay.
+///
+/// This is a proof-result integrity check within the same trusted transition
+/// model, not an independent proof system. It rejects changed scope, counts,
+/// assumptions, invariant outcomes, coverage, or counterexample traces.
+///
+/// # Errors
+///
+/// Returns stable diagnostics for an invalid request or a result that differs
+/// from the checker's deterministic output for that request.
+pub fn validate_result(
+    request: &ModelCheckRequest,
+    result: &ModelCheckResult,
+) -> Result<(), Vec<crate::ValidationDiagnostic>> {
+    let expected = check(request)?;
+    let mut diagnostics = Vec::new();
+    if result.scope.universal_proof {
+        diagnostics.push(crate::ValidationDiagnostic {
+            path: "scope.universal_proof".to_owned(),
+            message: "bounded explicit-state evidence cannot claim a universal proof".to_owned(),
+        });
+    }
+    if result != &expected {
+        diagnostics.push(crate::ValidationDiagnostic {
+            path: "result".to_owned(),
+            message: "does not match deterministic recomputation for the supplied request"
+                .to_owned(),
+        });
+    }
+    for outcome in &result.invariants {
+        if let Some(trace) = &outcome.counterexample {
+            if let Err(error) = replay_counterexample(request, trace) {
+                diagnostics.push(crate::ValidationDiagnostic {
+                    path: format!("invariants.{}.counterexample", outcome.invariant),
+                    message: error.to_string(),
+                });
+            }
+        }
+    }
+    if diagnostics.is_empty() {
+        Ok(())
+    } else {
+        Err(diagnostics)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1106,6 +1153,32 @@ mod tests {
         let first = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
         let second = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
         assert_eq!(first, second);
+    }
+
+    #[test]
+    fn result_validation_recomputes_scope_counts_and_traces() {
+        let request = ModelCheckRequest::safe(43);
+        let result = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
+        validate_result(&request, &result)
+            .unwrap_or_else(|errors| panic!("valid result was rejected: {errors:?}"));
+
+        let mut forged_scope = result.clone();
+        forged_scope.scope.universal_proof = true;
+        let Err(diagnostics) = validate_result(&request, &forged_scope) else {
+            panic!("universal-proof overclaim must be rejected");
+        };
+        assert!(
+            diagnostics
+                .iter()
+                .any(|item| item.path == "scope.universal_proof")
+        );
+
+        let mut forged_count = result;
+        forged_count.transition_count = forged_count.transition_count.saturating_add(1);
+        let Err(diagnostics) = validate_result(&request, &forged_count) else {
+            panic!("changed exploration count must be rejected");
+        };
+        assert!(diagnostics.iter().any(|item| item.path == "result"));
     }
 
     #[test]

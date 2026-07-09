@@ -262,6 +262,15 @@ if __name__ == "__main__":
 '''
 
 
+def generated_runtime_template_hashes() -> dict[str, str]:
+    """Return trusted source identities for the conservative runtime schema."""
+
+    return {
+        "correctness_harness.py": hashlib.sha256(_HARNESS_SOURCE.encode("utf-8")).hexdigest(),
+        "runtime.py": hashlib.sha256(_RUNTIME_SOURCE.encode("utf-8")).hexdigest(),
+    }
+
+
 def generate_baseline_runtime(
     package_path: Path,
     inspection: InspectionResult,

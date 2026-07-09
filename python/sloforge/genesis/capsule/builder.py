@@ -26,6 +26,10 @@ from sloforge.genesis.ir import (
     load_transformation,
 )
 from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytecode_document
+from sloforge.genesis.runtime.generator import (
+    GENERATED_RUNTIME_SCHEMA_VERSION,
+    generated_runtime_template_hashes,
+)
 from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
 from sloforge.genesis.search import CandidateDesign
 from sloforge.genesis.synthesis import (
@@ -58,6 +62,7 @@ from .models import (
     HardwareCompatibility,
     ScopedClaim,
     TrustedArtifactAnchor,
+    TrustedClaimAnchor,
     TrustedEvidenceAnchor,
     ValidationContext,
     VerificationLevel,
@@ -82,6 +87,19 @@ class CapsuleBuildResult(BaseModel):
     hardware_backed: bool
 
 
+_CANDIDATE_RUNTIME_ARTIFACTS = frozenset(
+    {
+        "correctness_harness.py",
+        "deployment_manifest.json",
+        "policy.bytecode.json",
+        "policy.slo",
+        "runtime.py",
+        "runtime_config.json",
+    }
+)
+_CANDIDATE_RUNTIME_FILES = _CANDIDATE_RUNTIME_ARTIFACTS | {"candidate_runtime_manifest.json"}
+
+
 def _digest(payload: bytes) -> Digest:
     return Digest(value=hashlib.sha256(payload).hexdigest())
 
@@ -91,6 +109,117 @@ def _read_object(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {path}")
     return value
+
+
+def _validate_candidate_runtime_binding(
+    candidate_directory: Path,
+    *,
+    candidate_id: str,
+    candidate_genome_hash: str,
+    package_hash: str,
+    package_root: Path,
+) -> tuple[dict[str, Any], dict[str, Any], str]:
+    """Bind untrusted candidate runtime bytes to trusted local-synthesis identities."""
+
+    runtime_directory = candidate_directory / "generated_runtime"
+    if runtime_directory.is_symlink() or not runtime_directory.is_dir():
+        raise ValueError("candidate runtime directory must be a regular non-symlink directory")
+    observed = {path.name for path in runtime_directory.iterdir()}
+    if observed != _CANDIDATE_RUNTIME_FILES:
+        raise ValueError("candidate runtime file set is incomplete or contains undeclared entries")
+    for name in _CANDIDATE_RUNTIME_FILES:
+        path = runtime_directory / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(
+                f"candidate runtime artifact must be a regular non-symlink file: {name}"
+            )
+    for name in ("policy.bytecode.json", "policy.slo"):
+        source = candidate_directory / name
+        if source.is_symlink() or not source.is_file():
+            raise ValueError(
+                f"candidate policy artifact must be a regular non-symlink file: {name}"
+            )
+    admitted_policy = load_bytecode_document(
+        (candidate_directory / "policy.bytecode.json").read_bytes()
+    )
+    authenticate_bytecode_source(
+        admitted_policy,
+        (candidate_directory / "policy.slo").read_bytes(),
+    )
+    for name in ("policy.bytecode.json", "policy.slo"):
+        source = candidate_directory / name
+        if source.read_bytes() != (runtime_directory / name).read_bytes():
+            raise ValueError(f"candidate runtime {name} differs from the admitted candidate policy")
+
+    template_hashes = generated_runtime_template_hashes()
+    for name, expected_digest in template_hashes.items():
+        observed_digest = hashlib.sha256((runtime_directory / name).read_bytes()).hexdigest()
+        if observed_digest != expected_digest:
+            raise ValueError(
+                f"candidate runtime source does not match the trusted generated template: {name}"
+            )
+
+    policy_digest = hashlib.sha256(
+        (candidate_directory / "policy.bytecode.json").read_bytes()
+    ).hexdigest()
+    runtime_hashes_value = _read_object(
+        candidate_directory / "evidence/runtime-differential-result.json"
+    ).get("runtime_artifact_hashes")
+    if not isinstance(runtime_hashes_value, dict) or set(runtime_hashes_value) != set(
+        _CANDIDATE_RUNTIME_ARTIFACTS
+    ):
+        raise ValueError("differential evidence runtime artifact set is incomplete")
+    if any(
+        not isinstance(name, str) or not isinstance(digest, str)
+        for name, digest in runtime_hashes_value.items()
+    ):
+        raise ValueError("differential evidence runtime artifact identities are malformed")
+    runtime_hashes = {str(name): str(digest) for name, digest in runtime_hashes_value.items()}
+    if any(
+        hashlib.sha256((runtime_directory / name).read_bytes()).hexdigest() != digest
+        for name, digest in runtime_hashes.items()
+    ):
+        raise ValueError("differential evidence runtime artifact identities do not match")
+
+    differential = _read_object(candidate_directory / "evidence/runtime-differential-result.json")
+    if differential.get("candidate_id") != candidate_id:
+        raise ValueError("differential evidence candidate identity mismatch")
+    if differential.get("candidate_genome_hash") != candidate_genome_hash:
+        raise ValueError("differential evidence genome identity mismatch")
+    if differential.get("policy_bytecode_sha256") != policy_digest:
+        raise ValueError("differential evidence policy identity mismatch")
+
+    runtime_config = _read_object(runtime_directory / "runtime_config.json")
+    configured_root = Path(str(runtime_config.get("reference_package_root")))
+    if not configured_root.is_absolute():
+        configured_root = runtime_directory / configured_root
+    if (
+        runtime_config.get("schema_version") != GENERATED_RUNTIME_SCHEMA_VERSION
+        or runtime_config.get("genome_hash") != candidate_genome_hash
+        or runtime_config.get("package_hash") != package_hash
+        or configured_root.resolve() != package_root.resolve()
+    ):
+        raise ValueError("candidate runtime configuration identity mismatch")
+    if (
+        runtime_config.get("policy_bytecode_path") != "policy.bytecode.json"
+        or runtime_config.get("policy_bytecode_sha256") != policy_digest
+    ):
+        raise ValueError("candidate runtime policy identity mismatch")
+    if differential.get("state_allocator") != runtime_config.get("state_allocator"):
+        raise ValueError("differential evidence state allocator identity mismatch")
+
+    runtime_manifest = _read_object(runtime_directory / "candidate_runtime_manifest.json")
+    expected_manifest = {
+        "schema_version": "1.0.0",
+        "candidate_id": candidate_id,
+        "candidate_genome_hash": candidate_genome_hash,
+        "policy_bytecode_sha256": policy_digest,
+        "state_allocator": runtime_config.get("state_allocator"),
+        "artifacts": runtime_hashes,
+    }
+    if runtime_manifest != expected_manifest:
+        raise ValueError("candidate runtime manifest identity mismatch")
+    return differential, runtime_config, policy_digest
 
 
 def _write_once(path: Path, payload: bytes) -> None:
@@ -601,6 +730,15 @@ def build_local_capsule(
     )
     transformation_paths = [path for path, _transformation in ordered_transformations]
 
+    differential, runtime_config, policy_digest = _validate_candidate_runtime_binding(
+        candidate_directory,
+        candidate_id=candidate.candidate_id,
+        candidate_genome_hash=candidate.genome_hash.value,
+        package_hash=package.package_hash,
+        package_root=package_root,
+    )
+    candidate_runtime = candidate_directory / "generated_runtime"
+
     artifacts: list[ArtifactRef] = []
     runtime_bundle = _runtime_bundle_bytes(
         run_directory,
@@ -718,27 +856,6 @@ def build_local_capsule(
         origin=ArtifactOrigin.VERIFIED_EVIDENCE,
     )
     artifacts.append(semantic)
-    differential_path = candidate_directory / "evidence/runtime-differential-result.json"
-    differential = _read_object(differential_path)
-    policy_digest = hashlib.sha256(
-        (candidate_directory / "policy.bytecode.json").read_bytes()
-    ).hexdigest()
-    if differential.get("candidate_id") != candidate.candidate_id:
-        raise ValueError("differential evidence candidate identity mismatch")
-    if differential.get("candidate_genome_hash") != candidate.genome_hash.value:
-        raise ValueError("differential evidence genome identity mismatch")
-    if differential.get("policy_bytecode_sha256") != policy_digest:
-        raise ValueError("differential evidence policy identity mismatch")
-    runtime_hashes = differential.get("runtime_artifact_hashes")
-    candidate_runtime = candidate_directory / "generated_runtime"
-    if not isinstance(runtime_hashes, dict) or any(
-        not isinstance(name, str)
-        or not isinstance(digest, str)
-        or not (candidate_runtime / name).is_file()
-        or hashlib.sha256((candidate_runtime / name).read_bytes()).hexdigest() != digest
-        for name, digest in runtime_hashes.items()
-    ):
-        raise ValueError("differential evidence runtime artifact identities do not match")
     final_corpus = package_root / str(
         package_manifest["quality_contract"]["final_evaluation_corpus"]
     )
@@ -747,15 +864,6 @@ def build_local_capsule(
     cases = differential.get("cases")
     if not isinstance(cases, list) or not cases:
         raise ValueError("differential evidence has no replayable cases")
-    runtime_config = _read_object(candidate_runtime / "runtime_config.json")
-    if (
-        runtime_config.get("package_hash") != package.package_hash
-        or Path(str(runtime_config.get("reference_package_root"))).resolve()
-        != package_root.resolve()
-    ):
-        raise ValueError("candidate runtime is bound to another reference package")
-    if differential.get("state_allocator") != runtime_config.get("state_allocator"):
-        raise ValueError("differential evidence state allocator identity mismatch")
     replay = _independent_runtime_differential(
         candidate_runtime,
         package_root,
@@ -1075,6 +1183,14 @@ def build_local_capsule(
                 ),
             )
             for record in evidence
+        ),
+        trusted_claim_anchors=tuple(
+            TrustedClaimAnchor(
+                claim_id=claim.claim_id,
+                claim_digest=_digest(canonical_json(claim)),
+            )
+            for claim in claims
+            if claim.promotion_required
         ),
         trusted_artifact_anchors=tuple(
             TrustedArtifactAnchor(artifact_id=item.artifact_id, digest=item.digest)

@@ -56,6 +56,13 @@ class StateAllocatorConfig:
             raise ValueError("state allocator page size must be a power of two")
         if self.maximum_bytes_per_request > self.maximum_total_bytes:
             raise ValueError("per-request state bound exceeds total state capacity")
+        reserved_per_request = self.maximum_bytes_per_request
+        if self.layout is StateAllocatorLayout.PAGED:
+            reserved_per_request = (
+                (reserved_per_request + self.page_bytes - 1) // self.page_bytes
+            ) * self.page_bytes
+        if reserved_per_request > self.maximum_total_bytes:
+            raise ValueError("rounded per-request state reservation exceeds total state capacity")
 
 
 @dataclass(frozen=True)

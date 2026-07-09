@@ -537,6 +537,85 @@ def test_capsule_builder_replays_trusted_transformation_lowering(tmp_path: Path)
         )
 
 
+def test_capsule_builder_rejects_forged_runtime_harness_and_stale_identity(
+    tmp_path: Path,
+) -> None:
+    candidate = _accepted_candidate(tmp_path)
+    observed_at = datetime(2026, 8, 2, 12, 0, tzinfo=UTC)
+    runtime = candidate / "generated_runtime"
+    harness_path = runtime / "correctness_harness.py"
+    config_path = runtime / "runtime_config.json"
+    differential_path = candidate / "evidence/runtime-differential-result.json"
+    manifest_path = runtime / "candidate_runtime_manifest.json"
+    simulation_path = candidate / "evidence/simulation-result.json"
+    original = {
+        path: path.read_bytes()
+        for path in (harness_path, config_path, differential_path, manifest_path, simulation_path)
+    }
+
+    def rebind_runtime_artifact(name: str) -> None:
+        differential = json.loads(differential_path.read_bytes())
+        differential["runtime_artifact_hashes"][name] = hashlib.sha256(
+            (runtime / name).read_bytes()
+        ).hexdigest()
+        differential_path.write_text(
+            json.dumps(differential, sort_keys=True, separators=(",", ":")), encoding="utf-8"
+        )
+        manifest = json.loads(manifest_path.read_bytes())
+        manifest["artifacts"] = differential["runtime_artifact_hashes"]
+        manifest_path.write_text(
+            json.dumps(manifest, sort_keys=True, separators=(",", ":")), encoding="utf-8"
+        )
+        simulation = json.loads(simulation_path.read_bytes())
+        simulation["runtime_manifest_sha256"] = hashlib.sha256(
+            manifest_path.read_bytes()
+        ).hexdigest()
+        simulation_path.write_text(
+            json.dumps(simulation, sort_keys=True, separators=(",", ":")), encoding="utf-8"
+        )
+
+    forged_harness = """import argparse
+import json
+from pathlib import Path
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--samples", type=Path, required=True)
+parser.add_argument("--seed")
+parser.add_argument("--timeout-seconds")
+args = parser.parse_args()
+cases = []
+for line_number, line in enumerate(args.samples.read_text().splitlines(), 1):
+    sample = json.loads(line)
+    expected = sample["expected_tokens"]
+    cases.append({"line": line_number, "request_seed": sample["seed"], "expected": expected,
+                  "observed": expected, "exact_match": True})
+print(json.dumps({"cases": cases, "failures": [], "passed": True}))
+"""
+    harness_path.write_text(forged_harness, encoding="utf-8")
+    rebind_runtime_artifact("correctness_harness.py")
+    with pytest.raises(ValueError, match="trusted generated template"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "forged-harness-capsule",
+            observed_at=observed_at,
+        )
+
+    for path, payload in original.items():
+        path.write_bytes(payload)
+    config = json.loads(config_path.read_bytes())
+    config["genome_hash"] = "0" * 64
+    config_path.write_text(
+        json.dumps(config, sort_keys=True, separators=(",", ":")), encoding="utf-8"
+    )
+    rebind_runtime_artifact("runtime_config.json")
+    with pytest.raises(ValueError, match="runtime configuration identity mismatch"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "stale-runtime-identity-capsule",
+            observed_at=observed_at,
+        )
+
+
 def test_capsule_builder_recomputes_proofs_and_final_corpus_oracle(tmp_path: Path) -> None:
     candidate = _accepted_candidate(tmp_path)
     observed_at = datetime(2026, 8, 2, 12, 0, tzinfo=UTC)

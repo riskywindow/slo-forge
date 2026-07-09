@@ -1,6 +1,6 @@
 use sloforge_genesis_modelcheck::{
     CheckStatus, InvariantId, ModelCheckRequest, PartialStateRead, QueueOverflow, StateOwnership,
-    TokenDelivery, check, replay_counterexample,
+    TokenDelivery, check, replay_counterexample, validate_result,
 };
 
 fn load_fixture(contents: &str) -> ModelCheckRequest {
@@ -11,6 +11,8 @@ fn load_fixture(contents: &str) -> ModelCheckRequest {
 fn assert_rejects(contents: &str, expected: InvariantId) {
     let request = load_fixture(contents);
     let result = check(&request).unwrap_or_else(|errors| panic!("invalid fixture: {errors:?}"));
+    validate_result(&request, &result)
+        .unwrap_or_else(|errors| panic!("result validation failed: {errors:?}"));
     assert_eq!(result.status, CheckStatus::Failed);
     let outcome = result
         .invariants
@@ -34,6 +36,8 @@ fn safe_streaming_fixture_passes() {
         "../../../modelcheck/streaming/safe_protocol.json"
     ));
     let result = check(&request).unwrap_or_else(|errors| panic!("invalid fixture: {errors:?}"));
+    validate_result(&request, &result)
+        .unwrap_or_else(|errors| panic!("result validation failed: {errors:?}"));
     assert_eq!(result.status, CheckStatus::Passed);
     assert!(result.scope.complete_within_bounds);
 }

@@ -94,9 +94,7 @@ class CampaignScope(_CampaignModel):
     hardware_backed: Literal[False] = False
     hardware_performance_claims: Literal[False] = False
     universal_proof: Literal[False] = False
-    oracle: Literal["bounded_explicit_state_and_policy_enumeration"] = (
-        "bounded_explicit_state_and_policy_enumeration"
-    )
+    oracle: Literal["bounded_policy_domain_enumeration"] = "bounded_policy_domain_enumeration"
     fault_family: Literal["deadline_batching_cancellation"] = "deadline_batching_cancellation"
 
 
@@ -347,9 +345,10 @@ def _ground_truth(
 ) -> tuple[dict[str, object], Path]:
     modelcheck = bounded_candidate_modelcheck_document(candidate, seed=run_seed)
     properties = bounded_candidate_policy_property_document(candidate, seed=run_seed)
-    combined_result = (
-        "pass" if modelcheck["result"] == "pass" and properties["result"] == "pass" else "fail"
-    )
+    # The strategy under evaluation must not define its own ground truth.  The
+    # exhaustive policy-domain enumerator labels this bounded fixture; the
+    # explicit-state result is retained as a cross-check only.
+    combined_result = "pass" if properties["result"] == "pass" else "fail"
     document: dict[str, object] = {
         "schema_version": "sloforge.genesis.h3-ground-truth/v1",
         "run_seed": run_seed,
@@ -489,6 +488,9 @@ def _modelcheck_records(
         if evidence != truth["modelcheck"]:
             raise RuntimeError("model-check strategy differs from ground truth evaluation")
         failed = evidence["result"] == "fail"
+        known_faulty = truth["combined_result"] == "fail"
+        if failed and not known_faulty:
+            raise RuntimeError("model-check strategy rejected the independent valid fixture")
         trace = evidence["counterexample_trace"]
         initial_size = len(trace) if isinstance(trace, list) and trace else None
         state_count = evidence["state_count"]
@@ -505,9 +507,13 @@ def _modelcheck_records(
                 strategy=VerificationStrategy.MODEL_CHECK_ONLY,
                 candidate=candidate,
                 ordinal=ordinal,
-                known_faulty=failed,
+                known_faulty=known_faulty,
                 disposition=(
-                    FaultDisposition.DETECTED if failed else FaultDisposition.VALID_CONFIRMED
+                    FaultDisposition.DETECTED
+                    if known_faulty and failed
+                    else FaultDisposition.ESCAPED
+                    if known_faulty
+                    else FaultDisposition.VALID_CONFIRMED
                 ),
                 cases=0,
                 invocations=1,
@@ -846,6 +852,7 @@ def run_cegis_campaign(
             "Tests-only uses a declared happy-path and late-cancellation suite; other test suites may differ.",
             "Fuzzing is schema-aware deterministic schedule generation with a fixed per-candidate budget.",
             "Model checking is exhaustive only within the recorded single-request, depth-four abstraction.",
+            "Fault labels come from exhaustive policy-domain enumeration; explicit-state model checking is evaluated as a separate strategy and retained only as a cross-check.",
             "All results are CPU protocol evidence; no latency, throughput, GPU, or universal-proof claim is made.",
         ),
     )
@@ -1099,12 +1106,7 @@ def validate_cegis_campaign(output_directory: Path) -> H3CampaignReport:
             if (
                 truth.get("candidate_sha256") != _candidate_sha(candidate)
                 or truth.get("combined_result")
-                != (
-                    "pass"
-                    if expected_modelcheck["result"] == "pass"
-                    and expected_property["result"] == "pass"
-                    else "fail"
-                )
+                != ("pass" if expected_property["result"] == "pass" else "fail")
                 or truth.get("modelcheck") != expected_modelcheck
                 or truth.get("property_enumeration") != expected_property
                 or truth.get("checks_agree")

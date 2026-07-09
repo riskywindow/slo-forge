@@ -90,7 +90,7 @@ def minimize_protocol_failure(
         nonlocal evaluations
         if evaluations >= maximum_evaluations:
             return False
-        outcome = verifier.verify(candidate, witness, seed=seed + evaluations + 1)
+        outcome = verifier.verify(candidate, witness, seed=seed)
         evaluations += 1
         return (
             not outcome.passed

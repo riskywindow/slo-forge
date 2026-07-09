@@ -34,6 +34,7 @@ from sloforge.genesis.capsule import (
     RawBenchmarkSamples,
     ScopedClaim,
     TrustedArtifactAnchor,
+    TrustedClaimAnchor,
     TrustedEvidenceAnchor,
     ValidationContext,
     ValidationIssue,
@@ -379,6 +380,13 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
             )
             for record in evidence
         ),
+        trusted_claim_anchors=tuple(
+            TrustedClaimAnchor(
+                claim_id=claim.claim_id,
+                claim_digest=_digest(canonical_json(claim)),
+            )
+            for claim in claims
+        ),
         trusted_artifact_anchors=(
             TrustedArtifactAnchor(artifact_id=rollback.artifact_id, digest=rollback.digest),
         ),
@@ -431,6 +439,45 @@ def test_trusted_artifact_origin_requires_external_anchor(tmp_path: Path) -> Non
     report = validate_capsule(capsule, tmp_path, unanchored)
     assert ValidationIssueCode.EVIDENCE_UNTRUSTED in {item.code for item in report.issues}
     assert not report.local_evolution_eligible
+
+
+def test_promotion_claim_scope_requires_external_anchor(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    operational = next(
+        claim for claim in capsule.claims if claim.category is ClaimCategory.OPERATIONAL
+    )
+    broadened = operational.model_copy(
+        update={
+            "scope": operational.scope.model_copy(
+                update={
+                    "hardware_fingerprints": (
+                        *operational.scope.hardware_fingerprints,
+                        _constant_digest("unverified-hardware"),
+                    )
+                }
+            )
+        }
+    )
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "claims": tuple(
+                    broadened if claim.claim_id == operational.claim_id else claim
+                    for claim in capsule.claims
+                ),
+            }
+        )
+    )
+    assert resealed.capsule_digest is not None
+    report = validate_capsule(
+        resealed,
+        tmp_path,
+        context.model_copy(update={"expected_capsule_digest": resealed.capsule_digest}),
+    )
+
+    assert ValidationIssueCode.EVIDENCE_UNTRUSTED in {issue.code for issue in report.issues}
+    assert not report.promotion_eligible
 
 
 def test_runtime_bundle_entry_count_is_bounded_before_extraction(tmp_path: Path) -> None:

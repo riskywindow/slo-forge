@@ -576,26 +576,36 @@ def bounded_candidate_policy_property_document(
             f"policy property domain contains {state_count} states, limit is {maximum_states}"
         )
     checked = 0
-    counterexample: dict[str, object] | None = None
-    for values in product(*domains):
-        assignment = {
-            specification.name: value
-            for specification, value in zip(policy.inputs, values, strict=True)
+    input_names = {specification.name for specification in policy.inputs}
+    counterexample: dict[str, object] | None = (
+        {
+            "assignment": {},
+            "observed_output": None,
+            "violations": ["required boolean cancellation_pending input is absent"],
         }
-        decision = execute_bytecode(policy, assignment)
-        checked += 1
-        violations: list[str] = []
-        if type(decision) is not int or not 0 <= decision <= 4:
-            violations.append("output is outside the declared integer bound [0,4]")
-        if assignment.get("cancellation_pending") is True and decision != 0:
-            violations.append("cancelled request remains schedulable")
-        if violations:
-            counterexample = {
-                "assignment": assignment,
-                "observed_output": decision,
-                "violations": violations,
+        if "cancellation_pending" not in input_names
+        else None
+    )
+    if counterexample is None:
+        for values in product(*domains):
+            assignment = {
+                specification.name: value
+                for specification, value in zip(policy.inputs, values, strict=True)
             }
-            break
+            decision = execute_bytecode(policy, assignment)
+            checked += 1
+            violations: list[str] = []
+            if type(decision) is not int or not 0 <= decision <= 4:
+                violations.append("output is outside the declared integer bound [0,4]")
+            if assignment.get("cancellation_pending") is True and decision != 0:
+                violations.append("cancelled request remains schedulable")
+            if violations:
+                counterexample = {
+                    "assignment": assignment,
+                    "observed_output": decision,
+                    "violations": violations,
+                }
+                break
     return {
         "schema_version": "genesis.candidate-policy-property.v1",
         "candidate_id": design.candidate_id,
@@ -605,6 +615,7 @@ def bounded_candidate_policy_property_document(
         "maximum_states": maximum_states,
         "states_checked": checked,
         "properties": [
+            "typed boolean cancellation_pending input is present",
             "output is an integer in the declared interval [0,4]",
             "cancellation_pending implies output equals zero",
         ],
