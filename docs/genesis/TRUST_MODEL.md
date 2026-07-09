@@ -116,6 +116,49 @@ SHA-256 gives content integrity and addressing, not signer identity. A caller mu
 capsule digest through the deployment control plane. Signature/key distribution can be layered on
 the manifest without weakening hash checks; it is not claimed by this implementation.
 
+## H6 adversarial validation of the trust boundary
+
+The H6 proof-carrying promotion campaign treats
+`genesis/capsule/validator.py` as the production trust decision and treats the campaign generator,
+mutations, fixture manifests, and re-sealed attacker output as untrusted inputs. The campaign does
+not add an alternative verifier or accept a candidate from a hard-coded outcome. It first requires
+the unmodified, promotion-complete conformance capsule to pass `validate_capsule`, then requires the
+same validator to reject each mutation.
+
+The default campaign spans three explicit seeds and ten attack classes:
+
+- changed generated-runtime bytes;
+- a mismatched current hardware fingerprint;
+- a mismatched installed dependency version;
+- evidence evaluated after its validity horizon;
+- a missing required quality-evidence record;
+- a re-sealed benchmark summary inconsistent with raw samples;
+- changed replayable quality-evidence bytes;
+- a missing counterexample corpus;
+- an operational/model-check claim outside the current hardware scope; and
+- changed state-conversion bytes naming an incompatible source genome.
+
+Each result includes the validator's exact typed issue codes and immutable hashes for the mutation,
+attacked capsule, validation context, and validation report. A separate campaign validator reopens
+those artifacts and calls the production validator again. It then builds the baseline capsule in a
+fresh temporary tree, reapplies the mutation, and compares the independently rebuilt mutation,
+capsule, context, issue set, and report. This prevents the summary from becoming authority for its
+own result.
+
+Several re-sealed attacks also substitute the attacker-selected manifest digest into the test
+context. This is intentional adversarial depth: the inner evidence-anchor, completeness, scope, and
+statistics controls must still reject the attack even if content addressing alone passes. It is not
+the operational trust flow. In deployment, `expected_capsule_digest` remains an independently
+pinned control-plane value, and an attacker cannot authorize its replacement merely by re-sealing a
+manifest.
+
+H6 is local CPU trust-boundary conformance only. It records zero hardware-backed runs and zero GPU
+hours. The benchmark inputs are deterministic validation vectors, not measured performance. The
+model-check attack verifies claim-scope enforcement, not the soundness of the bounded model checker.
+The migration attack verifies the integrity of an externally anchored state-conversion artifact,
+not semantic equivalence of source and target state. Semantic conversion replay and protocol
+invariants remain obligations of the evidence issuer and promotion controller.
+
 ## Generated-code sandbox
 
 The sandbox takes an argv vector and never invokes a shell. It receives explicit non-symlink
@@ -178,6 +221,7 @@ The current targeted verification command is:
 PYTHONDONTWRITEBYTECODE=1 uv run pytest -q \
   tests/python/test_genesis_sandbox.py \
   tests/python/test_genesis_capsule.py \
+  tests/python/test_genesis_capsule_attack_campaign.py \
   tests/python/test_genesis_artifacts.py
 ```
 

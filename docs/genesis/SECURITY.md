@@ -81,6 +81,29 @@ Lineage is proposal input, never proof authority. Transferred transformations an
 must be rechecked in the new model, workload, hardware, and dependency context. Dependency
 invalidation marks affected evidence stale instead of silently reusing it.
 
+## Proof-carrying promotion attack campaign
+
+H6 exercises the production capsule validator against ten fail-closed attack classes: modified
+generated-runtime bytes, hardware mismatch, dependency mismatch, stale evidence, incomplete
+evidence, an altered benchmark summary, altered quality-evidence bytes, a missing counterexample
+corpus, an out-of-scope operational/model-check claim, and changed incompatible state-conversion
+bytes. The default campaign uses three explicit seeds, so its schema-default matrix contains thirty
+attacked cases after the three unmodified baselines have passed.
+
+The stored campaign report is not trusted as proof of its own assertions. Validation rehashes every
+supporting artifact, reruns `validate_capsule` on the stored attack, rebuilds the baseline fixture in
+a new temporary tree, reapplies the mutation, and compares the complete typed issue report. Mutation
+records bind before/after file hashes plus changed manifest and context paths. Re-sealed-manifest
+attacks may supply their new digest to exercise controls behind content addressing, while the real
+deployment boundary still requires an independently pinned expected digest.
+
+This campaign records zero hardware-backed runs and zero GPU hours; it neither deploys candidates
+nor reports performance measurements. Its model-check case demonstrates hardware-scope enforcement
+for an operational claim, not model-checker soundness. Its state-migration case demonstrates that
+anchored conversion bytes cannot be replaced without detection, not that the validator executes or
+semantically proves a conversion. Those narrower results must not be described as universal proof
+of transition safety.
+
 ## Promotion safety
 
 Generated output cannot edit verifier code, benchmark acceptance logic, the capsule validator,
@@ -120,6 +143,7 @@ PYTHONDONTWRITEBYTECODE=1 uv run pytest -q \
   tests/python/test_genesis_sandbox.py \
   tests/python/test_genesis_artifacts.py \
   tests/python/test_genesis_capsule.py \
+  tests/python/test_genesis_capsule_attack_campaign.py \
   tests/python/test_genesis_evolution.py \
   tests/python/test_genesis_redteam.py
 ```
