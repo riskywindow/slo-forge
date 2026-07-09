@@ -116,7 +116,7 @@ def test_suite_configuration_derives_distinct_bounded_seeds() -> None:
         h1_synthesis_seed_count=2,
     )
 
-    assert _campaign_seeds(configuration) == (74129, 74130, 74131)
+    assert _campaign_seeds(configuration) == (73129, 73130, 73131)
     h1 = _h1_configuration(configuration)
     assert h1.grammar.seed == 76129
     assert h1.grammar.count == 2

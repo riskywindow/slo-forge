@@ -103,6 +103,9 @@ class WilsonInterval(_CampaignModel):
             raise ValueError("H1 campaign reports pre-registered 95% Wilson intervals")
         if self.lower > self.upper:
             raise ValueError("Wilson interval is reversed")
+        estimate = self.successes / self.trials
+        if not self.lower <= estimate <= self.upper:
+            raise ValueError("Wilson interval does not contain its observed proportion")
         return self
 
 
@@ -322,8 +325,8 @@ def _wilson(successes: int, trials: int, *, sample_unit: str) -> WilsonInterval:
     return WilsonInterval(
         successes=successes,
         trials=trials,
-        lower=max(0.0, center - margin),
-        upper=min(1.0, center + margin),
+        lower=0.0 if successes == 0 else max(0.0, center - margin),
+        upper=1.0 if successes == trials else min(1.0, center + margin),
         sample_unit=sample_unit,  # type: ignore[arg-type]
     )
 

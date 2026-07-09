@@ -978,6 +978,7 @@ def run_autopsy_guided_campaign(
             "actual hardware experiment counts are zero and no GPU claim is supported",
             "the campaign evaluates one synthetic network-degradation diagnosis and mutation grammar",
             "final objective values are normalized utility points, not production latency",
+            "multi-seed means are descriptive deterministic fixture summaries; no population confidence interval is claimed",
         ),
         report_path=str(report_path.resolve()),
     )
