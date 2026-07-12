@@ -66,8 +66,9 @@ make synthbench-smoke
 It produces `artifacts/genesis/demo/GENESIS_DEMO_REPORT.json` and
 `artifacts/synthbench/smoke/run/report.json`. The flagship run executes a real unsafe
 cancellation-policy candidate, minimizes the witness to `admit, cancel, emit`, learns a reusable
-`cancel_check_before_emit` precondition, and accepts a corrected candidate that changes both request
-and serving regions. It then builds two separate capsules from independently synthesized candidates,
+`cancel_check_before_emit` precondition, and accepts a corrected candidate that changes request,
+serving, and state regions through a synthesized batching policy plus a bounded paged-state layout.
+It then builds two separate capsules from independently synthesized candidates,
 registers the second as an isolated challenger, runs deterministic local shadow/canary gates,
 revalidates immediately before promotion, and proves in the fixture that an already visible stream
 remains leased to its original capsule. The later fabric-degradation trigger is simulated, not a
@@ -82,17 +83,21 @@ sloforge genesis capsule validate artifacts/genesis/manual-73129/capsule \
 ```
 
 The operator-controlled context pins model, tokenizer, workload, hardware, dependency lock, verifier
-version, evidence-record issuers, and exact artifact digests. SHA-256 provides content identity, not
-signer authentication; production use must distribute the expected digest and evidence anchors over
-a trusted channel. The CLI rejects a context stored inside the capsule itself. See the exact
+version, each complete promotion claim and scope, evidence-record issuers, and exact artifact
+digests. SHA-256 provides content identity, not signer authentication; production use must distribute
+the expected digest and anchors over a trusted channel. The CLI rejects a context stored inside the
+capsule itself. See the exact
 [CPU demo and validation procedure](docs/genesis/DEMO_SCRIPT.md), [capsule format](docs/genesis/GENESIS_CAPSULE.md), and [trust model](docs/genesis/TRUST_MODEL.md).
 
 ServingSynthBench's CPU smoke mode uses seeded randomized model grammars, evaluator-only hidden cases,
 raw timing samples, randomized run order, and artifact-derived metrics. These timings exercise the
-harness; they are not GPU or production serving results. The multi-seed Genesis evaluation is honest
-about the evidence boundary: H2 (whole-stack performance), H4 (Autopsy-guided search efficiency), and
-H5 (lineage transfer efficiency) remain unevaluated campaigns, while the local controller and
-cross-layer candidate results are only scoped or partial evidence.
+harness; they are not GPU or production serving results. `make genesis-evaluation` runs dedicated,
+independently replayed H1--H9 campaigns and binds every file in
+`artifacts/genesis/evaluation/GENESIS_EVALUATION_SUITE.json`. In the retained five-seed CPU/synthetic
+campaign, H1, H2, H5, H6, H7, and H8 are supported only in their declared fixture scopes; H3 and H4
+are mixed against their ablation baselines; and H9 is negative because bounded page overhead makes
+the accepted two-layer policy/state candidate slightly worse than policy-only. All nine campaigns
+record zero hardware-backed runs.
 
 On the checked Darwin host, the macOS sandbox path was exercised. NVIDIA GPU/Triton execution,
 multi-GPU/multi-node execution, Linux bubblewrap isolation, Docker-daemon smoke, paid synthesis,

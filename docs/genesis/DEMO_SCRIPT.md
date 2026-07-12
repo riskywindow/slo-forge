@@ -165,12 +165,12 @@ fi
 The verifier actually executes the unsafe policy schedule, observes cancelled work being scheduled for token commitment,
 and minimizes the schedule to `admit, cancel, emit`. The learned
 `cancel_check_before_emit == true` precondition suppresses a repeated family member before Genesis
-selects the corrected request/serving candidate.
+selects the corrected request/serving plus bounded paged-state candidate.
 
 ## Validate with an external trust context
 
 Capsule integrity is not identity authentication. The operator must pin the expected capsule digest
-and trusted evidence anchors outside the untrusted capsule tree. For the local demo, the trusted
+and trusted claim/evidence anchors outside the untrusted capsule tree. For the local demo, the trusted
 builder emits a convenience context; copy it into an operator-controlled location before treating the
 capsule directory as hostile:
 
@@ -219,8 +219,16 @@ Run the multi-seed hypothesis report with:
 make genesis-evaluation
 ```
 
-The resulting `artifacts/genesis/evaluation/evaluation.json` reports H2 and H4 as not evaluated.
-Lineage mechanics and a deterministic transfer demonstration exist, but the required performance
-campaign for H5 remains unevaluated. H7 and H9 are only partially evaluated. No NVIDIA GPU, Linux
-sandbox backend, Docker daemon, multi-node environment, or external live promotion was exercised on
-the checked Darwin host.
+The resulting `artifacts/genesis/evaluation/GENESIS_EVALUATION_SUITE.json` binds the native core,
+H1, H2/H9, H3, H4, H5, H6, H7, and H8 reports plus every raw artifact in one canonical manifest.
+The retained campaign supports H1, H2, H5, H6, H7, and H8 only in their declared CPU/synthetic
+fixture scopes. H3 and H4 are mixed against their ablation baselines, and H9 is an explicit negative.
+Validate it independently with:
+
+```bash
+uv run --locked python -m sloforge.genesis.evaluation_suite validate \
+  --report artifacts/genesis/evaluation/GENESIS_EVALUATION_SUITE.json
+```
+
+No NVIDIA GPU, Linux sandbox backend, Docker daemon, multi-node environment, or external live
+promotion was exercised on the checked Darwin host.

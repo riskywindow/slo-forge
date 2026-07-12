@@ -27,12 +27,12 @@ An optional synthesis agent could propose code, but the implemented local path d
 4. Runtime synthesis emits a bounded single-worker streaming reference runtime with deterministic phase seeds, ownership/release discipline, cancellation safe points, fixed queues, metrics, and a differential harness.
 5. Search proposes typed transformations and uses static-to-operational fidelity stages, hard budgets, mutable-region guards, a Pareto archive, and an independent evaluator.
 6. Verification records separate semantic, quality, resource, statistical, model-check, hardware, and operational claims; there is no aggregate “verified” Boolean.
-7. A capsule seals generated artifacts, raw evidence, compatibility, counterexamples, limitations, rollback, and lineage under one canonical digest. An operator-controlled context outside the capsule pins that digest and every trusted evidence issuer/artifact binding.
+7. A capsule seals generated artifacts, raw evidence, compatibility, counterexamples, limitations, rollback, and lineage under one canonical digest. An operator-controlled context outside the capsule pins that digest, every complete promotion claim/scope, and every trusted evidence issuer/artifact binding.
 8. The flagship evolution path synthesizes and builds two distinct capsules, validates both, isolates the challenger, and pins active streams to their starting capsule while new work moves to the promoted challenger; the previous champion remains rollback-ready.
 
 ## The real counterexample story
 
-The local synthesis fixture proposes a high-upside deadline batching policy that checks cancellation too early. An independent policy simulator executes an actual request schedule and observes cancelled work being scheduled for token commitment. Deterministic delta debugging reduces the failure to `admit, cancel, emit`. Genesis learns `cancel_check_before_emit == true`, persists the constraint, suppresses another member of the same unsafe family, and verifies a corrected candidate that changes both request and serving regions.
+The local synthesis fixture proposes a high-upside deadline batching policy that checks cancellation too early. An independent policy simulator executes an actual request schedule and observes cancelled work being scheduled for token commitment. Deterministic delta debugging reduces the failure to `admit, cancel, emit`. Genesis learns `cancel_check_before_emit == true`, persists the constraint, suppresses another member of the same unsafe family, and verifies a corrected candidate that changes request, serving, and bounded state-layout regions.
 
 The scope matters: this is bounded cancellation-protocol evidence, not universal program correctness or a claim of global algorithmic novelty.
 
@@ -48,7 +48,7 @@ Kernel synthesis is evidence-targeted rather than an attempt to rewrite attentio
 
 The standalone upstream-ready bundle preserves a negative local CPU microbenchmark: its validation-first implementation is slower than the scalar reference on the measured host. The local capsule records a candidate-bound deterministic feasibility simulation but explicitly accepts no performance-improvement claim. Neither artifact is a hardware-backed serving speedup. GPU/Triton paths remain fail-closed and unexercised without real hardware and opt-in.
 
-The multi-seed evaluation therefore leaves H2 (whole-stack performance), H4 (Autopsy-guided search efficiency), and H5 (lineage transfer efficiency) unevaluated. H7 and H9 have only local/scoped evidence. The mechanism demos are useful, but they do not substitute for the missing comparative campaigns.
+The multi-seed evaluation supports H1, H2, H5, H6, H7, and H8 only in declared CPU/synthetic fixture scopes. H3 and H4 are mixed against their ablation baselines. H9 is negative because bounded page overhead makes the accepted policy/state candidate slightly worse than policy-only. None of these service-model or logical-time results substitutes for hardware-backed serving evidence.
 
 ## Persistent intelligence
 
@@ -67,4 +67,4 @@ Lineage stores tasks, accepted and rejected candidates, transformations, evidenc
 
 ## What remains unclaimed
 
-The implemented CPU vertical slice does not establish production-scale third-party model coverage, a universal transformation interpreter, real GPU speedup, multi-node deployment, external live promotion, or global novelty. Independent tensor/state/distributed/search modules are tested but are not all composed into the local cancellation fixture. The checked host exercised the macOS sandbox, not Linux bubblewrap or a Docker daemon. Hardware claims require raw hardware artifacts, and performance placeholders stay unpopulated until final artifact-derived evaluation exists.
+The implemented CPU vertical slice does not establish production-scale third-party model coverage, a universal transformation interpreter, real GPU speedup, multi-node deployment, external live promotion, or global novelty. Tensor and Fabric transformations are evaluated but not lowered into the accepted local runtime. The checked host exercised the macOS sandbox, not Linux bubblewrap or a Docker daemon. Hardware claims require raw hardware artifacts.

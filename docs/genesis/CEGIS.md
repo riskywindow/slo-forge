@@ -35,7 +35,7 @@ It observes cancelled work being scheduled for token commitment, rejects the can
 admit, cancel, emit
 ```
 
-The verifier generalizes the family precondition `batching.cancel_check_before_emit == true`. A second unsafe candidate in the same transformation family is suppressed without another full verifier run. A corrected cross-layer request/serving candidate performs the required immediate pre-commit check and is accepted within this bounded protocol scope. Acceptance is computed by simulation; it is not hard-coded and is not a capsule or production-promotion decision.
+The verifier generalizes the family precondition `batching.cancel_check_before_emit == true`. A second unsafe candidate in the same transformation family is suppressed without another full verifier run. A corrected candidate performs the required immediate pre-commit check and combines the request/serving batching change with a bounded paged-state layout. It is accepted within this bounded protocol and deterministic service-model scope. Acceptance is computed by verification and simulation; it is not hard-coded and is not an external production-promotion decision.
 
 Artifacts include:
 

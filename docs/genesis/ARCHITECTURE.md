@@ -1,6 +1,6 @@
 # Genesis architecture
 
-SLOForge Genesis is implemented as a proof-carrying extension of the existing SLOForge compiler, Fabric planner, Autopsy diagnosis pipeline, and deployment controller. It does not replace those systems. The implemented CPU vertical slice turns a typed reference package into an `InferenceGenome`, generates a conservative runtime, synthesizes request/serving policy candidates, rejects an unsafe candidate with a minimized counterexample, and retains scoped evidence for later capsule and rollout gates.
+SLOForge Genesis is implemented as a proof-carrying extension of the existing SLOForge compiler, Fabric planner, Autopsy diagnosis pipeline, and deployment controller. It does not replace those systems. The implemented CPU vertical slice turns a typed reference package into an `InferenceGenome`, generates a conservative runtime, synthesizes request/serving policy and bounded state-layout candidates, rejects an unsafe candidate with a minimized counterexample, and retains scoped evidence for later capsule and rollout gates.
 
 ## Data and control flow
 

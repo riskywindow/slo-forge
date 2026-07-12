@@ -15,7 +15,7 @@ The implemented CPU vertical slice statically inspects a previously unseen-style
 package, generates a bounded streaming reference runtime, synthesizes a cancellation-sensitive
 batching policy, rejects the highest heuristic-upside unsafe proposal, minimizes the actual failing
 schedule, learns a reusable precondition, and validates a corrected cross-layer request/serving
-candidate. The checked-in environment had no NVIDIA GPU or CUDA compiler; this paper therefore
+plus bounded paged-state candidate. The checked-in environment had no NVIDIA GPU or CUDA compiler; this paper therefore
 reports no GPU, multi-node, cloud, production-traffic, energy, or speedup result. CPU benchmark
 samples exercise the harness, and the capsule's positive performance statement is explicitly a
 deterministic service-model result rather than hardware evidence.
@@ -181,7 +181,7 @@ admit, cancel, emit
 
 Genesis learns `batching.cancel_check_before_emit == true`, suppresses a second candidate from the same
 invalid family without a full verifier run, and independently accepts a corrected candidate that
-changes both request cancellation and serving batching behavior. The rejected proposal had the
+changes request cancellation, serving batching behavior, and the bounded state layout. The rejected proposal had the
 highest declared heuristic upside; no measured speed claim is attached to it.
 
 Operator verification separately exercises rare shapes, dtypes, non-contiguous strides, aliasing,
@@ -209,11 +209,12 @@ The independent validator rejects path escape, symlinks, missing/changed files, 
 issuer/role mismatch, expired or future evidence, incompatible contracts/hardware/dependencies,
 altered benchmark summaries, incomplete promotion evidence, and absent rollback/counterexample
 material. It recomputes benchmark median and tail values from finite raw samples. Promotion-required
-issuer labels are checked against an operator-supplied context outside the capsule; its trusted
-evidence anchors bind the evidence-record digest, issuer/version, and exact artifact digests.
+issuer labels are checked against an operator-supplied context outside the capsule; its trusted claim
+anchors bind the complete claim and scope, while trusted evidence anchors bind the evidence-record
+digest, issuer/version, and exact artifact digests.
 
 SHA-256 supplies integrity and content identity, not signer identity. Deployment must pin the expected
-capsule digest and trusted evidence anchors through an external operator-controlled channel. The CLI
+capsule digest and trusted claim/evidence anchors through an external operator-controlled channel. The CLI
 rejects a validation context located inside the capsule root. The implementation does not claim a
 public-key signature scheme or universal proof.
 
@@ -340,16 +341,17 @@ the handoff count.
   exact validity checks, randomized run ordering, raw timing persistence, audit checks, and
   artifact-derived reporting.
 
-### 11.3 Results not established
+### 11.3 Evaluation disposition
 
 No Genesis artifact at paper-authoring time supports a hardware-backed latency, throughput, goodput,
 cost, energy, GPU-kernel, multi-device, or optimization-speedup comparison. The kernel path exercises
 real CPU timing and conservative acceptance logic; its standalone preserved result is negative. The
 capsule's positive performance evidence is a deterministic service-model simulation and is labeled as
-such. H2 (whole-stack performance), H4 (Autopsy-guided efficiency), and H5 (lineage-transfer
-efficiency) are unevaluated. H7 and H9 are partially evaluated only in local/scoped fixtures. The
-focused suite also does not establish a complete four-category search or external production
-evolution.
+such. Dedicated five-seed campaigns support H1, H2, H5, H6, H7, and H8 only in their declared
+CPU/synthetic fixture scopes. H3 and H4 are mixed against their ablation baselines. H9 is negative:
+the accepted policy/state candidate loses slightly to policy-only after bounded page overhead. The
+suite does not establish a complete four-category accepted runtime, hardware speedup, or external
+production evolution.
 
 ## 12. Related work
 
