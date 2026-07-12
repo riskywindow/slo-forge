@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict
 
 from sloforge.genesis.capsule import (
     CapsuleValidationReport,
+    GenesisCapsule,
     ValidationContext,
     build_local_capsule,
     load_capsule,
@@ -274,9 +275,74 @@ def run_genesis_demo(
         observed_at=timestamp,
     )
 
+    capsule = load_capsule(Path(capsule_result.capsule_path))
+    context = ValidationContext.model_validate_json(
+        Path(capsule_result.context_path).read_bytes(), strict=True
+    )
+    challenger_validation: tuple[GenesisCapsule, Path, Path, ValidationContext] | None = None
+
+    def validator(path: Path) -> CapsuleValidationReport:
+        resolved = path.resolve()
+        if resolved == Path(capsule_result.capsule_path).resolve():
+            return validate_capsule(capsule, capsule_directory, context)
+        if challenger_validation is not None:
+            (
+                challenger_capsule,
+                challenger_manifest,
+                challenger_directory,
+                challenger_context,
+            ) = challenger_validation
+            if resolved == challenger_manifest.resolve():
+                return validate_capsule(
+                    challenger_capsule,
+                    challenger_directory,
+                    challenger_context,
+                )
+        raise ValueError("controller requested validation of an unknown capsule")
+
+    champion = CapsuleReference(
+        capsule_id="genesis-champion",
+        capsule_digest=capsule_result.capsule_digest,
+        genome_hash=synthesis.accepted_genome_hash,
+        path=capsule_result.capsule_path,
+    )
+    gate_evidence_root = output / "evolution/runtime-gates"
+    controller = EvolutionController.initialize(
+        store=EvolutionStore(output / "evolution/controller-state.json"),
+        capsule_validator=validator,
+        gate_evidence_validator=local_gate_evidence_validator(gate_evidence_root),
+        config=EvolutionConfig(
+            execution_target=ExecutionTarget.LOCAL,
+            minimum_shadow_samples=2,
+            minimum_canary_samples=3,
+            maximum_p95_ttft_ratio=10.0,
+            maximum_p99_tpot_ratio=10.0,
+        ),
+        deployment_id="genesis-demo",
+        champion=champion,
+        seed=seed,
+        now_ms=0,
+    )
+    controller.open_stream(
+        "active-stream-before-promotion",
+        event_id="demo-open-active-stream",
+        observed_at_ms=1,
+        externally_visible_output=True,
+    )
+    triggered = controller.observe_trigger(
+        TriggerObservation(
+            event_id="fixture-workload-drift",
+            observed_at_ms=10,
+            workload_js_divergence=0.40,
+            detail="fixture prompt distribution moved from short to bimodal",
+        )
+    )
+    write_canonical(triggered, output / "evolution/triggered-snapshot.json")
+
     # Evolve from one independently validated capsule to another.  The
-    # challenger is synthesized in a separate immutable run with a distinct
-    # search seed while retaining the fixed reference-model seed and contracts.
+    # workload trigger above starts evolution before this separate immutable
+    # challenger run. The search seed is distinct while the fixed reference-
+    # model seed and content-addressed contracts remain unchanged.
     challenger_run = output / "evolution/challenger-run"
     challenger_initialized = initialize_genesis_run(
         package_root,
@@ -320,6 +386,32 @@ def run_genesis_demo(
         challenger_capsule_directory,
         observed_at=timestamp + timedelta(seconds=1),
     )
+    challenger_capsule = load_capsule(Path(challenger_capsule_result.capsule_path))
+    challenger_context = ValidationContext.model_validate_json(
+        Path(challenger_capsule_result.context_path).read_bytes(), strict=True
+    )
+    challenger_validation = (
+        challenger_capsule,
+        Path(challenger_capsule_result.capsule_path),
+        challenger_capsule_directory,
+        challenger_context,
+    )
+    synthesis_event_path = output / "evolution/challenger-synthesis-event.json"
+    synthesis_event = {
+        "schema_version": "sloforge.genesis.evolution.synthesis-event/v1",
+        "event_id": "demo-synthesize-challenger",
+        "observed_at_ms": 15,
+        "trigger_event_id": "fixture-workload-drift",
+        "trigger_snapshot_sha256": sha256_file(
+            output / "evolution/triggered-snapshot.json"
+        ),
+        "search_seed": seed + 1,
+        "runtime_seed": effective_runtime_seed,
+        "candidate_id": challenger_synthesis.accepted_candidate_id,
+        "genome_hash": challenger_synthesis.accepted_genome_hash,
+        "capsule_digest": challenger_capsule_result.capsule_digest,
+    }
+    _write(synthesis_event_path, synthesis_event)
 
     redteam = run_redteam_demo(output / "redteam", seed=seed)
     bottleneck = _measure_bottleneck(output / "kernel/raw-bottleneck.json", seed=seed)
@@ -328,6 +420,7 @@ def run_genesis_demo(
         output_root=output / "kernel/lab",
         seed=seed,
         candidate_limit=2,
+        reference_package_root=package_root,
         benchmark_config=KernelBenchmarkConfig(
             deterministic_seed=seed,
             warmup_count=1,
@@ -340,33 +433,6 @@ def run_genesis_demo(
         ),
     )
 
-    capsule = load_capsule(Path(capsule_result.capsule_path))
-    context = ValidationContext.model_validate_json(
-        Path(capsule_result.context_path).read_bytes(), strict=True
-    )
-    challenger_capsule = load_capsule(Path(challenger_capsule_result.capsule_path))
-    challenger_context = ValidationContext.model_validate_json(
-        Path(challenger_capsule_result.context_path).read_bytes(), strict=True
-    )
-
-    def validator(path: Path) -> CapsuleValidationReport:
-        resolved = path.resolve()
-        if resolved == Path(capsule_result.capsule_path).resolve():
-            return validate_capsule(capsule, capsule_directory, context)
-        if resolved == Path(challenger_capsule_result.capsule_path).resolve():
-            return validate_capsule(
-                challenger_capsule,
-                challenger_capsule_directory,
-                challenger_context,
-            )
-        raise ValueError("controller requested validation of an unknown capsule")
-
-    champion = CapsuleReference(
-        capsule_id="genesis-champion",
-        capsule_digest=capsule_result.capsule_digest,
-        genome_hash=synthesis.accepted_genome_hash,
-        path=capsule_result.capsule_path,
-    )
     challenger = CapsuleReference(
         capsule_id="genesis-corrected",
         capsule_digest=challenger_capsule_result.capsule_digest,
@@ -384,29 +450,6 @@ def run_genesis_demo(
             writable_artifact_root=str(isolation.resolve()),
         ),
         active_stream_compatible=False,
-    )
-    gate_evidence_root = output / "evolution/runtime-gates"
-    controller = EvolutionController.initialize(
-        store=EvolutionStore(output / "evolution/controller-state.json"),
-        capsule_validator=validator,
-        gate_evidence_validator=local_gate_evidence_validator(gate_evidence_root),
-        config=EvolutionConfig(
-            execution_target=ExecutionTarget.LOCAL,
-            minimum_shadow_samples=2,
-            minimum_canary_samples=3,
-            maximum_p95_ttft_ratio=10.0,
-            maximum_p99_tpot_ratio=10.0,
-        ),
-        deployment_id="genesis-demo",
-        champion=champion,
-        seed=seed,
-        now_ms=0,
-    )
-    controller.open_stream(
-        "active-stream-before-promotion",
-        event_id="demo-open-active-stream",
-        observed_at_ms=1,
-        externally_visible_output=True,
     )
     promoted = run_local_evolution_fixture(
         controller,
@@ -429,12 +472,27 @@ def run_genesis_demo(
         )
     )
     write_canonical(degraded, output / "evolution/degraded-snapshot.json")
+    timeline_events: list[dict[str, object]] = []
+    for audit in degraded.audit:
+        timeline_events.append(
+            {"source": "controller_audit", **audit.model_dump(mode="json")}
+        )
+        if audit.event_id == "fixture-workload-drift":
+            timeline_events.append(
+                {
+                    "source": "artifact_bound_synthesis",
+                    "action": "synthesize_challenger",
+                    "artifact_path": str(synthesis_event_path.resolve()),
+                    "artifact_sha256": sha256_file(synthesis_event_path),
+                    **synthesis_event,
+                }
+            )
     _write(
         output / "evolution/timeline.json",
         {
             "schema_version": "1.0.0",
-            "source": "controller_audit_records",
-            "events": [item.model_dump(mode="json") for item in degraded.audit],
+            "source": "controller_audit_records_and_artifact_bound_synthesis",
+            "events": timeline_events,
         },
     )
     run_lineage_transfer_demo(output / "lineage", seed=seed)
@@ -466,7 +524,7 @@ def run_genesis_demo(
         kernel_speedup_claim_count=sum(
             decision.status.value == "accepted" for decision in kernel.decisions
         ),
-        kernel_measurement_scope="isolated_operator_only_not_end_to_end_serving",
+        kernel_measurement_scope="cpu_generated_runtime_end_to_end_serving",
         kernel_causal_attribution=bottleneck.causal_attribution,
         evolution_promoted=promoted.phase is EvolutionPhase.PROMOTED,
         active_stream_preserved=active_preserved,

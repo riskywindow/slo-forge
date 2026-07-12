@@ -28,6 +28,8 @@ Snapshots preserve the trigger, challenger population, independent capsule repor
 
 `run_local_evolution_fixture` accepts a controller whose validator is already wired to real capsule artifacts, a challenger specification, and an explicit controller seed. It injects deterministic workload drift, runs shadow and canary gates, revalidates the capsule, and promotes only if all evidence passes. Tests also cover capsule rejection, canary rejection, request-boundary and policy swaps, rollback, crash recovery, persisted-state tampering, and the external live-promotion guard.
 
+The flagship demo establishes the chronology around that fixture explicitly: it persists the workload-drift trigger first, then executes the separate challenger synthesis and capsule build, records a content-hashed synthesis event bound to the trigger snapshot, and only then registers, shadows, canaries, and promotes the challenger. The combined timeline is derived from controller audit records plus that synthesis artifact; it is not a prewritten transcript.
+
 The controller and local/simulated observations are exercised; external production traffic is not implied. Gate observations are supplied by a harness rather than collected by this controller. Real workload-drift monitoring, physical fault injection, state-conversion migration, multi-node draining and external live promotion remain unexercised unless a separate artifact records them. The environment guard prevents those paths from being inferred from local success.
 
 ## H7 comparative campaign

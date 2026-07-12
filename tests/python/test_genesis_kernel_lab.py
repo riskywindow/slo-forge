@@ -16,7 +16,9 @@ from sloforge.genesis.kernel_lab import (
     KernelBenchmarkConfig,
     LabStatus,
     benchmark_candidate,
+    benchmark_generated_runtime_impact,
     decide_candidate,
+    derive_runtime_impact_config,
     execute_correctness,
     generate_candidates,
     generate_correctness_cases,
@@ -27,6 +29,7 @@ from sloforge.genesis.kernel_lab import (
     validate_bottleneck_evidence,
     validate_correctness_evidence,
     validate_generated_source,
+    validate_runtime_impact_report,
 )
 
 SEED = 73129
@@ -410,8 +413,127 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
         == report.benchmarks[0].raw_samples_sha256
     )
     assert json.loads((output / "kernel_lab_report.json").read_text())["evidence"]
+    assert len(report.runtime_impacts) == 1
+    impact = report.runtime_impacts[0]
+    assert impact.measurement_scope == "cpu_generated_runtime_end_to_end_serving"
+    assert impact.hardware_backed_gpu is False
+    assert impact.output_exact_match
+    assert impact.state_exact_match
+    assert impact.validation is not None
+    assert impact.validation.runtime_outputs_replayed
+    assert impact.validation.state_semantics_replayed
+    assert len(impact.samples) == 14
+    assert {item.alternative for item in impact.samples} == {"reference", "candidate"}
+    assert impact.source_package_hash != impact.patched_package_hash
+    assert {item.package_hash for item in impact.runtime_bundles} == {
+        impact.source_package_hash,
+        impact.patched_package_hash,
+    }
+    assert len(
+        {
+            impact.config.synthesis_seed,
+            impact.config.runtime_generation_seed,
+            impact.config.trace_seed,
+            impact.config.trial_order_seed,
+            impact.config.bootstrap_seed,
+            impact.config.sandbox_seed,
+        }
+    ) == 6
+    impact_root = candidate_root / "runtime-impact"
+    validate_runtime_impact_report(impact, artifact_root=impact_root)
+
+    package_link = tmp_path / "flagship-package-link"
+    package_link.symlink_to(
+        Path(__file__).resolve().parents[2] / "models/reference_tasks/hybrid_decoder",
+        target_is_directory=True,
+    )
+    generated_candidate, generated_source = generate_candidates(seed=SEED)[0]
+    with pytest.raises(ValueError, match="source package must not be a symlink"):
+        benchmark_generated_runtime_impact(
+            generated_candidate,
+            generated_source,
+            report.correctness[0],
+            reference_package_root=package_link,
+            output_root=tmp_path / "symlink-runtime-impact",
+            config=derive_runtime_impact_config(SEED),
+        )
+    raw_runtime_path = Path(impact.raw_samples_path)
+    raw_runtime = raw_runtime_path.read_bytes()
+    raw_runtime_path.write_bytes(raw_runtime + b"{}\n")
+    with pytest.raises(ValueError, match="raw samples changed"):
+        validate_runtime_impact_report(impact, artifact_root=impact_root)
+    raw_runtime_path.write_bytes(raw_runtime)
+    validate_runtime_impact_report(impact, artifact_root=impact_root)
+
+    escaped = impact.model_copy(update={"raw_samples_path": "/etc/hosts"})
+    with pytest.raises(ValueError, match="escapes its trusted root"):
+        validate_runtime_impact_report(escaped, artifact_root=impact_root)
+
+    runner_path = Path(impact.runner_path)
+    runner_source = runner_path.read_bytes()
+    runner_path.write_bytes(runner_source + b"\n# forged runner\n")
+    with pytest.raises(ValueError, match=r"installed trusted runner|trusted runner changed"):
+        validate_runtime_impact_report(impact, artifact_root=impact_root)
+    runner_path.write_bytes(runner_source)
+
+    candidate_identity = next(
+        item for item in impact.runtime_bundles if item.alternative == "candidate"
+    )
+    wrapper_path = Path(candidate_identity.package_root) / "reference.py"
+    wrapper_source = wrapper_path.read_bytes()
+    wrapper_path.write_bytes(wrapper_source + b"\n# forged wrapper\n")
+    with pytest.raises(ValueError, match="package hash changed"):
+        validate_runtime_impact_report(impact, artifact_root=impact_root)
+    wrapper_path.write_bytes(wrapper_source)
+
+    runtime_path = Path(candidate_identity.bundle_root) / "runtime.py"
+    runtime_source = runtime_path.read_bytes()
+    runtime_path.write_bytes(runtime_source + b"\n# forged runtime\n")
+    with pytest.raises(ValueError, match="generated runtime artifact changed"):
+        validate_runtime_impact_report(impact, artifact_root=impact_root)
+    runtime_path.write_bytes(runtime_source)
+
+    symlink_backup = raw_runtime_path.with_name("raw-runtime-samples.backup")
+    raw_runtime_path.rename(symlink_backup)
+    raw_runtime_path.symlink_to(symlink_backup.name)
+    with pytest.raises(ValueError, match="contains a symlink"):
+        validate_runtime_impact_report(impact, artifact_root=impact_root)
+    raw_runtime_path.unlink()
+    symlink_backup.rename(raw_runtime_path)
+
+    measured_path = Path(impact.runner_output_path)
+    measured_source = measured_path.read_bytes()
+    measured = json.loads(measured_source)
+    measured["samples"][0]["output_sha256"] = "0" * 64
+    measured_path.write_text(
+        json.dumps(measured, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    forged_sample = impact.samples[0].model_copy(update={"output_sha256": "0" * 64})
+    forged_samples = (forged_sample, *impact.samples[1:])
+    forged_raw = b"".join(
+        json.dumps(
+            item.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
+        ).encode()
+        + b"\n"
+        for item in forged_samples
+    )
+    raw_runtime_path.write_bytes(forged_raw)
+    forged_output = impact.model_copy(
+        update={
+            "samples": forged_samples,
+            "raw_samples_sha256": hashlib.sha256(forged_raw).hexdigest(),
+            "runner_output_sha256": hashlib.sha256(measured_path.read_bytes()).hexdigest(),
+        }
+    )
+    with pytest.raises(ValueError, match="output digest is not observation-derived"):
+        validate_runtime_impact_report(forged_output, artifact_root=impact_root)
+    measured_path.write_bytes(measured_source)
+    raw_runtime_path.write_bytes(raw_runtime)
+    validate_runtime_impact_report(impact, artifact_root=impact_root)
     assert report.decisions[0].claim in {
-        "no speedup claim; isolated operator evidence is not end-to-end serving evidence",
+        "no speedup claim; end-to-end generated-runtime acceptance gate did not pass",
+        "CPU generated-runtime speedup accepted within the declared local evidence scope",
     }
     with pytest.raises(FileExistsError, match="must be empty"):
         run_kernel_lab_demo(

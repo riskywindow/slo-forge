@@ -35,7 +35,7 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
     assert result.redteam_finding_count == result.redteam_replayed_count
     assert result.kernel_candidate_count == 2
     assert result.kernel_speedup_claim_count == 0
-    assert result.kernel_measurement_scope == "isolated_operator_only_not_end_to_end_serving"
+    assert result.kernel_measurement_scope == "cpu_generated_runtime_end_to_end_serving"
     assert not result.kernel_causal_attribution
     assert result.evolution_promoted
     assert result.active_stream_preserved
@@ -44,8 +44,19 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
     report = json.loads(Path(result.report_path).read_text(encoding="utf-8"))
     assert report["accepted_genome_hash"] == result.accepted_genome_hash
     timeline = json.loads((tmp_path / "demo/evolution/timeline.json").read_text(encoding="utf-8"))
-    assert timeline["source"] == "controller_audit_records"
+    assert timeline["source"] == "controller_audit_records_and_artifact_bound_synthesis"
     assert any(item["action"] == "promote" for item in timeline["events"])
+    actions = [item["action"] for item in timeline["events"]]
+    assert actions.index("begin_evolution") < actions.index("synthesize_challenger")
+    assert actions.index("synthesize_challenger") < actions.index("register_challenger")
+    assert actions.index("register_challenger") < actions.index("begin_shadow")
+    synthesis_event = next(
+        item for item in timeline["events"] if item["action"] == "synthesize_challenger"
+    )
+    assert (
+        hashlib.sha256(Path(synthesis_event["artifact_path"]).read_bytes()).hexdigest()
+        == synthesis_event["artifact_sha256"]
+    )
     promoted = json.loads(
         (tmp_path / "demo/evolution/promoted-snapshot.json").read_text(encoding="utf-8")
     )

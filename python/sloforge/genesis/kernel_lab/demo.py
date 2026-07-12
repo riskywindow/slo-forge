@@ -15,7 +15,17 @@ from .cases import generate_correctness_cases
 from .evidence import validate_bottleneck_evidence
 from .executor import execute_correctness
 from .generator import generate_candidates, hybrid_quantized_state_schema
-from .models import BottleneckEvidence, KernelBenchmarkConfig, KernelLabReport
+from .models import (
+    BottleneckEvidence,
+    KernelBenchmarkConfig,
+    KernelLabReport,
+    RuntimeImpactConfig,
+)
+from .runtime_impact import (
+    benchmark_generated_runtime_impact,
+    decide_with_runtime_impact,
+    derive_runtime_impact_config,
+)
 from .triton import triton_adapter_status
 
 
@@ -26,6 +36,8 @@ def run_kernel_lab_demo(
     seed: int,
     candidate_limit: int = 2,
     benchmark_config: KernelBenchmarkConfig | None = None,
+    reference_package_root: Path | None = None,
+    runtime_impact_config: RuntimeImpactConfig | None = None,
 ) -> KernelLabReport:
     """Generate, sandbox, verify, benchmark, decide, and persist all raw evidence."""
 
@@ -44,8 +56,15 @@ def run_kernel_lab_demo(
     cases = generate_correctness_cases(seed=seed)
     correctness = []
     benchmarks = []
+    runtime_impacts = []
     decisions = []
-    for candidate, source in generated:
+    package_root = reference_package_root or (
+        Path(__file__).resolve().parents[4] / "models/reference_tasks/hybrid_decoder"
+    )
+    impact_config = runtime_impact_config or derive_runtime_impact_config(seed)
+    if impact_config.synthesis_seed != seed:
+        raise ValueError("kernel demo and runtime-impact synthesis seeds must match")
+    for candidate_index, (candidate, source) in enumerate(generated):
         candidate_root = output_root / "candidates" / candidate.candidate_id
         verification = execute_correctness(
             candidate,
@@ -62,7 +81,24 @@ def run_kernel_lab_demo(
             output_root=candidate_root / "benchmark",
             config=config,
         )
-        decision = decide_candidate(verification, benchmark)
+        if candidate_index == 0 and verification.status.value == "passed":
+            impact = benchmark_generated_runtime_impact(
+                candidate,
+                source,
+                verification,
+                reference_package_root=package_root,
+                output_root=candidate_root / "runtime-impact",
+                config=impact_config,
+            )
+            runtime_impacts.append(impact)
+            decision = decide_with_runtime_impact(
+                verification,
+                benchmark,
+                impact,
+                artifact_root=candidate_root / "runtime-impact",
+            )
+        else:
+            decision = decide_candidate(verification, benchmark)
         correctness.append(verification)
         benchmarks.append(benchmark)
         decisions.append(decision)
@@ -89,6 +125,7 @@ def run_kernel_lab_demo(
         candidates=tuple(item[0] for item in generated),
         correctness=tuple(correctness),
         benchmarks=tuple(benchmarks),
+        runtime_impacts=tuple(runtime_impacts),
         decisions=tuple(decisions),
         triton_adapter=triton_adapter_status(),
     )

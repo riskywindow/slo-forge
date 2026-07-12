@@ -146,7 +146,8 @@ The focused kernel lab targets the HybridDecoder's saturating quantized state up
 reimplementing attention. It generates deterministic restricted CPU candidates, validates their AST
 against an allowlist, executes through the existing sandbox, tests int8 boundaries, random values,
 stride/alias behavior, and non-finite input rejection, and records warmup, raw samples, content hashes,
-confidence intervals, and repeated focused-operator-loop measurements. That loop is not end-to-end
+confidence intervals, repeated focused-operator-loop measurements, and a separate paired local-CPU
+generated-runtime experiment over interleaved request traces. The operator loop alone is not end-to-end
 model or serving execution, so it cannot promote a speedup claim by itself. The Triton
 adapter is feature-gated and was not executed on the checked-in host.
 
