@@ -120,6 +120,20 @@ impl ModelCheckRequest {
                 "partial reads require state transfer to be enabled",
             ));
         }
+        if self.assumptions.len() > 64 {
+            diagnostics.push(ValidationDiagnostic::new(
+                "assumptions",
+                "must contain at most 64 caller assumptions",
+            ));
+        }
+        for (index, assumption) in self.assumptions.iter().enumerate() {
+            if assumption.trim().is_empty() || assumption.len() > 512 {
+                diagnostics.push(ValidationDiagnostic::new(
+                    format!("assumptions[{index}]"),
+                    "must contain between 1 and 512 bytes",
+                ));
+            }
+        }
         if diagnostics.is_empty() {
             Ok(())
         } else {

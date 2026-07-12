@@ -12,10 +12,17 @@ from .model import EvidenceStatus, QualityContract, QualityEvidence, Verificatio
 FloatArray = npt.NDArray[np.float64]
 IntArray = npt.NDArray[np.int64]
 
+_MAXIMUM_QUALITY_CELLS = 10_000_000
+
 
 def _probabilities(logits: FloatArray) -> FloatArray:
-    shifted = logits - np.max(logits, axis=-1, keepdims=True)
-    exponent = np.exp(shifted)
+    # Always evaluate the quality metric in float64, independently of a
+    # candidate's lower-precision output dtype. Extreme but finite logits can
+    # legitimately underflow to zero after the stable maximum subtraction.
+    values = np.asarray(logits, dtype=np.float64)
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        shifted = values - np.max(values, axis=-1, keepdims=True)
+        exponent = np.exp(shifted)
     return cast(FloatArray, exponent / np.sum(exponent, axis=-1, keepdims=True))
 
 
@@ -30,8 +37,14 @@ def evaluate_quality(
         raise VerificationError("quality logits must be matching [samples, vocabulary] arrays")
     if reference_tokens.shape != candidate_tokens.shape or reference_tokens.ndim != 1:
         raise VerificationError("quality token arrays must be matching vectors")
-    if reference_logits.shape[0] != reference_tokens.shape[0] or not reference_tokens.size:
+    if (
+        reference_logits.shape[0] != reference_tokens.shape[0]
+        or not reference_tokens.size
+        or reference_logits.shape[1] == 0
+    ):
         raise VerificationError("quality dataset must be non-empty and aligned")
+    if reference_logits.size > _MAXIMUM_QUALITY_CELLS:
+        raise VerificationError("quality dataset exceeds the bounded logit-cell budget")
     if not np.issubdtype(reference_logits.dtype, np.floating) or not np.issubdtype(
         candidate_logits.dtype, np.floating
     ):
@@ -66,8 +79,12 @@ def evaluate_quality(
         raise VerificationError("quality error bounds must be finite and non-negative")
     if not 1 <= contract.topk <= reference_logits.shape[1]:
         raise VerificationError("top-k quality domain is invalid")
-    reference_probability = _probabilities(reference_logits)
-    candidate_probability = _probabilities(candidate_logits)
+    reference_values = np.asarray(reference_logits, dtype=np.float64)
+    candidate_values = np.asarray(candidate_logits, dtype=np.float64)
+    if not np.all(np.isfinite(reference_values)) or not np.all(np.isfinite(candidate_values)):
+        raise VerificationError("quality logits must be finite when represented as float64")
+    reference_probability = _probabilities(reference_values)
+    candidate_probability = _probabilities(candidate_values)
     epsilon = np.finfo(np.float64).tiny
     kl = np.mean(
         np.sum(
@@ -89,10 +106,10 @@ def evaluate_quality(
             axis=-1,
         )
     )
-    reference_top1 = np.argmax(reference_logits, axis=-1)
-    candidate_top1 = np.argmax(candidate_logits, axis=-1)
-    reference_topk = np.argpartition(reference_logits, -contract.topk, axis=-1)[:, -contract.topk :]
-    candidate_topk = np.argpartition(candidate_logits, -contract.topk, axis=-1)[:, -contract.topk :]
+    reference_top1 = np.argmax(reference_values, axis=-1)
+    candidate_top1 = np.argmax(candidate_values, axis=-1)
+    reference_topk = np.argpartition(reference_values, -contract.topk, axis=-1)[:, -contract.topk :]
+    candidate_topk = np.argpartition(candidate_values, -contract.topk, axis=-1)[:, -contract.topk :]
     topk_agreement = np.mean(
         [
             len(set(reference_row.tolist()) & set(candidate_row.tolist())) / contract.topk
@@ -101,7 +118,11 @@ def evaluate_quality(
     )
     exact_tokens = float(np.mean(reference_tokens == candidate_tokens))
     top1 = float(np.mean(reference_top1 == candidate_top1))
-    maximum_error = float(np.max(np.abs(reference_logits - candidate_logits)))
+    with np.errstate(over="ignore", invalid="ignore"):
+        maximum_error_long = np.max(
+            np.abs(reference_values.astype(np.longdouble) - candidate_values.astype(np.longdouble))
+        )
+    maximum_error = float(min(maximum_error_long, np.longdouble(np.finfo(np.float64).max)))
     violations: list[str] = []
     if exact_tokens < contract.exact_token_match_minimum:
         violations.append("exact_token_match")

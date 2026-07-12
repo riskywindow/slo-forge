@@ -24,13 +24,14 @@ The checker reports these properties independently:
 
 ## Exploration and evidence
 
-Exploration is deterministic breadth first. The seed breaks successor-order ties but does not relax completeness. Bounds cover requests, queue capacity, tokens/request, workers, worker failures, depth, states, and fairness window. Results record model version, seed, bounds, state and transition counts, assumptions, action coverage, each invariant result, and truncation reasons.
+Exploration is deterministic breadth first. The seed breaks successor-order ties but does not relax completeness. Bounds cover requests, queue capacity, tokens/request, workers, worker failures, depth, states, and fairness window. Results record model version, seed, bounds, state and transition counts, bounded caller assumptions, action coverage, each invariant result, and truncation reasons. Every invariant scope statement includes the canonical protocol choices; caller-supplied assumptions are explicitly prefixed so they cannot be confused with checker assumptions.
 
 If depth or state capacity truncates unexplored successors, unaffected properties are `inconclusive`; the result is not silently passed. `universal_proof` is always false. A failure contains a shortest trace under breadth-first exploration, per-step typed actions, state summaries and fingerprints. The independent replay function rejects altered fingerprints or actions.
+
+An invariant whose necessary protocol feature is disabled is also `inconclusive`, not vacuously passed. This applies independently to retry/worker-failure, state-transfer, rollout, and controller-recovery obligations. The aggregate result can pass only when every declared invariant is applicable, completely explored within the bounds, and counterexample-free.
 
 ## Exercised and unexercised scope
 
 Fixtures exercise a safe protocol plus duplicate/drop delivery, cancellation leak, queue overflow, ambiguous ownership, partial reads, incompatible migration, orphaning promotion, invalid rollback, stalled recovery and trace tampering. JSON Schema generation is available for request and result documents.
 
 The checker proves no property beyond its finite transition model, bounds and assumptions. It does not model packet-level networks, actual thread memory ordering, CUDA/NCCL internals, Byzantine failures, unbounded liveness, arbitrary generated source, or numerical tensor behavior. Protocol changes must be encoded as a `ProtocolSpec`/transition-model change before this checker can cover them.
-

@@ -14,11 +14,28 @@ from .model import (
 
 
 def analyze_resources(contract: ResourceContract, demand: ResourceDemand) -> ResourceEvidence:
+    capacity_and_limits = (
+        contract.device_capacity_bytes,
+        contract.host_capacity_bytes,
+        contract.maximum_processes,
+        contract.maximum_threads,
+        contract.maximum_file_descriptors,
+    )
+    if any(type(value) is not int for value in capacity_and_limits):
+        raise VerificationError("resource capacities and limits must be integers")
     if contract.device_capacity_bytes <= 0 or contract.host_capacity_bytes <= 0:
         raise VerificationError("resource capacities must be positive")
-    if not 0 <= contract.safety_margin_fraction < 1:
+    if any(value <= 0 for value in capacity_and_limits[2:]):
+        raise VerificationError("resource count limits must be positive")
+    if (
+        not math.isfinite(contract.safety_margin_fraction)
+        or not 0 <= contract.safety_margin_fraction < 1
+    ):
         raise VerificationError("safety margin must be in [0, 1)")
-    if not 0 <= contract.fragmentation_fraction < 1:
+    if (
+        not math.isfinite(contract.fragmentation_fraction)
+        or not 0 <= contract.fragmentation_fraction < 1
+    ):
         raise VerificationError("fragmentation allowance must be in [0, 1)")
     numeric_demand = (
         demand.model_device_bytes,
@@ -33,11 +50,14 @@ def analyze_resources(contract: ResourceContract, demand: ResourceDemand) -> Res
         demand.threads,
         demand.file_descriptors,
     )
+    if any(type(value) is not int for value in numeric_demand):
+        raise VerificationError("resource demands must be integers")
     if any(value < 0 for value in numeric_demand):
         raise VerificationError("resource demands cannot be negative")
     raw_device = sum(numeric_demand[:6]) + demand.conversion_overlap_bytes
     device_peak = math.ceil(raw_device / (1 - contract.fragmentation_fraction))
-    host_peak = demand.host_bytes + demand.conversion_overlap_bytes
+    raw_host = demand.host_bytes + demand.conversion_overlap_bytes
+    host_peak = math.ceil(raw_host / (1 - contract.fragmentation_fraction))
     usable_device = math.floor(
         contract.device_capacity_bytes * (1 - contract.safety_margin_fraction)
     )
@@ -63,6 +83,6 @@ def analyze_resources(contract: ResourceContract, demand: ResourceDemand) -> Res
         assumptions=(
             "champion_and_challenger_coexist",
             "conversion_buffer_overlaps",
-            "fragmentation_applied_to_device_peak",
+            "fragmentation_applied_to_device_and_host_peaks",
         ),
     )

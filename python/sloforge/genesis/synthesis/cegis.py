@@ -79,10 +79,16 @@ def minimize_protocol_failure(
     seed: int,
     maximum_evaluations: int,
 ) -> MinimizationResult:
-    """Run deterministic delta debugging while preserving the same contract failure."""
+    """Return a certified one-event-minimal failure under the valid witness domain.
+
+    The evaluation budget is a fail-closed resource bound. Exhausting it raises
+    instead of allowing a merely smaller witness to be labeled ``minimized``.
+    """
 
     if maximum_evaluations <= 0:
         raise ValueError("maximum minimization evaluations must be positive")
+    if not 0 <= seed <= (1 << 64) - 1:
+        raise ValueError("minimization seed must be an unsigned 64-bit integer")
     current = failure.witness
     evaluations = 0
 
@@ -120,6 +126,25 @@ def minimize_protocol_failure(
         if granularity >= len(current.events):
             break
         granularity = min(len(current.events), granularity * 2)
+
+    # Independently certify one-event minimality. Delta debugging normally
+    # reaches this same fixed point, but an exhausted budget must never be
+    # indistinguishable from a completed minimization.
+    while len(current.events) > 1:
+        reduced = False
+        for removed in range(len(current.events)):
+            if evaluations >= maximum_evaluations:
+                raise RuntimeError(
+                    "minimization budget exhausted before certifying one-event minimality"
+                )
+            retained = current.events[:removed] + current.events[removed + 1 :]
+            proposal = _renumber(tuple(retained))
+            if preserves(proposal):
+                current = proposal
+                reduced = True
+                break
+        if not reduced:
+            break
     return MinimizationResult(witness=current, evaluations=evaluations)
 
 

@@ -5,8 +5,10 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from sloforge.genesis.ir import load_counterexample, write_canonical
-from sloforge.genesis.synthesis import ConstraintStore
+from sloforge.genesis.synthesis import CegisConfiguration, CegisRunner, ConstraintStore
 from sloforge.genesis.synthesis.cegis import _counterexample, minimize_protocol_failure
 from sloforge.genesis.synthesis.fixture import (
     CancellationPolicyVerifier,
@@ -124,6 +126,29 @@ def test_minimization_preserves_the_original_verification_seed() -> None:
     assert not reproduced.passed
     assert reproduced.failure is not None
     assert reproduced.failure.violated_contract == initial.failure.violated_contract
+
+
+def test_exhausted_minimization_budget_cannot_persist_a_minimized_claim(
+    tmp_path: Path,
+) -> None:
+    runner = CegisRunner(
+        CegisConfiguration(
+            seed=73129,
+            maximum_candidates=1,
+            maximum_minimization_evaluations=1,
+        ),
+        CancellationPolicyVerifier(),
+        output_directory=tmp_path,
+    )
+    with pytest.raises(RuntimeError, match="before certifying one-event minimality"):
+        runner.run((cancellation_fixture_candidates(73129)[0],))
+
+    documents = [
+        json.loads(path.read_text()) for path in (tmp_path / "counterexamples").glob("*.json")
+    ]
+    assert len(documents) == 1
+    assert documents[0]["minimized"] is False
+    assert not (tmp_path / "constraints.json").exists()
 
 
 def test_counterexample_reproduction_command_executes_real_verifier(tmp_path: Path) -> None:
