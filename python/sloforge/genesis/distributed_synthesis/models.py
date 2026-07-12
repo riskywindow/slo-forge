@@ -50,7 +50,13 @@ INVALIDATED_FABRIC_FIELDS: Final[tuple[InvalidatedField, ...]] = (
 
 
 class DistributedModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True, strict=True, validate_default=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        strict=True,
+        validate_default=True,
+        allow_inf_nan=False,
+    )
 
 
 class CollectiveMutation(DistributedModel):
@@ -116,8 +122,12 @@ class InvalidatedEvidenceReference(DistributedModel):
 
 
 class DistributedSynthesisResult(DistributedModel):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.0.0", "1.1.0"] = "1.1.0"
     source_plan_id: NonEmpty
+    # Version 1.0 did not bind the complete source plan or deterministic seed.
+    # Keep those documents parseable, but never treat them as source-bound.
+    source_plan_hash: Sha256Hex | None = None
+    seed: Annotated[int, Field(ge=0)] | None = None
     candidate_plan: PhysicalExecutionPlan
     transformation_id: NonEmpty
     affected_surface: Literal[
@@ -137,6 +147,11 @@ class DistributedSynthesisResult(DistributedModel):
 
     @model_validator(mode="after")
     def validate_fail_closed_evidence_state(self) -> Self:
+        if self.schema_version == "1.1.0":
+            if self.source_plan_hash is None or self.seed is None:
+                raise ValueError("version 1.1 distributed result requires source hash and seed")
+        elif self.source_plan_hash is not None or self.seed is not None:
+            raise ValueError("version 1.0 distributed result must use its legacy unbound shape")
         if self.required_verifier_stages != REQUIRED_REVALIDATION_STAGES:
             raise ValueError("distributed mutation must require the complete revalidation pipeline")
         if self.invalidated_fields != INVALIDATED_FABRIC_FIELDS:
@@ -163,7 +178,7 @@ class DistributedSynthesisResult(DistributedModel):
             raise ValueError(
                 "pending distributed candidate is missing its evidence-state extension"
             )
-        expected_extension_values = {
+        expected_extension_values: dict[str, object] = {
             "evidence_state": self.evidence_state,
             "performance_evidence_valid": False,
             "eligible_for_performance_comparison": False,
@@ -180,6 +195,9 @@ class DistributedSynthesisResult(DistributedModel):
             "source_predicted_metrics_hash": self.source_predicted_metrics_hash,
             "transformation_id": self.transformation_id,
         }
+        if self.schema_version == "1.1.0":
+            expected_extension_values["source_plan_hash"] = self.source_plan_hash
+            expected_extension_values["seed"] = self.seed
         for key, expected in expected_extension_values.items():
             if extension.get(key) != expected:
                 raise ValueError(f"candidate evidence-state extension has invalid {key}")
@@ -203,6 +221,15 @@ class DistributedSynthesisResult(DistributedModel):
                 "pending candidate must contain only its unsimulated feasibility event"
             )
         return self
+
+    def require_source_binding(self) -> tuple[str, int]:
+        """Return the trusted source binding or reject a legacy unbound result."""
+
+        if self.source_plan_hash is None or self.seed is None:
+            raise ValueError(
+                "legacy distributed result is source-unbound and requires recompilation"
+            )
+        return self.source_plan_hash, self.seed
 
 
 __all__ = [

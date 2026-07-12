@@ -70,6 +70,13 @@ def _legacy_event_digest(event_id: str) -> str:
     return hashlib.sha256(f"legacy-event\0{event_id}".encode()).hexdigest()
 
 
+def _safety_config_digest(config: EvolutionConfig) -> str:
+    """Bind restart safety while leaving the explicit live-authorization switch ephemeral."""
+
+    payload = config.model_dump(mode="json", exclude={"live_promotion_authorized"})
+    return hashlib.sha256(canonical_json(payload)).hexdigest()
+
+
 def _serialized(
     method: Callable[..., EvolutionSnapshot],
 ) -> Callable[..., EvolutionSnapshot]:
@@ -187,6 +194,7 @@ class EvolutionController:
         )
         snapshot = EvolutionSnapshot(
             deployment_id=deployment_id,
+            controller_safety_config_sha256=_safety_config_digest(config),
             seed=seed,
             sequence=0,
             phase=EvolutionPhase.IDLE,
@@ -227,10 +235,23 @@ class EvolutionController:
         if config.execution_target is ExecutionTarget.EXTERNAL and gate_evidence_validator is None:
             raise EvolutionError("external evolution requires a trusted gate-evidence validator")
         snapshot = store.load()
+        if snapshot.controller_safety_config_sha256 is None:
+            raise EvolutionError("restored controller safety configuration is unbound")
+        if snapshot.controller_safety_config_sha256 != _safety_config_digest(config):
+            raise EvolutionError("restored controller safety configuration does not match state")
         if len(snapshot.challengers) > config.maximum_challengers:
             raise EvolutionError("persisted challenger population exceeds the configured bound")
         if len(snapshot.active_streams) > config.maximum_active_streams:
             raise EvolutionError("persisted stream registry exceeds the configured bound")
+        if len(snapshot.processed_events) > config.maximum_processed_events:
+            raise EvolutionError("persisted idempotency registry exceeds the configured bound")
+        if len(snapshot.audit) > config.maximum_audit_records:
+            raise EvolutionError("persisted audit registry exceeds the configured bound")
+        if (
+            len(snapshot.retained_capsules) > config.maximum_challengers + 2
+            or len(snapshot.retained_capsule_ids) > config.maximum_challengers + 2
+        ):
+            raise EvolutionError("persisted retained-capsule registry exceeds the configured bound")
         champion_report = capsule_validator(Path(snapshot.champion.path))
         if not cls._capsule_reference_is_eligible(
             snapshot.champion,
@@ -370,6 +391,10 @@ class EvolutionController:
             raise EvolutionError("active stream registry exceeds its configured bound")
         if len(next_snapshot.retained_capsules) > self.config.maximum_challengers + 2:
             raise EvolutionError("retained capsule registry exceeds its configured bound")
+        if len(next_snapshot.retained_capsule_ids) > self.config.maximum_challengers + 2:
+            raise EvolutionError(
+                "retained capsule identifier registry exceeds its configured bound"
+            )
         self.store.save(next_snapshot, expected_sequence=self.snapshot.sequence)
         self.snapshot = next_snapshot
         return next_snapshot
@@ -481,8 +506,24 @@ class EvolutionController:
         observations = (record.shadow_observation, record.canary_observation)
         if any(item is None for item in observations):
             raise EvolutionError("promotion requires persisted shadow and canary observations")
-        for observation in observations:
+        for observation, expected_stage in zip(
+            observations, (GateStage.SHADOW, GateStage.CANARY), strict=True
+        ):
             assert observation is not None
+            if (
+                observation.stage is not expected_stage
+                or observation.candidate_id != record.spec.candidate_id
+                or observation.capsule_digest != record.spec.capsule.capsule_digest
+                or observation.deterministic_seed != self.snapshot.seed
+            ):
+                raise EvolutionError(
+                    "persisted gate evidence is not bound to the selected challenger"
+                )
+            if (
+                self.config.execution_target is ExecutionTarget.EXTERNAL
+                and observation.verification_level is not VerificationLevel.HARDWARE_OPERATIONAL
+            ):
+                raise EvolutionError("persisted external gate evidence is below Level 5")
             if not self.gate_evidence_validator(observation, record.spec, self.snapshot.champion):
                 raise EvolutionError(
                     f"persisted {observation.stage.value} evidence failed trusted revalidation"

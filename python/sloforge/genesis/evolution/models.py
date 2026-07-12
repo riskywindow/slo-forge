@@ -237,6 +237,22 @@ class ChallengerRecord(EvolutionModel):
     canary_observation: GateObservation | None = None
     rejection_reason: str | None = None
 
+    @model_validator(mode="after")
+    def validate_observation_bindings(self) -> Self:
+        for observation, expected_stage in (
+            (self.shadow_observation, GateStage.SHADOW),
+            (self.canary_observation, GateStage.CANARY),
+        ):
+            if observation is None:
+                continue
+            if (
+                observation.stage is not expected_stage
+                or observation.candidate_id != self.spec.candidate_id
+                or observation.capsule_digest != self.spec.capsule.capsule_digest
+            ):
+                raise ValueError("challenger gate observation is not bound to its candidate stage")
+        return self
+
 
 class EvolutionAuditRecord(EvolutionModel):
     sequence: int = Field(ge=0)
@@ -266,6 +282,7 @@ class ProcessedEventRecord(EvolutionModel):
 class EvolutionSnapshot(EvolutionModel):
     schema_version: Literal["sloforge.genesis.evolution/v1"] = EVOLUTION_SCHEMA_VERSION
     deployment_id: Identifier
+    controller_safety_config_sha256: str | None = None
     seed: int = Field(ge=0)
     sequence: int = Field(ge=0)
     phase: EvolutionPhase
@@ -281,6 +298,15 @@ class EvolutionSnapshot(EvolutionModel):
     processed_events: tuple[ProcessedEventRecord, ...] = ()
     audit: tuple[EvolutionAuditRecord, ...]
     last_observed_at_ms: int = Field(ge=0)
+
+    @field_validator("controller_safety_config_sha256")
+    @classmethod
+    def validate_config_digest(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if _DIGEST.fullmatch(value) is None:
+            raise ValueError("controller safety configuration digest must be lowercase sha256")
+        return value
 
     @model_validator(mode="after")
     def validate_snapshot(self) -> Self:
