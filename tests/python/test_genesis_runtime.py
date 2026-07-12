@@ -331,7 +331,13 @@ def test_runtime_detects_reference_source_tampering(tmp_path: Path) -> None:
         RuntimeRequest("bad-timeout", (1,), 1, 7, math.nan),
         RuntimeRequest("bad-count", (1,), True, 7, 1.0),
         RuntimeRequest("bad-seed", (1,), 1, True, 1.0),
+        RuntimeRequest("bad-seed", (1,), 1, 1 << 64, 1.0),
         RuntimeRequest("bad-token", (True,), 1, 7, 1.0),
+        RuntimeRequest("bad-token", (1 << 64,), 1, 7, 1.0),
+        RuntimeRequest("x" * 513, (1,), 1, 7, 1.0),
+        RuntimeRequest("bad\x7fidentifier", (1,), 1, 7, 1.0),
+        RuntimeRequest("bad\ud800identifier", (1,), 1, 7, 1.0),
+        RuntimeRequest("bad-timeout", (1,), 1, 7, 86_401.0),
         RuntimeRequest("bad-batching", (1,), 1, 7, 1.0, batching_eligible=1),
     ],
 )
@@ -347,6 +353,19 @@ def test_runtime_limits_reject_non_finite_timeouts_and_non_integer_bounds() -> N
         RuntimeLimits(worker_poll_seconds=math.inf)
     with pytest.raises(ValueError, match="integer limits"):
         RuntimeLimits(maximum_queue_depth=1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="bounded domain"):
+        RuntimeLimits(maximum_queue_depth=65_537)
+    with pytest.raises(ValueError, match="bounded"):
+        RuntimeLimits(shutdown_timeout_seconds=86_401.0)
+
+
+def test_runtime_rejects_seed_outside_wire_domain() -> None:
+    with pytest.raises(ValueError, match="unsigned 64-bit"):
+        BaselineStreamingRuntime(
+            cast(ReferenceRuntimeAdapter, object()),
+            limits=RuntimeLimits(),
+            runtime_seed=1 << 64,
+        )
 
 
 def test_paged_allocator_rejects_capacity_smaller_than_rounded_reservation() -> None:

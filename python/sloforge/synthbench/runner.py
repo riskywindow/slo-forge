@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import math
 import platform
@@ -11,11 +10,7 @@ import random
 import statistics
 import sys
 import time
-from collections.abc import Callable
-from itertools import pairwise
 from pathlib import Path
-from types import ModuleType
-from typing import cast
 
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import inspect_reference_package
@@ -40,9 +35,44 @@ from .models import (
 )
 from .special_case import audit_special_casing
 
+_MAXIMUM_REPORT_ARTIFACT_BYTES = 32 * 1024 * 1024
+_MAXIMUM_RUNTIME_ARTIFACT_BYTES = 8 * 1024 * 1024
+
 
 def _sha(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+def _contained_regular_file(
+    path_value: str | Path,
+    artifact_root: Path,
+    *,
+    label: str,
+    maximum_bytes: int = _MAXIMUM_REPORT_ARTIFACT_BYTES,
+) -> Path:
+    root = artifact_root.resolve(strict=True)
+    unresolved = Path(path_value)
+    if not unresolved.is_absolute():
+        raise ValueError(f"{label} path must be absolute")
+    if unresolved.is_symlink():
+        raise ValueError(f"{label} cannot be a symlink")
+    try:
+        lexical_relative = unresolved.relative_to(root)
+    except ValueError as error:
+        raise ValueError(f"{label} escapes the benchmark artifact root") from error
+    cursor = root
+    for part in lexical_relative.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise ValueError(f"{label} cannot traverse a symlink")
+    path = unresolved.resolve(strict=True)
+    try:
+        path.relative_to(root)
+    except ValueError as error:
+        raise ValueError(f"{label} escapes the benchmark artifact root") from error
+    if not path.is_file() or path.stat().st_size > maximum_bytes:
+        raise ValueError(f"{label} is not a bounded regular file")
+    return path
 
 
 def _seed(base: int, *parts: object) -> int:
@@ -62,20 +92,57 @@ def _environment_fingerprint() -> str:
     return _sha(json.dumps(value, sort_keys=True, separators=(",", ":")).encode())
 
 
-def _load_module(path: Path, identity: str) -> ModuleType:
-    specification = importlib.util.spec_from_file_location(identity, path)
-    if specification is None or specification.loader is None:
-        raise RuntimeError(f"cannot import generated reference module: {path}")
-    module = importlib.util.module_from_spec(specification)
-    specification.loader.exec_module(module)
-    return module
-
-
-def _callable(module: ModuleType, name: str) -> Callable[..., object]:
-    value = getattr(module, name, None)
-    if value is None or not callable(value):
-        raise ValueError(f"generated reference entry point is missing: {name}")
-    return cast(Callable[..., object], value)
+def _persist_execution_evidence(
+    *,
+    result_stdout: str,
+    result_stderr: str,
+    result_termination: str,
+    result_return_code: int | None,
+    result_backend: str,
+    result_capabilities: dict[str, object],
+    sanitized_environment_names: tuple[str, ...],
+    process_group_cleaned: bool,
+    output_bytes: int,
+    output: Path,
+    request_path: Path,
+    request: WorkloadRequest,
+    run_seed: int,
+    execution_surface: str,
+    subject_sha256: str,
+    runner_path: Path,
+) -> tuple[str, str]:
+    stdout_path = output / "runner-stdout.json"
+    stderr_path = output / "runner-stderr.txt"
+    stdout_payload = result_stdout.encode()
+    stderr_payload = result_stderr.encode()
+    stdout_path.write_bytes(stdout_payload)
+    stderr_path.write_bytes(stderr_payload)
+    execution_record = {
+        "schema_version": "sloforge.synthbench.sandbox-execution/v2",
+        "execution_surface": execution_surface,
+        "subject_sha256": subject_sha256,
+        "request_id": request.request_id,
+        "request_seed": request.seed,
+        "run_seed": run_seed,
+        "request_path": str(request_path.resolve()),
+        "request_sha256": _sha(request_path.read_bytes()),
+        "runner_sha256": _sha(runner_path.read_bytes()),
+        "stdout_sha256": _sha(stdout_payload),
+        "stderr_sha256": _sha(stderr_payload),
+        "stdout_path": str(stdout_path.resolve()),
+        "stderr_path": str(stderr_path.resolve()),
+        "termination": result_termination,
+        "return_code": result_return_code,
+        "sandbox_backend": result_backend,
+        "capabilities": result_capabilities,
+        "sanitized_environment_names": sanitized_environment_names,
+        "process_group_cleaned": process_group_cleaned,
+        "output_bytes": output_bytes,
+    }
+    evidence_path = output / "sandbox-execution.json"
+    evidence_payload = canonical_json(execution_record) + b"\n"
+    evidence_path.write_bytes(evidence_payload)
+    return str(evidence_path.resolve()), _sha(evidence_payload)
 
 
 class _Executor:
@@ -84,19 +151,17 @@ class _Executor:
         task_directory: Path,
         descriptor: TaskDescriptor,
         *,
-        identity_suffix: str = "reference",
+        sandbox_root: Path,
+        run_seed: int,
+        execution_surface: str,
     ) -> None:
         self.descriptor = descriptor
-        module = _load_module(
-            task_directory / descriptor.public_package_path / "reference.py",
-            f"synthbench_{descriptor.task_id}_{identity_suffix}",
-        )
-        self.load_model = _callable(module, "load_model")
-        self.allocate_state = _callable(module, "allocate_state")
-        self.prefill = _callable(module, "prefill")
-        self.decode_step = _callable(module, "decode_step")
-        self.sample = _callable(module, "custom_sampler")
-        self.model = self.load_model(seed=descriptor.seed)
+        self.reference_root = (task_directory / descriptor.public_package_path).resolve(strict=True)
+        self.repository_python = Path(__file__).resolve().parents[2]
+        self.sandbox_root = sandbox_root.resolve()
+        self.run_seed = run_seed
+        self.execution_surface = execution_surface
+        self.call_index = 0
 
     def execute(
         self,
@@ -104,46 +169,94 @@ class _Executor:
         *,
         deadline_ns: int,
     ) -> tuple[tuple[int, ...], int, int, tuple[int, ...], tuple[str, str] | None]:
-        start = time.perf_counter_ns()
-        state = self.allocate_state(
-            request_id=request.request_id,
-            prompt_tokens=request.prompt_tokens,
-            seed=request.seed,
-        )
-        state = self.prefill(
-            model=self.model,
-            prompt_tokens=request.prompt_tokens,
-            state=state,
-            seed=request.seed,
-        )
-        previous = request.prompt_tokens[-1]
-        tokens: list[int] = []
-        token_times: list[int] = []
-        for position in range(request.maximum_new_tokens):
-            if time.perf_counter_ns() > deadline_ns:
-                raise TimeoutError("ServingSynthBench CPU request exceeded run timeout")
-            result = self.decode_step(
-                model=self.model,
-                previous_token=previous,
-                state=state,
-                position=position,
-                seed=request.seed,
+        remaining_seconds = (deadline_ns - time.perf_counter_ns()) / 1e9
+        if remaining_seconds <= 0:
+            raise TimeoutError("ServingSynthBench CPU request exceeded run timeout")
+        call_id = self.call_index
+        self.call_index += 1
+        request_path = self.sandbox_root / "requests" / f"request-{call_id:05d}.json"
+        request_path.parent.mkdir(parents=True, exist_ok=True)
+        request_path.write_bytes(
+            canonical_json(
+                {
+                    "request_id": request.request_id,
+                    "prompt_tokens": request.prompt_tokens,
+                    "maximum_new_tokens": request.maximum_new_tokens,
+                    "seed": request.seed,
+                }
             )
-            if not isinstance(result, dict) or set(result) != {"logits", "state"}:
-                raise TypeError("generated decode_step violated its reference contract")
-            state = result["state"]
-            logits = result["logits"]
-            sample_seed = _seed(request.seed, "sample", position)
-            token = self.sample(logits=logits, seed=sample_seed)
-            if not isinstance(token, int) or isinstance(token, bool):
-                raise TypeError("generated sampler returned a non-integer token")
-            tokens.append(token)
-            token_times.append(time.perf_counter_ns())
-            previous = token
-        end = time.perf_counter_ns()
-        ttft = max(1, token_times[0] - start)
-        intervals = tuple(max(1, right - left) for left, right in pairwise(token_times))
-        return tuple(tokens), max(1, end - start), ttft, intervals, None
+            + b"\n"
+        )
+        output = self.sandbox_root / "outputs" / f"request-{call_id:05d}"
+        bounded_timeout = min(30.0, remaining_seconds)
+        result = execute_sandboxed(
+            SandboxRequest(
+                argv=(
+                    sys.executable,
+                    "-m",
+                    "sloforge.synthbench.reference_runner",
+                    "--reference-package",
+                    str(self.reference_root),
+                    "--request",
+                    str(request_path),
+                    "--model-seed",
+                    str(self.descriptor.seed),
+                    "--timeout-seconds",
+                    str(bounded_timeout),
+                ),
+                working_directory=self.reference_root,
+                read_only_paths=(
+                    self.reference_root,
+                    request_path,
+                    self.repository_python,
+                    Path(sys.prefix),
+                    Path(sys.base_prefix),
+                ),
+                artifact_output_directory=output,
+                seed=self.run_seed,
+                limits=SandboxLimits(
+                    wall_time_seconds=bounded_timeout,
+                    cpu_time_seconds=max(1, min(30, int(bounded_timeout) + 1)),
+                    memory_bytes=2 * 1024 * 1024 * 1024,
+                    process_count=1,
+                    output_bytes=64 * 1024,
+                    artifact_bytes=1024 * 1024,
+                    artifact_entries=16,
+                    open_files=64,
+                ),
+            )
+        )
+        if not result.succeeded:
+            raise RuntimeError(
+                "sandboxed reference runtime failed: "
+                f"{result.termination.value}: {result.stderr.strip()}"
+            )
+        evidence = _persist_execution_evidence(
+            result_stdout=result.stdout,
+            result_stderr=result.stderr,
+            result_termination=result.termination.value,
+            result_return_code=result.return_code,
+            result_backend=result.capabilities.backend.value,
+            result_capabilities=result.capabilities.model_dump(mode="json"),
+            sanitized_environment_names=result.sanitized_environment_names,
+            process_group_cleaned=result.process_group_cleaned,
+            output_bytes=result.output_bytes,
+            output=output,
+            request_path=request_path,
+            request=request,
+            run_seed=self.run_seed,
+            execution_surface=self.execution_surface,
+            subject_sha256=self.descriptor.public_package_hash,
+            runner_path=Path(__file__).with_name("reference_runner.py").resolve(strict=True),
+        )
+        document = json.loads(result.stdout)
+        return (
+            tuple(int(token) for token in document["tokens"]),
+            int(document["latency_ns"]),
+            int(document["ttft_ns"]),
+            tuple(int(value) for value in document["inter_token_ns"]),
+            evidence,
+        )
 
 
 class _GenesisExecutor:
@@ -228,38 +341,25 @@ class _GenesisExecutor:
                 "sandboxed generated runtime failed: "
                 f"{result.termination.value}: {result.stderr.strip()}"
             )
-        stdout_path = output / "runner-stdout.json"
-        stderr_path = output / "runner-stderr.txt"
-        stdout_payload = result.stdout.encode()
-        stderr_payload = result.stderr.encode()
-        stdout_path.write_bytes(stdout_payload)
-        stderr_path.write_bytes(stderr_payload)
         runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
-        execution_record = {
-            "schema_version": "sloforge.synthbench.sandbox-execution/v1",
-            "request_id": request.request_id,
-            "request_seed": request.seed,
-            "run_seed": self.seed,
-            "config_sha256": _sha(self.config_path.read_bytes()),
-            "request_path": str(request_path),
-            "request_sha256": _sha(request_path.read_bytes()),
-            "runner_sha256": _sha(runner_path.read_bytes()),
-            "stdout_sha256": _sha(result.stdout.encode()),
-            "stderr_sha256": _sha(result.stderr.encode()),
-            "stdout_path": str(stdout_path.resolve()),
-            "stderr_path": str(stderr_path.resolve()),
-            "termination": result.termination.value,
-            "return_code": result.return_code,
-            "sandbox_backend": result.capabilities.backend.value,
-            "capabilities": result.capabilities.model_dump(mode="json"),
-            "sanitized_environment_names": result.sanitized_environment_names,
-            "process_group_cleaned": result.process_group_cleaned,
-            "output_bytes": result.output_bytes,
-        }
-        evidence_path = output / "sandbox-execution.json"
-        evidence_payload = canonical_json(execution_record) + b"\n"
-        evidence_path.write_bytes(evidence_payload)
-        execution_evidence = (str(evidence_path.resolve()), _sha(evidence_payload))
+        execution_evidence = _persist_execution_evidence(
+            result_stdout=result.stdout,
+            result_stderr=result.stderr,
+            result_termination=result.termination.value,
+            result_return_code=result.return_code,
+            result_backend=result.capabilities.backend.value,
+            result_capabilities=result.capabilities.model_dump(mode="json"),
+            sanitized_environment_names=result.sanitized_environment_names,
+            process_group_cleaned=result.process_group_cleaned,
+            output_bytes=result.output_bytes,
+            output=output,
+            request_path=request_path,
+            request=request,
+            run_seed=self.seed,
+            execution_surface="genesis_generated_runtime",
+            subject_sha256=_sha(self.config_path.read_bytes()),
+            runner_path=runner_path,
+        )
         document = json.loads(result.stdout)
         tokens = tuple(int(token) for token in document["tokens"])
         intervals = tuple(int(value) for value in document["inter_token_ns"])
@@ -282,6 +382,11 @@ _MEASURED_BASELINES = (
     BaselineKind.WITHOUT_LINEAGE,
     BaselineKind.GENESIS_FULL,
     BaselineKind.DETERMINISTIC_SINGLE_SHOT,
+)
+
+_EXECUTED_BASELINES = (
+    BaselineKind.PYTHON_EAGER_REFERENCE,
+    BaselineKind.GENESIS_FULL,
 )
 
 _UNAVAILABLE_REASONS = {
@@ -386,9 +491,9 @@ def _summary_from_artifact(
             else "actual generated bounded Genesis runtime execution; CPU smoke validates the "
             "zero-day runtime path but does not represent optimized search or a speedup claim"
             if baseline is BaselineKind.GENESIS_FULL
-            else f"CPU smoke request-order surrogate for {baseline.value}; uses the same "
-            "dependency-free reference executor and does not represent an independent engine, "
-            "kernel, or full ablation implementation"
+            else f"CPU smoke request-order surrogate for {baseline.value}; uses bound "
+            "eager-reference observations without another timed execution and does not "
+            "represent an independent engine, kernel, or full ablation implementation"
         ),
         raw_samples_path=str(path.resolve()),
         raw_samples_sha256=_sha(path.read_bytes()),
@@ -399,7 +504,9 @@ def _summary_from_artifact(
         p95_latency_ns=_percentile(latencies, 0.95),
         median_ttft_ns=float(statistics.median(ttfts)),
         median_inter_token_ns=float(statistics.median(intervals)) if intervals else 0.0,
-        observed_request_wall_seconds=sum(latencies) / 1_000_000_000,
+        observed_request_wall_seconds=(
+            sum(latencies) / 1_000_000_000 if baseline in _EXECUTED_BASELINES else 0.0
+        ),
         candidate_count=candidate_count,
         human_authored_model_specific_lines=0,
     )
@@ -470,32 +577,49 @@ def _decode_measurement_order(values: tuple[str, ...]) -> tuple[tuple[int, Basel
     return tuple(decoded)
 
 
+def _measurement_order(
+    *, run_seed: int, task_id: str, repetitions: int
+) -> tuple[tuple[int, BaselineKind], ...]:
+    order = [
+        (repetition, baseline)
+        for repetition in range(repetitions)
+        for baseline in _MEASURED_BASELINES
+    ]
+    random.Random(_seed(run_seed, task_id, "run-order")).shuffle(order)
+    return tuple(order)
+
+
 def _validate_sandbox_execution_evidence(
     path_value: str | None,
     digest: str | None,
     *,
     expected_request: WorkloadRequest,
     run_seed: int,
-    config_sha256: str,
+    expected_execution_surface: str,
+    expected_subject_sha256: str,
     observed_tokens: tuple[int, ...],
     latency_ns: int | None,
     ttft_ns: int | None,
     inter_token_ns: tuple[int, ...] | None,
+    artifact_root: Path,
 ) -> None:
     if path_value is None or digest is None:
         raise ValueError("generated execution is missing sandbox evidence")
-    path = Path(path_value)
-    if not path.is_file() or _sha(path.read_bytes()) != digest:
+    path = _contained_regular_file(
+        path_value, artifact_root, label="generated sandbox execution evidence"
+    )
+    if _sha(path.read_bytes()) != digest:
         raise ValueError("generated sandbox execution evidence is unavailable or changed")
     document = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(document, dict):
         raise ValueError("sandbox execution evidence must be an object")
     if (
-        document.get("schema_version") != "sloforge.synthbench.sandbox-execution/v1"
+        document.get("schema_version") != "sloforge.synthbench.sandbox-execution/v2"
+        or document.get("execution_surface") != expected_execution_surface
+        or document.get("subject_sha256") != expected_subject_sha256
         or document.get("request_id") != expected_request.request_id
         or document.get("request_seed") != expected_request.seed
         or document.get("run_seed") != run_seed
-        or document.get("config_sha256") != config_sha256
         or document.get("termination") != "success"
         or document.get("return_code") != 0
         or document.get("sandbox_backend") in {None, "none"}
@@ -506,8 +630,13 @@ def _validate_sandbox_execution_evidence(
     request_digest = document.get("request_sha256")
     if not isinstance(request_path_value, str) or not isinstance(request_digest, str):
         raise ValueError("sandbox evidence omits its oracle-free request identity")
-    request_path = Path(request_path_value)
-    if not request_path.is_file() or _sha(request_path.read_bytes()) != request_digest:
+    request_path = _contained_regular_file(
+        request_path_value,
+        artifact_root,
+        label="sandbox request artifact",
+        maximum_bytes=1024 * 1024,
+    )
+    if _sha(request_path.read_bytes()) != request_digest:
         raise ValueError("sandbox request artifact is unavailable or changed")
     request_document = json.loads(request_path.read_text(encoding="utf-8"))
     if not isinstance(request_document, dict) or set(request_document) != {
@@ -528,9 +657,26 @@ def _validate_sandbox_execution_evidence(
     stdout_digest = document.get("stdout_sha256")
     if not isinstance(stdout_path_value, str) or not isinstance(stdout_digest, str):
         raise ValueError("sandbox evidence omits the retained runner response")
-    stdout_path = Path(stdout_path_value)
-    if not stdout_path.is_file() or _sha(stdout_path.read_bytes()) != stdout_digest:
+    stdout_path = _contained_regular_file(
+        stdout_path_value,
+        artifact_root,
+        label="sandbox runner response",
+        maximum_bytes=1024 * 1024,
+    )
+    if _sha(stdout_path.read_bytes()) != stdout_digest:
         raise ValueError("sandbox runner response is unavailable or changed")
+    stderr_path_value = document.get("stderr_path")
+    stderr_digest = document.get("stderr_sha256")
+    if not isinstance(stderr_path_value, str) or not isinstance(stderr_digest, str):
+        raise ValueError("sandbox evidence omits the retained runner diagnostics")
+    stderr_path = _contained_regular_file(
+        stderr_path_value,
+        artifact_root,
+        label="sandbox runner diagnostics",
+        maximum_bytes=1024 * 1024,
+    )
+    if _sha(stderr_path.read_bytes()) != stderr_digest:
+        raise ValueError("sandbox runner diagnostics are unavailable or changed")
     response = json.loads(stdout_path.read_text(encoding="utf-8"))
     if not isinstance(response, dict) or set(response) != {
         "tokens",
@@ -547,12 +693,20 @@ def _validate_sandbox_execution_evidence(
         raise ValueError("raw TTFT does not match the sandbox runner response")
     if inter_token_ns is not None and tuple(response["inter_token_ns"]) != inter_token_ns:
         raise ValueError("raw inter-token timings do not match the sandbox runner response")
-    runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
+    runner_path = (
+        Path(__file__)
+        .with_name(
+            "runtime_runner.py"
+            if expected_execution_surface == "genesis_generated_runtime"
+            else "reference_runner.py"
+        )
+        .resolve(strict=True)
+    )
     if document.get("runner_sha256") != _sha(runner_path.read_bytes()):
         raise ValueError("sandbox execution used an unrecognized trusted runner")
 
 
-def _validate_runtime_manifest(path: Path) -> None:
+def _validate_runtime_manifest(path: Path, *, artifact_root: Path) -> None:
     document = json.loads(path.read_text(encoding="utf-8"))
     artifacts = document.get("artifacts") if isinstance(document, dict) else None
     if not isinstance(artifacts, list) or not artifacts:
@@ -565,12 +719,16 @@ def _validate_runtime_manifest(path: Path) -> None:
             or not isinstance(item[1], str)
         ):
             raise ValueError("generated runtime manifest contains an invalid artifact identity")
-        artifact = path.parent / item[0]
-        if (
-            not artifact.is_file()
-            or artifact.is_symlink()
-            or _sha(artifact.read_bytes()) != item[1]
-        ):
+        relative = Path(item[0])
+        if relative.is_absolute() or not relative.parts or ".." in relative.parts:
+            raise ValueError("generated runtime manifest artifact path is not relative")
+        artifact = _contained_regular_file(
+            path.parent / relative,
+            artifact_root,
+            label="generated runtime artifact",
+            maximum_bytes=_MAXIMUM_RUNTIME_ARTIFACT_BYTES,
+        )
+        if _sha(artifact.read_bytes()) != item[1]:
             raise ValueError("generated runtime artifact is unavailable or changed")
 
 
@@ -632,9 +790,11 @@ def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
     )
 
 
-def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
+def validate_cpu_benchmark_report(report: SynthBenchReport, *, artifact_root: Path) -> None:
     """Reopen raw artifacts and independently reconstruct every report summary."""
 
+    if artifact_root.is_symlink() or not artifact_root.is_dir():
+        raise ValueError("benchmark artifact root must be a regular non-symlinked directory")
     expected_baselines = set(BaselineKind)
     if {item.run_seed for item in report.tasks} != set(report.run_seeds):
         raise ValueError("report task seeds do not match declared run seeds")
@@ -663,7 +823,8 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             raise ValueError("report hidden-evaluation set is incomplete")
         descriptor_path = Path(task.task_descriptor_path)
         if (
-            not descriptor_path.is_file()
+            descriptor_path.is_symlink()
+            or not descriptor_path.is_file()
             or _sha(descriptor_path.read_bytes()) != task.task_descriptor_sha256
         ):
             raise ValueError("SynthBench task descriptor is unavailable or changed")
@@ -677,16 +838,17 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
         ):
             raise ValueError("report task identity does not match its descriptor")
         verify_public_package(task_directory, descriptor)
-        workload_by_id = {
-            request.request_id: request for request in load_workload(task_directory, descriptor)
-        }
+        workload = load_workload(task_directory, descriptor)
+        workload_by_id = {request.request_id: request for request in workload}
         hidden_cases = load_hidden_cases(task_directory, descriptor)
         hidden_by_id = {case.case_id: case for case in hidden_cases}
-        manifest_path = Path(task.genesis_runtime_manifest_path)
-        if (
-            not manifest_path.is_file()
-            or _sha(manifest_path.read_bytes()) != task.genesis_runtime_manifest_sha256
-        ):
+        manifest_path = _contained_regular_file(
+            task.genesis_runtime_manifest_path,
+            artifact_root,
+            label="generated Genesis runtime manifest",
+            maximum_bytes=_MAXIMUM_RUNTIME_ARTIFACT_BYTES,
+        )
+        if _sha(manifest_path.read_bytes()) != task.genesis_runtime_manifest_sha256:
             raise ValueError("generated Genesis runtime manifest is unavailable or changed")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         if (
@@ -694,10 +856,13 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             or manifest.get("package_hash") != task.reference_package_hash
         ):
             raise ValueError("generated runtime is bound to another public package")
-        _validate_runtime_manifest(manifest_path)
-        runtime_config_path = manifest_path.parent / "runtime_config.json"
-        if not runtime_config_path.is_file():
-            raise ValueError("generated runtime configuration is unavailable")
+        _validate_runtime_manifest(manifest_path, artifact_root=artifact_root)
+        runtime_config_path = _contained_regular_file(
+            manifest_path.parent / "runtime_config.json",
+            artifact_root,
+            label="generated runtime configuration",
+            maximum_bytes=_MAXIMUM_RUNTIME_ARTIFACT_BYTES,
+        )
         runtime_config_sha256 = _sha(runtime_config_path.read_bytes())
         all_samples: list[RawCpuSample] = []
         for summary in task.baselines:
@@ -705,8 +870,10 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                 continue
             if summary.raw_samples_path is None or summary.raw_samples_sha256 is None:
                 raise ValueError("measured baseline is missing raw evidence")
-            path = Path(summary.raw_samples_path)
-            if not path.is_file() or _sha(path.read_bytes()) != summary.raw_samples_sha256:
+            path = _contained_regular_file(
+                summary.raw_samples_path, artifact_root, label="SynthBench raw samples"
+            )
+            if _sha(path.read_bytes()) != summary.raw_samples_sha256:
                 raise ValueError("SynthBench raw samples are unavailable or changed")
             reconstructed = _summary_from_artifact(
                 summary.baseline, path, candidate_count=summary.candidate_count
@@ -728,26 +895,37 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                     or sample.exact_match != (sample.observed_tokens == sample.expected_tokens)
                 ):
                     raise ValueError("raw sample is not bound to the workload oracle")
-                if sample.execution_surface == "genesis_generated_runtime":
-                    _validate_sandbox_execution_evidence(
-                        sample.execution_evidence_path,
-                        sample.execution_evidence_sha256,
-                        expected_request=expected_request,
-                        run_seed=sample.run_seed,
-                        config_sha256=runtime_config_sha256,
-                        observed_tokens=sample.observed_tokens,
-                        latency_ns=sample.latency_ns,
-                        ttft_ns=sample.ttft_ns,
-                        inter_token_ns=sample.inter_token_ns,
-                    )
+                _validate_sandbox_execution_evidence(
+                    sample.execution_evidence_path,
+                    sample.execution_evidence_sha256,
+                    expected_request=expected_request,
+                    run_seed=sample.run_seed,
+                    expected_execution_surface=(
+                        "python_eager_reference"
+                        if sample.execution_surface == "reference_order_surrogate"
+                        else sample.execution_surface
+                    ),
+                    expected_subject_sha256=(
+                        runtime_config_sha256
+                        if sample.execution_surface == "genesis_generated_runtime"
+                        else task.public_package_hash
+                    ),
+                    observed_tokens=sample.observed_tokens,
+                    latency_ns=sample.latency_ns,
+                    ttft_ns=sample.ttft_ns,
+                    inter_token_ns=sample.inter_token_ns,
+                    artifact_root=artifact_root,
+                )
             all_samples.extend(loaded_samples)
         for hidden in task.hidden_evaluations:
             if hidden.status not in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}:
                 continue
             if hidden.evidence_path is None or hidden.evidence_sha256 is None:
                 raise ValueError("measured hidden evaluation is missing evidence")
-            path = Path(hidden.evidence_path)
-            if not path.is_file() or _sha(path.read_bytes()) != hidden.evidence_sha256:
+            path = _contained_regular_file(
+                hidden.evidence_path, artifact_root, label="SynthBench hidden evidence"
+            )
+            if _sha(path.read_bytes()) != hidden.evidence_sha256:
                 raise ValueError("SynthBench hidden evidence is unavailable or changed")
             if _hidden_summary_from_artifact(hidden.baseline, path) != hidden:
                 raise ValueError("hidden summary is not derived from its evidence")
@@ -756,29 +934,73 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                 for line in path.read_bytes().splitlines()
                 if line
             )
+            hidden_requests = tuple(case.request for case in hidden_cases)
+            expected_hidden_order, _ = _selected_order(hidden.baseline, hidden_requests)
+            case_by_request = {case.request.request_id: case.case_id for case in hidden_cases}
+            expected_case_ids = tuple(
+                case_by_request[request.request_id] for request in expected_hidden_order
+            )
+            if tuple(result.case_id for result in hidden_results) != expected_case_ids:
+                raise ValueError("hidden evidence is incomplete, duplicated, or reordered")
             for result in hidden_results:
                 expected_case = hidden_by_id.get(result.case_id)
                 if expected_case is None or expected_case.request.request_id != result.request_id:
                     raise ValueError("hidden result is absent from the bound hidden corpus")
                 expected_request = expected_case.request
                 if (
-                    result.request_seed != expected_request.seed
+                    result.baseline is not hidden.baseline
+                    or result.execution_surface
+                    != (
+                        "python_eager_reference"
+                        if hidden.baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+                        else "genesis_generated_runtime"
+                        if hidden.baseline is BaselineKind.GENESIS_FULL
+                        else "reference_order_surrogate"
+                    )
+                    or result.request_seed != expected_request.seed
                     or result.expected_tokens != expected_request.expected_tokens
                     or result.exact_match != (result.observed_tokens == result.expected_tokens)
                 ):
                     raise ValueError("hidden result is not bound to its evaluator oracle")
-                if result.execution_surface == "genesis_generated_runtime":
-                    _validate_sandbox_execution_evidence(
-                        result.execution_evidence_path,
-                        result.execution_evidence_sha256,
-                        expected_request=expected_request,
-                        run_seed=task.run_seed,
-                        config_sha256=runtime_config_sha256,
-                        observed_tokens=result.observed_tokens,
-                        latency_ns=None,
-                        ttft_ns=None,
-                        inter_token_ns=None,
-                    )
+                _validate_sandbox_execution_evidence(
+                    result.execution_evidence_path,
+                    result.execution_evidence_sha256,
+                    expected_request=expected_request,
+                    run_seed=task.run_seed,
+                    expected_execution_surface=(
+                        "python_eager_reference"
+                        if result.execution_surface == "reference_order_surrogate"
+                        else result.execution_surface
+                    ),
+                    expected_subject_sha256=(
+                        runtime_config_sha256
+                        if result.execution_surface == "genesis_generated_runtime"
+                        else task.public_package_hash
+                    ),
+                    observed_tokens=result.observed_tokens,
+                    latency_ns=None,
+                    ttft_ns=None,
+                    inter_token_ns=None,
+                    artifact_root=artifact_root,
+                )
+        decoded_order = _decode_measurement_order(task.measurement_run_order)
+        expected_order = _measurement_order(
+            run_seed=task.run_seed,
+            task_id=task.task_id,
+            repetitions=task.repetitions,
+        )
+        if decoded_order != expected_order:
+            raise ValueError("measurement run order does not replay from its declared seed")
+        for ordinal, (_repetition, baseline) in enumerate(expected_order):
+            expected_requests, _ = _selected_order(baseline, workload)
+            block = sorted(
+                (sample for sample in all_samples if sample.measurement_order_ordinal == ordinal),
+                key=lambda sample: sample.execution_ordinal,
+            )
+            if tuple(sample.request_id for sample in block) != tuple(
+                request.request_id for request in expected_requests
+            ):
+                raise ValueError("measurement request order differs from the declared policy")
         rebuilt_integrity = audit_raw_samples(
             tuple(all_samples),
             measured_baselines=_MEASURED_BASELINES,
@@ -788,7 +1010,7 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             run_seed=task.run_seed,
             repetitions=task.repetitions,
             request_ids=task.integrity.expected_request_ids,
-            measurement_run_order=_decode_measurement_order(task.measurement_run_order),
+            measurement_run_order=decoded_order,
         )
         if rebuilt_integrity != task.integrity or not rebuilt_integrity.passed:
             raise ValueError("report integrity result is not independently reproducible")
@@ -837,28 +1059,42 @@ def _run_task(
             else _Executor(
                 task_directory,
                 descriptor,
-                identity_suffix=f"{run_seed}_{baseline.value}",
+                sandbox_root=(
+                    output_directory
+                    / "sandbox"
+                    / descriptor.task_id
+                    / f"seed-{run_seed}"
+                    / "public"
+                    / baseline.value
+                ),
+                run_seed=run_seed,
+                execution_surface=(
+                    "python_eager_reference"
+                    if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+                    else "reference_order_surrogate"
+                ),
             )
         )
-        for baseline in _MEASURED_BASELINES
+        for baseline in _EXECUTED_BASELINES
     }
     deadline_ns = time.perf_counter_ns() + int(configuration.maximum_runtime_seconds * 1e9)
-    for baseline in _MEASURED_BASELINES:
+    for baseline in _EXECUTED_BASELINES:
         executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for _ in range(configuration.warmup_count):
             for request in selected:
                 executor.execute(request, deadline_ns=deadline_ns)
-    run_order = [
-        (repetition, baseline)
-        for repetition in range(configuration.repetitions)
-        for baseline in _MEASURED_BASELINES
-    ]
-    random.Random(_seed(run_seed, descriptor.task_id, "run-order")).shuffle(run_order)
+    run_order = _measurement_order(
+        run_seed=run_seed,
+        task_id=descriptor.task_id,
+        repetitions=configuration.repetitions,
+    )
     samples_by_baseline: dict[BaselineKind, list[RawCpuSample]] = {
         baseline: [] for baseline in _MEASURED_BASELINES
     }
     for measurement_order_ordinal, (repetition, baseline) in enumerate(run_order):
+        if baseline not in _EXECUTED_BASELINES:
+            continue
         executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for request in selected:
@@ -900,9 +1136,46 @@ def _run_task(
                     ),
                 )
             )
+    eager_by_request = {
+        (sample.repetition, sample.request_id): sample
+        for sample in samples_by_baseline[BaselineKind.PYTHON_EAGER_REFERENCE]
+    }
+    for measurement_order_ordinal, (repetition, baseline) in enumerate(run_order):
+        if baseline in _EXECUTED_BASELINES:
+            continue
+        selected, _ = _selected_order(baseline, workload)
+        baseline_samples = samples_by_baseline[baseline]
+        for request in selected:
+            reference = eager_by_request[(repetition, request.request_id)]
+            baseline_samples.append(
+                RawCpuSample(
+                    task_id=reference.task_id,
+                    task_hash=reference.task_hash,
+                    workload_fingerprint=reference.workload_fingerprint,
+                    environment_fingerprint=reference.environment_fingerprint,
+                    baseline=baseline,
+                    run_seed=reference.run_seed,
+                    repetition=repetition,
+                    measurement_order_ordinal=measurement_order_ordinal,
+                    execution_ordinal=len(baseline_samples),
+                    request_id=reference.request_id,
+                    request_seed=reference.request_seed,
+                    latency_ns=reference.latency_ns,
+                    ttft_ns=reference.ttft_ns,
+                    inter_token_ns=reference.inter_token_ns,
+                    observed_tokens=reference.observed_tokens,
+                    expected_tokens=reference.expected_tokens,
+                    exact_match=reference.exact_match,
+                    execution_surface="reference_order_surrogate",
+                    execution_evidence_path=reference.execution_evidence_path,
+                    execution_evidence_sha256=reference.execution_evidence_sha256,
+                    source="replayed_cpu_reference_observation",
+                )
+            )
     summaries: list[BaselineSummary] = []
     hidden_summaries: list[HiddenEvaluationSummary] = []
     all_samples: list[RawCpuSample] = []
+    hidden_reference_by_request: dict[str, HiddenCaseResult] = {}
     for baseline in BaselineKind:
         if baseline in _UNAVAILABLE_REASONS:
             summaries.append(_unavailable(baseline, _UNAVAILABLE_REASONS[baseline]))
@@ -926,47 +1199,78 @@ def _run_task(
         selected_hidden, _ = _selected_order(baseline, hidden_requests)
         case_by_request = {case.request.request_id: case for case in hidden_cases}
         hidden_results: list[HiddenCaseResult] = []
-        hidden_executor: _Executor | _GenesisExecutor = (
-            _GenesisExecutor(
-                initialized.runtime.output_directory / "runtime_config.json",
-                output_directory / "sandbox" / descriptor.task_id / f"seed-{run_seed}" / "hidden",
-                seed=run_seed,
-            )
-            if baseline is BaselineKind.GENESIS_FULL
-            else _Executor(
-                task_directory,
-                descriptor,
-                identity_suffix=f"{run_seed}_{baseline.value}_hidden",
-            )
-        )
-        for request in selected_hidden:
-            observed, _, _, _, execution_evidence = hidden_executor.execute(
-                request, deadline_ns=deadline_ns
-            )
-            hidden_results.append(
-                HiddenCaseResult(
-                    case_id=case_by_request[request.request_id].case_id,
-                    baseline=baseline,
-                    request_id=request.request_id,
-                    request_seed=request.seed,
-                    observed_tokens=observed,
-                    expected_tokens=request.expected_tokens,
-                    exact_match=observed == request.expected_tokens,
-                    execution_surface=(
-                        "python_eager_reference"
-                        if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
-                        else "genesis_generated_runtime"
-                        if baseline is BaselineKind.GENESIS_FULL
-                        else "reference_order_surrogate"
+        if baseline in _EXECUTED_BASELINES:
+            hidden_executor: _Executor | _GenesisExecutor = (
+                _GenesisExecutor(
+                    initialized.runtime.output_directory / "runtime_config.json",
+                    output_directory
+                    / "sandbox"
+                    / descriptor.task_id
+                    / f"seed-{run_seed}"
+                    / "hidden",
+                    seed=run_seed,
+                )
+                if baseline is BaselineKind.GENESIS_FULL
+                else _Executor(
+                    task_directory,
+                    descriptor,
+                    sandbox_root=(
+                        output_directory
+                        / "sandbox"
+                        / descriptor.task_id
+                        / f"seed-{run_seed}"
+                        / "hidden"
+                        / baseline.value
                     ),
-                    execution_evidence_path=(
-                        execution_evidence[0] if execution_evidence is not None else None
-                    ),
-                    execution_evidence_sha256=(
-                        execution_evidence[1] if execution_evidence is not None else None
-                    ),
+                    run_seed=run_seed,
+                    execution_surface="python_eager_reference",
                 )
             )
+            for request in selected_hidden:
+                observed, _, _, _, execution_evidence = hidden_executor.execute(
+                    request, deadline_ns=deadline_ns
+                )
+                hidden_results.append(
+                    HiddenCaseResult(
+                        case_id=case_by_request[request.request_id].case_id,
+                        baseline=baseline,
+                        request_id=request.request_id,
+                        request_seed=request.seed,
+                        observed_tokens=observed,
+                        expected_tokens=request.expected_tokens,
+                        exact_match=observed == request.expected_tokens,
+                        execution_surface=(
+                            "python_eager_reference"
+                            if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+                            else "genesis_generated_runtime"
+                        ),
+                        execution_evidence_path=(
+                            execution_evidence[0] if execution_evidence is not None else None
+                        ),
+                        execution_evidence_sha256=(
+                            execution_evidence[1] if execution_evidence is not None else None
+                        ),
+                    )
+                )
+            if baseline is BaselineKind.PYTHON_EAGER_REFERENCE:
+                hidden_reference_by_request = {item.request_id: item for item in hidden_results}
+        else:
+            for request in selected_hidden:
+                hidden_reference = hidden_reference_by_request[request.request_id]
+                hidden_results.append(
+                    HiddenCaseResult(
+                        case_id=case_by_request[request.request_id].case_id,
+                        baseline=baseline,
+                        request_id=request.request_id,
+                        request_seed=hidden_reference.request_seed,
+                        observed_tokens=hidden_reference.observed_tokens,
+                        expected_tokens=hidden_reference.expected_tokens,
+                        exact_match=hidden_reference.exact_match,
+                        execution_surface="reference_order_surrogate",
+                        execution_evidence_path=hidden_reference.execution_evidence_path,
+                        execution_evidence_sha256=hidden_reference.execution_evidence_sha256,
+                    )
+                )
         hidden_path = (
             output_directory
             / "hidden-evidence"
@@ -1045,5 +1349,5 @@ def run_cpu_benchmark(
         raise FileExistsError(f"refusing to overwrite synthbench report: {report_path}")
     report_path.write_bytes(canonical_json(result) + b"\n")
     persisted = SynthBenchReport.model_validate_json(report_path.read_bytes(), strict=True)
-    validate_cpu_benchmark_report(persisted)
+    validate_cpu_benchmark_report(persisted, artifact_root=output_directory)
     return persisted

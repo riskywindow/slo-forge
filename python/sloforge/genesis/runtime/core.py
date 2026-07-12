@@ -144,6 +144,12 @@ class BaselineStreamingRuntime:
         policy: BytecodeProgram | None = None,
         state_allocator: StateAllocatorConfig | None = None,
     ) -> None:
+        if (
+            not isinstance(runtime_seed, int)
+            or isinstance(runtime_seed, bool)
+            or not 0 <= runtime_seed < 1 << 64
+        ):
+            raise ValueError("runtime_seed must be an unsigned 64-bit integer")
         self._adapter = adapter
         self._limits = limits
         self._runtime_seed = runtime_seed

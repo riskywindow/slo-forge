@@ -30,10 +30,18 @@ class SynthBenchDemoResult(BaseModel):
 
 
 def _safe_reset(output: Path, repository: Path) -> None:
-    if not output.exists():
+    if not output.exists() and not output.is_symlink():
         return
+    absolute = output.absolute()
+    if any(path.is_symlink() for path in (absolute, *absolute.parents)):
+        raise ValueError(f"refusing to reset a symlinked path: {output}")
+    if not output.is_dir():
+        raise ValueError(f"refusing to reset a non-directory path: {output}")
     resolved = output.resolve()
-    if resolved in {Path("/").resolve(), Path.home().resolve(), repository.resolve()}:
+    if (
+        resolved in {Path("/").resolve(), Path.home().resolve(), repository.resolve()}
+        or len(resolved.parts) < 4
+    ):
         raise ValueError(f"refusing to reset unsafe path: {resolved}")
     shutil.rmtree(resolved)
 
@@ -50,7 +58,9 @@ def run_synthbench_demo(
     repository = Path(__file__).resolve().parents[3]
     if reset:
         _safe_reset(output, repository)
-    if output.exists() and any(output.iterdir()):
+    if output.is_symlink():
+        raise ValueError(f"synthbench output cannot be a symlink: {output}")
+    if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise FileExistsError(f"synthbench output is not empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
     tasks = output / "tasks"

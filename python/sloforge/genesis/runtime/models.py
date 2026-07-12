@@ -8,6 +8,16 @@ from enum import StrEnum
 from threading import Event, Lock, RLock
 from time import monotonic
 
+_MAXIMUM_SEED = (1 << 64) - 1
+_MAXIMUM_TOKEN_ID = (1 << 64) - 1
+_MAXIMUM_REQUEST_ID_BYTES = 512
+_MAXIMUM_RUNTIME_QUEUE_DEPTH = 65_536
+_MAXIMUM_RUNTIME_BATCH_SIZE = 4_096
+_MAXIMUM_RUNTIME_PROMPT_TOKENS = 1_048_576
+_MAXIMUM_RUNTIME_GENERATED_TOKENS = 65_536
+_MAXIMUM_RUNTIME_TIMEOUT_SECONDS = 86_400.0
+_MAXIMUM_STATE_BYTES = (1 << 63) - 1
+
 
 class RequestLifecycle(StrEnum):
     CREATED = "created"
@@ -52,6 +62,8 @@ class StateAllocatorConfig:
             not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in values
         ):
             raise ValueError("state allocator bounds must be positive integers")
+        if any(value > _MAXIMUM_STATE_BYTES for value in values):
+            raise ValueError("state allocator bounds exceed the supported signed 64-bit domain")
         if self.page_bytes & (self.page_bytes - 1):
             raise ValueError("state allocator page size must be a power of two")
         if self.maximum_bytes_per_request > self.maximum_total_bytes:
@@ -75,8 +87,14 @@ class RuntimeRequest:
     batching_eligible: bool = True
 
     def validate(self, *, maximum_prompt_tokens: int, maximum_generated_tokens: int) -> None:
-        if not self.request_id or any(ord(character) < 32 for character in self.request_id):
+        if not self.request_id or not self.request_id.isprintable():
             raise ValueError("request_id must be a non-empty printable string")
+        try:
+            request_id_bytes = self.request_id.encode("utf-8")
+        except UnicodeEncodeError as error:
+            raise ValueError("request_id must be valid UTF-8") from error
+        if len(request_id_bytes) > _MAXIMUM_REQUEST_ID_BYTES:
+            raise ValueError("request_id exceeds the bounded UTF-8 length")
         if not isinstance(self.prompt_tokens, tuple) or not self.prompt_tokens:
             raise ValueError("prompt_tokens cannot be empty")
         if len(self.prompt_tokens) > maximum_prompt_tokens:
@@ -87,22 +105,29 @@ class RuntimeRequest:
             or not 1 <= self.maximum_new_tokens <= maximum_generated_tokens
         ):
             raise ValueError("maximum_new_tokens is outside the declared bounded domain")
-        if not isinstance(self.seed, int) or isinstance(self.seed, bool) or self.seed < 0:
-            raise ValueError("seed must be a non-negative integer")
+        if (
+            not isinstance(self.seed, int)
+            or isinstance(self.seed, bool)
+            or not 0 <= self.seed <= _MAXIMUM_SEED
+        ):
+            raise ValueError("seed must be an unsigned 64-bit integer")
         if (
             not isinstance(self.timeout_seconds, (int, float))
             or isinstance(self.timeout_seconds, bool)
             or not math.isfinite(self.timeout_seconds)
             or self.timeout_seconds <= 0
+            or self.timeout_seconds > _MAXIMUM_RUNTIME_TIMEOUT_SECONDS
         ):
-            raise ValueError("timeout_seconds must be finite and positive")
+            raise ValueError("timeout_seconds is outside the finite bounded domain")
         if not isinstance(self.batching_eligible, bool):
             raise ValueError("batching_eligible must be Boolean")
         if any(
-            not isinstance(token, int) or isinstance(token, bool) or token < 0
+            not isinstance(token, int)
+            or isinstance(token, bool)
+            or not 0 <= token <= _MAXIMUM_TOKEN_ID
             for token in self.prompt_tokens
         ):
-            raise ValueError("prompt token identifiers must be non-negative")
+            raise ValueError("prompt token identifiers must be unsigned 64-bit integers")
 
 
 @dataclass(frozen=True)
@@ -140,6 +165,15 @@ class RuntimeLimits:
             for value in integer_bounds
         ):
             raise ValueError("runtime integer limits must be positive")
+        maximum_bounds = (
+            (self.maximum_queue_depth, _MAXIMUM_RUNTIME_QUEUE_DEPTH),
+            (self.maximum_batch_size, _MAXIMUM_RUNTIME_BATCH_SIZE),
+            (self.maximum_prompt_tokens, _MAXIMUM_RUNTIME_PROMPT_TOKENS),
+            (self.maximum_generated_tokens, _MAXIMUM_RUNTIME_GENERATED_TOKENS),
+            (self.maximum_output_events_per_request, _MAXIMUM_RUNTIME_GENERATED_TOKENS + 1),
+        )
+        if any(value > maximum for value, maximum in maximum_bounds):
+            raise ValueError("runtime integer limits exceed the supported bounded domain")
         if self.maximum_output_events_per_request < self.maximum_generated_tokens + 1:
             raise ValueError("output event bound must fit generated tokens and a terminal event")
         if self.maximum_batch_size > self.maximum_queue_depth:
@@ -155,9 +189,10 @@ class RuntimeLimits:
             or isinstance(value, bool)
             or not math.isfinite(value)
             or value <= 0
+            or value > _MAXIMUM_RUNTIME_TIMEOUT_SECONDS
             for value in timeouts
         ):
-            raise ValueError("runtime timeouts must be finite and positive")
+            raise ValueError("runtime timeouts must be finite and positive and bounded")
 
 
 @dataclass
