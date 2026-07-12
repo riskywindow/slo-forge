@@ -467,7 +467,7 @@ def _independent_runtime_differential(
 
     repository_python = Path(__file__).resolve().parents[3]
     with tempfile.TemporaryDirectory(prefix="sloforge-capsule-replay-") as temporary:
-        sandbox_output = Path(temporary) / "artifacts"
+        sandbox_output = _trusted_temporary_output(temporary)
         result = execute_sandboxed(
             SandboxRequest(
                 argv=(
@@ -523,6 +523,18 @@ def _independent_runtime_differential(
         ):
             raise ValueError("independent differential replay did not pass exact matching")
         return document
+
+
+def _trusted_temporary_output(temporary: str) -> Path:
+    """Resolve an orchestrator-created temporary root before deriving output."""
+
+    root = Path(temporary).resolve(strict=True)
+    if not root.is_dir():
+        raise ValueError("trusted temporary sandbox root must be a directory")
+    output = root / "artifacts"
+    if output.exists() or output.is_symlink():
+        raise ValueError("trusted temporary sandbox output must not already exist")
+    return output
 
 
 def _git_commit(repository: Path) -> str:
