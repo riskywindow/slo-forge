@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -70,11 +71,30 @@ class ContentAddressedArtifactStore:
     def _hash_file(path: Path) -> tuple[str, int]:
         digest = hashlib.sha256()
         size = 0
-        with path.open("rb") as handle:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(path, flags)
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            os.close(descriptor)
+            raise ArtifactStoreError(f"CAS object is not a regular file: {path}")
+        with os.fdopen(descriptor, "rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
                 digest.update(chunk)
                 size += len(chunk)
         return digest.hexdigest(), size
+
+    @staticmethod
+    def _reject_symlink_components(path: Path) -> None:
+        absolute = path if path.is_absolute() else Path.cwd() / path
+        cursor = Path(absolute.anchor)
+        for component in absolute.parts[1:]:
+            cursor = cursor / component
+            if cursor.is_symlink():
+                raise ArtifactStoreError(
+                    f"materialization destination contains a symlink component: {cursor}"
+                )
+            if not cursor.exists():
+                break
 
     def _verify_existing(self, path: Path, digest: Digest, size_bytes: int | None) -> int:
         if path.is_symlink() or not path.is_file():
@@ -174,20 +194,32 @@ class ContentAddressedArtifactStore:
         """Copy a verified object to an explicit, non-existing capsule path."""
 
         source = self.object_path(digest)
-        self._verify_existing(source, digest, None)
+        expected_size = self._verify_existing(source, digest, None)
+        self._reject_symlink_components(destination)
         if destination.exists() or destination.is_symlink():
             raise ArtifactStoreError("materialization destination already exists")
         destination.parent.mkdir(parents=True, exist_ok=True)
+        self._reject_symlink_components(destination)
         temporary: Path | None = None
         try:
+            copied_digest = hashlib.sha256()
+            copied_size = 0
             with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as handle:
                 temporary = Path(handle.name)
-                with source.open("rb") as source_handle:
+                source_descriptor = os.open(source, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+                with os.fdopen(source_descriptor, "rb") as source_handle:
                     for chunk in iter(lambda: source_handle.read(1024 * 1024), b""):
+                        copied_digest.update(chunk)
+                        copied_size += len(chunk)
                         handle.write(chunk)
                 handle.flush()
                 os.fsync(handle.fileno())
+            if copied_digest.hexdigest() != digest.value or copied_size != expected_size:
+                raise ArtifactStoreError("CAS object changed during materialization")
             os.chmod(temporary, 0o444)
+            self._reject_symlink_components(destination)
+            if destination.exists() or destination.is_symlink():
+                raise ArtifactStoreError("materialization destination already exists")
             os.replace(temporary, destination)
             temporary = None
         finally:

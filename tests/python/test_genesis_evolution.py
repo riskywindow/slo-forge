@@ -750,7 +750,7 @@ def test_capsule_is_revalidated_immediately_before_promotion(tmp_path: Path) -> 
     assert len(validator.paths) == 5
 
 
-def test_external_live_canary_requires_both_opt_ins(
+def test_external_live_canary_requires_config_and_both_environment_opt_ins(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     config = _config(
@@ -767,9 +767,13 @@ def test_external_live_canary_requires_both_opt_ins(
         _gate(controller, GateStage.SHADOW, event_id="shadow-pass", observed_at_ms=40)
     )
     monkeypatch.delenv("SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION", raising=False)
+    monkeypatch.delenv("SLOFORGE_GENESIS_ALLOW_EXTERNAL_DEPLOYMENT", raising=False)
     with pytest.raises(EvolutionError, match="SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION"):
         controller.begin_canary(event_id="canary", observed_at_ms=50)
     monkeypatch.setenv("SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION", "1")
+    with pytest.raises(EvolutionError, match="SLOFORGE_GENESIS_ALLOW_EXTERNAL_DEPLOYMENT"):
+        controller.begin_canary(event_id="canary", observed_at_ms=50)
+    monkeypatch.setenv("SLOFORGE_GENESIS_ALLOW_EXTERNAL_DEPLOYMENT", "1")
     assert (
         controller.begin_canary(event_id="canary", observed_at_ms=50).phase
         is EvolutionPhase.CANARYING

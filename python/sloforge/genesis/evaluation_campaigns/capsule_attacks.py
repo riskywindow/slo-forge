@@ -9,11 +9,13 @@ Every attack is persisted, validated, then independently rebuilt and replayed.
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import random
 import shutil
 import tempfile
-from dataclasses import dataclass
+import zipfile
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
@@ -55,6 +57,7 @@ from sloforge.genesis.capsule import (
     validate_capsule,
 )
 from sloforge.genesis.capsule.statistics import bootstrap_median_interval
+from sloforge.genesis.policy_dsl import compile_policy, parse_policy
 
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
@@ -325,6 +328,7 @@ def _add_artifact(
     payload: bytes,
     *,
     origin: ArtifactOrigin = ArtifactOrigin.VERIFIED_EVIDENCE,
+    media_type: str = "application/json",
 ) -> ArtifactRef:
     relative = f"artifacts/{artifact_id}"
     path = root / relative
@@ -336,8 +340,74 @@ def _add_artifact(
         digest=_digest(payload),
         size_bytes=len(payload),
         path=relative,
-        media_type="application/json",
+        media_type=media_type,
     )
+
+
+def _runtime_bundle(
+    candidate_hash: Digest, source_hash: Digest, tokenizer_hash: Digest
+) -> tuple[bytes, dict[str, str]]:
+    policy_source = (
+        b"policy h6_fixture\ninput queue_length int 0 8\noutput int 1 1\nlimit 8\nreturn 1\n"
+    )
+    policy_bytecode = json.dumps(
+        asdict(compile_policy(parse_policy(policy_source.decode("utf-8")))),
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    tested_config = {
+        "genome_hash": candidate_hash.value,
+        "package_hash": source_hash.value,
+        "policy_bytecode_path": "policy.bytecode.json",
+        "policy_bytecode_sha256": hashlib.sha256(policy_bytecode).hexdigest(),
+        "reference_package_root": "/trusted/reference-package",
+    }
+    tested_config_payload = canonical_json(tested_config) + b"\n"
+    packaged_config = dict(tested_config)
+    packaged_config["reference_package_root"] = "reference_package"
+    entries = {
+        "runtime.py": b"raise SystemExit('sandbox launch required')\n",
+        "correctness_harness.py": b"raise SystemExit('fixture only')\n",
+        "deployment_manifest.json": b"{}\n",
+        "runtime_config.json": canonical_json(packaged_config) + b"\n",
+        "tested_runtime_config.json": tested_config_payload,
+        "policy.slo": policy_source,
+        "policy.bytecode.json": policy_bytecode,
+        "reference_package/reference_package.json": b'{"tokenizer_module":"tokenizer.py"}\n',
+        "reference_package/tokenizer.py": b"h6-tokenizer",
+    }
+    if (
+        hashlib.sha256(entries["reference_package/tokenizer.py"]).hexdigest()
+        != tokenizer_hash.value
+    ):
+        raise CapsuleAttackCampaignValidationError("H6 tokenizer fixture identity is inconsistent")
+    manifest = {
+        "candidate_genome_hash": candidate_hash.value,
+        "direct_launch_supported": False,
+        "entries": {
+            name: hashlib.sha256(payload).hexdigest() for name, payload in sorted(entries.items())
+        },
+        "tested_runtime_config_sha256": hashlib.sha256(tested_config_payload).hexdigest(),
+    }
+    entries["bundle_manifest.json"] = canonical_json(manifest) + b"\n"
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
+        for name, payload in sorted(entries.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o444 << 16
+            archive.writestr(info, payload)
+    tested_hashes = {
+        name: hashlib.sha256(entries[bundle_name]).hexdigest()
+        for name, bundle_name in {
+            "runtime.py": "runtime.py",
+            "correctness_harness.py": "correctness_harness.py",
+            "deployment_manifest.json": "deployment_manifest.json",
+            "policy.bytecode.json": "policy.bytecode.json",
+            "policy.slo": "policy.slo",
+            "runtime_config.json": "tested_runtime_config.json",
+        }.items()
+    }
+    return output.getvalue(), tested_hashes
 
 
 def _execution_order(seed: int) -> tuple[_ExecutionEntry, ...]:
@@ -439,12 +509,16 @@ def _build_fixture(root: Path, seed: int) -> _Fixture:
         canonical_json(candidate_document),
         origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
     )
+    runtime_payload, tested_runtime_hashes = _runtime_bundle(
+        candidate_hash, _named_digest("h6-model"), _named_digest("h6-tokenizer")
+    )
     runtime = _add_artifact(
         root,
         "generated-runtime",
         ArtifactRole.GENERATED_RUNTIME,
-        canonical_json({"fixture": "bounded-runtime", "seed": seed}),
+        runtime_payload,
         origin=ArtifactOrigin.GENERATED_UNTRUSTED,
+        media_type="application/zip",
     )
     deployment = _add_artifact(
         root,
@@ -490,6 +564,7 @@ def _build_fixture(root: Path, seed: int) -> _Fixture:
                 "observed": 1.0,
                 "threshold": 1.0,
                 "passed": True,
+                "runtime_artifact_hashes": tested_runtime_hashes,
             }
         ),
     )
@@ -511,9 +586,9 @@ def _build_fixture(root: Path, seed: int) -> _Fixture:
                 "runtime_bundle_bytes": runtime.size_bytes,
                 "single_runtime_peak_bytes": 1024 + 792 + runtime.size_bytes,
                 "champion_challenger_coexistence_bytes": 2 * (1024 + 792 + runtime.size_bytes),
-                "capacity_bytes": 5120,
+                "capacity_bytes": 1024 * 1024,
                 "safety_margin_fraction": 0.2,
-                "usable_capacity_bytes": 4096,
+                "usable_capacity_bytes": int(1024 * 1024 * 0.8),
                 "passed": True,
             }
         ),
@@ -550,7 +625,7 @@ def _build_fixture(root: Path, seed: int) -> _Fixture:
         EvidenceClass.SEMANTIC: (semantic,),
         EvidenceClass.QUALITY: (quality,),
         EvidenceClass.RESOURCE: (resource,),
-        EvidenceClass.PERFORMANCE: (samples,),
+        EvidenceClass.PERFORMANCE: (definition, samples, software, baseline),
         EvidenceClass.OPERATIONAL: (modelcheck, state_conversion),
     }
     issuer_by_class = {

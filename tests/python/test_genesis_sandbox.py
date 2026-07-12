@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import sys
 import tempfile
+import time
+from contextlib import suppress
 from pathlib import Path
 
 import pytest
@@ -15,7 +17,12 @@ from sloforge.genesis.sandbox import (
     detect_capabilities,
     execute_sandboxed,
 )
-from sloforge.genesis.sandbox.executor import _macos_firmlink_alias, _process_group_rss_bytes
+from sloforge.genesis.sandbox.executor import (
+    _bounded_output,
+    _canonical_paths,
+    _macos_firmlink_alias,
+    _process_group_rss_bytes,
+)
 
 
 def test_macos_firmlink_aliases_are_symmetric() -> None:
@@ -62,6 +69,18 @@ def test_sandbox_capabilities_are_explicit() -> None:
     assert capabilities.environment_sanitization is IsolationStatus.ENFORCED
     assert capabilities.output_limit is IsolationStatus.ENFORCED
     assert capabilities.limitations
+
+
+def test_no_backend_does_not_claim_detached_child_cleanup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import sloforge.genesis.sandbox.executor as executor
+
+    monkeypatch.setattr(executor.platform, "system", lambda: "Unsupported")
+    monkeypatch.setattr(executor.shutil, "which", lambda _name: None)
+    capabilities = executor.detect_capabilities()
+    assert capabilities.backend is SandboxBackend.NONE
+    assert capabilities.child_cleanup is IsolationStatus.UNAVAILABLE
 
 
 def test_parent_resource_watchdog_observes_its_process_group() -> None:
@@ -194,6 +213,84 @@ def test_sandbox_refuses_nonempty_artifact_directory(tmp_path: Path) -> None:
     assert "must be empty" in result.stderr
     assert marker.read_text(encoding="utf-8") == "preserve"
     assert "must-not-run" not in result.stdout
+
+
+def test_sandbox_checks_source_output_overlap_before_creating_output(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    script = source / "ok.py"
+    script.write_text("print('must-not-run')\n", encoding="utf-8")
+    output = source / "generated-output"
+
+    with pytest.raises(ValueError, match="must not be nested"):
+        _canonical_paths(_request(source, output, script))
+
+    assert not output.exists()
+
+
+def test_sandbox_rejects_symlinked_output_parent(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    script = source / "ok.py"
+    script.write_text("print('must-not-run')\n", encoding="utf-8")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    linked_parent = tmp_path / "linked-output"
+    linked_parent.symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="symlink component"):
+        _canonical_paths(_request(source, linked_parent / "artifacts", script))
+
+    assert not (outside / "artifacts").exists()
+
+
+@pytest.mark.skipif(not hasattr(__import__("os"), "fork"), reason="requires POSIX process groups")
+def test_output_drain_is_bounded_when_detached_child_holds_pipe(tmp_path: Path) -> None:
+    import os
+    import subprocess
+
+    output = tmp_path / "output"
+    output.mkdir()
+    process = subprocess.Popen(
+        (
+            sys.executable,
+            "-c",
+            (
+                "import os,time\n"
+                "child=os.fork()\n"
+                "if child == 0:\n"
+                " os.setsid(); time.sleep(10); raise SystemExit(0)\n"
+                "print(child, flush=True)\n"
+            ),
+        ),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    started = time.monotonic()
+    child_pid: int | None = None
+    try:
+        stdout, _stderr, _observed, termination, _violation = _bounded_output(
+            process,
+            4096,
+            started + 0.1,
+            memory_bytes=2 * 1024 * 1024 * 1024,
+            artifact_output=output,
+            artifact_bytes=1024 * 1024,
+            artifact_entries=128,
+        )
+        child_pid = int(stdout.strip())
+        process.wait(timeout=1.0)
+        assert termination is SandboxTermination.TIMEOUT
+        assert time.monotonic() - started < 0.75
+    finally:
+        if child_pid is not None:
+            with suppress(ProcessLookupError):
+                os.kill(child_pid, 9)
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=1.0)
 
 
 def test_sandbox_kills_timed_out_process_group(tmp_path: Path) -> None:

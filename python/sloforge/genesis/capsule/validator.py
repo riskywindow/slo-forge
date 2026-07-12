@@ -64,6 +64,10 @@ _MAXIMUM_ARTIFACT_BYTES = 256 * 1024 * 1024
 _MAXIMUM_TOTAL_ARTIFACT_BYTES = 512 * 1024 * 1024
 _MAXIMUM_RUNTIME_BUNDLE_ENTRIES = 4_096
 _MAXIMUM_RUNTIME_BUNDLE_BYTES = 64 * 1024 * 1024
+_MAXIMUM_STRUCTURED_EVIDENCE_BYTES = 16 * 1024 * 1024
+_MAXIMUM_BENCHMARK_SAMPLES = 10_000
+_MAXIMUM_BOOTSTRAP_ROUNDS = 100_000
+_MAXIMUM_BOOTSTRAP_WORK = 10_000_000
 _ISSUERS_BY_CLASS = {
     EvidenceClass.BUILD: frozenset({EvidenceIssuer.TRUSTED_VALIDATOR, EvidenceIssuer.SANDBOX}),
     EvidenceClass.SEMANTIC: frozenset(
@@ -95,7 +99,13 @@ _ARTIFACT_ROLE_BY_EVIDENCE = {
     ),
     EvidenceClass.QUALITY: frozenset({ArtifactRole.QUALITY_EVIDENCE}),
     EvidenceClass.RESOURCE: frozenset({ArtifactRole.RESOURCE_EVIDENCE}),
-    EvidenceClass.PERFORMANCE: frozenset({ArtifactRole.PERFORMANCE_SAMPLES}),
+    EvidenceClass.PERFORMANCE: frozenset(
+        {
+            ArtifactRole.BENCHMARK_DEFINITION,
+            ArtifactRole.PERFORMANCE_SAMPLES,
+            ArtifactRole.SOFTWARE_MANIFEST,
+        }
+    ),
     EvidenceClass.OPERATIONAL: frozenset(
         {
             ArtifactRole.OPERATIONAL_EVIDENCE,
@@ -154,6 +164,8 @@ def _validate_runtime_bundle(
 ) -> None:
     prefix = f"artifacts.{artifact.artifact_id}"
     try:
+        if path.stat().st_size > _MAXIMUM_RUNTIME_BUNDLE_BYTES:
+            raise ValueError("bundle compressed size exceeds the trusted validation bound")
         with zipfile.ZipFile(path) as archive:
             members = archive.infolist()
             if not 1 <= len(members) <= _MAXIMUM_RUNTIME_BUNDLE_ENTRIES:
@@ -240,6 +252,11 @@ def _validate_policy_artifacts(resolved: dict[str, Path], issues: list[Validatio
     if bytecode_path is None or source_path is None:
         return
     try:
+        if any(
+            path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES
+            for path in (bytecode_path, source_path)
+        ):
+            raise ValueError("generated policy exceeds the trusted parsing bound")
         program = load_bytecode_document(bytecode_path.read_bytes())
         authenticate_bytecode_source(program, source_path.read_bytes())
     except (OSError, ValueError) as error:
@@ -273,7 +290,10 @@ def _validate_runtime_test_binding(
     if len(bundles) != 1 or len(quality_artifacts) != 1:
         return
     try:
-        quality = json.loads(resolved[quality_artifacts[0].artifact_id].read_text(encoding="utf-8"))
+        quality_path = resolved[quality_artifacts[0].artifact_id]
+        if quality_path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES:
+            raise ValueError("quality evidence exceeds the trusted parsing bound")
+        quality = json.loads(quality_path.read_text(encoding="utf-8"))
         tested_hashes = quality["runtime_artifact_hashes"]
         if not isinstance(tested_hashes, dict) or quality.get("passed") is not True:
             raise ValueError("quality evidence omits a passing tested-runtime manifest")
@@ -303,6 +323,8 @@ def _validate_runtime_test_binding(
 
 def _validate_quality_artifact(path: Path) -> str | None:
     try:
+        if path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES:
+            return "quality evidence exceeds the trusted parsing bound"
         document = json.loads(path.read_text(encoding="utf-8"))
         cases = document["cases"]
         if not isinstance(cases, list) or not cases:
@@ -329,6 +351,8 @@ def _validate_quality_artifact(path: Path) -> str | None:
 
 def _validate_resource_artifact(path: Path, *, runtime_bundle_bytes: int | None) -> str | None:
     try:
+        if path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES:
+            return "resource evidence exceeds the trusted parsing bound"
         document = json.loads(path.read_text(encoding="utf-8"))
         request_bytes = (
             (int(document["maximum_prompt_tokens"]) + int(document["maximum_generated_tokens"])) * 8
@@ -465,6 +489,27 @@ def _validate_benchmark(
     if definition_path is None or raw_path is None or baseline_path is None:
         return
     try:
+        exceeds_resource_bound = benchmark.sample_count > _MAXIMUM_BENCHMARK_SAMPLES or any(
+            path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES
+            for path in (definition_path, raw_path, baseline_path)
+        )
+    except OSError as exc:
+        _append(
+            issues,
+            ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID,
+            prefix,
+            f"benchmark artifacts changed during validation: {exc}",
+        )
+        return
+    if exceeds_resource_bound:
+        _append(
+            issues,
+            ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID,
+            prefix,
+            "benchmark exceeds the trusted parsing or sample-count bound",
+        )
+        return
+    try:
         definition = json.loads(definition_path.read_text(encoding="utf-8"))
         samples = RawBenchmarkSamples.model_validate_json(raw_path.read_bytes(), strict=True)
         baseline_samples = RawBenchmarkSamples.model_validate_json(
@@ -509,6 +554,10 @@ def _validate_benchmark(
         mismatches.append("randomized run order")
     candidate_by_trial = {sample.trial: sample for sample in samples.samples}
     baseline_by_trial = {sample.trial: sample for sample in baseline_samples.samples}
+    if len(candidate_by_trial) != len(samples.samples) or len(baseline_by_trial) != len(
+        baseline_samples.samples
+    ):
+        mismatches.append("unique trial identity")
     candidate_trials = {trial: sample.seed for trial, sample in candidate_by_trial.items()}
     baseline_trials = {trial: sample.seed for trial, sample in baseline_by_trial.items()}
     if candidate_trials != baseline_trials:
@@ -583,6 +632,11 @@ def _validate_benchmark(
         bootstrap_rounds = int(definition["bootstrap_rounds"])
         confidence = float(definition["confidence"])
         statistical_seed = int(definition["statistical_seed"])
+        if (
+            bootstrap_rounds > _MAXIMUM_BOOTSTRAP_ROUNDS
+            or bootstrap_rounds * len(samples.samples) > _MAXIMUM_BOOTSTRAP_WORK
+        ):
+            raise ValueError("bootstrap work exceeds the trusted validation bound")
         expected_low, expected_high = bootstrap_median_interval(
             tuple(sample.value for sample in samples.samples),
             seed=statistical_seed,
@@ -1043,6 +1097,18 @@ def validate_capsule(
                 "artifacts",
                 f"promotion requires artifact role {role.value}",
             )
+        runtimes = [
+            artifact
+            for artifact in capsule.artifacts
+            if artifact.role is ArtifactRole.GENERATED_RUNTIME
+        ]
+        if len(runtimes) != 1 or runtimes[0].media_type != "application/zip":
+            _append(
+                issues,
+                ValidationIssueCode.REQUIRED_ARTIFACT_MISSING,
+                "artifacts",
+                "promotion requires exactly one generated runtime in the validated bundle format",
+            )
         classes = {record.evidence_class for record in capsule.evidence}
         for evidence_class in sorted(
             _PROMOTION_EVIDENCE_CLASSES - classes, key=lambda item: item.value
@@ -1075,6 +1141,11 @@ def validate_capsule(
             )
         elif corpus_refs[0].artifact_id in resolved:
             try:
+                if (
+                    resolved[corpus_refs[0].artifact_id].stat().st_size
+                    > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES
+                ):
+                    raise ValueError("counterexample corpus exceeds the trusted parsing bound")
                 corpus = CounterexampleCorpus.model_validate_json(
                     resolved[corpus_refs[0].artifact_id].read_bytes(), strict=True
                 )
@@ -1097,21 +1168,32 @@ def validate_capsule(
                 "promotion requires independent raw benchmark evidence",
             )
         else:
-            raw_sample_ids = {item.raw_samples_artifact_id for item in capsule.benchmarks}
-            performance_records = [
-                item
-                for item in capsule.evidence
-                if item.evidence_class is EvidenceClass.PERFORMANCE
+            performance_claim_records = [
+                evidence[evidence_id]
+                for claim in capsule.claims
+                if claim.promotion_required and claim.category is ClaimCategory.PERFORMANCE
+                for evidence_id in claim.evidence_ids
+                if evidence_id in evidence
+                and evidence[evidence_id].evidence_class is EvidenceClass.PERFORMANCE
             ]
-            if not any(
-                raw_sample_ids.intersection(item.artifact_ids) for item in performance_records
-            ):
-                _append(
-                    issues,
-                    ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID,
-                    "evidence",
-                    "performance claim evidence is not bound to benchmark raw samples",
-                )
+            for benchmark in capsule.benchmarks:
+                provenance_ids = {
+                    benchmark.definition_artifact_id,
+                    benchmark.raw_samples_artifact_id,
+                    benchmark.software_manifest_artifact_id,
+                    benchmark.baseline_artifact_id,
+                }
+                if not any(
+                    provenance_ids.issubset(record.artifact_ids)
+                    for record in performance_claim_records
+                ):
+                    _append(
+                        issues,
+                        ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID,
+                        f"benchmarks.{benchmark.benchmark_id}",
+                        "promotion performance evidence does not externally bind the complete "
+                        "benchmark definition, candidate samples, baseline, and software manifest",
+                    )
 
     integrity_codes = {
         ValidationIssueCode.UNSEALED,
