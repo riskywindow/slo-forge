@@ -688,6 +688,32 @@ class InferenceGenome(GenesisModel):
             for identifier in identifiers:
                 visit(identifier)
 
+        nodes = (
+            self.workflow.node,
+            *(step.node for step in self.workflow.steps),
+            *(edge.node for edge in self.workflow.edges),
+            self.request.node,
+            self.serving.node,
+            self.state.node,
+            *(state.node for state in self.state.states),
+            self.distributed.node,
+            self.distributed.parallelism.node,
+            *(placement.node for placement in self.distributed.rank_placement),
+            *(placement.node for placement in self.distributed.expert_placement),
+            *(step.node for step in self.distributed.collective_dag),
+            self.tensor.node,
+            *(dimension.node for dimension in self.tensor.symbolic_dimensions),
+            *(value.node for value in self.tensor.values),
+            *(operator.node for operator in self.tensor.operators),
+            self.kernel.node,
+            *(kernel.node for kernel in self.kernel.kernels),
+            self.recovery.node,
+            *(transition.node for transition in self.recovery.transitions),
+        )
+        stable_ids = [node.stable_id for node in nodes]
+        if len(stable_ids) != len(set(stable_ids)):
+            raise ValueError("genome node stable identifiers must be globally unique")
+
         step_ids = [step.node.stable_id for step in self.workflow.steps]
         if len(step_ids) != len(set(step_ids)):
             raise ValueError("workflow step stable identifiers must be unique")
@@ -889,6 +915,49 @@ class Transformation(GenesisModel):
             raise ValueError("approximate transformations require an expected quality cost")
         if not self.verification_obligations:
             raise ValueError("every transformation must create verification obligations")
+        if self.source_pattern.region != self.target_pattern.region:
+            raise ValueError("source and target patterns must use the same primary region")
+        if not self.source_pattern.node_ids or not self.target_pattern.node_ids:
+            raise ValueError("transformation patterns must identify genome nodes")
+        if not self.preconditions or not self.postconditions:
+            raise ValueError("transformations must declare preconditions and postconditions")
+        if not self.affected_regions:
+            raise ValueError("transformations must declare affected genome regions")
+        region_names = {
+            "workflow",
+            "request",
+            "serving",
+            "state",
+            "distributed",
+            "tensor",
+            "kernel",
+            "recovery",
+        }
+        if any(region.split(".", 1)[0] not in region_names for region in self.affected_regions):
+            raise ValueError("affected_regions must use typed genome-region paths")
+        if not any(
+            region == self.source_pattern.region
+            or region.startswith(f"{self.source_pattern.region}.")
+            for region in self.affected_regions
+        ):
+            raise ValueError("affected_regions must cover the primary genome pattern")
+        unique_collections = (
+            ("affected_regions", self.affected_regions),
+            ("required_verifier_stages", self.required_verifier_stages),
+            ("required_benchmark_stages", self.required_benchmark_stages),
+            ("parent_transformations", self.parent_transformations),
+            ("counterexample_references", self.counterexample_references),
+        )
+        for name, values in unique_collections:
+            if len(values) != len(set(values)):
+                raise ValueError(f"{name} must be unique")
+        if not self.required_verifier_stages or not self.required_benchmark_stages:
+            raise ValueError("transformations must declare verifier and benchmark stages")
+        if self.transformation_id in self.parent_transformations:
+            raise ValueError("transformation cannot be its own parent")
+        constraint_ids = [item.constraint_id for item in self.learned_constraints]
+        if len(constraint_ids) != len(set(constraint_ids)):
+            raise ValueError("learned constraint identifiers must be unique")
         return self
 
 
@@ -973,6 +1042,12 @@ class Candidate(GenesisModel):
 
     @model_validator(mode="after")
     def lifecycle_is_audit_log(self) -> Self:
+        if len(self.parent_candidate_ids) != len(set(self.parent_candidate_ids)):
+            raise ValueError("parent candidate identifiers must be unique")
+        if self.candidate_id in self.parent_candidate_ids:
+            raise ValueError("candidate cannot be its own parent")
+        if len(self.transformation_ids) != len(set(self.transformation_ids)):
+            raise ValueError("candidate transformation identifiers must be unique")
         if not self.lifecycle:
             raise ValueError("candidate lifecycle must not be empty")
         for expected, event in enumerate(self.lifecycle):

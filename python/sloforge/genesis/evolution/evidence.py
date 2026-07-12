@@ -45,6 +45,7 @@ class _RuntimeObservation(BaseModel):
 
     schema_version: Literal["sloforge.genesis.evolution.runtime-observation/v1"]
     seed: int = Field(ge=0)
+    runtime_seed: int = Field(ge=0)
     request_count: Annotated[int, Field(ge=1, le=256)]
     cases: tuple[_ObservationCase, ...]
 

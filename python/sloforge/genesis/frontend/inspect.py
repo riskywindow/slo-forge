@@ -244,7 +244,6 @@ class _ModuleInspection:
                 or (root in imported_roots and root in _SAFE_IMPORTED_MODULES)
                 or symbol in _SAFE_PYTHON_CALLS
                 or leaf in _SAFE_METHODS
-                or category != "python"
             )
             if not known:
                 self.diagnostics.append(
@@ -257,6 +256,36 @@ class _ModuleInspection:
                         proof_obligation=f"declare and independently verify semantics for {symbol}",
                     )
                 )
+
+        unknown_state_accesses = sorted(
+            {
+                (
+                    field,
+                    getattr(item, "lineno", 1),
+                    getattr(item, "col_offset", 0),
+                )
+                for item in ast.walk(tree)
+                if (field := _state_field(item)) is not None and field not in declared_state
+            }
+        )
+        for ordinal, (field, line, column) in enumerate(unknown_state_accesses):
+            self.diagnostics.append(
+                InspectionDiagnostic(
+                    diagnostic_id=f"{self.identity}-unknown-state-{ordinal:05d}",
+                    severity=DiagnosticSeverity.UNSUPPORTED,
+                    category="contract",
+                    message=f"state field {field!r} is absent from the declared state contract",
+                    location=SourceLocation(
+                        relative_path=self.relative_path,
+                        line=max(1, line),
+                        column=max(0, column),
+                    ),
+                    proof_obligation=(
+                        "declare ownership, lifetime, shape, dtype, and mutation semantics "
+                        f"for state field {field}"
+                    ),
+                )
+            )
 
         state_assignments = (
             node
@@ -444,6 +473,7 @@ def inspect_reference_package(
                 package.manifest.reference_module,
                 package.manifest.tokenizer_module,
                 package.manifest.sample_generator_module,
+                *package.manifest.auxiliary_modules,
             }
         )
     ]
@@ -496,6 +526,24 @@ def inspect_reference_package(
     if output_path is not None:
         write_canonical(result, output_path)
     return result
+
+
+def validate_inspection_binding(path: Path, inspection: InspectionResult) -> None:
+    """Independently recompute static evidence before trusting inspection fields.
+
+    Optional ``torch.export`` evidence is deliberately excluded: it is sandbox
+    evidence and is not consumed by the conservative compiler or runtime
+    generator. Every statically consumed field must exactly match a fresh,
+    non-executing inspection of the content-addressed package.
+    """
+
+    expected = inspect_reference_package(path)
+    observed = inspection.model_copy(update={"torch_export": None})
+    if observed != expected:
+        raise ValueError(
+            "inspection evidence does not match an independent static inspection "
+            "of the reference package"
+        )
 
 
 def unsupported_obligations(result: InspectionResult) -> Iterable[InspectionDiagnostic]:

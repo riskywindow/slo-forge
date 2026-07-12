@@ -320,6 +320,21 @@ string_enum!(GenomeRegion {
     Kernel,
     Recovery
 });
+
+impl GenomeRegion {
+    const fn as_str(self) -> &'static str {
+        match self {
+            Self::Workflow => "workflow",
+            Self::Request => "request",
+            Self::Serving => "serving",
+            Self::State => "state",
+            Self::Distributed => "distributed",
+            Self::Tensor => "tensor",
+            Self::Kernel => "kernel",
+            Self::Recovery => "recovery",
+        }
+    }
+}
 string_enum!(RequestEventAction {
     Admit,
     Schedule,
@@ -1096,6 +1111,63 @@ impl Validate for InferenceGenome {
         ] {
             node.validate_at(path)?;
         }
+        let mut stable_ids = BTreeSet::new();
+        macro_rules! insert_stable_id {
+            ($node:expr) => {
+                if !stable_ids.insert($node.stable_id.as_str()) {
+                    return Err(ValidationError::new(
+                        "stable_id",
+                        "genome node stable identifiers must be globally unique",
+                    ));
+                }
+            };
+        }
+        for node in [
+            &self.workflow.node,
+            &self.request.node,
+            &self.serving.node,
+            &self.state.node,
+            &self.distributed.node,
+            &self.distributed.parallelism.node,
+            &self.tensor.node,
+            &self.kernel.node,
+            &self.recovery.node,
+        ] {
+            insert_stable_id!(node);
+        }
+        for step in &self.workflow.steps {
+            insert_stable_id!(&step.node);
+        }
+        for edge in &self.workflow.edges {
+            insert_stable_id!(&edge.node);
+        }
+        for state in &self.state.states {
+            insert_stable_id!(&state.node);
+        }
+        for placement in &self.distributed.rank_placement {
+            insert_stable_id!(&placement.node);
+        }
+        for placement in &self.distributed.expert_placement {
+            insert_stable_id!(&placement.node);
+        }
+        for step in &self.distributed.collective_dag {
+            insert_stable_id!(&step.node);
+        }
+        for dimension in &self.tensor.symbolic_dimensions {
+            insert_stable_id!(&dimension.node);
+        }
+        for value in &self.tensor.values {
+            insert_stable_id!(&value.node);
+        }
+        for operator in &self.tensor.operators {
+            insert_stable_id!(&operator.node);
+        }
+        for kernel in &self.kernel.kernels {
+            insert_stable_id!(&kernel.node);
+        }
+        for transition in &self.recovery.transitions {
+            insert_stable_id!(&transition.node);
+        }
         if self.request.maximum_queue_depth == 0 {
             return Err(ValidationError::new(
                 "request.maximum_queue_depth",
@@ -1747,6 +1819,7 @@ pub struct Transformation {
 }
 
 impl Validate for Transformation {
+    #[allow(clippy::too_many_lines)]
     fn validate(&self) -> Result<(), ValidationError> {
         validate_document_header(
             &self.schema_version,
@@ -1755,6 +1828,77 @@ impl Validate for Transformation {
             "Transformation",
         )?;
         nonempty("transformation_id", &self.transformation_id)?;
+        if self.source_pattern.region != self.target_pattern.region {
+            return Err(ValidationError::new(
+                "target_pattern.region",
+                "source and target patterns must use the same primary region",
+            ));
+        }
+        if self.source_pattern.node_ids.is_empty() || self.target_pattern.node_ids.is_empty() {
+            return Err(ValidationError::new(
+                "source_pattern.node_ids",
+                "transformation patterns must identify genome nodes",
+            ));
+        }
+        for (name, pattern) in [
+            ("source_pattern", &self.source_pattern),
+            ("target_pattern", &self.target_pattern),
+        ] {
+            nonempty_values(&format!("{name}.node_ids"), &pattern.node_ids)?;
+            nonempty_values(
+                &format!("{name}.structural_constraints"),
+                &pattern.structural_constraints,
+            )?;
+        }
+        if self.preconditions.is_empty() || self.postconditions.is_empty() {
+            return Err(ValidationError::new(
+                "preconditions",
+                "transformations must declare preconditions and postconditions",
+            ));
+        }
+        nonempty_values("preconditions", &self.preconditions)?;
+        nonempty_values("postconditions", &self.postconditions)?;
+        if self.affected_regions.is_empty() {
+            return Err(ValidationError::new(
+                "affected_regions",
+                "transformations must declare affected genome regions",
+            ));
+        }
+        let primary_region = self.source_pattern.region.as_str();
+        let known_regions = [
+            "workflow",
+            "request",
+            "serving",
+            "state",
+            "distributed",
+            "tensor",
+            "kernel",
+            "recovery",
+        ];
+        let mut affected = BTreeSet::new();
+        let mut primary_covered = false;
+        for region in &self.affected_regions {
+            nonempty("affected_regions", region)?;
+            let root = region
+                .split_once('.')
+                .map_or(region.as_str(), |(root, _)| root);
+            if !known_regions.contains(&root) {
+                return Err(ValidationError::new(
+                    "affected_regions",
+                    "must use typed genome-region paths",
+                ));
+            }
+            if !affected.insert(region.as_str()) {
+                return Err(ValidationError::new("affected_regions", "must be unique"));
+            }
+            primary_covered |= root == primary_region;
+        }
+        if !primary_covered {
+            return Err(ValidationError::new(
+                "affected_regions",
+                "must cover the primary genome pattern",
+            ));
+        }
         if self.verification_obligations.is_empty() {
             return Err(ValidationError::new(
                 "verification_obligations",
@@ -1776,6 +1920,11 @@ impl Validate for Transformation {
             .chain(&self.expected_performance_change)
             .enumerate()
         {
+            nonempty(
+                &format!("estimated_changes[{index}].metric"),
+                &change.metric,
+            )?;
+            nonempty(&format!("estimated_changes[{index}].unit"), &change.unit)?;
             if !(change.lower.is_finite()
                 && change.expected.is_finite()
                 && change.upper.is_finite()
@@ -1785,6 +1934,80 @@ impl Validate for Transformation {
                 return Err(ValidationError::new(
                     format!("estimated_changes[{index}]"),
                     "must be a finite ordered interval",
+                ));
+            }
+        }
+        for (index, obligation) in self.verification_obligations.iter().enumerate() {
+            let prefix = format!("verification_obligations[{index}]");
+            nonempty(
+                &format!("{prefix}.obligation_id"),
+                &obligation.obligation_id,
+            )?;
+            nonempty(&format!("{prefix}.property"), &obligation.property)?;
+            nonempty(&format!("{prefix}.scope"), &obligation.scope)?;
+            nonempty_values(&format!("{prefix}.assumptions"), &obligation.assumptions)?;
+        }
+        for (name, values) in [
+            ("required_verifier_stages", &self.required_verifier_stages),
+            ("required_benchmark_stages", &self.required_benchmark_stages),
+        ] {
+            if values.is_empty() {
+                return Err(ValidationError::new(
+                    name,
+                    "transformations must declare verifier and benchmark stages",
+                ));
+            }
+            nonempty_values(name, values)?;
+            let unique: BTreeSet<_> = values.iter().collect();
+            if unique.len() != values.len() {
+                return Err(ValidationError::new(name, "must be unique"));
+            }
+        }
+        nonempty("rollback_strategy", &self.rollback_strategy)?;
+        nonempty("proposal_source", &self.proposal_source)?;
+        nonempty_values("parent_transformations", &self.parent_transformations)?;
+        let parents: BTreeSet<_> = self.parent_transformations.iter().collect();
+        if parents.len() != self.parent_transformations.len()
+            || parents.contains(&self.transformation_id)
+        {
+            return Err(ValidationError::new(
+                "parent_transformations",
+                "must be unique and cannot contain transformation_id",
+            ));
+        }
+        nonempty_values("counterexample_references", &self.counterexample_references)?;
+        let counterexamples: BTreeSet<_> = self.counterexample_references.iter().collect();
+        if counterexamples.len() != self.counterexample_references.len() {
+            return Err(ValidationError::new(
+                "counterexample_references",
+                "must be unique",
+            ));
+        }
+        let mut constraints = BTreeSet::new();
+        for (index, constraint) in self.learned_constraints.iter().enumerate() {
+            let prefix = format!("learned_constraints[{index}]");
+            nonempty(
+                &format!("{prefix}.constraint_id"),
+                &constraint.constraint_id,
+            )?;
+            nonempty(&format!("{prefix}.expression"), &constraint.expression)?;
+            if !matches!(
+                constraint.scope.as_str(),
+                "candidate" | "family" | "hardware" | "dependency" | "universal_precondition"
+            ) {
+                return Err(ValidationError::new(
+                    format!("{prefix}.scope"),
+                    "invalid learned-constraint scope",
+                ));
+            }
+            nonempty_values(
+                &format!("{prefix}.counterexample_ids"),
+                &constraint.counterexample_ids,
+            )?;
+            if !constraints.insert(constraint.constraint_id.as_str()) {
+                return Err(ValidationError::new(
+                    "learned_constraints",
+                    "constraint identifiers must be unique",
                 ));
             }
         }
@@ -1849,6 +2072,7 @@ pub struct Candidate {
 }
 
 impl Validate for Candidate {
+    #[allow(clippy::too_many_lines)]
     fn validate(&self) -> Result<(), ValidationError> {
         validate_document_header(
             &self.schema_version,
@@ -1858,6 +2082,20 @@ impl Validate for Candidate {
         )?;
         nonempty("candidate_id", &self.candidate_id)?;
         self.genome_hash.validate_at("genome_hash")?;
+        nonempty_values("parent_candidate_ids", &self.parent_candidate_ids)?;
+        let parents: BTreeSet<_> = self.parent_candidate_ids.iter().collect();
+        if parents.len() != self.parent_candidate_ids.len() || parents.contains(&self.candidate_id)
+        {
+            return Err(ValidationError::new(
+                "parent_candidate_ids",
+                "must be unique and cannot contain candidate_id",
+            ));
+        }
+        nonempty_values("transformation_ids", &self.transformation_ids)?;
+        let transformations: BTreeSet<_> = self.transformation_ids.iter().collect();
+        if transformations.len() != self.transformation_ids.len() {
+            return Err(ValidationError::new("transformation_ids", "must be unique"));
+        }
         if self.lifecycle.is_empty() {
             return Err(ValidationError::new("lifecycle", "must not be empty"));
         }
@@ -1873,6 +2111,10 @@ impl Validate for Candidate {
                     format!("lifecycle[{index}].sequence"),
                     "must be contiguous from zero",
                 ));
+            }
+            nonempty(&format!("lifecycle[{index}].reason"), &event.reason)?;
+            for (evidence_index, evidence) in event.evidence.iter().enumerate() {
+                evidence.validate_at(&format!("lifecycle[{index}].evidence[{evidence_index}]"))?;
             }
             if index == 0 {
                 if event.from_state.is_some() || event.to_state != CandidateState::Proposed {
@@ -1920,6 +2162,34 @@ impl Validate for Candidate {
             || self.usage.compilation_count > self.budget.compilation_count
             || self.usage.benchmark_count > self.budget.benchmark_count
             || self.usage.verifier_time_seconds > self.budget.verifier_time_seconds;
+        for (path, value) in [
+            ("budget.wall_time_seconds", self.budget.wall_time_seconds),
+            ("budget.cpu_time_seconds", self.budget.cpu_time_seconds),
+            ("budget.gpu_time_seconds", self.budget.gpu_time_seconds),
+            ("budget.cloud_cost_usd", self.budget.cloud_cost_usd),
+            (
+                "budget.external_synthesis_cost_usd",
+                self.budget.external_synthesis_cost_usd,
+            ),
+            (
+                "budget.verifier_time_seconds",
+                self.budget.verifier_time_seconds,
+            ),
+            ("usage.wall_time_seconds", self.usage.wall_time_seconds),
+            ("usage.cpu_time_seconds", self.usage.cpu_time_seconds),
+            ("usage.gpu_time_seconds", self.usage.gpu_time_seconds),
+            ("usage.cloud_cost_usd", self.usage.cloud_cost_usd),
+            (
+                "usage.external_synthesis_cost_usd",
+                self.usage.external_synthesis_cost_usd,
+            ),
+            (
+                "usage.verifier_time_seconds",
+                self.usage.verifier_time_seconds,
+            ),
+        ] {
+            finite_nonnegative(path, value)?;
+        }
         if over_budget {
             return Err(ValidationError::new(
                 "usage",

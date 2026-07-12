@@ -318,11 +318,49 @@ def _materialize_candidate_runtime(
     design: CandidateDesign,
     genome: InferenceGenome,
 ) -> tuple[Path, dict[str, str]]:
+    genome_hash = canonical_hash(genome)
+    if design.genome_hash.value != genome_hash:
+        raise ValueError("candidate design is not bound to the lowered genome")
+    synthesis_record = genome.extensions.root.get("sloforge.dev/synthesis-candidate")
+    expected_transformations = [item.transformation_id for item in design.mutations]
+    if (
+        not isinstance(synthesis_record, dict)
+        or synthesis_record.get("candidate_id") != design.candidate_id
+        or synthesis_record.get("transformation_ids") != expected_transformations
+    ):
+        raise ValueError("lowered genome does not bind the candidate mutation sequence")
+
+    batching = tuple(
+        mutation
+        for mutation in design.mutations
+        if mutation.family.value == "batching_transformation"
+    )
+    if len(batching) != 1:
+        raise ValueError("candidate runtime requires exactly one lowered batching policy")
+    safe = batching[0].parameter("cancel_check_before_emit") == "true"
+    expected_policy = "deadline_cancel_batch" if safe else "deadline_batch"
+    policy_record = genome.request.node.extensions.root.get("sloforge.dev/synthesized-policy")
+    serving_policy_record = genome.serving.node.extensions.root.get(
+        "sloforge.dev/synthesized-policy"
+    )
+    if (
+        genome.request.queue_discipline.value != "earliest_deadline"
+        or genome.request.cancellation_behavior.value
+        != ("immediate" if safe else "safe_point")
+        or genome.serving.decode_scheduling.value != "slo_slack"
+        or policy_record != serving_policy_record
+        or not isinstance(policy_record, dict)
+        or policy_record.get("candidate_id") != design.candidate_id
+        or policy_record.get("policy") != expected_policy
+        or policy_record.get("cancel_check_before_emit") is not safe
+    ):
+        raise ValueError("lowered Request/Serving genome is inconsistent with policy execution")
+
     baseline_runtime = run_directory / "generated_runtime"
     runtime_directory = candidate_directory / "generated_runtime"
     policy = (candidate_directory / "policy.bytecode.json").read_bytes()
     policy_source = (candidate_directory / "policy.slo").read_bytes()
-    for name in ("runtime.py", "correctness_harness.py", "deployment_manifest.json"):
+    for name in ("runtime.py", "correctness_harness.py"):
         _atomic_write(runtime_directory / name, (baseline_runtime / name).read_bytes())
     _atomic_write(runtime_directory / "policy.bytecode.json", policy)
     _atomic_write(runtime_directory / "policy.slo", policy_source)
@@ -337,8 +375,19 @@ def _materialize_candidate_runtime(
     page_bytes = 64
     layout_record = genome.state.node.extensions.root.get("sloforge.dev/synthesized-state-layout")
     if layout == "paged":
-        page_value = layout_record.get("page_bytes") if isinstance(layout_record, dict) else None
-        if type(page_value) is not int:
+        if not isinstance(layout_record, dict):
+            raise ValueError("paged StateGenome is missing its typed allocator page size")
+        page_value = layout_record.get("page_bytes")
+        if (
+            type(page_value) is not int
+            or layout_record.get("candidate_id") != design.candidate_id
+            or layout_record.get("layout") != "paged"
+            or any(
+                state.node.extensions.root.get("sloforge.dev/synthesized-state-layout")
+                != layout_record
+                for state in genome.state.states
+            )
+        ):
             raise ValueError("paged StateGenome is missing its typed allocator page size")
         page_bytes = page_value
         reserved_per_request = (
@@ -355,17 +404,50 @@ def _materialize_candidate_runtime(
         "maximum_bytes_per_request": maximum_bytes_per_request,
         "maximum_total_bytes": reserved_per_request * queue_depth,
     }
+    policy_digest = hashlib.sha256(policy).hexdigest()
+    runtime_identity = hashlib.sha256(
+        json.dumps(
+            {
+                "base_runtime_id": config["runtime_id"],
+                "candidate_id": design.candidate_id,
+                "genome_hash": genome_hash,
+                "policy_bytecode_sha256": policy_digest,
+                "state_allocator": state_allocator,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
     config.update(
         {
-            "genome_hash": canonical_hash(genome),
+            "runtime_id": runtime_identity,
+            "genome_hash": genome_hash,
             "policy_bytecode_path": "policy.bytecode.json",
-            "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+            "policy_bytecode_sha256": policy_digest,
             "state_allocator": state_allocator,
         }
     )
     _atomic_write(
         runtime_directory / "runtime_config.json",
         json.dumps(config, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n",
+    )
+    deployment = json.loads(
+        (baseline_runtime / "deployment_manifest.json").read_text(encoding="utf-8")
+    )
+    deployment.update(
+        {
+            "runtime_id": runtime_identity,
+            "candidate_id": design.candidate_id,
+            "genome_hash": genome_hash,
+            "policy_bytecode_sha256": policy_digest,
+            "state_allocator": state_allocator,
+        }
+    )
+    _atomic_write(
+        runtime_directory / "deployment_manifest.json",
+        json.dumps(deployment, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+        + b"\n",
     )
     hashes = {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
@@ -375,8 +457,8 @@ def _materialize_candidate_runtime(
     manifest = {
         "schema_version": "1.0.0",
         "candidate_id": design.candidate_id,
-        "candidate_genome_hash": canonical_hash(genome),
-        "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+        "candidate_genome_hash": genome_hash,
+        "policy_bytecode_sha256": policy_digest,
         "state_allocator": state_allocator,
         "artifacts": hashes,
     }
@@ -394,6 +476,7 @@ def _run_differential_harness(
     genome: InferenceGenome,
     *,
     seed: int,
+    final_evaluation: bool,
 ) -> tuple[bool, str, Path]:
     runtime_directory, runtime_hashes = _materialize_candidate_runtime(
         run_directory, candidate_directory, design, genome
@@ -401,7 +484,11 @@ def _run_differential_harness(
     config = json.loads((runtime_directory / "runtime_config.json").read_text(encoding="utf-8"))
     runtime_seed = int(config["generation_seed"])
     package = load_reference_package(Path(config["reference_package_root"]))
-    samples = package.resolve(package.manifest.quality_contract.final_evaluation_corpus)
+    samples = package.resolve(
+        package.manifest.quality_contract.final_evaluation_corpus
+        if final_evaluation
+        else package.manifest.quality_contract.search_corpus
+    )
     sandbox_output = candidate_directory / "evidence/runtime-differential-sandbox"
     repository_python = Path(__file__).resolve().parents[3]
     result = execute_sandboxed(
@@ -454,6 +541,9 @@ def _run_differential_harness(
         "state_allocator": config["state_allocator"],
         "runtime_artifact_hashes": runtime_hashes,
         "seed": seed,
+        "candidate_seed": design.seed,
+        "runtime_seed": runtime_seed,
+        "corpus_role": "final_evaluation" if final_evaluation else "search",
         "corpus_path": str(samples.resolve()),
         "corpus_sha256": hashlib.sha256(samples.read_bytes()).hexdigest(),
         "sandbox_termination": result.termination.value,
@@ -815,6 +905,7 @@ def synthesize_local_run(
                 design,
                 genome,
                 seed=seed,
+                final_evaluation=design.candidate_id == cegis.accepted_candidate_id,
             )
         if candidate_runtime_passed and design.candidate_id == cegis.accepted_candidate_id:
             property_passed, property_evidence_path = _bounded_candidate_policy_properties(

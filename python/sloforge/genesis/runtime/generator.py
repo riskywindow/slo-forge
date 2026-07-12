@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+from sloforge.genesis.frontend import validate_inspection_binding
 from sloforge.genesis.frontend.models import DiagnosticSeverity, InspectionResult
 from sloforge.genesis.frontend.package import load_reference_package
 from sloforge.genesis.policy_dsl import BytecodeProgram, load_bytecode_document
@@ -281,6 +282,8 @@ def generate_baseline_runtime(
 ) -> GeneratedRuntimeBundle:
     """Generate a runtime bundle only from a matching static inspection."""
 
+    if not isinstance(seed, int) or isinstance(seed, bool) or not 0 <= seed < 1 << 64:
+        raise ValueError("generated runtime seed must be an unsigned 64-bit integer")
     package = load_reference_package(package_path)
     if package.package_hash != inspection.package_hash:
         raise ValueError("inspection no longer matches the reference package content")
@@ -292,6 +295,7 @@ def generate_baseline_runtime(
     if unsupported:
         messages = "; ".join(item.message for item in unsupported)
         raise ValueError(f"cannot synthesize runtime with unsupported semantics: {messages}")
+    validate_inspection_binding(package_path, inspection)
     runtime_id = hashlib.sha256(
         f"{package.package_hash}\0{inspection.manifest_hash}\0{seed}".encode()
     ).hexdigest()
@@ -484,6 +488,17 @@ def load_generated_runtime(
         )
 
     config = _load_config(config_path)
+    configured_seed = config["generation_seed"]
+    if (
+        not isinstance(configured_seed, int)
+        or isinstance(configured_seed, bool)
+        or not 0 <= configured_seed < 1 << 64
+    ):
+        raise ValueError("generated runtime configuration contains an invalid seed")
+    if seed != configured_seed:
+        raise ValueError(
+            "runtime seed does not match the seed bound to the generated runtime and genome"
+        )
     package_root = Path(str(config["reference_package_root"]))
     if not package_root.is_absolute():
         package_root = config_path.parent / package_root

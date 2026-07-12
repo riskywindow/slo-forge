@@ -9,7 +9,11 @@ from typing import Any, Literal, TypeAlias, cast
 
 from pydantic import JsonValue
 
-from sloforge.genesis.frontend import InspectionResult, load_reference_package
+from sloforge.genesis.frontend import (
+    InspectionResult,
+    load_reference_package,
+    validate_inspection_binding,
+)
 from sloforge.genesis.frontend.models import DiagnosticSeverity, StateFieldContract, TensorDomain
 from sloforge.genesis.ir import (
     AdmissionControl,
@@ -267,6 +271,10 @@ def compile_inference_genome(
             "unsupported reference behavior must be resolved before compilation: "
             + "; ".join(unsupported)
         )
+    try:
+        validate_inspection_binding(package_path, inspection)
+    except ValueError as error:
+        raise GenomeCompilationError(str(error)) from error
 
     state_bytes = sum(_state_bytes(field) for field in package.manifest.state_contract.fields)
     resource = ResourceRequirements(

@@ -133,6 +133,9 @@ class SearchEngine:
     def run(self, designs: tuple[CandidateDesign, ...]) -> SearchRunResult:
         unique: dict[str, CandidateDesign] = {}
         for design in designs:
+            existing = unique.get(design.candidate_id)
+            if existing is not None and existing != design:
+                raise ValueError("candidate identifier collision has conflicting designs")
             unique.setdefault(design.candidate_id, design)
         remaining = tuple(unique.values())[: self.configuration.maximum_candidates]
         observations: list[SurrogateObservation] = []

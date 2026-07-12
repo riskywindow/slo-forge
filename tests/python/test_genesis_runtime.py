@@ -12,6 +12,7 @@ from typing import cast
 
 import pytest
 
+from sloforge.genesis.evolution.runtime_evidence_runner import main as run_evolution_evidence
 from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.genesis.policy_dsl import BytecodeProgram, Instruction, ScalarType, VariableSpec
 from sloforge.genesis.runtime import (
@@ -83,7 +84,7 @@ def test_generated_runtime_streams_deterministically_and_releases_state(tmp_path
 def test_generated_application_exposes_health_metrics_and_bounded_manifest(tmp_path: Path) -> None:
     output = _generated(tmp_path)
     runtime = load_generated_runtime(
-        output / "runtime_config.json", seed=3, allow_untrusted_in_process=True
+        output / "runtime_config.json", seed=73129, allow_untrusted_in_process=True
     )
     application = GeneratedRuntimeApplication(runtime)
     application.start()
@@ -111,6 +112,74 @@ def test_generated_application_exposes_health_metrics_and_bounded_manifest(tmp_p
         "correctness_harness.py",
         "exec",
     )
+
+
+def test_generated_runtime_rejects_seed_outside_verified_genome(tmp_path: Path) -> None:
+    output = _generated(tmp_path, seed=73129)
+
+    with pytest.raises(ValueError, match="seed bound to the generated runtime and genome"):
+        load_generated_runtime(
+            output / "runtime_config.json", seed=3, allow_untrusted_in_process=True
+        )
+
+
+def test_evolution_runner_separates_campaign_seed_from_runtime_seed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = _generated(tmp_path, seed=73129)
+    trace = tmp_path / "trace.json"
+    trace.write_text(
+        json.dumps(
+            {
+                "requests": [
+                    {
+                        "request_id": "seed-separation",
+                        "text": "hybrid",
+                        "maximum_new_tokens": 1,
+                        "seed": 17,
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SLOFORGE_GENESIS_SANDBOX_LAUNCH", "sandbox-executor-v1")
+
+    for campaign_seed in (73129, 73130):
+        result_path = tmp_path / f"observation-{campaign_seed}.json"
+        assert (
+            run_evolution_evidence(
+                [
+                    "--bundle",
+                    str(output),
+                    "--trace",
+                    str(trace),
+                    "--output",
+                    str(result_path),
+                    "--seed",
+                    str(campaign_seed),
+                ]
+            )
+            == 0
+        )
+        observation = json.loads(result_path.read_text(encoding="utf-8"))
+        assert observation["seed"] == campaign_seed
+        assert observation["runtime_seed"] == 73129
+        assert observation["cases"][0]["request_seed"] == 17
+
+
+def test_runtime_generation_recomputes_static_inspection(tmp_path: Path) -> None:
+    inspection = inspect_reference_package(HYBRID)
+    altered = inspection.model_copy(
+        update={
+            "supported_input_domain": inspection.supported_input_domain.model_copy(
+                update={"maximum_generated_tokens": 1}
+            )
+        }
+    )
+
+    with pytest.raises(ValueError, match="independent static inspection"):
+        generate_baseline_runtime(HYBRID, altered, tmp_path / "runtime", seed=73129)
 
 
 def test_generated_correctness_harness_executes_reference_fixture(tmp_path: Path) -> None:

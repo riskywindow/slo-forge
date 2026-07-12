@@ -66,9 +66,24 @@ return (clamp (if cancellation_pending 0 (if (lt slo_slack_ms 20) 1 (min queue_l
 def compiled_candidate_policy(candidate: CandidateDesign) -> tuple[str, BytecodeProgram, bytes]:
     """Compile the exact restricted policy represented by a candidate design."""
 
-    safe = any(
-        mutation.parameter("cancel_check_before_emit") == "true" for mutation in candidate.mutations
+    batching = tuple(
+        mutation
+        for mutation in candidate.mutations
+        if mutation.family is TransformationFamily.BATCHING
     )
+    if len(batching) != 1:
+        raise ValueError("candidate policy compilation requires exactly one batching mutation")
+    mutation = batching[0]
+    if set(mutation.regions) != {"request", "serving"}:
+        raise ValueError("candidate batching policy must bind request and serving regions")
+    parameters = {item.key: item.value for item in mutation.parameters}
+    if set(parameters) != {"cancel_check_before_emit", "queue_policy"}:
+        raise ValueError("candidate batching parameters do not match the policy registry")
+    if parameters["queue_policy"] != "deadline_bucket":
+        raise ValueError("candidate batching policy is unsupported")
+    if parameters["cancel_check_before_emit"] not in {"true", "false"}:
+        raise ValueError("cancel_check_before_emit must be Boolean text")
+    safe = parameters["cancel_check_before_emit"] == "true"
     program = parse_policy(_CORRECTED_POLICY if safe else _UNSAFE_POLICY)
     check_policy(program)
     bytecode = compile_policy(program)
