@@ -11,7 +11,13 @@ case "$result_root" in
   *) result_root="$repository_root/$result_root" ;;
 esac
 cleanup() {
+  exit_status=$?
+  if test "$exit_status" -ne 0 && test -f "$clean_root/genesis-clean-room.log"; then
+    cp "$clean_root/genesis-clean-room.log" "$result_root/.run.log.failed"
+    mv "$result_root/.run.log.failed" "$result_root/run.log"
+  fi
   rm -rf -- "$clean_root"
+  return "$exit_status"
 }
 trap cleanup EXIT INT TERM
 
@@ -68,6 +74,24 @@ cd "$clean_root"
   make synthbench-smoke
   make package
 
+  # The seeded demo uses a historical deterministic timestamp, so a real
+  # current-time validator must reject that capsule as stale. Rebuild the same
+  # accepted candidate with a fresh evidence horizon for the installed-wheel
+  # validation instead of weakening the production freshness check.
+  accepted_candidate_id="$($clean_root/.venv/bin/python -c \
+    'import json, sys; print(json.load(open(sys.argv[1]))["accepted_candidate_id"])' \
+    "$clean_root/artifacts/genesis/demo/GENESIS_DEMO_REPORT.json")"
+  fresh_timestamp="$($clean_root/.venv/bin/python -c \
+    'from datetime import UTC, datetime; print(datetime.now(UTC).isoformat())')"
+  fresh_capsule="$clean_root/artifacts/genesis/wheel-capsule"
+  fresh_context="$clean_root/artifacts/genesis/wheel-capsule.validation-context.json"
+  fresh_build="$clean_root/artifacts/genesis/wheel-capsule-build.json"
+  "$clean_root/.venv/bin/sloforge" genesis capsule build \
+    --candidate "$clean_root/artifacts/genesis/demo/run/candidates/$accepted_candidate_id" \
+    --output "$fresh_capsule" \
+    --trust-output "$fresh_context" \
+    --timestamp "$fresh_timestamp" > "$fresh_build"
+
   wheel_count="$(find "$clean_root/dist" -maxdepth 1 -type f -name '*.whl' -print | wc -l | tr -d '[:space:]')"
   test "$wheel_count" = 1
   wheel_path="$(find "$clean_root/dist" -maxdepth 1 -type f -name '*.whl' -print)"
@@ -101,13 +125,14 @@ PY
 
   capsule_path="$($clean_root/.venv/bin/python -c \
     'import json, sys; print(json.load(open(sys.argv[1]))["capsule_path"])' \
-    "$clean_root/artifacts/genesis/demo/GENESIS_DEMO_REPORT.json")"
+    "$fresh_build")"
   capsule_digest="$($clean_root/.venv/bin/python -c \
     'import json, sys; print(json.load(open(sys.argv[1]))["capsule_digest"])' \
-    "$clean_root/artifacts/genesis/demo/GENESIS_DEMO_REPORT.json")"
+    "$fresh_build")"
   "$clean_root/.wheel-venv/bin/sloforge" genesis capsule validate "$capsule_path" \
-    --context "$clean_root/artifacts/genesis/demo/capsule.validation-context.json" \
-    --expected-digest "$capsule_digest" >/dev/null
+    --context "$fresh_context" \
+    --expected-digest "$capsule_digest" \
+    > "$clean_root/artifacts/genesis/wheel-capsule-validation.json"
 } 2>&1 | tee "$clean_root/genesis-clean-room.log"
 
 wheel_path="$(find "$clean_root/dist" -maxdepth 1 -type f -name '*.whl' -print)"
@@ -116,6 +141,10 @@ tar -czf "$evidence_bundle" -C "$clean_root" \
   artifacts/genesis/demo/GENESIS_DEMO_REPORT.json \
   artifacts/genesis/demo/capsule.validation-context.json \
   artifacts/genesis/demo/capsule \
+  artifacts/genesis/wheel-capsule-build.json \
+  artifacts/genesis/wheel-capsule.validation-context.json \
+  artifacts/genesis/wheel-capsule-validation.json \
+  artifacts/genesis/wheel-capsule \
   artifacts/synthbench/smoke
 "$clean_root/.wheel-venv/bin/python" "$clean_root/tools/validate-clean-room-genesis.py" \
   --root "$clean_root" \

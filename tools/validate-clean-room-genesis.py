@@ -35,6 +35,8 @@ def _validate_evidence_bundle(path: Path) -> int:
     required = {
         "artifacts/genesis/demo/GENESIS_DEMO_REPORT.json",
         "artifacts/genesis/demo/capsule.validation-context.json",
+        "artifacts/genesis/wheel-capsule.validation-context.json",
+        "artifacts/genesis/wheel-capsule-validation.json",
         "artifacts/synthbench/smoke/summary.json",
     }
     names: set[str] = set()
@@ -51,6 +53,8 @@ def _validate_evidence_bundle(path: Path) -> int:
         raise ValueError(f"retained evidence archive lacks required files: {missing}")
     if not any(name.startswith("artifacts/genesis/demo/capsule/manifests/") for name in names):
         raise ValueError("retained evidence archive lacks a capsule manifest")
+    if not any(name.startswith("artifacts/genesis/wheel-capsule/manifests/") for name in names):
+        raise ValueError("retained evidence archive lacks the wheel-validated capsule manifest")
     return len(names)
 
 
@@ -192,6 +196,66 @@ def validate(
     if simulation.get("comparison_permitted") is not False:
         raise ValueError("synthetic candidate simulation permits a performance comparison")
 
+    wheel_validation_path = root / "artifacts/genesis/wheel-capsule-validation.json"
+    wheel_validation = _object(wheel_validation_path)
+    required_wheel_results = {
+        "integrity_valid": True,
+        "contract_compatible": True,
+        "evidence_complete": True,
+        "local_evolution_eligible": True,
+        "promotion_eligible": False,
+        "external_production_eligible": False,
+        "hardware_backed": False,
+    }
+    for field, expected in required_wheel_results.items():
+        if wheel_validation.get(field) is not expected:
+            raise ValueError(
+                f"installed-wheel capsule validation field {field!r} is not {expected!r}"
+            )
+    if wheel_validation.get("issues") != []:
+        raise ValueError("installed-wheel capsule validation retained issues")
+    if wheel_validation.get("candidate_genome_hash") != genesis.get("accepted_genome_hash"):
+        raise ValueError("installed-wheel capsule validates the wrong candidate genome")
+
+    wheel_capsule_root = (root / "artifacts/genesis/wheel-capsule").resolve(strict=True)
+    wheel_manifests = sorted((wheel_capsule_root / "manifests").glob("*.json"))
+    if len(wheel_manifests) != 1:
+        raise ValueError("wheel-validated capsule directory must contain exactly one manifest")
+    wheel_capsule = _object(wheel_manifests[0])
+    wheel_embedded_digest = wheel_capsule.get("capsule_digest")
+    wheel_digest = _capsule_digest(wheel_capsule)
+    if (
+        not isinstance(wheel_embedded_digest, dict)
+        or wheel_embedded_digest.get("algorithm") != "sha256"
+        or wheel_embedded_digest.get("value") != wheel_digest
+        or wheel_manifests[0].stem != wheel_digest
+    ):
+        raise ValueError("wheel-validated capsule canonical digest mismatch")
+    validation_digest = wheel_validation.get("capsule_digest")
+    if not isinstance(validation_digest, dict) or validation_digest.get("value") != wheel_digest:
+        raise ValueError("installed-wheel validation reports the wrong capsule digest")
+    wheel_artifacts = wheel_capsule.get("artifacts")
+    if not isinstance(wheel_artifacts, list) or not wheel_artifacts:
+        raise ValueError("wheel-validated capsule has no artifacts")
+    for artifact in wheel_artifacts:
+        if not isinstance(artifact, dict):
+            raise ValueError("wheel-validated capsule contains an invalid artifact record")
+        artifact_path = Path(str(artifact.get("path", "")))
+        if artifact_path.is_absolute() or ".." in artifact_path.parts:
+            raise ValueError("wheel-validated capsule artifact path is not contained")
+        retained = _inside(
+            wheel_capsule_root / artifact_path,
+            wheel_capsule_root,
+            label="wheel-validated capsule artifact",
+        )
+        digest = artifact.get("digest")
+        if not isinstance(digest, dict) or digest.get("algorithm") != "sha256":
+            raise ValueError("wheel-validated capsule artifact lacks a SHA-256 digest")
+        if _sha256(retained) != digest.get("value") or retained.stat().st_size != artifact.get(
+            "size_bytes"
+        ):
+            raise ValueError("wheel-validated capsule artifact integrity mismatch")
+
     log = _inside(log, root, label="clean-room log")
     wheel = _inside(wheel, root, label="built wheel")
     evidence_bundle = _inside(evidence_bundle, root, label="retained evidence bundle")
@@ -206,6 +270,8 @@ def validate(
         "evidence_bundle_member_count": evidence_bundle_member_count,
         "demo_report_sha256": _sha256(demo_report_path),
         "capsule_digest": capsule_digest,
+        "wheel_capsule_digest": wheel_digest,
+        "wheel_capsule_validation_sha256": _sha256(wheel_validation_path),
         "synthbench_summary_sha256": _sha256(synthbench_summary_path),
         "synthbench_report_sha256": _sha256(synthbench_report),
         "capsule_artifact_count": len(artifacts),

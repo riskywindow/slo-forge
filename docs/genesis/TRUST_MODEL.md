@@ -51,7 +51,7 @@ The Python trust lane consists of:
 - `schemas/genesis_capsule/genesis-capsule-v1.schema.json`: the public wire schema.
 
 On 2026-08-02 the narrow capsule/artifact/sandbox subset measured 4,278 physical lines. The
-conservative local evidence, clean-room, and promotion envelope measured 11,120 lines. Reproduce the conservative
+conservative local evidence, clean-room, and promotion envelope measured 11,462 lines. Reproduce the conservative
 count from the repository root with:
 
 ```bash
@@ -63,7 +63,8 @@ wc -l \
   python/sloforge/genesis/evolution/{evidence,controller}.py \
   python/sloforge/synthbench/{runner,runtime_runner,integrity}.py \
   python/sloforge/genesis/kernel_lab/{executor,benchmark,runtime_impact,runtime_impact_runner}.py \
-  tools/clean-room-genesis.sh
+  tools/clean-room-genesis.sh \
+  tools/validate-clean-room-genesis.py
 rg '^import |^from ' python/sloforge/genesis/{capsule,artifacts,sandbox} -g '*.py' \
   | sed -E 's/^.*:(from|import) ([A-Za-z0-9_.]+).*$/\2/' \
   | cut -d. -f1 | sort -u
