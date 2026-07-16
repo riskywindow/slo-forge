@@ -8,6 +8,7 @@ import os
 import platform
 import random
 import shutil
+import statistics
 import sys
 import tempfile
 from pathlib import Path
@@ -22,12 +23,6 @@ from sloforge.genesis.sandbox import (
     SandboxRequest,
     SandboxTermination,
     execute_sandboxed,
-)
-from sloforge.genesis.verification import (
-    BenchmarkContract,
-    EvidenceStatus,
-    MetricDirection,
-    evaluate_performance,
 )
 from sloforge.util import sha256_file
 
@@ -178,22 +173,23 @@ def _trace_payload(package_root: Path, config: RuntimeImpactConfig) -> bytes:
                 "text": f"{sample['text']}{suffix}",
                 "maximum_new_tokens": max(1, min(8, maximum + (index % 2))),
                 "seed": int.from_bytes(
-                    hashlib.sha256(
-                        f"{config.trace_seed}\0request\0{index}".encode()
-                    ).digest()[:8],
+                    hashlib.sha256(f"{config.trace_seed}\0request\0{index}".encode()).digest()[:8],
                     "big",
                 ),
                 "batching_eligible": index % 4 != 3,
             }
         )
-    return _canonical(
-        {
-            "schema_version": "sloforge.genesis.kernel-runtime-trace/v1",
-            "trace_seed": config.trace_seed,
-            "interleaved_submission": True,
-            "requests": requests,
-        }
-    ) + b"\n"
+    return (
+        _canonical(
+            {
+                "schema_version": "sloforge.genesis.kernel-runtime-trace/v1",
+                "trace_seed": config.trace_seed,
+                "interleaved_submission": True,
+                "requests": requests,
+            }
+        )
+        + b"\n"
+    )
 
 
 def _software_manifest() -> tuple[str, ...]:
@@ -298,8 +294,7 @@ def _sandbox_execute(
     )
     if not result.succeeded or not result_path.is_file():
         raise RuntimeError(
-            f"sandboxed runtime-impact {mode} failed: "
-            f"{result.termination.value}: {result.stderr}"
+            f"sandboxed runtime-impact {mode} failed: {result.termination.value}: {result.stderr}"
         )
     if not result.process_group_cleaned:
         raise RuntimeError("runtime-impact sandbox did not clean its process group")
@@ -353,12 +348,10 @@ def _semantic_matches(
 ) -> tuple[bool, bool]:
     expected_tokens = {
         "reference": tuple(
-            {"request_id": item.request_id, "token_ids": list(item.token_ids)}
-            for item in reference
+            {"request_id": item.request_id, "token_ids": list(item.token_ids)} for item in reference
         ),
         "candidate": tuple(
-            {"request_id": item.request_id, "token_ids": list(item.token_ids)}
-            for item in candidate
+            {"request_id": item.request_id, "token_ids": list(item.token_ids)} for item in candidate
         ),
     }
     output_exact = True
@@ -398,51 +391,106 @@ def _statistics(
         trials = sorted(item.trial_index for item in ordered if item.alternative == alternative)
         if trials != list(range(config.repetitions)):
             raise ValueError(f"runtime-impact {alternative} trials are incomplete")
-    reference = tuple(float(item.duration_ns) for item in ordered if item.alternative == "reference")
-    candidate = tuple(float(item.duration_ns) for item in ordered if item.alternative == "candidate")
-    contract = BenchmarkContract(
-        benchmark_id="hybrid-qstate-generated-runtime-end-to-end",
-        metric="trace_completion_ns",
-        unit="ns",
-        direction=MetricDirection.LOWER_IS_BETTER,
-        workload_fingerprint=workload_fingerprint,
-        hardware_fingerprint=hardware_fingerprint,
-        software_manifest_hash=hashlib.sha256("|".join(software_manifest).encode()).hexdigest(),
-        warmup_count=config.warmup_count,
-        practical_significance_percent=config.practical_significance_percent,
-        noise_floor_percent=config.noise_floor_percent,
-        bootstrap_rounds=config.bootstrap_rounds,
-        confidence=config.confidence,
+    expected_order: list[str] = []
+    order_generator = random.Random(config.trial_order_seed)
+    for _trial_index in range(config.repetitions):
+        alternatives = ["reference", "candidate"]
+        order_generator.shuffle(alternatives)
+        expected_order.extend(alternatives)
+    if [item.alternative for item in ordered] != expected_order:
+        raise ValueError("runtime-impact trial order is not seed-derived")
+    by_trial = {
+        trial_index: {
+            item.alternative: float(item.duration_ns)
+            for item in ordered
+            if item.trial_index == trial_index
+        }
+        for trial_index in range(config.repetitions)
+    }
+    if any(set(pair) != {"reference", "candidate"} for pair in by_trial.values()):
+        raise ValueError("runtime-impact paired trials are incomplete")
+    reference = tuple(by_trial[index]["reference"] for index in range(config.repetitions))
+    candidate = tuple(by_trial[index]["candidate"] for index in range(config.repetitions))
+    paired_improvements = tuple(
+        (reference_value - candidate_value) / reference_value * 100.0
+        for reference_value, candidate_value in zip(reference, candidate, strict=True)
     )
-    evidence = evaluate_performance(
-        contract,
-        reference,
-        candidate,
-        seed=config.bootstrap_seed,
-        run_order=tuple(
-            "baseline" if item.alternative == "reference" else "candidate" for item in ordered
-        ),
+    generator = random.Random(config.bootstrap_seed)
+    draws = tuple(
+        statistics.median(generator.choices(paired_improvements, k=len(paired_improvements)))
+        for _ in range(config.bootstrap_rounds)
     )
-    mapped = {
-        EvidenceStatus.PASSED: LabStatus.PASSED,
-        EvidenceStatus.FAILED: LabStatus.FAILED,
-        EvidenceStatus.INCONCLUSIVE: LabStatus.INCONCLUSIVE,
-        EvidenceStatus.UNAVAILABLE: LabStatus.UNAVAILABLE,
-    }[evidence.status]
-    status = mapped if semantic_valid else LabStatus.FAILED
+    ordered_draws = sorted(draws)
+
+    def quantile(probability: float) -> float:
+        position = probability * (len(ordered_draws) - 1)
+        lower = int(position)
+        upper = min(lower + 1, len(ordered_draws) - 1)
+        fraction = position - lower
+        return ordered_draws[lower] + (ordered_draws[upper] - ordered_draws[lower]) * fraction
+
+    alpha = 1.0 - config.confidence
+    low = quantile(alpha / 2.0)
+    high = quantile(1.0 - alpha / 2.0)
+    threshold = max(
+        config.practical_significance_percent,
+        config.noise_floor_percent,
+    )
+    if low > threshold:
+        statistical_status = LabStatus.PASSED
+        statistical_rationale = (
+            "paired confidence interval exceeds the declared practical and noise thresholds"
+        )
+    elif high < -threshold:
+        statistical_status = LabStatus.FAILED
+        statistical_rationale = (
+            "paired confidence interval establishes a practically significant regression"
+        )
+    else:
+        statistical_status = LabStatus.INCONCLUSIVE
+        statistical_rationale = (
+            "paired confidence interval overlaps the declared practical or noise threshold"
+        )
+    status = statistical_status if semantic_valid else LabStatus.FAILED
     rationale = (
-        evidence.rationale
+        statistical_rationale
         if semantic_valid
         else "exact generated-runtime output or persistent-state semantics did not match"
     )
+    reference_median = float(statistics.median(reference))
+    candidate_median = float(statistics.median(candidate))
+    improvement = (reference_median - candidate_median) / reference_median * 100.0
+    favorable = sum(1.0 if item > 0 else 0.5 if item == 0 else 0.0 for item in paired_improvements)
+    contract_sha256 = hashlib.sha256(
+        _canonical(
+            {
+                "benchmark_id": "hybrid-qstate-generated-runtime-end-to-end",
+                "metric": "trace_completion_ns",
+                "unit": "ns",
+                "direction": "lower_is_better",
+                "workload_fingerprint": workload_fingerprint,
+                "hardware_fingerprint": hardware_fingerprint,
+                "software_manifest_sha256": hashlib.sha256(
+                    "\0".join(software_manifest).encode()
+                ).hexdigest(),
+                "warmup_count": config.warmup_count,
+                "practical_significance_percent": config.practical_significance_percent,
+                "declared_noise_threshold_percent": config.noise_floor_percent,
+                "bootstrap_rounds": config.bootstrap_rounds,
+                "confidence": config.confidence,
+                "analysis_method": "paired_trial_bootstrap_median_improvement",
+            }
+        )
+    ).hexdigest()
     return RuntimeImpactStatistics(
+        benchmark_contract_sha256=contract_sha256,
         status=status,
-        reference_median_ns=evidence.baseline_median,
-        candidate_median_ns=evidence.candidate_median,
-        improvement_percent=evidence.improvement_percent,
-        confidence_interval_low_percent=evidence.interval_low_percent,
-        confidence_interval_high_percent=evidence.interval_high_percent,
-        effect_size=evidence.effect_size,
+        reference_median_ns=reference_median,
+        candidate_median_ns=candidate_median,
+        improvement_percent=improvement,
+        confidence_interval_low_percent=low,
+        confidence_interval_high_percent=high,
+        effect_size=favorable / len(paired_improvements) * 2.0 - 1.0,
         practical_significance_percent=config.practical_significance_percent,
         noise_floor_percent=config.noise_floor_percent,
         rationale=rationale,
@@ -499,9 +547,7 @@ def _verify_runtime_bundle(
     package_root = _artifact_path(artifact_root, identity.package_root, kind="directory")
     bundle = _artifact_path(artifact_root, identity.bundle_root, kind="directory")
     inspection_path = _artifact_path(artifact_root, identity.inspection_path, kind="file")
-    manifest_path = _artifact_path(
-        artifact_root, identity.artifact_manifest_path, kind="file"
-    )
+    manifest_path = _artifact_path(artifact_root, identity.artifact_manifest_path, kind="file")
     package = load_reference_package(package_root)
     if package.package_hash != identity.package_hash:
         raise ValueError("runtime-impact package hash changed")
@@ -573,9 +619,7 @@ def _validate_recorded_replay(report: RuntimeImpactReport, *, artifact_root: Pat
     validation = report.validation
     if validation is None:
         return
-    replay_path = _artifact_path(
-        artifact_root, validation.replay_output_path, kind="file"
-    )
+    replay_path = _artifact_path(artifact_root, validation.replay_output_path, kind="file")
     if sha256_file(replay_path) != validation.replay_output_sha256:
         raise ValueError("runtime-impact independent replay artifact changed")
     replay = _parse_runner_output(replay_path, mode="replay")
@@ -588,22 +632,14 @@ def _validate_recorded_replay(report: RuntimeImpactReport, *, artifact_root: Pat
         raise ValueError("runtime-impact independent replay differs from measured semantics")
 
 
-def validate_runtime_impact_report(
-    report: RuntimeImpactReport, *, artifact_root: Path
-) -> None:
+def validate_runtime_impact_report(report: RuntimeImpactReport, *, artifact_root: Path) -> None:
     """Reopen raw artifacts and independently reconstruct every report claim."""
 
-    candidate_source_path = _artifact_path(
-        artifact_root, report.candidate_source_path, kind="file"
-    )
+    candidate_source_path = _artifact_path(artifact_root, report.candidate_source_path, kind="file")
     trace_path = _artifact_path(artifact_root, report.trace_path, kind="file")
     runner_path = _artifact_path(artifact_root, report.runner_path, kind="file")
-    runner_output_path = _artifact_path(
-        artifact_root, report.runner_output_path, kind="file"
-    )
-    raw_samples_path = _artifact_path(
-        artifact_root, report.raw_samples_path, kind="file"
-    )
+    runner_output_path = _artifact_path(artifact_root, report.runner_output_path, kind="file")
+    raw_samples_path = _artifact_path(artifact_root, report.raw_samples_path, kind="file")
     if sha256_file(candidate_source_path) != report.candidate_source_sha256:
         raise ValueError("runtime-impact generated candidate source changed")
     if report.candidate.source_sha256 != report.candidate_source_sha256:
@@ -656,7 +692,9 @@ def validate_runtime_impact_report(
             candidate_source_path.read_text(encoding="utf-8"),
         )
         if load_reference_package(reconstructed).package_hash != candidate.package_hash:
-            raise ValueError("runtime-impact patched package is not deterministically reconstructed")
+            raise ValueError(
+                "runtime-impact patched package is not deterministically reconstructed"
+            )
     trusted_runner_sha256 = sha256_file(Path(__file__).with_name("runtime_impact_runner.py"))
     if report.runner_sha256 != trusted_runner_sha256:
         raise ValueError("runtime-impact runner is not the installed trusted runner")
@@ -689,12 +727,28 @@ def validate_runtime_impact_report(
         if key in observation_outputs:
             raise ValueError("runtime-impact observation identity is duplicated")
         observation_outputs[key] = requests
+    expected_observations = {
+        (alternative, trial_index)
+        for trial_index in range(report.config.repetitions)
+        for alternative in ("reference", "candidate")
+    }
+    if set(observation_outputs) != expected_observations:
+        raise ValueError("runtime-impact observations do not exactly cover paired trials")
     for sample in report.samples:
         requests = observation_outputs.get((sample.alternative, sample.trial_index))
         if requests is None:
             raise ValueError("runtime-impact sample has no recorded runtime observation")
         if hashlib.sha256(_canonical(requests)).hexdigest() != sample.output_sha256:
             raise ValueError("runtime-impact sample output digest is not observation-derived")
+        if not isinstance(requests, list) or sample.request_count != len(requests):
+            raise ValueError("runtime-impact request count is not observation-derived")
+        token_count = 0
+        for request in requests:
+            if not isinstance(request, dict) or not isinstance(request.get("token_ids"), list):
+                raise ValueError("runtime-impact request observation is malformed")
+            token_count += len(cast("list[object]", request["token_ids"]))
+        if sample.emitted_token_count != token_count:
+            raise ValueError("runtime-impact token count is not observation-derived")
     reference_semantics = _typed_semantics(measured, "reference")
     candidate_semantics = _typed_semantics(measured, "candidate")
     if reference_semantics != report.reference_semantics:
@@ -825,9 +879,7 @@ def benchmark_generated_runtime_impact(
         _bundle_identity(
             "reference", reference_bundle, reference_package, reference_inspection_path
         ),
-        _bundle_identity(
-            "candidate", candidate_bundle, patched_package, candidate_inspection_path
-        ),
+        _bundle_identity("candidate", candidate_bundle, patched_package, candidate_inspection_path),
     )
     provisional = RuntimeImpactReport(
         candidate=candidate,
@@ -927,7 +979,9 @@ def decide_with_runtime_impact(
         )
         claim = "no speedup claim; end-to-end generated-runtime acceptance gate did not pass"
         reasons = (
-            "exact semantics passed" if impact.output_exact_match and impact.state_exact_match else "exact semantics failed",
+            "exact semantics passed"
+            if impact.output_exact_match and impact.state_exact_match
+            else "exact semantics failed",
             f"end-to-end statistical gate was {impact.statistics.status.value}",
             "isolated operator results cannot override the generated-runtime serving gate",
         )

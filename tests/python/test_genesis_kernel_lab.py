@@ -416,9 +416,11 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
     assert len(report.runtime_impacts) == 1
     impact = report.runtime_impacts[0]
     assert impact.measurement_scope == "cpu_generated_runtime_end_to_end_serving"
+    assert impact.timing_boundary.endswith("through_state_release")
     assert impact.hardware_backed_gpu is False
     assert impact.output_exact_match
     assert impact.state_exact_match
+    assert impact.statistics.analysis_method == "paired_trial_bootstrap_median_improvement"
     assert impact.validation is not None
     assert impact.validation.runtime_outputs_replayed
     assert impact.validation.state_semantics_replayed
@@ -429,16 +431,19 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
         impact.source_package_hash,
         impact.patched_package_hash,
     }
-    assert len(
-        {
-            impact.config.synthesis_seed,
-            impact.config.runtime_generation_seed,
-            impact.config.trace_seed,
-            impact.config.trial_order_seed,
-            impact.config.bootstrap_seed,
-            impact.config.sandbox_seed,
-        }
-    ) == 6
+    assert (
+        len(
+            {
+                impact.config.synthesis_seed,
+                impact.config.runtime_generation_seed,
+                impact.config.trace_seed,
+                impact.config.trial_order_seed,
+                impact.config.bootstrap_seed,
+                impact.config.sandbox_seed,
+            }
+        )
+        == 6
+    )
     impact_root = candidate_root / "runtime-impact"
     validate_runtime_impact_report(impact, artifact_root=impact_root)
 
@@ -512,9 +517,7 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
     forged_sample = impact.samples[0].model_copy(update={"output_sha256": "0" * 64})
     forged_samples = (forged_sample, *impact.samples[1:])
     forged_raw = b"".join(
-        json.dumps(
-            item.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
-        ).encode()
+        json.dumps(item.model_dump(mode="json"), sort_keys=True, separators=(",", ":")).encode()
         + b"\n"
         for item in forged_samples
     )

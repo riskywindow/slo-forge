@@ -4,7 +4,7 @@ Genesis accepts performance only from repeated raw samples bound to a benchmark 
 
 ## Contract and calculation
 
-The implemented `BenchmarkContract` records benchmark/metric/unit, optimization direction, workload fingerprint, hardware fingerprint, software-manifest hash, warmup count, practical-significance threshold, measured noise floor, bootstrap rounds and confidence level. At least seven positive samples are required for both baseline and candidate.
+The implemented `BenchmarkContract` records benchmark/metric/unit, optimization direction, workload fingerprint, hardware fingerprint, software-manifest hash, warmup count, practical-significance threshold, a declared noise threshold, bootstrap rounds and confidence level. At least seven positive samples are required for both baseline and candidate. A harness may replace the declared threshold with a separately characterized noise floor only when it retains that characterization.
 
 `evaluate_performance` computes baseline and candidate medians, percent improvement in the declared direction, a pairwise probability-of-superiority effect size, and a seeded bootstrap confidence interval over median improvement. It returns:
 
@@ -24,7 +24,7 @@ ServingSynthBench CPU smoke runs the generated Genesis runtime in the strict loc
 
 Tests demonstrate a clearly separated passing case, a noisy inconclusive case, minimum sample rejection, and deterministic bootstrap output. They do not establish that any particular generated runtime is faster on real hardware.
 
-The generic `evaluate_performance` helper does not currently perform a blocked bootstrap, characterize the noise floor itself, detect thermal/clock drift, or choose sample count from a power analysis. The independent capsule validator does calculate trial-aligned regression probability and applies the conservative promotion gates described above. Simulator prediction and prediction error can be capsule evidence, but the local CPU capsule intentionally contains no accepted benchmark comparison and no performance-improvement claim.
+The generic `evaluate_performance` helper does not currently perform a blocked bootstrap, characterize the noise floor itself, detect thermal/clock drift, or choose sample count from a power analysis. The focused kernel runtime-impact gate uses a paired bootstrap aligned by trial, but its short local run still uses a declared noise threshold rather than a separate A/A characterization. The independent capsule validator does calculate trial-aligned regression probability and applies the conservative promotion gates described above. Simulator prediction and prediction error can be capsule evidence, but the local CPU capsule intentionally contains no accepted benchmark comparison and no performance-improvement claim.
 
 ## Artifact-backed hypothesis campaigns
 
