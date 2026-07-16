@@ -1,0 +1,228 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "TransactionAcknowledgment": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "minLength": 1,
+          "title": "Actor",
+          "type": "string"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "phase": {
+          "$ref": "#/$defs/TransactionPhase"
+        },
+        "recorded_at": {
+          "minLength": 1,
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "state_hash": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "actor",
+        "phase",
+        "owner_epoch",
+        "state_hash",
+        "recorded_at"
+      ],
+      "title": "TransactionAcknowledgment",
+      "type": "object"
+    },
+    "TransactionPhase": {
+      "enum": [
+        "proposed",
+        "compatibility_validated",
+        "destination_preparing",
+        "precopying",
+        "delta_syncing",
+        "cutover_requested",
+        "source_quiescing",
+        "source_frozen",
+        "final_delta_transferring",
+        "destination_importing",
+        "destination_validating",
+        "commit_intent_recorded",
+        "ownership_committed",
+        "gateway_switching",
+        "destination_active",
+        "source_draining",
+        "completed",
+        "rejected",
+        "aborting",
+        "rolled_back",
+        "failed_before_commit",
+        "failed_after_commit",
+        "destination_lost",
+        "source_lost",
+        "coordinator_unavailable",
+        "operator_required"
+      ],
+      "title": "TransactionPhase",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "acknowledgments": {
+      "items": {
+        "$ref": "#/$defs/TransactionAcknowledgment"
+      },
+      "title": "Acknowledgments",
+      "type": "array"
+    },
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "commit_watermark": {
+      "title": "Commit Watermark",
+      "type": "integer"
+    },
+    "current_phase": {
+      "$ref": "#/$defs/TransactionPhase"
+    },
+    "destination_candidate": {
+      "minLength": 1,
+      "title": "Destination Candidate",
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Reason"
+    },
+    "fencing_token": {
+      "exclusiveMinimum": 0,
+      "maximum": 18446744073709551615,
+      "title": "Fencing Token",
+      "type": "integer"
+    },
+    "journal_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "kind": {
+      "const": "StateTransaction",
+      "default": "StateTransaction",
+      "title": "Kind",
+      "type": "string"
+    },
+    "migration_plan_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "proposed_destination_epoch": {
+      "exclusiveMinimum": 0,
+      "maximum": 18446744073709551615,
+      "title": "Proposed Destination Epoch",
+      "type": "integer"
+    },
+    "rollback_watermark": {
+      "title": "Rollback Watermark",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_epoch": {
+      "exclusiveMinimum": 0,
+      "maximum": 18446744073709551615,
+      "title": "Source Epoch",
+      "type": "integer"
+    },
+    "source_owner": {
+      "minLength": 1,
+      "title": "Source Owner",
+      "type": "string"
+    },
+    "state_hashes": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "title": "State Hashes",
+      "type": "array"
+    },
+    "timeout_at": {
+      "minLength": 1,
+      "title": "Timeout At",
+      "type": "string"
+    },
+    "transaction_id": {
+      "minLength": 1,
+      "title": "Transaction Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "transaction_id",
+    "source_owner",
+    "destination_candidate",
+    "source_epoch",
+    "proposed_destination_epoch",
+    "fencing_token",
+    "migration_plan_hash",
+    "current_phase",
+    "commit_watermark",
+    "rollback_watermark",
+    "state_hashes",
+    "acknowledgments",
+    "timeout_at",
+    "journal_hash"
+  ],
+  "title": "StateTransaction",
+  "type": "object"
+}

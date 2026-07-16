@@ -1,0 +1,17 @@
+[package]
+name = "sloforge-state-transaction"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Canonical ownership, fencing, cutover, and gateway commit protocol for SLOForge Continuum"
+
+[dependencies]
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

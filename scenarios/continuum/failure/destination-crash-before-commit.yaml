@@ -1,0 +1,16 @@
+schema_version: sloforge.continuum.fault-scenario/v1
+scenario_id: destination-crash-during-validation
+seed: 317
+fault:
+  ground_truth_label: continuum.fault.destination_crash_during_validation
+  affected_component: destination_runtime
+  transaction_phase: DESTINATION_VALIDATING
+  activation: before_validate_imported_state
+  expected_protocol_response: persist ABORTING then ROLLED_BACK, discard destination staging, and resume the unchanged source epoch
+assertions:
+  ownership_committed: false
+  source_epoch_unchanged: true
+  source_resumed: true
+  gateway_watermark_unchanged: true
+  accepted_duplicate_tokens: 0
+  accepted_token_gaps: 0

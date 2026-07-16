@@ -1,0 +1,344 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ExactnessClass": {
+      "enum": [
+        "exact_bitwise",
+        "exact_semantic",
+        "numerically_equivalent",
+        "quality_bounded",
+        "recomputation_assisted",
+        "incompatible"
+      ],
+      "title": "ExactnessClass",
+      "type": "string"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MigrationStrategy": {
+      "enum": [
+        "stop_and_copy",
+        "pre_copy",
+        "hybrid_pre_copy",
+        "recomputation_assisted",
+        "constrained_lazy",
+        "fork",
+        "clone"
+      ],
+      "title": "MigrationStrategy",
+      "type": "string"
+    },
+    "RuntimeIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "build_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "dependency_versions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependency Versions",
+          "type": "array"
+        },
+        "runtime_name": {
+          "minLength": 1,
+          "title": "Runtime Name",
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "title": "Runtime Version",
+          "type": "string"
+        },
+        "target_hardware": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Target Hardware",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runtime_name",
+        "runtime_version",
+        "adapter_version",
+        "build_hash",
+        "dependency_versions",
+        "target_hardware"
+      ],
+      "title": "RuntimeIdentity",
+      "type": "object"
+    },
+    "TransportSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "bandwidth_limit_bytes_per_second": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bandwidth Limit Bytes Per Second"
+        },
+        "chunk_size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Chunk Size Bytes",
+          "type": "integer"
+        },
+        "concurrency": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "deadline_ms": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Deadline Ms",
+          "type": "integer"
+        },
+        "transport_id": {
+          "minLength": 1,
+          "title": "Transport Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "transport_id",
+        "chunk_size_bytes",
+        "concurrency",
+        "deadline_ms"
+      ],
+      "title": "TransportSelection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "conversion_plan_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "cutover_threshold_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Cutover Threshold Bytes",
+      "type": "integer"
+    },
+    "destination_physical_plan": {
+      "$ref": "#/$defs/Digest"
+    },
+    "destination_runtime": {
+      "$ref": "#/$defs/RuntimeIdentity"
+    },
+    "destination_warmup_actions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Destination Warmup Actions",
+      "type": "array"
+    },
+    "exactness_requirement": {
+      "$ref": "#/$defs/ExactnessClass"
+    },
+    "expected_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Expected Bytes",
+      "type": "integer"
+    },
+    "expected_cost_usd": {
+      "minimum": 0.0,
+      "title": "Expected Cost Usd",
+      "type": "number"
+    },
+    "expected_destination_overhead_ms": {
+      "minimum": 0.0,
+      "title": "Expected Destination Overhead Ms",
+      "type": "number"
+    },
+    "expected_interruption_ms": {
+      "minimum": 0.0,
+      "title": "Expected Interruption Ms",
+      "type": "number"
+    },
+    "expected_source_overhead_ms": {
+      "minimum": 0.0,
+      "title": "Expected Source Overhead Ms",
+      "type": "number"
+    },
+    "expected_temporary_memory_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Expected Temporary Memory Bytes",
+      "type": "integer"
+    },
+    "expected_total_time_ms": {
+      "minimum": 0.0,
+      "title": "Expected Total Time Ms",
+      "type": "number"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "failure_probability": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Failure Probability",
+      "type": "number"
+    },
+    "kind": {
+      "const": "MigrationPlan",
+      "default": "MigrationPlan",
+      "title": "Kind",
+      "type": "string"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "pre_copy_rounds": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Pre Copy Rounds",
+      "type": "integer"
+    },
+    "rejected_alternatives": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Rejected Alternatives",
+      "type": "array"
+    },
+    "required_before_resume_segments": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Required Before Resume Segments",
+      "type": "array"
+    },
+    "rollback_capsule_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rollback Capsule Id"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_session_id": {
+      "minLength": 1,
+      "title": "Source Session Id",
+      "type": "string"
+    },
+    "strategy": {
+      "$ref": "#/$defs/MigrationStrategy"
+    },
+    "transport": {
+      "$ref": "#/$defs/TransportSelection"
+    },
+    "uncertainty_ms": {
+      "minimum": 0.0,
+      "title": "Uncertainty Ms",
+      "type": "number"
+    },
+    "validation_actions": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Validation Actions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "plan_id",
+    "source_session_id",
+    "destination_runtime",
+    "destination_physical_plan",
+    "strategy",
+    "exactness_requirement",
+    "conversion_plan_hash",
+    "transport",
+    "pre_copy_rounds",
+    "cutover_threshold_bytes",
+    "destination_warmup_actions",
+    "validation_actions",
+    "rollback_capsule_id",
+    "expected_interruption_ms",
+    "expected_total_time_ms",
+    "expected_source_overhead_ms",
+    "expected_destination_overhead_ms",
+    "expected_bytes",
+    "expected_temporary_memory_bytes",
+    "expected_cost_usd",
+    "failure_probability",
+    "uncertainty_ms",
+    "rejected_alternatives",
+    "required_before_resume_segments"
+  ],
+  "title": "MigrationPlan",
+  "type": "object"
+}

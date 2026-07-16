@@ -1,0 +1,36 @@
+schema_version: sloforge.continuum.demo-scenario/v1
+scenario_id: cpu-hybrid-cross-layout-precopy
+seed: 317
+session:
+  prompt_tokens: 12
+  initial_output_tokens: 24
+  state_types:
+    - attention_kv
+    - recurrent
+    - sampler
+    - guided_decoding
+source:
+  adapter: continuum-reference-token-major
+  layout: paged_token_major_separate_kv
+  tensor_parallel_degree: 4
+  page_size_tokens: 3
+destination:
+  adapter: continuum-reference-head-major
+  layout: paged_head_major_packed_kv
+  tensor_parallel_degree: 2
+  page_size_tokens: 5
+migrations:
+  - outcome: pre_commit_rollback
+    fault_scenario: ../failure/destination-crash-before-commit.yaml
+  - outcome: completed
+    strategy: pre_copy
+    delta_round_token_counts: [4, 3]
+    resumed_tokens: 5
+fork:
+  branches:
+    - session_id: branch-a
+      adapter: continuum-reference-token-major
+      page_size_tokens: 4
+    - session_id: branch-b
+      adapter: continuum-reference-head-major
+      page_size_tokens: 7

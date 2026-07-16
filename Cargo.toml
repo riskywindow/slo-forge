@@ -10,6 +10,9 @@ members = [
   "crates/sloforge-fabric-sim",
   "crates/sloforge-genesis-ir",
   "crates/sloforge-genesis-modelcheck",
+  "crates/sloforge-continuum-ir",
+  "crates/sloforge-state-transaction",
+  "crates/sloforge-state-modelcheck",
 ]
 
 [workspace.package]

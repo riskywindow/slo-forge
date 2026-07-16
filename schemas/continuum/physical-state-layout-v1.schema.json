@@ -1,0 +1,962 @@
+{
+  "$defs": {
+    "AccessPatternDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "access_pattern_id": {
+          "minLength": 1,
+          "title": "Access Pattern Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/AccessPatternKind"
+        },
+        "recomputable": {
+          "title": "Recomputable",
+          "type": "boolean"
+        },
+        "required_before_resume": {
+          "title": "Required Before Resume",
+          "type": "boolean"
+        },
+        "streamable_before_use": {
+          "title": "Streamable Before Use",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "access_pattern_id",
+        "kind",
+        "required_before_resume",
+        "streamable_before_use",
+        "recomputable"
+      ],
+      "title": "AccessPatternDescriptor",
+      "type": "object"
+    },
+    "AccessPatternKind": {
+      "enum": [
+        "append_only",
+        "mutable",
+        "read_only",
+        "layer_sequential",
+        "sliding_window",
+        "random_access",
+        "sparse_access"
+      ],
+      "title": "AccessPatternKind",
+      "type": "string"
+    },
+    "ByteRange": {
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Length",
+          "type": "integer"
+        },
+        "offset": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "offset",
+        "length"
+      ],
+      "title": "ByteRange",
+      "type": "object"
+    },
+    "CompressionKind": {
+      "enum": [
+        "none",
+        "zstd",
+        "lz4",
+        "runtime_specific"
+      ],
+      "title": "CompressionKind",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EncryptionKind": {
+      "enum": [
+        "none",
+        "aes_256_gcm",
+        "chacha20_poly1305"
+      ],
+      "title": "EncryptionKind",
+      "type": "string"
+    },
+    "ExactnessClass": {
+      "enum": [
+        "exact_bitwise",
+        "exact_semantic",
+        "numerically_equivalent",
+        "quality_bounded",
+        "recomputation_assisted",
+        "incompatible"
+      ],
+      "title": "ExactnessClass",
+      "type": "string"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "KVPacking": {
+      "enum": [
+        "separate",
+        "packed_kv",
+        "interleaved_kv"
+      ],
+      "title": "KVPacking",
+      "type": "string"
+    },
+    "LayoutDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Alignment Bytes",
+          "type": "integer"
+        },
+        "block_size": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "k_v_packing": {
+          "$ref": "#/$defs/KVPacking"
+        },
+        "kind": {
+          "$ref": "#/$defs/LayoutKind"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "ordering": {
+          "$ref": "#/$defs/Ordering"
+        },
+        "padding_bytes": {
+          "default": 0,
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Padding Bytes",
+          "type": "integer"
+        },
+        "page_size_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Size Bytes"
+        },
+        "runtime_layout_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Layout Name"
+        }
+      },
+      "required": [
+        "layout_id",
+        "kind",
+        "alignment_bytes",
+        "ordering",
+        "k_v_packing"
+      ],
+      "title": "LayoutDescriptor",
+      "type": "object"
+    },
+    "LayoutKind": {
+      "enum": [
+        "contiguous",
+        "paged",
+        "blocked",
+        "interleaved",
+        "transposed",
+        "tiled",
+        "runtime_specific"
+      ],
+      "title": "LayoutKind",
+      "type": "string"
+    },
+    "LogicalComponentSize": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "logical_size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Logical Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "component_id",
+        "logical_size_bytes"
+      ],
+      "title": "LogicalComponentSize",
+      "type": "object"
+    },
+    "Ordering": {
+      "enum": [
+        "token_major",
+        "head_major",
+        "layer_major",
+        "block_major",
+        "runtime_specific"
+      ],
+      "title": "Ordering",
+      "type": "string"
+    },
+    "PageTableDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/PageTableEntry"
+          },
+          "title": "Entries",
+          "type": "array"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_id",
+        "entries"
+      ],
+      "title": "PageTableDescriptor",
+      "type": "object"
+    },
+    "PageTableEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "copy_on_write_reference_count": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Copy On Write Reference Count",
+          "type": "integer"
+        },
+        "dirty": {
+          "title": "Dirty",
+          "type": "boolean"
+        },
+        "logical_token_range": {
+          "$ref": "#/$defs/TokenRange"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "page_version": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Page Version",
+          "type": "integer"
+        },
+        "physical_page_id": {
+          "minLength": 1,
+          "title": "Physical Page Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "logical_token_range",
+        "physical_page_id",
+        "page_version",
+        "owner_epoch",
+        "dirty",
+        "copy_on_write_reference_count"
+      ],
+      "title": "PageTableEntry",
+      "type": "object"
+    },
+    "PlacementDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/StorageLocation"
+        },
+        "nic_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nic Id"
+        },
+        "placement_id": {
+          "minLength": 1,
+          "title": "Placement Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "placement_id",
+        "location"
+      ],
+      "title": "PlacementDescriptor",
+      "type": "object"
+    },
+    "QualityContract": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_contract": {
+          "minLength": 1,
+          "title": "Evaluation Contract",
+          "type": "string"
+        },
+        "maximum_loss": {
+          "minimum": 0.0,
+          "title": "Maximum Loss",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "maximum_loss",
+        "evaluation_contract"
+      ],
+      "title": "QualityContract",
+      "type": "object"
+    },
+    "QuantizationDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulation_semantics": {
+          "minLength": 1,
+          "title": "Accumulation Semantics",
+          "type": "string"
+        },
+        "exactness_class": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "format": {
+          "minLength": 1,
+          "title": "Format",
+          "type": "string"
+        },
+        "metadata_layout": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metadata Layout"
+        },
+        "quality_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QualityContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quantization_id": {
+          "minLength": 1,
+          "title": "Quantization Id",
+          "type": "string"
+        },
+        "scale_granularity": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scale Granularity"
+        },
+        "zero_point": {
+          "default": false,
+          "title": "Zero Point",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "quantization_id",
+        "format",
+        "accumulation_semantics",
+        "exactness_class"
+      ],
+      "title": "QuantizationDescriptor",
+      "type": "object"
+    },
+    "RuntimeIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "build_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "dependency_versions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependency Versions",
+          "type": "array"
+        },
+        "runtime_name": {
+          "minLength": 1,
+          "title": "Runtime Name",
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "title": "Runtime Version",
+          "type": "string"
+        },
+        "target_hardware": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Target Hardware",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runtime_name",
+        "runtime_version",
+        "adapter_version",
+        "build_hash",
+        "dependency_versions",
+        "target_hardware"
+      ],
+      "title": "RuntimeIdentity",
+      "type": "object"
+    },
+    "ShardDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "data_parallel_replica": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Data Parallel Replica",
+          "type": "integer"
+        },
+        "destination_logical_slice": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "expert_parallel_group": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Expert Parallel Group",
+          "type": "integer"
+        },
+        "pipeline_stage": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Pipeline Stage",
+          "type": "integer"
+        },
+        "rank": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "replicated": {
+          "default": false,
+          "title": "Replicated",
+          "type": "boolean"
+        },
+        "shard_id": {
+          "minLength": 1,
+          "title": "Shard Id",
+          "type": "string"
+        },
+        "shard_order": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Shard Order",
+          "type": "integer"
+        },
+        "source_logical_slice": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "tensor_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Tensor Parallel Degree",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "shard_id",
+        "tensor_parallel_degree",
+        "pipeline_stage",
+        "expert_parallel_group",
+        "data_parallel_replica",
+        "rank",
+        "source_logical_slice",
+        "destination_logical_slice",
+        "shard_order"
+      ],
+      "title": "ShardDescriptor",
+      "type": "object"
+    },
+    "StateSegment": {
+      "additionalProperties": false,
+      "properties": {
+        "access_pattern_id": {
+          "minLength": 1,
+          "title": "Access Pattern Id",
+          "type": "string"
+        },
+        "allocation_id": {
+          "minLength": 1,
+          "title": "Allocation Id",
+          "type": "string"
+        },
+        "checksum": {
+          "$ref": "#/$defs/Digest"
+        },
+        "chunk_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Chunk Ids",
+          "type": "array"
+        },
+        "compression": {
+          "$ref": "#/$defs/CompressionKind"
+        },
+        "current_version": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Current Version",
+          "type": "integer"
+        },
+        "dirty_epoch": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Dirty Epoch",
+          "type": "integer"
+        },
+        "encryption": {
+          "$ref": "#/$defs/EncryptionKind"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "logical_byte_range": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "logical_state_reference": {
+          "minLength": 1,
+          "title": "Logical State Reference",
+          "type": "string"
+        },
+        "page_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Page Ids",
+          "type": "array"
+        },
+        "physical_byte_range": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "placement_id": {
+          "minLength": 1,
+          "title": "Placement Id",
+          "type": "string"
+        },
+        "quantization_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quantization Id"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "shard_id": {
+          "minLength": 1,
+          "title": "Shard Id",
+          "type": "string"
+        },
+        "storage_offset": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Storage Offset",
+          "type": "integer"
+        },
+        "tensor_shape": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Tensor Shape",
+          "type": "array"
+        },
+        "tensor_strides": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Tensor Strides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "logical_state_reference",
+        "segment_id",
+        "logical_byte_range",
+        "physical_byte_range",
+        "tensor_shape",
+        "tensor_strides",
+        "storage_offset",
+        "allocation_id",
+        "chunk_ids",
+        "current_version",
+        "dirty_epoch",
+        "checksum",
+        "compression",
+        "encryption",
+        "layout_id",
+        "shard_id",
+        "placement_id",
+        "access_pattern_id"
+      ],
+      "title": "StateSegment",
+      "type": "object"
+    },
+    "StorageLocation": {
+      "additionalProperties": false,
+      "properties": {
+        "device_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Id"
+        },
+        "fault_domain": {
+          "minLength": 1,
+          "title": "Fault Domain",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "memory_tier": {
+          "minLength": 1,
+          "title": "Memory Tier",
+          "type": "string"
+        },
+        "memory_type": {
+          "enum": [
+            "host",
+            "gpu",
+            "storage",
+            "remote"
+          ],
+          "title": "Memory Type",
+          "type": "string"
+        },
+        "network_rail": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Network Rail"
+        },
+        "numa_domain": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain"
+        }
+      },
+      "required": [
+        "memory_type",
+        "host_id",
+        "memory_tier",
+        "fault_domain"
+      ],
+      "title": "StorageLocation",
+      "type": "object"
+    },
+    "TokenRange": {
+      "additionalProperties": false,
+      "properties": {
+        "end_exclusive": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Exclusive",
+          "type": "integer"
+        },
+        "start": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end_exclusive"
+      ],
+      "title": "TokenRange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_patterns": {
+      "items": {
+        "$ref": "#/$defs/AccessPatternDescriptor"
+      },
+      "title": "Access Patterns",
+      "type": "array"
+    },
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "kind": {
+      "const": "PhysicalStateLayout",
+      "default": "PhysicalStateLayout",
+      "title": "Kind",
+      "type": "string"
+    },
+    "layout_descriptors": {
+      "items": {
+        "$ref": "#/$defs/LayoutDescriptor"
+      },
+      "title": "Layout Descriptors",
+      "type": "array"
+    },
+    "layout_id": {
+      "minLength": 1,
+      "title": "Layout Id",
+      "type": "string"
+    },
+    "logical_component_sizes": {
+      "items": {
+        "$ref": "#/$defs/LogicalComponentSize"
+      },
+      "title": "Logical Component Sizes",
+      "type": "array"
+    },
+    "owner_epoch": {
+      "exclusiveMinimum": 0,
+      "maximum": 18446744073709551615,
+      "title": "Owner Epoch",
+      "type": "integer"
+    },
+    "page_tables": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PageTableDescriptor"
+      },
+      "title": "Page Tables",
+      "type": "array"
+    },
+    "physical_plan_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "placement_descriptors": {
+      "items": {
+        "$ref": "#/$defs/PlacementDescriptor"
+      },
+      "title": "Placement Descriptors",
+      "type": "array"
+    },
+    "quantization_descriptors": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/QuantizationDescriptor"
+      },
+      "title": "Quantization Descriptors",
+      "type": "array"
+    },
+    "reconstructible_runtime_state": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Reconstructible Runtime State",
+      "type": "array"
+    },
+    "runtime": {
+      "$ref": "#/$defs/RuntimeIdentity"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/StateSegment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "shard_descriptors": {
+      "items": {
+        "$ref": "#/$defs/ShardDescriptor"
+      },
+      "title": "Shard Descriptors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "layout_id",
+    "runtime",
+    "physical_plan_hash",
+    "owner_epoch",
+    "logical_component_sizes",
+    "layout_descriptors",
+    "shard_descriptors",
+    "placement_descriptors",
+    "access_patterns",
+    "segments"
+  ],
+  "title": "PhysicalStateLayout",
+  "type": "object"
+}

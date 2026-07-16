@@ -64,12 +64,31 @@ class WarmPathDemoManifest(_DemoModel):
     artifacts: tuple[WarmPathDemoArtifact, ...]
 
 
+_DEMO_OWNED_PATHS = (
+    "input",
+    "cache",
+    "profile",
+    "execution",
+    "plan.json",
+    "simulation.json",
+    "manifest.json",
+)
+
+
 def _reset(path: Path, *, enabled: bool) -> None:
     if path.exists() and enabled:
         resolved = path.resolve()
         if resolved in {Path("/").resolve(), Path.home().resolve()}:
             raise ValueError("refusing to reset a broad directory")
-        shutil.rmtree(path)
+        # The checked-in H6 evaluation is a sibling under artifacts/warmpath.
+        # Reset only files owned by the local demo so running `warmpath-demo`
+        # cannot invalidate the subsequent repository test gate.
+        for relative in _DEMO_OWNED_PATHS:
+            target = path / relative
+            if target.is_symlink() or target.is_file():
+                target.unlink()
+            elif target.is_dir():
+                shutil.rmtree(target)
     path.mkdir(parents=True, exist_ok=True)
 
 

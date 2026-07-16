@@ -46,6 +46,7 @@ gpu-transformers = [
 gpu-vllm = ["vllm>=0.8.5"]
 gpu-sglang = ["sglang>=0.4.6"]
 dev = [
+  "cryptography>=44,<51",
   "hypothesis>=6.120,<7",
   "mypy>=1.14,<2",
   "pytest>=8.3,<10",
@@ -76,6 +77,7 @@ testpaths = ["tests/python"]
 addopts = "-ra --strict-markers"
 markers = [
   "gpu: requires an NVIDIA GPU",
+  "continuum_gpu: exercises the version-gated Continuum PyTorch CUDA converter",
   "expensive: long-running performance evaluation",
   "docker: requires a running Docker daemon",
 ]

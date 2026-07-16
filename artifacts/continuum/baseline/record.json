@@ -1,0 +1,87 @@
+{
+  "schema_version": "sloforge.continuum.baseline/v1",
+  "recorded_date": "2026-08-02",
+  "baseline_commit": "7e51ea7f7338755d23f889820558a4e046d6c42e",
+  "baseline_tag": "sloforge-continuum-baseline-7e51ea7",
+  "platform": {
+    "os": "Darwin 24.6.0",
+    "architecture": "arm64",
+    "python": "3.12.8",
+    "rustc": "1.93.1",
+    "cargo": "1.93.1",
+    "nvidia_gpu_available": false,
+    "docker_daemon_available": false
+  },
+  "runtime_inventory": {
+    "torch": null,
+    "triton": null,
+    "vllm": null,
+    "sglang": null,
+    "nixl": null,
+    "bifrost": null,
+    "modal": "1.5.3",
+    "truss": "0.18.24"
+  },
+  "safety_controls": {
+    "gpu_budget_present": false,
+    "gpu_opt_in": false,
+    "multi_node_opt_in": false,
+    "rdma_opt_in": false,
+    "external_deployment_opt_in": false,
+    "live_migration_opt_in": false
+  },
+  "checks": [
+    {
+      "command": "make check",
+      "status": "passed",
+      "result": "730 Python passed, 5 optional skips; 128 Rust test/doc-test lanes passed; 37 UI tests passed and 1 generated-fixture test skipped; formatting, linting, typing, Clippy, and production UI build passed"
+    },
+    {
+      "command": "make fabric-check",
+      "status": "passed",
+      "result": "292 focused Python tests and 31 Fabric Rust tests passed"
+    },
+    {
+      "command": "make genesis-check",
+      "status": "passed",
+      "result": "363 focused Python tests with 1 optional PyTorch skip and 30 Genesis Rust tests passed"
+    }
+  ],
+  "demonstrations": [
+    {
+      "command": "make demo",
+      "status": "passed",
+      "result": "120 gateway requests and 120 simulated requests; diagnosis accuracy 1.0"
+    },
+    {
+      "command": "make fabric-demo",
+      "status": "passed",
+      "result": "synthetic physical-plan demo restored the SLO after two injected faults"
+    },
+    {
+      "command": "make autopsy-demo",
+      "status": "passed",
+      "result": "synthetic fault diagnosis and recovery completed"
+    },
+    {
+      "command": "make genesis-zero-day-demo",
+      "status": "passed",
+      "result": "deterministic CPU zero-day runtime and capsule path completed; hardware_backed=false"
+    },
+    {
+      "command": "make forgeci-demo",
+      "status": "passed",
+      "result": "identified the planted first regressing commit with zero inconclusive rate"
+    },
+    {
+      "command": "make warmpath-demo",
+      "status": "passed",
+      "result": "243 plans evaluated; local restore and checksum verification passed"
+    }
+  ],
+  "notes": [
+    "The first make check attempt reached the UI after all Python and Rust checks passed, then failed because the pre-existing node_modules omitted Rollup's Darwin ARM64 optional package. npm ci from the locked package manifest repaired the environment and the complete make check rerun passed.",
+    "The required demonstrations regenerated their documented artifact and report directories. Pre-existing untracked Genesis artifact directories were not deleted or overwritten outside each command's declared output path.",
+    "No paid resource, external deployment, privileged fault, live production session, GPU path, or RDMA path was used."
+  ]
+}

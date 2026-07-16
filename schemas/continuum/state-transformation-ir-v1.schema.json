@@ -1,0 +1,582 @@
+{
+  "$defs": {
+    "ByteRange": {
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Length",
+          "type": "integer"
+        },
+        "offset": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "offset",
+        "length"
+      ],
+      "title": "ByteRange",
+      "type": "object"
+    },
+    "DTypeSemantics": {
+      "enum": [
+        "bool",
+        "uint8",
+        "int8",
+        "int32",
+        "int64",
+        "float16",
+        "bfloat16",
+        "float32",
+        "float64",
+        "fp8",
+        "opaque"
+      ],
+      "title": "DTypeSemantics",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ExactnessClass": {
+      "enum": [
+        "exact_bitwise",
+        "exact_semantic",
+        "numerically_equivalent",
+        "quality_bounded",
+        "recomputation_assisted",
+        "incompatible"
+      ],
+      "title": "ExactnessClass",
+      "type": "string"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MemoryAllocation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocation_id": {
+          "minLength": 1,
+          "title": "Allocation Id",
+          "type": "string"
+        },
+        "lifetime_end_operation": {
+          "minLength": 1,
+          "title": "Lifetime End Operation",
+          "type": "string"
+        },
+        "lifetime_start_operation": {
+          "minLength": 1,
+          "title": "Lifetime Start Operation",
+          "type": "string"
+        },
+        "memory_type": {
+          "minLength": 1,
+          "title": "Memory Type",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "allocation_id",
+        "memory_type",
+        "size_bytes",
+        "lifetime_start_operation",
+        "lifetime_end_operation"
+      ],
+      "title": "MemoryAllocation",
+      "type": "object"
+    },
+    "StateContractRef": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "dtype": {
+          "$ref": "#/$defs/DTypeSemantics"
+        },
+        "logical_range": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "shape": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Shape",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id",
+        "logical_range",
+        "dtype",
+        "shape"
+      ],
+      "title": "StateContractRef",
+      "type": "object"
+    },
+    "StateTransformationOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "attributes": {
+          "$ref": "#/$defs/TransformationAttributes"
+        },
+        "dependencies": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "destinations": {
+          "items": {
+            "$ref": "#/$defs/StateContractRef"
+          },
+          "title": "Destinations",
+          "type": "array"
+        },
+        "estimated_cost": {
+          "$ref": "#/$defs/TransformCost"
+        },
+        "exactness_class": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "fallback_implementation": {
+          "minLength": 1,
+          "title": "Fallback Implementation",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TransformationOpKind"
+        },
+        "operation_id": {
+          "minLength": 1,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "ownership_behavior": {
+          "minLength": 1,
+          "title": "Ownership Behavior",
+          "type": "string"
+        },
+        "postconditions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Postconditions",
+          "type": "array"
+        },
+        "preconditions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Preconditions",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/StateContractRef"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "streamable": {
+          "title": "Streamable",
+          "type": "boolean"
+        },
+        "target_device": {
+          "minLength": 1,
+          "title": "Target Device",
+          "type": "string"
+        },
+        "verification_obligations": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Verification Obligations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation_id",
+        "kind",
+        "dependencies",
+        "sources",
+        "destinations",
+        "preconditions",
+        "postconditions",
+        "exactness_class",
+        "attributes",
+        "ownership_behavior",
+        "target_device",
+        "estimated_cost",
+        "streamable",
+        "verification_obligations",
+        "fallback_implementation"
+      ],
+      "title": "StateTransformationOperation",
+      "type": "object"
+    },
+    "TransformCost": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_read": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Bytes Read",
+          "type": "integer"
+        },
+        "bytes_written": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Bytes Written",
+          "type": "integer"
+        },
+        "estimate_source": {
+          "minLength": 1,
+          "title": "Estimate Source",
+          "type": "string"
+        },
+        "estimated_duration_ms": {
+          "minimum": 0.0,
+          "title": "Estimated Duration Ms",
+          "type": "number"
+        },
+        "peak_memory_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Peak Memory Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "estimated_duration_ms",
+        "bytes_read",
+        "bytes_written",
+        "peak_memory_bytes",
+        "estimate_source"
+      ],
+      "title": "TransformCost",
+      "type": "object"
+    },
+    "TransformationAttributes": {
+      "additionalProperties": false,
+      "properties": {
+        "axes": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Axes",
+          "type": "array"
+        },
+        "checksum_algorithm": {
+          "anyOf": [
+            {
+              "const": "sha256",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checksum Algorithm"
+        },
+        "codec": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Codec"
+        },
+        "padding_after": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Padding After",
+          "type": "array"
+        },
+        "padding_before": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Padding Before",
+          "type": "array"
+        },
+        "page_size_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Size Bytes"
+        },
+        "permutation": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Permutation",
+          "type": "array"
+        },
+        "shard_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shard Count"
+        },
+        "target_dtype": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DTypeSemantics"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target_shape": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Target Shape",
+          "type": "array"
+        },
+        "transport_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transport Id"
+        }
+      },
+      "title": "TransformationAttributes",
+      "type": "object"
+    },
+    "TransformationOpKind": {
+      "enum": [
+        "slice",
+        "concatenate",
+        "split",
+        "reshape",
+        "permute",
+        "transpose",
+        "pad",
+        "unpad",
+        "interleave",
+        "deinterleave",
+        "pack",
+        "unpack",
+        "shard",
+        "reshard",
+        "replicate",
+        "gather",
+        "scatter",
+        "page_remap",
+        "page_coalesce",
+        "page_split",
+        "dtype_convert",
+        "quantize",
+        "dequantize",
+        "compress",
+        "decompress",
+        "checksum",
+        "encrypt",
+        "decrypt",
+        "copy",
+        "zero_fill",
+        "reconstruct_metadata",
+        "recompute",
+        "send",
+        "receive",
+        "write_destination",
+        "validate"
+      ],
+      "title": "TransformationOpKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "chunk_order": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Chunk Order",
+      "type": "array"
+    },
+    "compatibility_report_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "destination_layout_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "kind": {
+      "const": "StateTransformationIR",
+      "default": "StateTransformationIR",
+      "title": "Kind",
+      "type": "string"
+    },
+    "maximum_buffer_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Maximum Buffer Bytes",
+      "type": "integer"
+    },
+    "memory_plan": {
+      "items": {
+        "$ref": "#/$defs/MemoryAllocation"
+      },
+      "title": "Memory Plan",
+      "type": "array"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/StateTransformationOperation"
+      },
+      "title": "Operations",
+      "type": "array"
+    },
+    "predicted_duration_ms": {
+      "minimum": 0.0,
+      "title": "Predicted Duration Ms",
+      "type": "number"
+    },
+    "rollback_behavior": {
+      "minLength": 1,
+      "title": "Rollback Behavior",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_layout_hash": {
+      "$ref": "#/$defs/Digest"
+    },
+    "transformation_id": {
+      "minLength": 1,
+      "title": "Transformation Id",
+      "type": "string"
+    },
+    "uncertainty_ms": {
+      "minimum": 0.0,
+      "title": "Uncertainty Ms",
+      "type": "number"
+    }
+  },
+  "required": [
+    "transformation_id",
+    "source_layout_hash",
+    "destination_layout_hash",
+    "compatibility_report_hash",
+    "operations",
+    "memory_plan",
+    "maximum_buffer_bytes",
+    "chunk_order",
+    "rollback_behavior",
+    "predicted_duration_ms",
+    "uncertainty_ms"
+  ],
+  "title": "StateTransformationIR",
+  "type": "object"
+}

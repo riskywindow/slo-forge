@@ -35,6 +35,7 @@ from sloforge.trace.format import (
 from sloforge.util import load_json, sha256_file, write_json
 
 from .autopsy import autopsy_app
+from .continuum import continuum_app
 from .fabric import fabric_app
 from .forgeci import forgeci_app
 from .genesis import genesis_app
@@ -62,6 +63,7 @@ app.add_typer(genesis_app, name="genesis")
 app.add_typer(lineage_app, name="lineage")
 app.add_typer(synthbench_app, name="synthbench")
 app.add_typer(redteam_app, name="redteam")
+app.add_typer(continuum_app, name="continuum")
 console = Console()
 
 

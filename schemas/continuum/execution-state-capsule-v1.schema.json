@@ -1,0 +1,2826 @@
+{
+  "$defs": {
+    "AccessPatternDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "access_pattern_id": {
+          "minLength": 1,
+          "title": "Access Pattern Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/AccessPatternKind"
+        },
+        "recomputable": {
+          "title": "Recomputable",
+          "type": "boolean"
+        },
+        "required_before_resume": {
+          "title": "Required Before Resume",
+          "type": "boolean"
+        },
+        "streamable_before_use": {
+          "title": "Streamable Before Use",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "access_pattern_id",
+        "kind",
+        "required_before_resume",
+        "streamable_before_use",
+        "recomputable"
+      ],
+      "title": "AccessPatternDescriptor",
+      "type": "object"
+    },
+    "AccessPatternKind": {
+      "enum": [
+        "append_only",
+        "mutable",
+        "read_only",
+        "layer_sequential",
+        "sliding_window",
+        "random_access",
+        "sparse_access"
+      ],
+      "title": "AccessPatternKind",
+      "type": "string"
+    },
+    "AttentionLayerState": {
+      "additionalProperties": false,
+      "properties": {
+        "attention_window_semantics": {
+          "minLength": 1,
+          "title": "Attention Window Semantics",
+          "type": "string"
+        },
+        "dtype_semantics": {
+          "$ref": "#/$defs/DTypeSemantics"
+        },
+        "head_count": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Head Count",
+          "type": "integer"
+        },
+        "head_dimension": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Head Dimension",
+          "type": "integer"
+        },
+        "kv_head_count": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Kv Head Count",
+          "type": "integer"
+        },
+        "layer_identity": {
+          "minLength": 1,
+          "title": "Layer Identity",
+          "type": "string"
+        },
+        "logical_k_shape": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Logical K Shape",
+          "type": "array"
+        },
+        "logical_v_shape": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Logical V Shape",
+          "type": "array"
+        },
+        "positional_encoding_semantics": {
+          "minLength": 1,
+          "title": "Positional Encoding Semantics",
+          "type": "string"
+        },
+        "token_range": {
+          "$ref": "#/$defs/TokenRange"
+        }
+      },
+      "required": [
+        "layer_identity",
+        "logical_k_shape",
+        "logical_v_shape",
+        "token_range",
+        "head_count",
+        "kv_head_count",
+        "head_dimension",
+        "positional_encoding_semantics",
+        "attention_window_semantics",
+        "dtype_semantics"
+      ],
+      "title": "AttentionLayerState",
+      "type": "object"
+    },
+    "AttentionState": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "layers": {
+          "items": {
+            "$ref": "#/$defs/AttentionLayerState"
+          },
+          "title": "Layers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component",
+        "layers"
+      ],
+      "title": "AttentionState",
+      "type": "object"
+    },
+    "ByteRange": {
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Length",
+          "type": "integer"
+        },
+        "offset": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "offset",
+        "length"
+      ],
+      "title": "ByteRange",
+      "type": "object"
+    },
+    "CapsuleIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_hash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "capsule_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Capsule Id",
+          "type": "string"
+        },
+        "capsule_type": {
+          "$ref": "#/$defs/CapsuleType"
+        },
+        "capture_timestamp": {
+          "minLength": 1,
+          "title": "Capture Timestamp",
+          "type": "string"
+        },
+        "continuum_version": {
+          "minLength": 1,
+          "title": "Continuum Version",
+          "type": "string"
+        },
+        "git_commit": {
+          "minLength": 1,
+          "title": "Git Commit",
+          "type": "string"
+        },
+        "model_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "parent_capsule_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Capsule Id"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "source_physical_plan": {
+          "$ref": "#/$defs/Digest"
+        },
+        "source_runtime": {
+          "$ref": "#/$defs/RuntimeIdentity"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tokenizer_hash": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "capsule_id",
+        "capsule_type",
+        "session_id",
+        "tenant_id",
+        "model_hash",
+        "tokenizer_hash",
+        "source_runtime",
+        "source_physical_plan",
+        "owner_epoch",
+        "capture_timestamp",
+        "git_commit",
+        "continuum_version"
+      ],
+      "title": "CapsuleIdentity",
+      "type": "object"
+    },
+    "CapsuleIntegrity": {
+      "additionalProperties": false,
+      "properties": {
+        "compatibility_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "evidence_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "extensions_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "identity_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "logical_state_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "merkle_root": {
+          "$ref": "#/$defs/Digest"
+        },
+        "physical_layout_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "segment_manifests_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "transaction_binding_hash": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "identity_hash",
+        "logical_state_hash",
+        "physical_layout_hash",
+        "segment_manifests_hash",
+        "compatibility_hash",
+        "transaction_binding_hash",
+        "evidence_hash",
+        "extensions_hash",
+        "merkle_root"
+      ],
+      "title": "CapsuleIntegrity",
+      "type": "object"
+    },
+    "CapsuleTransactionBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "commit_watermark": {
+          "title": "Commit Watermark",
+          "type": "integer"
+        },
+        "destination_epoch": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Epoch"
+        },
+        "fencing_token": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Fencing Token",
+          "type": "integer"
+        },
+        "ownership_lease": {
+          "$ref": "#/$defs/OwnershipLease"
+        },
+        "pending_dirty_log_hash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rollback_boundary": {
+          "title": "Rollback Boundary",
+          "type": "integer"
+        },
+        "source_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Source Epoch",
+          "type": "integer"
+        },
+        "transaction_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transaction Id"
+        },
+        "transaction_journal_hash": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "ownership_lease",
+        "fencing_token",
+        "source_epoch",
+        "commit_watermark",
+        "rollback_boundary",
+        "transaction_journal_hash"
+      ],
+      "title": "CapsuleTransactionBinding",
+      "type": "object"
+    },
+    "CapsuleType": {
+      "enum": [
+        "complete",
+        "incremental",
+        "fork",
+        "rollback",
+        "migration",
+        "recomputation_assisted"
+      ],
+      "title": "CapsuleType",
+      "type": "string"
+    },
+    "ClientDeliveryState": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "error_state": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error State"
+        },
+        "last_client_acknowledged_token_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Client Acknowledged Token Index"
+        },
+        "last_gateway_committed_token_index": {
+          "title": "Last Gateway Committed Token Index",
+          "type": "integer"
+        },
+        "last_generated_token_index": {
+          "title": "Last Generated Token Index",
+          "type": "integer"
+        },
+        "stream_owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Stream Owner Epoch",
+          "type": "integer"
+        },
+        "terminal_status": {
+          "$ref": "#/$defs/TerminalStatus"
+        }
+      },
+      "required": [
+        "component",
+        "last_generated_token_index",
+        "last_gateway_committed_token_index",
+        "last_client_acknowledged_token_index",
+        "stream_owner_epoch",
+        "terminal_status"
+      ],
+      "title": "ClientDeliveryState",
+      "type": "object"
+    },
+    "CompatibilityConstraints": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture_restrictions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Architecture Restrictions",
+          "type": "array"
+        },
+        "prohibited_conversions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ConversionPermission"
+          },
+          "title": "Prohibited Conversions",
+          "type": "array"
+        },
+        "quality_loss_budget": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quality Loss Budget"
+        },
+        "recomputation_permissions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RecomputationPermission"
+          },
+          "title": "Recomputation Permissions",
+          "type": "array"
+        },
+        "required_destination_capabilities": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Required Destination Capabilities",
+          "type": "array"
+        },
+        "source_compatibility_fingerprint": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "source_compatibility_fingerprint",
+        "required_destination_capabilities"
+      ],
+      "title": "CompatibilityConstraints",
+      "type": "object"
+    },
+    "CompressionKind": {
+      "enum": [
+        "none",
+        "zstd",
+        "lz4",
+        "runtime_specific"
+      ],
+      "title": "CompressionKind",
+      "type": "string"
+    },
+    "ConversionPermission": {
+      "enum": [
+        "exact_relayout",
+        "dtype_conversion",
+        "quantization",
+        "recompute",
+        "opaque_copy"
+      ],
+      "title": "ConversionPermission",
+      "type": "string"
+    },
+    "DTypeSemantics": {
+      "enum": [
+        "bool",
+        "uint8",
+        "int8",
+        "int32",
+        "int64",
+        "float16",
+        "bfloat16",
+        "float32",
+        "float64",
+        "fp8",
+        "opaque"
+      ],
+      "title": "DTypeSemantics",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EncryptionKind": {
+      "enum": [
+        "none",
+        "aes_256_gcm",
+        "chacha20_poly1305"
+      ],
+      "title": "EncryptionKind",
+      "type": "string"
+    },
+    "ExactnessClass": {
+      "enum": [
+        "exact_bitwise",
+        "exact_semantic",
+        "numerically_equivalent",
+        "quality_bounded",
+        "recomputation_assisted",
+        "incompatible"
+      ],
+      "title": "ExactnessClass",
+      "type": "string"
+    },
+    "ExecutionIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "creation_epoch": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Creation Epoch",
+          "type": "integer"
+        },
+        "current_owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Current Owner Epoch",
+          "type": "integer"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/Digest"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tokenizer_identity": {
+          "$ref": "#/$defs/Digest"
+        },
+        "workflow_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workflow Id"
+        }
+      },
+      "required": [
+        "session_id",
+        "request_id",
+        "tenant_id",
+        "model_identity",
+        "tokenizer_identity",
+        "creation_epoch",
+        "current_owner_epoch"
+      ],
+      "title": "ExecutionIdentity",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "ExternalChunkReference": {
+      "additionalProperties": false,
+      "properties": {
+        "chunk_id": {
+          "minLength": 1,
+          "title": "Chunk Id",
+          "type": "string"
+        },
+        "compression": {
+          "$ref": "#/$defs/CompressionKind"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "encryption": {
+          "$ref": "#/$defs/EncryptionKind"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "storage_uri": {
+          "minLength": 1,
+          "title": "Storage Uri",
+          "type": "string"
+        },
+        "tenant_security_domain": {
+          "minLength": 1,
+          "title": "Tenant Security Domain",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chunk_id",
+        "content_hash",
+        "size_bytes",
+        "tenant_security_domain",
+        "storage_uri",
+        "compression",
+        "encryption"
+      ],
+      "title": "ExternalChunkReference",
+      "type": "object"
+    },
+    "GuidedDecodingState": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_prefix": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Accepted Prefix",
+          "type": "array"
+        },
+        "automaton_identity": {
+          "$ref": "#/$defs/Digest"
+        },
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "current_automaton_state": {
+          "minLength": 1,
+          "title": "Current Automaton State",
+          "type": "string"
+        },
+        "pending_constraint_state": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pending Constraint State"
+        },
+        "tokenizer_contract": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "component",
+        "automaton_identity",
+        "current_automaton_state",
+        "tokenizer_contract",
+        "accepted_prefix"
+      ],
+      "title": "GuidedDecodingState",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "KVPacking": {
+      "enum": [
+        "separate",
+        "packed_kv",
+        "interleaved_kv"
+      ],
+      "title": "KVPacking",
+      "type": "string"
+    },
+    "LayoutDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Alignment Bytes",
+          "type": "integer"
+        },
+        "block_size": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "k_v_packing": {
+          "$ref": "#/$defs/KVPacking"
+        },
+        "kind": {
+          "$ref": "#/$defs/LayoutKind"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "ordering": {
+          "$ref": "#/$defs/Ordering"
+        },
+        "padding_bytes": {
+          "default": 0,
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Padding Bytes",
+          "type": "integer"
+        },
+        "page_size_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Size Bytes"
+        },
+        "runtime_layout_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Layout Name"
+        }
+      },
+      "required": [
+        "layout_id",
+        "kind",
+        "alignment_bytes",
+        "ordering",
+        "k_v_packing"
+      ],
+      "title": "LayoutDescriptor",
+      "type": "object"
+    },
+    "LayoutKind": {
+      "enum": [
+        "contiguous",
+        "paged",
+        "blocked",
+        "interleaved",
+        "transposed",
+        "tiled",
+        "runtime_specific"
+      ],
+      "title": "LayoutKind",
+      "type": "string"
+    },
+    "LogicalComponentSize": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "logical_size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Logical Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "component_id",
+        "logical_size_bytes"
+      ],
+      "title": "LogicalComponentSize",
+      "type": "object"
+    },
+    "LogicalStateSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "sloforge.io/continuum/v1",
+          "default": "sloforge.io/continuum/v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "attention": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AttentionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "client_delivery": {
+          "$ref": "#/$defs/ClientDeliveryState"
+        },
+        "dependency_graph": {
+          "$ref": "#/$defs/StateDependencyGraph"
+        },
+        "exactness_contract": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "execution": {
+          "$ref": "#/$defs/ExecutionIdentity"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "guided_decoding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuidedDecodingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "const": "LogicalStateSchema",
+          "default": "LogicalStateSchema",
+          "title": "Kind",
+          "type": "string"
+        },
+        "quality_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QualityContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "recurrent": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RecurrentState"
+          },
+          "title": "Recurrent",
+          "type": "array"
+        },
+        "sampler": {
+          "$ref": "#/$defs/SamplerState"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "speculative": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpeculativeState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "token_history": {
+          "$ref": "#/$defs/TokenHistoryState"
+        },
+        "unknown_components": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UnknownStateComponent"
+          },
+          "title": "Unknown Components",
+          "type": "array"
+        },
+        "unknown_state_handling": {
+          "$ref": "#/$defs/UnknownStateHandling",
+          "default": "reject"
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkflowState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "execution",
+        "token_history",
+        "sampler",
+        "client_delivery",
+        "dependency_graph",
+        "exactness_contract"
+      ],
+      "title": "LogicalStateSchema",
+      "type": "object"
+    },
+    "MigrationVerificationEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "sloforge.io/continuum/v1",
+          "default": "sloforge.io/continuum/v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "benchmark_provenance": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Provenance"
+          },
+          "title": "Benchmark Provenance",
+          "type": "array"
+        },
+        "capture_consistency": {
+          "items": {
+            "$ref": "#/$defs/VerificationClaim"
+          },
+          "title": "Capture Consistency",
+          "type": "array"
+        },
+        "continuation_verification": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/VerificationClaim"
+          },
+          "title": "Continuation Verification",
+          "type": "array"
+        },
+        "conversion_verification": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/VerificationClaim"
+          },
+          "title": "Conversion Verification",
+          "type": "array"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "generated_at": {
+          "minLength": 1,
+          "title": "Generated At",
+          "type": "string"
+        },
+        "kind": {
+          "const": "MigrationVerificationEvidence",
+          "default": "MigrationVerificationEvidence",
+          "title": "Kind",
+          "type": "string"
+        },
+        "known_limitations": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Known Limitations",
+          "type": "array"
+        },
+        "model_check_scope": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Check Scope"
+        },
+        "protocol_verification": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/VerificationClaim"
+          },
+          "title": "Protocol Verification",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "segment_integrity": {
+          "items": {
+            "$ref": "#/$defs/VerificationClaim"
+          },
+          "title": "Segment Integrity",
+          "type": "array"
+        },
+        "transaction_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transaction Id"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "transaction_id",
+        "generated_at",
+        "capture_consistency",
+        "segment_integrity"
+      ],
+      "title": "MigrationVerificationEvidence",
+      "type": "object"
+    },
+    "Ordering": {
+      "enum": [
+        "token_major",
+        "head_major",
+        "layer_major",
+        "block_major",
+        "runtime_specific"
+      ],
+      "title": "Ordering",
+      "type": "string"
+    },
+    "OwnershipLease": {
+      "additionalProperties": false,
+      "properties": {
+        "coordinator_version": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Coordinator Version",
+          "type": "integer"
+        },
+        "expiration": {
+          "minLength": 1,
+          "title": "Expiration",
+          "type": "string"
+        },
+        "fencing_token": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Fencing Token",
+          "type": "integer"
+        },
+        "last_committed_state_version": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Last Committed State Version",
+          "type": "integer"
+        },
+        "last_committed_token_index": {
+          "title": "Last Committed Token Index",
+          "type": "integer"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "owner_runtime": {
+          "minLength": 1,
+          "title": "Owner Runtime",
+          "type": "string"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "owner_runtime",
+        "owner_epoch",
+        "fencing_token",
+        "expiration",
+        "coordinator_version",
+        "last_committed_state_version",
+        "last_committed_token_index"
+      ],
+      "title": "OwnershipLease",
+      "type": "object"
+    },
+    "OwnershipScope": {
+      "enum": [
+        "session_owner",
+        "immutable_shared",
+        "copy_on_write",
+        "external_coordinator"
+      ],
+      "title": "OwnershipScope",
+      "type": "string"
+    },
+    "PageTableDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/PageTableEntry"
+          },
+          "title": "Entries",
+          "type": "array"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_id",
+        "entries"
+      ],
+      "title": "PageTableDescriptor",
+      "type": "object"
+    },
+    "PageTableEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "copy_on_write_reference_count": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Copy On Write Reference Count",
+          "type": "integer"
+        },
+        "dirty": {
+          "title": "Dirty",
+          "type": "boolean"
+        },
+        "logical_token_range": {
+          "$ref": "#/$defs/TokenRange"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "page_version": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Page Version",
+          "type": "integer"
+        },
+        "physical_page_id": {
+          "minLength": 1,
+          "title": "Physical Page Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "logical_token_range",
+        "physical_page_id",
+        "page_version",
+        "owner_epoch",
+        "dirty",
+        "copy_on_write_reference_count"
+      ],
+      "title": "PageTableEntry",
+      "type": "object"
+    },
+    "PendingToolCall": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "call_id": {
+          "minLength": 1,
+          "title": "Call Id",
+          "type": "string"
+        },
+        "side_effect_class": {
+          "$ref": "#/$defs/SideEffectClass"
+        },
+        "tool_identity": {
+          "minLength": 1,
+          "title": "Tool Identity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call_id",
+        "tool_identity",
+        "arguments_digest",
+        "side_effect_class"
+      ],
+      "title": "PendingToolCall",
+      "type": "object"
+    },
+    "PhysicalStateLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "access_patterns": {
+          "items": {
+            "$ref": "#/$defs/AccessPatternDescriptor"
+          },
+          "title": "Access Patterns",
+          "type": "array"
+        },
+        "api_version": {
+          "const": "sloforge.io/continuum/v1",
+          "default": "sloforge.io/continuum/v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "kind": {
+          "const": "PhysicalStateLayout",
+          "default": "PhysicalStateLayout",
+          "title": "Kind",
+          "type": "string"
+        },
+        "layout_descriptors": {
+          "items": {
+            "$ref": "#/$defs/LayoutDescriptor"
+          },
+          "title": "Layout Descriptors",
+          "type": "array"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "logical_component_sizes": {
+          "items": {
+            "$ref": "#/$defs/LogicalComponentSize"
+          },
+          "title": "Logical Component Sizes",
+          "type": "array"
+        },
+        "owner_epoch": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Owner Epoch",
+          "type": "integer"
+        },
+        "page_tables": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PageTableDescriptor"
+          },
+          "title": "Page Tables",
+          "type": "array"
+        },
+        "physical_plan_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "placement_descriptors": {
+          "items": {
+            "$ref": "#/$defs/PlacementDescriptor"
+          },
+          "title": "Placement Descriptors",
+          "type": "array"
+        },
+        "quantization_descriptors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuantizationDescriptor"
+          },
+          "title": "Quantization Descriptors",
+          "type": "array"
+        },
+        "reconstructible_runtime_state": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Reconstructible Runtime State",
+          "type": "array"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeIdentity"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/StateSegment"
+          },
+          "title": "Segments",
+          "type": "array"
+        },
+        "shard_descriptors": {
+          "items": {
+            "$ref": "#/$defs/ShardDescriptor"
+          },
+          "title": "Shard Descriptors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "layout_id",
+        "runtime",
+        "physical_plan_hash",
+        "owner_epoch",
+        "logical_component_sizes",
+        "layout_descriptors",
+        "shard_descriptors",
+        "placement_descriptors",
+        "access_patterns",
+        "segments"
+      ],
+      "title": "PhysicalStateLayout",
+      "type": "object"
+    },
+    "PlacementDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/StorageLocation"
+        },
+        "nic_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nic Id"
+        },
+        "placement_id": {
+          "minLength": 1,
+          "title": "Placement Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "placement_id",
+        "location"
+      ],
+      "title": "PlacementDescriptor",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "captured_at": {
+          "minLength": 1,
+          "title": "Captured At",
+          "type": "string"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "producer": {
+          "minLength": 1,
+          "title": "Producer",
+          "type": "string"
+        },
+        "producer_version": {
+          "minLength": 1,
+          "title": "Producer Version",
+          "type": "string"
+        },
+        "raw_evidence_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Evidence Uri"
+        },
+        "source_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": [
+        "producer",
+        "producer_version",
+        "captured_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "QualityContract": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_contract": {
+          "minLength": 1,
+          "title": "Evaluation Contract",
+          "type": "string"
+        },
+        "maximum_loss": {
+          "minimum": 0.0,
+          "title": "Maximum Loss",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "maximum_loss",
+        "evaluation_contract"
+      ],
+      "title": "QualityContract",
+      "type": "object"
+    },
+    "QuantizationDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulation_semantics": {
+          "minLength": 1,
+          "title": "Accumulation Semantics",
+          "type": "string"
+        },
+        "exactness_class": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "format": {
+          "minLength": 1,
+          "title": "Format",
+          "type": "string"
+        },
+        "metadata_layout": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metadata Layout"
+        },
+        "quality_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QualityContract"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quantization_id": {
+          "minLength": 1,
+          "title": "Quantization Id",
+          "type": "string"
+        },
+        "scale_granularity": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scale Granularity"
+        },
+        "zero_point": {
+          "default": false,
+          "title": "Zero Point",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "quantization_id",
+        "format",
+        "accumulation_semantics",
+        "exactness_class"
+      ],
+      "title": "QuantizationDescriptor",
+      "type": "object"
+    },
+    "RecomputationPermission": {
+      "enum": [
+        "forbidden",
+        "from_token_history",
+        "from_checkpoint",
+        "model_specific"
+      ],
+      "title": "RecomputationPermission",
+      "type": "string"
+    },
+    "RecurrentState": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "dtype": {
+          "$ref": "#/$defs/DTypeSemantics"
+        },
+        "initialization_contract": {
+          "minLength": 1,
+          "title": "Initialization Contract",
+          "type": "string"
+        },
+        "layer_identity": {
+          "minLength": 1,
+          "title": "Layer Identity",
+          "type": "string"
+        },
+        "logical_shape": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "maximum": 18446744073709551615,
+            "type": "integer"
+          },
+          "title": "Logical Shape",
+          "type": "array"
+        },
+        "sequence_position": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Sequence Position",
+          "type": "integer"
+        },
+        "state_identifier": {
+          "minLength": 1,
+          "title": "State Identifier",
+          "type": "string"
+        },
+        "update_semantics": {
+          "minLength": 1,
+          "title": "Update Semantics",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "state_identifier",
+        "layer_identity",
+        "logical_shape",
+        "update_semantics",
+        "dtype",
+        "sequence_position",
+        "initialization_contract"
+      ],
+      "title": "RecurrentState",
+      "type": "object"
+    },
+    "RuntimeIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "build_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "dependency_versions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependency Versions",
+          "type": "array"
+        },
+        "runtime_name": {
+          "minLength": 1,
+          "title": "Runtime Name",
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "title": "Runtime Version",
+          "type": "string"
+        },
+        "target_hardware": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Target Hardware",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runtime_name",
+        "runtime_version",
+        "adapter_version",
+        "build_hash",
+        "dependency_versions",
+        "target_hardware"
+      ],
+      "title": "RuntimeIdentity",
+      "type": "object"
+    },
+    "SamplerState": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "deterministic_required": {
+          "title": "Deterministic Required",
+          "type": "boolean"
+        },
+        "frequency_penalty": {
+          "title": "Frequency Penalty",
+          "type": "number"
+        },
+        "implementation_independent_state": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementation Independent State"
+        },
+        "presence_penalty": {
+          "title": "Presence Penalty",
+          "type": "number"
+        },
+        "repetition_penalty": {
+          "exclusiveMinimum": 0.0,
+          "title": "Repetition Penalty",
+          "type": "number"
+        },
+        "rng_algorithm": {
+          "minLength": 1,
+          "title": "Rng Algorithm",
+          "type": "string"
+        },
+        "rng_counter": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Rng Counter",
+          "type": "integer"
+        },
+        "sampling_algorithm": {
+          "minLength": 1,
+          "title": "Sampling Algorithm",
+          "type": "string"
+        },
+        "seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "temperature": {
+          "minimum": 0.0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "top_k": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Top K",
+          "type": "integer"
+        },
+        "top_p": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Top P",
+          "type": "number"
+        }
+      },
+      "required": [
+        "component",
+        "sampling_algorithm",
+        "seed",
+        "rng_algorithm",
+        "rng_counter",
+        "temperature",
+        "top_k",
+        "top_p",
+        "repetition_penalty",
+        "frequency_penalty",
+        "presence_penalty",
+        "deterministic_required"
+      ],
+      "title": "SamplerState",
+      "type": "object"
+    },
+    "SegmentManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "chunks": {
+          "items": {
+            "$ref": "#/$defs/ExternalChunkReference"
+          },
+          "title": "Chunks",
+          "type": "array"
+        },
+        "segment_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_id",
+        "segment_hash",
+        "chunks"
+      ],
+      "title": "SegmentManifest",
+      "type": "object"
+    },
+    "ShardDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "data_parallel_replica": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Data Parallel Replica",
+          "type": "integer"
+        },
+        "destination_logical_slice": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "expert_parallel_group": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Expert Parallel Group",
+          "type": "integer"
+        },
+        "pipeline_stage": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Pipeline Stage",
+          "type": "integer"
+        },
+        "rank": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "replicated": {
+          "default": false,
+          "title": "Replicated",
+          "type": "boolean"
+        },
+        "shard_id": {
+          "minLength": 1,
+          "title": "Shard Id",
+          "type": "string"
+        },
+        "shard_order": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Shard Order",
+          "type": "integer"
+        },
+        "source_logical_slice": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "tensor_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "Tensor Parallel Degree",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "shard_id",
+        "tensor_parallel_degree",
+        "pipeline_stage",
+        "expert_parallel_group",
+        "data_parallel_replica",
+        "rank",
+        "source_logical_slice",
+        "destination_logical_slice",
+        "shard_order"
+      ],
+      "title": "ShardDescriptor",
+      "type": "object"
+    },
+    "SideEffectClass": {
+      "enum": [
+        "none",
+        "idempotent",
+        "at_most_once_external",
+        "non_replayable"
+      ],
+      "title": "SideEffectClass",
+      "type": "string"
+    },
+    "SpeculativeState": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_prefix": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Accepted Prefix",
+          "type": "array"
+        },
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "draft_model_identity": {
+          "$ref": "#/$defs/Digest"
+        },
+        "pending_draft_tokens": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Pending Draft Tokens",
+          "type": "array"
+        },
+        "rng_state": {
+          "minLength": 1,
+          "title": "Rng State",
+          "type": "string"
+        },
+        "rollback_boundary": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Rollback Boundary",
+          "type": "integer"
+        },
+        "verification_cursor": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Verification Cursor",
+          "type": "integer"
+        },
+        "verifier_model_identity": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "component",
+        "draft_model_identity",
+        "verifier_model_identity",
+        "accepted_prefix",
+        "pending_draft_tokens",
+        "rng_state",
+        "verification_cursor",
+        "rollback_boundary"
+      ],
+      "title": "SpeculativeState",
+      "type": "object"
+    },
+    "StateComponentDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "compatibility_fingerprint": {
+          "$ref": "#/$defs/Digest"
+        },
+        "conversion_permissions": {
+          "items": {
+            "$ref": "#/$defs/ConversionPermission"
+          },
+          "title": "Conversion Permissions",
+          "type": "array"
+        },
+        "dtype_semantics": {
+          "$ref": "#/$defs/DTypeSemantics"
+        },
+        "exactness_requirement": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "integrity_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "kind": {
+          "$ref": "#/$defs/StateKind"
+        },
+        "lifetime": {
+          "$ref": "#/$defs/StateLifetime"
+        },
+        "ownership": {
+          "$ref": "#/$defs/OwnershipScope"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/Provenance"
+          },
+          "title": "Provenance",
+          "type": "array"
+        },
+        "recomputation_permission": {
+          "$ref": "#/$defs/RecomputationPermission"
+        },
+        "schema_version": {
+          "minLength": 1,
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "semantic_id": {
+          "minLength": 1,
+          "title": "Semantic Id",
+          "type": "string"
+        },
+        "symbolic_shape": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Symbolic Shape",
+          "type": "array"
+        },
+        "update_semantics": {
+          "minLength": 1,
+          "title": "Update Semantics",
+          "type": "string"
+        }
+      },
+      "required": [
+        "semantic_id",
+        "schema_version",
+        "kind",
+        "symbolic_shape",
+        "dtype_semantics",
+        "update_semantics",
+        "lifetime",
+        "ownership",
+        "exactness_requirement",
+        "conversion_permissions",
+        "recomputation_permission",
+        "compatibility_fingerprint",
+        "integrity_hash",
+        "provenance"
+      ],
+      "title": "StateComponentDescriptor",
+      "type": "object"
+    },
+    "StateDependencyEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "dependency_semantics": {
+          "minLength": 1,
+          "title": "Dependency Semantics",
+          "type": "string"
+        },
+        "downstream_component_id": {
+          "minLength": 1,
+          "title": "Downstream Component Id",
+          "type": "string"
+        },
+        "invalidated_by_weight_change": {
+          "title": "Invalidated By Weight Change",
+          "type": "boolean"
+        },
+        "upstream_component_id": {
+          "minLength": 1,
+          "title": "Upstream Component Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upstream_component_id",
+        "downstream_component_id",
+        "dependency_semantics",
+        "invalidated_by_weight_change"
+      ],
+      "title": "StateDependencyEdge",
+      "type": "object"
+    },
+    "StateDependencyGraph": {
+      "additionalProperties": false,
+      "properties": {
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/StateDependencyEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/StateDependencyNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "title": "StateDependencyGraph",
+      "type": "object"
+    },
+    "StateDependencyNode": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "state_producing_fingerprint": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "component_id",
+        "state_producing_fingerprint"
+      ],
+      "title": "StateDependencyNode",
+      "type": "object"
+    },
+    "StateKind": {
+      "enum": [
+        "token_history",
+        "attention_kv",
+        "recurrent",
+        "state_space",
+        "convolutional",
+        "speculative",
+        "sampler",
+        "guided_decoding",
+        "workflow",
+        "client_delivery",
+        "unknown"
+      ],
+      "title": "StateKind",
+      "type": "string"
+    },
+    "StateLifetime": {
+      "enum": [
+        "request",
+        "session",
+        "workflow",
+        "checkpoint"
+      ],
+      "title": "StateLifetime",
+      "type": "string"
+    },
+    "StateSegment": {
+      "additionalProperties": false,
+      "properties": {
+        "access_pattern_id": {
+          "minLength": 1,
+          "title": "Access Pattern Id",
+          "type": "string"
+        },
+        "allocation_id": {
+          "minLength": 1,
+          "title": "Allocation Id",
+          "type": "string"
+        },
+        "checksum": {
+          "$ref": "#/$defs/Digest"
+        },
+        "chunk_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Chunk Ids",
+          "type": "array"
+        },
+        "compression": {
+          "$ref": "#/$defs/CompressionKind"
+        },
+        "current_version": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Current Version",
+          "type": "integer"
+        },
+        "dirty_epoch": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Dirty Epoch",
+          "type": "integer"
+        },
+        "encryption": {
+          "$ref": "#/$defs/EncryptionKind"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "logical_byte_range": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "logical_state_reference": {
+          "minLength": 1,
+          "title": "Logical State Reference",
+          "type": "string"
+        },
+        "page_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Page Ids",
+          "type": "array"
+        },
+        "physical_byte_range": {
+          "$ref": "#/$defs/ByteRange"
+        },
+        "placement_id": {
+          "minLength": 1,
+          "title": "Placement Id",
+          "type": "string"
+        },
+        "quantization_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quantization Id"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "shard_id": {
+          "minLength": 1,
+          "title": "Shard Id",
+          "type": "string"
+        },
+        "storage_offset": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Storage Offset",
+          "type": "integer"
+        },
+        "tensor_shape": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Tensor Shape",
+          "type": "array"
+        },
+        "tensor_strides": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Tensor Strides",
+          "type": "array"
+        }
+      },
+      "required": [
+        "logical_state_reference",
+        "segment_id",
+        "logical_byte_range",
+        "physical_byte_range",
+        "tensor_shape",
+        "tensor_strides",
+        "storage_offset",
+        "allocation_id",
+        "chunk_ids",
+        "current_version",
+        "dirty_epoch",
+        "checksum",
+        "compression",
+        "encryption",
+        "layout_id",
+        "shard_id",
+        "placement_id",
+        "access_pattern_id"
+      ],
+      "title": "StateSegment",
+      "type": "object"
+    },
+    "StorageLocation": {
+      "additionalProperties": false,
+      "properties": {
+        "device_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Id"
+        },
+        "fault_domain": {
+          "minLength": 1,
+          "title": "Fault Domain",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "memory_tier": {
+          "minLength": 1,
+          "title": "Memory Tier",
+          "type": "string"
+        },
+        "memory_type": {
+          "enum": [
+            "host",
+            "gpu",
+            "storage",
+            "remote"
+          ],
+          "title": "Memory Type",
+          "type": "string"
+        },
+        "network_rail": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Network Rail"
+        },
+        "numa_domain": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numa Domain"
+        }
+      },
+      "required": [
+        "memory_type",
+        "host_id",
+        "memory_tier",
+        "fault_domain"
+      ],
+      "title": "StorageLocation",
+      "type": "object"
+    },
+    "TerminalStatus": {
+      "enum": [
+        "open",
+        "completed",
+        "cancelled",
+        "errored"
+      ],
+      "title": "TerminalStatus",
+      "type": "string"
+    },
+    "TokenHistoryState": {
+      "additionalProperties": false,
+      "properties": {
+        "attention_mask_semantics": {
+          "minLength": 1,
+          "title": "Attention Mask Semantics",
+          "type": "string"
+        },
+        "committed_output_token_ids": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Committed Output Token Ids",
+          "type": "array"
+        },
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "input_token_ids": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Input Token Ids",
+          "type": "array"
+        },
+        "normalization_contract": {
+          "minLength": 1,
+          "title": "Normalization Contract",
+          "type": "string"
+        },
+        "position_offset": {
+          "default": 0,
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Position Offset",
+          "type": "integer"
+        },
+        "token_positions": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Token Positions",
+          "type": "array"
+        },
+        "tokenizer_fingerprint": {
+          "$ref": "#/$defs/Digest"
+        },
+        "uncommitted_speculative_tokens": {
+          "default": [],
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Uncommitted Speculative Tokens",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component",
+        "input_token_ids",
+        "committed_output_token_ids",
+        "attention_mask_semantics",
+        "tokenizer_fingerprint",
+        "normalization_contract"
+      ],
+      "title": "TokenHistoryState",
+      "type": "object"
+    },
+    "TokenRange": {
+      "additionalProperties": false,
+      "properties": {
+        "end_exclusive": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Exclusive",
+          "type": "integer"
+        },
+        "start": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end_exclusive"
+      ],
+      "title": "TokenRange",
+      "type": "object"
+    },
+    "ToolResult": {
+      "additionalProperties": false,
+      "properties": {
+        "call_id": {
+          "minLength": 1,
+          "title": "Call Id",
+          "type": "string"
+        },
+        "result_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "side_effect_class": {
+          "$ref": "#/$defs/SideEffectClass"
+        }
+      },
+      "required": [
+        "call_id",
+        "result_digest",
+        "side_effect_class"
+      ],
+      "title": "ToolResult",
+      "type": "object"
+    },
+    "UnknownStateComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "namespace": {
+          "minLength": 1,
+          "title": "Namespace",
+          "type": "string"
+        },
+        "payload_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "portable_opaque": {
+          "title": "Portable Opaque",
+          "type": "boolean"
+        },
+        "required_for_resume": {
+          "title": "Required For Resume",
+          "type": "boolean"
+        },
+        "type_name": {
+          "minLength": 1,
+          "title": "Type Name",
+          "type": "string"
+        },
+        "type_version": {
+          "minLength": 1,
+          "title": "Type Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "namespace",
+        "type_name",
+        "type_version",
+        "required_for_resume",
+        "portable_opaque"
+      ],
+      "title": "UnknownStateComponent",
+      "type": "object"
+    },
+    "UnknownStateHandling": {
+      "enum": [
+        "reject",
+        "preserve_opaque",
+        "ignore_reconstructible"
+      ],
+      "title": "UnknownStateHandling",
+      "type": "string"
+    },
+    "VerificationClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "claim_id": {
+          "minLength": 1,
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "property": {
+          "minLength": 1,
+          "title": "Property",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_exercised"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "scope": {
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim_id",
+        "property",
+        "scope",
+        "result",
+        "evidence_digest"
+      ],
+      "title": "VerificationClaim",
+      "type": "object"
+    },
+    "WorkflowState": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_identity": {
+          "minLength": 1,
+          "title": "Branch Identity",
+          "type": "string"
+        },
+        "completed_tool_results": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ToolResult"
+          },
+          "title": "Completed Tool Results",
+          "type": "array"
+        },
+        "component": {
+          "$ref": "#/$defs/StateComponentDescriptor"
+        },
+        "continuation_contract": {
+          "minLength": 1,
+          "title": "Continuation Contract",
+          "type": "string"
+        },
+        "current_node": {
+          "minLength": 1,
+          "title": "Current Node",
+          "type": "string"
+        },
+        "pending_tool_calls": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PendingToolCall"
+          },
+          "title": "Pending Tool Calls",
+          "type": "array"
+        },
+        "side_effect_class": {
+          "$ref": "#/$defs/SideEffectClass"
+        },
+        "workflow_deadline": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workflow Deadline"
+        }
+      },
+      "required": [
+        "component",
+        "current_node",
+        "branch_identity",
+        "side_effect_class",
+        "continuation_contract"
+      ],
+      "title": "WorkflowState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "compatibility": {
+      "$ref": "#/$defs/CompatibilityConstraints"
+    },
+    "evidence": {
+      "$ref": "#/$defs/MigrationVerificationEvidence"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "identity": {
+      "$ref": "#/$defs/CapsuleIdentity"
+    },
+    "integrity": {
+      "$ref": "#/$defs/CapsuleIntegrity"
+    },
+    "kind": {
+      "const": "ExecutionStateCapsule",
+      "default": "ExecutionStateCapsule",
+      "title": "Kind",
+      "type": "string"
+    },
+    "logical_state": {
+      "$ref": "#/$defs/LogicalStateSchema"
+    },
+    "physical_state": {
+      "$ref": "#/$defs/PhysicalStateLayout"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "segment_manifests": {
+      "items": {
+        "$ref": "#/$defs/SegmentManifest"
+      },
+      "title": "Segment Manifests",
+      "type": "array"
+    },
+    "transaction": {
+      "$ref": "#/$defs/CapsuleTransactionBinding"
+    }
+  },
+  "required": [
+    "identity",
+    "logical_state",
+    "physical_state",
+    "segment_manifests",
+    "compatibility",
+    "transaction",
+    "evidence",
+    "integrity"
+  ],
+  "title": "ExecutionStateCapsule",
+  "type": "object"
+}

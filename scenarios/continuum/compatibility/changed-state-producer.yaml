@@ -1,0 +1,16 @@
+schema_version: sloforge.continuum.compatibility-scenario/v1
+scenario_id: matching-shape-changed-attention-weights
+seed: 317
+change:
+  component: attention
+  tensor_shapes_unchanged: true
+  state_producing_weights_changed: true
+  tokenizer_changed: false
+expected_direct_reuse: INCOMPATIBLE
+recomputation:
+  allowed: true
+  source: token_history
+  recomputable_state_components:
+    - attention.kv
+  expected_class: RECOMPUTATION_ASSISTED
+  verification_obligation: recompute state from declared token history and validate bounded continuation

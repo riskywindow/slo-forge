@@ -1,0 +1,276 @@
+{
+  "$defs": {
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "captured_at": {
+          "minLength": 1,
+          "title": "Captured At",
+          "type": "string"
+        },
+        "extensions": {
+          "$ref": "#/$defs/Extensions"
+        },
+        "producer": {
+          "minLength": 1,
+          "title": "Producer",
+          "type": "string"
+        },
+        "producer_version": {
+          "minLength": 1,
+          "title": "Producer Version",
+          "type": "string"
+        },
+        "raw_evidence_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Evidence Uri"
+        },
+        "source_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": [
+        "producer",
+        "producer_version",
+        "captured_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VerificationClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "claim_id": {
+          "minLength": 1,
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "property": {
+          "minLength": 1,
+          "title": "Property",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "not_exercised"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "scope": {
+          "minLength": 1,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim_id",
+        "property",
+        "scope",
+        "result",
+        "evidence_digest"
+      ],
+      "title": "VerificationClaim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "benchmark_provenance": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Provenance"
+      },
+      "title": "Benchmark Provenance",
+      "type": "array"
+    },
+    "capture_consistency": {
+      "items": {
+        "$ref": "#/$defs/VerificationClaim"
+      },
+      "title": "Capture Consistency",
+      "type": "array"
+    },
+    "continuation_verification": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VerificationClaim"
+      },
+      "title": "Continuation Verification",
+      "type": "array"
+    },
+    "conversion_verification": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VerificationClaim"
+      },
+      "title": "Conversion Verification",
+      "type": "array"
+    },
+    "evidence_id": {
+      "minLength": 1,
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "title": "Generated At",
+      "type": "string"
+    },
+    "kind": {
+      "const": "MigrationVerificationEvidence",
+      "default": "MigrationVerificationEvidence",
+      "title": "Kind",
+      "type": "string"
+    },
+    "known_limitations": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Known Limitations",
+      "type": "array"
+    },
+    "model_check_scope": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Check Scope"
+    },
+    "protocol_verification": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VerificationClaim"
+      },
+      "title": "Protocol Verification",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "segment_integrity": {
+      "items": {
+        "$ref": "#/$defs/VerificationClaim"
+      },
+      "title": "Segment Integrity",
+      "type": "array"
+    },
+    "transaction_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Transaction Id"
+    }
+  },
+  "required": [
+    "evidence_id",
+    "transaction_id",
+    "generated_at",
+    "capture_consistency",
+    "segment_integrity"
+  ],
+  "title": "MigrationVerificationEvidence",
+  "type": "object"
+}

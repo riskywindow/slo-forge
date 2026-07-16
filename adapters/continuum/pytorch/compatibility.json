@@ -1,0 +1,22 @@
+{
+  "adapter_schema": "sloforge.continuum.external-adapter/v1",
+  "adapter_version": "1.0.0",
+  "runtime": "pytorch",
+  "supported_versions": ">=2.5.0,<2.14.0",
+  "normal_ci_status": "implemented_but_unexercised_when_torch_is_absent",
+  "portable_scope": [
+    "explicitly_supplied_cpu_tensors",
+    "cpu_rng_state",
+    "canonical_model_state_dict"
+  ],
+  "prohibited_claims": [
+    "generic_live_inference_session_capture",
+    "implicit_gpu_to_cpu_fallback"
+  ],
+  "source_lock": [
+    "https://docs.pytorch.org/docs/main/distributed.checkpoint.html",
+    "https://docs.pytorch.org/docs/stable/distributed.tensor.html",
+    "https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.state_dict"
+  ],
+  "inspected_on": "2026-08-02"
+}

@@ -25,7 +25,7 @@ from sloforge.warmpath import (
     profile_local_startup,
     simulate_cold_start,
 )
-from sloforge.warmpath.demo import WarmPathDemoManifest
+from sloforge.warmpath.demo import WarmPathDemoManifest, _reset
 from sloforge.warmpath.statistics import robust_summary
 
 
@@ -126,6 +126,22 @@ def test_checked_in_warmpath_demo_is_measured_and_hash_verified() -> None:
     for artifact in manifest.artifacts:
         payload = (artifact_root / artifact.path).read_bytes()
         assert hashlib.sha256(payload).hexdigest() == artifact.sha256
+
+
+def test_demo_reset_preserves_sibling_evaluation_artifacts(tmp_path: Path) -> None:
+    artifact_root = tmp_path / "warmpath"
+    evaluation = artifact_root / "evaluation" / "result.json"
+    evaluation.parent.mkdir(parents=True)
+    evaluation.write_text("retained-evidence", encoding="utf-8")
+    (artifact_root / "profile").mkdir()
+    (artifact_root / "profile" / "stale.json").write_text("stale", encoding="utf-8")
+    (artifact_root / "manifest.json").write_text("stale", encoding="utf-8")
+
+    _reset(artifact_root, enabled=True)
+
+    assert evaluation.read_text(encoding="utf-8") == "retained-evidence"
+    assert not (artifact_root / "profile").exists()
+    assert not (artifact_root / "manifest.json").exists()
 
 
 def test_artifact_graph_rejects_cycles_unknown_edges_and_path_traversal() -> None:

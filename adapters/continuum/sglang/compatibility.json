@@ -1,0 +1,24 @@
+{
+  "adapter_schema": "sloforge.continuum.external-adapter/v1",
+  "adapter_version": "1.0.0",
+  "runtime": "sglang",
+  "supported_versions": ">=0.4.6,<0.6.0",
+  "source_version_examined": "0.5.12",
+  "normal_ci_status": "implemented_but_unexercised",
+  "portable_scope": [
+    "pd_disaggregation_configuration",
+    "nixl_transport_selection",
+    "mooncake_transport_selection"
+  ],
+  "prohibited_claims": [
+    "complete_portable_execution_state_export",
+    "token_ownership_transfer",
+    "semantic_compatibility_decision"
+  ],
+  "source_lock": [
+    "https://docs.sglang.ai/backend/pd_disaggregation.html",
+    "https://github.com/sgl-project/sglang/blob/v0.5.12/python/sglang/srt/server_args.py",
+    "https://github.com/sgl-project/sglang/tree/v0.5.12/python/sglang/srt/disaggregation"
+  ],
+  "inspected_on": "2026-08-02"
+}

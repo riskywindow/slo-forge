@@ -5733,6 +5733,7 @@ deploy = [
     { name = "truss" },
 ]
 dev = [
+    { name = "cryptography" },
     { name = "hypothesis" },
     { name = "mypy" },
     { name = "pytest" },
@@ -5763,6 +5764,7 @@ profile = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", marker = "extra == 'dev'", specifier = ">=44,<51" },
     { name = "fastapi", marker = "extra == 'gpu-transformers'", specifier = ">=0.116,<1" },
     { name = "httpx", specifier = ">=0.28,<1" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.120,<7" },

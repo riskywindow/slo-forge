@@ -1,0 +1,344 @@
+{
+  "$defs": {
+    "CompatibilityCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Digest"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "requires_recomputation",
+            "not_applicable"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "subject": {
+          "minLength": 1,
+          "title": "Subject",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "subject",
+        "result",
+        "explanation"
+      ],
+      "title": "CompatibilityCheck",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "ExactnessClass": {
+      "enum": [
+        "exact_bitwise",
+        "exact_semantic",
+        "numerically_equivalent",
+        "quality_bounded",
+        "recomputation_assisted",
+        "incompatible"
+      ],
+      "title": "ExactnessClass",
+      "type": "string"
+    },
+    "Extensions": {
+      "description": "The only extension point; each key names its owning compatibility domain.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "QualityContract": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_contract": {
+          "minLength": 1,
+          "title": "Evaluation Contract",
+          "type": "string"
+        },
+        "maximum_loss": {
+          "minimum": 0.0,
+          "title": "Maximum Loss",
+          "type": "number"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "maximum_loss",
+        "evaluation_contract"
+      ],
+      "title": "QualityContract",
+      "type": "object"
+    },
+    "RecomputeRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "from_component_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "From Component Ids",
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id",
+        "from_component_ids",
+        "reason"
+      ],
+      "title": "RecomputeRequirement",
+      "type": "object"
+    },
+    "RequiredConversion": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "exactness_class": {
+          "$ref": "#/$defs/ExactnessClass"
+        },
+        "operation": {
+          "minLength": 1,
+          "title": "Operation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id",
+        "operation",
+        "exactness_class"
+      ],
+      "title": "RequiredConversion",
+      "type": "object"
+    },
+    "RuntimeIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "build_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "dependency_versions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Dependency Versions",
+          "type": "array"
+        },
+        "runtime_name": {
+          "minLength": 1,
+          "title": "Runtime Name",
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "title": "Runtime Version",
+          "type": "string"
+        },
+        "target_hardware": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Target Hardware",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runtime_name",
+        "runtime_version",
+        "adapter_version",
+        "build_hash",
+        "dependency_versions",
+        "target_hardware"
+      ],
+      "title": "RuntimeIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/continuum/v1",
+      "default": "sloforge.io/continuum/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CompatibilityCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "compatibility_class": {
+      "$ref": "#/$defs/ExactnessClass"
+    },
+    "destination_physical_plan": {
+      "$ref": "#/$defs/Digest"
+    },
+    "destination_runtime": {
+      "$ref": "#/$defs/RuntimeIdentity"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "kind": {
+      "const": "CompatibilityReport",
+      "default": "CompatibilityReport",
+      "title": "Kind",
+      "type": "string"
+    },
+    "migration_restrictions": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Migration Restrictions",
+      "type": "array"
+    },
+    "quality_implications": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/QualityContract"
+      },
+      "title": "Quality Implications",
+      "type": "array"
+    },
+    "rejected_classes": {
+      "items": {
+        "$ref": "#/$defs/ExactnessClass"
+      },
+      "title": "Rejected Classes",
+      "type": "array"
+    },
+    "report_id": {
+      "minLength": 1,
+      "title": "Report Id",
+      "type": "string"
+    },
+    "required_conversions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RequiredConversion"
+      },
+      "title": "Required Conversions",
+      "type": "array"
+    },
+    "required_recomputation": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RecomputeRequirement"
+      },
+      "title": "Required Recomputation",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_capsule_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Capsule Id",
+      "type": "string"
+    },
+    "unsupported_state": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Unsupported State",
+      "type": "array"
+    },
+    "verification_obligations": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Verification Obligations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "report_id",
+    "source_capsule_id",
+    "destination_runtime",
+    "destination_physical_plan",
+    "compatibility_class",
+    "checks",
+    "rejected_classes"
+  ],
+  "title": "CompatibilityReport",
+  "type": "object"
+}

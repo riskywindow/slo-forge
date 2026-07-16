@@ -7,7 +7,10 @@ CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE
 	extension-evaluation clean-room-test genesis-check genesis-demo \
 	genesis-zero-day-demo genesis-redteam-demo genesis-evolution-demo \
 	synthbench-smoke synthbench-evaluation genesis-evaluation \
-	genesis-docker-smoke genesis-clean-room-test
+	genesis-docker-smoke genesis-clean-room-test continuum-check continuum-demo \
+	continuum-migration-demo continuum-fault-demo continuum-fork-demo \
+	continuum-compatibility-demo continuum-benchmark-cpu continuum-benchmark-gpu \
+	continuum-docker-smoke continuum-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -100,6 +103,50 @@ genesis-clean-room-test:
 
 genesis-docker-smoke:
 	./tools/genesis-docker-smoke.sh
+
+continuum-check:
+	uv run --locked ruff format --check python/sloforge/continuum python/sloforge/cli/continuum.py tests/python/test_continuum*.py
+	uv run --locked ruff check python/sloforge/continuum python/sloforge/cli/continuum.py tests/python/test_continuum*.py
+	uv run --locked mypy python/sloforge/continuum python/sloforge/cli/continuum.py
+	uv run --locked pytest -q tests/python/test_continuum*.py
+	cargo fmt --all --check
+	$(CARGO_BOUNDED_ENV) cargo clippy -p sloforge-continuum-ir -p sloforge-state-transaction -p sloforge-state-modelcheck --all-targets --all-features --locked -- -D warnings
+	$(CARGO_BOUNDED_ENV) cargo test -p sloforge-continuum-ir -p sloforge-state-transaction -p sloforge-state-modelcheck --all-features --locked
+
+continuum-demo:
+	uv run --locked sloforge continuum migrate --mode pre-copy --seed 317 --output artifacts/continuum/demo --reset
+
+continuum-migration-demo:
+	uv run --locked sloforge continuum migrate --mode pre-copy --seed 331 --output artifacts/continuum/migration-demo --reset
+	uv run --locked sloforge continuum migration verify --artifact artifacts/continuum/migration-demo/flagship.json --output artifacts/continuum/migration-demo/verification.json
+
+continuum-fault-demo:
+	uv run --locked sloforge continuum chaos --scenario scenarios/continuum/failure/destination-crash-before-commit.yaml --output artifacts/continuum/fault-demo --reset
+
+continuum-fork-demo:
+	uv run --locked sloforge continuum migrate --mode pre-copy --seed 347 --output artifacts/continuum/fork-demo --reset
+	uv run --locked sloforge continuum fork --artifact artifacts/continuum/fork-demo/flagship.json --output artifacts/continuum/fork-demo/fork.json
+
+continuum-compatibility-demo:
+	uv run --locked sloforge continuum migrate --mode pre-copy --seed 359 --output artifacts/continuum/compatibility-demo --reset
+	uv run --locked sloforge continuum compatibility --artifact artifacts/continuum/compatibility-demo/flagship.json --output artifacts/continuum/compatibility-demo/compatibility.json
+
+continuum-benchmark-cpu:
+	uv run --locked python -m sloforge.continuum.benchmarking --output artifacts/continuum/evaluation --seeds 101,202,303,404,505 --git-commit "$$(git rev-parse HEAD)" --initial-output-tokens 16 --delta-rounds 3,2 --resumed-tokens 3 --converter-repetitions 5 --reset
+	cp artifacts/continuum/evaluation/reports/continuum-evaluation.md reports/continuum-evaluation.md
+	cp artifacts/continuum/evaluation/reports/continuum-evaluation.html reports/continuum-evaluation.html
+	cp artifacts/continuum/evaluation/reports/continuum-compatibility.md reports/continuum-compatibility.md
+	cp artifacts/continuum/evaluation/reports/continuum-fault-tolerance.md reports/continuum-fault-tolerance.md
+	cp artifacts/continuum/evaluation/reports/continuum-runtime-adapters.md reports/continuum-runtime-adapters.md
+
+continuum-benchmark-gpu:
+	./tools/continuum-gpu-benchmark.sh
+
+continuum-docker-smoke:
+	./tools/continuum-docker-smoke.sh
+
+continuum-clean-room-test:
+	./tools/clean-room-continuum.sh
 
 benchmark-cpu:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/cpu-demo --report-dir reports/cpu-demo --reset

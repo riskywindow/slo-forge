@@ -1,0 +1,19 @@
+{
+  "adapter_schema": "sloforge.continuum.external-adapter/v1",
+  "adapter_version": "1.0.0",
+  "runtime": "genesis",
+  "supported_generated_runtime_schemas": ["1.0.0"],
+  "normal_ci_status": "implemented_and_exercised_cpu",
+  "portable_scope": [
+    "generated_bundle_validation",
+    "bounded_streaming",
+    "cancellation",
+    "deterministic_seed_binding"
+  ],
+  "prohibited_claims": ["active_state_export_from_generated_runtime_schema_1_0_0"],
+  "source_lock": [
+    "python/sloforge/genesis/runtime/generator.py",
+    "python/sloforge/genesis/runtime/core.py"
+  ],
+  "inspected_on": "2026-08-02"
+}
