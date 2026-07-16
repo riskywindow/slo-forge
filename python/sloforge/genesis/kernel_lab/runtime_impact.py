@@ -23,6 +23,7 @@ from sloforge.genesis.sandbox import (
     SandboxRequest,
     SandboxTermination,
     execute_sandboxed,
+    interpreter_read_roots,
 )
 from sloforge.util import sha256_file
 
@@ -275,8 +276,7 @@ def _sandbox_execute(
             read_only_paths=(
                 execution_inputs.resolve(strict=True),
                 repository_python.resolve(strict=True),
-                Path(sys.prefix),
-                Path(sys.base_prefix),
+                *interpreter_read_roots(),
             ),
             artifact_output_directory=output_root.resolve(),
             seed=config.sandbox_seed,

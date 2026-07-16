@@ -6,7 +6,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
+from sloforge.genesis.sandbox import (
+    SandboxLimits,
+    SandboxRequest,
+    execute_sandboxed,
+    interpreter_read_roots,
+)
 
 from .models import TorchExportEvidence
 from .package import LoadedReferencePackage
@@ -35,7 +40,11 @@ def inspect_with_torch_export(package: LoadedReferencePackage) -> TorchExportEvi
                     str(result_path),
                 ),
                 working_directory=repository_python,
-                read_only_paths=(repository_python, package.root, Path(sys.prefix)),
+                read_only_paths=(
+                    repository_python,
+                    package.root,
+                    *interpreter_read_roots(),
+                ),
                 artifact_output_directory=output_root,
                 seed=0,
                 limits=SandboxLimits(

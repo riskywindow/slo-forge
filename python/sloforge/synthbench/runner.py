@@ -15,7 +15,12 @@ from pathlib import Path
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.genesis.ir import canonical_json
-from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
+from sloforge.genesis.sandbox import (
+    SandboxLimits,
+    SandboxRequest,
+    execute_sandboxed,
+    interpreter_read_roots,
+)
 
 from .grammar import load_hidden_cases, load_task, load_workload, verify_public_package
 from .integrity import audit_raw_samples
@@ -209,8 +214,7 @@ class _Executor:
                     self.reference_root,
                     request_path,
                     self.repository_python,
-                    Path(sys.prefix),
-                    Path(sys.base_prefix),
+                    *interpreter_read_roots(),
                 ),
                 artifact_output_directory=output,
                 seed=self.run_seed,
@@ -319,8 +323,7 @@ class _GenesisExecutor:
                     self.package_root,
                     request_path,
                     self.repository_python,
-                    Path(sys.prefix),
-                    Path(sys.base_prefix),
+                    *interpreter_read_roots(),
                 ),
                 artifact_output_directory=output,
                 seed=self.seed,

@@ -22,6 +22,8 @@ from sloforge.genesis.sandbox.executor import (
     _canonical_paths,
     _macos_firmlink_alias,
     _process_group_rss_bytes,
+    _reject_symlink_components,
+    interpreter_read_roots,
 )
 
 
@@ -35,6 +37,24 @@ def test_macos_firmlink_aliases_are_symmetric() -> None:
         "/var/folders/genesis"
     )
     assert _macos_firmlink_alias(Path("/Users/genesis")) is None
+
+
+def test_interpreter_roots_canonicalize_virtualenv_symlink_spelling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sloforge.genesis.sandbox.executor as executor
+
+    canonical = tmp_path / "private" / "virtualenv"
+    canonical.mkdir(parents=True)
+    alias = tmp_path / "virtualenv-alias"
+    alias.symlink_to(canonical, target_is_directory=True)
+    monkeypatch.setattr(executor.sys, "prefix", str(alias))
+    monkeypatch.setattr(executor.sys, "base_prefix", str(canonical))
+
+    roots = interpreter_read_roots()
+    assert roots == (canonical.resolve(strict=True),)
+    for root in roots:
+        _reject_symlink_components(root, label="interpreter root")
 
 
 def _request(

@@ -48,6 +48,24 @@ _ALLOWED_CALLER_ENVIRONMENT = frozenset({"LANG", "LC_ALL", "TZ"})
 _PIPE_DRAIN_GRACE_SECONDS = 0.25
 
 
+def interpreter_read_roots() -> tuple[Path, ...]:
+    """Return canonical interpreter roots safe for strict sandbox allowlists.
+
+    macOS commonly spells temporary virtual environments below ``/var`` even
+    though that component is a symlink to ``/private/var``. Callers must not
+    pass that unresolved spelling into the symlink-rejecting trust boundary.
+    """
+
+    return tuple(
+        dict.fromkeys(
+            (
+                Path(sys.prefix).resolve(strict=True),
+                Path(sys.base_prefix).resolve(strict=True),
+            )
+        )
+    )
+
+
 def detect_capabilities() -> SandboxCapabilities:
     system = platform.system()
     if system == "Darwin" and Path("/usr/bin/sandbox-exec").is_file():
@@ -206,8 +224,7 @@ def _macos_profile(read_only: tuple[Path, ...], output: Path, executable: Path) 
                 Path("/private/etc/localtime"),
                 Path("/private/var/db"),
                 Path("/private/var/select"),
-                Path(sys.base_prefix).resolve(),
-                Path(sys.prefix).resolve(),
+                *interpreter_read_roots(),
                 executable.absolute(),
                 executable.absolute().parent,
                 executable.resolve(),

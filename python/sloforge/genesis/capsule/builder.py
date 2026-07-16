@@ -30,7 +30,12 @@ from sloforge.genesis.runtime.generator import (
     GENERATED_RUNTIME_SCHEMA_VERSION,
     generated_runtime_template_hashes,
 )
-from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
+from sloforge.genesis.sandbox import (
+    SandboxLimits,
+    SandboxRequest,
+    execute_sandboxed,
+    interpreter_read_roots,
+)
 from sloforge.genesis.search import CandidateDesign
 from sloforge.genesis.synthesis import (
     CancellationPolicyVerifier,
@@ -485,8 +490,7 @@ def _independent_runtime_differential(
                     runtime_directory.resolve(strict=True),
                     package_root.resolve(strict=True),
                     repository_python,
-                    Path(sys.prefix),
-                    Path(sys.base_prefix),
+                    *interpreter_read_roots(),
                 ),
                 artifact_output_directory=sandbox_output,
                 seed=seed,
