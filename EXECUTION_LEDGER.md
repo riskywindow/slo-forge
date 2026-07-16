@@ -237,7 +237,7 @@ that could not run here.
 
 | Genesis task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
 |---|---|---|---|---|---|---|---|---|
-| Baseline, task graph, root integration, CLI, release gates | root | exercised; Docker daemon unavailable | `main` | root manifests, CLI, ledger, report | all lanes | baseline commands; `make check`; `make genesis-check`; clean room | `artifacts/genesis/baseline/record.json` | `3ca2d74` through `8dc39a2` |
+| Baseline, task graph, root integration, CLI, release gates | root | exercised; Docker daemon unavailable | `main` | root manifests, CLI, ledger, report | all lanes | baseline commands; `make check`; `make genesis-check`; clean room | `artifacts/genesis/baseline/record.json`, `artifacts/genesis/clean-room/` | `3ca2d74` through `93e7818` |
 | InferenceGenome, Transformation, Candidate, Counterexample IR, migrations and conformance | Genesis IR lane | exercised | shared `main` checkout | Genesis IR crates/Python/schemas/goldens | baseline | Python/Rust/schema round trips, hash and migration tests | schemas and golden fixtures | `68d19f0`, `4c5de8c` |
 | GenesisCapsule, artifacts, sandbox and independent validation | Genesis trust lane | exercised on macOS; H6 replays ten promotion attacks per seed; exact-source loading rejects bytecode caches; Linux/Windows unexercised | shared `main` checkout | capsule/artifacts/sandbox and H6 campaign | Genesis IR | tamper/stale/hardware/dependency/evidence/benchmark/quality/corpus/scope/migration replay tests | capsule, sandbox, and `campaigns/h6` evidence | `38999aa` through `e01120f` |
 | Zero-day frontend and conservative generated baseline runtime | Genesis frontend/runtime lane | AST/runtime exercised; optional PyTorch export skipped | shared `main` checkout | frontend/runtime/reference task | IR | inspect/generate/differential/stream/cancel/bounds/shutdown | `artifacts/genesis/zero-day-demo/` | `e59d6d5`, `89f474d`, `f9bffcf` |
@@ -257,7 +257,7 @@ that could not run here.
 | Trace-justified kernel lab and upstream bundle | kernel lane | measured CPU reference trace, correctness, microbench, generated-runtime serving impact and independent replay exercised; result inconclusive/rejected; GPU unexercised | shared `main` checkout | kernel lab/generated patch | Autopsy/verification | kernel tests/demo, raw paired trials, exact token/state replay | kernel artifacts/upstream bundle | `8b97e5a`, `f1346d1`, `5f51656` |
 | Evaluation H1-H9 and statistical review | evaluation lane | final artifact-backed suite regenerated and independently validated; H1/H2/H5/H6/H7/H8 supported only in declared CPU/synthetic scopes, H3/H4 mixed, H9 negative | shared `main` checkout | evaluation and campaign validators | demos | `make genesis-evaluation`; independent suite validator | `artifacts/genesis/evaluation/` | through `5f51656`; final artifacts regenerated 2026-08-02 |
 | Visualization | visualization lane | artifact-backed static view exercised | shared `main` checkout | UI bundle/report views | artifact schemas | UI checks/build | Genesis UI bundles | `bd514a0` |
-| Security/compiler/formal/GPU/benchmark/concurrency reviews | review lanes | final adversarial, GPU/performance, runtime, and clean-room reviews completed; all high and reasonable medium findings fixed; no GPU available | shared `main` checkout | focused patches/tests | integrated system | review commands, attack replays, final gates | findings summarized in final report | `e9fa92c` through `8dc39a2` |
+| Security/compiler/formal/GPU/benchmark/concurrency reviews | review lanes | final adversarial, GPU/performance, runtime, and clean-room reviews completed; all high and reasonable medium findings fixed; no GPU available | shared `main` checkout | focused patches/tests | integrated system | review commands, attack replays, final gates | findings summarized in final report | `e9fa92c` through `93e7818` |
 | Documentation, ADRs, paper, clean room and final report | root/documentation | final report reconciled to raw evidence; clean-room result recorded separately; Docker daemon unavailable | `main` | README/docs/ADRs/paper/report | stable evidence | inventory, clean room, report verification | `GENESIS_FINAL_REPORT.md` | `b242833`, final report commits |
 
 ### Genesis dependency graph
@@ -275,9 +275,9 @@ that could not run here.
 
 ### Genesis final acceptance record
 
-- Final source checks: `make check` completed with 728 Python passes, five optional skips,
+- Final source checks: `make check` completed with 730 Python passes, five optional skips,
   warning-denied workspace Clippy, all 128 Rust test lanes, and UI type/lint/37-pass/build.
-- Genesis checks: 362 Python passes, one optional PyTorch skip, and 30 Genesis Rust tests.
+- Genesis checks: 363 Python passes, one optional PyTorch skip, and 30 Genesis Rust tests.
 - Fabric non-regression: serialized `make fabric-check` completed with 292 Python and 31 Rust
   passes. Core, Fabric, Autopsy, ForgeCI, WarmPath, and extension demonstrations passed.
 - Genesis artifacts: all four Genesis demos, both ServingSynthBench targets, and the final H1-H9
@@ -290,9 +290,10 @@ that could not run here.
 - Docker smoke was attempted and failed closed before mutation because no daemon is available.
   GPU, CUDA/Triton, multi-node, external deployment, and live production validation remain
   explicitly unexercised; zero hardware speedup claims are present.
-- Clean-room validation is performed only after the release-candidate report is committed. Its
-  commit/hash-bearing result is retained in `artifacts/genesis/clean-room/` and copied into the
-  final report without rewriting measured evidence.
+- Clean-room validation passed for release commit `93e7818b88dd08f177eba97df75122855d83885a`
+  and source tree `0df798cb11520cf03d54b374308ab49886067e2b`. Its hash-bearing result, log,
+  portable evidence archive, fresh installed-wheel capsule validation, and artifact digests are
+  retained in `artifacts/genesis/clean-room/`; report publication does not rewrite raw evidence.
 
 The host had only 330 MiB free when three temporary worktrees were attempted;
 Git aborted each copy before registration. The incomplete directories were

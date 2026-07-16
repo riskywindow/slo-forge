@@ -4,8 +4,9 @@ Date: 2026-08-02 (America/Los_Angeles)
 
 - Baseline commit: `435a04799a831c3d19fce18eb816b206d23778d7`
 - Immutable baseline tag: `sloforge-genesis-baseline-435a047`
-- Final reviewed implementation ancestry: `8dc39a2d383232449e42a06f23794f9b8e69e06b`
-- Clean-room validated release commit: populated from `artifacts/genesis/clean-room/result.json`
+- Final reviewed implementation ancestry: `93e7818b88dd08f177eba97df75122855d83885a`
+- Clean-room validated release commit: `93e7818b88dd08f177eba97df75122855d83885a`
+- Clean-room validated source tree: `0df798cb11520cf03d54b374308ab49886067e2b`
 - Final report publication commit: resolve with `git log -1 --format=%H -- GENESIS_FINAL_REPORT.md`
 
 This report distinguishes local CPU measurements, deterministic synthetic/model evidence, bounded
@@ -108,11 +109,11 @@ benchmarks/quality, missing counterexamples, invalid proof scope, and state-conv
 
 Final host validation before clean-room publication:
 
-- `make check`: 728 Python tests passed, five optional PyTorch/GPU tests skipped, and six intentional
+- `make check`: 730 Python tests passed, five optional PyTorch/GPU tests skipped, and six intentional
   overflow warnings; Rust formatting, warning-denied workspace Clippy, 128 Rust tests/doc-test lanes,
   UI typecheck/lint, 37 UI tests (one fixture skip), and production build passed. The final Rust/UI
   portion was rerun independently after a detached-session record was lost.
-- `make genesis-check`: 362 Genesis/SynthBench Python tests passed, one optional PyTorch skip;
+- `make genesis-check`: 363 Genesis/SynthBench Python tests passed, one optional PyTorch skip;
   Genesis Rust formatting/lint and 30 IR/model-check tests passed.
 - `make fabric-check`: 292 focused Python tests and 31 Fabric Rust tests passed after a serialized
   rerun. An earlier parallel invocation raced the demo's `--reset`; its six missing-artifact errors
@@ -126,9 +127,13 @@ Final host validation before clean-room publication:
   `make genesis-evaluation` plus its independent suite validator: passed.
 - `make genesis-docker-smoke`: failed closed at preflight because the Docker daemon is unavailable;
   no container was started. Docker execution is implemented but unexercised on this host.
-- `make genesis-clean-room-test`: final result is recorded after running against the committed
-  release candidate; it uses a Git archive, fresh locked environment, built wheel, installed CLI,
-  actual capsule validation, and a portable evidence tarball.
+- `make genesis-clean-room-test`: passed for commit `93e7818b88dd08f177eba97df75122855d83885a`
+  and source tree `0df798cb11520cf03d54b374308ab49886067e2b`. It used a Git archive, fresh
+  locked environment, built wheel, installed CLI, and portable evidence tarball. The seeded demo's
+  intentionally historical timestamp remained deterministic; the installed wheel independently
+  validated a freshly issued capsule for the same accepted genome, digest
+  `49234f1520e01c5a7336175fb821608d908bf1b3f981475c519ba03bf780a7ea`, without weakening evidence
+  freshness. Retained log and archive hashes were independently recomputed after publication.
 
 No SLOForge child process or fault configuration remained after the runs. No cloud resource,
 external deployment, paid synthesis call, privileged probe, or production traffic mutation occurred.
