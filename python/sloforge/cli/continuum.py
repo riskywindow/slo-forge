@@ -1126,6 +1126,7 @@ def chaos_command(
             "gateway_watermark_unchanged": result.invariants.rollback_preserved_gateway_watermark,
         },
     )
+    shutil.rmtree(output / "work")
 
 
 @continuum_app.command("benchmark")

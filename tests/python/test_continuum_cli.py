@@ -448,3 +448,23 @@ def test_flagship_cli_migrate_verify_compatibility_and_fork(tmp_path: Path) -> N
         ],
     )
     assert bad_conversion.exit_code != 0
+
+
+def test_chaos_cli_removes_terminal_coordinator_state(tmp_path: Path) -> None:
+    root = Path(__file__).parents[2]
+    output = tmp_path / "fault"
+    result = runner.invoke(
+        app,
+        [
+            "continuum",
+            "chaos",
+            "--scenario",
+            str(root / "scenarios/continuum/failure/destination-crash-before-commit.yaml"),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (output / "fault-manifest.json").is_file()
+    assert not (output / "work").exists()
