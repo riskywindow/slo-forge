@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import random
 import stat
 import statistics
 import zipfile
@@ -66,8 +67,12 @@ _MAXIMUM_RUNTIME_BUNDLE_ENTRIES = 4_096
 _MAXIMUM_RUNTIME_BUNDLE_BYTES = 64 * 1024 * 1024
 _MAXIMUM_STRUCTURED_EVIDENCE_BYTES = 16 * 1024 * 1024
 _MAXIMUM_BENCHMARK_SAMPLES = 10_000
+_MAXIMUM_QUALITY_CASES = 10_000
+_MAXIMUM_QUALITY_TOKENS_PER_CASE = 65_536
 _MAXIMUM_BOOTSTRAP_ROUNDS = 100_000
 _MAXIMUM_BOOTSTRAP_WORK = 10_000_000
+_MAXIMUM_SEED = (1 << 64) - 1
+_MAXIMUM_RESOURCE_VALUE = (1 << 63) - 1
 _ISSUERS_BY_CLASS = {
     EvidenceClass.BUILD: frozenset({EvidenceIssuer.TRUSTED_VALIDATOR, EvidenceIssuer.SANDBOX}),
     EvidenceClass.SEMANTIC: frozenset(
@@ -326,23 +331,55 @@ def _validate_quality_artifact(path: Path) -> str | None:
         if path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES:
             return "quality evidence exceeds the trusted parsing bound"
         document = json.loads(path.read_text(encoding="utf-8"))
+        if document.get("schema_version") != "1.0.0":
+            return "quality evidence uses an unsupported schema version"
         cases = document["cases"]
-        if not isinstance(cases, list) or not cases:
+        if not isinstance(cases, list) or not 1 <= len(cases) <= _MAXIMUM_QUALITY_CASES:
             return "quality evidence has no replayable cases"
         exact = 0
         for case in cases:
             if not isinstance(case, dict):
                 return "quality case is not an object"
-            reproduced = bool(case.get("expected") == case.get("observed"))
-            if case.get("exact_match") is not reproduced:
+            expected = case.get("expected")
+            observed_value = case.get("observed")
+            if (
+                not isinstance(expected, list)
+                or not isinstance(observed_value, list)
+                or len(expected) > _MAXIMUM_QUALITY_TOKENS_PER_CASE
+                or len(observed_value) > _MAXIMUM_QUALITY_TOKENS_PER_CASE
+                or any(
+                    not isinstance(token, int)
+                    or isinstance(token, bool)
+                    or not 0 <= token <= _MAXIMUM_SEED
+                    for token in (*expected, *observed_value)
+                )
+            ):
+                return "quality case token sequences are outside the bounded uint64 domain"
+            reproduced = expected == observed_value
+            if (
+                not isinstance(case.get("exact_match"), bool)
+                or case.get("exact_match") is not reproduced
+            ):
                 return "quality case exact-match flag is inconsistent"
             exact += reproduced
         observed = exact / len(cases)
+        threshold = document["threshold"]
+        declared_observed = document["observed"]
+        if (
+            not isinstance(threshold, (int, float))
+            or isinstance(threshold, bool)
+            or not math.isfinite(float(threshold))
+            or not 0.0 <= float(threshold) <= 1.0
+            or not isinstance(declared_observed, (int, float))
+            or isinstance(declared_observed, bool)
+            or not math.isfinite(float(declared_observed))
+        ):
+            return "quality threshold and observed value must be finite probabilities"
         if document.get("case_count") != len(cases) or not math.isclose(
-            float(document["observed"]), observed, rel_tol=0.0, abs_tol=0.0
+            float(declared_observed), observed, rel_tol=0.0, abs_tol=0.0
         ):
             return "quality summary is not derived from its cases"
-        if document.get("passed") is not True or observed < float(document["threshold"]):
+        if document.get("passed") is not True or observed < float(threshold):
             return "quality evidence does not satisfy its declared threshold"
     except (KeyError, OSError, TypeError, ValueError):
         return "quality evidence is not a valid replayable document"
@@ -354,68 +391,109 @@ def _validate_resource_artifact(path: Path, *, runtime_bundle_bytes: int | None)
         if path.stat().st_size > _MAXIMUM_STRUCTURED_EVIDENCE_BYTES:
             return "resource evidence exceeds the trusted parsing bound"
         document = json.loads(path.read_text(encoding="utf-8"))
+        if document.get("schema_version") != "1.1.0":
+            return "resource evidence uses an unsupported schema version"
+        bounded_integer_fields = (
+            "maximum_prompt_tokens",
+            "maximum_generated_tokens",
+            "maximum_output_events_per_request",
+            "persistent_state_bytes_per_request",
+            "runtime_queue_depth",
+            "bounded_request_bytes",
+            "bounded_queue_bytes",
+            "genome_declared_peak_host_bytes",
+            "interpreter_and_model_reserve_bytes",
+            "runtime_bundle_bytes",
+            "single_runtime_peak_bytes",
+            "champion_challenger_coexistence_bytes",
+            "capacity_bytes",
+            "usable_capacity_bytes",
+            "reference_state_bytes_per_request",
+            "genome_state_bytes_per_request",
+            "state_allocator_page_bytes",
+            "state_allocator_reserved_bytes_per_request",
+            "state_allocator_total_bytes",
+            "maximum_processes",
+        )
+        if any(
+            not isinstance(document.get(field), int)
+            or isinstance(document.get(field), bool)
+            or not 0 <= document[field] <= _MAXIMUM_RESOURCE_VALUE
+            for field in bounded_integer_fields
+        ):
+            return "resource evidence contains an out-of-domain integer bound"
+        if (
+            not 1 <= document["maximum_prompt_tokens"] <= 1_048_576
+            or not 1 <= document["maximum_generated_tokens"] <= 65_536
+            or not 1 <= document["maximum_output_events_per_request"] <= 65_537
+            or not 1 <= document["runtime_queue_depth"] <= 65_536
+            or document["state_allocator_page_bytes"] <= 0
+            or document["runtime_bundle_bytes"] <= 0
+            or document["capacity_bytes"] <= 0
+            or document["maximum_processes"] != 2
+        ):
+            return "resource evidence exceeds the supported runtime resource domain"
+        safety_margin = document.get("safety_margin_fraction")
+        if (
+            not isinstance(safety_margin, (int, float))
+            or isinstance(safety_margin, bool)
+            or not math.isfinite(float(safety_margin))
+            or not 0.0 <= float(safety_margin) < 1.0
+        ):
+            return "resource safety margin must be a finite fraction in [0, 1)"
         request_bytes = (
-            (int(document["maximum_prompt_tokens"]) + int(document["maximum_generated_tokens"])) * 8
-            + int(document["maximum_output_events_per_request"]) * 128
-            + int(document["persistent_state_bytes_per_request"])
+            (document["maximum_prompt_tokens"] + document["maximum_generated_tokens"]) * 8
+            + document["maximum_output_events_per_request"] * 128
+            + document["persistent_state_bytes_per_request"]
             + 512
         )
-        queue_bytes = int(document["runtime_queue_depth"]) * request_bytes
+        queue_bytes = document["runtime_queue_depth"] * request_bytes
         single = max(
-            int(document["genome_declared_peak_host_bytes"]),
-            int(document["interpreter_and_model_reserve_bytes"])
+            document["genome_declared_peak_host_bytes"],
+            document["interpreter_and_model_reserve_bytes"]
             + queue_bytes
-            + int(document["runtime_bundle_bytes"]),
+            + document["runtime_bundle_bytes"],
         )
         coexistence = single * 2
-        usable = int(
-            int(document["capacity_bytes"]) * (1.0 - float(document["safety_margin_fraction"]))
+        usable = int(document["capacity_bytes"] * (1.0 - float(safety_margin)))
+        allocator_layout = document.get("state_allocator_layout")
+        page_bytes = document["state_allocator_page_bytes"]
+        allocator_request_bytes = document["genome_state_bytes_per_request"]
+        if allocator_layout == "paged":
+            reserved = ((allocator_request_bytes + page_bytes - 1) // page_bytes) * page_bytes
+        elif allocator_layout == "contiguous":
+            reserved = allocator_request_bytes
+        else:
+            reserved = -1
+        layout_match = document.get("genome_state_layouts") == [allocator_layout]
+        bound_match = document["reference_state_bytes_per_request"] == allocator_request_bytes
+        capacity_valid = (
+            page_bytes > 0
+            and page_bytes & (page_bytes - 1) == 0
+            and document["state_allocator_total_bytes"]
+            >= document["runtime_queue_depth"] * reserved
         )
-        allocator_valid = True
-        if document.get("schema_version") == "1.1.0":
-            allocator_layout = str(document["state_allocator_layout"])
-            page_bytes = int(document["state_allocator_page_bytes"])
-            allocator_request_bytes = int(document["genome_state_bytes_per_request"])
-            if allocator_layout == "paged":
-                reserved = ((allocator_request_bytes + page_bytes - 1) // page_bytes) * page_bytes
-            elif allocator_layout == "contiguous":
-                reserved = allocator_request_bytes
-            else:
-                reserved = -1
-            layout_match = document["genome_state_layouts"] == [allocator_layout]
-            bound_match = (
-                int(document["reference_state_bytes_per_request"])
-                == allocator_request_bytes
-                == int(document["state_allocator_reserved_bytes_per_request"])
-                if allocator_layout == "contiguous"
-                else int(document["reference_state_bytes_per_request"]) == allocator_request_bytes
-            )
-            capacity_valid = (
-                page_bytes > 0
-                and page_bytes & (page_bytes - 1) == 0
-                and int(document["state_allocator_total_bytes"])
-                >= int(document["runtime_queue_depth"]) * reserved
-            )
-            allocator_valid = (
-                int(document["persistent_state_bytes_per_request"]) == reserved
-                and int(document["state_allocator_reserved_bytes_per_request"]) == reserved
-                and layout_match
-                and bound_match
-                and capacity_valid
-                and document["state_allocator_layout_matches_genome"] is layout_match
-                and document["state_allocator_bound_matches_genome"] is bound_match
-                and document["state_allocator_capacity_valid"] is capacity_valid
-            )
+        allocator_valid = (
+            reserved >= 0
+            and document["persistent_state_bytes_per_request"] == reserved
+            and document["state_allocator_reserved_bytes_per_request"] == reserved
+            and layout_match
+            and bound_match
+            and capacity_valid
+            and document.get("state_allocator_layout_matches_genome") is layout_match
+            and document.get("state_allocator_bound_matches_genome") is bound_match
+            and document.get("state_allocator_capacity_valid") is capacity_valid
+        )
         passed = usable >= coexistence and allocator_valid
         if (
-            int(document["bounded_request_bytes"]) != request_bytes
-            or int(document["bounded_queue_bytes"]) != queue_bytes
-            or int(document["single_runtime_peak_bytes"]) != single
-            or int(document["champion_challenger_coexistence_bytes"]) != coexistence
-            or int(document["usable_capacity_bytes"]) != usable
+            document["bounded_request_bytes"] != request_bytes
+            or document["bounded_queue_bytes"] != queue_bytes
+            or document["single_runtime_peak_bytes"] != single
+            or document["champion_challenger_coexistence_bytes"] != coexistence
+            or document["usable_capacity_bytes"] != usable
             or (
                 runtime_bundle_bytes is not None
-                and int(document["runtime_bundle_bytes"]) != runtime_bundle_bytes
+                and document["runtime_bundle_bytes"] != runtime_bundle_bytes
             )
             or document.get("passed") is not passed
         ):
@@ -571,9 +649,17 @@ def _validate_benchmark(
     try:
         if not isinstance(execution_order, list):
             raise TypeError("execution order must be a list")
-        observed_execution = [
-            (str(item["alternative"]), int(item["trial"])) for item in execution_order
-        ]
+        observed_execution = []
+        for item in execution_order:
+            if not isinstance(item, dict):
+                raise TypeError("execution entry must be an object")
+            alternative = item["alternative"]
+            trial = item["trial"]
+            if alternative not in {"baseline", "candidate"} or (
+                not isinstance(trial, int) or isinstance(trial, bool) or trial < 0
+            ):
+                raise ValueError("execution entry is outside the typed domain")
+            observed_execution.append((alternative, trial))
     except (KeyError, TypeError, ValueError):
         observed_execution = []
     if (
@@ -581,6 +667,31 @@ def _validate_benchmark(
         or set(observed_execution) != expected_execution
     ):
         mismatches.append("recorded randomized execution order")
+    try:
+        run_order_algorithm = definition["run_order_algorithm"]
+        run_order_seed = definition["run_order_seed"]
+        warmup_iterations = definition["warmup_iterations"]
+        if run_order_algorithm != "python-random-v1":
+            raise ValueError("unsupported run-order algorithm")
+        if (
+            not isinstance(run_order_seed, int)
+            or isinstance(run_order_seed, bool)
+            or not 0 <= run_order_seed <= _MAXIMUM_SEED
+            or not isinstance(warmup_iterations, int)
+            or isinstance(warmup_iterations, bool)
+            or warmup_iterations != benchmark.warmup_iterations
+        ):
+            raise ValueError("run-order seed or warmup policy is invalid")
+        reconstructed_execution = [
+            (alternative, trial)
+            for alternative in ("baseline", "candidate")
+            for trial in sorted(candidate_trials)
+        ]
+        random.Random(run_order_seed).shuffle(reconstructed_execution)
+        if reconstructed_execution != observed_execution:
+            raise ValueError("recorded order does not match its deterministic seed")
+    except (KeyError, TypeError, ValueError):
+        mismatches.append("deterministic run-order reconstruction and warmup binding")
     combined_samples = tuple(("baseline", sample) for sample in baseline_samples.samples) + tuple(
         ("candidate", sample) for sample in samples.samples
     )
@@ -629,11 +740,20 @@ def _validate_benchmark(
     ):
         mismatches.append("reported effect size")
     try:
-        bootstrap_rounds = int(definition["bootstrap_rounds"])
-        confidence = float(definition["confidence"])
-        statistical_seed = int(definition["statistical_seed"])
+        bootstrap_rounds = definition["bootstrap_rounds"]
+        confidence = definition["confidence"]
+        statistical_seed = definition["statistical_seed"]
         if (
-            bootstrap_rounds > _MAXIMUM_BOOTSTRAP_ROUNDS
+            not isinstance(bootstrap_rounds, int)
+            or isinstance(bootstrap_rounds, bool)
+            or not isinstance(statistical_seed, int)
+            or isinstance(statistical_seed, bool)
+            or not isinstance(confidence, (int, float))
+            or isinstance(confidence, bool)
+            or not 1 <= bootstrap_rounds <= _MAXIMUM_BOOTSTRAP_ROUNDS
+            or not 0 <= statistical_seed <= _MAXIMUM_SEED
+            or not math.isfinite(float(confidence))
+            or not 0.0 < float(confidence) < 1.0
             or bootstrap_rounds * len(samples.samples) > _MAXIMUM_BOOTSTRAP_WORK
         ):
             raise ValueError("bootstrap work exceeds the trusted validation bound")
@@ -641,7 +761,7 @@ def _validate_benchmark(
             tuple(sample.value for sample in samples.samples),
             seed=statistical_seed,
             rounds=bootstrap_rounds,
-            confidence=confidence,
+            confidence=float(confidence),
         )
     except (KeyError, TypeError, ValueError):
         expected_low = expected_high = math.nan

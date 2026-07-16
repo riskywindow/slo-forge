@@ -20,7 +20,8 @@ def _load_runtime(bundle_root: Path) -> ModuleType:
         raise RuntimeError("candidate runtime module could not be loaded")
     module = importlib.util.module_from_spec(spec)
     sys.path.insert(0, str(bundle_root))
-    spec.loader.exec_module(module)
+    code = compile(runtime_path.read_bytes(), str(runtime_path), "exec", dont_inherit=True)
+    exec(code, module.__dict__)
     return module
 
 

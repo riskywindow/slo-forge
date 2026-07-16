@@ -23,7 +23,11 @@ def _load_module(package: LoadedReferencePackage) -> ModuleType:
     if specification is None or specification.loader is None:
         raise RuntimeError(f"cannot load reference module at {path}")
     module = importlib.util.module_from_spec(specification)
-    specification.loader.exec_module(module)
+    # The package identity binds the declared source, not interpreter caches.
+    # Compile those exact source bytes so a timestamp-valid adjacent .pyc can
+    # never replace the inspected program.
+    code = compile(path.read_bytes(), str(path), "exec", dont_inherit=True)
+    exec(code, module.__dict__)
     return module
 
 

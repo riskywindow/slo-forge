@@ -26,6 +26,8 @@ class DecodeResult:
 
 
 def _load_source(path: Path, identity: str) -> ModuleType:
+    """Compile the declared source bytes directly; never consume adjacent bytecode caches."""
+
     if not path.is_file():
         raise FileNotFoundError(f"generated runtime source is missing: {path}")
     specification = importlib.util.spec_from_file_location(identity, path)
@@ -38,7 +40,9 @@ def _load_source(path: Path, identity: str) -> ModuleType:
         sys.dont_write_bytecode = True
         sys.path.insert(0, package_root)
         try:
-            specification.loader.exec_module(module)
+            source = path.read_bytes()
+            code = compile(source, str(path), "exec", dont_inherit=True)
+            exec(code, module.__dict__)
         finally:
             if sys.path[0] == package_root:
                 sys.path.pop(0)
