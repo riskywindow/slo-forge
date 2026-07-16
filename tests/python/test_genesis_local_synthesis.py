@@ -84,9 +84,7 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
         (accepted_directory / "generated_runtime/runtime_config.json").read_text(encoding="utf-8")
     )
     baseline_runtime_config = json.loads(
-        (run.output_directory / "generated_runtime/runtime_config.json").read_text(
-            encoding="utf-8"
-        )
+        (run.output_directory / "generated_runtime/runtime_config.json").read_text(encoding="utf-8")
     )
     deployment_manifest = json.loads(
         (accepted_directory / "generated_runtime/deployment_manifest.json").read_text(

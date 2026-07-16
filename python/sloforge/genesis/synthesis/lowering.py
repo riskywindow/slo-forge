@@ -60,9 +60,7 @@ def _batching_delta(
         raise ValueError("cancel_check_before_emit must be Boolean text")
     safe = parameters["cancel_check_before_emit"] == "true"
     expected_policy = "deadline_cancel_batch" if safe else "deadline_batch"
-    existing_policy = baseline.request.node.extensions.root.get(
-        "sloforge.dev/synthesized-policy"
-    )
+    existing_policy = baseline.request.node.extensions.root.get("sloforge.dev/synthesized-policy")
     if (
         baseline.request.queue_discipline is QueueDiscipline.EARLIEST_DEADLINE
         and baseline.request.cancellation_behavior

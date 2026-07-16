@@ -345,8 +345,7 @@ def _materialize_candidate_runtime(
     )
     if (
         genome.request.queue_discipline.value != "earliest_deadline"
-        or genome.request.cancellation_behavior.value
-        != ("immediate" if safe else "safe_point")
+        or genome.request.cancellation_behavior.value != ("immediate" if safe else "safe_point")
         or genome.serving.decode_scheduling.value != "slo_slack"
         or policy_record != serving_policy_record
         or not isinstance(policy_record, dict)
