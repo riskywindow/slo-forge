@@ -1,14 +1,14 @@
 # SLOForge Helix: H3 and H10
 
-## H3: not_exercised
+## H3: not_supported
 
-Comparative sample efficiency across four training algorithms.
+Comparative sample-budget behavior of four objectives on one categorical CPU reference fixture.
 
-- Observation: The flagship exercised branch-relative optimization only.
-- Limitation: A controlled multi-algorithm learning-curve experiment is absent.
-- Artifact: `raw/flagship/seed-41/summary.json`
-- Artifact: `raw/flagship/seed-73/summary.json`
-- Artifact: `raw/flagship/seed-113/summary.json`
+- Observation: At 8 examples, mean targeted success was 0.778646 for successful-branch distillation, 0.802083 for pairwise preference, 0.328125 for group-relative, and 0.348958 for branch-relative optimization.
+- Observation: The paired campaign decision rule classified H3 as not_supported.
+- Limitation: Training examples are controlled synthetic branch-provenance samples, not GPU-hour-normalized exact-state flagship trajectories.
+- Limitation: This reference result does not establish comparative performance for neural policies.
+- Artifact: `raw/campaigns/h3-training-algorithms/campaign.json`
 
 ## H10: partial
 

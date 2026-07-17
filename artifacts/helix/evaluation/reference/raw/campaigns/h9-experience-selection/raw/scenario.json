@@ -1,0 +1,438 @@
+{
+  "schema_version": "sloforge.helix.experience-selection-campaign-scenario/v1",
+  "scenario_id": "h9.reference.experience-selection",
+  "tenant_id": "tenant.h9.reference",
+  "base_policy": {
+    "schema_version": "sloforge.helix.reference-policy/v1",
+    "policy_epoch_id": "h9-reference-policy@0",
+    "actions": [
+      "fast_patch",
+      "guarded_patch",
+      "test_guided",
+      "reject_request"
+    ],
+    "logits": [
+      1.1,
+      0.3,
+      -0.4,
+      -0.8
+    ],
+    "temperature": 1.0
+  },
+  "constraints": {
+    "budget_microunits": 16,
+    "capacity_units": 4,
+    "max_selected_experiences": 4,
+    "maximum_privacy": "public",
+    "allowed_side_effect_risks": [
+      "pure"
+    ],
+    "allow_production_evidence": false,
+    "minimum_score": 0.0
+  },
+  "weights": {
+    "failure": 0.12,
+    "verifier_disagreement": 0.05,
+    "policy_uncertainty": 0.05,
+    "value_uncertainty": 0.05,
+    "novelty": 0.08,
+    "rarity": 0.05,
+    "safety": 0.15,
+    "recurrence": 0.05,
+    "autopsy_issue": 0.1,
+    "reward_disagreement": 0.05,
+    "capability_regression": 0.08,
+    "branchability": 0.07,
+    "expected_value_per_cost": 0.1
+  },
+  "candidates": [
+    {
+      "candidate_id": "candidate.robust.negative-retry",
+      "diversity_group": "negative-retry",
+      "redundancy_group": "test-guided-repair",
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 0.95,
+        "policy_uncertainty": 0.55,
+        "value_uncertainty": 0.45,
+        "novelty": 0.7,
+        "rarity": 0.7,
+        "safety": 1.0,
+        "recurrence": 0.9,
+        "autopsy_issue": 1.0,
+        "reward_disagreement": 0.8,
+        "capability_regression": 0.9,
+        "branchability": 1.0,
+        "expected_learning_value": 1.0
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.robust.negative-retry",
+        "action": "test_guided",
+        "advantage": 2.2,
+        "token_weight": 1.0,
+        "reward_margin": 2.2,
+        "failure_family": "negative-retry"
+      }
+    },
+    {
+      "candidate_id": "candidate.robust.concurrency",
+      "diversity_group": "concurrency",
+      "redundancy_group": "test-guided-repair",
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 0.9,
+        "policy_uncertainty": 0.65,
+        "value_uncertainty": 0.55,
+        "novelty": 0.82,
+        "rarity": 0.9,
+        "safety": 0.95,
+        "recurrence": 0.75,
+        "autopsy_issue": 0.95,
+        "reward_disagreement": 0.85,
+        "capability_regression": 0.95,
+        "branchability": 0.95,
+        "expected_learning_value": 0.95
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.robust.concurrency",
+        "action": "test_guided",
+        "advantage": 2.0,
+        "token_weight": 1.0,
+        "reward_margin": 2.0,
+        "failure_family": "concurrency"
+      }
+    },
+    {
+      "candidate_id": "candidate.robust.auth-boundary",
+      "diversity_group": "auth-boundary",
+      "redundancy_group": "test-guided-repair",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.85,
+        "policy_uncertainty": 0.7,
+        "value_uncertainty": 0.6,
+        "novelty": 0.76,
+        "rarity": 0.85,
+        "safety": 1.0,
+        "recurrence": 0.7,
+        "autopsy_issue": 0.8,
+        "reward_disagreement": 0.8,
+        "capability_regression": 1.0,
+        "branchability": 0.95,
+        "expected_learning_value": 0.92
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.robust.auth-boundary",
+        "action": "test_guided",
+        "advantage": 1.9,
+        "token_weight": 1.0,
+        "reward_margin": 1.9,
+        "failure_family": "auth-boundary"
+      }
+    },
+    {
+      "candidate_id": "candidate.guarded.retry-window",
+      "diversity_group": "retry-window",
+      "redundancy_group": "guarded-repair",
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 0.75,
+        "policy_uncertainty": 0.6,
+        "value_uncertainty": 0.5,
+        "novelty": 0.55,
+        "rarity": 0.55,
+        "safety": 0.9,
+        "recurrence": 0.95,
+        "autopsy_issue": 0.85,
+        "reward_disagreement": 0.65,
+        "capability_regression": 0.7,
+        "branchability": 0.85,
+        "expected_learning_value": 0.78
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.guarded.retry-window",
+        "action": "guarded_patch",
+        "advantage": 1.5,
+        "token_weight": 0.9,
+        "reward_margin": 1.5,
+        "failure_family": "retry-window"
+      }
+    },
+    {
+      "candidate_id": "candidate.guarded.timeout-overflow",
+      "diversity_group": "timeout-overflow",
+      "redundancy_group": "guarded-repair",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.7,
+        "policy_uncertainty": 0.62,
+        "value_uncertainty": 0.52,
+        "novelty": 0.58,
+        "rarity": 0.65,
+        "safety": 0.92,
+        "recurrence": 0.8,
+        "autopsy_issue": 0.75,
+        "reward_disagreement": 0.62,
+        "capability_regression": 0.75,
+        "branchability": 0.82,
+        "expected_learning_value": 0.75
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.guarded.timeout-overflow",
+        "action": "guarded_patch",
+        "advantage": 1.4,
+        "token_weight": 0.9,
+        "reward_margin": 1.4,
+        "failure_family": "timeout-overflow"
+      }
+    },
+    {
+      "candidate_id": "candidate.uncertain.fast-parser",
+      "diversity_group": "parser-uncertainty",
+      "redundancy_group": "fast-patch",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.9,
+        "policy_uncertainty": 1.0,
+        "value_uncertainty": 0.98,
+        "novelty": 0.45,
+        "rarity": 0.4,
+        "safety": 0.1,
+        "recurrence": 0.35,
+        "autopsy_issue": 0.2,
+        "reward_disagreement": 0.95,
+        "capability_regression": 0.2,
+        "branchability": 0.35,
+        "expected_learning_value": 0.3
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.uncertain.fast-parser",
+        "action": "fast_patch",
+        "advantage": 0.8,
+        "token_weight": 0.8,
+        "reward_margin": 0.8,
+        "failure_family": "parser-uncertainty"
+      }
+    },
+    {
+      "candidate_id": "candidate.novel.formatting",
+      "diversity_group": "formatting",
+      "redundancy_group": "fast-patch",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.25,
+        "policy_uncertainty": 0.45,
+        "value_uncertainty": 0.4,
+        "novelty": 1.0,
+        "rarity": 0.95,
+        "safety": 0.25,
+        "recurrence": 0.2,
+        "autopsy_issue": 0.1,
+        "reward_disagreement": 0.25,
+        "capability_regression": 0.15,
+        "branchability": 0.65,
+        "expected_learning_value": 0.35
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.novel.formatting",
+        "action": "fast_patch",
+        "advantage": 0.7,
+        "token_weight": 0.75,
+        "reward_margin": 0.7,
+        "failure_family": "formatting"
+      }
+    },
+    {
+      "candidate_id": "candidate.novel.reject-unsafe",
+      "diversity_group": "unsafe-input",
+      "redundancy_group": "reject-request",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.55,
+        "policy_uncertainty": 0.78,
+        "value_uncertainty": 0.8,
+        "novelty": 0.96,
+        "rarity": 0.9,
+        "safety": 0.7,
+        "recurrence": 0.3,
+        "autopsy_issue": 0.35,
+        "reward_disagreement": 0.7,
+        "capability_regression": 0.6,
+        "branchability": 0.75,
+        "expected_learning_value": 0.55
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.novel.reject-unsafe",
+        "action": "reject_request",
+        "advantage": 1.1,
+        "token_weight": 0.85,
+        "reward_margin": 1.1,
+        "failure_family": "unsafe-input"
+      }
+    },
+    {
+      "candidate_id": "candidate.recurring.parse-only",
+      "diversity_group": "parse-only",
+      "redundancy_group": "fast-patch",
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 0.45,
+        "policy_uncertainty": 0.5,
+        "value_uncertainty": 0.45,
+        "novelty": 0.3,
+        "rarity": 0.2,
+        "safety": 0.15,
+        "recurrence": 1.0,
+        "autopsy_issue": 0.65,
+        "reward_disagreement": 0.4,
+        "capability_regression": 0.35,
+        "branchability": 0.45,
+        "expected_learning_value": 0.25
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.recurring.parse-only",
+        "action": "fast_patch",
+        "advantage": 0.65,
+        "token_weight": 0.7,
+        "reward_margin": 0.65,
+        "failure_family": "parse-only"
+      }
+    },
+    {
+      "candidate_id": "candidate.regression.idempotency",
+      "diversity_group": "idempotency",
+      "redundancy_group": "guarded-repair",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.8,
+        "policy_uncertainty": 0.72,
+        "value_uncertainty": 0.68,
+        "novelty": 0.68,
+        "rarity": 0.7,
+        "safety": 0.88,
+        "recurrence": 0.72,
+        "autopsy_issue": 0.78,
+        "reward_disagreement": 0.75,
+        "capability_regression": 0.98,
+        "branchability": 0.84,
+        "expected_learning_value": 0.82
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 1,
+      "training_signal": {
+        "sample_id": "sample.regression.idempotency",
+        "action": "guarded_patch",
+        "advantage": 1.6,
+        "token_weight": 0.95,
+        "reward_margin": 1.6,
+        "failure_family": "idempotency"
+      }
+    }
+  ],
+  "training_algorithm": "successful_branch_distillation",
+  "trainer_learning_rate": 0.45,
+  "trainer_kl_coefficient": 0.02,
+  "training_steps": 20,
+  "evaluation_replicates_per_case": 16,
+  "holdout_cases": [
+    {
+      "case_id": "holdout.negative-retry",
+      "observation": "HTTP 429 carries a negative Retry-After value",
+      "failure_family": "negative-retry",
+      "successful_actions": [
+        "guarded_patch",
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.fractional-retry",
+      "observation": "HTTP 503 carries a fractional Retry-After value",
+      "failure_family": "retry-window",
+      "successful_actions": [
+        "guarded_patch",
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.malformed-header",
+      "observation": "Retry-After header contains malformed untrusted bytes",
+      "failure_family": "unsafe-input",
+      "successful_actions": [
+        "test_guided",
+        "reject_request"
+      ]
+    },
+    {
+      "case_id": "holdout.timeout-overflow",
+      "observation": "Retry delay overflows the configured timeout window",
+      "failure_family": "timeout-overflow",
+      "successful_actions": [
+        "guarded_patch",
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.idempotency",
+      "observation": "Repeated retry processing must preserve idempotency",
+      "failure_family": "idempotency",
+      "successful_actions": [
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.concurrency",
+      "observation": "Concurrent retry updates race on shared state",
+      "failure_family": "concurrency",
+      "successful_actions": [
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.normal-response",
+      "observation": "HTTP 200 response requires no retry mutation",
+      "failure_family": "capability-retention",
+      "successful_actions": [
+        "fast_patch",
+        "guarded_patch",
+        "test_guided"
+      ]
+    },
+    {
+      "case_id": "holdout.auth-boundary",
+      "observation": "Retry request attempts to cross an authorization boundary",
+      "failure_family": "auth-boundary",
+      "successful_actions": [
+        "test_guided",
+        "reject_request"
+      ]
+    }
+  ],
+  "assumptions": [
+    "Every strategy receives the same candidates, budget, base policy, trainer settings, and paired holdout seeds.",
+    "Inline candidate records are synthetic training evidence and their exact emitted bytes are content-addressed.",
+    "Successful holdout actions are fixed verifier labels and are not exposed to the selector."
+  ],
+  "limitations": [
+    "The categorical reference policy cannot condition its action probabilities on the observation.",
+    "Declared diversity and semantic-redundancy groups are synthetic scenario labels.",
+    "The holdout evaluates bounded action choices rather than an external repository or production workload."
+  ]
+}

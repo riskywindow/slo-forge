@@ -51,7 +51,7 @@ The provisional workstream table above records the launch state. It is
 superseded by this verified closure record.
 
 - Final verified implementation source commit:
-  `de89932164a5ecc8a73e5fc2c309796a34f4b8b4`.
+  `b0d86eb0afd52f18b291206f791bf31209f5cbb5`.
 - Root integration commit: `5450fadd482be4804c420b4d960554d7a765fc58`.
 - All transactional IR, environment/effect, capture/branch/replay,
   rollout/reward/credit/training, staleness, experience selection, scheduler,
@@ -60,7 +60,7 @@ superseded by this verified closure record.
 - `make check` passed with 1,082 Python tests and six declared optional
   no-Torch/GPU skips, strict Ruff/mypy, all warning-denied Rust checks/tests,
   37 UI tests with one fixture skip, and the production UI build.
-- `make helix-check` passed with 155 Python tests, strict Ruff/mypy, Rust
+- `make helix-check` passed with 188 Python tests, strict Ruff/mypy, Rust
   format/Clippy/tests, and five Rust/Python conformance tests.
 - Every Helix demo/evaluation target passed except Docker execution, whose
   capability check ran and recorded `unexercised: Docker daemon unavailable`.
@@ -71,9 +71,10 @@ superseded by this verified closure record.
   promoted after trusted gates; one incompatible active session stayed pinned;
   and rollback restored the champion.
 - The three-seed evaluation reports a local synthetic success change from
-  0.6250 to 0.7917. It labels H1/H2/H5/H10 partial, H7 supported only within
-  local scope, and H3/H4/H6/H8/H9 not exercised. The five scheduler policies
-  tied on the supplied workload; no scheduling win is claimed.
+  0.6250 to 0.7917. It labels H1/H2/H5/H8/H10 partial, H3 not supported, H9
+  inconclusive, and H4/H6/H7 supported only within local deterministic scopes.
+  The five scheduler policies tied on the supplied workload; no scheduling win
+  is claimed.
 - No GPU, PyTorch/PEFT, vLLM/SGLang, multi-node, cloud, external API,
   production capture, external side effect, or live production promotion was
   authorized or exercised. Adapters and capability checks fail closed.
@@ -94,6 +95,24 @@ superseded by this verified closure record.
 | Experience selection and resource compiler | root + experience/resource lane | complete and synthetic exercised | all selectors; five scheduler policies × three seeds; hard SLO tests | `5450fad` |
 | Learning transaction, promotion and active sessions | root + promotion/security lanes | complete and exercised locally | eight-artifact gate; rejection; shadow; canary; atomic promote; pin; rollback | `5450fad` |
 | Faults, evaluation, ForgeCI/Autopsy, traces, docs and reviews | root + review lanes | complete in declared scope | 16-fault campaign; three-seed evaluation; all required reports/docs; final adversarial review | `5450fad`, `de89932` |
+
+### Continued Helix empirical closure
+
+This continuation replaces the earlier "not exercised" disposition for H3,
+H4, H6, H8, and H9 with replay-validated deterministic campaigns. Root retained
+manifest and release-report ownership; implementation lanes used disjoint
+evaluation modules and tests. The reference validator distrusts campaign
+summaries, bounds reads, rejects symlinks and orphaned artifacts, replays each
+campaign, and independently reconstructs H1-H10 dispositions.
+
+| Continued task | Owner | Status | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
+|---|---|---|---|---|---|---|---|
+| H3 four-objective campaign | training-algorithm lane + root | complete; negative result retained | `helix/evaluation/training_algorithms.py`, focused test/docs | trainer, batches, credit | `make helix-training-demo` | `raw/campaigns/h3-training-algorithms/` | `bc757ea` |
+| H4 provenance/staleness campaign | staleness lane + root | complete; fail-closed local scope | `helix/evaluation/staleness_campaign.py`, focused test | staleness, policy epochs, trainer | `make helix-check` | `raw/campaigns/h4-staleness/` | `bc757ea` |
+| H6 rollout-preservation campaign | preservation/security lane + root | complete; deterministic accounting scope | `helix/evaluation/preservation.py`, scenario, focused test | Continuum, environment capsules | `make helix-resource-demo` | `raw/campaigns/h6-preservation/` | `bc757ea` |
+| H8 continual-learning campaign | continual-learning lane + root | complete; partial result | `helix/evaluation/continual_learning.py`, focused test | trainer, retention gate | `make helix-training-demo` | `raw/campaigns/h8-continual-learning/` | `bc757ea` |
+| H9 experience-selection campaign | experience-selection lane + root | complete; inconclusive result retained | `helix/evaluation/experience_selection.py`, scenario, focused test | selector, trainer, holdout | `make helix-resource-demo` | `raw/campaigns/h9-experience-selection/` | `bc757ea` |
+| Independent reference reconstruction and provenance | root + reference-validation lane | complete | `helix/evaluation/reference.py`, reference tests | all five campaigns and flagship | `make helix-evaluation` plus validator replay | `artifacts/helix/evaluation/reference/` | `bc757ea`, `b0d86eb` |
 
 Final evidence is indexed in `HELIX_FINAL_REPORT.md`. Raw artifacts are under
 `artifacts/helix/`; generated evaluations are under `reports/helix-*`.

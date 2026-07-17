@@ -1,12 +1,15 @@
 # SLOForge Helix: H4 and H7
 
-## H4: not_exercised
+## H4: supported_within_scope
 
 Fail-closed policy provenance and bounded staleness semantics.
 
-- Observation: The reference evaluation did not execute a multi-policy asynchronous staleness campaign.
-- Limitation: Source-level tests are not counted as executed evaluation evidence.
-- Limitation: Training stability under a large asynchronous optimizer was not measured.
+- Observation: The campaign executed 21 policy-version cases with 0 invalid sample acceptances.
+- Observation: 12 cases passed the staleness layer, while strict batch and trainer boundaries separately rejected mixed or unsupported old-policy evidence.
+- Limitation: The reference trainer intentionally cannot consume bounded off-policy or segmented mixed-policy evidence.
+- Limitation: The recomputed-log-probability case uses declared deterministic fixture evidence rather than recomputing a neural policy probability from token history.
+- Limitation: Training stability under a large asynchronous neural optimizer was not measured.
+- Artifact: `raw/campaigns/h4-staleness/campaign.json`
 
 ## H7: supported_within_scope
 

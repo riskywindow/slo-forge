@@ -1,14 +1,16 @@
 # SLOForge Helix final implementation report
 
-Verified on 2026-08-03 (America/Los_Angeles).
+Verified on 2026-08-09 (America/Chicago).
 
 ## Release identity and claim boundary
 
 - Baseline commit: `a3366807e879cf17615021e32606fbf77216235c`
 - Immutable baseline tag: `sloforge-helix-baseline-a336680`
 - Final verified implementation source commit:
-  `de89932164a5ecc8a73e5fc2c309796a34f4b8b4`
+  `b0d86eb0afd52f18b291206f791bf31209f5cbb5`
 - Main implementation commit: `5450fadd482be4804c420b4d960554d7a765fc58`
+- Empirical-campaign implementation commits: `bc757ea5dede2471cba663d059191e005c4d4d72`
+  through `b0d86eb0afd52f18b291206f791bf31209f5cbb5`
 - Validation class: `deterministic-local-cpu-synthetic`
 - Host: Apple Silicon macOS, 12 logical CPUs, 24 GiB RAM
 
@@ -73,8 +75,8 @@ The retained seed-41 run captured one consistent coding-agent decision boundary:
 
 | Evidence | Value |
 |---|---|
-| BranchPoint | `2765e28ed1ba4a3ca480db7a8f1fa3ab451d5db5f39dbfa117fbe8d4b29594f8` |
-| Continuum capsule | `060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d` |
+| BranchPoint | `3bd2d901c7fbfacfb696dc97a6f83e937de989f5635231ad8bd9dbe8853f470f` |
+| Continuum capsule | `7a6c46a9b67316503ec130d58d8c134e20dc86bb40e1c3c4fc21f61b84756258` |
 | Environment capsule | `9ae27338c11c2ac8ddc9afc55709936ba7a308f4aad1926d4e2df309a594e2e1` |
 | Capture artifact bytes verified | true |
 | Source resumed | true |
@@ -124,24 +126,30 @@ remain available independently of the aggregate score.
 
 Branch comparison found the first controlled divergence and emitted
 branch-relative credit evidence
-`60f8124a67eb17bc558c382e1bb592ecbb7f16008598c0a32d54a1770f38359d`.
+`0688d0dbc6c9ea4e53ec8082c0898be1c7ca25fa577602254a90ae5125a752a8`.
 Observational branches receive zero optimization credit. The evidence states
 its controlled-sibling assumptions and does not claim perfect causal
 identification. The provenance-complete training batch is
-`1634dddd376b04d420194d02895125b51d55fe7b7fe1999aae6ac9337f9b947c`
+`dc544b5650eaaf824e733c30c5e717ebf879d08bcb704636a742a31e7f23169a`
 with content hash
-`bd956cdfa0628291d25b1b4ce531446af9d9dad870e6006d75fcf271e61b43df`.
+`7ba48eadad7cbc3c853c26158fac95cb50b1cf9d4c9a84280f909d17325b77fe`.
 
 The flagship exercised deterministic branch-relative optimization. Champion
 success was 0.625. A deliberately undertrained but genuinely evaluated
 candidate reached 0.6667 and was rejected below the predeclared 0.75 quality
 threshold. The corrected challenger reached 0.7917, an absolute paired
 improvement of 0.1667 on this synthetic suite, and published checkpoint
-`91d75141151e502f58f103012f9fbb950c8c64907e8e069a4faa88523ee8aadf`.
-The required successful-branch distillation, sibling preference, group-relative,
-and branch-relative objectives and their numerical/staleness tests are present;
-only branch-relative optimization was exercised in the retained flagship, so
-no comparative sample-efficiency claim is made.
+`528f832bfcbd866bc3b1b89d35debbd7b984eba650709b1d86cff0ec95598f1a`.
+
+The H3 campaign then executed successful-branch distillation, sibling
+preference, group-relative, and branch-relative optimization over budgets 1,
+2, 4, and 8 for three deterministic seed-sensitivity cases. At eight examples,
+mean targeted success was 0.778646, 0.802083, 0.328125, and 0.348958,
+respectively. Branch-relative minus successful-distillation was -0.356771 and
+branch-relative minus pairwise preference was -0.319661 when averaged across
+the declared budgets and paired by seed. H3 is therefore **not supported** on
+this fixture. This is a categorical CPU comparison, not a GPU-hour-normalized
+neural-policy sample-efficiency result.
 
 A staged public-CLI flow independently built four samples, published batch
 `e97731dedbcc64e1945e02d00740f78a44fe028d228d3faa1c301506d3680e98`,
@@ -161,9 +169,33 @@ acceptance, recomputation, clipped importance weighting, truncation,
 resampling, priority reduction, and evaluation-only disposition. Missing
 behavior probabilities and undeclared policy mixing fail closed.
 
+The H4 campaign executed 21 version/provenance cases. Twelve were invalid for
+training and none were accepted; twelve reached the staleness boundary, while
+the batch and trainer boundaries separately rejected mixed or unsupported
+old-policy evidence. Six current/recomputed cases trained and were evaluated.
+H4 is **supported within this fail-closed reference scope**; stability of a
+large asynchronous neural optimizer remains unmeasured.
+
 The reference rollout worker is exercised. PyTorch, Genesis, vLLM, and SGLang
 adapters advertise capabilities and reject exact-state reuse when no portable
 state export exists. Queues and subprocesses are bounded and timed.
+
+## Continual learning and experience selection
+
+The H8 campaign ran three sequential tasks for each seed. One candidate per
+seed passed the retention gate and two were rejected before promotion for
+prior-capability loss. The domain-separated final audit measured zero
+recurrence for accepted repairs, but later task success remained low because
+the categorical policy has no observation representation. H8 is **partial**:
+the gate protected retention, but the campaign does not show continual-
+learning superiority or useful forward adaptation.
+
+The H9 campaign ran random, failure-only, uncertainty-only, novelty-only, and
+Helix value-aware selection through the same trainer and held-out evaluator.
+Mean measured success changes were 0.330729, 0.437500, 0.255208, 0.427083, and
+0.523438. Helix minus the predeclared random primary comparator was +0.192708,
+with the three-seed sensitivity interval [-0.088084, 0.473500]. H9 is therefore
+**inconclusive**, not a claimed win.
 
 ## Resource compiler
 
@@ -182,8 +214,17 @@ were compiled for each of three seeds. On the supplied workload every policy
 was feasible and tied: two completed work items, predicted learning value 16.0,
 41,300 cost microunits, zero preemptions, and zero lost-work ticks. Those are
 scenario predictions with raw provenance, not observed policy gains. H5 is
-therefore partial and there is no claimed scheduling win; H6 was not exercised
-because no preservation path was selected in the 15 policy/seed runs.
+therefore partial and there is no claimed scheduling win.
+
+H6 was exercised independently of the scheduler's no-preemption workload.
+Across three executed local runs per strategy, terminate/restart lost four
+tokens and one tool-work unit, environment-only restoration lost four tokens,
+model-only restoration lost one tool-work unit, and joint Continuum plus
+environment restoration lost neither. Joint restoration stored a mean 4,369
+bytes and cost 260 deterministic accounting microunits. The resume/restoration
+values are declared reference accounting ticks, not measured wall time or an
+instrumented hardware trace. H6 is **supported within this local deterministic
+scope**.
 
 ## Learning transaction, promotion, and rollback
 
@@ -196,7 +237,7 @@ partial champion publication.
 The trusted promotion gate independently rehashed eight local gate artifacts
 covering lineage, reward integrity, quality, safety, serving, compatibility,
 shadow, and canary evidence. The retained capsule digest is
-`f01301ff2423dce908141616e09cc276af2dbbd2d893e4d720fd89a02e7f1e31`.
+`1a9d15c51df4425b8c07b0aeb473c83953052c51ff20356d1960f31c9c645573`.
 The corrected challenger passed shadow and canary, became the route for a new
 eligible session, and preserved its previous champion as rollback parent.
 Continuum classified transition as recomputation-assisted. One incompatible
@@ -288,11 +329,11 @@ job remained active after validation.
 ## Evaluation results
 
 The evaluation ID is
-`95857f1fa8a42c9b6b193d9b429c9241f4aa275686687390f8302cf77e5e0e62`.
-It seals 22 top-level raw references and retains the complete 452-file raw
+`db8d73223397e48487e23652db7f1bd24229754033276f11ed18a17aa279b792`.
+It seals 27 top-level raw references and retains the complete 707-file raw
 evaluation tree. Student-t intervals summarize deterministic seed sensitivity,
-not independent population sampling. The three runs were identical, so the
-reported intervals collapse to the observed values:
+not independent population sampling. The three flagship runs were identical,
+so those intervals collapse to the observed values:
 
 | Metric | Mean | 95% sensitivity interval |
 |---|---:|---:|
@@ -307,10 +348,10 @@ was pinned three times, and rollback completed three times. The measured local
 categorical-policy decision latency was 0.008623 ms for seed 41; this is not an
 LLM serving benchmark.
 
-Hypothesis disposition is intentionally conservative: H1, H2, H5, and H10 are
-partial; H7 is supported within the local reference scope; H3, H4, H6, H8, and
-H9 were not exercised as empirical comparisons. No missing experiment is
-reported as a win.
+Hypothesis disposition is intentionally conservative: H1, H2, H5, H8, and H10
+are partial; H3 is not supported; H9 is inconclusive; and H4, H6, and H7 are
+supported only within their declared deterministic local scopes. No missing or
+negative experiment is reported as a win.
 
 ## Hardware-backed and external adapter status
 
@@ -340,17 +381,18 @@ fixtures and fail-closed capability probes.
 - Replay comparison validates captured identities and event evidence. It does
   not by itself attest that an arbitrary external engine restored memory bytes.
 - The resource compiler is forecast-based and discrete-tick. Its supplied
-  workload produced a tie, and hardware preemption/migration timing was not
-  measured.
+  scheduler workload produced a tie. The separate H6 campaign used declared
+  accounting ticks; hardware preemption/migration timing was not measured.
 - Environment capsules reconstruct declared state and services; they do not
   capture arbitrary kernel memory or undeclared external systems. Local
   filesystem isolation is not a hostile multi-tenant kernel boundary.
 - SQLite supplies durable local transactions, not distributed consensus.
   Content hashes need an independently authenticated digest registry to prove
   issuer identity.
-- H3, H4, H6, H8, and H9 need controlled empirical campaigns; the current
-  reports label them not exercised rather than inferring outcomes from unit
-  tests.
+- H3 and H9 use three non-independent deterministic sensitivity seeds on one
+  categorical-policy fixture. H3 was negative and H9 inconclusive; neither
+  establishes neural-policy or production behavior. H4, H6, and H8 likewise
+  remain bounded local campaigns rather than distributed or hardware results.
 - Docker smoke was unavailable because the daemon was not running. GPU and
   external runtime paths remain unexercised.
 
@@ -361,6 +403,11 @@ fixtures and fail-closed capability probes.
 - Flagship raw artifacts: `artifacts/helix/demo/seed-41/`
 - Evaluation: `artifacts/helix/evaluation/reference/evaluation.json`
 - Evaluation raw tree: `artifacts/helix/evaluation/reference/raw/`
+- H3 training campaign: `artifacts/helix/evaluation/reference/raw/campaigns/h3-training-algorithms/`
+- H4 staleness campaign: `artifacts/helix/evaluation/reference/raw/campaigns/h4-staleness/`
+- H6 preservation campaign: `artifacts/helix/evaluation/reference/raw/campaigns/h6-preservation/`
+- H8 continual-learning campaign: `artifacts/helix/evaluation/reference/raw/campaigns/h8-continual-learning/`
+- H9 experience-selection campaign: `artifacts/helix/evaluation/reference/raw/campaigns/h9-experience-selection/`
 - Resource demo: `artifacts/helix/resource-demo/`
 - Fault campaign: `artifacts/helix/faults/cpu-matrix/`
 - Staged CLI workflow: `artifacts/helix/cli-workflow/de89932/`
