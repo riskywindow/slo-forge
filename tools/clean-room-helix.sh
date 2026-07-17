@@ -18,6 +18,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 git -C "$repository_root" archive "$revision" | tar -x -C "$clean_root"
+printf '%s\n' "$revision" > "$clean_root/.sloforge-source-commit"
 unset PYTHONPATH PYTHONHOME VIRTUAL_ENV UV_PROJECT UV_PROJECT_ENVIRONMENT UV_WORKING_DIR
 unset CARGO_BUILD_TARGET RUSTC_WRAPPER RUSTFLAGS CARGO_ENCODED_RUSTFLAGS MAKEFLAGS MFLAGS
 unset SLOFORGE_HELIX_GPU_BUDGET_USD SLOFORGE_HELIX_TRAINING_BUDGET_USD

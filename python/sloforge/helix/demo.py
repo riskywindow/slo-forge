@@ -124,6 +124,12 @@ def _named_seed(label: str, *, lower: int = 0, span: int = 2**31) -> int:
 
 def _source_commit() -> str:
     repository = Path(__file__).resolve().parents[3]
+    marker = repository / ".sloforge-source-commit"
+    if marker.is_file() and not marker.is_symlink():
+        commit = marker.read_text(encoding="utf-8").strip()
+        if len(commit) != 40 or any(character not in "0123456789abcdef" for character in commit):
+            raise RuntimeError("Helix source marker is not a lowercase Git SHA-1")
+        return commit
     task_environment = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "LANG": "C",
