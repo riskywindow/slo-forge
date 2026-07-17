@@ -337,7 +337,16 @@ def _repository_manifest() -> dict[str, str]:
             timeout=5.0,
         ).stdout.strip()
         status = subprocess.run(
-            ("git", "status", "--porcelain", "--untracked-files=no"),
+            (
+                "git",
+                "status",
+                "--porcelain",
+                "--untracked-files=no",
+                "--",
+                ".",
+                ":(exclude)artifacts/**",
+                ":(exclude)reports/**",
+            ),
             cwd=_REPOSITORY_ROOT,
             check=True,
             capture_output=True,
@@ -345,10 +354,13 @@ def _repository_manifest() -> dict[str, str]:
             timeout=5.0,
         ).stdout
     except (OSError, subprocess.SubprocessError):
-        return {"git_commit": "unavailable", "tracked_worktree_dirty": "unavailable"}
+        return {
+            "git_commit": "unavailable",
+            "tracked_source_worktree_dirty": "unavailable",
+        }
     return {
         "git_commit": commit,
-        "tracked_worktree_dirty": str(bool(status)).lower(),
+        "tracked_source_worktree_dirty": str(bool(status)).lower(),
     }
 
 
