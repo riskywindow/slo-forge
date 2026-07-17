@@ -1,0 +1,69 @@
+{
+  "branches": [
+    {
+      "copy_on_write_new_bytes": 13575,
+      "copy_on_write_new_chunks": 213,
+      "emitted_token_ids": [
+        217
+      ],
+      "emitted_token_indices": [
+        37
+      ],
+      "incremental_manifest_id": "bb08b7b0183077575409457b9913f41ff09d478a4398137b4646707931517534",
+      "initial_next_token": 217,
+      "owner_epoch": 3,
+      "owner_id": "continuum-reference-token-major:epoch-3",
+      "runtime": {
+        "adapter_version": "continuum-adapter-a/1.0.0",
+        "layout": "paged_token_major_separate_kv",
+        "page_size_tokens": 4,
+        "runtime_name": "continuum-reference-token-major",
+        "simulated_devices": [
+          "sim-source-gpu-0",
+          "sim-source-gpu-1",
+          "sim-source-gpu-2",
+          "sim-source-gpu-3"
+        ],
+        "tensor_parallel_degree": 4
+      },
+      "session_id": "branch-a"
+    },
+    {
+      "copy_on_write_new_bytes": 13835,
+      "copy_on_write_new_chunks": 37,
+      "emitted_token_ids": [
+        217,
+        202
+      ],
+      "emitted_token_indices": [
+        37,
+        38
+      ],
+      "incremental_manifest_id": "89c6343a810d8b59a049aa9e1479d469625fbe7d7d2b4939924007e53884ecb5",
+      "initial_next_token": 217,
+      "owner_epoch": 4,
+      "owner_id": "continuum-reference-head-major:epoch-4",
+      "runtime": {
+        "adapter_version": "continuum-adapter-b/1.0.0",
+        "layout": "paged_head_major_packed_kv",
+        "page_size_tokens": 7,
+        "runtime_name": "continuum-reference-head-major",
+        "simulated_devices": [
+          "sim-destination-gpu-0",
+          "sim-destination-gpu-1"
+        ],
+        "tensor_parallel_degree": 2
+      },
+      "session_id": "branch-b"
+    }
+  ],
+  "checkpoint_bytes_deduplicated": 13315,
+  "content_addressed_checkpoint_bytes": 13315,
+  "divergence_unique_bytes": 27410,
+  "full_copy_baseline_bytes": 26630,
+  "parent_manifest_id": "07963ee12748416e061f2909cbc828dc9c7d165612655582486170f0cc679c90",
+  "parent_owner_epoch": 2,
+  "parent_session_id": "session-flagship-001",
+  "shared_checkpoint_manifest_id": "0c509951d6f9dec3eb3e0f54f18cb23bc78b78be0c9c48c3326399f50bfdd8d5",
+  "shared_chunk_count": 45
+}

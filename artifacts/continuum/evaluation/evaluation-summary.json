@@ -1,0 +1,725 @@
+{
+  "schema_version": "1.0.0",
+  "evaluation_id": "385704604314a07571752635f41961674ccbe191ba843cbe4e567073e0431037",
+  "generated_at": "2026-08-02T00:00:00Z",
+  "exact_command": "uv run --locked python -m sloforge.continuum.benchmarking --output artifacts/continuum/evaluation --seeds 101,202,303,404,505 --git-commit 8bba247b44d26e1be4475ca18058fcbc652adcf0 --initial-output-tokens 16 --delta-rounds 3,2 --resumed-tokens 3 --converter-repetitions 5 --reset",
+  "seeds": [
+    101,
+    202,
+    303,
+    404,
+    505
+  ],
+  "software": {
+    "python_version": "3.12.7",
+    "python_implementation": "CPython",
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "git_commit": "8bba247b44d26e1be4475ca18058fcbc652adcf0",
+    "continuum_version": "0.1.0",
+    "packages": [
+      {
+        "package": "numpy",
+        "version": "2.3.5"
+      },
+      {
+        "package": "pydantic",
+        "version": "2.13.4"
+      },
+      {
+        "package": "sloforge",
+        "version": "0.1.0"
+      }
+    ]
+  },
+  "hardware": {
+    "mode": "cpu_only",
+    "machine": "arm64",
+    "processor": "arm",
+    "operating_system": "Darwin 24.6.0",
+    "logical_cpu_count": 12,
+    "nvidia_smi_available": false,
+    "gpu_opt_in_enabled": false,
+    "gpu_exercised": false,
+    "rdma_exercised": false,
+    "hardware_result_claims": []
+  },
+  "adapters": [
+    {
+      "runtime": "continuum-reference-token-major",
+      "version": "1.0.0",
+      "adapter_status": "implemented_and_exercised",
+      "discovery_exercised": true,
+      "migration_exercised": true,
+      "capabilities": [
+        "capture",
+        "dirty_tracking",
+        "pre_copy",
+        "fencing",
+        "streaming"
+      ],
+      "evidence": [
+        "raw per-seed flagship artifacts"
+      ],
+      "limitation": "deterministic CPU runtime with simulated devices, not a hardware runtime"
+    },
+    {
+      "runtime": "continuum-reference-head-major",
+      "version": "1.0.0",
+      "adapter_status": "implemented_and_exercised",
+      "discovery_exercised": true,
+      "migration_exercised": true,
+      "capabilities": [
+        "import",
+        "validation",
+        "activation",
+        "fork",
+        "streaming"
+      ],
+      "evidence": [
+        "raw per-seed flagship artifacts"
+      ],
+      "limitation": "deterministic CPU runtime with simulated devices, not a hardware runtime"
+    },
+    {
+      "runtime": "pytorch",
+      "version": null,
+      "adapter_status": "partially_implemented_package_not_installed",
+      "discovery_exercised": false,
+      "migration_exercised": false,
+      "capabilities": [],
+      "evidence": [
+        "https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.state_dict",
+        "https://docs.pytorch.org/docs/main/distributed.checkpoint.html",
+        "https://docs.pytorch.org/docs/stable/distributed.tensor.html"
+      ],
+      "limitation": "version-gated public API probe only; no complete active-state migration was exercised in this CPU campaign"
+    },
+    {
+      "runtime": "genesis",
+      "version": "1.0.0",
+      "adapter_status": "partially_implemented_ready",
+      "discovery_exercised": true,
+      "migration_exercised": false,
+      "capabilities": [
+        "bounded_streaming",
+        "cancellation",
+        "generated_runtime_loading",
+        "runtime_inspection"
+      ],
+      "evidence": [
+        "python/sloforge/genesis/runtime/generator.py:GENERATED_RUNTIME_SCHEMA_VERSION",
+        "python/sloforge/genesis/runtime/generator.py:load_generated_runtime",
+        "python/sloforge/genesis/runtime/core.py:BaselineStreamingRuntime"
+      ],
+      "limitation": "version-gated public API probe only; no complete active-state migration was exercised in this CPU campaign"
+    },
+    {
+      "runtime": "vllm",
+      "version": null,
+      "adapter_status": "partially_implemented_package_not_installed",
+      "discovery_exercised": false,
+      "migration_exercised": false,
+      "capabilities": [],
+      "evidence": [
+        "https://docs.vllm.ai/en/latest/api/vllm/config/kv_transfer.html",
+        "https://docs.vllm.ai/en/latest/api/vllm/distributed/kv_transfer/kv_connector/v1/base.html",
+        "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/config/kv_transfer.py",
+        "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/distributed/kv_transfer/kv_connector/v1/base.py"
+      ],
+      "limitation": "version-gated public API probe only; no complete active-state migration was exercised in this CPU campaign"
+    },
+    {
+      "runtime": "sglang",
+      "version": null,
+      "adapter_status": "partially_implemented_package_not_installed",
+      "discovery_exercised": false,
+      "migration_exercised": false,
+      "capabilities": [],
+      "evidence": [
+        "https://docs.sglang.ai/backend/pd_disaggregation.html",
+        "https://github.com/sgl-project/sglang/blob/v0.5.12/python/sglang/srt/server_args.py",
+        "https://github.com/sgl-project/sglang/tree/v0.5.12/python/sglang/srt/disaggregation"
+      ],
+      "limitation": "version-gated public API probe only; no complete active-state migration was exercised in this CPU campaign"
+    }
+  ],
+  "per_seed": [
+    {
+      "schema_version": "sloforge.continuum.seed-measurement/v1",
+      "seed": 101,
+      "observed_flagship_wall_ns": 113982209,
+      "observed_conversion_campaign_wall_ns": 2165292,
+      "observed_canonical_conversion_median_ns": 84667,
+      "observed_direct_conversion_median_ns": 171041,
+      "observed_precopy_interruption_ns": 7471583,
+      "observed_stop_and_copy_interruption_ns": 26329416,
+      "selected_converter": "canonical_cpu",
+      "conversion_exact": true,
+      "conversion_maximum_absolute_error": 0.0,
+      "synthetic_transport_elapsed_us": 18861,
+      "synthetic_transport_bytes_on_wire": 20848,
+      "synthetic_final_delta_transfer_us": 964,
+      "gateway_accepted_tokens": 25,
+      "gateway_duplicate_count": 0,
+      "gateway_gap_count": 0,
+      "failed_transaction_final_phase": "ROLLED_BACK",
+      "successful_transaction_final_phase": "COMPLETED",
+      "source_owner_epoch": 1,
+      "destination_owner_epoch": 2,
+      "checkpoint_bytes_deduplicated": 10206,
+      "cow_divergence_unique_bytes": 21192,
+      "direct_reuse_class": "incompatible",
+      "recomputation_class": "recomputation_assisted",
+      "planner_selected_strategy": "hybrid_pre_copy",
+      "planner_objective": 81.93334591651919,
+      "planner_oracle_objective": 81.93334591651919,
+      "planner_regret": 0.0,
+      "fixed_stop_objective": 327.95443200000005,
+      "planner_predicted_interruption_ms": 1.0152617286909433,
+      "planner_observed_interruption_ms": 7.471583,
+      "planner_interruption_absolute_error_ms": 6.456321271309056,
+      "measurement_artifact": {
+        "path": "raw/seed-101/measurements.json",
+        "sha256": "6ab93d8c1b66ce6be703fc2b15b0af0f0820dd00e7d4ff9b8e7bd70532827f91",
+        "size_bytes": 1430,
+        "media_type": "application/json"
+      },
+      "flagship_artifact": {
+        "path": "raw/seed-101/flagship.json",
+        "sha256": "75a533e3e4d2da88be62cbbf5505f0ce2cd47ba1557f916c93c430f4c4e0161b",
+        "size_bytes": 1054220,
+        "media_type": "application/json"
+      },
+      "conversion_artifact": {
+        "path": "raw/seed-101/conversion.json",
+        "sha256": "09cf2a35596e5ae6014615fb3f4b6f0287514bc99f9ae354bc25f6060e1be016",
+        "size_bytes": 3052,
+        "media_type": "application/json"
+      },
+      "stop_and_copy_artifact": {
+        "path": "raw/seed-101/stop-and-copy.json",
+        "sha256": "6b5dc3382102f23c14c4d5a8143a33531ffd3c26138f39bbf87a3dd9433728b7",
+        "size_bytes": 383,
+        "media_type": "application/json"
+      },
+      "planner_artifact": {
+        "path": "raw/seed-101/planner.json",
+        "sha256": "9290a692c25aba7824a0cb1b59fdf2a886a333fc71d93da65e13a80803930e95",
+        "size_bytes": 4099,
+        "media_type": "application/json"
+      }
+    },
+    {
+      "schema_version": "sloforge.continuum.seed-measurement/v1",
+      "seed": 202,
+      "observed_flagship_wall_ns": 111222333,
+      "observed_conversion_campaign_wall_ns": 1926750,
+      "observed_canonical_conversion_median_ns": 76291,
+      "observed_direct_conversion_median_ns": 155292,
+      "observed_precopy_interruption_ns": 7504375,
+      "observed_stop_and_copy_interruption_ns": 26310125,
+      "selected_converter": "canonical_cpu",
+      "conversion_exact": true,
+      "conversion_maximum_absolute_error": 0.0,
+      "synthetic_transport_elapsed_us": 18854,
+      "synthetic_transport_bytes_on_wire": 20292,
+      "synthetic_final_delta_transfer_us": 963,
+      "gateway_accepted_tokens": 25,
+      "gateway_duplicate_count": 0,
+      "gateway_gap_count": 0,
+      "failed_transaction_final_phase": "ROLLED_BACK",
+      "successful_transaction_final_phase": "COMPLETED",
+      "source_owner_epoch": 1,
+      "destination_owner_epoch": 2,
+      "checkpoint_bytes_deduplicated": 10197,
+      "cow_divergence_unique_bytes": 21172,
+      "direct_reuse_class": "incompatible",
+      "recomputation_class": "recomputation_assisted",
+      "planner_selected_strategy": "hybrid_pre_copy",
+      "planner_objective": 81.93338410094213,
+      "planner_oracle_objective": 81.93338410094213,
+      "planner_regret": 0.0,
+      "fixed_stop_objective": 327.95443200000005,
+      "planner_predicted_interruption_ms": 1.0152646686025215,
+      "planner_observed_interruption_ms": 7.504375,
+      "planner_interruption_absolute_error_ms": 6.4891103313974785,
+      "measurement_artifact": {
+        "path": "raw/seed-202/measurements.json",
+        "sha256": "4ac628748aba978206e10a0eaa7fdaf21988744e42e2a5e093529277add2d59b",
+        "size_bytes": 1431,
+        "media_type": "application/json"
+      },
+      "flagship_artifact": {
+        "path": "raw/seed-202/flagship.json",
+        "sha256": "86d2cfd0ab2f0c9fbf336aeea86f138beb3e08ed16f4debad23bc3bc37d1f4b5",
+        "size_bytes": 1052010,
+        "media_type": "application/json"
+      },
+      "conversion_artifact": {
+        "path": "raw/seed-202/conversion.json",
+        "sha256": "e08c67b2931a0c212ab2660f3531a95c771c1b83252696b79ebee4beb9053012",
+        "size_bytes": 3052,
+        "media_type": "application/json"
+      },
+      "stop_and_copy_artifact": {
+        "path": "raw/seed-202/stop-and-copy.json",
+        "sha256": "1403038b857dbf1b75893655901b5e3eeb4c34ce56bc7487a8322d83754b9458",
+        "size_bytes": 383,
+        "media_type": "application/json"
+      },
+      "planner_artifact": {
+        "path": "raw/seed-202/planner.json",
+        "sha256": "4fc7e1421a140fbe13ca5d6924ece22afca29283d724ca736ee4a1c31c5f1085",
+        "size_bytes": 4104,
+        "media_type": "application/json"
+      }
+    },
+    {
+      "schema_version": "sloforge.continuum.seed-measurement/v1",
+      "seed": 303,
+      "observed_flagship_wall_ns": 111425625,
+      "observed_conversion_campaign_wall_ns": 1961459,
+      "observed_canonical_conversion_median_ns": 77583,
+      "observed_direct_conversion_median_ns": 166625,
+      "observed_precopy_interruption_ns": 16446375,
+      "observed_stop_and_copy_interruption_ns": 26844875,
+      "selected_converter": "canonical_cpu",
+      "conversion_exact": true,
+      "conversion_maximum_absolute_error": 0.0,
+      "synthetic_transport_elapsed_us": 18854,
+      "synthetic_transport_bytes_on_wire": 20469,
+      "synthetic_final_delta_transfer_us": 963,
+      "gateway_accepted_tokens": 25,
+      "gateway_duplicate_count": 0,
+      "gateway_gap_count": 0,
+      "failed_transaction_final_phase": "ROLLED_BACK",
+      "successful_transaction_final_phase": "COMPLETED",
+      "source_owner_epoch": 1,
+      "destination_owner_epoch": 2,
+      "checkpoint_bytes_deduplicated": 10198,
+      "cow_divergence_unique_bytes": 21173,
+      "direct_reuse_class": "incompatible",
+      "recomputation_class": "recomputation_assisted",
+      "planner_selected_strategy": "hybrid_pre_copy",
+      "planner_objective": 81.93342228569065,
+      "planner_oracle_objective": 81.93342228569065,
+      "planner_regret": 0.0,
+      "fixed_stop_objective": 327.95443200000005,
+      "planner_predicted_interruption_ms": 1.015267608797234,
+      "planner_observed_interruption_ms": 16.446375,
+      "planner_interruption_absolute_error_ms": 15.431107391202765,
+      "measurement_artifact": {
+        "path": "raw/seed-303/measurements.json",
+        "sha256": "96343d0c9d83da54578274517e76dbfd6ca39cb97f7b69cbe7483d779f69f7a2",
+        "size_bytes": 1432,
+        "media_type": "application/json"
+      },
+      "flagship_artifact": {
+        "path": "raw/seed-303/flagship.json",
+        "sha256": "a8c92737b362312a6ee21f3764d9e828f3943153f37c80c77af50768a5c97a27",
+        "size_bytes": 1052545,
+        "media_type": "application/json"
+      },
+      "conversion_artifact": {
+        "path": "raw/seed-303/conversion.json",
+        "sha256": "e349144c21d6cc2d5ebef8e87dbc635a3d4ef255c06f3ee688bb011997d2bd28",
+        "size_bytes": 3052,
+        "media_type": "application/json"
+      },
+      "stop_and_copy_artifact": {
+        "path": "raw/seed-303/stop-and-copy.json",
+        "sha256": "8563d503e58ff89336c962ef6c5359d69bfb4cc7f2a8a431fd924a7cdd876047",
+        "size_bytes": 384,
+        "media_type": "application/json"
+      },
+      "planner_artifact": {
+        "path": "raw/seed-303/planner.json",
+        "sha256": "700327c502e7629b58e6ddf7895022318739f2fde5ef9ae400f439095992b4f6",
+        "size_bytes": 4101,
+        "media_type": "application/json"
+      }
+    },
+    {
+      "schema_version": "sloforge.continuum.seed-measurement/v1",
+      "seed": 404,
+      "observed_flagship_wall_ns": 112984417,
+      "observed_conversion_campaign_wall_ns": 1877125,
+      "observed_canonical_conversion_median_ns": 74834,
+      "observed_direct_conversion_median_ns": 154875,
+      "observed_precopy_interruption_ns": 7670459,
+      "observed_stop_and_copy_interruption_ns": 26540916,
+      "selected_converter": "canonical_cpu",
+      "conversion_exact": true,
+      "conversion_maximum_absolute_error": 0.0,
+      "synthetic_transport_elapsed_us": 18860,
+      "synthetic_transport_bytes_on_wire": 20656,
+      "synthetic_final_delta_transfer_us": 964,
+      "gateway_accepted_tokens": 25,
+      "gateway_duplicate_count": 0,
+      "gateway_gap_count": 0,
+      "failed_transaction_final_phase": "ROLLED_BACK",
+      "successful_transaction_final_phase": "COMPLETED",
+      "source_owner_epoch": 1,
+      "destination_owner_epoch": 2,
+      "checkpoint_bytes_deduplicated": 10206,
+      "cow_divergence_unique_bytes": 21189,
+      "direct_reuse_class": "incompatible",
+      "recomputation_class": "recomputation_assisted",
+      "planner_selected_strategy": "hybrid_pre_copy",
+      "planner_objective": 81.9334604707648,
+      "planner_oracle_objective": 81.9334604707648,
+      "planner_regret": 0.0,
+      "fixed_stop_objective": 327.95443200000005,
+      "planner_predicted_interruption_ms": 1.0152705492750815,
+      "planner_observed_interruption_ms": 7.670459,
+      "planner_interruption_absolute_error_ms": 6.655188450724919,
+      "measurement_artifact": {
+        "path": "raw/seed-404/measurements.json",
+        "sha256": "c53c5b761b0b443a0d14fac898259c8bed5e500964c51ad57b711734f8eb8253",
+        "size_bytes": 1428,
+        "media_type": "application/json"
+      },
+      "flagship_artifact": {
+        "path": "raw/seed-404/flagship.json",
+        "sha256": "cf1e6908acb26db7bdce2b377f116860ff56a558b4350a19a7bd608ca281a09c",
+        "size_bytes": 1052560,
+        "media_type": "application/json"
+      },
+      "conversion_artifact": {
+        "path": "raw/seed-404/conversion.json",
+        "sha256": "d4e8fae3bdb16596c29d895f50c8733553619a247d79dfcadcd64f86b0063c2f",
+        "size_bytes": 3052,
+        "media_type": "application/json"
+      },
+      "stop_and_copy_artifact": {
+        "path": "raw/seed-404/stop-and-copy.json",
+        "sha256": "ee6cc4d1f91c775c2199d337f5b5ad1c3fa968ef0dce9dde93adb7f579e755da",
+        "size_bytes": 383,
+        "media_type": "application/json"
+      },
+      "planner_artifact": {
+        "path": "raw/seed-404/planner.json",
+        "sha256": "a3562171786002736c9febae302398f96148bb1dba8995eca76ffd025877d8bb",
+        "size_bytes": 4100,
+        "media_type": "application/json"
+      }
+    },
+    {
+      "schema_version": "sloforge.continuum.seed-measurement/v1",
+      "seed": 505,
+      "observed_flagship_wall_ns": 111447250,
+      "observed_conversion_campaign_wall_ns": 1896375,
+      "observed_canonical_conversion_median_ns": 75833,
+      "observed_direct_conversion_median_ns": 156083,
+      "observed_precopy_interruption_ns": 7557875,
+      "observed_stop_and_copy_interruption_ns": 26520500,
+      "selected_converter": "canonical_cpu",
+      "conversion_exact": true,
+      "conversion_maximum_absolute_error": 0.0,
+      "synthetic_transport_elapsed_us": 18850,
+      "synthetic_transport_bytes_on_wire": 20478,
+      "synthetic_final_delta_transfer_us": 962,
+      "gateway_accepted_tokens": 25,
+      "gateway_duplicate_count": 0,
+      "gateway_gap_count": 0,
+      "failed_transaction_final_phase": "ROLLED_BACK",
+      "successful_transaction_final_phase": "COMPLETED",
+      "source_owner_epoch": 1,
+      "destination_owner_epoch": 2,
+      "checkpoint_bytes_deduplicated": 10185,
+      "cow_divergence_unique_bytes": 21148,
+      "direct_reuse_class": "incompatible",
+      "recomputation_class": "recomputation_assisted",
+      "planner_selected_strategy": "hybrid_pre_copy",
+      "planner_objective": 81.93349865616455,
+      "planner_oracle_objective": 81.93349865616455,
+      "planner_regret": 0.0,
+      "fixed_stop_objective": 327.95443200000005,
+      "planner_predicted_interruption_ms": 1.0152734900360634,
+      "planner_observed_interruption_ms": 7.557875,
+      "planner_interruption_absolute_error_ms": 6.542601509963937,
+      "measurement_artifact": {
+        "path": "raw/seed-505/measurements.json",
+        "sha256": "7320901d92e685fa29983325d096e155608780c7932fce66a6bcca73e8ff66d6",
+        "size_bytes": 1430,
+        "media_type": "application/json"
+      },
+      "flagship_artifact": {
+        "path": "raw/seed-505/flagship.json",
+        "sha256": "b8e20b08469a2289713c3bde972c15871d7d6bde47d2e8c72e671e8d86e71f64",
+        "size_bytes": 1053092,
+        "media_type": "application/json"
+      },
+      "conversion_artifact": {
+        "path": "raw/seed-505/conversion.json",
+        "sha256": "d1300c58ff008f246d1bdb6a4c5ef50c700ae22eb25759fc90ad71c6c8d423c7",
+        "size_bytes": 3052,
+        "media_type": "application/json"
+      },
+      "stop_and_copy_artifact": {
+        "path": "raw/seed-505/stop-and-copy.json",
+        "sha256": "287ad48d7494b4d709172dc6fd07ab90219319ee23177046308a1e9739449a0f",
+        "size_bytes": 383,
+        "media_type": "application/json"
+      },
+      "planner_artifact": {
+        "path": "raw/seed-505/planner.json",
+        "sha256": "6c916354206d9146795ff7c4250b97002cd3a7e4b890a0c8a7d4ee7302da5f48",
+        "size_bytes": 4104,
+        "media_type": "application/json"
+      }
+    }
+  ],
+  "confidence_intervals": [
+    {
+      "metric": "flagship_wall_time",
+      "unit": "milliseconds",
+      "sample_count": 5,
+      "mean": 112.2123668,
+      "sample_standard_deviation": 1.2158264912059593,
+      "lower": 110.70296083669759,
+      "upper": 113.72177276330241,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "canonical_conversion_median",
+      "unit": "microseconds",
+      "sample_count": 5,
+      "mean": 77.8416,
+      "sample_standard_deviation": 3.941365600905352,
+      "lower": 72.9485327863874,
+      "upper": 82.7346672136126,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "direct_conversion_median",
+      "unit": "microseconds",
+      "sample_count": 5,
+      "mean": 160.7832,
+      "sample_standard_deviation": 7.524976292321457,
+      "lower": 151.44120575041492,
+      "upper": 170.12519424958506,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "precopy_observed_interruption",
+      "unit": "milliseconds",
+      "sample_count": 5,
+      "mean": 9.3301334,
+      "sample_standard_deviation": 3.9788163059026487,
+      "lower": 4.390572449113482,
+      "upper": 14.269694350886517,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "stop_copy_observed_interruption",
+      "unit": "milliseconds",
+      "sample_count": 5,
+      "mean": 26.509166399999998,
+      "sample_standard_deviation": 0.2155019935622404,
+      "lower": 26.24162823025362,
+      "upper": 26.776704569746375,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "planner_regret",
+      "unit": "objective_units",
+      "sample_count": 5,
+      "mean": 0.0,
+      "sample_standard_deviation": 0.0,
+      "lower": 0.0,
+      "upper": 0.0,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "synthetic_protocol"
+    },
+    {
+      "metric": "planner_interruption_absolute_error",
+      "unit": "milliseconds",
+      "sample_count": 5,
+      "mean": 8.314865790919631,
+      "sample_standard_deviation": 3.9788162434968304,
+      "lower": 3.3753049175077505,
+      "upper": 13.254426664331511,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "observed_host"
+    },
+    {
+      "metric": "synthetic_transport_bytes_on_wire",
+      "unit": "bytes",
+      "sample_count": 5,
+      "mean": 20548.6,
+      "sample_standard_deviation": 211.15113070973595,
+      "lower": 20286.463273948575,
+      "upper": 20810.736726051422,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "synthetic_protocol"
+    },
+    {
+      "metric": "synthetic_final_delta_transfer",
+      "unit": "microseconds",
+      "sample_count": 5,
+      "mean": 963.2,
+      "sample_standard_deviation": 0.8366600265340756,
+      "lower": 962.1613159094316,
+      "upper": 964.2386840905685,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "synthetic_protocol"
+    },
+    {
+      "metric": "checkpoint_bytes_deduplicated",
+      "unit": "bytes",
+      "sample_count": 5,
+      "mean": 10198.4,
+      "sample_standard_deviation": 8.61974477580398,
+      "lower": 10187.69888905954,
+      "upper": 10209.101110940459,
+      "confidence_level": 0.95,
+      "method": "two_sided_student_t",
+      "metric_class": "artifact_derived"
+    }
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "H1",
+      "status": "pass",
+      "statement": "Exact-semantic continuation passed across TP, page-size, and K/V packing changes.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "Scoped to the deterministic CPU HybridDecoder reference adapters."
+    },
+    {
+      "hypothesis": "H2",
+      "status": "negative",
+      "statement": "Direct CPU conversion did not beat canonical CPU conversion in this matrix.",
+      "evidence": [
+        "raw/seed-101/conversion.json",
+        "raw/seed-202/conversion.json",
+        "raw/seed-303/conversion.json",
+        "raw/seed-404/conversion.json",
+        "raw/seed-505/conversion.json"
+      ],
+      "limitation": "Observed CPU wall timings are environment-specific and do not imply GPU speedup."
+    },
+    {
+      "hypothesis": "H3",
+      "status": "pass",
+      "statement": "Observed pre-copy cutover was shorter than the CPU stop-and-copy pause in 5/5 seeds.",
+      "evidence": [
+        "raw/seed-101/stop-and-copy.json",
+        "raw/seed-202/stop-and-copy.json",
+        "raw/seed-303/stop-and-copy.json",
+        "raw/seed-404/stop-and-copy.json",
+        "raw/seed-505/stop-and-copy.json",
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "Both paths use CPU reference runtimes and in-memory stores on this host."
+    },
+    {
+      "hypothesis": "H4",
+      "status": "pass",
+      "statement": "Planner objective matched exhaustive legal-candidate enumeration in every seed; predicted-versus-observed interruption error is reported separately.",
+      "evidence": [
+        "raw/seed-101/planner.json",
+        "raw/seed-202/planner.json",
+        "raw/seed-303/planner.json",
+        "raw/seed-404/planner.json",
+        "raw/seed-505/planner.json"
+      ],
+      "limitation": "Oracle comparison is scoped to the planner's tractable deterministic candidate set; observed interruption comes from the CPU reference pre-copy path."
+    },
+    {
+      "hypothesis": "H5",
+      "status": "pass",
+      "statement": "Every seeded destination-validation crash rolled back with zero accepted duplicate or gap events.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "Bounded deterministic destination-validation crash scenario only."
+    },
+    {
+      "hypothesis": "H6",
+      "status": "pass",
+      "statement": "Reference token-major to reference head-major adapters preserved logical continuation.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "vLLM, SGLang, PyTorch, and Genesis migration paths were not exercised here."
+    },
+    {
+      "hypothesis": "H7",
+      "status": "pass",
+      "statement": "Every seed reused content-addressed checkpoint chunks before COW divergence.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "In-memory content store; no remote-store startup latency was measured."
+    },
+    {
+      "hypothesis": "H8",
+      "status": "pass",
+      "statement": "Every changed state-producing weight revision was rejected for direct reuse.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "One attention-weight dependency pattern plus recomputation evidence was exercised."
+    },
+    {
+      "hypothesis": "H9",
+      "status": "pass",
+      "statement": "Recurrent, sampler, and guided state migrated with attention KV state in every seed.",
+      "evidence": [
+        "raw/seed-101/flagship.json",
+        "raw/seed-202/flagship.json",
+        "raw/seed-303/flagship.json",
+        "raw/seed-404/flagship.json",
+        "raw/seed-505/flagship.json"
+      ],
+      "limitation": "Reference integer recurrent update equation only."
+    }
+  ],
+  "negative_results": [
+    "No GPU, RDMA, multi-node, or cloud benchmark was executed; no hardware speedup is claimed.",
+    "vLLM, SGLang, PyTorch, and Genesis active-state migrations were not exercised.",
+    "Direct CPU conversion won 0/5 observed per-seed median comparisons.",
+    "Synthetic transport elapsed values model configured bandwidth and latency; they are not wall-clock measurements."
+  ]
+}

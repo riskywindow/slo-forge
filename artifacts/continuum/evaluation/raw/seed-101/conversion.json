@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "selected_backend": "canonical_cpu",
+  "canonical_median_ns": 84667,
+  "direct_median_ns": 171041,
+  "measurements": [
+    {
+      "backend": "direct_cpu",
+      "iteration": 0,
+      "elapsed_ns": 169875,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 0,
+      "elapsed_ns": 77750,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 1,
+      "elapsed_ns": 84667,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 1,
+      "elapsed_ns": 171041,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 2,
+      "elapsed_ns": 84917,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 2,
+      "elapsed_ns": 153041,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 3,
+      "elapsed_ns": 298041,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 3,
+      "elapsed_ns": 96000,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 4,
+      "elapsed_ns": 192125,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 4,
+      "elapsed_ns": 78041,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 101,
+      "clock": "perf_counter_ns"
+    }
+  ],
+  "verification": {
+    "schema_version": "1.0.0",
+    "source_hash": "efa81f05ab4aa8f4e16dbf794e64e4d242a719e64e33e0dc23e3ecb2828c3d47",
+    "canonical_hash": "a46283b6ac2fa38f9293c0d27f5059021afc143d4c6bca4614e4e099d8c5befe",
+    "direct_hash": "a46283b6ac2fa38f9293c0d27f5059021afc143d4c6bca4614e4e099d8c5befe",
+    "element_count": 9216,
+    "maximum_absolute_error": 0.0,
+    "source_to_destination_maximum_absolute_error": 0.0,
+    "declared_exactness": "exact_semantic",
+    "numeric_tolerance": null,
+    "numeric_contract_satisfied": true,
+    "comparison_scope": "direct_vs_canonical_destination_and_source_vs_destination",
+    "exact": true,
+    "canonical_integrity_valid": true,
+    "direct_integrity_valid": true
+  },
+  "selection_rule": "lowest_measured_median_after_equivalence"
+}

@@ -1,0 +1,171 @@
+{
+  "invariants": [
+    {
+      "counterexample": null,
+      "description": "at most one runtime owns mutable session state",
+      "invariant": "unique_state_owner",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "at most one active runtime matches the gateway output epoch",
+      "invariant": "unique_accepted_output_owner",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "state and gateway owner epochs never regress",
+      "invariant": "monotonic_owner_epoch",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "accepted token watermarks never regress",
+      "invariant": "monotonic_token_watermark",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "a stale owner epoch cannot cross the gateway acceptance boundary",
+      "invariant": "stale_epoch_cannot_commit_output",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "no token index is accepted twice by the gateway",
+      "invariant": "no_accepted_duplicate_token",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "gateway acceptance does not skip a token index",
+      "invariant": "no_accepted_token_gap",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "destination activation requires validated imported state",
+      "invariant": "destination_validated_before_activation",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "ownership commit requires a writer fence and the fenced source stays inactive",
+      "invariant": "source_inactive_after_fence",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "a completed pre-commit rollback leaves a valid source owner",
+      "invariant": "precommit_abort_preserves_source",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "a non-cancelled completed migration leaves a valid destination owner",
+      "invariant": "completed_migration_preserves_destination",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "every reachable bounded state can reach a declared terminal outcome",
+      "invariant": "explicit_terminal_or_recoverable",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "no non-terminal reachable state is deadlocked",
+      "invariant": "no_deadlock",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "transport queues remain within the declared bound",
+      "invariant": "bounded_queues",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "counterexample": null,
+      "description": "duplicate protocol messages and outputs are idempotent",
+      "invariant": "idempotent_replay",
+      "passed": true,
+      "status": "passed"
+    }
+  ],
+  "max_depth_reached": 22,
+  "model_version": "continuum-cutover-protocol.v1",
+  "schema_version": "continuum.modelcheck.result.v1",
+  "scope": {
+    "assumptions": [
+      "compare-and-swap coordinator linearizes committed lease updates",
+      "authenticated state hashes detect corrupt final state before validation",
+      "logical ticks provide a bounded timeout and weakly fair recovery action",
+      "correlated fault coverage is limited by max_faults_per_execution",
+      "source quiesce and fencing drain output through the declared cutover watermark",
+      "gateway and coordinator restart retain their durable ledgers",
+      "runtime mutation and emission paths consult the current lease and fence"
+    ],
+    "bounded_not_universal_proof": true,
+    "bounds": {
+      "max_depth": 32,
+      "max_faults_per_execution": 1,
+      "max_messages": 3,
+      "max_states": 100000,
+      "max_tokens": 1,
+      "timeout_ticks": 6
+    },
+    "claim": "bounded explicit-state exploration; not a universal proof",
+    "complete_within_bounds": true,
+    "truncated_by": []
+  },
+  "seed": 41,
+  "states_explored": 1659,
+  "status": "passed",
+  "transition_coverage": {
+    "abort": 138,
+    "acknowledge_client": 438,
+    "activate_destination": 73,
+    "advance_time": 108,
+    "attempt_stale_output": 13,
+    "begin_precopy": 5,
+    "cancel": 20,
+    "commit_ownership": 32,
+    "crash": 236,
+    "delay_acknowledgment": 25,
+    "deliver": 741,
+    "disconnect_client": 3,
+    "drain_source": 216,
+    "drop": 24,
+    "duplicate": 24,
+    "emit_destination_token": 40,
+    "emit_source_token": 146,
+    "enqueue": 190,
+    "finish_abort": 231,
+    "heal_partition": 15,
+    "prepare_destination": 5,
+    "quiesce_source": 26,
+    "reconnect_client": 11,
+    "record_commit_intent": 29,
+    "require_operator": 59,
+    "restart": 301,
+    "start_partition": 15,
+    "switch_gateway": 18,
+    "validate_compatibility": 5,
+    "validate_destination": 29
+  },
+  "transitions_explored": 3216
+}

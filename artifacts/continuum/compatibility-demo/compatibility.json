@@ -1,0 +1,217 @@
+{
+  "changed_model_hash": "a203f2699275362b9e99a3a566b981208366bbf5b99532e3dfc5ba12939b3300",
+  "direct_reuse": {
+    "compatibility_class": "incompatible",
+    "migration_restrictions": [
+      "destination activation prohibited"
+    ],
+    "quality_implications": [],
+    "reasons": [
+      {
+        "code": "STATE_PRODUCING_DEPENDENCY_CHANGED",
+        "component": "model_weights",
+        "evidence": [
+          "e74632944e64ca634cf461773ef5c7656347f9dc0d0ef9fb189011425f7c2afc",
+          "b3a20da19439bd66fd1ee52e9e8940f9e7a3e594088062e4cb388e997c076cc1",
+          "9176a435d10a4ead8e62de8529df6664131866d769045fc572b1ee290aa068b8",
+          "9176a435d10a4ead8e62de8529df6664131866d769045fc572b1ee290aa068b8"
+        ],
+        "message": "matching shapes do not make state derived from different weights or adapters reusable",
+        "severity": "blocking"
+      }
+    ],
+    "rejected_classes": [
+      {
+        "exactness_class": "exact_bitwise",
+        "reason_codes": [
+          "STATE_PRODUCING_DEPENDENCY_CHANGED"
+        ]
+      },
+      {
+        "exactness_class": "exact_semantic",
+        "reason_codes": [
+          "STATE_PRODUCING_DEPENDENCY_CHANGED"
+        ]
+      },
+      {
+        "exactness_class": "numerically_equivalent",
+        "reason_codes": [
+          "STATE_PRODUCING_DEPENDENCY_CHANGED"
+        ]
+      },
+      {
+        "exactness_class": "quality_bounded",
+        "reason_codes": [
+          "STATE_PRODUCING_DEPENDENCY_CHANGED"
+        ]
+      },
+      {
+        "exactness_class": "recomputation_assisted",
+        "reason_codes": [
+          "STATE_PRODUCING_DEPENDENCY_CHANGED"
+        ]
+      }
+    ],
+    "required_conversion": [],
+    "required_recomputation": [],
+    "safe": false,
+    "schema_version": "1.0.0",
+    "unsupported_state": [],
+    "verification_obligations": []
+  },
+  "recomputation_assisted": {
+    "compatibility_class": "recomputation_assisted",
+    "migration_restrictions": [
+      "direct reuse of model- or adapter-derived source state prohibited"
+    ],
+    "quality_implications": [],
+    "reasons": [
+      {
+        "code": "STATE_WEIGHTS_CHANGED_RECOMPUTE",
+        "component": "model_weights",
+        "evidence": [
+          "e74632944e64ca634cf461773ef5c7656347f9dc0d0ef9fb189011425f7c2afc",
+          "b3a20da19439bd66fd1ee52e9e8940f9e7a3e594088062e4cb388e997c076cc1",
+          "e85440bd9c74dd0a99bd4136d27a91d13aff37401135af8681414edceec4167c"
+        ],
+        "message": "model- or adapter-derived state cannot be reused and must be regenerated from token history",
+        "severity": "requirement"
+      },
+      {
+        "code": "IDENTICAL_COMPATIBILITY_DOMAIN",
+        "component": "execution_state",
+        "evidence": [],
+        "message": "runtime adapter, dtype, quantization, and layout fingerprints match",
+        "severity": "info"
+      }
+    ],
+    "rejected_classes": [
+      {
+        "exactness_class": "exact_bitwise",
+        "reason_codes": [
+          "STATE_WEIGHTS_CHANGED_RECOMPUTE",
+          "IDENTICAL_COMPATIBILITY_DOMAIN"
+        ]
+      },
+      {
+        "exactness_class": "exact_semantic",
+        "reason_codes": [
+          "STATE_WEIGHTS_CHANGED_RECOMPUTE",
+          "IDENTICAL_COMPATIBILITY_DOMAIN"
+        ]
+      }
+    ],
+    "required_conversion": [
+      "copy"
+    ],
+    "required_recomputation": [
+      {
+        "dependency_graph_hash": "e85440bd9c74dd0a99bd4136d27a91d13aff37401135af8681414edceec4167c",
+        "source": "token_history",
+        "state_components": [
+          "attention.kv"
+        ]
+      }
+    ],
+    "safe": true,
+    "schema_version": "1.0.0",
+    "unsupported_state": [],
+    "verification_obligations": [
+      {
+        "component": "weight_derived_state",
+        "kind": "recomputation",
+        "method": "recompute from the declared token history and validate bounded continuation",
+        "obligation_id": "verify-recomputed-state",
+        "tolerance": null
+      },
+      {
+        "component": "portable_state",
+        "kind": "structural",
+        "method": "compare canonical state hashes before activation",
+        "obligation_id": "verify-bitwise-state",
+        "tolerance": null
+      }
+    ]
+  },
+  "recomputation_execution": {
+    "checkpoint_capsule_id": "b9784c9a33876e5624061e28a7c75a14f1b305c912952542cc5fadf0be113f30",
+    "coordinator_scope": "ephemeral_local_closed",
+    "destination_owner_epoch": 2,
+    "dry_run_next_token": 200,
+    "evidence_digest": "222c6ff971f132fd0fd081059ef4eb41700c8b4bbde9f2cb164bfb5254745a2f",
+    "imported_continuation_valid": true,
+    "imported_logical_hash": "7408fd37893825f02cbd2016dee6db52a49f2ce557f62a57747204d392ac0589",
+    "imported_structurally_valid": true,
+    "phase_history": [
+      "PROPOSED",
+      "COMPATIBILITY_VALIDATED",
+      "DESTINATION_PREPARING",
+      "PRECOPYING",
+      "DELTA_SYNCING",
+      "CUTOVER_REQUESTED",
+      "SOURCE_QUIESCING",
+      "SOURCE_FROZEN",
+      "FINAL_DELTA_TRANSFERRING",
+      "DESTINATION_IMPORTING",
+      "DESTINATION_VALIDATING",
+      "COMMIT_INTENT_RECORDED",
+      "OWNERSHIP_COMMITTED",
+      "GATEWAY_SWITCHING",
+      "DESTINATION_ACTIVE",
+      "SOURCE_DRAINING",
+      "COMPLETED"
+    ],
+    "recomputation": {
+      "continuation_horizon": 5,
+      "dependency_edges": [
+        "state/token-history->state/attention-kv:tokens produce attention K/V",
+        "state/token-history->state/recurrent:tokens drive recurrent updates"
+      ],
+      "destination_model_hash": "a203f2699275362b9e99a3a566b981208366bbf5b99532e3dfc5ba12939b3300",
+      "evidence_digest": "84ea57d1b50aaa94e5543bf1de0dad0de09f372995bea974b10c4bd0dc71125a",
+      "first_run_tokens": [
+        200,
+        159,
+        8,
+        119,
+        154
+      ],
+      "independent_run_tokens": [
+        200,
+        159,
+        8,
+        119,
+        154
+      ],
+      "recomputed_components": [
+        "state/attention-kv",
+        "state/recurrent"
+      ],
+      "seed": 860,
+      "source_capsule_id": "b9784c9a33876e5624061e28a7c75a14f1b305c912952542cc5fadf0be113f30",
+      "token_count": 49,
+      "verified": true
+    },
+    "recomputed_session_id": "session-flagship-001-recomputed",
+    "resumed_token_ids": [
+      200,
+      159,
+      8,
+      119,
+      154
+    ],
+    "resumed_token_indices": [
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    "source_owner_epoch": 1,
+    "transaction_id": "4edf350f240da937e3c4df82643abc55c658e9194eea650221080820d104c337"
+  },
+  "recomputation_source": "token_history",
+  "recomputation_token_count": 49,
+  "shapes_match": true,
+  "source_model_hash": "a045a7e3148b33c605e63dc539e7dd4c0264203b9c67dc15324e13849716ddf2"
+}

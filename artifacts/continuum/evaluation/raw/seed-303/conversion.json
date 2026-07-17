@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "selected_backend": "canonical_cpu",
+  "canonical_median_ns": 77583,
+  "direct_median_ns": 166625,
+  "measurements": [
+    {
+      "backend": "direct_cpu",
+      "iteration": 0,
+      "elapsed_ns": 166625,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 0,
+      "elapsed_ns": 76583,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 1,
+      "elapsed_ns": 157167,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 1,
+      "elapsed_ns": 77583,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 2,
+      "elapsed_ns": 177542,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 2,
+      "elapsed_ns": 96375,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 3,
+      "elapsed_ns": 151292,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 3,
+      "elapsed_ns": 77333,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 4,
+      "elapsed_ns": 81084,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 4,
+      "elapsed_ns": 173917,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 303,
+      "clock": "perf_counter_ns"
+    }
+  ],
+  "verification": {
+    "schema_version": "1.0.0",
+    "source_hash": "487d12e45656a6dbf0a75c134c2866c324079facaba1777df5d8bf0e5966575c",
+    "canonical_hash": "267a43cc0f6301281da104382d1ed0ec69b568fee286556d5dd88bff8dfa330d",
+    "direct_hash": "267a43cc0f6301281da104382d1ed0ec69b568fee286556d5dd88bff8dfa330d",
+    "element_count": 9216,
+    "maximum_absolute_error": 0.0,
+    "source_to_destination_maximum_absolute_error": 0.0,
+    "declared_exactness": "exact_semantic",
+    "numeric_tolerance": null,
+    "numeric_contract_satisfied": true,
+    "comparison_scope": "direct_vs_canonical_destination_and_source_vs_destination",
+    "exact": true,
+    "canonical_integrity_valid": true,
+    "direct_integrity_valid": true
+  },
+  "selection_rule": "lowest_measured_median_after_equivalence"
+}

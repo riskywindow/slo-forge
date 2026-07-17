@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "selected_backend": "canonical_cpu",
+  "canonical_median_ns": 74834,
+  "direct_median_ns": 154875,
+  "measurements": [
+    {
+      "backend": "direct_cpu",
+      "iteration": 0,
+      "elapsed_ns": 169750,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 0,
+      "elapsed_ns": 76875,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 1,
+      "elapsed_ns": 73875,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 1,
+      "elapsed_ns": 154875,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 2,
+      "elapsed_ns": 150666,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 2,
+      "elapsed_ns": 74792,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 3,
+      "elapsed_ns": 150708,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 3,
+      "elapsed_ns": 74834,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "direct_cpu",
+      "iteration": 4,
+      "elapsed_ns": 170500,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    },
+    {
+      "backend": "canonical_cpu",
+      "iteration": 4,
+      "elapsed_ns": 85875,
+      "source_bytes": 36864,
+      "destination_bytes": 40960,
+      "seed": 404,
+      "clock": "perf_counter_ns"
+    }
+  ],
+  "verification": {
+    "schema_version": "1.0.0",
+    "source_hash": "52666b108281fda2367fc4c96a9a4fe8e86c3eecfc4ca23ba8bcb09f005f5d44",
+    "canonical_hash": "9f09bd519b55acae89fe860e66f576e971bf1bcc89592087244c00bc4522fe95",
+    "direct_hash": "9f09bd519b55acae89fe860e66f576e971bf1bcc89592087244c00bc4522fe95",
+    "element_count": 9216,
+    "maximum_absolute_error": 0.0,
+    "source_to_destination_maximum_absolute_error": 0.0,
+    "declared_exactness": "exact_semantic",
+    "numeric_tolerance": null,
+    "numeric_contract_satisfied": true,
+    "comparison_scope": "direct_vs_canonical_destination_and_source_vs_destination",
+    "exact": true,
+    "canonical_integrity_valid": true,
+    "direct_integrity_valid": true
+  },
+  "selection_rule": "lowest_measured_median_after_equivalence"
+}
