@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.helix.reference-policy/v1",
+  "policy_epoch_id": "coding-agent-cli@1",
+  "actions": [
+    "naive_parse",
+    "guarded_parse",
+    "ast_guided",
+    "verifier_assisted"
+  ],
+  "logits": [
+    0.2350071220344308,
+    0.49475464075738135,
+    0.32320021785707936,
+    0.14703801935110855
+  ],
+  "temperature": 1.0
+}

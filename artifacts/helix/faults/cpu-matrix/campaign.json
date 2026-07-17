@@ -1,0 +1,289 @@
+{
+  "schema_version": "sloforge.helix.fault-campaign-result/v1",
+  "result_id": "896754e5e084fee34fed04edb38a71c927a9f216b66c7a175b9e50c95adc6242",
+  "plan_id": "1fe58001b288407c409bb9c172cfc3e51eab10d172f32e81454e02b30e58c011",
+  "seed": 20260803,
+  "passed": true,
+  "callback_count": 16,
+  "results": [
+    {
+      "fault_id": "fault.capture.boundary",
+      "ground_truth_label": "capture.inconsistent_boundary",
+      "kind": "inconsistent_boundary",
+      "stage": "capture",
+      "activation": {
+        "start_step": 0,
+        "end_step": 1
+      },
+      "expected_response": "aborted",
+      "actual_response": "aborted",
+      "passed": true,
+      "evidence_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observation_evidence_sha256": "a83ce2c00ee60da284430622df1ef6a1a272e001179dbab5ac514d3e6d4b498a",
+      "injection_id": "872d12009ac76989dd7fbc2a1af5963b232904174fe34a98d951c1f3319ec00f",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response aborted"
+    },
+    {
+      "fault_id": "fault.rollout.effect",
+      "ground_truth_label": "rollout.illegal_effect",
+      "kind": "illegal_effect",
+      "stage": "rollout",
+      "activation": {
+        "start_step": 1,
+        "end_step": 2
+      },
+      "expected_response": "rejected",
+      "actual_response": "rejected",
+      "passed": true,
+      "evidence_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "observation_evidence_sha256": "bcf6a9da5dd5048309cf6fec4f146f90acbeece109eb89895687699ae9483baa",
+      "injection_id": "b8c1471e24ccb19a68a68fcda1c3cde79e78b94d2408ca008631a8104490ee60",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response rejected"
+    },
+    {
+      "fault_id": "fault.rollout.logprob",
+      "ground_truth_label": "rollout.missing_logprob",
+      "kind": "missing_logprob",
+      "stage": "rollout",
+      "activation": {
+        "start_step": 2,
+        "end_step": 3
+      },
+      "expected_response": "quarantined",
+      "actual_response": "quarantined",
+      "passed": true,
+      "evidence_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "observation_evidence_sha256": "4e8419c23878a506808202c10b7ac8fc829f63ce5134f0919994ccaab5709482",
+      "injection_id": "f03277f4312a093734bb6a5d48c2a4d345e86579b7989582307936d5f101a2b6",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response quarantined"
+    },
+    {
+      "fault_id": "fault.rollout.policy",
+      "ground_truth_label": "rollout.policy_mismatch",
+      "kind": "policy_mismatch",
+      "stage": "rollout",
+      "activation": {
+        "start_step": 3,
+        "end_step": 4
+      },
+      "expected_response": "rejected",
+      "actual_response": "rejected",
+      "passed": true,
+      "evidence_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "observation_evidence_sha256": "4c0482519d93cdfbe4a8b7808d9f2f38bdf7f2ae9d4189d2d76b571f0e49de41",
+      "injection_id": "ab6ce2afa716b44824a8de4471b30071977d77cdca9cc0c5c2d01c6e6ac4039f",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response rejected"
+    },
+    {
+      "fault_id": "fault.rollout.stale",
+      "ground_truth_label": "rollout.policy_staleness",
+      "kind": "policy_staleness",
+      "stage": "rollout",
+      "activation": {
+        "start_step": 4,
+        "end_step": 5
+      },
+      "expected_response": "deferred",
+      "actual_response": "deferred",
+      "passed": true,
+      "evidence_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "observation_evidence_sha256": "c46a59bdab49c179ddb71658151d0ad9a025440bcb8222df1950dec33ef7cfca",
+      "injection_id": "7fcfa9550df14e50506d143814c8455a7e48e28006d49c71d165fff484c5a33e",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response deferred"
+    },
+    {
+      "fault_id": "fault.reward.corrupt",
+      "ground_truth_label": "reward.corruption",
+      "kind": "reward_corruption",
+      "stage": "reward",
+      "activation": {
+        "start_step": 5,
+        "end_step": 6
+      },
+      "expected_response": "quarantined",
+      "actual_response": "quarantined",
+      "passed": true,
+      "evidence_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "observation_evidence_sha256": "5b109250aa619c94f7942ed5ffc3f7e148c19a021bf6936bcf149caf43892f09",
+      "injection_id": "08da1cf6ad1da39b034d3a4c04b48b8fd53f7e25389647c928d1050d8d4e853a",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response quarantined"
+    },
+    {
+      "fault_id": "fault.reward.duplicate",
+      "ground_truth_label": "reward.duplicate",
+      "kind": "duplicate_reward",
+      "stage": "reward",
+      "activation": {
+        "start_step": 6,
+        "end_step": 7
+      },
+      "expected_response": "rejected",
+      "actual_response": "rejected",
+      "passed": true,
+      "evidence_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "observation_evidence_sha256": "58da0fa8446cc159e7f628e3fcc82781331358837959183b95320ad20f4fef2e",
+      "injection_id": "dc4154251b29968fe3c77326276734d9441b49e6e245b20cc17d53f8d3cca972",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response rejected"
+    },
+    {
+      "fault_id": "fault.branch.checkpoint",
+      "ground_truth_label": "branching.checkpoint_failure",
+      "kind": "checkpoint_failure",
+      "stage": "branching",
+      "activation": {
+        "start_step": 7,
+        "end_step": 8
+      },
+      "expected_response": "aborted",
+      "actual_response": "aborted",
+      "passed": true,
+      "evidence_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+      "observation_evidence_sha256": "b2d3cb9881c2901cd04ae792d0a8a77355add616e4e86f0b589e7c28072054a4",
+      "injection_id": "d7931479cc74c830c51738fa4c4347a3c65437c655e9560770d8b52ef5f1711a",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response aborted"
+    },
+    {
+      "fault_id": "fault.training.lineage",
+      "ground_truth_label": "training.lineage_failure",
+      "kind": "lineage_failure",
+      "stage": "training",
+      "activation": {
+        "start_step": 8,
+        "end_step": 9
+      },
+      "expected_response": "rejected",
+      "actual_response": "rejected",
+      "passed": true,
+      "evidence_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "observation_evidence_sha256": "3502cdfaaa0ff8452ce9dc853cc4591094b094288fecb7c28a2b27d102d4e65c",
+      "injection_id": "bb21ad3f99174dba771fbfc56a769f33db7ead14dca6b3f29336bfa22dc8ec41",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response rejected"
+    },
+    {
+      "fault_id": "fault.training.step",
+      "ground_truth_label": "training.step_failure",
+      "kind": "training_failure",
+      "stage": "training",
+      "activation": {
+        "start_step": 9,
+        "end_step": 10
+      },
+      "expected_response": "aborted",
+      "actual_response": "aborted",
+      "passed": true,
+      "evidence_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "observation_evidence_sha256": "4c9b00c5797609a489eb45271c1ce4346515010945623763e83dfc68f2533191",
+      "injection_id": "f09aa5871a2b4ea177ba1ecaf2cddafb8f3f6ef65dc4c5a41bda2fec88b30052",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response aborted"
+    },
+    {
+      "fault_id": "fault.evaluation.quality",
+      "ground_truth_label": "evaluation.quality_reject",
+      "kind": "quality_reject",
+      "stage": "evaluation",
+      "activation": {
+        "start_step": 10,
+        "end_step": 11
+      },
+      "expected_response": "retained_champion",
+      "actual_response": "retained_champion",
+      "passed": true,
+      "evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observation_evidence_sha256": "df64088c1ba9cd94fc6fc0d65917e915999e471ce5db1b59b42e55d51170c89c",
+      "injection_id": "9a9166ebb91fbb7e868acb006a00c98a42c8db22026a047f8362c2870bc8027d",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response retained_champion"
+    },
+    {
+      "fault_id": "fault.evaluation.serving",
+      "ground_truth_label": "evaluation.serving_reject",
+      "kind": "serving_reject",
+      "stage": "evaluation",
+      "activation": {
+        "start_step": 11,
+        "end_step": 12
+      },
+      "expected_response": "retained_champion",
+      "actual_response": "retained_champion",
+      "passed": true,
+      "evidence_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "observation_evidence_sha256": "b8e04da2bd991b827617a90333a58029f5b69fb36b141ad27044b45b93587500",
+      "injection_id": "fea22ca677488b751d6f14cc06e3acaddf6f37f42308a704d17296acf3928a45",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response retained_champion"
+    },
+    {
+      "fault_id": "fault.evaluation.compatibility",
+      "ground_truth_label": "evaluation.compatibility_reject",
+      "kind": "compatibility_reject",
+      "stage": "evaluation",
+      "activation": {
+        "start_step": 12,
+        "end_step": 13
+      },
+      "expected_response": "retained_champion",
+      "actual_response": "retained_champion",
+      "passed": true,
+      "evidence_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "observation_evidence_sha256": "a2075e9beb879cde78c3085113d6dec2b1bf22e995b6a83c8500088351388997",
+      "injection_id": "3f76b1ec066c6e29df99523c7f1e64195699813807f934af467c69d1b645a0b5",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response retained_champion"
+    },
+    {
+      "fault_id": "fault.promotion.pointer",
+      "ground_truth_label": "promotion.partial_champion_pointer",
+      "kind": "partial_champion_pointer",
+      "stage": "promotion",
+      "activation": {
+        "start_step": 13,
+        "end_step": 14
+      },
+      "expected_response": "rolled_back",
+      "actual_response": "rolled_back",
+      "passed": true,
+      "evidence_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "observation_evidence_sha256": "25969c3d75d078c951a0c939ac4def37ffa297f6a42c4d514cb4dd535f9b5fce",
+      "injection_id": "1108339df1396e27f988c55f0ae8501c8bcb04a501935838cbd4d48dad748e2c",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response rolled_back"
+    },
+    {
+      "fault_id": "fault.resource.traffic",
+      "ground_truth_label": "resource.traffic_spike",
+      "kind": "traffic_spike",
+      "stage": "resource",
+      "activation": {
+        "start_step": 14,
+        "end_step": 15
+      },
+      "expected_response": "serving_protected",
+      "actual_response": "serving_protected",
+      "passed": true,
+      "evidence_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "observation_evidence_sha256": "c7bb9baff1980fd2a780d4d914f262a031f3d0163c8fde5ddba643a05344ac97",
+      "injection_id": "fb3c9fbad7e1cfc6dced3119ba8614fb0171243380eceb31ce0fd68f9026bbc2",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response serving_protected"
+    },
+    {
+      "fault_id": "fault.resource.gpu",
+      "ground_truth_label": "resource.gpu_loss",
+      "kind": "gpu_loss",
+      "stage": "resource",
+      "activation": {
+        "start_step": 15,
+        "end_step": 16
+      },
+      "expected_response": "capacity_reduced",
+      "actual_response": "capacity_reduced",
+      "passed": true,
+      "evidence_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "observation_evidence_sha256": "a0b104e2a5d816cbc5581254b88d4d422e1ceb1365f299ee2b93689d4b6361fc",
+      "injection_id": "69eb68078868d5b9716d1deadfadc0a288bbf89e246d0787a325af4fc6d88fa9",
+      "detail": "deterministic protocol-fixture callback observed the injected mutation and returned the declared fail-closed response capacity_reduced"
+    }
+  ],
+  "failed_fault_ids": [],
+  "assumptions": [
+    "Fault callbacks are CPU-only, invoked at most once per planned fault, and time bounded.",
+    "A callback error, timeout, missing callback, or response mismatch fails the campaign closed.",
+    "Evidence hashes are content-addressed input claims and are not fabricated measurements.",
+    "Callbacks bind each injected instruction to a real stage-specific assertion when available."
+  ]
+}

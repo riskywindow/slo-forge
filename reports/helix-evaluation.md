@@ -1,0 +1,160 @@
+# SLOForge Helix reference evaluation
+
+Evaluation ID: `95857f1fa8a42c9b6b193d9b429c9241f4aa275686687390f8302cf77e5e0e62`
+
+This report is generated from deterministic local CPU artifacts. Synthetic results are not presented as GPU or production measurements.
+
+## Flagship result
+
+Intervals are two-sided Student-t 95% intervals over paired deterministic seed runs. They describe seed sensitivity in this fixture, not population uncertainty.
+
+Effect size: paired absolute success-rate difference (corrected challenger minus champion).
+
+| Metric | Mean | Student-t 95% interval | Seed runs |
+|---|---:|---:|---:|
+| Champion task success | 0.625 | [0.625, 0.625] | 3 |
+| Rejected challenger task success | 0.667 | [0.667, 0.667] | 3 |
+| Corrected challenger task success | 0.792 | [0.792, 0.792] | 3 |
+| Corrected minus champion paired effect | 0.167 | [0.167, 0.167] | 3 |
+
+## Scheduler comparison
+
+All scheduler values and SLO results below are modeled predictions, not measurements.
+
+| Seed | Policy | Predicted SLO feasible | Completed | Predicted value | Cost (microunits) | Lost ticks |
+|---:|---|---:|---:|---:|---:|---:|
+| 41 | dedicated | true | 2 | 16.000 | 41300 | 0 |
+| 41 | static | true | 2 | 16.000 | 41300 | 0 |
+| 41 | utilization | true | 2 | 16.000 | 41300 | 0 |
+| 41 | fifo | true | 2 | 16.000 | 41300 | 0 |
+| 41 | helix_value_aware | true | 2 | 16.000 | 41300 | 0 |
+| 73 | dedicated | true | 2 | 16.000 | 41300 | 0 |
+| 73 | static | true | 2 | 16.000 | 41300 | 0 |
+| 73 | utilization | true | 2 | 16.000 | 41300 | 0 |
+| 73 | fifo | true | 2 | 16.000 | 41300 | 0 |
+| 73 | helix_value_aware | true | 2 | 16.000 | 41300 | 0 |
+| 113 | dedicated | true | 2 | 16.000 | 41300 | 0 |
+| 113 | static | true | 2 | 16.000 | 41300 | 0 |
+| 113 | utilization | true | 2 | 16.000 | 41300 | 0 |
+| 113 | fifo | true | 2 | 16.000 | 41300 | 0 |
+| 113 | helix_value_aware | true | 2 | 16.000 | 41300 | 0 |
+
+## Hypotheses
+
+### H1: partial
+
+State identity and replay contracts, not downstream trajectory fidelity.
+
+- Observation: Joint restoration passed exact identity in 3/3 runs.
+- Observation: Non-joint modes passed exact identity in 0 cases.
+- Observation: Transcript equality explicitly did not establish hidden model/environment equivalence.
+- Limitation: Readiness, prefill work, and divergence under a nondeterministic real model were not measured.
+- Limitation: Reference policy and repository are synthetic local CPU fixtures.
+- Limitation: The result does not establish behavior for arbitrary models, tools, or production traffic.
+
+### H2: partial
+
+CAS-backed logical copy-on-write isolation and cleanup.
+
+- Observation: All branch workspaces were isolated and cleaned after each run.
+- Limitation: No reflink/page-fault or GPU-memory amplification benchmark was run on this host.
+- Limitation: Reference policy and repository are synthetic local CPU fixtures.
+- Limitation: The result does not establish behavior for arbitrary models, tools, or production traffic.
+
+### H3: not_exercised
+
+Comparative sample efficiency across four training algorithms.
+
+- Observation: The flagship exercised branch-relative optimization only.
+- Limitation: A controlled multi-algorithm learning-curve experiment is absent.
+
+### H4: not_exercised
+
+Fail-closed policy provenance and bounded staleness semantics.
+
+- Observation: The reference evaluation did not execute a multi-policy asynchronous staleness campaign.
+- Limitation: Source-level tests are not counted as executed evaluation evidence.
+- Limitation: Training stability under a large asynchronous optimizer was not measured.
+
+### H5: partial
+
+Deterministic scheduler feasibility under identical scenario inputs.
+
+- Observation: Dedicated, static, utilization, FIFO, and value-aware policies were compiled for every evaluation seed.
+- Observation: Hard feasibility against supplied serving latency and queue predictions is reported independently for every policy, seed, and tick.
+- Limitation: Learning values are scenario predictions with provenance, not observed policy gains.
+- Limitation: No GPU-hour causal claim is made.
+
+### H6: not_exercised
+
+Deterministic capacity-reclamation accounting.
+
+- Observation: A preservation path was selected in 0/15 scheduler policy-seed runs.
+- Observation: The workload declares restart, checkpoint, and Continuum alternatives, but declaration alone is not execution evidence.
+- Limitation: No hardware-backed rollout migration timing was measured.
+
+### H7: supported_within_scope
+
+Local atomic promotion state machine and evidence preservation.
+
+- Observation: Each local synthetic run rejected an executed below-threshold candidate, promoted a passing candidate after shadow/canary, pinned an incompatible session, and restored the champion during rollback.
+- Limitation: No live distributed gateway or multi-region control plane was exercised.
+
+### H8: not_exercised
+
+Continual repair and forgetting over changing task distributions.
+
+- Observation: One targeted repair transaction was exercised per seed.
+- Limitation: A longitudinal task-distribution sequence is absent.
+
+### H9: not_exercised
+
+Governed deterministic experience selection.
+
+- Observation: The reference evaluation did not run a controlled comparison of experience-selection strategies.
+- Limitation: Source-level selector tests are not counted as executed evaluation evidence.
+- Limitation: Downstream learning gain from selection strategies was not measured.
+
+### H10: partial
+
+Controlled exact-state sibling rewards and credit provenance.
+
+- Observation: Every branch group shared one committed BranchPoint and preserved component rewards, first divergence, intervention type, assumptions, and exclusions.
+- Limitation: No independent non-sibling variance baseline was run.
+- Limitation: Controlled sibling differences improve comparability but do not prove universal causal identification.
+
+## Raw provenance
+
+Every executed summary and scheduler plan used above is content-addressed here. Paths are relative to the evaluation output directory.
+
+- `9036c08be84578e64f060572dc11267f24071bb159a3a619b3ee8b3dd2d69525`  `raw/flagship/seed-113/credit/branch-relative.json`
+- `000a1a6a0bc6d2f3d1223a583c51e57bbd47b93eac459f56832bc5acc527fcbd`  `raw/flagship/seed-113/summary.json`
+- `2d4e6915f6eeddef5e1f0690849f72055630ba3a9f1998019eca70a3bf031e24`  `raw/flagship/seed-41/credit/branch-relative.json`
+- `e36d0b7df4be2e4ff576cb829064ef9bd7bbe0272a570d0ffefbd192da8b8377`  `raw/flagship/seed-41/summary.json`
+- `510783faae03370929c1a7304846dd9e26ab895bdb1b411c25e0529bb77c1f00`  `raw/flagship/seed-73/credit/branch-relative.json`
+- `846cbdb767d7d68a398e53105c9f4f83a3cee9c19d47d3fc9fbe7536e490f170`  `raw/flagship/seed-73/summary.json`
+- `da241bb2e8c19c529f90d409adf1af2115e669517a92edbfa91d981fbdd02f6a`  `raw/scheduler/seed-113/dedicated.json`
+- `731432ffe9d198ec73c36d22fc3939d1612af6145328d8726b5c7af097105ecf`  `raw/scheduler/seed-113/fifo.json`
+- `7e396eb0ef4852c5a2fe020f0e9d6feeadadab7b5e32892acb81c8ed2b2bd67c`  `raw/scheduler/seed-113/helix_value_aware.json`
+- `2ea80ff2671b6f803ab849b91463729b6fc6516b7fb4f53104dec9e909a318cd`  `raw/scheduler/seed-113/static.json`
+- `e0aa21ee9fdc9e28ace7443184cbda8cdc944fb5d9333b7c6d6ad4affa7d4064`  `raw/scheduler/seed-113/utilization.json`
+- `31ec28abddd2c549810be41c1fbd9ee0fef9ef5d7838172712d71559269765f2`  `raw/scheduler/seed-41/dedicated.json`
+- `4e3a0467e813b60a3f81a40660d04c8212bbca26148de25d390e9be580eaddc6`  `raw/scheduler/seed-41/fifo.json`
+- `b5dd0a4894b66cf1d69249631a741a31833eaacd05f557661d6830ec94166912`  `raw/scheduler/seed-41/helix_value_aware.json`
+- `6db329bcdcaabeefaa97dd93615951dcd0e62725ea5ec196059842e5a27308bf`  `raw/scheduler/seed-41/static.json`
+- `6e3ef0ce5587ea63f79b8c025df6bca8f2913d02449b4357d481e1c2ce5aa07f`  `raw/scheduler/seed-41/utilization.json`
+- `5ea61a15ec6e692813d99746b9f51435d72dabfe882fbd323cc62b8100a1fa26`  `raw/scheduler/seed-73/dedicated.json`
+- `4f3f811bd67bc0126d11c0ab00ea092f545452ee5d961e805086c713e28a0585`  `raw/scheduler/seed-73/fifo.json`
+- `5c9d3266adbae426cc92310deec746fd0c48e62b24ac5237a9580b8278139ef9`  `raw/scheduler/seed-73/helix_value_aware.json`
+- `c6fc020f2d382be6f9bfc4a725af1ffd80fe54fcdbae1f98f8063942e74bea3f`  `raw/scheduler/seed-73/static.json`
+- `255f59ed1e4dfb5c7e89d2343b598515e528d6e1afe62310d22a8cfa288036cf`  `raw/scheduler/seed-73/utilization.json`
+- `9e1b5c66fa1c7d26b28dd5a8e67cd5e75e1847fb36f7ce54df37263138c78809`  `raw/scheduler/source-workload.json`
+
+## Limitations
+
+- No GPU or hardware-backed model path was available on this host.
+- No production data, external API, live promotion, or external side effect was authorized.
+- Student-t intervals summarize deterministic seed sensitivity with a small sample; seeds are not asserted to be independent population draws.
+- H1-H10 statuses are descriptive evidence classifications, not multiplicity-adjusted statistical hypothesis tests.
+- Predicted scheduler learning value and predicted serving-SLO feasibility are not observed quality or serving measurements.
+- The static baseline uses one declared resource-vector unit per learning class because the source workload is authored for the value-aware policy.

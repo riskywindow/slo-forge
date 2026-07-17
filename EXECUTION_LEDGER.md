@@ -1,6 +1,6 @@
 # SLOForge execution ledger
 
-Updated: 2026-08-02 (America/Los_Angeles)
+Updated: 2026-08-03 (America/Los_Angeles)
 
 ## SLOForge Helix extension
 
@@ -44,6 +44,59 @@ Baseline recorded: 2026-08-03 (America/Los_Angeles).
 The detailed dependency graph is `docs/helix/DEPENDENCY_GRAPH.md`. Every
 completion claim remains provisional until its acceptance command passes and
 root has verified the produced artifacts.
+
+### Final Helix closure
+
+The provisional workstream table above records the launch state. It is
+superseded by this verified closure record.
+
+- Final verified implementation source commit:
+  `de89932164a5ecc8a73e5fc2c309796a34f4b8b4`.
+- Root integration commit: `5450fadd482be4804c420b4d960554d7a765fc58`.
+- All transactional IR, environment/effect, capture/branch/replay,
+  rollout/reward/credit/training, staleness, experience selection, scheduler,
+  transaction/promotion, fault, report, and documentation workstreams are
+  complete in the local reference boundary.
+- `make check` passed with 1,082 Python tests and six declared optional
+  no-Torch/GPU skips, strict Ruff/mypy, all warning-denied Rust checks/tests,
+  37 UI tests with one fixture skip, and the production UI build.
+- `make helix-check` passed with 155 Python tests, strict Ruff/mypy, Rust
+  format/Clippy/tests, and five Rust/Python conformance tests.
+- Every Helix demo/evaluation target passed except Docker execution, whose
+  capability check ran and recorded `unexercised: Docker daemon unavailable`.
+  The literal clean archive passed from the final source commit.
+- The retained flagship contains 145 files and an artifact-derived 24-event
+  transaction timeline plus a 15-node/17-edge lineage graph. A deterministic
+  below-threshold candidate was rejected; the corrected challenger was
+  promoted after trusted gates; one incompatible active session stayed pinned;
+  and rollback restored the champion.
+- The three-seed evaluation reports a local synthetic success change from
+  0.6250 to 0.7917. It labels H1/H2/H5/H10 partial, H7 supported only within
+  local scope, and H3/H4/H6/H8/H9 not exercised. The five scheduler policies
+  tied on the supplied workload; no scheduling win is claimed.
+- No GPU, PyTorch/PEFT, vLLM/SGLang, multi-node, cloud, external API,
+  production capture, external side effect, or live production promotion was
+  authorized or exercised. Adapters and capability checks fail closed.
+- The fresh security, concurrency, state-semantics, agent-environment,
+  numerical, causal-credit, training, resource, benchmark, statistical, and
+  hiring review found no unresolved high-severity or reasonable medium-severity
+  issue inside the exercised boundary. It classified Helix as a transactional
+  learning substrate, while rejecting broader Principal causal/empirical-RL
+  claims without external evidence.
+
+| Closed Helix workstream | Final owner | Status | Acceptance evidence | Commit |
+|---|---|---|---|---|
+| Baseline, root integration, CLI, release gates | root | complete and exercised | baseline record; full checks; all local demos; clean archive | `a336680`, `5450fad`, `de89932` |
+| Canonical IR, schemas, migrations, stable hashes | root + IR lane | complete and exercised | 13 schemas; Rust/Python conformance; tamper tests | `5450fad` |
+| Environment capsules, COW, effects, security lifecycle | root + environment/security lanes | complete and exercised locally | isolation, service reconstruction, illegal-effect, tenant, redaction, corruption, cleanup tests | `5450fad` |
+| Coordinated capture, Continuum reuse, branching and replay | root + capture/state lanes | complete and exercised locally | fenced capture; four strategies; exact/causal/semantic replay; state-reuse reports | `5450fad` |
+| Rollout, reward, credit, training, staleness | root + post-training lanes | complete in reference path | real sandbox tests; complete batch; four objective implementations; deterministic trainer and CLI vertical | `5450fad` |
+| Experience selection and resource compiler | root + experience/resource lane | complete and synthetic exercised | all selectors; five scheduler policies × three seeds; hard SLO tests | `5450fad` |
+| Learning transaction, promotion and active sessions | root + promotion/security lanes | complete and exercised locally | eight-artifact gate; rejection; shadow; canary; atomic promote; pin; rollback | `5450fad` |
+| Faults, evaluation, ForgeCI/Autopsy, traces, docs and reviews | root + review lanes | complete in declared scope | 16-fault campaign; three-seed evaluation; all required reports/docs; final adversarial review | `5450fad`, `de89932` |
+
+Final evidence is indexed in `HELIX_FINAL_REPORT.md`. Raw artifacts are under
+`artifacts/helix/`; generated evaluations are under `reports/helix-*`.
 
 | Task | Owner | Status | Files owned | Dependencies | Acceptance test | Commit/patch |
 |---|---|---|---|---|---|---|

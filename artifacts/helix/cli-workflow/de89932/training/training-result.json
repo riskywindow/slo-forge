@@ -1,0 +1,83 @@
+{
+  "schema_version": "sloforge.helix.reference-training/v1",
+  "algorithm": "branch_relative",
+  "base_policy_epoch_id": "coding-agent@0",
+  "candidate": {
+    "schema_version": "sloforge.helix.reference-policy/v1",
+    "policy_epoch_id": "coding-agent-cli@1",
+    "actions": [
+      "naive_parse",
+      "guarded_parse",
+      "ast_guided",
+      "verifier_assisted"
+    ],
+    "logits": [
+      0.2350071220344308,
+      0.49475464075738135,
+      0.32320021785707936,
+      0.14703801935110855
+    ],
+    "temperature": 1.0
+  },
+  "data_hash": "bb05b51fabd755c792b809236017c7d487b4141188acfa3b5393df99fc325da6",
+  "checkpoint_hash": "7bc19ef5d030137c9c390f662c204835bac139b2169ae0637f417c292df4967a",
+  "seed": 41,
+  "metrics": [
+    {
+      "step": 0,
+      "objective": 2.220446049250313e-16,
+      "policy_kl": 0.0014522658459229015,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 1,
+      "objective": 0.19584532017818557,
+      "policy_kl": 0.005475385306944287,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 2,
+      "objective": 0.3748117333991302,
+      "policy_kl": 0.01159102678896785,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 3,
+      "objective": 0.5231473847443892,
+      "policy_kl": 0.013863967491394975,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 4,
+      "objective": 0.539873706013733,
+      "policy_kl": 0.016292042111249225,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 5,
+      "objective": 0.5561277452353737,
+      "policy_kl": 0.01886395682074354,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 6,
+      "objective": 0.5719240241236697,
+      "policy_kl": 0.02156910939010776,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    },
+    {
+      "step": 7,
+      "objective": 0.5872772516364358,
+      "policy_kl": 0.024397571261077024,
+      "accepted_samples": 4,
+      "rejected_samples": 0
+    }
+  ]
+}

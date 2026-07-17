@@ -1,0 +1,105 @@
+{
+  "schema_version": "sloforge.helix.branch-credit/v1",
+  "branch_group_id": "3287f279bcc52dc89d802cc93b9e99a85bc1ddb67127e5231b0e654047278a34",
+  "branch_point_id": "2765e28ed1ba4a3ca480db7a8f1fa3ab451d5db5f39dbfa117fbe8d4b29594f8",
+  "policy_epoch_id": "coding-agent@0",
+  "method": "branch_relative",
+  "divergence_action_index": 0,
+  "credits": [
+    {
+      "branch_id": "alternative-tool",
+      "trajectory_id": "3ea26075fc9e2af95116fce34a3267cf1d80c7c1019415727b96b62c07218082",
+      "action": "ast_guided",
+      "behavior_log_probability": -1.5111541217815445,
+      "reward_components": {
+        "visible-unit-and-retention-tests": 1.0,
+        "hidden-negative-retry-after": 1.0
+      },
+      "total_reward": 2.0,
+      "group_relative_advantage": 0.5773502691896258,
+      "decision_local_weight": 1.0,
+      "weighted_advantage": 0.5773502691896258,
+      "confidence": 0.7224999999999999,
+      "excluded_reason": null
+    },
+    {
+      "branch_id": "different-rng",
+      "trajectory_id": "ed96d5bd9fa718f4c342849defe0962fc96de5c8fb4732e0400384226dd3ebd8",
+      "action": "naive_parse",
+      "behavior_log_probability": -1.1111541217815444,
+      "reward_components": {
+        "visible-unit-and-retention-tests": 1.0,
+        "hidden-negative-retry-after": -1.0
+      },
+      "total_reward": 0.0,
+      "group_relative_advantage": -1.7320508075688774,
+      "decision_local_weight": 1.0,
+      "weighted_advantage": -1.7320508075688774,
+      "confidence": 0.6375,
+      "excluded_reason": null
+    },
+    {
+      "branch_id": "forced-alternative",
+      "trajectory_id": "d69d73f5f4d5d3c752a5a0784e38ff90cbebd3e2c8060e74c6f20256f7eff1aa",
+      "action": "guarded_parse",
+      "behavior_log_probability": -1.3111541217815443,
+      "reward_components": {
+        "visible-unit-and-retention-tests": 1.0,
+        "hidden-negative-retry-after": 1.0
+      },
+      "total_reward": 2.0,
+      "group_relative_advantage": 0.5773502691896258,
+      "decision_local_weight": 1.0,
+      "weighted_advantage": 0.5773502691896258,
+      "confidence": 0.8075,
+      "excluded_reason": null
+    },
+    {
+      "branch_id": "verifier-assisted",
+      "trajectory_id": "9a5d7eb2f428bb5c0eaef9b9b086d837f9fc7dc0eaae56340be2ac4222280c86",
+      "action": "verifier_assisted",
+      "behavior_log_probability": -1.7111541217815447,
+      "reward_components": {
+        "visible-unit-and-retention-tests": 1.0,
+        "hidden-negative-retry-after": 1.0
+      },
+      "total_reward": 2.0,
+      "group_relative_advantage": 0.5773502691896258,
+      "decision_local_weight": 1.0,
+      "weighted_advantage": 0.5773502691896258,
+      "confidence": 0.7224999999999999,
+      "excluded_reason": null
+    }
+  ],
+  "preferences": [
+    {
+      "chosen_branch_id": "verifier-assisted",
+      "rejected_branch_id": "different-rng",
+      "reward_margin": 2.0,
+      "confidence": 0.6375,
+      "controlled_difference": true
+    },
+    {
+      "chosen_branch_id": "forced-alternative",
+      "rejected_branch_id": "different-rng",
+      "reward_margin": 2.0,
+      "confidence": 0.6375,
+      "controlled_difference": true
+    },
+    {
+      "chosen_branch_id": "alternative-tool",
+      "rejected_branch_id": "different-rng",
+      "reward_margin": 2.0,
+      "confidence": 0.6375,
+      "controlled_difference": true
+    }
+  ],
+  "assumptions": [
+    "siblings share one validated BranchPoint",
+    "reward components are independently validated",
+    "observational branches are retained for accounting but excluded from optimization",
+    "process scores must come from evidence independent of terminal reward",
+    "controlled sibling differences support local counterfactual comparison, not universal causal identification",
+    "unmodeled environment interactions may still confound later suffix credit"
+  ]
+}
