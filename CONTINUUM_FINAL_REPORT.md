@@ -8,6 +8,7 @@ Date: 2026-08-02 (America/Los_Angeles)
 - Baseline tag: `sloforge-continuum-baseline-7e51ea7`
 - Final implementation commit: `8bba247b44d26e1be4475ca18058fcbc652adcf0`
 - Final implementation tag: `sloforge-continuum-source-8bba247`
+- Retained evidence commit: `d364419a77797ab5c22f01af70624cea2ceeb22c`
 - Evaluation identity: `385704604314a07571752635f41961674ccbe191ba843cbe4e567073e0431037`
 - Evaluation source commit: `8bba247b44d26e1be4475ca18058fcbc652adcf0`
 - Clean-room source tree: `d2677e4de91db57821f9943f48ca03a3cbb439c9`
