@@ -1,0 +1,26 @@
+{
+  "schema": "sloforge.helix.environment-scenario/v1",
+  "seed": 73,
+  "working_directories": ["."],
+  "services": [
+    {
+      "service_id": "fixture-db",
+      "kind": "sqlite",
+      "state_paths": ["service.sqlite"],
+      "reconstructible": true,
+      "metadata": {
+        "reconstruction": "restore authenticated database bytes and run SQLite integrity_check"
+      }
+    }
+  ],
+  "policies": {
+    "production_capture_enabled": false,
+    "external_side_effects_enabled": false,
+    "cross_tenant_sharing_enabled": false,
+    "network_enabled": false,
+    "secret_redaction_enabled": true
+  },
+  "limitations": [
+    "This scenario reconstructs declared files and service recipes, not arbitrary process memory."
+  ]
+}

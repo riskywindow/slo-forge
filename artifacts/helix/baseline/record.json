@@ -1,0 +1,111 @@
+{
+  "schema_version": "sloforge.helix.baseline/v1",
+  "recorded_date": "2026-08-03",
+  "baseline_commit": "a3366807e879cf17615021e32606fbf77216235c",
+  "baseline_tag": "sloforge-helix-baseline-a336680",
+  "working_tree_policy": "pre-existing generated artifact changes preserved; Helix baseline evidence written only below artifacts/helix/baseline and reports/helix-baseline",
+  "host": {
+    "platform": "Apple Silicon macOS",
+    "logical_cpu_count": 12,
+    "memory_gib": 24,
+    "python": "3.12.8",
+    "rustc": "1.93.1",
+    "node": "22.16.0",
+    "uv": "0.10.2",
+    "nvidia_gpu_available": false,
+    "pytorch_available": false
+  },
+  "safety_controls": {
+    "gpu_budget_present": false,
+    "training_budget_present": false,
+    "external_api_budget_present": false,
+    "gpu_opt_in": false,
+    "multi_node_opt_in": false,
+    "external_api_opt_in": false,
+    "production_capture_opt_in": false,
+    "external_side_effects_opt_in": false,
+    "external_deployment_opt_in": false,
+    "live_promotion_opt_in": false
+  },
+  "checks": [
+    {
+      "command": "make check",
+      "status": "passed_after_locked_ui_dependency_refresh",
+      "details": "927 Python passed, 6 declared optional skips; Rust fmt, warning-denied Clippy, workspace tests and doc-tests passed; UI 37 passed, 1 generated-fixture skip, production build passed"
+    },
+    {
+      "command": "make fabric-check",
+      "status": "passed",
+      "details": "293 Python tests and all focused Fabric Rust tests passed"
+    },
+    {
+      "command": "make genesis-check",
+      "status": "passed",
+      "details": "363 Python passed, 1 optional PyTorch skip, all focused Genesis Rust tests passed"
+    },
+    {
+      "command": "make continuum-check",
+      "status": "passed",
+      "details": "196 Python passed, 1 optional PyTorch skip, all focused Continuum Rust tests passed"
+    }
+  ],
+  "demonstrations": [
+    {
+      "name": "core",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/demo/evidence/evidence.json",
+      "sha256": "1f178ac5b1d7947e9358bb2c64de0f8ef2a5bf9ee9fc8e22144760c80d63d235",
+      "summary": "120 live and 120 simulated requests"
+    },
+    {
+      "name": "fabric",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/fabric-demo/manifest.json",
+      "sha256": "c417c8231976eae3a7b1fdc0dd5750de02ef4ebb48c662ab2e4cde79687fca16",
+      "summary": "two deterministic faults, seven counterfactuals, guarded recovery completed"
+    },
+    {
+      "name": "autopsy",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/autopsy-demo/manifest.json",
+      "sha256": "6d0729cc2d28389608c57b3722c825f903d24189111f3d38812006c6ac0c4404",
+      "summary": "structured diagnosis and counterfactual recovery completed"
+    },
+    {
+      "name": "genesis_zero_day",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/genesis-zero-day-demo/GENESIS_DEMO_REPORT.json",
+      "sha256": "f47f4908f20475256c9badac24272cc4b92dd0e409343ad35b25d42cc41071bd",
+      "summary": "real candidate rejection, corrected candidate acceptance, CPU-only local evolution"
+    },
+    {
+      "name": "continuum_migration",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/continuum-migration-demo/verification.json",
+      "sha256": "755c3eafd9ad870edd7fe5d73a6f59c823466caaddde9089862c8199642972df",
+      "summary": "pre-copy migration verified"
+    },
+    {
+      "name": "continuum_fault",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/continuum-fault-demo/fault-manifest.json",
+      "sha256": "681dc7657542d484902d4ac9cf725fd29baab3e750c5688985206ed8b4f994ff",
+      "summary": "destination crash before commit handled with rollback evidence"
+    },
+    {
+      "name": "forgeci",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/forgeci-demo/evaluation.json",
+      "sha256": "a32661037e0f06e8cffda3c2f251a6ba9e5004366384d101e1a0140d94f622b8",
+      "summary": "exact planted regression commit identified"
+    },
+    {
+      "name": "warmpath",
+      "status": "passed",
+      "artifact": "artifacts/helix/baseline/warmpath-demo/manifest.json",
+      "sha256": "addbbeb5463d3a34748e53e4b3a87b0b1723bdf85913785e14c3a1a67ad0bebe",
+      "summary": "measured local restore completed with checksum verification"
+    }
+  ],
+  "known_baseline_issue": "The first make check attempt reached the UI and failed because node_modules lacked Rollup's architecture-specific optional dependency. npm ci from the existing lock restored the dependency; the complete make check rerun passed."
+}

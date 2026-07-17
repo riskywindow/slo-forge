@@ -39,6 +39,7 @@ from .continuum import continuum_app
 from .fabric import fabric_app
 from .forgeci import forgeci_app
 from .genesis import genesis_app
+from .helix import helix_app
 from .lineage import lineage_app
 from .recovery import recovery_app
 from .redteam import redteam_app
@@ -64,6 +65,7 @@ app.add_typer(lineage_app, name="lineage")
 app.add_typer(synthbench_app, name="synthbench")
 app.add_typer(redteam_app, name="redteam")
 app.add_typer(continuum_app, name="continuum")
+app.add_typer(helix_app, name="helix")
 console = Console()
 
 

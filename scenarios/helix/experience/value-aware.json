@@ -1,0 +1,199 @@
+{
+  "schema_version": "sloforge.helix.experience-selection-request/v1",
+  "request_id": "experience.value-aware.demo",
+  "tenant_id": "tenant.demo",
+  "seed": 20260803,
+  "strategy": "helix_value_aware",
+  "constraints": {
+    "budget_microunits": 12,
+    "capacity_units": 8,
+    "max_selected_experiences": 2,
+    "maximum_privacy": "tenant_private",
+    "allowed_side_effect_risks": [
+      "pure",
+      "read_only"
+    ],
+    "allow_production_evidence": true,
+    "minimum_score": 0.0
+  },
+  "candidates": [
+    {
+      "candidate_id": "experience.synthetic.failure",
+      "tenant_id": "tenant.demo",
+      "source": "synthetic",
+      "privacy": "tenant_private",
+      "side_effect_risk": "pure",
+      "consent_granted": false,
+      "redaction_applied": false,
+      "requires_live_side_effects": false,
+      "content_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111",
+      "artifacts": [
+        {
+          "artifact_id": "artifact.synthetic.failure",
+          "artifact_uri": "evidence://helix-demo/synthetic-failure",
+          "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sample_ids": [
+            "sample.synthetic.failure"
+          ]
+        }
+      ],
+      "authorization_artifact_sha256": null,
+      "redaction_artifact_sha256": null,
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 0.8,
+        "policy_uncertainty": 0.4,
+        "value_uncertainty": 0.3,
+        "novelty": 0.6,
+        "rarity": 0.5,
+        "safety": 0.8,
+        "recurrence": 0.7,
+        "autopsy_issue": 0.9,
+        "reward_disagreement": 0.5,
+        "capability_regression": 0.7,
+        "branchability": 0.9,
+        "expected_learning_value": 0.9
+      },
+      "training_cost_microunits": 5,
+      "capacity_units": 3
+    },
+    {
+      "candidate_id": "experience.production.uncertain",
+      "tenant_id": "tenant.demo",
+      "source": "authorized_production",
+      "privacy": "tenant_private",
+      "side_effect_risk": "read_only",
+      "consent_granted": true,
+      "redaction_applied": true,
+      "requires_live_side_effects": false,
+      "content_fingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+      "artifacts": [
+        {
+          "artifact_id": "artifact.production.uncertain",
+          "artifact_uri": "evidence://helix-demo/redacted-production-uncertainty",
+          "artifact_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "sample_ids": [
+            "sample.production.uncertain"
+          ]
+        }
+      ],
+      "authorization_artifact_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "redaction_artifact_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.7,
+        "policy_uncertainty": 0.95,
+        "value_uncertainty": 0.85,
+        "novelty": 0.5,
+        "rarity": 0.6,
+        "safety": 0.3,
+        "recurrence": 0.4,
+        "autopsy_issue": 0.2,
+        "reward_disagreement": 0.8,
+        "capability_regression": 0.5,
+        "branchability": 0.8,
+        "expected_learning_value": 0.8
+      },
+      "training_cost_microunits": 4,
+      "capacity_units": 3
+    },
+    {
+      "candidate_id": "experience.synthetic.novel",
+      "tenant_id": "tenant.demo",
+      "source": "synthetic",
+      "privacy": "public",
+      "side_effect_risk": "pure",
+      "consent_granted": false,
+      "redaction_applied": false,
+      "requires_live_side_effects": false,
+      "content_fingerprint": "3333333333333333333333333333333333333333333333333333333333333333",
+      "artifacts": [
+        {
+          "artifact_id": "artifact.synthetic.novel",
+          "artifact_uri": "evidence://helix-demo/synthetic-novel",
+          "artifact_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "sample_ids": [
+            "sample.synthetic.novel"
+          ]
+        }
+      ],
+      "authorization_artifact_sha256": null,
+      "redaction_artifact_sha256": null,
+      "features": {
+        "failure": false,
+        "verifier_disagreement": 0.1,
+        "policy_uncertainty": 0.2,
+        "value_uncertainty": 0.2,
+        "novelty": 1.0,
+        "rarity": 0.9,
+        "safety": 0.1,
+        "recurrence": 0.1,
+        "autopsy_issue": 0.0,
+        "reward_disagreement": 0.1,
+        "capability_regression": 0.2,
+        "branchability": 0.7,
+        "expected_learning_value": 0.6
+      },
+      "training_cost_microunits": 3,
+      "capacity_units": 2
+    },
+    {
+      "candidate_id": "experience.production.blocked",
+      "tenant_id": "tenant.other",
+      "source": "authorized_production",
+      "privacy": "restricted",
+      "side_effect_risk": "external",
+      "consent_granted": false,
+      "redaction_applied": false,
+      "requires_live_side_effects": true,
+      "content_fingerprint": "4444444444444444444444444444444444444444444444444444444444444444",
+      "artifacts": [
+        {
+          "artifact_id": "artifact.production.blocked",
+          "artifact_uri": "evidence://helix-demo/blocked-production-reference",
+          "artifact_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "sample_ids": [
+            "sample.production.blocked"
+          ]
+        }
+      ],
+      "authorization_artifact_sha256": null,
+      "redaction_artifact_sha256": null,
+      "features": {
+        "failure": true,
+        "verifier_disagreement": 1.0,
+        "policy_uncertainty": 1.0,
+        "value_uncertainty": 1.0,
+        "novelty": 1.0,
+        "rarity": 1.0,
+        "safety": 1.0,
+        "recurrence": 1.0,
+        "autopsy_issue": 1.0,
+        "reward_disagreement": 1.0,
+        "capability_regression": 1.0,
+        "branchability": 1.0,
+        "expected_learning_value": 1.0
+      },
+      "training_cost_microunits": 1,
+      "capacity_units": 1
+    }
+  ],
+  "weights": {
+    "failure": 0.1,
+    "verifier_disagreement": 0.08,
+    "policy_uncertainty": 0.08,
+    "value_uncertainty": 0.08,
+    "novelty": 0.1,
+    "rarity": 0.06,
+    "safety": 0.1,
+    "recurrence": 0.06,
+    "autopsy_issue": 0.08,
+    "reward_disagreement": 0.06,
+    "capability_regression": 0.08,
+    "branchability": 0.05,
+    "expected_value_per_cost": 0.07
+  },
+  "assumptions": [
+    "Feature calibration is bound to the referenced evaluation evidence."
+  ]
+}

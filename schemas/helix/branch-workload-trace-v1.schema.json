@@ -1,0 +1,215 @@
+{
+  "$defs": {
+    "BranchWorkloadRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_point_id": {
+          "minLength": 1,
+          "title": "Branch Point Id",
+          "type": "string"
+        },
+        "input_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "ordinal": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "output_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "scheduled_offset_ms": {
+          "minimum": 0.0,
+          "title": "Scheduled Offset Ms",
+          "type": "number"
+        },
+        "status": {
+          "$ref": "#/$defs/BranchWorkloadStatus"
+        },
+        "trajectory_id": {
+          "minLength": 1,
+          "title": "Trajectory Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id",
+        "branch_point_id",
+        "trajectory_id",
+        "ordinal",
+        "scheduled_offset_ms",
+        "input_digest",
+        "output_digest",
+        "status"
+      ],
+      "title": "BranchWorkloadRequest",
+      "type": "object"
+    },
+    "BranchWorkloadStatus": {
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "BranchWorkloadStatus",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "minLength": 1,
+          "title": "Artifact Kind",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "relation": {
+          "$ref": "#/$defs/LineageRelation"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "relation",
+        "digest"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "LineageRelation": {
+      "enum": [
+        "source",
+        "parent",
+        "derived_from",
+        "evidence",
+        "state",
+        "policy"
+      ],
+      "title": "LineageRelation",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/helix/v1",
+      "default": "sloforge.io/helix/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "branch_group_id": {
+      "minLength": 1,
+      "title": "Branch Group Id",
+      "type": "string"
+    },
+    "completed_at": {
+      "minLength": 1,
+      "title": "Completed At",
+      "type": "string"
+    },
+    "environment_id": {
+      "minLength": 1,
+      "title": "Environment Id",
+      "type": "string"
+    },
+    "kind": {
+      "const": "BranchWorkloadTrace",
+      "default": "BranchWorkloadTrace",
+      "title": "Kind",
+      "type": "string"
+    },
+    "lineage": {
+      "items": {
+        "$ref": "#/$defs/LineageReference"
+      },
+      "title": "Lineage",
+      "type": "array"
+    },
+    "raw_trace_digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "raw_trace_uri": {
+      "minLength": 1,
+      "title": "Raw Trace Uri",
+      "type": "string"
+    },
+    "requests": {
+      "items": {
+        "$ref": "#/$defs/BranchWorkloadRequest"
+      },
+      "title": "Requests",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "started_at": {
+      "minLength": 1,
+      "title": "Started At",
+      "type": "string"
+    },
+    "trace_id": {
+      "minLength": 1,
+      "title": "Trace Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "trace_id",
+    "branch_group_id",
+    "environment_id",
+    "seed",
+    "started_at",
+    "completed_at",
+    "requests",
+    "raw_trace_uri",
+    "raw_trace_digest",
+    "lineage"
+  ],
+  "title": "BranchWorkloadTrace",
+  "type": "object"
+}

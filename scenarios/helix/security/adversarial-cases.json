@@ -1,0 +1,67 @@
+{
+  "schema_version": "sloforge.helix.security-adversarial-corpus/v1",
+  "seed": 22003,
+  "scope": "offline preflight and evidence validation only",
+  "cases": [
+    {
+      "case_id": "production-without-grant",
+      "control": "production_capture_opt_in",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "actor-resource-tenant-mismatch",
+      "control": "tenant_authorization",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "residual-secret-and-email",
+      "control": "secret_pii_redaction",
+      "expected_disposition": "redact_then_verify"
+    },
+    {
+      "case_id": "expired-artifact-without-receipt",
+      "control": "retention_deletion",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "foreign-tenant-capsule-reuse",
+      "control": "cross_tenant_reuse",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "tampered-checkpoint-and-lineage",
+      "control": "artifact_integrity",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "git-fsmonitor-hook-and-escaping-symlink",
+      "control": "malicious_repository",
+      "expected_disposition": "reject_without_execution"
+    },
+    {
+      "case_id": "ansi-control-secret-output-flood",
+      "control": "tool_output",
+      "expected_disposition": "bound_normalize_redact"
+    },
+    {
+      "case_id": "untrusted-evaluator-forged-trajectory",
+      "control": "reward_lineage",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "hidden-suite-mounted-under-policy-root",
+      "control": "hidden_test_boundary",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "reward-replay-with-new-id",
+      "control": "duplicate_submission",
+      "expected_disposition": "reject"
+    },
+    {
+      "case_id": "speculative-network-write",
+      "control": "external_effect_isolation",
+      "expected_disposition": "reject"
+    }
+  ]
+}

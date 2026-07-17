@@ -2,6 +2,49 @@
 
 Updated: 2026-08-02 (America/Los_Angeles)
 
+## SLOForge Helix extension
+
+Baseline recorded: 2026-08-03 (America/Los_Angeles).
+
+- Baseline commit: `a3366807e879cf17615021e32606fbf77216235c`.
+- Immutable baseline tag: `sloforge-helix-baseline-a336680`.
+- Machine-readable baseline: `artifacts/helix/baseline/record.json`.
+- The existing worktree contained extensive generated `artifacts/` and
+  `reports/` changes before Helix started. They are user-owned and were not
+  reset. New baseline evidence is isolated under `artifacts/helix/baseline/`
+  and `reports/helix-baseline/`.
+- `make check` passed after refreshing the locked UI install: 927 Python tests
+  passed with six declared optional hardware/PyTorch skips; the Rust workspace,
+  warning-denied Clippy, 37 UI tests, and production UI build passed.
+- `make fabric-check` passed with 293 focused Python tests and the Fabric Rust
+  suites. `make genesis-check` passed with 363 Python tests, one optional
+  PyTorch skip, and the Genesis Rust suites. `make continuum-check` passed with
+  196 Python tests, one optional PyTorch skip, and the Continuum Rust suites.
+- Core, Fabric, Autopsy, Genesis zero-day, Continuum migration/fault, ForgeCI,
+  and WarmPath demonstrations passed in the isolated baseline evidence root.
+- The host has no available PyTorch/NVIDIA path and all Helix budget/production/
+  external/live-promotion opt-ins are absent. No paid resource or external
+  mutation is authorized.
+- Four total agent slots are available, so root plus three subagents is the
+  maximum concurrency. Completed lanes are replaced while independent ready
+  work remains.
+
+| Helix task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline, dependency graph, root integration and release gates | root | baseline complete; implementation in progress | shared `main` with disjoint ownership | root manifests, CLI, ledger, flagship integration | all lanes | `make check`; all Helix targets; clean room | `artifacts/helix/baseline/record.json`; `docs/helix/DEPENDENCY_GRAPH.md` | baseline `a336680`; implementation pending |
+| Canonical transactional Helix IR, schemas, Rust conformance and stable hashes | Helix IR lane | ready | shared `main` | `python/sloforge/helix/ir`, `schemas/helix`, `crates/sloforge-helix-ir`, focused tests | baseline | Python/Rust round trips, schema validation, tamper tests | schemas and golden fixtures | pending |
+| Environment capsule, local COW backend, effect ledger and branch legality | Environment/effect lane | ready | shared `main` | `python/sloforge/helix/environments`, `python/sloforge/helix/effects`, focused tests | Helix identifiers | environment isolation, corruption, redaction and illegal-effect tests | environment fixtures | pending |
+| Coordinated capture, Continuum branching, branch groups and replay | Capture/branch/replay lane | ready | shared `main` | `python/sloforge/helix/capture`, `python/sloforge/helix/branching`, `python/sloforge/helix/replay`, focused tests | IR, Continuum, environment/effect contracts | consistent-boundary, exact/causal/semantic replay and recomputation tests | BranchPoint and replay fixtures | pending |
+| Rollout, reward, branch comparison, credit and training vertical | root initially; rotating lanes after first integration | planned after IR contracts | shared `main` | Helix rollout/reward/credit/dataset/trainer packages | first three lanes | deterministic end-to-end vertical test | trajectory/reward/credit/batch/candidate evidence | pending |
+| Staleness, segmented trajectories and asynchronous rollout semantics | rotating implementation lane | planned | shared `main` | Helix staleness and rollout coordination | trajectory IR, rollout | provenance/staleness/mixed-policy tests | staleness reports | pending |
+| Learning-aware resource compiler and capacity reclamation | rotating implementation lane + root | planned | shared `main` | Helix scheduler and Fabric integration | stable work/resource evidence | scheduler baselines and SLO-hard simulation | scheduler raw artifacts | pending |
+| Learning transaction, promotion capsule, active sessions, shadow/canary/rollback | rotating implementation lane + root | planned | shared `main` | Helix transaction/promotion packages | candidate/evaluation evidence | state-machine, gate and rollback tests | transaction journal and promotion evidence | pending |
+| Flagship, faults, evaluation, security, docs, reports and final reviews | root + rotating review lanes | planned | shared `main` | scenarios, tools, docs, paper, reports | stable integrated system | all demos, evaluation, Docker/clean-room disposition, adversarial review | final Helix bundle | pending |
+
+The detailed dependency graph is `docs/helix/DEPENDENCY_GRAPH.md`. Every
+completion claim remains provisional until its acceptance command passes and
+root has verified the produced artifacts.
+
 | Task | Owner | Status | Files owned | Dependencies | Acceptance test | Commit/patch |
 |---|---|---|---|---|---|---|
 | Workspace, integration, CLI and CPU demo | root | complete | root manifests, `python/sloforge/{cli,demo,runtime,benchmarks}` | all lanes | `make check && make demo` | `2c889e6` plus final evidence publication |

@@ -1,0 +1,343 @@
+{
+  "schema_version": "sloforge.helix.scheduler-request/v1",
+  "request_id": "helix-resource-reference",
+  "seed": 1701,
+  "policy": "helix_value_aware",
+  "horizon_ticks": 5,
+  "capacity": {
+    "cpu_millicores": 8000,
+    "memory_mib": 16384,
+    "gpu_milliunits": 1000,
+    "storage_mib": 100000,
+    "storage_iops": 10000,
+    "network_mbps": 10000
+  },
+  "resource_vectors": {
+    "serving": {
+      "cpu_millicores": 1000,
+      "memory_mib": 1024,
+      "gpu_milliunits": 0,
+      "storage_mib": 100,
+      "storage_iops": 100,
+      "network_mbps": 200
+    },
+    "rollout": {
+      "cpu_millicores": 2000,
+      "memory_mib": 2048,
+      "gpu_milliunits": 0,
+      "storage_mib": 200,
+      "storage_iops": 200,
+      "network_mbps": 300
+    },
+    "environment": {
+      "cpu_millicores": 500,
+      "memory_mib": 1024,
+      "gpu_milliunits": 0,
+      "storage_mib": 500,
+      "storage_iops": 100,
+      "network_mbps": 100
+    },
+    "reward": {
+      "cpu_millicores": 1000,
+      "memory_mib": 1024,
+      "gpu_milliunits": 0,
+      "storage_mib": 100,
+      "storage_iops": 100,
+      "network_mbps": 100
+    },
+    "verifier": {
+      "cpu_millicores": 1000,
+      "memory_mib": 1024,
+      "gpu_milliunits": 0,
+      "storage_mib": 100,
+      "storage_iops": 100,
+      "network_mbps": 100
+    },
+    "training": {
+      "cpu_millicores": 3000,
+      "memory_mib": 4096,
+      "gpu_milliunits": 1000,
+      "storage_mib": 500,
+      "storage_iops": 500,
+      "network_mbps": 500
+    },
+    "evaluation": {
+      "cpu_millicores": 1000,
+      "memory_mib": 1024,
+      "gpu_milliunits": 0,
+      "storage_mib": 100,
+      "storage_iops": 100,
+      "network_mbps": 100
+    }
+  },
+  "serving_slo": {
+    "reserved_capacity": {
+      "cpu_millicores": 5000,
+      "memory_mib": 8192,
+      "gpu_milliunits": 0,
+      "storage_mib": 1000,
+      "storage_iops": 1000,
+      "network_mbps": 2000
+    },
+    "maximum_predicted_latency_ms": 120.0,
+    "maximum_predicted_queue_depth": 32
+  },
+  "serving_forecast": [
+    {
+      "tick": 0,
+      "resource_units": 2,
+      "predicted_latency_ms": 40.0,
+      "predicted_queue_depth": 4,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/serving-forecast.jsonl",
+        "artifact_sha256": "529c568e312fede9d98f5b21a2ebaae9fa22709bc84c45e100ea56ee9b690991",
+        "sample_ids": ["serving.0"]
+      }
+    },
+    {
+      "tick": 1,
+      "resource_units": 2,
+      "predicted_latency_ms": 42.0,
+      "predicted_queue_depth": 5,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/serving-forecast.jsonl",
+        "artifact_sha256": "529c568e312fede9d98f5b21a2ebaae9fa22709bc84c45e100ea56ee9b690991",
+        "sample_ids": ["serving.1"]
+      }
+    },
+    {
+      "tick": 2,
+      "resource_units": 3,
+      "predicted_latency_ms": 55.0,
+      "predicted_queue_depth": 8,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/serving-forecast.jsonl",
+        "artifact_sha256": "529c568e312fede9d98f5b21a2ebaae9fa22709bc84c45e100ea56ee9b690991",
+        "sample_ids": ["serving.2"]
+      }
+    },
+    {
+      "tick": 3,
+      "resource_units": 2,
+      "predicted_latency_ms": 43.0,
+      "predicted_queue_depth": 5,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/serving-forecast.jsonl",
+        "artifact_sha256": "529c568e312fede9d98f5b21a2ebaae9fa22709bc84c45e100ea56ee9b690991",
+        "sample_ids": ["serving.3"]
+      }
+    },
+    {
+      "tick": 4,
+      "resource_units": 2,
+      "predicted_latency_ms": 41.0,
+      "predicted_queue_depth": 4,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/serving-forecast.jsonl",
+        "artifact_sha256": "529c568e312fede9d98f5b21a2ebaae9fa22709bc84c45e100ea56ee9b690991",
+        "sample_ids": ["serving.4"]
+      }
+    }
+  ],
+  "work": [
+    {
+      "work_id": "rollout.high-value",
+      "branch_id": "branch.high-value",
+      "work_class": "rollout",
+      "tenant_id": "tenant.reference",
+      "privacy": "tenant_private",
+      "effect": "pure",
+      "arrival_tick": 0,
+      "duration_ticks": 3,
+      "deadline_tick": 5,
+      "policy_age_ticks": 1,
+      "resource_units": 1,
+      "predicted_learning_value": {
+        "value": 12.0,
+        "model_id": "reference-value-model",
+        "model_version": "reference-value-model/v1",
+        "evidence": {
+          "artifact_uri": "scenario://helix/resource/value-predictions.jsonl",
+          "artifact_sha256": "ba9c3f601319472d67170f0c9978ef890e351bba3058d0094b41286be2c5f9d2",
+          "sample_ids": ["prediction.rollout.high-value"]
+        }
+      },
+      "preservation": [
+        {
+          "mode": "restart",
+          "pause_ticks": 0,
+          "checkpoint_interval_ticks": 0,
+          "storage_mib_written": 0,
+          "network_mib_transferred": 0,
+          "cost_microunits": 0
+        },
+        {
+          "mode": "checkpoint",
+          "pause_ticks": 1,
+          "checkpoint_interval_ticks": 1,
+          "storage_mib_written": 128,
+          "network_mib_transferred": 0,
+          "cost_microunits": 100,
+          "method_evidence": {
+            "artifact_uri": "scenario://helix/resource/preservation-methods.json",
+            "artifact_sha256": "36e30bca253d20ecc876f089a7ff28c00139aa4da90b3217845aef5776df37da",
+            "sample_ids": ["checkpoint.reference"]
+          }
+        },
+        {
+          "mode": "continuum",
+          "pause_ticks": 0,
+          "checkpoint_interval_ticks": 0,
+          "storage_mib_written": 16,
+          "network_mib_transferred": 16,
+          "cost_microunits": 150,
+          "method_evidence": {
+            "artifact_uri": "scenario://helix/resource/preservation-methods.json",
+            "artifact_sha256": "36e30bca253d20ecc876f089a7ff28c00139aa4da90b3217845aef5776df37da",
+            "sample_ids": ["continuum.reference"]
+          }
+        }
+      ]
+    },
+    {
+      "work_id": "evaluation.reference",
+      "branch_id": "branch.high-value",
+      "work_class": "evaluation",
+      "tenant_id": "tenant.reference",
+      "privacy": "tenant_private",
+      "effect": "read_only",
+      "arrival_tick": 0,
+      "duration_ticks": 1,
+      "deadline_tick": 5,
+      "policy_age_ticks": 1,
+      "resource_units": 1,
+      "predicted_learning_value": {
+        "value": 4.0,
+        "model_id": "reference-value-model",
+        "model_version": "reference-value-model/v1",
+        "evidence": {
+          "artifact_uri": "scenario://helix/resource/value-predictions.jsonl",
+          "artifact_sha256": "ba9c3f601319472d67170f0c9978ef890e351bba3058d0094b41286be2c5f9d2",
+          "sample_ids": ["prediction.evaluation.reference"]
+        }
+      },
+      "preservation": [
+        {
+          "mode": "restart",
+          "pause_ticks": 0,
+          "checkpoint_interval_ticks": 0,
+          "storage_mib_written": 0,
+          "network_mib_transferred": 0,
+          "cost_microunits": 0
+        }
+      ]
+    }
+  ],
+  "constraints": {
+    "max_budget_microunits": 1000000000,
+    "prices": {
+      "cpu_millicore_tick": 1,
+      "memory_mib_tick": 1,
+      "gpu_milliunit_tick": 10,
+      "storage_mib_tick": 0,
+      "storage_iop_tick": 0,
+      "network_mbps_tick": 1
+    },
+    "max_policy_staleness_ticks": 16,
+    "allowed_tenant_ids": ["tenant.reference"],
+    "maximum_privacy": "tenant_private",
+    "allowed_effects": ["pure", "read_only"],
+    "max_selected_branches": 2,
+    "max_preemptions_per_work": 2,
+    "max_total_preemptions": 4,
+    "capacity_lending": true
+  },
+  "static_limits": null,
+  "faults": [
+    {
+      "fault_id": "fault.traffic-spike",
+      "kind": "traffic_spike",
+      "start_tick": 2,
+      "end_tick": 3,
+      "magnitude": 0.25,
+      "direction": 1,
+      "target_work_id": null,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.traffic-spike"]
+      }
+    },
+    {
+      "fault_id": "fault.gpu-loss",
+      "kind": "gpu_loss",
+      "start_tick": 1,
+      "end_tick": 2,
+      "magnitude": 1.0,
+      "direction": 1,
+      "target_work_id": null,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.gpu-loss"]
+      }
+    },
+    {
+      "fault_id": "fault.cpu-exhaustion",
+      "kind": "cpu_exhaustion",
+      "start_tick": 3,
+      "end_tick": 4,
+      "magnitude": 0.1,
+      "direction": 1,
+      "target_work_id": null,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.cpu-exhaustion"]
+      }
+    },
+    {
+      "fault_id": "fault.storage-slowdown",
+      "kind": "storage_slowdown",
+      "start_tick": 3,
+      "end_tick": 4,
+      "magnitude": 0.2,
+      "direction": 1,
+      "target_work_id": null,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.storage-slowdown"]
+      }
+    },
+    {
+      "fault_id": "fault.network-slowdown",
+      "kind": "network_slowdown",
+      "start_tick": 3,
+      "end_tick": 4,
+      "magnitude": 0.2,
+      "direction": 1,
+      "target_work_id": null,
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.network-slowdown"]
+      }
+    },
+    {
+      "fault_id": "fault.value-error",
+      "kind": "value_prediction_error",
+      "start_tick": 0,
+      "end_tick": 2,
+      "magnitude": 0.2,
+      "direction": -1,
+      "target_work_id": "rollout.high-value",
+      "evidence": {
+        "artifact_uri": "scenario://helix/resource/faults.json",
+        "artifact_sha256": "06e66fb7927be3eb335b9d089e1ea07186c7cec43417260aefa71c5ef2fdf20a",
+        "sample_ids": ["fault.value-error"]
+      }
+    }
+  ],
+  "max_audit_records": 10000
+}

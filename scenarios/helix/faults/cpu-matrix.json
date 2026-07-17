@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.helix.fault-plan-request/v1",
+  "request_id": "helix.cpu-fault-matrix",
+  "seed": 20260803,
+  "horizon_steps": 16,
+  "callback_timeout_ms": 1000,
+  "max_callbacks": 16,
+  "faults": [
+    {"fault_id":"fault.capture.boundary","ground_truth_label":"capture.inconsistent_boundary","kind":"inconsistent_boundary","stage":"capture","activation":{"start_step":0,"end_step":1},"expected_response":"aborted","evidence_sha256":"0000000000000000000000000000000000000000000000000000000000000000","magnitude":1.0},
+    {"fault_id":"fault.rollout.effect","ground_truth_label":"rollout.illegal_effect","kind":"illegal_effect","stage":"rollout","activation":{"start_step":1,"end_step":2},"expected_response":"rejected","evidence_sha256":"1111111111111111111111111111111111111111111111111111111111111111","magnitude":1.0},
+    {"fault_id":"fault.rollout.logprob","ground_truth_label":"rollout.missing_logprob","kind":"missing_logprob","stage":"rollout","activation":{"start_step":2,"end_step":3},"expected_response":"quarantined","evidence_sha256":"2222222222222222222222222222222222222222222222222222222222222222","magnitude":1.0},
+    {"fault_id":"fault.rollout.policy","ground_truth_label":"rollout.policy_mismatch","kind":"policy_mismatch","stage":"rollout","activation":{"start_step":3,"end_step":4},"expected_response":"rejected","evidence_sha256":"3333333333333333333333333333333333333333333333333333333333333333","magnitude":1.0},
+    {"fault_id":"fault.rollout.stale","ground_truth_label":"rollout.policy_staleness","kind":"policy_staleness","stage":"rollout","activation":{"start_step":4,"end_step":5},"expected_response":"deferred","evidence_sha256":"4444444444444444444444444444444444444444444444444444444444444444","magnitude":99.0},
+    {"fault_id":"fault.reward.corrupt","ground_truth_label":"reward.corruption","kind":"reward_corruption","stage":"reward","activation":{"start_step":5,"end_step":6},"expected_response":"quarantined","evidence_sha256":"5555555555555555555555555555555555555555555555555555555555555555","magnitude":2.0},
+    {"fault_id":"fault.reward.duplicate","ground_truth_label":"reward.duplicate","kind":"duplicate_reward","stage":"reward","activation":{"start_step":6,"end_step":7},"expected_response":"rejected","evidence_sha256":"6666666666666666666666666666666666666666666666666666666666666666","magnitude":1.0},
+    {"fault_id":"fault.branch.checkpoint","ground_truth_label":"branching.checkpoint_failure","kind":"checkpoint_failure","stage":"branching","activation":{"start_step":7,"end_step":8},"expected_response":"aborted","evidence_sha256":"7777777777777777777777777777777777777777777777777777777777777777","magnitude":1.0},
+    {"fault_id":"fault.training.lineage","ground_truth_label":"training.lineage_failure","kind":"lineage_failure","stage":"training","activation":{"start_step":8,"end_step":9},"expected_response":"rejected","evidence_sha256":"8888888888888888888888888888888888888888888888888888888888888888","magnitude":1.0},
+    {"fault_id":"fault.training.step","ground_truth_label":"training.step_failure","kind":"training_failure","stage":"training","activation":{"start_step":9,"end_step":10},"expected_response":"aborted","evidence_sha256":"9999999999999999999999999999999999999999999999999999999999999999","magnitude":1.0},
+    {"fault_id":"fault.evaluation.quality","ground_truth_label":"evaluation.quality_reject","kind":"quality_reject","stage":"evaluation","activation":{"start_step":10,"end_step":11},"expected_response":"retained_champion","evidence_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","magnitude":1.0},
+    {"fault_id":"fault.evaluation.serving","ground_truth_label":"evaluation.serving_reject","kind":"serving_reject","stage":"evaluation","activation":{"start_step":11,"end_step":12},"expected_response":"retained_champion","evidence_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","magnitude":1.0},
+    {"fault_id":"fault.evaluation.compatibility","ground_truth_label":"evaluation.compatibility_reject","kind":"compatibility_reject","stage":"evaluation","activation":{"start_step":12,"end_step":13},"expected_response":"retained_champion","evidence_sha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","magnitude":1.0},
+    {"fault_id":"fault.promotion.pointer","ground_truth_label":"promotion.partial_champion_pointer","kind":"partial_champion_pointer","stage":"promotion","activation":{"start_step":13,"end_step":14},"expected_response":"rolled_back","evidence_sha256":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","magnitude":1.0},
+    {"fault_id":"fault.resource.traffic","ground_truth_label":"resource.traffic_spike","kind":"traffic_spike","stage":"resource","activation":{"start_step":14,"end_step":15},"expected_response":"serving_protected","evidence_sha256":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","magnitude":1.5},
+    {"fault_id":"fault.resource.gpu","ground_truth_label":"resource.gpu_loss","kind":"gpu_loss","stage":"resource","activation":{"start_step":15,"end_step":16},"expected_response":"capacity_reduced","evidence_sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","magnitude":0.25}
+  ],
+  "assumptions": [
+    "Callbacks bind each injected instruction to a real stage-specific assertion when available."
+  ]
+}

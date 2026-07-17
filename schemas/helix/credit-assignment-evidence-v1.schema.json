@@ -1,0 +1,315 @@
+{
+  "$defs": {
+    "CreditAssignment": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_id": {
+          "minLength": 1,
+          "title": "Assignment Id",
+          "type": "string"
+        },
+        "behavior_log_probability": {
+          "maximum": 0.0,
+          "title": "Behavior Log Probability",
+          "type": "number"
+        },
+        "credit": {
+          "title": "Credit",
+          "type": "number"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "policy_epoch": {
+          "$ref": "#/$defs/PolicyEpoch"
+        },
+        "reward_component_id": {
+          "minLength": 1,
+          "title": "Reward Component Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "subject_kind": {
+          "$ref": "#/$defs/CreditSubjectKind"
+        }
+      },
+      "required": [
+        "assignment_id",
+        "subject_kind",
+        "subject_id",
+        "event_id",
+        "reward_component_id",
+        "policy_epoch",
+        "behavior_log_probability",
+        "credit"
+      ],
+      "title": "CreditAssignment",
+      "type": "object"
+    },
+    "CreditSubjectKind": {
+      "enum": [
+        "event",
+        "token",
+        "action"
+      ],
+      "title": "CreditSubjectKind",
+      "type": "string"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "minLength": 1,
+          "title": "Artifact Kind",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "relation": {
+          "$ref": "#/$defs/LineageRelation"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "relation",
+        "digest"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "LineageRelation": {
+      "enum": [
+        "source",
+        "parent",
+        "derived_from",
+        "evidence",
+        "state",
+        "policy"
+      ],
+      "title": "LineageRelation",
+      "type": "string"
+    },
+    "PolicyEpoch": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "sloforge.io/helix/v1",
+          "default": "sloforge.io/helix/v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "created_at": {
+          "minLength": 1,
+          "title": "Created At",
+          "type": "string"
+        },
+        "epoch": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Epoch",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "PolicyEpoch",
+          "default": "PolicyEpoch",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lineage": {
+          "items": {
+            "$ref": "#/$defs/LineageReference"
+          },
+          "title": "Lineage",
+          "type": "array"
+        },
+        "parent_epoch": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Epoch"
+        },
+        "parent_policy_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "policy_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "policy_id": {
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "training_transaction_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Training Transaction Id"
+        }
+      },
+      "required": [
+        "policy_id",
+        "epoch",
+        "policy_digest",
+        "created_at",
+        "lineage"
+      ],
+      "title": "PolicyEpoch",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/helix/v1",
+      "default": "sloforge.io/helix/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "assignments": {
+      "items": {
+        "$ref": "#/$defs/CreditAssignment"
+      },
+      "title": "Assignments",
+      "type": "array"
+    },
+    "credit_evidence_id": {
+      "minLength": 1,
+      "title": "Credit Evidence Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "title": "Generated At",
+      "type": "string"
+    },
+    "kind": {
+      "const": "CreditAssignmentEvidence",
+      "default": "CreditAssignmentEvidence",
+      "title": "Kind",
+      "type": "string"
+    },
+    "lineage": {
+      "items": {
+        "$ref": "#/$defs/LineageReference"
+      },
+      "title": "Lineage",
+      "type": "array"
+    },
+    "method": {
+      "minLength": 1,
+      "title": "Method",
+      "type": "string"
+    },
+    "policy_epochs": {
+      "items": {
+        "$ref": "#/$defs/PolicyEpoch"
+      },
+      "title": "Policy Epochs",
+      "type": "array"
+    },
+    "reward_evidence_digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "reward_evidence_id": {
+      "minLength": 1,
+      "title": "Reward Evidence Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "total_credit": {
+      "title": "Total Credit",
+      "type": "number"
+    },
+    "trajectory_digest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "trajectory_id": {
+      "minLength": 1,
+      "title": "Trajectory Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "credit_evidence_id",
+    "trajectory_id",
+    "trajectory_digest",
+    "reward_evidence_id",
+    "reward_evidence_digest",
+    "method",
+    "policy_epochs",
+    "assignments",
+    "total_credit",
+    "generated_at",
+    "lineage"
+  ],
+  "title": "CreditAssignmentEvidence",
+  "type": "object"
+}

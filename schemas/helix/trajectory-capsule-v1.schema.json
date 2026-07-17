@@ -1,0 +1,547 @@
+{
+  "$defs": {
+    "ActionProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "action_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Action Index",
+          "type": "integer"
+        },
+        "action_type": {
+          "minLength": 1,
+          "title": "Action Type",
+          "type": "string"
+        },
+        "arguments_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "behavior_log_probability": {
+          "maximum": 0.0,
+          "title": "Behavior Log Probability",
+          "type": "number"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "policy_epoch": {
+          "$ref": "#/$defs/PolicyEpoch"
+        },
+        "raw_sample": {
+          "$ref": "#/$defs/EvidencePointer"
+        }
+      },
+      "required": [
+        "action_id",
+        "action_index",
+        "event_id",
+        "action_type",
+        "policy_epoch",
+        "behavior_log_probability",
+        "arguments_digest",
+        "raw_sample"
+      ],
+      "title": "ActionProvenance",
+      "type": "object"
+    },
+    "Digest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "Digest",
+      "type": "object"
+    },
+    "EvidencePointer": {
+      "additionalProperties": false,
+      "properties": {
+        "captured_at": {
+          "minLength": 1,
+          "title": "Captured At",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "digest",
+        "media_type",
+        "captured_at"
+      ],
+      "title": "EvidencePointer",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "minLength": 1,
+          "title": "Artifact Kind",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "relation": {
+          "$ref": "#/$defs/LineageRelation"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "relation",
+        "digest"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "LineageRelation": {
+      "enum": [
+        "source",
+        "parent",
+        "derived_from",
+        "evidence",
+        "state",
+        "policy"
+      ],
+      "title": "LineageRelation",
+      "type": "string"
+    },
+    "PolicyConsistency": {
+      "enum": [
+        "strict",
+        "segmented"
+      ],
+      "title": "PolicyConsistency",
+      "type": "string"
+    },
+    "PolicyEpoch": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "sloforge.io/helix/v1",
+          "default": "sloforge.io/helix/v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "created_at": {
+          "minLength": 1,
+          "title": "Created At",
+          "type": "string"
+        },
+        "epoch": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Epoch",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "PolicyEpoch",
+          "default": "PolicyEpoch",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lineage": {
+          "items": {
+            "$ref": "#/$defs/LineageReference"
+          },
+          "title": "Lineage",
+          "type": "array"
+        },
+        "parent_epoch": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Epoch"
+        },
+        "parent_policy_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "policy_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "policy_id": {
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "training_transaction_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Training Transaction Id"
+        }
+      },
+      "required": [
+        "policy_id",
+        "epoch",
+        "policy_digest",
+        "created_at",
+        "lineage"
+      ],
+      "title": "PolicyEpoch",
+      "type": "object"
+    },
+    "TokenProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "behavior_log_probability": {
+          "maximum": 0.0,
+          "title": "Behavior Log Probability",
+          "type": "number"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "policy_epoch": {
+          "$ref": "#/$defs/PolicyEpoch"
+        },
+        "raw_sample": {
+          "$ref": "#/$defs/EvidencePointer"
+        },
+        "sampler_seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Sampler Seed",
+          "type": "integer"
+        },
+        "token_id": {
+          "minLength": 1,
+          "title": "Token Id",
+          "type": "string"
+        },
+        "token_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Token Index",
+          "type": "integer"
+        },
+        "token_value": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Token Value",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "token_id",
+        "token_index",
+        "event_id",
+        "token_value",
+        "policy_epoch",
+        "behavior_log_probability",
+        "sampler_seed",
+        "raw_sample"
+      ],
+      "title": "TokenProvenance",
+      "type": "object"
+    },
+    "TrajectoryEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Event Index",
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/TrajectoryEventKind"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "policy_epoch": {
+          "$ref": "#/$defs/PolicyEpoch"
+        },
+        "source_evidence": {
+          "$ref": "#/$defs/EvidencePointer"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_index",
+        "kind",
+        "policy_epoch",
+        "payload_digest",
+        "source_evidence"
+      ],
+      "title": "TrajectoryEvent",
+      "type": "object"
+    },
+    "TrajectoryEventKind": {
+      "enum": [
+        "prompt_token",
+        "generated_token",
+        "action",
+        "observation",
+        "tool_result",
+        "terminal"
+      ],
+      "title": "TrajectoryEventKind",
+      "type": "string"
+    },
+    "TrajectorySegment": {
+      "additionalProperties": false,
+      "properties": {
+        "end_event_index_exclusive": {
+          "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
+          "title": "End Event Index Exclusive",
+          "type": "integer"
+        },
+        "policy_epoch": {
+          "$ref": "#/$defs/PolicyEpoch"
+        },
+        "segment_evidence": {
+          "$ref": "#/$defs/EvidencePointer"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "start_event_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Event Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start_event_index",
+        "end_event_index_exclusive",
+        "policy_epoch",
+        "segment_evidence"
+      ],
+      "title": "TrajectorySegment",
+      "type": "object"
+    },
+    "TrajectoryTerminalStatus": {
+      "enum": [
+        "completed",
+        "cancelled",
+        "errored",
+        "truncated"
+      ],
+      "title": "TrajectoryTerminalStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/ActionProvenance"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "api_version": {
+      "const": "sloforge.io/helix/v1",
+      "default": "sloforge.io/helix/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "branch_point_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Branch Point Id"
+    },
+    "completed_at": {
+      "minLength": 1,
+      "title": "Completed At",
+      "type": "string"
+    },
+    "environment_id": {
+      "minLength": 1,
+      "title": "Environment Id",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/TrajectoryEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "kind": {
+      "const": "TrajectoryCapsule",
+      "default": "TrajectoryCapsule",
+      "title": "Kind",
+      "type": "string"
+    },
+    "lineage": {
+      "items": {
+        "$ref": "#/$defs/LineageReference"
+      },
+      "title": "Lineage",
+      "type": "array"
+    },
+    "parent_trajectory_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Trajectory Id"
+    },
+    "policy_consistency": {
+      "$ref": "#/$defs/PolicyConsistency"
+    },
+    "policy_epochs": {
+      "items": {
+        "$ref": "#/$defs/PolicyEpoch"
+      },
+      "title": "Policy Epochs",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/TrajectorySegment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "source_state_capsule_id": {
+      "minLength": 1,
+      "title": "Source State Capsule Id",
+      "type": "string"
+    },
+    "started_at": {
+      "minLength": 1,
+      "title": "Started At",
+      "type": "string"
+    },
+    "terminal_status": {
+      "$ref": "#/$defs/TrajectoryTerminalStatus"
+    },
+    "tokens": {
+      "items": {
+        "$ref": "#/$defs/TokenProvenance"
+      },
+      "title": "Tokens",
+      "type": "array"
+    },
+    "trace_evidence": {
+      "$ref": "#/$defs/EvidencePointer"
+    },
+    "trajectory_id": {
+      "minLength": 1,
+      "title": "Trajectory Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "trajectory_id",
+    "source_state_capsule_id",
+    "environment_id",
+    "policy_consistency",
+    "policy_epochs",
+    "segments",
+    "events",
+    "tokens",
+    "actions",
+    "terminal_status",
+    "started_at",
+    "completed_at",
+    "trace_evidence",
+    "lineage"
+  ],
+  "title": "TrajectoryCapsule",
+  "type": "object"
+}

@@ -1,0 +1,19 @@
+{
+  "methods": [
+    {
+      "checkpoint_interval_ticks": 1,
+      "method_id": "checkpoint.reference",
+      "network_mib_transferred": 0,
+      "pause_ticks": 1,
+      "storage_mib_written": 128
+    },
+    {
+      "adapter_contract": "sloforge.continuum.execution-state/v1",
+      "method_id": "continuum.reference",
+      "network_mib_transferred": 16,
+      "pause_ticks": 0,
+      "storage_mib_written": 16
+    }
+  ],
+  "schema_version": "sloforge.helix.preservation-method-input/v1"
+}

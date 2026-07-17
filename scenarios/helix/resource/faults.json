@@ -1,0 +1,12 @@
+{
+  "faults": [
+    {"end_tick": 3, "fault_id": "fault.traffic-spike", "kind": "traffic_spike", "magnitude": 0.25, "start_tick": 2},
+    {"end_tick": 2, "fault_id": "fault.gpu-loss", "kind": "gpu_loss", "magnitude": 1.0, "start_tick": 1},
+    {"end_tick": 4, "fault_id": "fault.cpu-exhaustion", "kind": "cpu_exhaustion", "magnitude": 0.1, "start_tick": 3},
+    {"end_tick": 4, "fault_id": "fault.storage-slowdown", "kind": "storage_slowdown", "magnitude": 0.2, "start_tick": 3},
+    {"end_tick": 4, "fault_id": "fault.network-slowdown", "kind": "network_slowdown", "magnitude": 0.2, "start_tick": 3},
+    {"direction": -1, "end_tick": 2, "fault_id": "fault.value-error", "kind": "value_prediction_error", "magnitude": 0.2, "start_tick": 0, "target_work_id": "rollout.high-value"}
+  ],
+  "schema_version": "sloforge.helix.scheduler-fault-input/v1",
+  "seed": 1701
+}

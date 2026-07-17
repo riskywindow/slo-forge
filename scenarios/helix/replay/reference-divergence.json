@@ -1,0 +1,43 @@
+{
+  "schema_version": "sloforge.helix.replay-scenario/v1",
+  "scenario_id": "reference-first-divergence",
+  "seed": 97,
+  "runtime": "continuum-reference-token-major",
+  "modes": [
+    "exact",
+    "causal",
+    "semantic"
+  ],
+  "comparison_scopes": [
+    "transcript",
+    "environment_only",
+    "model_only",
+    "joint"
+  ],
+  "frame_bound": 64,
+  "required_identity_contracts": [
+    "policy_digest",
+    "runtime_build_hash",
+    "model_hash",
+    "model_state_digest",
+    "environment_state_digest",
+    "rng_algorithm_and_position",
+    "tool_contract_hash"
+  ],
+  "first_divergence_axes": [
+    "token",
+    "action",
+    "environment",
+    "reward",
+    "outcome",
+    "resource"
+  ],
+  "claims": {
+    "transcript_implies_environment_state_equality": false,
+    "transcript_implies_model_state_equality": false
+  },
+  "notes": [
+    "This is a deterministic CPU reference scenario, not a performance measurement.",
+    "Exact replay fails closed before comparison when any identity contract differs."
+  ]
+}

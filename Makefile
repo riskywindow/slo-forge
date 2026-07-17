@@ -10,7 +10,10 @@ CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE
 	genesis-docker-smoke genesis-clean-room-test continuum-check continuum-demo \
 	continuum-migration-demo continuum-fault-demo continuum-fork-demo \
 	continuum-compatibility-demo continuum-benchmark-cpu continuum-benchmark-gpu \
-	continuum-docker-smoke continuum-clean-room-test
+	continuum-docker-smoke continuum-clean-room-test helix-check helix-demo \
+	helix-branch-demo helix-replay-demo helix-training-demo helix-resource-demo \
+	helix-promotion-demo helix-fault-demo helix-evaluation helix-docker-smoke \
+	helix-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -147,6 +150,46 @@ continuum-docker-smoke:
 
 continuum-clean-room-test:
 	./tools/clean-room-continuum.sh
+
+helix-check:
+	uv run --locked ruff format --check python/sloforge/helix python/sloforge/cli/helix.py tests/python/test_helix*.py
+	uv run --locked ruff check python/sloforge/helix python/sloforge/cli/helix.py tests/python/test_helix*.py
+	uv run --locked mypy python/sloforge/helix python/sloforge/cli/helix.py
+	uv run --locked pytest -q tests/python/test_helix*.py
+	cargo fmt --all --check
+	$(CARGO_BOUNDED_ENV) cargo clippy -p sloforge-helix-ir --all-targets --all-features --locked -- -D warnings
+	$(CARGO_BOUNDED_ENV) cargo test -p sloforge-helix-ir --all-features --locked
+
+helix-demo:
+	uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed-41 --replace
+
+helix-branch-demo:
+	uv run --locked pytest -q tests/python/test_helix_capture.py tests/python/test_helix_branching.py tests/python/test_helix_environment_backend.py tests/python/test_helix_rollout.py
+
+helix-replay-demo:
+	uv run --locked pytest -q tests/python/test_helix_replay.py tests/python/test_helix_demo.py
+
+helix-training-demo:
+	uv run --locked pytest -q tests/python/test_helix_dataset.py tests/python/test_helix_training.py tests/python/test_helix_demo.py
+
+helix-resource-demo:
+	uv run --locked sloforge helix scheduler simulate --workload scenarios/helix/resource/cpu-learning-aware.json --policy helix_value_aware --output artifacts/helix/resource-demo
+
+helix-promotion-demo:
+	uv run --locked pytest -q tests/python/test_helix_promotion.py tests/python/test_helix_learning_transaction.py tests/python/test_helix_demo.py
+
+helix-fault-demo:
+	uv run --locked pytest -q tests/python/test_helix_faults*.py tests/python/test_helix_effect_ledger.py tests/python/test_helix_promotion.py tests/python/test_helix_scheduler.py
+	uv run --locked sloforge helix fault run --matrix scenarios/helix/faults/cpu-matrix.json --output artifacts/helix/faults/cpu-matrix
+
+helix-evaluation:
+	uv run --locked sloforge helix evaluate --output artifacts/helix/evaluation/reference --reports reports --seeds 41,73,113 --replace
+
+helix-docker-smoke:
+	./tools/helix-docker-smoke.sh
+
+helix-clean-room-test:
+	./tools/clean-room-helix.sh
 
 benchmark-cpu:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/cpu-demo --report-dir reports/cpu-demo --reset

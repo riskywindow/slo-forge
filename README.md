@@ -4,6 +4,53 @@ SLOForge is an SLO-driven inference deployment compiler and adaptive runtime. It
 
 It is not an LLM proxy or a YAML generator. The compiler performs memory feasibility pruning, measured hardware and engine profiling, service-curve calibration, budgeted candidate search, topology/routing/admission/autoscaling lowering, deployment validation, replay, fault injection, and evidence-backed reporting. Modal and Baseten Truss are optional output targets; the local compiler, Rust simulator, and Rust gateway have no cloud dependency.
 
+## SLOForge Helix
+
+Helix turns a production failure or decision boundary into a durable learning transaction. It
+captures a Continuum `ExecutionStateCapsule` and an `EnvironmentStateCapsule` behind one persisted
+barrier, forks exact same-policy model state and copy-on-write environment state, records behavior
+policy log probabilities, verifies sibling outcomes, trains a provenance-complete challenger, and
+allows serving only through independent quality, integrity, safety, performance, compatibility,
+shadow, and canary gates. Incompatible active sessions remain pinned to their champion epoch.
+
+```mermaid
+flowchart LR
+    O[Failure or valuable decision] --> C[Coordinated model + environment capture]
+    C --> B[Exact-state sibling branches]
+    B --> R[Tests, rewards, verifiers]
+    R --> A[Branch-relative credit]
+    A --> T[Versioned challenger training]
+    T --> G{Trusted gates}
+    G -->|pass| S[Shadow then canary]
+    G -->|fail| X[Reject and preserve evidence]
+    S --> P[Atomic champion pointer]
+    P --> M[Compatibility-aware session routing]
+    M --> K[Monitor or rollback]
+```
+
+The deterministic CPU flagship uses a real isolated coding fixture and actual visible/hidden test
+processes. It exercises four sibling strategies, rejects an under-trained candidate, promotes a
+corrected candidate, pins one incompatible session, and restores the champion in a separate
+rollback drill. The resulting policy and repository are synthetic; local CPU decision latency is
+not a model-serving or GPU measurement.
+
+```console
+make helix-check
+make helix-demo
+make helix-resource-demo
+make helix-fault-demo
+make helix-evaluation
+```
+
+The three-minute path is `make helix-demo`. Its raw branch point, state-reuse reports,
+trajectories, rewards, credit, batch, checkpoints, evaluation cases, transaction journal, registry,
+lineage graph, and summary are under `artifacts/helix/demo/seed-41/`. `make helix-evaluation`
+runs multiple seeds, retains all raw inputs, evaluates all five scheduler policies, and generates
+`reports/helix-evaluation.md`; unresolved hardware or causal hypotheses remain explicitly marked
+partial or unexercised. Start with [the Helix architecture](docs/helix/ARCHITECTURE.md),
+[trust model](docs/helix/TRUST_MODEL.md), [demo script](docs/helix/DEMO_SCRIPT.md), and
+[limitations](docs/helix/LIMITATIONS.md).
+
 ## SLOForge Continuum
 
 Continuum makes an active AI execution a portable, proof-carrying state capsule. It separates logical continuation state from runtime physical layout, compiles verified state conversion, transfers versioned deltas, and changes the sole state/output owner through a durable fenced transaction.

@@ -1612,6 +1612,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sloforge-helix-ir"
+version = "0.1.0"
+dependencies = [
+ "schemars",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
 name = "sloforge-loadgen"
 version = "0.1.0"
 dependencies = [

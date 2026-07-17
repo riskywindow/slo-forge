@@ -39,12 +39,17 @@ profile = ["psutil>=6.1,<8"]
 models = ["scikit-learn>=1.6,<2"]
 gpu-transformers = [
   "fastapi>=0.116,<1",
-  "torch>=2.5",
-  "transformers>=4.51",
+  "torch>=2.11,<2.14",
+  "transformers>=5.4,<6",
   "uvicorn>=0.35,<1",
 ]
-gpu-vllm = ["vllm>=0.8.5"]
-gpu-sglang = ["sglang>=0.4.6"]
+gpu-vllm = ["vllm>=0.9,<0.24"]
+gpu-sglang = ["sglang>=0.4.6,<0.6"]
+helix-training = [
+  "peft>=0.19.1,<1",
+  "torch>=2.11,<2.14",
+  "transformers>=5.4,<6",
+]
 dev = [
   "cryptography>=44,<51",
   "hypothesis>=6.120,<7",
