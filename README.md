@@ -45,9 +45,11 @@ make helix-evaluation
 The three-minute path is `make helix-demo`. Its raw branch point, state-reuse reports,
 trajectories, rewards, credit, batch, checkpoints, evaluation cases, transaction journal, registry,
 lineage graph, and summary are under `artifacts/helix/demo/seed-41/`. `make helix-evaluation`
-runs multiple seeds, retains all raw inputs, evaluates all five scheduler policies, and generates
-`reports/helix-evaluation.md`; unresolved hardware or causal hypotheses remain explicitly marked
-partial or unexercised. Start with [the Helix architecture](docs/helix/ARCHITECTURE.md),
+runs multiple seeds, retains all raw inputs, evaluates all five scheduler policies, and executes
+separate algorithm (H3), staleness/provenance (H4), rollout-preservation (H6), continual-learning
+(H8), and experience-selection (H9) campaigns. Each campaign reopens and replays its raw evidence
+before entering `reports/helix-evaluation.md`. Negative and inconclusive outcomes remain explicit;
+synthetic CPU evidence is never relabeled as neural, GPU, or production evidence. Start with [the Helix architecture](docs/helix/ARCHITECTURE.md),
 [trust model](docs/helix/TRUST_MODEL.md), [demo script](docs/helix/DEMO_SCRIPT.md), and
 [limitations](docs/helix/LIMITATIONS.md).
 

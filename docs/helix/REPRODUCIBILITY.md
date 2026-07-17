@@ -10,6 +10,14 @@ scenario, and the CPU fault matrix. The evaluation records software/hardware man
 seeds, intervals, artifact paths, hypothesis statuses, and limitations. Run `make check` before
 interpreting artifacts.
 
+`sloforge helix evaluate` also executes five bounded campaigns: the four-objective H3
+sample-budget matrix, the H4 policy-version/staleness matrix, the H6 local rollout-preservation
+matrix, the H8 sequential candidate gate, and the H9 experience-selection comparison. Their
+public validators reopen raw files, verify hashes and typed identities, and replay trainer,
+selection, policy-outcome, or restore calculations before the top-level evaluation accepts them.
+Use `make helix-training-demo`, `make helix-resource-demo`, and `make helix-evaluation` for the
+integrated paths.
+
 Determinism means identical declared inputs produce identical logical outputs. Wall-clock sandbox
 durations, filesystem/SQLite implementation details, and real hardware timing can vary. Checked-in
 synthetic/local results must not be relabeled as production measurements. See

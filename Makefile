@@ -170,10 +170,11 @@ helix-replay-demo:
 	uv run --locked pytest -q tests/python/test_helix_replay.py tests/python/test_helix_demo.py
 
 helix-training-demo:
-	uv run --locked pytest -q tests/python/test_helix_dataset.py tests/python/test_helix_training.py tests/python/test_helix_demo.py
+	uv run --locked pytest -q tests/python/test_helix_dataset.py tests/python/test_helix_training.py tests/python/test_helix_training_algorithm_campaign.py tests/python/test_helix_continual_learning_campaign.py tests/python/test_helix_demo.py
 
 helix-resource-demo:
 	uv run --locked sloforge helix scheduler simulate --workload scenarios/helix/resource/cpu-learning-aware.json --policy helix_value_aware --output artifacts/helix/resource-demo
+	uv run --locked pytest -q tests/python/test_helix_preservation_evaluation.py tests/python/test_helix_experience_selection_evaluation.py
 
 helix-promotion-demo:
 	uv run --locked pytest -q tests/python/test_helix_promotion.py tests/python/test_helix_learning_transaction.py tests/python/test_helix_demo.py

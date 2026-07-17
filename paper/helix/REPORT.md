@@ -116,6 +116,9 @@ failure, disagreement, uncertainty, novelty, rarity, safety, recurrence, Autopsy
 regression, branchability, and predicted learning value per cost. Consent, authorization, redaction,
 tenant, privacy, effect, redundancy, budget, capacity, and anti-train-all gates are hard. All
 candidates retain scores and exclusion reasons. The features remain predictions until evaluated.
+The reference H9 campaign therefore measures downstream categorical-policy decisions after training
+and treats random selection as its predeclared primary comparator; failure-, uncertainty-, and
+novelty-only comparisons remain descriptive.
 
 ## 7. Staleness, batches, and trainer boundary
 
@@ -128,6 +131,12 @@ lineage. It rejects duplicate identities, holdout leakage, action or epoch misma
 and changed hashes. A narrow trainer adapter consumes only validated samples and emits a new immutable
 epoch. The built-in CPU trainer exists to execute the contract; it is not a distributed LLM trainer.
 
+Two additional reference campaigns exercise this boundary. H3 runs all four required objectives
+over matched seeds and sample budgets with trainer replay and paired learning-curve effects. H4
+derives parameter distance and action log probabilities from its actual categorical policies,
+exercises current, stale, mixed, missing-probability, recomputed, and incompatible-state cases, and
+requires zero invalid sample admissions. Neither campaign is evidence about neural convergence.
+
 ## 8. Serving-hard resource compilation
 
 The resource compiler models serving and learning classes in deterministic ticks. Mandatory serving
@@ -139,6 +148,12 @@ Idle reserved capacity may be lent and later reclaimed. Restart, checkpoint, and
 preservation account for pause, storage, network, retained progress, lost work, and cost. Faults such
 as traffic spike and GPU loss alter explicit capacity. The compiler's forecasts and learning values
 are scenario inputs linked to evidence, not measured causal benefits.
+
+The H6 campaign separately executes local restart, environment-only, model-only, and joint
+Continuum/environment restoration. Loss and state bytes are derived from raw trajectories,
+checkpoints, and restore evidence. Resume and serving values are deterministic reference accounting
+ticks containing declared validation/dispatch weights, not wall time or an instrumented operation
+trace.
 
 ## 9. Promotion, sessions, and rollback
 

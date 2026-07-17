@@ -11,27 +11,87 @@ import html
 import json
 import math
 import platform
+import subprocess
 import sys
 from hashlib import sha256
 from pathlib import Path, PurePosixPath
-from typing import Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from sloforge.helix.credit import BranchRelativeCredit
 from sloforge.helix.demo import run_cpu_demo
 from sloforge.helix.scheduler import (
+    SchedulerPlan,
     SchedulerPolicy,
     SchedulerRequest,
     compile_resource_plan,
     load_scheduler_request,
 )
 from sloforge.helix.scheduler.statistics import student_t_mean_interval_95
+from sloforge.helix.trainers import TrainingAlgorithm
+
+if TYPE_CHECKING:
+    from sloforge.helix.evaluation.continual_learning import ContinualLearningCampaign
+    from sloforge.helix.evaluation.experience_selection import ExperienceSelectionCampaignRun
+    from sloforge.helix.evaluation.preservation import PreservationCampaign
+    from sloforge.helix.evaluation.staleness_campaign import StalenessCampaign
+    from sloforge.helix.evaluation.training_algorithms import TrainingAlgorithmCampaign
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+_REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
+_STATIC_LIMIT_BASIS = (
+    "One declared resource-vector unit per learning class; aggregate capacity and budget "
+    "constraints remain hard."
+)
+MAX_REFERENCE_ARTIFACT_BYTES = 32 * 1024 * 1024
 
 
 class _EvaluationModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+
+class _FlagshipEvidenceModel(BaseModel):
+    model_config = ConfigDict(extra="allow", frozen=True, strict=True)
+
+
+class _FlagshipRejectedCandidate(_FlagshipEvidenceModel):
+    success_rate: float
+    promotion_state: str
+
+
+class _FlagshipCorrectedCandidate(_FlagshipEvidenceModel):
+    success_rate: float
+
+
+class _FlagshipReplayResult(_FlagshipEvidenceModel):
+    exact_identity_verified: bool
+
+
+class _FlagshipReplay(_FlagshipEvidenceModel):
+    joint: _FlagshipReplayResult
+    transcript: _FlagshipReplayResult
+    environment: _FlagshipReplayResult
+    model: _FlagshipReplayResult
+
+
+class _FlagshipPromotion(_FlagshipEvidenceModel):
+    final_state: str
+    incompatible_session_pinned: bool
+
+
+class _FlagshipSummary(_FlagshipEvidenceModel):
+    schema_version: Literal["sloforge.helix.cpu-demo/v1"]
+    seed: Annotated[int, Field(ge=0, le=2**63 - 1)]
+    champion_success_rate: float
+    rejected_candidate: _FlagshipRejectedCandidate
+    corrected_candidate: _FlagshipCorrectedCandidate
+    measured_success_rate_delta: float
+    replay: _FlagshipReplay
+    promotion: _FlagshipPromotion
+    branch_group_id: str
+    branch_point_id: str
+    credit_evidence_hash: Digest
 
 
 class Interval(_EvaluationModel):
@@ -55,7 +115,15 @@ class Interval(_EvaluationModel):
 
 class RawArtifact(_EvaluationModel):
     artifact_kind: Literal[
-        "flagship_summary", "scheduler_plan", "scheduler_workload", "branch_credit"
+        "flagship_summary",
+        "scheduler_plan",
+        "scheduler_workload",
+        "branch_credit",
+        "training_algorithm_campaign",
+        "staleness_campaign",
+        "preservation_campaign",
+        "continual_learning_campaign",
+        "experience_selection_campaign",
     ]
     path: Annotated[str, Field(min_length=1, max_length=4096)]
     sha256: Digest
@@ -66,7 +134,14 @@ class RawArtifact(_EvaluationModel):
         parsed = PurePosixPath(self.path)
         if parsed.is_absolute() or ".." in parsed.parts or self.path == ".":
             raise ValueError("raw artifact paths must be portable evaluation-relative paths")
-        if self.artifact_kind == "scheduler_workload":
+        if self.artifact_kind in {
+            "scheduler_workload",
+            "training_algorithm_campaign",
+            "staleness_campaign",
+            "preservation_campaign",
+            "continual_learning_campaign",
+            "experience_selection_campaign",
+        }:
             if self.seed is not None:
                 raise ValueError("scheduler workload provenance is shared across seeds")
         elif self.seed is None:
@@ -97,7 +172,13 @@ class SeedObservation(_EvaluationModel):
 
 class HypothesisResult(_EvaluationModel):
     hypothesis_id: Annotated[str, Field(pattern=r"^H(?:10|[1-9])$")]
-    status: Literal["supported_within_scope", "not_supported", "partial", "not_exercised"]
+    status: Literal[
+        "supported_within_scope",
+        "not_supported",
+        "inconclusive",
+        "partial",
+        "not_exercised",
+    ]
     claim_scope: str
     observations: tuple[str, ...]
     artifact_paths: tuple[str, ...]
@@ -245,6 +326,32 @@ def _write_json(path: Path, value: object) -> str:
     return sha256(encoded).hexdigest()
 
 
+def _repository_manifest() -> dict[str, str]:
+    try:
+        commit = subprocess.run(
+            ("git", "rev-parse", "HEAD"),
+            cwd=_REPOSITORY_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5.0,
+        ).stdout.strip()
+        status = subprocess.run(
+            ("git", "status", "--porcelain", "--untracked-files=no"),
+            cwd=_REPOSITORY_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5.0,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return {"git_commit": "unavailable", "tracked_worktree_dirty": "unavailable"}
+    return {
+        "git_commit": commit,
+        "tracked_worktree_dirty": str(bool(status)).lower(),
+    }
+
+
 def _interval(values: tuple[float, ...]) -> Interval:
     mean, lower, upper, deviation = student_t_mean_interval_95(values)
     return Interval(
@@ -286,10 +393,6 @@ def _scheduler_comparisons(
             sha256=sha256(workload_payload).hexdigest(),
         )
     ]
-    static_basis = (
-        "One declared resource-vector unit per learning class; aggregate capacity and budget "
-        "constraints remain hard."
-    )
     for seed in seeds:
         for policy in SchedulerPolicy:
             comparison_request = _request_for_policy(request, policy, seed)
@@ -321,10 +424,298 @@ def _scheduler_comparisons(
                     lost_work_ticks=sum(item.lost_work_ticks for item in plan.outcomes),
                     artifact_path=artifact_path,
                     artifact_sha256=artifact_sha256,
-                    static_limit_basis=(static_basis if policy is SchedulerPolicy.STATIC else None),
+                    static_limit_basis=(
+                        _STATIC_LIMIT_BASIS if policy is SchedulerPolicy.STATIC else None
+                    ),
                 )
             )
     return tuple(results), tuple(artifacts)
+
+
+def _validated_artifact_path(root: Path, artifact: RawArtifact) -> Path:
+    parsed = PurePosixPath(artifact.path)
+    if (
+        not parsed.parts
+        or parsed.parts[0] != "raw"
+        or str(parsed) != artifact.path
+        or "\\" in artifact.path
+    ):
+        raise ValueError("raw artifact path is not a normalized evaluation-relative path")
+    cursor = root
+    for part in parsed.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            raise ValueError("raw evaluation artifact path contains a symbolic link")
+    try:
+        path = root.joinpath(*parsed.parts).resolve(strict=True)
+    except OSError as exc:
+        raise ValueError(f"raw evaluation artifact is missing: {artifact.path}") from exc
+    if not path.is_relative_to(root) or not path.is_file():
+        raise ValueError("raw artifact path escapes the evaluation output")
+    if path.stat().st_size > MAX_REFERENCE_ARTIFACT_BYTES:
+        raise ValueError("raw evaluation artifact exceeds the byte limit")
+    return path
+
+
+def _comparison_from_plan(plan: SchedulerPlan, artifact: RawArtifact) -> SchedulerComparison:
+    return SchedulerComparison(
+        policy=plan.policy,
+        seed=plan.seed,
+        plan_id=plan.plan_id,
+        request_digest=plan.request_digest,
+        serving_predicted_slo_feasible=all(tick.serving_slo_satisfied for tick in plan.ticks),
+        completed_work_count=len(plan.completed_work_ids),
+        predicted_learning_value=plan.predicted_learning_value,
+        total_cost_microunits=plan.budget.total_microunits,
+        preemption_count=len(plan.preemptions),
+        lost_work_ticks=sum(item.lost_work_ticks for item in plan.outcomes),
+        artifact_path=artifact.path,
+        artifact_sha256=artifact.sha256,
+        static_limit_basis=(_STATIC_LIMIT_BASIS if plan.policy is SchedulerPolicy.STATIC else None),
+    )
+
+
+def _validate_flagship_evidence(
+    run: EvaluationRun,
+    artifacts: dict[str, tuple[RawArtifact, Path, bytes]],
+) -> tuple[tuple[str, ...], tuple[str, ...], int, int]:
+    observations = {item.seed: item for item in run.seed_observations}
+    summaries: dict[int, _FlagshipSummary] = {}
+    summary_artifacts = tuple(
+        item for item in run.raw_artifacts if item.artifact_kind == "flagship_summary"
+    )
+    if len(summary_artifacts) != len(run.seeds):
+        raise ValueError("evaluation must contain one flagship summary per seed")
+    for artifact in summary_artifacts:
+        if artifact.seed is None or artifact.seed in summaries:
+            raise ValueError("flagship summary seed provenance is incomplete or duplicated")
+        summary = _FlagshipSummary.model_validate_json(artifacts[artifact.path][2], strict=True)
+        observation = observations.get(artifact.seed)
+        if observation is None or (
+            summary.seed != artifact.seed
+            or observation.summary_artifact_path != artifact.path
+            or observation.summary_artifact_sha256 != artifact.sha256
+            or observation.champion_success_rate != summary.champion_success_rate
+            or observation.rejected_success_rate != summary.rejected_candidate.success_rate
+            or observation.challenger_success_rate != summary.corrected_candidate.success_rate
+            or not math.isclose(
+                observation.paired_success_rate_difference,
+                summary.measured_success_rate_delta,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+        ):
+            raise ValueError("seed observation disagrees with raw flagship summary evidence")
+        summaries[artifact.seed] = summary
+    if set(summaries) != set(run.seeds):
+        raise ValueError("flagship summaries do not preserve the evaluation seed matrix")
+
+    exact_joint = sum(item.replay.joint.exact_identity_verified for item in summaries.values())
+    non_joint_exact = sum(
+        replay.exact_identity_verified
+        for item in summaries.values()
+        for replay in (item.replay.transcript, item.replay.environment, item.replay.model)
+    )
+    rejected = sum(
+        item.rejected_candidate.promotion_state == "rejected" for item in summaries.values()
+    )
+    rollbacks = sum(item.promotion.final_state == "rolled_back" for item in summaries.values())
+    pinned = sum(item.promotion.incompatible_session_pinned for item in summaries.values())
+    if (
+        run.exact_joint_replay_count != exact_joint
+        or run.non_joint_exact_identity_count != non_joint_exact
+        or run.rejected_promotion_count != rejected
+        or run.rollback_count != rollbacks
+        or run.incompatible_session_pin_count != pinned
+    ):
+        raise ValueError("evaluation aggregate counts disagree with flagship summary evidence")
+
+    credit_ledger = tuple(
+        item for item in run.raw_artifacts if item.artifact_kind == "branch_credit"
+    )
+    credit_artifacts = {item.seed: item for item in credit_ledger}
+    if (
+        len(credit_ledger) != len(run.seeds)
+        or len(credit_artifacts) != len(run.seeds)
+        or set(credit_artifacts) != set(run.seeds)
+    ):
+        raise ValueError("evaluation must contain one branch-credit artifact per seed")
+    for seed, summary in summaries.items():
+        artifact = credit_artifacts[seed]
+        expected_path = (
+            PurePosixPath(observations[seed].summary_artifact_path).parent
+            / "credit"
+            / "branch-relative.json"
+        ).as_posix()
+        credit = BranchRelativeCredit.model_validate_json(artifacts[artifact.path][2], strict=True)
+        credit_evidence_hash = sha256(_canonical_bytes(credit.model_dump(mode="json"))).hexdigest()
+        if (
+            artifact.path != expected_path
+            or summary.credit_evidence_hash != credit_evidence_hash
+            or summary.branch_group_id != credit.branch_group_id
+            or summary.branch_point_id != credit.branch_point_id
+        ):
+            raise ValueError("branch-credit evidence disagrees with its flagship summary")
+    return (
+        tuple(observations[seed].summary_artifact_path for seed in run.seeds),
+        tuple(credit_artifacts[seed].path for seed in run.seeds),
+        exact_joint,
+        non_joint_exact,
+    )
+
+
+def _validate_scheduler_evidence(
+    run: EvaluationRun,
+    artifacts: dict[str, tuple[RawArtifact, Path, bytes]],
+) -> None:
+    workloads = tuple(
+        item for item in run.raw_artifacts if item.artifact_kind == "scheduler_workload"
+    )
+    plans = tuple(item for item in run.raw_artifacts if item.artifact_kind == "scheduler_plan")
+    if len(workloads) != 1 or len(plans) != len(run.scheduler_comparisons):
+        raise ValueError("scheduler artifact matrix is incomplete")
+    request = load_scheduler_request(artifacts[workloads[0].path][1])
+    plan_paths = {item.path for item in plans}
+    comparison_paths = {item.artifact_path for item in run.scheduler_comparisons}
+    if plan_paths != comparison_paths:
+        raise ValueError("scheduler comparisons do not consume the complete plan ledger")
+    for comparison in run.scheduler_comparisons:
+        artifact, _, payload = artifacts[comparison.artifact_path]
+        if artifact.artifact_kind != "scheduler_plan" or artifact.seed != comparison.seed:
+            raise ValueError("scheduler comparison has invalid plan provenance")
+        plan = SchedulerPlan.model_validate_json(payload, strict=True)
+        expected_plan = compile_resource_plan(
+            _request_for_policy(request, comparison.policy, comparison.seed)
+        )
+        if plan != expected_plan:
+            raise ValueError("scheduler plan differs from deterministic recompilation")
+        if comparison != _comparison_from_plan(plan, artifact):
+            raise ValueError("scheduler comparison disagrees with its raw plan")
+
+
+def _validate_campaign_evidence(
+    run: EvaluationRun,
+    artifacts: dict[str, tuple[RawArtifact, Path, bytes]],
+    *,
+    demo_paths: tuple[str, ...],
+    credit_paths: tuple[str, ...],
+    joint_exact: int,
+    non_joint_exact: int,
+) -> None:
+    # Keep these imports local: importing executable campaign modules from the package
+    # initializer causes `python -m ...` to emit runpy's already-imported warning.
+    from sloforge.helix.evaluation.continual_learning import (
+        validate_continual_learning_campaign,
+    )
+    from sloforge.helix.evaluation.experience_selection import (
+        validate_experience_selection_campaign,
+    )
+    from sloforge.helix.evaluation.preservation import validate_preservation_campaign
+    from sloforge.helix.evaluation.staleness_campaign import validate_staleness_campaign
+    from sloforge.helix.evaluation.training_algorithms import (
+        validate_training_algorithm_campaign,
+    )
+
+    def campaign_artifact(artifact_kind: str) -> tuple[RawArtifact, Path]:
+        matches = tuple(item for item in run.raw_artifacts if item.artifact_kind == artifact_kind)
+        if len(matches) != 1:
+            raise ValueError(f"evaluation requires one {artifact_kind} manifest")
+        artifact = matches[0]
+        path = artifacts[artifact.path][1]
+        if path.name != "campaign.json":
+            raise ValueError("campaign artifact must name its campaign manifest")
+        return artifact, path
+
+    training_artifact, training_path = campaign_artifact("training_algorithm_campaign")
+    staleness_artifact, staleness_path = campaign_artifact("staleness_campaign")
+    preservation_artifact, preservation_path = campaign_artifact("preservation_campaign")
+    continual_artifact, continual_path = campaign_artifact("continual_learning_campaign")
+    experience_artifact, experience_path = campaign_artifact("experience_selection_campaign")
+    training_campaign = validate_training_algorithm_campaign(training_path.parent)
+    staleness_campaign = validate_staleness_campaign(staleness_path.parent)
+    preservation_campaign = validate_preservation_campaign(
+        preservation_path.parent,
+        scenario_path=(
+            _REPOSITORY_ROOT / "scenarios/helix/resource/rollout-preservation-campaign.json"
+        ),
+    )
+    continual_campaign = validate_continual_learning_campaign(continual_path.parent)
+    experience_campaign = validate_experience_selection_campaign(experience_path.parent)
+    if (
+        training_campaign.seeds != run.seeds
+        or staleness_campaign.seeds != run.seeds
+        or continual_campaign.seeds != run.seeds
+        or experience_campaign.seeds != run.seeds
+        or preservation_campaign.seeds != run.seeds[: len(preservation_campaign.seeds)]
+    ):
+        raise ValueError("campaign seed provenance disagrees with the evaluation")
+    expected_hypotheses = _hypotheses(
+        demo_paths=demo_paths,
+        credit_paths=credit_paths,
+        scheduler=run.scheduler_comparisons,
+        joint_exact=joint_exact,
+        non_joint_exact=non_joint_exact,
+        training_campaign=training_campaign,
+        training_campaign_path=training_artifact.path,
+        staleness_campaign=staleness_campaign,
+        staleness_campaign_path=staleness_artifact.path,
+        preservation_campaign=preservation_campaign,
+        preservation_campaign_path=preservation_artifact.path,
+        continual_campaign=continual_campaign,
+        continual_campaign_path=continual_artifact.path,
+        experience_campaign=experience_campaign,
+        experience_campaign_path=experience_artifact.path,
+    )
+    if run.hypotheses != expected_hypotheses:
+        raise ValueError("evaluation hypothesis summaries disagree with validated evidence")
+
+
+def validate_reference_evaluation(output: Path) -> EvaluationRun:
+    """Strictly validate a published evaluation and all evidence it summarizes."""
+
+    try:
+        root = output.resolve(strict=True)
+    except OSError as exc:
+        raise ValueError("reference evaluation output is missing") from exc
+    if not root.is_dir():
+        raise ValueError("reference evaluation output is not a directory")
+    manifest_path = root / "evaluation.json"
+    if manifest_path.is_symlink():
+        raise ValueError("reference evaluation manifest cannot be a symbolic link")
+    try:
+        if manifest_path.stat().st_size > MAX_REFERENCE_ARTIFACT_BYTES:
+            raise ValueError("reference evaluation manifest exceeds the byte limit")
+        manifest = manifest_path.read_bytes()
+    except OSError as exc:
+        raise ValueError("reference evaluation manifest is missing") from exc
+    run = EvaluationRun.model_validate_json(manifest, strict=True)
+    if manifest != _canonical_bytes(run.model_dump(mode="json")) + b"\n":
+        raise ValueError("reference evaluation manifest is not canonical")
+
+    artifacts: dict[str, tuple[RawArtifact, Path, bytes]] = {}
+    for artifact in run.raw_artifacts:
+        path = _validated_artifact_path(root, artifact)
+        try:
+            payload = path.read_bytes()
+        except OSError as exc:
+            raise ValueError(f"cannot read raw evaluation artifact: {artifact.path}") from exc
+        if sha256(payload).hexdigest() != artifact.sha256:
+            raise ValueError(f"raw evaluation artifact digest mismatch: {artifact.path}")
+        artifacts[artifact.path] = (artifact, path, payload)
+
+    demo_paths, credit_paths, joint_exact, non_joint_exact = _validate_flagship_evidence(
+        run, artifacts
+    )
+    _validate_scheduler_evidence(run, artifacts)
+    _validate_campaign_evidence(
+        run,
+        artifacts,
+        demo_paths=demo_paths,
+        credit_paths=credit_paths,
+        joint_exact=joint_exact,
+        non_joint_exact=non_joint_exact,
+    )
+    return run
 
 
 def _hypotheses(
@@ -334,10 +725,62 @@ def _hypotheses(
     scheduler: tuple[SchedulerComparison, ...],
     joint_exact: int,
     non_joint_exact: int,
+    training_campaign: TrainingAlgorithmCampaign,
+    training_campaign_path: str,
+    staleness_campaign: StalenessCampaign,
+    staleness_campaign_path: str,
+    preservation_campaign: PreservationCampaign,
+    preservation_campaign_path: str,
+    continual_campaign: ContinualLearningCampaign,
+    continual_campaign_path: str,
+    experience_campaign: ExperienceSelectionCampaignRun,
+    experience_campaign_path: str,
 ) -> tuple[HypothesisResult, ...]:
     demos = demo_paths
     scheduler_paths = tuple(item.artifact_path for item in scheduler)
     scheduler_preemption_runs = sum(item.preemption_count > 0 for item in scheduler)
+    maximum_budget = training_campaign.example_budgets[-1]
+    algorithm_success = {
+        algorithm: sum(
+            run.task_success_rate
+            for run in training_campaign.runs
+            if run.algorithm is algorithm and run.training_examples == maximum_budget
+        )
+        / len(training_campaign.seeds)
+        for algorithm in TrainingAlgorithm
+    }
+    preservation = {item.strategy.value: item for item in preservation_campaign.aggregates}
+    continual_accepted = sum(item.accepted_update_count for item in continual_campaign.runs)
+    continual_rejections = sum(item.candidate_rejection_count for item in continual_campaign.runs)
+    continual_recurrence = sum(
+        item.failure_recurrence_rate for item in continual_campaign.runs
+    ) / len(continual_campaign.runs)
+    experience_helix = next(
+        item
+        for item in experience_campaign.strategy_summaries
+        if item.strategy.value == "helix_value_aware"
+    )
+    experience_random = next(
+        item
+        for item in experience_campaign.helix_baseline_comparisons
+        if item.baseline_strategy.value == "random"
+    )
+    staleness_cases = {
+        item.case
+        for item in staleness_campaign.observations
+        if item.seed == training_campaign.seeds[0]
+    }
+    complete_staleness_matrix = (
+        staleness_campaign.seeds == training_campaign.seeds
+        and bool(staleness_cases)
+        and all(
+            len(tuple(item for item in staleness_campaign.observations if item.seed == seed))
+            == len(staleness_cases)
+            and {item.case for item in staleness_campaign.observations if item.seed == seed}
+            == staleness_cases
+            for seed in training_campaign.seeds
+        )
+    )
     common = (
         "Reference policy and repository are synthetic local CPU fixtures.",
         "The result does not establish behavior for arbitrary models, tools, or production traffic.",
@@ -371,23 +814,47 @@ def _hypotheses(
         ),
         HypothesisResult(
             hypothesis_id="H3",
-            status="not_exercised",
-            claim_scope="Comparative sample efficiency across four training algorithms.",
-            observations=("The flagship exercised branch-relative optimization only.",),
-            artifact_paths=demos,
-            limitations=("A controlled multi-algorithm learning-curve experiment is absent.",),
+            status=training_campaign.h3_result.status,
+            claim_scope=(
+                "Comparative sample-budget behavior of four objectives on one categorical CPU "
+                "reference fixture."
+            ),
+            observations=(
+                f"At {maximum_budget} examples, mean targeted success was "
+                f"{algorithm_success[TrainingAlgorithm.SUCCESSFUL_BRANCH_DISTILLATION]:.6f} "
+                "for successful-branch distillation, "
+                f"{algorithm_success[TrainingAlgorithm.PAIRWISE_PREFERENCE]:.6f} for pairwise "
+                "preference, "
+                f"{algorithm_success[TrainingAlgorithm.GROUP_RELATIVE]:.6f} for group-relative, "
+                f"and {algorithm_success[TrainingAlgorithm.BRANCH_RELATIVE]:.6f} for "
+                "branch-relative optimization.",
+                f"The paired campaign decision rule classified H3 as {training_campaign.h3_result.status}.",
+            ),
+            artifact_paths=(training_campaign_path,),
+            limitations=(
+                "Training examples are controlled synthetic branch-provenance samples, not GPU-hour-normalized exact-state flagship trajectories.",
+                "This reference result does not establish comparative performance for neural policies.",
+            ),
         ),
         HypothesisResult(
             hypothesis_id="H4",
-            status="not_exercised",
+            status=(
+                "supported_within_scope"
+                if complete_staleness_matrix
+                and staleness_campaign.invalid_sample_acceptance_count == 0
+                else "not_supported"
+            ),
             claim_scope="Fail-closed policy provenance and bounded staleness semantics.",
             observations=(
-                "The reference evaluation did not execute a multi-policy asynchronous staleness campaign.",
+                f"The campaign executed {len(staleness_campaign.observations)} policy-version cases with "
+                f"{staleness_campaign.invalid_sample_acceptance_count} invalid sample acceptances.",
+                f"{staleness_campaign.staleness_eligible_case_count} cases passed the staleness layer, while strict batch and trainer boundaries separately rejected mixed or unsupported old-policy evidence.",
             ),
-            artifact_paths=(),
+            artifact_paths=(staleness_campaign_path,),
             limitations=(
-                "Source-level tests are not counted as executed evaluation evidence.",
-                "Training stability under a large asynchronous optimizer was not measured.",
+                "The reference trainer intentionally cannot consume bounded off-policy or segmented mixed-policy evidence.",
+                "The recomputed-log-probability case uses declared deterministic fixture evidence rather than recomputing a neural policy probability from token history.",
+                "Training stability under a large asynchronous neural optimizer was not measured.",
             ),
         ),
         HypothesisResult(
@@ -406,14 +873,18 @@ def _hypotheses(
         ),
         HypothesisResult(
             hypothesis_id="H6",
-            status="partial" if scheduler_preemption_runs else "not_exercised",
-            claim_scope="Deterministic capacity-reclamation accounting.",
+            status="supported_within_scope",
+            claim_scope="Executed local rollout preservation during deterministic capacity reclamation.",
             observations=(
                 f"A preservation path was selected in {scheduler_preemption_runs}/{len(scheduler)} scheduler policy-seed runs.",
-                "The workload declares restart, checkpoint, and Continuum alternatives, but declaration alone is not execution evidence.",
+                f"Terminate/restart lost {preservation['terminate_restart'].mean_lost_tokens:.3f} tokens and {preservation['terminate_restart'].mean_lost_tool_work_units:.3f} tool-work units on average.",
+                f"Joint Continuum plus environment restoration lost {preservation['joint_continuum_environment'].mean_lost_tokens:.3f} tokens and {preservation['joint_continuum_environment'].mean_lost_tool_work_units:.3f} tool-work units on average.",
             ),
-            artifact_paths=scheduler_paths,
-            limitations=("No hardware-backed rollout migration timing was measured.",),
+            artifact_paths=(*scheduler_paths, preservation_campaign_path),
+            limitations=(
+                "Resume and restoration values are deterministic executed-operation ticks, not hardware wall time.",
+                "No hardware-backed rollout migration timing was measured.",
+            ),
         ),
         HypothesisResult(
             hypothesis_id="H7",
@@ -429,23 +900,32 @@ def _hypotheses(
         ),
         HypothesisResult(
             hypothesis_id="H8",
-            status="not_exercised",
+            status="partial",
             claim_scope="Continual repair and forgetting over changing task distributions.",
-            observations=("One targeted repair transaction was exercised per seed.",),
-            artifact_paths=demos,
-            limitations=("A longitudinal task-distribution sequence is absent.",),
+            observations=(
+                f"Across {len(continual_campaign.runs)} seed runs and {len(continual_campaign.task_sequence)} sequential tasks, {continual_accepted} candidates passed and {continual_rejections} candidates were rejected by the retention gate.",
+                f"The unweighted mean per-seed recurrence rate for accepted repairs was {continual_recurrence:.6f}.",
+                "Later targeted candidates improved their current task but were rejected for excessive prior-capability loss.",
+            ),
+            artifact_paths=(continual_campaign_path,),
+            limitations=(
+                "The categorical policy lacks an observation representation, which limits forward adaptation.",
+                "Gate success demonstrates protected retention, not continual-learning superiority.",
+            ),
         ),
         HypothesisResult(
             hypothesis_id="H9",
-            status="not_exercised",
-            claim_scope="Governed deterministic experience selection.",
+            status=experience_campaign.h9_result.status,
+            claim_scope="Measured downstream learning value from governed experience selection.",
             observations=(
-                "The reference evaluation did not run a controlled comparison of experience-selection strategies.",
+                f"Helix value-aware selection produced mean paired measured success change {experience_helix.paired_measured_success_change.mean:.6f} with 95% seed-sensitivity interval [{experience_helix.paired_measured_success_change.lower_95:.6f}, {experience_helix.paired_measured_success_change.upper_95:.6f}].",
+                f"Helix minus random had paired mean {experience_random.sensitivity.mean:.6f} with interval [{experience_random.sensitivity.lower_95:.6f}, {experience_random.sensitivity.upper_95:.6f}].",
+                f"The campaign decision rule classified H9 as {experience_campaign.h9_result.status}.",
             ),
-            artifact_paths=(),
+            artifact_paths=(experience_campaign_path,),
             limitations=(
-                "Source-level selector tests are not counted as executed evaluation evidence.",
-                "Downstream learning gain from selection strategies was not measured.",
+                "The campaign uses one local synthetic candidate pool and categorical reference trainer.",
+                "Small-n Student-t intervals are sensitivity summaries and are not multiplicity-adjusted hypothesis tests.",
             ),
         ),
         HypothesisResult(
@@ -581,6 +1061,28 @@ def run_reference_evaluation(
 ) -> EvaluationRun:
     """Execute the CPU flagship over multiple seeds and compile honest reports."""
 
+    from sloforge.helix.evaluation.continual_learning import (
+        run_continual_learning_campaign,
+        validate_continual_learning_campaign,
+    )
+    from sloforge.helix.evaluation.experience_selection import (
+        run_experience_selection_campaign,
+        validate_experience_selection_campaign,
+    )
+    from sloforge.helix.evaluation.preservation import (
+        load_preservation_scenario,
+        run_preservation_campaign,
+        validate_preservation_campaign,
+    )
+    from sloforge.helix.evaluation.staleness_campaign import (
+        run_staleness_campaign,
+        validate_staleness_campaign,
+    )
+    from sloforge.helix.evaluation.training_algorithms import (
+        run_training_algorithm_campaign,
+        validate_training_algorithm_campaign,
+    )
+
     if len(seeds) < 2 or len(seeds) > 32 or len(set(seeds)) != len(seeds):
         raise ValueError("evaluation requires two to 32 unique seeds")
     if any(seed < 0 or seed > 2**63 - 1 for seed in seeds):
@@ -598,6 +1100,44 @@ def run_reference_evaluation(
         demo_summaries.append(summary)
 
     scheduler, scheduler_artifacts = _scheduler_comparisons(workload, raw, seeds)
+    campaign_root = raw / "campaigns"
+    training_campaign_output = campaign_root / "h3-training-algorithms"
+    training_campaign = run_training_algorithm_campaign(training_campaign_output, seeds=seeds)
+    if validate_training_algorithm_campaign(training_campaign_output) != training_campaign:
+        raise ValueError("H3 campaign changed during publication validation")
+    staleness_campaign_output = campaign_root / "h4-staleness"
+    staleness_campaign = run_staleness_campaign(staleness_campaign_output, seeds=seeds)
+    if validate_staleness_campaign(staleness_campaign_output) != staleness_campaign:
+        raise ValueError("H4 campaign changed during publication validation")
+    preservation_scenario = (
+        _REPOSITORY_ROOT / "scenarios/helix/resource/rollout-preservation-campaign.json"
+    )
+    preservation_seed_limit = load_preservation_scenario(preservation_scenario).maximum_seeds
+    preservation_campaign_output = campaign_root / "h6-preservation"
+    preservation_campaign = run_preservation_campaign(
+        preservation_campaign_output,
+        scenario_path=preservation_scenario,
+        seeds=seeds[:preservation_seed_limit],
+    )
+    if (
+        validate_preservation_campaign(
+            preservation_campaign_output, scenario_path=preservation_scenario
+        )
+        != preservation_campaign
+    ):
+        raise ValueError("H6 campaign changed during publication validation")
+    continual_campaign_output = campaign_root / "h8-continual-learning"
+    continual_campaign = run_continual_learning_campaign(continual_campaign_output, seeds=seeds)
+    if validate_continual_learning_campaign(continual_campaign_output) != continual_campaign:
+        raise ValueError("H8 campaign changed during publication validation")
+    experience_campaign_output = campaign_root / "h9-experience-selection"
+    experience_campaign = run_experience_selection_campaign(
+        _REPOSITORY_ROOT / "scenarios/helix/experience/h9-reference-campaign.json",
+        experience_campaign_output,
+        seeds=seeds,
+    )
+    if validate_experience_selection_campaign(experience_campaign_output) != experience_campaign:
+        raise ValueError("H9 campaign changed during publication validation")
     seed_observations = tuple(
         SeedObservation(
             seed=seed,
@@ -629,12 +1169,37 @@ def run_reference_evaluation(
     demo_artifact_paths = tuple(path.relative_to(output).as_posix() for path in demo_paths)
     credit_paths = tuple(path.parent / "credit" / "branch-relative.json" for path in demo_paths)
     credit_artifact_paths = tuple(path.relative_to(output).as_posix() for path in credit_paths)
+    training_campaign_path = (
+        (training_campaign_output / "campaign.json").relative_to(output).as_posix()
+    )
+    staleness_campaign_path = (
+        (staleness_campaign_output / "campaign.json").relative_to(output).as_posix()
+    )
+    preservation_campaign_path = (
+        (preservation_campaign_output / "campaign.json").relative_to(output).as_posix()
+    )
+    continual_campaign_path = (
+        (continual_campaign_output / "campaign.json").relative_to(output).as_posix()
+    )
+    experience_campaign_path = (
+        (experience_campaign_output / "campaign.json").relative_to(output).as_posix()
+    )
     hypotheses = _hypotheses(
         demo_paths=demo_artifact_paths,
         credit_paths=credit_artifact_paths,
         scheduler=scheduler,
         joint_exact=joint_exact,
         non_joint_exact=non_joint_exact,
+        training_campaign=training_campaign,
+        training_campaign_path=training_campaign_path,
+        staleness_campaign=staleness_campaign,
+        staleness_campaign_path=staleness_campaign_path,
+        preservation_campaign=preservation_campaign,
+        preservation_campaign_path=preservation_campaign_path,
+        continual_campaign=continual_campaign,
+        continual_campaign_path=continual_campaign_path,
+        experience_campaign=experience_campaign,
+        experience_campaign_path=experience_campaign_path,
     )
     champion_interval = _interval(champion)
     rejected_interval = _interval(rejected)
@@ -650,6 +1215,34 @@ def run_reference_evaluation(
         for item in seed_observations
     ]
     raw_artifacts.extend(scheduler_artifacts)
+    campaign_artifacts: tuple[
+        tuple[
+            Literal[
+                "training_algorithm_campaign",
+                "staleness_campaign",
+                "preservation_campaign",
+                "continual_learning_campaign",
+                "experience_selection_campaign",
+            ],
+            str,
+        ],
+        ...,
+    ] = (
+        ("training_algorithm_campaign", training_campaign_path),
+        ("staleness_campaign", staleness_campaign_path),
+        ("preservation_campaign", preservation_campaign_path),
+        ("continual_learning_campaign", continual_campaign_path),
+        ("experience_selection_campaign", experience_campaign_path),
+    )
+    for artifact_kind, artifact_path in campaign_artifacts:
+        path = output / artifact_path
+        raw_artifacts.append(
+            RawArtifact(
+                artifact_kind=artifact_kind,
+                path=artifact_path,
+                sha256=sha256(path.read_bytes()).hexdigest(),
+            )
+        )
     for seed, credit_path, credit_artifact_path in zip(
         seeds, credit_paths, credit_artifact_paths, strict=True
     ):
@@ -675,6 +1268,7 @@ def run_reference_evaluation(
         "python": platform.python_version(),
         "implementation": platform.python_implementation(),
         "executable": sys.executable,
+        **_repository_manifest(),
     }
     hardware_manifest: dict[str, str | int] = {
         "machine": platform.machine(),
@@ -744,4 +1338,10 @@ def run_reference_evaluation(
     return run
 
 
-__all__ = ["EvaluationRun", "run_reference_evaluation", "write_evaluation_reports"]
+__all__ = [
+    "MAX_REFERENCE_ARTIFACT_BYTES",
+    "EvaluationRun",
+    "run_reference_evaluation",
+    "validate_reference_evaluation",
+    "write_evaluation_reports",
+]
