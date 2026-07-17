@@ -1089,6 +1089,7 @@ def run_reference_evaluation(
         raise ValueError("evaluation seeds must fit signed 64-bit integers")
     if output.exists() and any(output.iterdir()):
         raise FileExistsError("evaluation output must be absent or empty")
+    repository_manifest = _repository_manifest()
     raw = output / "raw"
     demo_summaries: list[dict[str, Any]] = []
     demo_paths: list[Path] = []
@@ -1268,7 +1269,7 @@ def run_reference_evaluation(
         "python": platform.python_version(),
         "implementation": platform.python_implementation(),
         "executable": sys.executable,
-        **_repository_manifest(),
+        **repository_manifest,
     }
     hardware_manifest: dict[str, str | int] = {
         "machine": platform.machine(),
