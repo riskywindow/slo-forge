@@ -75,34 +75,47 @@ def test_seed_41_real_demo_lifecycle_and_trace_levels_preserve_semantics(
     } <= branch_operations
     state_operations = {event["operation_type"] for event in full_recorder.state_events}
     assert {"STATE_SNAPSHOT", "STATE_FORK", "STATE_COW", "STATE_FREE"} <= state_operations
-    assert len(
-        [event for event in full_recorder.branch_events if event["operation_type"] == "BRANCH_FORK"]
-    ) == 4
-    assert len(
-        [event for event in full_recorder.branch_events if event["operation_type"] == "BRANCH_PRUNE"]
-    ) == 3
-    assert len(
-        [
-            event
-            for event in full_recorder.branch_events
-            if event["operation_type"] == "BRANCH_COMPLETE"
-        ]
-    ) == 1
+    assert (
+        len(
+            [
+                event
+                for event in full_recorder.branch_events
+                if event["operation_type"] == "BRANCH_FORK"
+            ]
+        )
+        == 4
+    )
+    assert (
+        len(
+            [
+                event
+                for event in full_recorder.branch_events
+                if event["operation_type"] == "BRANCH_PRUNE"
+            ]
+        )
+        == 3
+    )
+    assert (
+        len(
+            [
+                event
+                for event in full_recorder.branch_events
+                if event["operation_type"] == "BRANCH_COMPLETE"
+            ]
+        )
+        == 1
+    )
 
     all_events = (*full_recorder.branch_events, *full_recorder.state_events)
     assert all(event["measurement_source"] == "SYNTHETIC" for event in all_events)
     assert all(event["workload_evidence_class"] == "SYNTHETIC" for event in all_events)
-    assert all(
-        event["timing_measurement_class"] == "HARDWARE_BACKED_REAL" for event in all_events
-    )
+    assert all(event["timing_measurement_class"] == "HARDWARE_BACKED_REAL" for event in all_events)
     assert all(event["simulated_gpu_state"] is False for event in all_events)
     assert all(int(event["duration_ns"]) >= 0 for event in all_events)
     assert all(event["content_hash"] == _event_hash(event) for event in all_events)
     assert len({int(event["event_sequence"]) for event in all_events}) == len(all_events)
 
-    sharing = analyze_branch_state_sharing(
-        full_recorder.branch_events, full_recorder.state_events
-    )
+    sharing = analyze_branch_state_sharing(full_recorder.branch_events, full_recorder.state_events)
     assert sharing["branch_count"] == 4
     model = sharing["model_state"]
     assert isinstance(model, dict)

@@ -12,9 +12,7 @@ from collections.abc import Mapping
 from enum import StrEnum
 from typing import Protocol, TypeAlias, runtime_checkable
 
-JsonValue: TypeAlias = (
-    bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"] | None
-)
+JsonValue: TypeAlias = bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"] | None
 
 
 class TraceStream(StrEnum):

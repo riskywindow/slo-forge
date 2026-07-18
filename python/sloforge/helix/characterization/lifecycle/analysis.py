@@ -37,15 +37,15 @@ def analyze_branch_state_sharing(
     model_shared = sum(int(event.get("shared_logical_bytes", 0)) for event in forks)
     model_incremental = sum(int(event.get("physical_bytes", 0)) for event in forks)
     naive_model = sum(int(event.get("naive_independent_bytes", 0)) for event in forks)
-    model_physical = int(forks[0].get("source_physical_bytes", 0)) + model_incremental if forks else 0
+    model_physical = (
+        int(forks[0].get("source_physical_bytes", 0)) + model_incremental if forks else 0
+    )
 
     environment_base = max(
         (int(event.get("logical_bytes", 0)) for event in environment_forks), default=0
     )
     live_workspace = sum(int(event.get("physical_bytes", 0)) for event in environment_forks)
-    environment_private = sum(
-        int(event.get("dirty_bytes", 0)) for event in environment_checkpoints
-    )
+    environment_private = sum(int(event.get("dirty_bytes", 0)) for event in environment_checkpoints)
     environment_checkpoint_incremental = sum(
         int(event.get("physical_bytes", 0)) for event in environment_checkpoints
     )
@@ -71,9 +71,7 @@ def analyze_branch_state_sharing(
             "physical_allocated_bytes": model_physical,
             "naive_independent_bytes": naive_model,
             "logical_unique_content_bytes": unique_model_logical,
-            "sharing_efficiency": (
-                1.0 - model_physical / naive_model if naive_model else 0.0
-            ),
+            "sharing_efficiency": (1.0 - model_physical / naive_model if naive_model else 0.0),
             "physical_amplification": (
                 model_physical / unique_model_logical if unique_model_logical else 0.0
             ),

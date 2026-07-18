@@ -132,9 +132,7 @@ def _unique_chunk_bytes(artifact: CheckpointArtifact) -> int:
 
 def _workspace_bytes(root: Path) -> int:
     return sum(
-        path.stat().st_size
-        for path in root.rglob("*")
-        if path.is_file() and not path.is_symlink()
+        path.stat().st_size for path in root.rglob("*") if path.is_file() and not path.is_symlink()
     )
 
 
@@ -651,9 +649,9 @@ def run_characterized_cpu_demo(
 
     if not 0 <= seed <= 2**63 - 1:
         raise ValueError("demo seed must fit a signed 64-bit integer")
-    chosen_trace_id = trace_id or sha256(
-        f"sloforge-helix-characterized-cpu/v1\0{seed}".encode()
-    ).hexdigest()
+    chosen_trace_id = (
+        trace_id or sha256(f"sloforge-helix-characterized-cpu/v1\0{seed}".encode()).hexdigest()
+    )
     origin = time.perf_counter_ns()
     cpu_origin = time.process_time_ns()
     emitter = _Emitter(recorder, trace_level, chosen_trace_id, seed, origin)

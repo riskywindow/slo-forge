@@ -62,6 +62,7 @@ class StateOperationObservation:
     result: str
     failure: str | None
     state_epoch: int
+    workload_evidence_class: MeasurementKind
     measurement_kind: MeasurementKind
     seed: int
     evidence_references: tuple[str, ...]
@@ -90,6 +91,8 @@ class StateOperationObservation:
             raise ValueError("observation counts and timings must be non-negative")
         if self.fanout < 1 or self.concurrency < 1:
             raise ValueError("fanout and concurrency must be positive")
+        if self.workload_evidence_class is not MeasurementKind.SYNTHETIC:
+            raise ValueError("the reference Continuum harness workload is synthetic")
         if not self.logical_state_id or not self.branch_id or not self.tenant_security_domain:
             raise ValueError("state, branch, and security-domain identities are required")
         if not self.evidence_references:
@@ -150,6 +153,7 @@ class SharingAnalysis:
 @dataclass(frozen=True, slots=True)
 class CharacterizationResult:
     seed: int
+    workload_evidence_class: MeasurementKind
     trace_level: TraceLevel
     events: tuple[StateOperationObservation, ...]
     dropped_events: int

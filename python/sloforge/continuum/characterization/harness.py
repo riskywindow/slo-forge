@@ -284,6 +284,7 @@ class _Emitter:
             queue_delay_ns=0,
             concurrency=1,
             seed=self.seed,
+            workload_evidence_class=MeasurementKind.SYNTHETIC,
             metadata=metadata,
             evidence_references=values.pop("evidence"),
             **values,
@@ -920,6 +921,7 @@ def run_continuum_characterization(
     dropped = sink.dropped_events if isinstance(sink, ListRecorder) else 0
     return CharacterizationResult(
         seed=seed,
+        workload_evidence_class=MeasurementKind.SYNTHETIC,
         trace_level=trace_level,
         events=events,
         dropped_events=dropped,

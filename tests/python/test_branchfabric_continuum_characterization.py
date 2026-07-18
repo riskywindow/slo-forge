@@ -56,6 +56,10 @@ def test_full_trace_covers_real_state_lifecycle_and_preserves_provenance() -> No
     assert all(event.evidence_references for event in result.events)
     assert result.dropped_events == 0
     assert result.migration_transport_kind is MeasurementKind.SIMULATED_HARDWARE
+    assert result.workload_evidence_class is MeasurementKind.SYNTHETIC
+    assert all(
+        event.workload_evidence_class is MeasurementKind.SYNTHETIC for event in result.events
+    )
     cow = next(event for event in result.events if event.operation == "STATE_COW")
     assert cow.metadata["cow_implementation"].endswith("not_an_os_or_gpu_page_fault")
     simulated = [
