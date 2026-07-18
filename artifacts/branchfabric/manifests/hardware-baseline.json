@@ -1,0 +1,49 @@
+{
+  "schema_version": "sloforge.branchfabric.hardware-manifest/v1",
+  "captured_at_utc": "2026-08-09T21:29:44Z",
+  "measurement_class": "HARDWARE_BACKED_REAL",
+  "host": {
+    "model_identifier": "Mac16,8",
+    "chip": "Apple M4 Pro",
+    "process_architecture": "x86_64",
+    "kernel_architecture": "ARM64_T6041",
+    "logical_cpus": 12,
+    "physical_cpus_reported": 12,
+    "performance_cores": 8,
+    "efficiency_cores": 4,
+    "memory_bytes": 25769803776,
+    "numa_nodes": 1,
+    "operating_system": "macOS 15.6.1 (24G90)",
+    "kernel": "Darwin 24.6.0"
+  },
+  "gpu": {
+    "apple_integrated": {
+      "model": "Apple M4 Pro",
+      "cores": 16,
+      "metal": "Metal 3",
+      "memory_model": "unified"
+    },
+    "nvidia": {
+      "available": false,
+      "nvidia_smi": false,
+      "cuda_toolkit": false,
+      "nvlink": false,
+      "hardware_backed_helix_supported": false
+    }
+  },
+  "fabric": {
+    "pcie_gpu_path": "not_applicable_integrated_gpu",
+    "infiniband": false,
+    "rdma": false,
+    "multi_gpu": false,
+    "multi_node": false,
+    "network_characterization": "not_measured_at_baseline"
+  },
+  "storage": {
+    "filesystem_size_gib": 460,
+    "filesystem_used_gib": 351,
+    "filesystem_available_gib": 69,
+    "capacity_percent": 84
+  },
+  "privacy": "Host serial numbers, UUIDs, MAC addresses, and IP addresses were intentionally omitted."
+}

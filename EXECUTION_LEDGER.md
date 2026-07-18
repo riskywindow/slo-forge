@@ -2,6 +2,74 @@
 
 Updated: 2026-08-03 (America/Los_Angeles)
 
+## BranchFabric Characterization / SLOForge Helix Characterization
+
+Baseline recorded: 2026-08-09 (America/Chicago).
+
+- Baseline commit: `d6f77c839334a4644b4e2edf36a7543c68670a2d`.
+- Immutable baseline tag:
+  `sloforge-branchfabric-characterization-baseline-d6f77c8`.
+- Machine-readable baseline:
+  `artifacts/branchfabric/baseline/record.json`.
+- Hardware/software manifests:
+  `artifacts/branchfabric/manifests/{hardware,software}-baseline.json`.
+- Baseline `make check` passed: 1,115 Python tests, six declared optional
+  hardware skips, strict Ruff/mypy, all workspace Rust format,
+  warning-denied Clippy/tests/doc-tests, 37 UI tests with one fixture skip,
+  and the production UI build.
+- The isolated seed-41 Helix CPU demo passed in 12.51 seconds wall time with
+  125,190,144 bytes maximum RSS and produced 145 files (920 KiB). The workload
+  is deterministic local CPU synthetic; host timing is a real local
+  observation collected under high background load and not a stable
+  distribution.
+- The host is an Apple M4 Pro with 12 CPU cores, 24 GiB unified memory, and a
+  16-core integrated Apple GPU. No NVIDIA/CUDA/PyTorch/vLLM/SGLang path,
+  multi-GPU/multi-node inventory, RDMA, or characterization GPU budget is
+  available. No paid resource is authorized.
+- The worktree already contained extensive untracked evidence. It remains
+  user-owned and is not reset; this phase writes only under the requested
+  BranchFabric artifact/report paths.
+- Four total agent slots are available, so root plus three clean worktrees is
+  the maximum concurrency. The eight-agent target is unavailable.
+
+The measurement dependency graph is
+`docs/branchfabric/DEPENDENCY_GRAPH.md`. Status vocabulary: **measured** means
+real host counters or timings; **synthetic** means a deterministic controlled
+fixture; **replayed** means derived from immutable retained traces;
+**unexercised** means no compatible hardware/path was available.
+
+| Characterization task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline, integration, release gates, final measurement correctness | root | baseline complete; integration active | `main` / repository root | baseline manifests, CLI, Makefile, ledger, final artifacts/reports | all lanes | `make check` plus all BranchFabric targets | `artifacts/branchfabric/baseline/`; manifests | baseline `d6f77c8`; implementation pending |
+| BranchWorkloadTrace v1, StateOperationTrace v1, storage, schemas, conformance | trace-schema lane | active | `char/trace-schema` / `sloforge-char-trace` | trace package, BranchFabric schemas, focused Python/Rust tests | baseline | focused schema/conformance/large-trace/Perfetto tests | golden traces and schema fixtures | pending |
+| Helix branch DAG and lifecycle instrumentation | Helix-instrumentation lane | active | `char/helix-instrumentation` / `sloforge-char-helix` | new Helix characterization lifecycle package and focused tests | baseline; recorder protocol | semantic-equivalence and lifecycle tests | measured event fragments | pending |
+| Continuum COW, dirty, checkpoint, migration, transform and transaction instrumentation | Continuum-instrumentation lane | active | `char/continuum-instrumentation` / `sloforge-char-continuum` | new Continuum characterization package and focused tests | baseline; recorder protocol | state-lifecycle and semantic-equivalence tests | measured state-operation fragments | pending |
+| Environment-state and filesystem COW instrumentation | rotating lane | ready after initial integration | clean worktree | environment characterization package/tests | trace schema; Helix hooks | environment isolation/COW/teardown tests | raw environment corpus | pending |
+| CPU/GPU/memory/PCIe/network counters and clock alignment | rotating performance lane | ready after trace schema | clean worktree | resource counter collectors/tests | trace schema | capability, counter, alignment, unavailable-path tests | hardware counter corpus | pending |
+| Trace-disabled/minimal/full overhead and information loss | rotating overhead lane | blocked on first vertical trace | clean worktree | overhead runner/tests | first vertical trace | repeated randomized three-level campaign | raw overhead samples/report | pending |
+| Workload matrix, deterministic generator, restart/resume | rotating workload lane | ready after schemas | clean worktree | benchmark matrix/generator/tests | schemas | matrix validation and deterministic resume | characterization runs | pending |
+| Flagship coding-agent characterization | root + rotating measurement lane | blocked on instrumentation | clean worktree + root integration | flagship runner/artifacts | validated instrumentation/overhead | flagship CLI and artifact validator | full branch/state DAG and waterfall | pending |
+| COW granularity and shared-root lifetime | rotating measurement lane | blocked on CPU traces | clean worktree | COW analysis/tests | CPU matrix | page sweep/replay validation | COW and residency corpus | pending |
+| Transform/integrity pipeline characterization | rotating measurement lane | blocked on state traces | clean worktree | transform analysis/tests | state lifecycle trace | transform command and raw-chain validation | transform corpus | pending |
+| Transport/multicast opportunity characterization | rotating measurement lane | blocked on transfer traces | clean worktree | network/multicast analysis/tests | state lifecycle trace | transport/multicast commands | transport corpus | pending |
+| Metadata hot-path and optimized software baseline | rotating measurement lane | blocked on state traces | clean worktree | metadata benchmark/analysis/tests | state lifecycle trace | repeated scaling campaign | metadata raw samples | pending |
+| Statistical methodology, raw artifact integrity and corpus validation | rotating statistics lane | blocked on first corpus | clean worktree | statistical analysis/validators/tests | workload campaigns | independent reconstruction/tamper tests | CDFs, intervals, correlations | pending |
+| Amdahl, roofline and bottleneck decomposition | rotating analysis lane | blocked on validated summaries | clean worktree | analysis modules/tests | statistics | analysis regeneration and source-reference validator | acceleration bounds | pending |
+| Hardware placement and strongest software baselines | rotating architecture lane | blocked on bottleneck analysis | clean worktree | placement/baseline analysis | Amdahl/roofline | recommendation reconstruction | placement matrix | pending |
+| Active experiment selection and cost ledger | rotating experiment lane | ready after initial uncertainties | clean worktree | prioritizer/cost ledger/tests | initial summaries | deterministic ranking/sensitivity tests | ranked queue | pending |
+| Hardware-backed GPU measurement | GPU performance lane | unexercised: no compatible hardware/budget | future compatible host | GPU commands/measurement artifacts only | capability gate | GPU characterization target | unavailable manifest now; raw traces later | pending |
+| Multi-GPU and multi-node measurement | network/GPU lanes | unexercised: no compatible inventory | future compatible hosts | hardware commands/artifacts only | GPU/network capability gate | multi-GPU/multi-node targets | unavailable manifests now; raw traces later | pending |
+| Requirements JSON and ISA/page/memory/queue/bandwidth/latency derivation | root + requirements lane | blocked on reviewed analysis | clean worktree + root | requirements derivation/tests | all applicable analyses | source-reference verification | `branchfabric_requirements.json` | pending |
+| Negative findings / what not to build | adversarial feature lane | blocked on reviewed analysis | clean worktree | negative-findings analysis/docs | Amdahl/placement/software baselines | claim-to-artifact audit | `WHAT_NOT_TO_BUILD.md` | pending |
+| Paper-quality characterization and design brief | report lane + root | blocked on requirements | clean worktree + root | reports/design brief | requirements/negative findings | report regeneration and link/hash audit | characterization report/design brief | pending |
+| Independent replication of top five measurements | replication lane | blocked on final candidate corpus | clean worktree | derived replication artifacts only | frozen raw corpus | independent commands per metric | replication records | pending |
+| Multidisciplinary and adversarial final review | rotating review lanes | blocked on draft reports | clean worktrees | review findings/patches only | complete draft | review-specific audits and final gates | review records | pending |
+
+Raw measurement agents may add new immutable raw files but may not edit existing
+raw files. Analysis and requirements lanes are not authorized to fill missing
+measurements with assumptions. No lane is authorized to implement RTL,
+BranchFabric hardware, firmware, a driver, or a cycle-accurate simulator.
+
 ## SLOForge Helix extension
 
 Baseline recorded: 2026-08-03 (America/Los_Angeles).

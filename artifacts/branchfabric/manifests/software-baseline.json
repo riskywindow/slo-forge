@@ -1,0 +1,43 @@
+{
+  "schema_version": "sloforge.branchfabric.software-manifest/v1",
+  "captured_at_utc": "2026-08-09T21:29:44Z",
+  "source_commit": "d6f77c839334a4644b4e2edf36a7543c68670a2d",
+  "tools": {
+    "git": "2.39.5 Apple Git-154",
+    "system_python": "3.12.8",
+    "locked_project_python": "3.12.7",
+    "uv": "0.10.2",
+    "rustc": "1.93.1",
+    "cargo": "1.93.1",
+    "node": "22.16.0",
+    "npm": "11.4.2",
+    "docker_client": "29.4.0"
+  },
+  "packages": {
+    "numpy": "2.3.5",
+    "psutil": "7.2.2",
+    "pydantic": "2.13.4",
+    "torch": null,
+    "triton": null,
+    "vllm": null,
+    "sglang": null,
+    "nixl": null,
+    "pyarrow": null,
+    "pandas": null,
+    "scipy": null,
+    "orjson": null,
+    "opentelemetry_api": null
+  },
+  "profilers": {
+    "powermetrics": "/usr/bin/powermetrics",
+    "xctrace": "/usr/bin/xctrace",
+    "nvidia_smi": null,
+    "nvcc": null,
+    "rocm_smi": null,
+    "perf": null
+  },
+  "budgets": {
+    "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD": "ABSENT",
+    "SLOFORGE_GPU_BUDGET_USD": "ABSENT"
+  }
+}

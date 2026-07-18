@@ -1,0 +1,90 @@
+{
+  "schema_version": "sloforge.branchfabric.characterization-baseline/v1",
+  "captured_at_utc": "2026-08-09T21:29:44Z",
+  "captured_at_local": "2026-08-09T16:29:44-05:00",
+  "baseline_commit": "d6f77c839334a4644b4e2edf36a7543c68670a2d",
+  "baseline_tag": "sloforge-branchfabric-characterization-baseline-d6f77c8",
+  "worktree_state": {
+    "tracked_changes_present": false,
+    "preexisting_untracked_artifacts_present": true,
+    "disposition": "preserved as user-owned; characterization evidence isolated under artifacts/branchfabric"
+  },
+  "validation": {
+    "make_check": {
+      "status": "passed",
+      "python": {
+        "passed": 1115,
+        "skipped": 6,
+        "warnings": 6,
+        "pytest_elapsed_seconds": 301.7
+      },
+      "rust": {
+        "format": "passed",
+        "clippy_warnings_denied": "passed",
+        "workspace_tests_and_doctests": "passed"
+      },
+      "ui": {
+        "typecheck": "passed",
+        "lint": "passed",
+        "passed": 37,
+        "fixture_skipped": 1,
+        "production_build": "passed"
+      }
+    },
+    "helix_cpu_demo": {
+      "status": "passed",
+      "seed": 41,
+      "validation_class": "deterministic-local-cpu-synthetic",
+      "hardware_backed": false,
+      "artifact_path": "artifacts/branchfabric/baseline/helix-demo-seed-41",
+      "summary_sha256": "62840c42762a54b406b3325227fd8c25bc896ab6f1bba5c0cac9d2221bb68ae9",
+      "artifact_file_count": 145,
+      "artifact_apparent_size": "920KiB",
+      "timing": {
+        "clock": "/usr/bin/time -lp",
+        "wall_seconds": 12.51,
+        "user_seconds": 9.88,
+        "system_seconds": 6.91,
+        "maximum_resident_set_bytes": 125190144,
+        "page_faults": 1499,
+        "page_reclaims": 1474499,
+        "voluntary_context_switches": 2093,
+        "involuntary_context_switches": 23699,
+        "instructions_retired": 305930295,
+        "cycles_elapsed": 146855996,
+        "peak_memory_footprint_bytes": 22364496
+      }
+    },
+    "hardware_backed_helix": {
+      "status": "not_applicable_no_compatible_hardware",
+      "reason": "No NVIDIA device, CUDA runtime, PyTorch, vLLM, SGLang, or GPU characterization budget was available."
+    }
+  },
+  "environment": {
+    "hardware_manifest": "artifacts/branchfabric/manifests/hardware-baseline.json",
+    "software_manifest": "artifacts/branchfabric/manifests/software-baseline.json",
+    "background_load": {
+      "uptime": "6 days 18:53",
+      "users": 3,
+      "load_average_1m": 11.59,
+      "load_average_5m": 10.01,
+      "load_average_15m": 7.19,
+      "noise_note": "Baseline demo timing was collected under high background load and is retained as a noisy reference, not a stable performance distribution."
+    }
+  },
+  "raw_provenance": {
+    "commands": [
+      "make check",
+      "/usr/bin/time -lp uv run --locked sloforge helix demo --seed 41 --output artifacts/branchfabric/baseline/helix-demo-seed-41"
+    ],
+    "reports_read": [
+      "FINAL_REPORT.md",
+      "FABRIC_FINAL_REPORT.md",
+      "GENESIS_FINAL_REPORT.md",
+      "CONTINUUM_FINAL_REPORT.md",
+      "HELIX_FINAL_REPORT.md"
+    ],
+    "architecture_decisions": "docs/adr/*.md",
+    "execution_ledger": "EXECUTION_LEDGER.md"
+  }
+}
