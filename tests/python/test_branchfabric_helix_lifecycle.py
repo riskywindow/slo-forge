@@ -107,10 +107,20 @@ def test_seed_41_real_demo_lifecycle_and_trace_levels_preserve_semantics(
     )
 
     all_events = (*full_recorder.branch_events, *full_recorder.state_events)
+    fork_events = [
+        event
+        for event in all_events
+        if event["operation_type"] in {"BRANCH_FORK", "ENVIRONMENT_FORK", "STATE_FORK"}
+    ]
+    assert len({event["timing_span_id"] for event in fork_events}) == 1
+    assert all(
+        event["duration_attribution"] == "shared_span_do_not_sum_across_branch_events"
+        for event in fork_events
+    )
     assert all(event["measurement_source"] == "SYNTHETIC" for event in all_events)
     assert all(event["workload_evidence_class"] == "SYNTHETIC" for event in all_events)
     assert all(event["timing_measurement_class"] == "HARDWARE_BACKED_REAL" for event in all_events)
-    assert all(event["simulated_gpu_state"] is False for event in all_events)
+    assert all(event["simulated_gpu_state"] is True for event in all_events)
     assert all(int(event["duration_ns"]) >= 0 for event in all_events)
     assert all(event["content_hash"] == _event_hash(event) for event in all_events)
     assert len({int(event["event_sequence"]) for event in all_events}) == len(all_events)

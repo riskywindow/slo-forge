@@ -241,7 +241,7 @@ class _Emitter:
             "measurement_source": "SYNTHETIC",
             "workload_evidence_class": "SYNTHETIC",
             "timing_measurement_class": "HARDWARE_BACKED_REAL",
-            "simulated_gpu_state": False,
+            "simulated_gpu_state": True,
             "seed": self.seed,
             "result": "success",
         }
@@ -367,6 +367,9 @@ def _install_wrappers(stack: ExitStack, emitter: _Emitter) -> None:
                 source_physical_representation="content_addressed_checkpoint",
                 destination_physical_representation="content_addressed_fork",
                 state_epoch=member.checkpoint.capsule.transaction.source_epoch,
+                timing_span_id=f"{emitter.trace_id}:combined-branch-group-fork",
+                timing_scope="combined_model_and_environment_group_fork",
+                duration_attribution="shared_span_do_not_sum_across_branch_events",
             )
             environment = cast(EnvironmentBranch, member.environment_branch)
             base = environment._backend._branch_state(member.branch_id).base
@@ -385,6 +388,9 @@ def _install_wrappers(stack: ExitStack, emitter: _Emitter) -> None:
                 physical_bytes=_workspace_bytes(environment.workspace),
                 metadata_bytes=len(environment._backend.artifact_payload(base)),
                 fork_implementation="eager_restore",
+                timing_span_id=f"{emitter.trace_id}:combined-branch-group-fork",
+                timing_scope="combined_model_and_environment_group_fork",
+                duration_attribution="shared_span_do_not_sum_across_branch_events",
             )
             emitter.emit(
                 TraceStream.BRANCH_WORKLOAD,
@@ -398,6 +404,9 @@ def _install_wrappers(stack: ExitStack, emitter: _Emitter) -> None:
                 shared_root=True,
                 private_suffix=False,
                 branch_strategy=member.state_reuse.strategy.value,
+                timing_span_id=f"{emitter.trace_id}:combined-branch-group-fork",
+                timing_scope="combined_model_and_environment_group_fork",
+                duration_attribution="shared_span_do_not_sum_across_branch_events",
             )
         return group
 
