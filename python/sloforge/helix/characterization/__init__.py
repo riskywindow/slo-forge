@@ -9,6 +9,12 @@ from .matrix import (
     expand_matrix,
     load_matrix,
 )
+from .prioritizer import (
+    ExperimentCandidate,
+    ExperimentQueue,
+    RankedExperiment,
+    prioritize_experiments,
+)
 from .projection import (
     CowProjection,
     StateCalibration,
@@ -23,8 +29,11 @@ __all__ = [
     "CharacterizationMatrix",
     "CowProjection",
     "EvidenceClass",
+    "ExperimentCandidate",
     "ExperimentCase",
+    "ExperimentQueue",
     "ExperimentSpec",
+    "RankedExperiment",
     "StateCalibration",
     "StateCompositionProjection",
     "TraceLevel",
@@ -32,6 +41,7 @@ __all__ = [
     "common_suffix_tokens",
     "expand_matrix",
     "load_matrix",
+    "prioritize_experiments",
     "project_attention_cow",
     "project_state_composition",
 ]
