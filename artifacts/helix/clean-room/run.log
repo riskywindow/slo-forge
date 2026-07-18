@@ -1,11 +1,11 @@
 uv sync --locked --extra dev --extra deploy
 Using CPython 3.12.7 interpreter at: /Users/rishivinodkumar/anaconda3/bin/python3
-Creating virtual environment at: /var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.AgzZxq/.venv
-Resolved 289 packages in 0.78ms
-   Building sloforge @ file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq
-      Built sloforge @ file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq
-Prepared 1 package in 179ms
-Installed 114 packages in 242ms
+Creating virtual environment at: /var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.x6UhTR/.venv
+Resolved 289 packages in 10ms
+   Building sloforge @ file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR
+      Built sloforge @ file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR
+Prepared 1 package in 206ms
+Installed 114 packages in 299ms
  + aiofiles==24.1.0
  + aiohappyeyeballs==2.7.1
  + aiohttp==3.14.3
@@ -99,7 +99,7 @@ Installed 114 packages in 242ms
  + s3transfer==0.19.2
  + shellingham==1.5.4
  + six==1.17.0
- + sloforge==0.1.0 (from file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq)
+ + sloforge==0.1.0 (from file:///private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR)
  + sortedcontainers==2.4.0
  + synchronicity==0.12.5
  + tenacity==9.1.4
@@ -123,8 +123,8 @@ Installed 114 packages in 242ms
 cargo fetch --locked
 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo build --workspace --locked
    Compiling proc-macro2 v1.0.107
-   Compiling quote v1.0.47
    Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
    Compiling libc v0.2.189
    Compiling cfg-if v1.0.4
    Compiling itoa v1.0.18
@@ -137,11 +137,11 @@ CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo b
    Compiling smallvec v1.15.2
    Compiling futures-core v0.3.33
    Compiling once_cell v1.21.4
-   Compiling thiserror v2.0.19
    Compiling stable_deref_trait v1.2.1
    Compiling bytes v1.12.1
-   Compiling parking_lot_core v0.9.12
+   Compiling thiserror v2.0.19
    Compiling version_check v0.9.5
+   Compiling parking_lot_core v0.9.12
    Compiling tracing-core v0.1.36
    Compiling generic-array v0.14.7
    Compiling futures-sink v0.3.33
@@ -155,148 +155,148 @@ CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo b
    Compiling http v1.5.0
    Compiling shlex v2.0.1
    Compiling find-msvc-tools v0.1.9
+   Compiling ref-cast v1.0.26
    Compiling num-traits v0.2.19
    Compiling cc v1.4.0
-   Compiling futures-task v0.3.33
-   Compiling core-foundation-sys v0.8.7
    Compiling futures-io v0.3.33
    Compiling litemap v0.8.2
-   Compiling ref-cast v1.0.26
    Compiling writeable v0.6.3
+   Compiling futures-task v0.3.33
+   Compiling core-foundation-sys v0.8.7
    Compiling http-body v1.1.0
-   Compiling iana-time-zone v0.1.65
    Compiling icu_properties_data v2.2.0
    Compiling percent-encoding v2.3.2
+   Compiling utf8_iter v1.0.4
+   Compiling iana-time-zone v0.1.65
+   Compiling utf8parse v0.2.2
+   Compiling icu_normalizer_data v2.2.0
+   Compiling anstyle-parse v1.0.0
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling zeroize v1.9.0
+   Compiling anstyle v1.0.14
+   Compiling hashbrown v0.17.1
+   Compiling dyn-clone v1.0.20
    Compiling syn v3.0.3
    Compiling syn v2.0.119
-   Compiling utf8_iter v1.0.4
    Compiling errno v0.3.14
    Compiling mio v1.2.2
-   Compiling signal-hook-registry v1.4.8
    Compiling socket2 v0.6.5
-   Compiling cpufeatures v0.2.17
-   Compiling utf8parse v0.2.2
-   Compiling parking_lot v0.12.5
-   Compiling icu_normalizer_data v2.2.0
+   Compiling signal-hook-registry v1.4.8
    Compiling ring v0.17.14
-   Compiling anstyle-parse v1.0.0
-   Compiling dyn-clone v1.0.20
-   Compiling is_terminal_polyfill v1.70.2
-   Compiling hashbrown v0.17.1
-   Compiling httparse v1.10.1
-   Compiling anstyle v1.0.14
-   Compiling equivalent v1.0.2
-   Compiling colorchoice v1.0.5
-   Compiling block-buffer v0.10.4
+   Compiling cpufeatures v0.2.17
+   Compiling parking_lot v0.12.5
    Compiling crypto-common v0.1.7
-   Compiling anstyle-query v1.1.5
-   Compiling zeroize v1.9.0
-   Compiling digest v0.10.7
+   Compiling block-buffer v0.10.4
    Compiling tower-service v0.3.3
-   Compiling anstream v1.0.0
+   Compiling digest v0.10.7
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling equivalent v1.0.2
+   Compiling httparse v1.10.1
    Compiling indexmap v2.14.0
-   Compiling rustls-pki-types v1.15.1
+   Compiling anstream v1.0.0
    Compiling sha2 v0.10.9
    Compiling getrandom v0.2.17
-   Compiling fnv v1.0.7
+   Compiling rustls-pki-types v1.15.1
    Compiling clap_lex v1.1.0
-   Compiling try-lock v0.2.5
-   Compiling atomic-waker v1.1.2
-   Compiling untrusted v0.9.0
    Compiling strsim v0.11.1
    Compiling heck v0.5.0
+   Compiling try-lock v0.2.5
+   Compiling atomic-waker v1.1.2
+   Compiling fnv v1.0.7
+   Compiling untrusted v0.9.0
+   Compiling clap_builder v4.6.5
    Compiling want v0.3.1
    Compiling form_urlencoded v1.2.2
    Compiling sync_wrapper v1.0.2
-   Compiling zerocopy v0.8.55
-   Compiling clap_builder v4.6.5
-   Compiling rustls v0.23.43
+   Compiling httpdate v1.0.3
    Compiling tower-layer v0.3.3
    Compiling getrandom v0.4.3
-   Compiling httpdate v1.0.3
+   Compiling zerocopy v0.8.55
    Compiling getrandom v0.3.4
-   Compiling serde_derive_internals v0.30.0
+   Compiling rustls v0.23.43
    Compiling http-body-util v0.1.4
-   Compiling base64 v0.22.1
    Compiling ipnet v2.12.0
    Compiling subtle v2.6.1
+   Compiling base64 v0.22.1
    Compiling ryu v1.0.23
    Compiling webpki-roots v1.0.9
    Compiling bitflags v2.13.1
    Compiling regex-syntax v0.8.11
-   Compiling lazy_static v1.5.0
-   Compiling anyhow v1.0.104
+   Compiling serde_derive_internals v0.30.0
    Compiling mime v0.3.17
+   Compiling anyhow v1.0.104
+   Compiling lazy_static v1.5.0
    Compiling uuid v1.24.0
    Compiling sharded-slab v0.1.7
    Compiling serde_path_to_error v0.1.20
-   Compiling tracing-log v0.2.0
-   Compiling synstructure v0.13.2
-   Compiling thread_local v1.1.10
    Compiling rand_core v0.9.5
-   Compiling matchit v0.8.4
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.10
    Compiling nu-ansi-term v0.50.3
+   Compiling matchit v0.8.4
+   Compiling regex-automata v0.4.16
    Compiling serde_derive v1.0.229
    Compiling thiserror-impl v2.0.19
    Compiling displaydoc v0.2.7
    Compiling tokio-macros v2.7.2
    Compiling ref-cast-impl v1.0.26
+   Compiling synstructure v0.13.2
    Compiling schemars_derive v1.2.2
    Compiling clap_derive v4.6.4
+   Compiling tokio v1.53.1
+   Compiling matchers v0.2.0
    Compiling zerofrom-derive v0.1.7
    Compiling yoke-derive v0.8.2
    Compiling zerovec-derive v0.11.3
    Compiling tracing-attributes v0.1.31
-   Compiling tokio v1.53.1
    Compiling futures-macro v0.3.33
-   Compiling regex-automata v0.4.16
-   Compiling axum-macros v0.5.1
-   Compiling zerofrom v0.1.8
-   Compiling futures-util v0.3.33
    Compiling async-stream-impl v0.3.6
-   Compiling yoke v0.8.3
-   Compiling ppv-lite86 v0.2.21
+   Compiling axum-macros v0.5.1
    Compiling clap v4.6.5
-   Compiling tracing v0.1.44
+   Compiling ppv-lite86 v0.2.21
    Compiling rand_chacha v0.9.0
-   Compiling zerovec v0.11.6
-   Compiling zerotrie v0.2.4
    Compiling rand v0.9.5
    Compiling async-stream v0.3.6
-   Compiling matchers v0.2.0
+   Compiling zerofrom v0.1.8
+   Compiling futures-util v0.3.33
+   Compiling tracing v0.1.44
+   Compiling chrono v0.4.45
+   Compiling serde_urlencoded v0.7.1
+   Compiling sloforge-sim v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-sim)
+   Compiling tracing-serde v0.2.0
+   Compiling sloforge-telemetry v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-telemetry)
+   Compiling sloforge-fabric-sim v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-fabric-sim)
+   Compiling yoke v0.8.3
    Compiling axum-core v0.5.6
+   Compiling tracing-subscriber v0.3.23
+   Compiling zerovec v0.11.6
+   Compiling zerotrie v0.2.4
+   Compiling schemars v1.2.2
    Compiling tinystr v0.8.3
    Compiling potential_utf v0.1.5
    Compiling icu_collections v2.2.0
-   Compiling icu_locale_core v2.2.0
-   Compiling futures-executor v0.3.33
-   Compiling futures v0.3.33
-   Compiling chrono v0.4.45
-   Compiling serde_urlencoded v0.7.1
-   Compiling sloforge-sim v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-sim)
-   Compiling tracing-serde v0.2.0
-   Compiling sloforge-telemetry v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-telemetry)
-   Compiling sloforge-fabric-sim v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-fabric-sim)
-   Compiling tracing-subscriber v0.3.23
    Compiling tokio-util v0.7.19
+   Compiling icu_locale_core v2.2.0
+   Compiling sloforge-state-transaction v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-state-transaction)
+   Compiling sloforge-genesis-modelcheck v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-genesis-modelcheck)
+   Compiling h2 v0.4.15
    Compiling tower v0.5.3
    Compiling icu_provider v2.2.0
-   Compiling icu_properties v2.2.0
+   Compiling futures-executor v0.3.33
+   Compiling sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-helix-ir)
    Compiling icu_normalizer v2.2.0
-   Compiling h2 v0.4.15
-   Compiling schemars v1.2.2
+   Compiling icu_properties v2.2.0
+   Compiling futures v0.3.33
+   Compiling sloforge-genesis-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-genesis-ir)
+   Compiling sloforge-continuum-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-continuum-ir)
+   Compiling sloforge-state-modelcheck v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-state-modelcheck)
+   Compiling sloforge-fabric-protocol v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-fabric-protocol)
+   Compiling sloforge-protocol v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-protocol)
    Compiling idna_adapter v1.2.2
    Compiling idna v1.1.0
    Compiling url v2.5.8
-   Compiling sloforge-state-transaction v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-state-transaction)
-   Compiling sloforge-genesis-modelcheck v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-genesis-modelcheck)
-   Compiling sloforge-protocol v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-protocol)
-   Compiling sloforge-fabric-protocol v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-fabric-protocol)
-   Compiling sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-helix-ir)
-   Compiling sloforge-genesis-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-genesis-ir)
    Compiling tower-http v0.6.11
-   Compiling sloforge-continuum-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-continuum-ir)
-   Compiling sloforge-state-modelcheck v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-state-modelcheck)
    Compiling hyper v1.11.0
    Compiling hyper-util v0.1.20
    Compiling axum v0.8.9
@@ -304,11 +304,11 @@ CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo b
    Compiling tokio-rustls v0.26.4
    Compiling hyper-rustls v0.27.9
    Compiling reqwest v0.12.28
-   Compiling sloforge-loadgen v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-loadgen)
-   Compiling sloforge-gateway v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-gateway)
-    Finished `dev` profile [unoptimized] target(s) in 21.15s
+   Compiling sloforge-loadgen v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-loadgen)
+   Compiling sloforge-gateway v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-gateway)
+    Finished `dev` profile [unoptimized] target(s) in 18.40s
 
-added 231 packages, and audited 232 packages in 2s
+added 231 packages, and audited 232 packages in 4s
 
 55 packages are looking for funding
   run `npm fund` for details
@@ -320,33 +320,33 @@ npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.19.0
 npm notice To update run: npm install -g npm@11.19.0
 npm notice
 uv run --locked ruff format --check python/sloforge/helix python/sloforge/cli/helix.py tests/python/test_helix*.py
-103 files already formatted
+113 files already formatted
 uv run --locked ruff check python/sloforge/helix python/sloforge/cli/helix.py tests/python/test_helix*.py
 All checks passed!
 uv run --locked mypy python/sloforge/helix python/sloforge/cli/helix.py
-Success: no issues found in 78 source files
+Success: no issues found in 83 source files
 uv run --locked pytest -q tests/python/test_helix*.py
-........................................................................ [ 46%]
-........................................................................ [ 92%]
-...........                                                              [100%]
-155 passed in 34.56s
+........................................................................ [ 38%]
+........................................................................ [ 76%]
+............................................                             [100%]
+188 passed in 45.98s
 cargo fmt --all --check
 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo clippy -p sloforge-helix-ir --all-targets --all-features --locked -- -D warnings
-    Checking typenum v1.20.1
    Compiling serde_core v1.0.229
+    Checking typenum v1.20.1
    Compiling libc v0.2.189
    Compiling serde_json v1.0.151
-    Checking itoa v1.0.18
     Checking zmij v1.0.23
     Checking memchr v2.8.3
+    Checking itoa v1.0.18
     Checking cfg-if v1.0.4
    Compiling syn v3.0.3
     Checking num-traits v0.2.19
     Checking dyn-clone v1.0.20
     Checking chrono v0.4.45
     Checking generic-array v0.14.7
-    Checking crypto-common v0.1.7
     Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
     Checking digest v0.10.7
    Compiling serde_derive_internals v0.30.0
    Compiling serde_derive v1.0.229
@@ -359,12 +359,12 @@ CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo c
     Checking thiserror v2.0.19
     Checking serde v1.0.229
     Checking schemars v1.2.2
-    Checking sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-helix-ir)
-    Finished `dev` profile [unoptimized] target(s) in 3.19s
+    Checking sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-helix-ir)
+    Finished `dev` profile [unoptimized] target(s) in 3.27s
 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test -p sloforge-helix-ir --all-features --locked
-   Compiling memchr v2.8.3
    Compiling serde_core v1.0.229
    Compiling libc v0.2.189
+   Compiling memchr v2.8.3
    Compiling chrono v0.4.45
    Compiling ref-cast v1.0.26
    Compiling thiserror v2.0.19
@@ -373,15 +373,15 @@ CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo t
    Compiling serde_json v1.0.151
    Compiling serde v1.0.229
    Compiling schemars v1.2.2
-   Compiling sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.AgzZxq/crates/sloforge-helix-ir)
-    Finished `test` profile [unoptimized] target(s) in 2.40s
-     Running unittests src/lib.rs (/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.AgzZxq/target/debug/deps/sloforge_helix_ir-1d1d1b8a55cad9c8)
+   Compiling sloforge-helix-ir v0.1.0 (/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/sloforge-helix-clean.x6UhTR/crates/sloforge-helix-ir)
+    Finished `test` profile [unoptimized] target(s) in 2.56s
+     Running unittests src/lib.rs (/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.x6UhTR/target/debug/deps/sloforge_helix_ir-1d1d1b8a55cad9c8)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/conformance.rs (/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.AgzZxq/target/debug/deps/conformance-528e62e429ef2e27)
+     Running tests/conformance.rs (/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T//sloforge-helix-clean.x6UhTR/target/debug/deps/conformance-528e62e429ef2e27)
 
 running 5 tests
 test canonical_float_and_unicode_profile_matches_python ... ok
@@ -390,7 +390,7 @@ test tampering_and_unknown_nested_fields_are_rejected ... ok
 test incompatible_state_reuse_and_missing_policy_provenance_are_rejected ... ok
 test complete_python_transaction_round_trips_with_golden_hash ... ok
 
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
 
    Doc-tests sloforge_helix_ir
 
@@ -403,17 +403,17 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
   "output": "artifacts/helix/demo/seed-41",
   "schema_version": "sloforge.helix.cpu-demo/v1",
   "seed": 41,
-  "git_commit": "de89932164a5ecc8a73e5fc2c309796a34f4b8b4",
+  "git_commit": "001fd7d5fb21135d4fd123efb8f083c00061f8e9",
   "production_failure_seed": 41,
   "production_failure_action": "naive_parse",
   "champion_policy_hash": "e4ee3aad5e59a2ec9e1c3129b93b3f9dd69c331aaa1804779f0a322a6bde7fd8",
-  "branch_point_id": "2765e28ed1ba4a3ca480db7a8f1fa3ab451d5db5f39dbfa117fbe8d4b29594f8",
-  "continuum_capsule_id": "060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d",
+  "branch_point_id": "08bec5d8a4e51296244ae596c7e62f3e29e4eca78debdb0f675dd834f61fbe43",
+  "continuum_capsule_id": "e793cd6f36a7cc50b7bd412211583b13bbf8981eb032d1e3285ea4dba2ce3e6e",
   "environment_capsule_id": "9ae27338c11c2ac8ddc9afc55709936ba7a308f4aad1926d4e2df309a594e2e1",
   "capture_consistent": true,
   "capture_artifact_bytes_verified": true,
   "source_resumed": true,
-  "branch_group_id": "3287f279bcc52dc89d802cc93b9e99a85bc1ddb67127e5231b0e654047278a34",
+  "branch_group_id": "0c6522c542a6eb5f9ace63c5041b38fba68f98e52d846aa5975e41e6e1cb601f",
   "branch_strategies": {
     "different-rng": null,
     "forced-alternative": "guarded_parse",
@@ -423,9 +423,9 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
   "state_reuse": {
     "different-rng": {
       "schema_version": "sloforge.helix.state-reuse-report/v1",
-      "report_id": "c677db2efe454939f0460945fab44f13465b934a2eaa9943ebf2e8d237590507",
+      "report_id": "be0b9aa41daa71f48fb8d8f340dc5ae9ee59e5478211fcecc1174d27c1ec4563",
       "branch_id": "different-rng",
-      "source_capsule_id": "060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d",
+      "source_capsule_id": "e793cd6f36a7cc50b7bd412211583b13bbf8981eb032d1e3285ea4dba2ce3e6e",
       "source_policy_epoch_id": "coding-agent@0",
       "destination_policy_epoch_id": "coding-agent@0",
       "strategy": "controlled_rng_mutation",
@@ -456,13 +456,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "source_state_exact": false,
       "transcript_equivalence_claimed": false,
       "recomputation_evidence_digest": null,
-      "report_digest": "2530e5c8ee59d4faa74a4f2ba8304c04b671ed1fc14bdb4e3923a74afeb49667"
+      "report_digest": "435e7055aa43a6e2d61dc6854e2a3d4236e945a994a0821dc6a6dea9553ae7eb"
     },
     "forced-alternative": {
       "schema_version": "sloforge.helix.state-reuse-report/v1",
-      "report_id": "2cb94e37c2a5f1a6832698c1f2d991161baf439700bd1d43263f4aeaf5030bee",
+      "report_id": "12bad92ae9351ff54e71b6f7de276a832b4f2dc6995a6b12ffda29e420d77bbe",
       "branch_id": "forced-alternative",
-      "source_capsule_id": "060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d",
+      "source_capsule_id": "e793cd6f36a7cc50b7bd412211583b13bbf8981eb032d1e3285ea4dba2ce3e6e",
       "source_policy_epoch_id": "coding-agent@0",
       "destination_policy_epoch_id": "coding-agent@0",
       "strategy": "exact_cow",
@@ -490,13 +490,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "source_state_exact": true,
       "transcript_equivalence_claimed": false,
       "recomputation_evidence_digest": null,
-      "report_digest": "42c9c6bc8e71b8cae6d063ed36e4ba808cfb0ba18371d17a05748748da901fc4"
+      "report_digest": "57d4bc41985efdd58fbc7339314a9363db5d6ab56920941d44cb6214e0db62ac"
     },
     "alternative-tool": {
       "schema_version": "sloforge.helix.state-reuse-report/v1",
-      "report_id": "5f976b7883d95b9bc36ceb6ed948519cf26e7a03515de2d6daef9b2b933d6dac",
+      "report_id": "6f5a0682910b5ad30e34a55407bad2b281863a458e092735a80c1793863cf790",
       "branch_id": "alternative-tool",
-      "source_capsule_id": "060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d",
+      "source_capsule_id": "e793cd6f36a7cc50b7bd412211583b13bbf8981eb032d1e3285ea4dba2ce3e6e",
       "source_policy_epoch_id": "coding-agent@0",
       "destination_policy_epoch_id": "coding-agent@0",
       "strategy": "exact_cow",
@@ -524,13 +524,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "source_state_exact": true,
       "transcript_equivalence_claimed": false,
       "recomputation_evidence_digest": null,
-      "report_digest": "e74ca06998ed82405ed721499200378cc2d2f38a52cce9d23a75cd679dba9192"
+      "report_digest": "21e1341decbf86fcb246cff9d199155249e0f73106dcc640bad40338ce70ceec"
     },
     "verifier-assisted": {
       "schema_version": "sloforge.helix.state-reuse-report/v1",
-      "report_id": "b5e429c923db67daa240879f102c5478af5debeec1c69442bf763c59b44e56f6",
+      "report_id": "54dd3f5c7faff6a4ca31b15a11a160e2f8a7553b8b812de48cdea9db72ad339f",
       "branch_id": "verifier-assisted",
-      "source_capsule_id": "060daf197efa6cf774c1f8b4f45a601a843026aa71e4410acf199ff22937510d",
+      "source_capsule_id": "e793cd6f36a7cc50b7bd412211583b13bbf8981eb032d1e3285ea4dba2ce3e6e",
       "source_policy_epoch_id": "coding-agent@0",
       "destination_policy_epoch_id": "coding-agent@0",
       "strategy": "exact_cow",
@@ -558,7 +558,7 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "source_state_exact": true,
       "transcript_equivalence_claimed": false,
       "recomputation_evidence_digest": null,
-      "report_digest": "0193e2ee1c28a0897a1b30098b6ee9da935a5ddb7323942455825a694d764a6a"
+      "report_digest": "51aa70427d8cdb5ee9c1d70b3623ed161cf318714341d2e557c2e54078992329"
     }
   },
   "branch_rewards": {
@@ -573,35 +573,35 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
     "holdout_separated_from_training": true,
     "all_evaluators_trusted": true
   },
-  "credit_evidence_hash": "60f8124a67eb17bc558c382e1bb592ecbb7f16008598c0a32d54a1770f38359d",
-  "training_batch_id": "231f71f88e3303d650617da9ff2ad78d68e0ceb7955509d230902b6f96825fa4",
-  "training_batch_hash": "969959c5253051c7134c314576f7d5af427e73569331bfd151ee825f408ec1b3",
+  "credit_evidence_hash": "4116d619ee9d0ec094df9b2f4a9df98d941e363c2743d7b226427d8a28aff85f",
+  "training_batch_id": "3b52ad6c7bc574b5691ffec3326ecbcab507adc0389fc37d8e7340611936d291",
+  "training_batch_hash": "397a968a3edb327b30383487116f2e06e1fc5bf3d93c5888c3fba6cf35e2bb37",
   "rejected_candidate": {
     "policy_epoch_id": "coding-agent-rejected@1",
     "success_rate": 0.6666666666666666,
     "quality_threshold": 0.75,
     "promotion_state": "rejected",
-    "evaluation_hash": "ecb8a8459c8ff434c1476e387067323345f5d9c8b9682e592613b5577107234d"
+    "evaluation_hash": "ba814c2a055add4ddc0236ad03c33cfad5392b3e9154b21cf0a73d96bf66d0c9"
   },
   "corrected_candidate": {
     "policy_epoch_id": "coding-agent@1",
     "success_rate": 0.7916666666666666,
     "quality_threshold": 0.75,
-    "evaluation_hash": "c8148160f95a33f2a8e9e5f8ceb675700a3af7f0d43cfc1d3d281a9d1ae1a5c2",
-    "checkpoint_hash": "91d75141151e502f58f103012f9fbb950c8c64907e8e069a4faa88523ee8aadf"
+    "evaluation_hash": "41488e0070318d7b71eb7cdbfcb5a384f915354018ab14beca55d98cd3d29b86",
+    "checkpoint_hash": "70f3b87b7f6229435473fd3ada4e423ee2aea9ce6498fa3b599d3d6fe96936eb"
   },
   "champion_success_rate": 0.625,
   "measured_success_rate_delta": 0.16666666666666663,
   "serving": {
-    "candidate_mean_policy_decision_latency_ms": 0.008699209000000001,
+    "candidate_mean_policy_decision_latency_ms": 0.009169458,
     "synthetic": true
   },
   "replay": {
     "transcript": {
       "schema_version": "sloforge.helix.replay-evidence/v1",
-      "evidence_id": "fcd95eeb53baa9ccaf20e904748b7b645858d79ddc752337825aa0043ea861ee",
-      "expected_trace_id": "10339e143c94d64dfd77717d259796cc6610bb0393c2d2ef94cdbca50d12f37c",
-      "observed_trace_id": "ec5e8e043358a9f0bf8fb339dcff2c0cc87933c39c4f709ffd7026d6f02152f9",
+      "evidence_id": "7073fb4a224fc5a29fb067e2f605a486604178e00b52dc4cacea439ccd03f381",
+      "expected_trace_id": "c73c692871846c8363127478865537695131b21bf7b73e86547daa11d26a57ea",
+      "observed_trace_id": "544ffc50857141aec13be9452e4599ba13c0e2276c692f0c6b01f922b6b3d90f",
       "mode": "causal",
       "scope": "transcript",
       "matched": true,
@@ -617,7 +617,7 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "first_reward_divergence": null,
       "first_outcome_divergence": null,
       "first_resource_divergence": null,
-      "transcript_evidence_digest": "6ab0bb114b6254f10739c0574a02f43c6de7898f71c7f4c18981ed972fef136e",
+      "transcript_evidence_digest": "738709a7535855a53d85aa7cde3b095d00c2e1211dc869cd681dac0d1d4aee17",
       "environment_state_evidence_digest": null,
       "model_state_evidence_digest": null,
       "joint_evidence_digest": null,
@@ -633,13 +633,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
         "trace comparison does not attest that the runner restored underlying state bytes",
         "semantic equality depends on the declared semantic event digests"
       ],
-      "evidence_digest": "10999812f602deb76f4af140bb525aabcdeb506afb6a8394a7bcb1c4cca7bae1"
+      "evidence_digest": "f4897b7dc42718173c20924989d7eea2a438d45a7fca573bdb28b69607eaded7"
     },
     "environment": {
       "schema_version": "sloforge.helix.replay-evidence/v1",
-      "evidence_id": "4b93dae93fb93de09e1e8f41bca7b80f2e080b1a341063dc4bcb0608ac5c6433",
-      "expected_trace_id": "10339e143c94d64dfd77717d259796cc6610bb0393c2d2ef94cdbca50d12f37c",
-      "observed_trace_id": "89bee4c6a053ab824cacb6f9830266e13dddba3cd3fb72519466ace362faffe1",
+      "evidence_id": "5526ed278ca2caf12675a930511b2af7baaeb7d7ea6235cde36b138ae2f983c4",
+      "expected_trace_id": "c73c692871846c8363127478865537695131b21bf7b73e86547daa11d26a57ea",
+      "observed_trace_id": "84cc2bb1a93e1b20a2b43eb66c7c67f1bace091cb2f4d75dac87514bf80949ff",
       "mode": "causal",
       "scope": "environment_only",
       "matched": true,
@@ -654,7 +654,7 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "first_outcome_divergence": null,
       "first_resource_divergence": null,
       "transcript_evidence_digest": null,
-      "environment_state_evidence_digest": "03e8ec8407a3266a71b1a832dc53ff5601d47da587a037169258dbad94896c28",
+      "environment_state_evidence_digest": "a76daa2d60638393c7418727bd93044260104270dbe96547f9281a4e24c9b5e2",
       "model_state_evidence_digest": null,
       "joint_evidence_digest": null,
       "environment_state_equal": true,
@@ -669,13 +669,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
         "trace comparison does not attest that the runner restored underlying state bytes",
         "semantic equality depends on the declared semantic event digests"
       ],
-      "evidence_digest": "5262ea7613c883d33a5f529e95ddc23452246b1a370836d93155d6e5252991a1"
+      "evidence_digest": "d56d036f4bf83d0e2f78f5f954b0cbb91b1962d850290b02cdfc905c0b83b711"
     },
     "model": {
       "schema_version": "sloforge.helix.replay-evidence/v1",
-      "evidence_id": "8d5d82312fc2b9132a1db70236d10e8e1868c2faad25ef1ff751d5c5ce96ec65",
-      "expected_trace_id": "10339e143c94d64dfd77717d259796cc6610bb0393c2d2ef94cdbca50d12f37c",
-      "observed_trace_id": "945f0c5ba5f52c126306ccdfa8ca35ecc65ed5a07542dbb1d5b1f0e310f56df7",
+      "evidence_id": "35b5602766ab0ef07a21ab836f78170173a1a049d722978cf8cd2f332c2b3d0f",
+      "expected_trace_id": "c73c692871846c8363127478865537695131b21bf7b73e86547daa11d26a57ea",
+      "observed_trace_id": "d421a6dc7afafa0a0e3fcf3f0ed9dfb4fdc1d9a803f391636949a314d8eecb71",
       "mode": "causal",
       "scope": "model_only",
       "matched": true,
@@ -692,7 +692,7 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "first_resource_divergence": null,
       "transcript_evidence_digest": null,
       "environment_state_evidence_digest": null,
-      "model_state_evidence_digest": "96206f5e8cd9e20f9701fc03fcd55da762d669c98fe148d239157f8631aff4fd",
+      "model_state_evidence_digest": "5bab8a5d8d51260ee58890706c65a3142887e764f50447983298e6ee8e2e70d8",
       "joint_evidence_digest": null,
       "environment_state_equal": null,
       "model_state_equal": true,
@@ -706,13 +706,13 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
         "trace comparison does not attest that the runner restored underlying state bytes",
         "semantic equality depends on the declared semantic event digests"
       ],
-      "evidence_digest": "317d186d91131ca84e86608d4f76946a4728a75d7881c73379daac4e96fdd628"
+      "evidence_digest": "af5178d857774e48e41a774d69998073c3e6226605e36238063c26a86471f99c"
     },
     "joint": {
       "schema_version": "sloforge.helix.replay-evidence/v1",
-      "evidence_id": "d56ee9c74f10ce0e44da6119136561a6ca16dd452484364a32afc8d65496538d",
-      "expected_trace_id": "10339e143c94d64dfd77717d259796cc6610bb0393c2d2ef94cdbca50d12f37c",
-      "observed_trace_id": "10339e143c94d64dfd77717d259796cc6610bb0393c2d2ef94cdbca50d12f37c",
+      "evidence_id": "0e20ac276ce073227f937af587e399f73a161e24d626419ad17f39d0804d3119",
+      "expected_trace_id": "c73c692871846c8363127478865537695131b21bf7b73e86547daa11d26a57ea",
+      "observed_trace_id": "c73c692871846c8363127478865537695131b21bf7b73e86547daa11d26a57ea",
       "mode": "exact",
       "scope": "joint",
       "matched": true,
@@ -724,10 +724,10 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
       "first_reward_divergence": null,
       "first_outcome_divergence": null,
       "first_resource_divergence": null,
-      "transcript_evidence_digest": "eb66151e92742824cc7c3154793ca585605b29c80677aafca6764ed405c812d1",
-      "environment_state_evidence_digest": "2d91d8f86f0e0ebcecde6dd5cd542ffacf7c694283d9dc06e9820e5806099065",
-      "model_state_evidence_digest": "8c44124c15e17ca0da6d5e7c1489493403180b4b1f13ad582d7cb2ba18f69cf7",
-      "joint_evidence_digest": "cda7813f294ce04d6955e93d4cad21f5259b7ce6bce2ba148d295f01b5f378d0",
+      "transcript_evidence_digest": "8a9d8ca8a9e97df240e2f47be69e5189011324921081efd0cc7d50f8b7180a94",
+      "environment_state_evidence_digest": "c608247b16c4b9a9f9f6dd84aa966223b3ab73f0b1a362dad9378c61311f4e65",
+      "model_state_evidence_digest": "e7eb333c04bbda637ed55d63c6aa5fefa2c68143d174bcc5fb749b3a45c3ff9e",
+      "joint_evidence_digest": "f7ccdd6db0d5188839babf2af415941b516b137b1cbaf0c8009e07261b9cd5c0",
       "environment_state_equal": true,
       "model_state_equal": true,
       "transcript_establishes_state_equivalence": false,
@@ -740,12 +740,12 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
         "trace comparison does not attest that the runner restored underlying state bytes",
         "semantic equality depends on the declared semantic event digests"
       ],
-      "evidence_digest": "6ceb21c89b72653dd0718970c361eef234664bc8b09e58f909d87d74e635296e"
+      "evidence_digest": "4ef97531b2abe0b69fa5d13e2c64b243e3026595f76a86680e778dc0a2c696bb"
     }
   },
   "promotion": {
     "tenant_id": "tenant-helix-demo",
-    "capsule_digest": "3677503509e85813369a8ea2f32482255db555c4a53a19ab2de92b82d980b14b",
+    "capsule_digest": "a103369fd6d102ded574b52b096954645cfd346f842cd9add792cea7dffbe187",
     "capsule_validation_eligible": true,
     "state_compatibility_class": "recomputation_assisted",
     "challenger_route_before_rollback": "coding-agent@1",
@@ -756,7 +756,7 @@ uv run --locked sloforge helix demo --seed 41 --output artifacts/helix/demo/seed
   },
   "learning_transaction_state": "rolled_back",
   "rejected_transaction_state": "quality_regression",
-  "lineage_hash": "fc60519afebeadc059839fc5284e50651ced5586e0f39fb098b2e58fcdd62072",
+  "lineage_hash": "019257c4c4df70a8d7205c131abd35e1c0ea690c233673c74d41e124a9f570f4",
   "environment_cleanup": {
     "branch_workspace_bytes": 0,
     "live_branches": 0
@@ -786,6 +786,9 @@ uv run --locked sloforge helix scheduler simulate --workload scenarios/helix/res
   "predicted_learning_value": 16.0,
   "total_cost_microunits": 41300
 }
+uv run --locked pytest -q tests/python/test_helix_preservation_evaluation.py tests/python/test_helix_experience_selection_evaluation.py
+................                                                         [100%]
+16 passed in 3.27s
 uv build
 Building source distribution...
 Building wheel from source distribution...

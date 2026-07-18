@@ -51,13 +51,13 @@ The provisional workstream table above records the launch state. It is
 superseded by this verified closure record.
 
 - Final verified implementation source commit:
-  `b0d86eb0afd52f18b291206f791bf31209f5cbb5`.
+  `001fd7d5fb21135d4fd123efb8f083c00061f8e9`.
 - Root integration commit: `5450fadd482be4804c420b4d960554d7a765fc58`.
 - All transactional IR, environment/effect, capture/branch/replay,
   rollout/reward/credit/training, staleness, experience selection, scheduler,
   transaction/promotion, fault, report, and documentation workstreams are
   complete in the local reference boundary.
-- `make check` passed with 1,082 Python tests and six declared optional
+- `make check` passed with 1,115 Python tests and six declared optional
   no-Torch/GPU skips, strict Ruff/mypy, all warning-denied Rust checks/tests,
   37 UI tests with one fixture skip, and the production UI build.
 - `make helix-check` passed with 188 Python tests, strict Ruff/mypy, Rust
@@ -113,6 +113,7 @@ campaign, and independently reconstructs H1-H10 dispositions.
 | H8 continual-learning campaign | continual-learning lane + root | complete; partial result | `helix/evaluation/continual_learning.py`, focused test | trainer, retention gate | `make helix-training-demo` | `raw/campaigns/h8-continual-learning/` | `bc757ea` |
 | H9 experience-selection campaign | experience-selection lane + root | complete; inconclusive result retained | `helix/evaluation/experience_selection.py`, scenario, focused test | selector, trainer, holdout | `make helix-resource-demo` | `raw/campaigns/h9-experience-selection/` | `bc757ea` |
 | Independent reference reconstruction and provenance | root + reference-validation lane | complete | `helix/evaluation/reference.py`, reference tests | all five campaigns and flagship | `make helix-evaluation` plus validator replay | `artifacts/helix/evaluation/reference/` | `bc757ea`, `b0d86eb` |
+| UI dependency audit closure | root | complete; zero vulnerabilities | `ui/package-lock.json` | clean archive and npm registry audit | `npm audit`, `npm run check`, `make check`, `make helix-clean-room-test` | clean-room result/log | `001fd7d` |
 
 Final evidence is indexed in `HELIX_FINAL_REPORT.md`. Raw artifacts are under
 `artifacts/helix/`; generated evaluations are under `reports/helix-*`.

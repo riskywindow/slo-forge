@@ -7,10 +7,11 @@ Verified on 2026-08-09 (America/Chicago).
 - Baseline commit: `a3366807e879cf17615021e32606fbf77216235c`
 - Immutable baseline tag: `sloforge-helix-baseline-a336680`
 - Final verified implementation source commit:
-  `b0d86eb0afd52f18b291206f791bf31209f5cbb5`
+  `001fd7d5fb21135d4fd123efb8f083c00061f8e9`
 - Main implementation commit: `5450fadd482be4804c420b4d960554d7a765fc58`
 - Empirical-campaign implementation commits: `bc757ea5dede2471cba663d059191e005c4d4d72`
   through `b0d86eb0afd52f18b291206f791bf31209f5cbb5`
+- Sealed evaluation evidence commit: `4ae8a03e94041b8a68fbbef23cfbc69404d59c9a`
 - Validation class: `deterministic-local-cpu-synthetic`
 - Host: Apple Silicon macOS, 12 logical CPUs, 24 GiB RAM
 
@@ -295,17 +296,18 @@ Baseline and non-regression commands:
 - `make forgeci-demo`
 - `make warmpath-demo`
 
-All passed. The final `make check` result was 1,082 Python tests passed with six
-declared optional no-Torch/GPU skips, Ruff format/lint over 531 files, strict
-mypy over 401 sources, all workspace Rust format, warning-denied Clippy, unit,
+All passed. The final `make check` result was 1,115 Python tests passed with six
+declared optional no-Torch/GPU skips, Ruff format/lint over 541 files, strict
+mypy over 406 sources, all workspace Rust format, warning-denied Clippy, unit,
 integration, and doc tests, and 37 UI tests with one fixture skip plus a
 production build. The six Genesis numerical-overflow warnings are known test
 inputs and did not represent test failures.
 
 Helix commands:
 
-- `make helix-check`: 155 Python tests passed; Ruff and strict mypy passed over
-  78 Helix sources; Rust format, warning-denied Clippy, unit tests, and five
+- `make helix-check`: 188 Python tests passed; Ruff passed over 113 Helix/test
+  files and strict mypy passed over 83 Helix sources; Rust format,
+  warning-denied Clippy, unit tests, and five
   cross-language conformance tests passed.
 - `make helix-demo`
 - `make helix-branch-demo` (26 focused tests)
@@ -318,13 +320,18 @@ Helix commands:
 - `make helix-clean-room-test`
 
 Every listed Helix target passed. The clean archive validated revision
-`de89932164a5ecc8a73e5fc2c309796a34f4b8b4`, source tree
-`f94e9e0c1df99f1aa1aec34afa2fbc500bea4a15`, and log hash
-`e068745302940de358da34bffc97b3d89c44fbfcc54a7487fc5d6b3f201f26df`.
+`001fd7d5fb21135d4fd123efb8f083c00061f8e9`, source tree
+`e4216971d243ad032a882c9f65a31806f6a3f48b`, and log hash
+`02b358855fedba1dfed25fd29bff3019ce58c39287c8a63069c36b24aea1444d`.
 `make helix-docker-smoke` ran its capability check and recorded
 `unexercised: Docker daemon unavailable`; it did not claim a pass. No Helix
 worker, environment branch, training process, canary, cloud resource, or paid
 job remained active after validation.
+
+The clean install initially exposed a high-severity advisory in the UI
+development graph (`nanoid` 3.3.16 through PostCSS). The lockfile now resolves
+the compatible fixed 3.3.18 release. Full and production-only `npm audit`, UI
+checks, and the subsequent clean archive all report zero vulnerabilities.
 
 ## Evaluation results
 
@@ -334,6 +341,12 @@ It seals 27 top-level raw references and retains the complete 707-file raw
 evaluation tree. Student-t intervals summarize deterministic seed sensitivity,
 not independent population sampling. The three flagship runs were identical,
 so those intervals collapse to the observed values:
+
+Its software manifest binds source commit
+`b0d86eb0afd52f18b291206f791bf31209f5cbb5` and records
+`tracked_source_worktree_dirty=false`; the later `001fd7d` release commit only
+updates the UI development lockfile and does not alter the evaluated Helix
+implementation.
 
 | Metric | Mean | 95% sensitivity interval |
 |---|---:|---:|
