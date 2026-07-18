@@ -337,8 +337,9 @@ checks, and the subsequent clean archive all report zero vulnerabilities.
 
 The evaluation ID is
 `db8d73223397e48487e23652db7f1bd24229754033276f11ed18a17aa279b792`.
-It seals 27 top-level raw references and retains the complete 707-file raw
-evaluation tree. Student-t intervals summarize deterministic seed sensitivity,
+It seals 27 top-level raw references and retains the complete 707-file
+evaluation bundle (706 files under `raw/` plus `evaluation.json`). Student-t
+intervals summarize deterministic seed sensitivity,
 not independent population sampling. The three flagship runs were identical,
 so those intervals collapse to the observed values:
 
@@ -402,6 +403,10 @@ fixtures and fail-closed capability probes.
 - SQLite supplies durable local transactions, not distributed consensus.
   Content hashes need an independently authenticated digest registry to prove
   issuer identity.
+- The reference validator verifies 27 top-level artifacts and completely
+  inventories the five new campaign bundles. It does not maintain a global
+  manifest for every nested flagship file in the retained evaluation tree;
+  those files are retained evidence, not each an independently sealed claim.
 - H3 and H9 use three non-independent deterministic sensitivity seeds on one
   categorical-policy fixture. H3 was negative and H9 inconclusive; neither
   establishes neural-policy or production behavior. H4, H6, and H8 likewise
@@ -440,5 +445,6 @@ fixtures and fail-closed capability probes.
 - Adversarial review: `docs/helix/FINAL_ADVERSARIAL_REVIEW.md`
 - Security review: `docs/helix/SECURITY_REVIEW_FINDINGS.md`
 
-All numeric claims in this report are sourced from the retained JSON artifacts.
+All numeric claims in this report are sourced from retained JSON artifacts or
+validation logs.
 No resume claim or hardware result is populated without raw provenance.

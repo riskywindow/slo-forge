@@ -102,8 +102,10 @@ This continuation replaces the earlier "not exercised" disposition for H3,
 H4, H6, H8, and H9 with replay-validated deterministic campaigns. Root retained
 manifest and release-report ownership; implementation lanes used disjoint
 evaluation modules and tests. The reference validator distrusts campaign
-summaries, bounds reads, rejects symlinks and orphaned artifacts, replays each
-campaign, and independently reconstructs H1-H10 dispositions.
+summaries, bounds reads, verifies the 27 top-level references, replays each
+campaign, rejects symlinks and orphans inside the five campaign bundles, and
+independently reconstructs H1-H10 dispositions. It does not claim a complete
+inventory of every nested flagship file.
 
 | Continued task | Owner | Status | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
 |---|---|---|---|---|---|---|---|
