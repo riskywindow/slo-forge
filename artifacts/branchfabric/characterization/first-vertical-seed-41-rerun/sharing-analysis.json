@@ -1,0 +1,37 @@
+{
+  "branch_count": 4,
+  "copy_on_write": {
+    "bytes_written": 1303,
+    "events": 4,
+    "old_bytes_replaced": 668,
+    "page_fault_measurement_available": false,
+    "page_faults_observed": 0
+  },
+  "environment_state": {
+    "base_logical_bytes": 594,
+    "checkpoint_implementation": "content_addressed_incremental_capsule",
+    "checkpoint_incremental_cas_bytes": 1303,
+    "checkpoint_private_dirty_bytes": 1303,
+    "live_workspace_physical_bytes": 2376,
+    "naive_live_workspace_bytes": 2376,
+    "workspace_implementation": "eager_restore_then_atomic_replace"
+  },
+  "limitations": [
+    "The reference environment backend eagerly materializes branch workspaces; filesystem page sharing is not claimed.",
+    "CAS byte counts describe application-level content deduplication, not filesystem block allocation."
+  ],
+  "measurement_source": "SYNTHETIC",
+  "model_state": {
+    "incremental_cas_physical_bytes": 0,
+    "logical_branch_bytes": 10640,
+    "logical_unique_content_bytes": 2660,
+    "naive_independent_bytes": 10640,
+    "physical_allocated_bytes": 2660,
+    "physical_amplification": 1.0,
+    "shared_logical_bytes": 8844,
+    "sharing_efficiency": 0.75,
+    "source_cas_physical_bytes": 2660
+  },
+  "timing_measurement_class": "HARDWARE_BACKED_REAL",
+  "workload_evidence_class": "SYNTHETIC"
+}

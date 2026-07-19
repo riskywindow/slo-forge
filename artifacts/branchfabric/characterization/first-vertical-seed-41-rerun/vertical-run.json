@@ -1,0 +1,68 @@
+{
+  "artifacts": [
+    "artifacts/branchfabric/characterization/first-vertical-seed-41-rerun/branch-workload-trace-v1.jsonl",
+    "artifacts/branchfabric/characterization/first-vertical-seed-41-rerun/state-operation-trace-v1.jsonl",
+    "artifacts/branchfabric/characterization/first-vertical-seed-41-rerun/helix-lifecycle.perfetto.json"
+  ],
+  "attempted_events": 78,
+  "branch_event_count": 61,
+  "cpu_time_ns": 1799380000,
+  "dropped_events": 0,
+  "filtered_events": 0,
+  "limitations": [
+    "The exercised coding-agent workload is a deterministic synthetic CPU fixture.",
+    "Model state sizes are simulated; no GPU HBM, PCIe, or GPU kernel timing is claimed.",
+    "The reference environment fork eagerly restores files; live filesystem COW is absent.",
+    "This demo does not migrate a post-fork branch; migration is measured separately."
+  ],
+  "migration_observed": false,
+  "output": "artifacts/branchfabric/characterization/first-vertical-seed-41-rerun",
+  "parquet_status": "unavailable",
+  "schema_version": "sloforge.branchfabric.vertical-trace-run/v1",
+  "seed": 41,
+  "semantic_digest": "7f18405c411892136d7c57721f3a334497f77ff60c18fa3793dabd572e04f471",
+  "sharing_analysis": {
+    "branch_count": 4,
+    "copy_on_write": {
+      "bytes_written": 1303,
+      "events": 4,
+      "old_bytes_replaced": 668,
+      "page_fault_measurement_available": false,
+      "page_faults_observed": 0
+    },
+    "environment_state": {
+      "base_logical_bytes": 594,
+      "checkpoint_implementation": "content_addressed_incremental_capsule",
+      "checkpoint_incremental_cas_bytes": 1303,
+      "checkpoint_private_dirty_bytes": 1303,
+      "live_workspace_physical_bytes": 2376,
+      "naive_live_workspace_bytes": 2376,
+      "workspace_implementation": "eager_restore_then_atomic_replace"
+    },
+    "limitations": [
+      "The reference environment backend eagerly materializes branch workspaces; filesystem page sharing is not claimed.",
+      "CAS byte counts describe application-level content deduplication, not filesystem block allocation."
+    ],
+    "measurement_source": "SYNTHETIC",
+    "model_state": {
+      "incremental_cas_physical_bytes": 0,
+      "logical_branch_bytes": 10640,
+      "logical_unique_content_bytes": 2660,
+      "naive_independent_bytes": 10640,
+      "physical_allocated_bytes": 2660,
+      "physical_amplification": 1.0,
+      "shared_logical_bytes": 8844,
+      "sharing_efficiency": 0.75,
+      "source_cas_physical_bytes": 2660
+    },
+    "timing_measurement_class": "HARDWARE_BACKED_REAL",
+    "workload_evidence_class": "SYNTHETIC"
+  },
+  "simulated_gpu_state": true,
+  "state_event_count": 17,
+  "timing_measurement_class": "HARDWARE_BACKED_REAL",
+  "trace_corpus_hash": "671df0c047406e2142ee9f416c5e9423a4877feb2c5e4f7269649f96c84cf1d5",
+  "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+  "wall_time_ns": 10603040083,
+  "workload_evidence_class": "SYNTHETIC"
+}
