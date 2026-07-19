@@ -61,6 +61,7 @@ def test_full_trace_covers_real_state_lifecycle_and_preserves_provenance() -> No
         event.workload_evidence_class is MeasurementKind.SYNTHETIC for event in result.events
     )
     cow = next(event for event in result.events if event.operation == "STATE_COW")
+    assert cow.state_segment == "model"
     assert cow.metadata["cow_implementation"].endswith("not_an_os_or_gpu_page_fault")
     simulated = [
         event
@@ -75,6 +76,8 @@ def test_full_trace_covers_real_state_lifecycle_and_preserves_provenance() -> No
         for event in result.events
         if event.measurement_kind is MeasurementKind.HARDWARE_BACKED_REAL
     )
+    commit = next(event for event in result.events if event.operation == "STATE_COMMIT")
+    assert commit.state_segment == "transaction"
 
 
 def test_sharing_and_cow_metrics_are_derived_from_continuum_artifacts() -> None:

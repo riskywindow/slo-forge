@@ -28,7 +28,7 @@
     "clock_source": {"enum": ["monotonic", "monotonic_raw", "perf_counter", "cuda_global_timer", "cupti", "synthetic"]},
     "alignment_confidence": {"type": "number", "minimum": 0, "maximum": 1},
     "operation_type": {"enum": ["STATE_ALLOC", "STATE_MAP", "STATE_PUBLISH", "STATE_FORK", "STATE_COW", "STATE_APPEND", "STATE_READ", "STATE_WRITE", "STATE_SNAPSHOT", "STATE_DELTA", "STATE_RESHARD", "STATE_TRANSPOSE", "STATE_REPACK", "STATE_QUANTIZE", "STATE_DEQUANTIZE", "STATE_COMPRESS", "STATE_DECOMPRESS", "STATE_HASH", "STATE_CHECKSUM", "STATE_ENCRYPT", "STATE_DECRYPT", "STATE_SEND", "STATE_RECEIVE", "STATE_MULTICAST", "STATE_ACK", "STATE_RETRY", "STATE_COMMIT", "STATE_ABORT", "STATE_RECLAIM", "STATE_FREE"]},
-    "state_segment": {"enum": ["token_history", "kv", "recurrent", "sampler", "guided_decoding", "workflow", "environment", "filesystem", "database", "process_reconstruction", "transaction", "integrity", "runtime_reconstructible", "unknown"]},
+    "state_segment": {"enum": ["model", "token_history", "kv", "recurrent", "sampler", "guided_decoding", "workflow", "environment", "filesystem", "database", "process_reconstruction", "transaction", "integrity", "runtime_reconstructible", "unknown"]},
     "source_physical_representation": {"type": "string", "minLength": 1},
     "destination_physical_representation": {"type": "string", "minLength": 1},
     "bytes": {"type": "integer", "minimum": 0},
@@ -49,6 +49,12 @@
     "source_location": {"enum": ["gpu_hbm", "gpu_peer_hbm", "host_dram", "pinned_memory", "local_nvme", "remote_storage", "nic", "transport_buffer", "unknown"]},
     "destination_location": {"enum": ["gpu_hbm", "gpu_peer_hbm", "host_dram", "pinned_memory", "local_nvme", "remote_storage", "nic", "transport_buffer", "unknown"]},
     "transport_type": {"enum": ["none", "memory_copy", "pcie", "nvlink", "nccl", "tcp", "rdma", "shared_memory", "storage", "synthetic"]},
+    "attributes": {
+      "type": "object",
+      "maxProperties": 64,
+      "propertyNames": {"minLength": 1, "maxLength": 128},
+      "additionalProperties": {"type": ["boolean", "integer", "number", "string", "null"]}
+    },
     "event_sequence": {"type": "integer", "minimum": 0},
     "content_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
   },

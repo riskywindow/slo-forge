@@ -137,6 +137,7 @@ class _Emitter:
         measurement_kind: MeasurementKind = MeasurementKind.HARDWARE_BACKED_REAL,
         transfer_time_ns: int = 0,
         evidence: tuple[str, ...],
+        state_segment: str = "model",
         metadata: dict[str, Any] | None = None,
         result_bytes: Callable[[_T], int] | None = None,
         result_page_size: Callable[[_T], int] | None = None,
@@ -173,6 +174,7 @@ class _Emitter:
                 result="failure",
                 failure=type(error).__name__,
                 evidence=evidence,
+                state_segment=state_segment,
                 metadata=metadata,
             )
             raise
@@ -206,6 +208,7 @@ class _Emitter:
             result="success",
             failure=None,
             evidence=evidence,
+            state_segment=state_segment,
             metadata=metadata,
         )
         return result
@@ -431,6 +434,7 @@ class _RecordingCoordinator(DurableCoordinator):
             evidence=(
                 "python/sloforge/continuum/transaction/coordinator.py:DurableCoordinator.commit_ownership",
             ),
+            state_segment="transaction",
             metadata={"timing_scope": "durable_ownership_compare_and_swap"},
         )
 

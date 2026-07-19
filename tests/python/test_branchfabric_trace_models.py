@@ -70,6 +70,7 @@ def branch_event(**updates: object) -> BranchWorkloadEventV1:
         "queue_delay_ns": 5,
         "execution_latency_ns": 35,
         "wait_latency_ns": 10,
+        "attributes": {"timing_span_id": "trace-1:fork", "generated_tokens": 4},
     }
     values.update(updates)
     return BranchWorkloadEventV1.model_validate(values)
@@ -113,6 +114,7 @@ def state_event(**updates: object) -> StateOperationEventV1:
         "state_epoch": 3,
         "source_location": MemoryLocation.HOST_DRAM,
         "destination_location": MemoryLocation.HOST_DRAM,
+        "attributes": {"dirty_bytes": 4096},
     }
     values.update(updates)
     return StateOperationEventV1.model_validate(values)
@@ -214,6 +216,10 @@ def test_strict_models_reject_coercion_extra_fields_and_invalid_failure() -> Non
         state_event(result=OperationResult.FAILURE)
     with pytest.raises(ValidationError, match="only failed operations"):
         state_event(failure="not allowed")
+    with pytest.raises(ValidationError, match="64-entry bound"):
+        state_event(attributes={f"key-{index}": index for index in range(65)})
+    with pytest.raises(ValidationError, match="finite"):
+        branch_event(attributes={"invalid": float("nan")})
 
 
 def test_trace_manifest_balances_counts_and_conforms_to_schema() -> None:

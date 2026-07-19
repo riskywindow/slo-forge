@@ -31,7 +31,7 @@
     "operation_type": {"enum": ["BRANCH_POINT", "CAPTURE", "BRANCH_FORK", "BRANCH_READY", "BRANCH_DIVERGENCE", "BRANCH_PRUNE", "BRANCH_ABORT", "BRANCH_COMMIT", "BRANCH_COMPLETE", "BRANCH_MIGRATION", "CHECKPOINT", "ROLLOUT", "REWARD", "TRAIN", "EVALUATE", "CANARY", "PROMOTE", "ROLLBACK", "STATE_ALLOC", "STATE_MAP", "STATE_PUBLISH", "STATE_FORK", "STATE_COW", "STATE_APPEND", "STATE_READ", "STATE_WRITE", "STATE_SNAPSHOT", "STATE_DELTA", "STATE_RESHARD", "STATE_TRANSPOSE", "STATE_REPACK", "STATE_QUANTIZE", "STATE_DEQUANTIZE", "STATE_COMPRESS", "STATE_DECOMPRESS", "STATE_HASH", "STATE_CHECKSUM", "STATE_ENCRYPT", "STATE_DECRYPT", "STATE_SEND", "STATE_RECEIVE", "STATE_MULTICAST", "STATE_ACK", "STATE_RETRY", "STATE_COMMIT", "STATE_ABORT", "STATE_RECLAIM", "STATE_FREE"]},
     "logical_state_id": {"type": ["string", "null"]},
     "physical_state_id": {"type": ["string", "null"]},
-    "state_segment": {"enum": ["token_history", "kv", "recurrent", "sampler", "guided_decoding", "workflow", "environment", "filesystem", "database", "process_reconstruction", "transaction", "integrity", "runtime_reconstructible", "unknown"]},
+    "state_segment": {"enum": ["model", "token_history", "kv", "recurrent", "sampler", "guided_decoding", "workflow", "environment", "filesystem", "database", "process_reconstruction", "transaction", "integrity", "runtime_reconstructible", "unknown"]},
     "page": {"type": ["integer", "null"], "minimum": 0},
     "version": {"type": ["integer", "null"], "minimum": 0},
     "source_epoch": {"type": ["integer", "null"], "minimum": 0},
@@ -68,6 +68,12 @@
     "pcie_path": {"type": ["string", "null"]},
     "network_rail": {"type": ["string", "null"]},
     "memory_tier": {"type": ["string", "null"]},
+    "attributes": {
+      "type": "object",
+      "maxProperties": 64,
+      "propertyNames": {"minLength": 1, "maxLength": 128},
+      "additionalProperties": {"type": ["boolean", "integer", "number", "string", "null"]}
+    },
     "event_sequence": {"type": "integer", "minimum": 0},
     "content_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
   },

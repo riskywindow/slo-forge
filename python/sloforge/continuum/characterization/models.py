@@ -66,6 +66,7 @@ class StateOperationObservation:
     measurement_kind: MeasurementKind
     seed: int
     evidence_references: tuple[str, ...]
+    state_segment: str = "model"
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -95,6 +96,8 @@ class StateOperationObservation:
             raise ValueError("the reference Continuum harness workload is synthetic")
         if not self.logical_state_id or not self.branch_id or not self.tenant_security_domain:
             raise ValueError("state, branch, and security-domain identities are required")
+        if self.state_segment not in {"model", "transaction", "integrity"}:
+            raise ValueError("Continuum characterization state segment is unsupported")
         if not self.evidence_references:
             raise ValueError("measurements require at least one source evidence reference")
 

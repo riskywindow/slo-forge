@@ -7,6 +7,7 @@ event-oriented, high-volume measurement boundary used by characterization.
 
 from __future__ import annotations
 
+import math
 from enum import StrEnum
 from typing import Annotated, Literal, Self
 
@@ -20,6 +21,20 @@ UNSEALED_CONTENT_HASH = "0" * 64
 
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+AttributeValue = bool | int | float | str | None
+MAX_ATTRIBUTES = 64
+
+
+def _validate_attributes(attributes: dict[str, AttributeValue]) -> None:
+    if len(attributes) > MAX_ATTRIBUTES:
+        raise ValueError(f"event attributes exceed the {MAX_ATTRIBUTES}-entry bound")
+    for key, value in attributes.items():
+        if not key or len(key) > 128:
+            raise ValueError("event attribute keys must contain 1..128 characters")
+        if isinstance(value, str) and len(value) > 4096:
+            raise ValueError("event attribute string values must not exceed 4096 characters")
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ValueError("event attribute floats must be finite")
 
 
 class StrictModel(BaseModel):
@@ -70,6 +85,7 @@ class MemoryLocation(StrEnum):
 
 
 class StateSegment(StrEnum):
+    MODEL = "model"
     TOKEN_HISTORY = "token_history"
     KV = "kv"
     RECURRENT = "recurrent"
@@ -266,6 +282,7 @@ class BranchWorkloadEventV1(StrictModel):
     pcie_path: str | None = None
     network_rail: str | None = None
     memory_tier: str | None = None
+    attributes: dict[str, AttributeValue] = Field(default_factory=dict)
 
     event_sequence: int = Field(default=0, ge=0)
     content_hash: Sha256 = UNSEALED_CONTENT_HASH
@@ -278,6 +295,7 @@ class BranchWorkloadEventV1(StrictModel):
             raise ValueError("error must be non-empty when present")
         if self.cow_allocation and self.operation_type is not BranchOperationType.STATE_COW:
             raise ValueError("cow_allocation is only valid for STATE_COW")
+        _validate_attributes(self.attributes)
         return self
 
 
@@ -335,6 +353,7 @@ class StateOperationEventV1(StrictModel):
     source_location: MemoryLocation = MemoryLocation.UNKNOWN
     destination_location: MemoryLocation = MemoryLocation.UNKNOWN
     transport_type: TransportType = TransportType.NONE
+    attributes: dict[str, AttributeValue] = Field(default_factory=dict)
 
     event_sequence: int = Field(default=0, ge=0)
     content_hash: Sha256 = UNSEALED_CONTENT_HASH
@@ -347,6 +366,7 @@ class StateOperationEventV1(StrictModel):
             raise ValueError("failed operations require failure detail")
         if self.result is not OperationResult.FAILURE and self.failure is not None:
             raise ValueError("only failed operations may carry failure detail")
+        _validate_attributes(self.attributes)
         return self
 
 
@@ -451,6 +471,7 @@ class TraceManifestV1(StrictModel):
 
 __all__ = [
     "BRANCH_TRACE_SCHEMA_VERSION",
+    "MAX_ATTRIBUTES",
     "STATE_TRACE_SCHEMA_VERSION",
     "TRACE_MANIFEST_SCHEMA_VERSION",
     "TRACE_PRODUCER_VERSION",

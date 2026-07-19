@@ -1,5 +1,6 @@
 """BranchWorkloadTrace v1 and StateOperationTrace v1 event infrastructure."""
 
+from .adapters import CanonicalContinuumRecorder, CanonicalLifecycleRecorder
 from .buffer import BoundedTraceBuffer, TraceBufferStats
 from .canonical import (
     TraceIntegrityError,
@@ -54,6 +55,8 @@ __all__ = [
     "BranchOperationType",
     "BranchWorkloadEventV1",
     "BranchWorkloadTraceV1",
+    "CanonicalContinuumRecorder",
+    "CanonicalLifecycleRecorder",
     "ClockSource",
     "HardwareDevice",
     "HardwareManifestV1",
