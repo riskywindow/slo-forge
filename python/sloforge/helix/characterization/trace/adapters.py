@@ -27,7 +27,7 @@ from .models import (
 
 _BRANCH_OPERATION_MAP = {
     "BRANCH_POINT_CAPTURE": BranchOperationType.BRANCH_POINT,
-    "ENVIRONMENT_FORK": BranchOperationType.BRANCH_FORK,
+    "ENVIRONMENT_FORK": BranchOperationType.ENVIRONMENT_FORK,
     "BRANCH_FORK": BranchOperationType.BRANCH_FORK,
     "ROLLOUT_COMPLETE": BranchOperationType.ROLLOUT,
     "REWARD_COMPLETE": BranchOperationType.REWARD,
@@ -35,9 +35,7 @@ _BRANCH_OPERATION_MAP = {
     "PROMOTION_COMPLETE": BranchOperationType.PROMOTE,
     "BRANCH_PRUNE": BranchOperationType.BRANCH_PRUNE,
     "BRANCH_COMPLETE": BranchOperationType.BRANCH_COMPLETE,
-    # The exact durable transaction state remains in attributes. Mapping an
-    # intermediate state to commit would overstate what occurred.
-    "LEARNING_TRANSACTION_STAGE": BranchOperationType.STATE_PUBLISH,
+    "LEARNING_TRANSACTION_STAGE": BranchOperationType.LEARNING_TRANSACTION_STAGE,
 }
 _CANONICAL_KEYS = {
     "trace_id",

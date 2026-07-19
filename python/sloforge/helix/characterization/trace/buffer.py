@@ -21,6 +21,7 @@ _MINIMAL_BRANCH_OPERATIONS: Final = frozenset(
     {
         BranchOperationType.BRANCH_POINT,
         BranchOperationType.BRANCH_FORK,
+        BranchOperationType.ENVIRONMENT_FORK,
         BranchOperationType.BRANCH_READY,
         BranchOperationType.BRANCH_PRUNE,
         BranchOperationType.BRANCH_ABORT,
@@ -33,6 +34,7 @@ _MINIMAL_BRANCH_OPERATIONS: Final = frozenset(
         BranchOperationType.TRAIN,
         BranchOperationType.PROMOTE,
         BranchOperationType.ROLLBACK,
+        BranchOperationType.LEARNING_TRANSACTION_STAGE,
     }
 )
 _MINIMAL_STATE_OPERATIONS: Final = frozenset(
