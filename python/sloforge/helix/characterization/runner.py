@@ -131,10 +131,9 @@ def _hardware_manifest(baseline: Path) -> HardwareManifestV1:
 
 def _software_manifest(baseline: Path) -> SoftwareManifestV1:
     document = _read_baseline_manifest(baseline)
-    host = document.get("host")
     tools = document.get("tools")
     packages = document.get("packages")
-    if not isinstance(host, dict) or not isinstance(tools, dict) or not isinstance(packages, dict):
+    if not isinstance(tools, dict) or not isinstance(packages, dict):
         raise ValueError("baseline software manifest is incomplete")
     components = tuple(
         VersionedComponent(name=name, version=str(version), source=baseline.as_posix())
@@ -142,8 +141,8 @@ def _software_manifest(baseline: Path) -> SoftwareManifestV1:
         if version is not None
     )
     return SoftwareManifestV1(
-        operating_system=str(host.get("operating_system", platform.platform())),
-        kernel=str(host.get("kernel", platform.release())),
+        operating_system=platform.platform(),
+        kernel=platform.release(),
         python_version=platform.python_version(),
         rust_version=(str(tools["rustc"]) if tools.get("rustc") else None),
         components=components,
