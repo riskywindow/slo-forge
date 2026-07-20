@@ -218,7 +218,8 @@ branchfabric-characterization-gpu:
 		SLOFORGE_BRANCHFABRIC_STATUS="$$1" \
 		SLOFORGE_BRANCHFABRIC_STATUS_REASON="$$2" \
 		SLOFORGE_BRANCHFABRIC_REVISION="$$revision" \
-		uv run --locked python -c 'import json, os, pathlib; path = pathlib.Path(os.environ["SLOFORGE_BRANCHFABRIC_STATUS_PATH"]); path.parent.mkdir(parents=True, exist_ok=True); path.write_text(json.dumps({"schema_version": "sloforge.branchfabric.hardware-status/v1", "status": os.environ["SLOFORGE_BRANCHFABRIC_STATUS"], "reason": os.environ["SLOFORGE_BRANCHFABRIC_STATUS_REASON"], "revision": os.environ["SLOFORGE_BRANCHFABRIC_REVISION"], "gpu_results_claimed": False, "paid_resources_created": False, "budget_env_present": bool(os.getenv("SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD"))}, indent=2, sort_keys=True) + "\n")'; \
+		SLOFORGE_BRANCHFABRIC_GPU_RESULTS_CLAIMED="$${3:-0}" \
+		uv run --locked python -c 'import json, os, pathlib; path = pathlib.Path(os.environ["SLOFORGE_BRANCHFABRIC_STATUS_PATH"]); path.parent.mkdir(parents=True, exist_ok=True); path.write_text(json.dumps({"schema_version": "sloforge.branchfabric.hardware-status/v1", "status": os.environ["SLOFORGE_BRANCHFABRIC_STATUS"], "reason": os.environ["SLOFORGE_BRANCHFABRIC_STATUS_REASON"], "revision": os.environ["SLOFORGE_BRANCHFABRIC_REVISION"], "gpu_results_claimed": os.environ["SLOFORGE_BRANCHFABRIC_GPU_RESULTS_CLAIMED"] == "1", "paid_resources_created": False, "budget_env_present": bool(os.getenv("SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD"))}, indent=2, sort_keys=True) + "\n")'; \
 	}; \
 	if test "$${SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU:-0}" != "1"; then \
 		record_status unexercised "explicit local GPU opt-in is disabled; no paid resources were created"; \
@@ -231,6 +232,7 @@ branchfabric-characterization-gpu:
 			--matrix benchmarks/branchfabric/characterization.yaml \
 			--output artifacts/branchfabric/characterization/gpu-reference \
 			--hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 1800; \
+		record_status exercised "accessible local NVIDIA characterization completed; see gpu-reference for evidence" 1; \
 	fi
 
 branchfabric-characterization:
