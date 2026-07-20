@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import hashlib
+import importlib
 import json
+import re
 import shutil
+from collections.abc import Callable
 from pathlib import Path
-from typing import Annotated, Literal, TypeVar
+from typing import Annotated, Literal, TypeVar, cast
 
 import typer
 from pydantic import BaseModel
@@ -66,6 +70,10 @@ transaction_app = typer.Typer(help="Inspect durable learning transactions.")
 scheduler_app = typer.Typer(help="Compile learning-aware resource schedules.")
 lineage_app = typer.Typer(help="Query portable Helix lineage graphs.")
 fault_app = typer.Typer(help="Run bounded deterministic Helix fault campaigns.")
+branch_trace_app = typer.Typer(help="Capture canonical branch and state-operation traces.")
+characterize_app = typer.Typer(
+    help="Run restartable, evidence-labelled BranchFabric characterization studies."
+)
 helix_app.add_typer(policy_app, name="policy")
 helix_app.add_typer(branchpoint_app, name="branchpoint")
 helix_app.add_typer(trajectory_app, name="trajectory")
@@ -75,12 +83,135 @@ helix_app.add_typer(transaction_app, name="transaction")
 helix_app.add_typer(scheduler_app, name="scheduler")
 helix_app.add_typer(lineage_app, name="lineage")
 helix_app.add_typer(fault_app, name="fault")
+helix_app.add_typer(branch_trace_app, name="trace")
+helix_app.add_typer(characterize_app, name="characterize")
 console = Console()
 ModelT = TypeVar("ModelT", bound=BaseModel)
+CharacterizationHardware = Literal["cpu", "gpu"]
+
+_SESSION_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$")
+_WORKFLOW_MODULE = "sloforge.helix.characterization.workflow"
+_MAX_ANALYSIS_EVENTS = 10_000_000
 
 
 def _json(value: object) -> None:
     console.print_json(json.dumps(value, default=str))
+
+
+def _workflow_callback(name: str) -> Callable[..., object]:
+    """Load the integrating workflow only when a command actually needs it."""
+
+    try:
+        module = importlib.import_module(_WORKFLOW_MODULE)
+    except ModuleNotFoundError as error:
+        if error.name != _WORKFLOW_MODULE:
+            raise
+        raise typer.BadParameter(
+            "the characterization workflow backend is not installed in this checkout; "
+            "run `make branchfabric-trace-check` to validate available trace studies, "
+            "or install/integrate sloforge.helix.characterization.workflow"
+        ) from error
+    callback = getattr(module, name, None)
+    if callback is None or not callable(callback):
+        raise typer.BadParameter(
+            f"the characterization workflow backend does not provide {name}(); "
+            "update the backend and CLI together"
+        )
+    return cast(Callable[..., object], callback)
+
+
+def _emit_backend_result(result: object) -> None:
+    if isinstance(result, BaseModel):
+        _json(result.model_dump(mode="json"))
+        return
+    _json(result)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while block := handle.read(1024 * 1024):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _analysis_target(output: Path, default_name: str) -> Path:
+    return output if output.suffix else output / default_name
+
+
+def _check_replaceable_json(target: Path, *, schema_version: str, replace: bool) -> None:
+    if not target.exists():
+        return
+    if not target.is_file() or target.is_symlink():
+        raise typer.BadParameter(f"refusing to replace non-regular output {target}")
+    if not replace:
+        raise typer.BadParameter(f"output {target} exists; pass --replace to replace it")
+    try:
+        prior = json.loads(target.read_bytes())
+    except (OSError, json.JSONDecodeError) as error:
+        raise typer.BadParameter(f"refusing to replace unrecognized output {target}") from error
+    if not isinstance(prior, dict) or prior.get("schema_version") != schema_version:
+        raise typer.BadParameter(
+            f"refusing to replace {target}: expected prior {schema_version} artifact"
+        )
+
+
+def _write_analysis(
+    output: Path,
+    *,
+    default_name: str,
+    schema_version: str,
+    payload: dict[str, object],
+    replace: bool,
+) -> Path:
+    target = _analysis_target(output, default_name)
+    _check_replaceable_json(target, schema_version=schema_version, replace=replace)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return target
+
+
+def _parse_positive_ints(
+    raw: str,
+    *,
+    option: str,
+    maximum: int,
+    require_first_one: bool = False,
+) -> tuple[int, ...]:
+    try:
+        values = tuple(int(item.strip()) for item in raw.split(",") if item.strip())
+    except ValueError as error:
+        raise typer.BadParameter(f"{option} must be comma-separated integers") from error
+    if not values or any(value < 1 or value > maximum for value in values):
+        raise typer.BadParameter(f"{option} values must be within 1..{maximum}")
+    if len(values) != len(set(values)) or tuple(sorted(values)) != values:
+        raise typer.BadParameter(f"{option} values must be unique and strictly increasing")
+    if require_first_one and values[0] != 1:
+        raise typer.BadParameter(f"{option} must begin with 1")
+    return values
+
+
+def _parse_page_sizes(raw: str) -> tuple[int, ...]:
+    multipliers = {"k": 1024, "m": 1024 * 1024}
+    values: list[int] = []
+    for item in raw.split(","):
+        normalized = item.strip().lower()
+        match = re.fullmatch(r"([1-9][0-9]*)([km]?)", normalized)
+        if match is None:
+            raise typer.BadParameter(
+                "--page-sizes must contain values such as 4k,16k,64k,256k,1m,2m"
+            )
+        value = int(match.group(1)) * multipliers.get(match.group(2), 1)
+        if not 4096 <= value <= 1024 * 1024 * 1024:
+            raise typer.BadParameter("--page-sizes values must be within 4 KiB..1 GiB")
+        values.append(value)
+    parsed = tuple(values)
+    if not parsed or len(parsed) != len(set(parsed)):
+        raise typer.BadParameter("--page-sizes must be non-empty and unique")
+    return parsed
 
 
 def _load_gate(path: Path, expected: str) -> GateEvidence:
@@ -88,6 +219,419 @@ def _load_gate(path: Path, expected: str) -> GateEvidence:
     if gate.gate != expected:
         raise typer.BadParameter(f"expected {expected!r} evidence, found {gate.gate!r}")
     return gate
+
+
+@branch_trace_app.command("branch")
+def trace_branch_command(
+    session: Annotated[str, typer.Option("--session")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 41,
+    trace_level: Annotated[
+        Literal["disabled", "minimal", "full"], typer.Option("--trace-level")
+    ] = "full",
+    buffer_capacity_events: Annotated[
+        int, typer.Option("--buffer-capacity-events", min=1, max=_MAX_ANALYSIS_EVENTS)
+    ] = 100_000,
+    hardware_baseline: Annotated[
+        Path, typer.Option("--hardware-baseline", exists=True, dir_okay=False)
+    ] = Path("artifacts/branchfabric/manifests/hardware-baseline.json"),
+    software_baseline: Annotated[
+        Path, typer.Option("--software-baseline", exists=True, dir_okay=False)
+    ] = Path("artifacts/branchfabric/manifests/software-baseline.json"),
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    """Trace the bounded reference Helix session into both canonical v1 streams."""
+
+    if _SESSION_PATTERN.fullmatch(session) is None:
+        raise typer.BadParameter(
+            "--session must be a 1-128 character alphanumeric, dot, dash, or underscore ID"
+        )
+    if session != "production-session":
+        raise typer.BadParameter(
+            "this backend currently traces only the bounded reference session "
+            "`production-session`; arbitrary live-session attachment is not implemented"
+        )
+    from sloforge.helix.characterization.runner import run_vertical_trace
+    from sloforge.helix.characterization.trace import TraceLevel
+
+    target = output / f"{session}-seed-{seed}"
+    try:
+        result = run_vertical_trace(
+            target,
+            seed=seed,
+            trace_level=TraceLevel(trace_level),
+            buffer_capacity_events=buffer_capacity_events,
+            replace=replace,
+            hardware_baseline=hardware_baseline,
+            software_baseline=software_baseline,
+        )
+    except (FileExistsError, ValueError) as error:
+        raise typer.BadParameter(str(error)) from error
+    _json(
+        {
+            "session": session,
+            "output": target.as_posix(),
+            **result.model_dump(mode="json"),
+        }
+    )
+
+
+@characterize_app.command("run")
+def characterize_run_command(
+    matrix: Annotated[Path, typer.Option("--matrix", exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/characterization/cpu-reference"
+    ),
+    hardware: Annotated[CharacterizationHardware, typer.Option("--hardware")] = "cpu",
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    max_experiments: Annotated[
+        int, typer.Option("--max-experiments", min=1, max=100_000)
+    ] = 100_000,
+    timeout_seconds: Annotated[
+        float, typer.Option("--timeout-seconds", min=1.0, max=86_400.0)
+    ] = 300.0,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+) -> None:
+    """Execute a bounded matrix, or validate and expand it with --dry-run."""
+
+    from sloforge.helix.characterization.matrix import expand_matrix, load_matrix
+
+    try:
+        loaded = load_matrix(matrix)
+        cases = expand_matrix(loaded)
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    if len(cases) > max_experiments:
+        raise typer.BadParameter(
+            f"matrix expands to {len(cases)} cases, above --max-experiments={max_experiments}"
+        )
+    if dry_run:
+        _json(
+            {
+                "dry_run": True,
+                "matrix_id": loaded.matrix_id,
+                "case_count": len(cases),
+                "hardware": hardware,
+                "seed": seed,
+                "timeout_seconds": timeout_seconds,
+                "distribution_claim": loaded.distribution_claim,
+                "output": output.as_posix(),
+            }
+        )
+        return
+    callback = _workflow_callback("run_characterization")
+    _emit_backend_result(
+        callback(
+            matrix=matrix,
+            output=output,
+            hardware=hardware,
+            seed=seed,
+            max_experiments=max_experiments,
+            timeout_seconds=timeout_seconds,
+            replace=replace,
+        )
+    )
+
+
+@characterize_app.command("resume")
+def characterize_resume_command(
+    run: Annotated[Path, typer.Option("--run", exists=True, file_okay=False)],
+    max_experiments: Annotated[
+        int, typer.Option("--max-experiments", min=1, max=100_000)
+    ] = 100_000,
+    timeout_seconds: Annotated[
+        float, typer.Option("--timeout-seconds", min=1.0, max=86_400.0)
+    ] = 300.0,
+) -> None:
+    callback = _workflow_callback("resume_characterization")
+    _emit_backend_result(
+        callback(
+            run=run,
+            max_experiments=max_experiments,
+            timeout_seconds=timeout_seconds,
+        )
+    )
+
+
+@characterize_app.command("workload")
+def characterize_workload_command(
+    trace: Annotated[Path, typer.Option("--trace", exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    max_events: Annotated[
+        int, typer.Option("--max-events", min=1, max=_MAX_ANALYSIS_EVENTS)
+    ] = 1_000_000,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    callback = _workflow_callback("analyze_workload")
+    _emit_backend_result(
+        callback(
+            trace=trace,
+            output=output,
+            seed=seed,
+            max_events=max_events,
+            replace=replace,
+        )
+    )
+
+
+@characterize_app.command("cow")
+def characterize_cow_command(
+    trace: Annotated[Path, typer.Option("--trace", exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    page_sizes: Annotated[str, typer.Option("--page-sizes")] = "4k,16k,64k,256k,1m,2m",
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    max_events: Annotated[
+        int, typer.Option("--max-events", min=1, max=_MAX_ANALYSIS_EVENTS)
+    ] = 1_000_000,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    parsed_page_sizes = _parse_page_sizes(page_sizes)
+    callback = _workflow_callback("analyze_cow")
+    _emit_backend_result(
+        callback(
+            trace=trace,
+            output=output,
+            page_sizes=parsed_page_sizes,
+            seed=seed,
+            max_events=max_events,
+            replace=replace,
+        )
+    )
+
+
+def _load_state_events(trace: Path, *, max_events: int) -> tuple[object, ...]:
+    from sloforge.helix.characterization.trace import StateOperationEventV1, iter_jsonl
+
+    events: list[object] = []
+    input_events = 0
+    for event in iter_jsonl(trace):
+        input_events += 1
+        if input_events > max_events:
+            raise typer.BadParameter(f"trace exceeds --max-events={max_events}")
+        if not isinstance(event, StateOperationEventV1):
+            continue
+        events.append(event)
+    if not events:
+        raise typer.BadParameter("trace contains no StateOperationTrace v1 events")
+    return tuple(events)
+
+
+@characterize_app.command("multicast")
+def characterize_multicast_command(
+    trace: Annotated[Path, typer.Option("--trace", exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/analysis/transport"
+    ),
+    source_experiment: Annotated[str, typer.Option("--source-experiment")] = "cli.transport",
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    repetition: Annotated[int, typer.Option("--repetition", min=0, max=1_000_000)] = 0,
+    max_events: Annotated[
+        int, typer.Option("--max-events", min=1, max=_MAX_ANALYSIS_EVENTS)
+    ] = 1_000_000,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    try:
+        module = importlib.import_module("sloforge.helix.characterization.analysis.transport")
+    except ModuleNotFoundError as error:
+        raise typer.BadParameter("the transport analysis backend is unavailable") from error
+    callback = cast(Callable[..., BaseModel], module.analyze_transport)
+    events = _load_state_events(trace, max_events=max_events)
+    try:
+        report = callback(
+            events,
+            source_experiment=source_experiment,
+            artifact_reference=trace.as_posix(),
+            artifact_sha256=_sha256_file(trace),
+            seed=seed,
+            repetition=repetition,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    payload = cast(dict[str, object], report.model_dump(mode="json"))
+    target = _write_analysis(
+        output,
+        default_name="transport-analysis.json",
+        schema_version="sloforge.branchfabric.transport-analysis/v1",
+        payload=payload,
+        replace=replace,
+    )
+    _json(
+        {
+            "output": target.as_posix(),
+            "artifact_sha256": _sha256_file(target),
+            "analysis": payload,
+        }
+    )
+
+
+@characterize_app.command("transform")
+def characterize_transform_command(
+    trace: Annotated[Path, typer.Option("--trace", exists=True, dir_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/analysis/transform"
+    ),
+    source_experiment: Annotated[str, typer.Option("--source-experiment")] = "cli.transform",
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    repetition: Annotated[int, typer.Option("--repetition", min=0, max=1_000_000)] = 0,
+    max_events: Annotated[
+        int, typer.Option("--max-events", min=1, max=_MAX_ANALYSIS_EVENTS)
+    ] = 1_000_000,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    try:
+        module = importlib.import_module("sloforge.helix.characterization.analysis.transform")
+    except ModuleNotFoundError as error:
+        raise typer.BadParameter("the transform analysis backend is unavailable") from error
+    callback = cast(Callable[..., BaseModel], module.analyze_transforms)
+    events = _load_state_events(trace, max_events=max_events)
+    try:
+        report = callback(
+            events,
+            source_experiment=source_experiment,
+            artifact_reference=trace.as_posix(),
+            artifact_sha256=_sha256_file(trace),
+            seed=seed,
+            repetition=repetition,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    payload = cast(dict[str, object], report.model_dump(mode="json"))
+    target = _write_analysis(
+        output,
+        default_name="transform-analysis.json",
+        schema_version="sloforge.branchfabric.transform-analysis/v1",
+        payload=payload,
+        replace=replace,
+    )
+    _json(
+        {
+            "output": target.as_posix(),
+            "artifact_sha256": _sha256_file(target),
+            "analysis": payload,
+        }
+    )
+
+
+@characterize_app.command("metadata")
+def characterize_metadata_command(
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/analysis/metadata/metadata-study.json"
+    ),
+    trace: Annotated[
+        Path | None,
+        typer.Option(
+            "--trace",
+            exists=True,
+            dir_okay=False,
+            help="Optional external evidence reference; it does not drive this controlled study.",
+        ),
+    ] = None,
+    operations: Annotated[str, typer.Option("--operations")] = "all",
+    thread_counts: Annotated[str, typer.Option("--thread-counts")] = "1,2,4",
+    operations_per_thread: Annotated[
+        int, typer.Option("--operations-per-thread", min=1, max=4096)
+    ] = 32,
+    warmups: Annotated[int, typer.Option("--warmups", min=0, max=20)] = 2,
+    repetitions: Annotated[int, typer.Option("--repetitions", min=1, max=100)] = 7,
+    timeout_seconds: Annotated[
+        float, typer.Option("--timeout-seconds", min=0.001, max=300.0)
+    ] = 30.0,
+    seed: Annotated[int, typer.Option("--seed", min=0, max=2**63 - 1)] = 20260809,
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    try:
+        module = importlib.import_module("sloforge.helix.characterization.metadata_study")
+    except ModuleNotFoundError as error:
+        raise typer.BadParameter("the metadata study backend is unavailable") from error
+    operation_type = module.MetadataOperation
+    if operations == "all":
+        parsed_operations = tuple(operation_type)
+    else:
+        try:
+            parsed_operations = tuple(
+                operation_type(item.strip()) for item in operations.split(",") if item.strip()
+            )
+        except ValueError as error:
+            raise typer.BadParameter(f"unknown metadata operation: {error}") from error
+        if not parsed_operations or len(parsed_operations) != len(set(parsed_operations)):
+            raise typer.BadParameter("--operations must be non-empty and unique")
+    parsed_threads = _parse_positive_ints(
+        thread_counts,
+        option="--thread-counts",
+        maximum=16,
+        require_first_one=True,
+    )
+    target = _analysis_target(output, "metadata-study.json")
+    _check_replaceable_json(
+        target,
+        schema_version="sloforge.branchfabric.metadata-study/v1",
+        replace=replace,
+    )
+    config_type = module.MetadataStudyConfig
+    run_study = cast(Callable[[object], BaseModel], module.run_metadata_study)
+    write_study = cast(Callable[[BaseModel, Path], str], module.write_metadata_study)
+    try:
+        config = config_type(
+            seed=seed,
+            operations=parsed_operations,
+            operations_per_thread=operations_per_thread,
+            warmup_repetitions=warmups,
+            measurement_repetitions=repetitions,
+            thread_counts=parsed_threads,
+            sample_timeout_seconds=timeout_seconds,
+        )
+        report = run_study(config)
+        artifact_sha256 = write_study(report, target)
+    except ValueError as error:
+        raise typer.BadParameter(str(error)) from error
+    _json(
+        {
+            "output": target.as_posix(),
+            "artifact_sha256": artifact_sha256,
+            "trace_reference": trace.as_posix() if trace is not None else None,
+            "trace_reference_sha256": _sha256_file(trace) if trace is not None else None,
+            "trace_consumed_by_study": False,
+            "report": report.model_dump(mode="json"),
+        }
+    )
+
+
+@characterize_app.command("amdahl")
+def characterize_amdahl_command(
+    run: Annotated[Path, typer.Option("--run", exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/analysis/amdahl"
+    ),
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    callback = _workflow_callback("analyze_run_amdahl")
+    _emit_backend_result(callback(run=run, output=output, replace=replace))
+
+
+@characterize_app.command("requirements")
+def characterize_requirements_command(
+    run: Annotated[Path, typer.Option("--run", exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "artifacts/branchfabric/requirements"
+    ),
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    callback = _workflow_callback("derive_requirements")
+    _emit_backend_result(callback(run=run, output=output, replace=replace))
+
+
+@characterize_app.command("report")
+def characterize_report_command(
+    run: Annotated[Path, typer.Option("--run", exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")] = Path(
+        "reports/branchfabric-characterization"
+    ),
+    replace: Annotated[bool, typer.Option("--replace")] = False,
+) -> None:
+    callback = _workflow_callback("write_characterization_report")
+    _emit_backend_result(callback(run=run, output=output, replace=replace))
 
 
 @helix_app.command("demo")
