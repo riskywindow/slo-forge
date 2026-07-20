@@ -1,0 +1,139 @@
+{
+  "buffer_overflowed": false,
+  "capabilities": {
+    "counters": {
+      "cache_misses": {
+        "available": false,
+        "reason": "not collected by the portable periodic sampler; use an external profiler",
+        "requires_privileges": false,
+        "source": null
+      },
+      "cpu_cycles": {
+        "available": false,
+        "reason": "not collected by the portable periodic sampler; use an external profiler",
+        "requires_privileges": false,
+        "source": null
+      },
+      "gpu_utilization": {
+        "available": false,
+        "reason": "not collected by the portable periodic sampler; use a GPU profiler",
+        "requires_privileges": false,
+        "source": null
+      },
+      "nic_hardware_counters": {
+        "available": false,
+        "reason": "psutil network bytes are OS totals, not NIC hardware counters",
+        "requires_privileges": false,
+        "source": null
+      },
+      "pcie_bytes": {
+        "available": false,
+        "reason": "no portable in-process PCIe byte counter is available",
+        "requires_privileges": false,
+        "source": null
+      },
+      "process_cpu_time": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "os.times"
+      },
+      "process_io": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.Process.io_counters"
+      },
+      "process_memory": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.Process.memory_info"
+      },
+      "process_threads": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.Process.num_threads"
+      },
+      "system_disk_io": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.disk_io_counters"
+      },
+      "system_load": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "os.getloadavg"
+      },
+      "system_memory": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.virtual_memory"
+      },
+      "system_network_io": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": false,
+        "source": "psutil.net_io_counters"
+      }
+    },
+    "hostname": "MacBook-Pro-5.local",
+    "logical_cpu_count": 12,
+    "machine": "arm64",
+    "operating_system": "Darwin",
+    "physical_cpu_count": 12,
+    "process_id": 83644,
+    "profiler_tools": {
+      "ncu": {
+        "available": false,
+        "reason": "NVIDIA Nsight Compute and GPU are unavailable",
+        "requires_privileges": false,
+        "source": null
+      },
+      "nsys": {
+        "available": false,
+        "reason": "NVIDIA Nsight Systems and GPU are unavailable",
+        "requires_privileges": false,
+        "source": null
+      },
+      "powermetrics": {
+        "available": true,
+        "reason": null,
+        "requires_privileges": true,
+        "source": "/usr/bin/powermetrics"
+      },
+      "xctrace": {
+        "available": false,
+        "reason": "xctrace requires an installed and selected full Xcode developer directory",
+        "requires_privileges": false,
+        "source": null
+      }
+    },
+    "python_implementation": "CPython",
+    "schema_version": "sloforge.branchfabric.resource-capabilities/v1"
+  },
+  "collection_error_count": 0,
+  "collection_errors": [],
+  "config": {
+    "max_duration_seconds": 300.0,
+    "max_samples": 5000,
+    "sample_interval_ms": 100,
+    "schema_version": "sloforge.branchfabric.resource-sampler-config/v1",
+    "seed": 73,
+    "trace_level": "disabled",
+    "workload_evidence": "SYNTHETIC"
+  },
+  "ended_monotonic_ns": 98444418451291,
+  "error_records_dropped": 0,
+  "sample_attempts": 0,
+  "samples": [],
+  "samples_dropped": 0,
+  "samples_recorded": 0,
+  "schema_version": "sloforge.branchfabric.resource-trace/v1",
+  "started_monotonic_ns": 98444418451291,
+  "timing_provenance": "HOST_MONOTONIC_OBSERVED"
+}

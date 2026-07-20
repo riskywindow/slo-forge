@@ -116,6 +116,7 @@ def test_continuum_adapter_keeps_modeled_transport_separate() -> None:
     assert event.provenance is WorkloadProvenance.SYNTHETIC
     assert event.timing_measurement_class is TimingMeasurementClass.SIMULATED_HARDWARE
     assert event.transfer_time_ns == 400
+    assert event.dependency_event_ids == ("trace-c:1",)
     assert event.attributes["modeled_transport"] is True
     verify_event(event)
 

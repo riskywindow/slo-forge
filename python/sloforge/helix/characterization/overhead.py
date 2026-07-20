@@ -236,7 +236,11 @@ def _series(
     measured = tuple(
         float(getattr(trial, metric))
         for trial in sorted(
-            (item for item in trials if not item.warmup),
+            (
+                item
+                for item in trials
+                if item.trace_level is level and not item.warmup
+            ),
             key=lambda item: (item.seed, item.repetition),
         )
     )

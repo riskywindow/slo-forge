@@ -335,7 +335,7 @@ class CanonicalContinuumRecorder:
             chunk_size_bytes=observation.chunk_size,
             fanout=observation.fanout,
             dependency_event_ids=tuple(
-                f"continuum-observation:{sequence}" for sequence in observation.dependencies
+                f"{self.trace_id}:{sequence}" for sequence in observation.dependencies
             ),
             concurrency=observation.concurrency,
             queue_delay_ns=observation.queue_delay_ns,
