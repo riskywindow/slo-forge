@@ -24,6 +24,9 @@ from sloforge.helix.characterization.lifecycle import (
     TraceLevel as LifecycleTraceLevel,
 )
 from sloforge.helix.characterization.lifecycle.recorder import JsonValue, LifecycleRecorder
+from sloforge.helix.characterization.matrix import EvidenceClass
+from sloforge.helix.characterization.matrix import TraceLevel as MatrixTraceLevel
+from sloforge.helix.characterization.resources import ResourceSampler, ResourceSamplerConfig
 from sloforge.helix.characterization.trace import (
     BoundedTraceBuffer,
     BranchWorkloadEventV1,
@@ -68,6 +71,8 @@ class VerticalTraceResult(RunnerModel):
     attempted_events: int = Field(ge=0)
     dropped_events: int = Field(ge=0)
     filtered_events: int = Field(ge=0)
+    resource_sample_count: int = Field(ge=0)
+    resource_samples_dropped: int = Field(ge=0)
     wall_time_ns: int = Field(ge=0)
     cpu_time_ns: int = Field(ge=0)
     migration_observed: bool
@@ -209,13 +214,26 @@ def run_vertical_trace(
     )
     raw_recorder = InMemoryLifecycleRecorder()
     canonical_recorder = CanonicalLifecycleRecorder(buffer)
-    run: CharacterizedRun = run_characterized_cpu_demo(
-        output / "helix-demo",
-        seed=seed,
-        recorder=_TeeLifecycleRecorder(raw_recorder, canonical_recorder),
-        trace_level=LifecycleTraceLevel(trace_level.value),
-        trace_id=trace_id,
-    )
+    resource_sampler = ResourceSampler(
+        ResourceSamplerConfig(
+            trace_level=MatrixTraceLevel(trace_level.value),
+            workload_evidence=EvidenceClass.SYNTHETIC,
+            seed=seed,
+            sample_interval_ms=100,
+            max_samples=5000,
+            max_duration_seconds=300.0,
+        )
+    ).start()
+    try:
+        run: CharacterizedRun = run_characterized_cpu_demo(
+            output / "helix-demo",
+            seed=seed,
+            recorder=_TeeLifecycleRecorder(raw_recorder, canonical_recorder),
+            trace_level=LifecycleTraceLevel(trace_level.value),
+            trace_id=trace_id,
+        )
+    finally:
+        resource_trace = resource_sampler.stop(timeout_seconds=5.0)
     events = buffer.drain()
     branch_events = tuple(event for event in events if isinstance(event, BranchWorkloadEventV1))
     state_events = tuple(event for event in events if isinstance(event, StateOperationEventV1))
@@ -251,8 +269,9 @@ def run_vertical_trace(
             _trace_artifact(parquet_path, format="parquet", event_count=parquet_count),
         )
 
+    raw_path = output / "raw-lifecycle-events.json"
     _write_json(
-        output / "raw-lifecycle-events.json",
+        raw_path,
         {
             "schema_version": "sloforge.branchfabric.raw-lifecycle-events/v1",
             "workload_evidence_class": "SYNTHETIC",
@@ -261,8 +280,20 @@ def run_vertical_trace(
             "state_events": raw_recorder.state_events,
         },
     )
+    resource_path = output / "resource-trace-v1.json"
+    _write_json(resource_path, resource_trace.model_dump(mode="json"))
     sharing = run.sharing_analysis or {}
-    _write_json(output / "sharing-analysis.json", sharing)
+    sharing_path = output / "sharing-analysis.json"
+    _write_json(sharing_path, sharing)
+    trace_artifacts += (
+        _trace_artifact(raw_path, format="raw", event_count=len(events)),
+        _trace_artifact(
+            resource_path,
+            format="resource",
+            event_count=resource_trace.samples_recorded,
+        ),
+        _trace_artifact(sharing_path, format="analysis", event_count=0),
+    )
     stats = buffer.stats()
     manifest = build_manifest(
         trace_id=trace_id,
@@ -292,6 +323,8 @@ def run_vertical_trace(
         attempted_events=stats.attempted_events,
         dropped_events=stats.dropped_events,
         filtered_events=stats.filtered_events,
+        resource_sample_count=resource_trace.samples_recorded,
+        resource_samples_dropped=resource_trace.samples_dropped,
         wall_time_ns=run.wall_time_ns,
         cpu_time_ns=run.cpu_time_ns,
         migration_observed=run.migration_observed,

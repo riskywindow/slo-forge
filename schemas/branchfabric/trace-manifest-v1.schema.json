@@ -29,7 +29,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "format": {"enum": ["jsonl", "parquet", "perfetto", "manifest"]},
+        "format": {"enum": ["jsonl", "parquet", "perfetto", "manifest", "raw", "resource", "analysis"]},
         "uri": {"type": "string", "minLength": 1},
         "byte_length": {"type": "integer", "minimum": 0},
         "sha256": {"$ref": "#/$defs/sha256"},

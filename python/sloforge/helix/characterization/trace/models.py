@@ -412,7 +412,7 @@ class SoftwareManifestV1(StrictModel):
 
 
 class TraceArtifactV1(StrictModel):
-    format: Literal["jsonl", "parquet", "perfetto", "manifest"]
+    format: Literal["jsonl", "parquet", "perfetto", "manifest", "raw", "resource", "analysis"]
     uri: NonEmpty
     byte_length: int = Field(ge=0)
     sha256: Sha256

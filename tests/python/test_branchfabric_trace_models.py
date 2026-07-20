@@ -274,3 +274,15 @@ def test_trace_manifest_balances_counts_and_conforms_to_schema() -> None:
         manifest.model_copy(update={"attempted_events": 5}, deep=True).__class__.model_validate(
             {**manifest.model_dump(), "attempted_events": 5}
         )
+
+
+def test_manifest_supports_raw_resource_and_analysis_artifacts() -> None:
+    for artifact_format in ("raw", "resource", "analysis"):
+        artifact = TraceArtifactV1(
+            format=artifact_format,
+            uri=f"artifacts/{artifact_format}.json",
+            byte_length=1,
+            sha256=canonical_hash({"format": artifact_format}),
+            event_count=0,
+        )
+        assert artifact.format == artifact_format
