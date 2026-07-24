@@ -72,6 +72,7 @@ def test_overhead_series_do_not_mix_trace_levels(
             warmup=warmup,
             order_index=order_index,
             artifact_path=output.as_posix(),
+            source_commit="0" * 40,
             wall_time_ns=duration,
             cpu_time_ns=duration,
             cpu_core_equivalents=1.0,

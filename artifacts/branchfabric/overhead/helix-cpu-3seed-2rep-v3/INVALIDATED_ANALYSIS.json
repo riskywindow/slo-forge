@@ -1,0 +1,8 @@
+{
+  "schema_version": "sloforge.branchfabric.invalidated-analysis/v1",
+  "status": "EXCLUDED_FROM_CORPUS",
+  "raw_measurements_preserved": true,
+  "reason": "Run was intentionally interrupted after discovering that the pinned source marker referenced a commit older than the active measurement-harness edits. No derived overhead artifact was produced.",
+  "affected_scope": "all cross-trace-level conclusions",
+  "replacement_artifact": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v4/instrumentation-overhead.json"
+}

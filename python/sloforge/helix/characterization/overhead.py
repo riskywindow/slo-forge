@@ -50,6 +50,7 @@ class OverheadTrial(OverheadModel):
     warmup: bool
     order_index: int = Field(ge=0)
     artifact_path: str
+    source_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
     wall_time_ns: int = Field(gt=0)
     cpu_time_ns: int = Field(gt=0)
     cpu_core_equivalents: float = Field(ge=0.0, allow_inf_nan=False)
@@ -82,6 +83,7 @@ class InstrumentationOverheadArtifact(OverheadModel):
     repetitions: int = Field(ge=1)
     warmups_per_level: int = Field(ge=0)
     run_order_seed: int = Field(ge=0)
+    source_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
     raw_artifact: str
     raw_artifact_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     trials: tuple[OverheadTrial, ...] = Field(min_length=1, max_length=MAX_OVERHEAD_TRIALS)
@@ -119,6 +121,24 @@ def _directory_bytes(root: Path) -> int:
     return sum(
         path.stat().st_size for path in root.rglob("*") if path.is_file() and not path.is_symlink()
     )
+
+
+def _source_commit_from_trial(output: Path) -> str:
+    checkpoint = output / "capture" / "coding-failure-capture.continuum.json"
+    document = json.loads(checkpoint.read_bytes())
+    if not isinstance(document, dict):
+        raise ValueError("Continuum capture must be a JSON object")
+    capsule = document.get("capsule", document)
+    if not isinstance(capsule, dict) or not isinstance(capsule.get("identity"), dict):
+        raise ValueError("Continuum capture is missing capsule identity")
+    commit = capsule["identity"].get("git_commit")
+    if (
+        not isinstance(commit, str)
+        or len(commit) != 40
+        or any(character not in "0123456789abcdef" for character in commit)
+    ):
+        raise ValueError("Continuum capture source commit is not a lowercase Git SHA-1")
+    return commit
 
 
 def _resource_delta(values: tuple[int | None, ...]) -> int | None:
@@ -199,6 +219,7 @@ def _run_trial(
         warmup=warmup,
         order_index=order_index,
         artifact_path=output.as_posix(),
+        source_commit=_source_commit_from_trial(output),
         wall_time_ns=run.wall_time_ns,
         cpu_time_ns=run.cpu_time_ns,
         cpu_core_equivalents=run.cpu_time_ns / run.wall_time_ns,
@@ -236,11 +257,7 @@ def _series(
     measured = tuple(
         float(getattr(trial, metric))
         for trial in sorted(
-            (
-                item
-                for item in trials
-                if item.trace_level is level and not item.warmup
-            ),
+            (item for item in trials if item.trace_level is level and not item.warmup),
             key=lambda item: (item.seed, item.repetition),
         )
     )
@@ -311,6 +328,13 @@ def run_instrumentation_overhead_study(
         )
         for order_index, (level, seed, repetition, warmup) in enumerate(schedule)
     )
+    source_commits = {trial.source_commit for trial in trials}
+    if len(source_commits) != 1:
+        raise RuntimeError(
+            "source commit changed during instrumentation overhead study; raw trials are invalid "
+            "for cross-level comparison"
+        )
+    source_commit = next(iter(source_commits))
     semantics: dict[tuple[int, int, bool], set[str]] = defaultdict(set)
     for trial in trials:
         semantics[(trial.seed, trial.repetition, trial.warmup)].add(trial.semantic_digest)
@@ -398,6 +422,7 @@ def run_instrumentation_overhead_study(
         repetitions=repetitions,
         warmups_per_level=warmups_per_level,
         run_order_seed=run_order_seed,
+        source_commit=source_commit,
         raw_artifact=raw_path.as_posix(),
         raw_artifact_sha256=raw_hash,
         trials=trials,

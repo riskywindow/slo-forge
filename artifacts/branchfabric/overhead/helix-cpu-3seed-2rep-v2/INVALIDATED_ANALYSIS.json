@@ -1,0 +1,8 @@
+{
+  "schema_version": "sloforge.branchfabric.invalidated-analysis/v1",
+  "status": "EXCLUDED_FROM_CORPUS",
+  "raw_measurements_preserved": true,
+  "reason": "The shared repository HEAD changed from 24e779bc96ebc649a4b37cdfb75ad9991bc91d92 to a59d969b4b6ef240f7eb56441288e4e684c1254b while subagent work was integrated, so same-seed trace-level trials used different source identities. The semantic-equivalence guard rejected the run before derived statistics were written.",
+  "affected_scope": "cross-trace-level comparison",
+  "replacement_artifact": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v3/instrumentation-overhead.json"
+}

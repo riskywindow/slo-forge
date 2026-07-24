@@ -522,9 +522,7 @@ def run_continuum_trace(
     )
     write_manifest(output / "trace-manifest-v1.json", manifest)
     timing_counts = {
-        kind.value: sum(
-            event.measurement_kind is kind for event in raw_recorder.events
-        )
+        kind.value: sum(event.measurement_kind is kind for event in raw_recorder.events)
         for kind in ContinuumMeasurementKind
     }
     result = ContinuumTraceResult(
