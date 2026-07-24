@@ -1142,11 +1142,19 @@ def _execute_stage_api(
         )
         return result
     if stage is CharacterizationStage.CONTINUUM_STATE:
-        module = _import("sloforge.continuum.characterization")
-        result = module.run_continuum_characterization(seed=stage_seed)
-        _exclusive_json(
-            attempt_directory / "continuum-characterization.json",
-            _jsonable(result),
+        module = _import("sloforge.helix.characterization.runner")
+        if (
+            manifest.capability_evidence.preserved_reference is None
+            or manifest.preserved_software_reference is None
+        ):
+            raise FileNotFoundError(
+                "Continuum trace requires preserved hardware and software manifests"
+            )
+        result = module.run_continuum_trace(
+            attempt_directory / "continuum-trace",
+            seed=stage_seed,
+            hardware_baseline=(run_directory / manifest.capability_evidence.preserved_reference),
+            software_baseline=(run_directory / manifest.preserved_software_reference),
         )
         return result
     if stage is CharacterizationStage.ENVIRONMENT_STATE:
@@ -1157,7 +1165,11 @@ def _execute_stage_api(
             seed=stage_seed,
             repetitions=config.environment_repetitions,
             warmups=config.environment_warmups,
-            workloads=(matrix_module.EnvironmentSize.TINY,),
+            workloads=tuple(
+                workload
+                for workload in matrix_module.EnvironmentSize
+                if workload is not matrix_module.EnvironmentSize.NONE
+            ),
             trace_levels=(matrix_module.TraceLevel.FULL,),
             trial_timeout_seconds=min(config.stage_timeout_seconds, 300.0),
         )
@@ -1177,12 +1189,14 @@ def _execute_stage_api(
         module.write_metadata_study(result, attempt_directory / "metadata-study.json")
         return result
     if stage is CharacterizationStage.INSTRUMENTATION_OVERHEAD:
-        module = _import("sloforge.continuum.characterization")
-        result = module.measure_instrumentation_overhead(
-            seed=stage_seed,
+        module = _import("sloforge.helix.characterization.overhead")
+        result = module.run_instrumentation_overhead_study(
+            attempt_directory / "helix-overhead",
+            seeds=(stage_seed,),
             repetitions=config.overhead_repetitions,
+            warmups_per_level=1,
+            run_order_seed=stage_seed,
         )
-        _exclusive_json(attempt_directory / "instrumentation-overhead.json", _jsonable(result))
         return result
     raise ValueError(f"hardware stage {stage.value} must be skipped by the parent orchestrator")
 
