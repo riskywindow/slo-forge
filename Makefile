@@ -207,7 +207,8 @@ branchfabric-characterization-cpu:
 	uv run --locked sloforge helix characterize run \
 		--matrix benchmarks/branchfabric/characterization.yaml \
 		--output artifacts/branchfabric/characterization/cpu-reference \
-		--hardware cpu --seed 20260809 --max-experiments 100000 --timeout-seconds 300
+		--hardware cpu --seed 20260809 --max-experiments 100000 --timeout-seconds 300 \
+		--replace
 
 branchfabric-characterization-gpu:
 	@set -euo pipefail; \
@@ -242,12 +243,14 @@ branchfabric-characterization:
 branchfabric-requirements:
 	uv run --locked sloforge helix characterize requirements \
 		--run artifacts/branchfabric/characterization/cpu-reference \
-		--output artifacts/branchfabric/requirements
+		--output artifacts/branchfabric/requirements \
+		--replace
 
 branchfabric-report:
 	uv run --locked sloforge helix characterize report \
 		--run artifacts/branchfabric/characterization/cpu-reference \
-		--output reports/branchfabric-characterization
+		--output reports/branchfabric-characterization \
+		--replace
 
 branchfabric-clean-room-test:
 	@set -euo pipefail; \
