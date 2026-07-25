@@ -577,9 +577,9 @@ def run_instrumentation_overhead_study(
             "The workload is the deterministic synthetic Helix CPU demo, not production traffic.",
             "A negative overhead estimate inside the measured noise floor is not a speedup claim.",
             "Resource sampling is periodic and can miss peaks between 100 ms samples.",
-            "The timed path includes the same raw plus canonical Pydantic adaptation and bounded "
-            "in-memory buffer as the vertical runner, but excludes post-run JSONL, Perfetto, and "
-            "Parquet serialization.",
+            "Hot-path wall time includes the same raw plus canonical Pydantic adaptation and "
+            "bounded in-memory buffer as the vertical runner. End-to-end wall time additionally "
+            "includes JSONL and Perfetto persistence; Parquet remains excluded.",
         ),
     )
     _write_json(output / "instrumentation-overhead.json", artifact.model_dump(mode="json"))
