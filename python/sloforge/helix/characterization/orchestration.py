@@ -28,6 +28,11 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from sloforge.helix.characterization.matrix import expand_matrix, load_matrix
 
+_CONTROLLED_MATRIX_CALIBRATION = Path(
+    "artifacts/branchfabric/baseline/helix-demo-seed-41/capture/"
+    "coding-failure-capture.continuum.json"
+)
+
 MAX_MANIFEST_BYTES = 16 * 1024 * 1024
 MAX_ARTIFACTS_PER_ATTEMPT = 100_000
 MAX_ERROR_BYTES = 16 * 1024
@@ -1089,13 +1094,25 @@ def _execute_stage_api(
     manifest = load_characterization_run(run_directory)
     config = manifest.config
     if stage is CharacterizationStage.MATRIX_VALIDATE:
-        matrix = load_matrix(run_directory / manifest.preserved_matrix_reference)
+        matrix_path = run_directory / manifest.preserved_matrix_reference
+        matrix = load_matrix(matrix_path)
         cases = expand_matrix(matrix)
+        module = _import("sloforge.helix.characterization.matrix_study")
+        study = module.evaluate_controlled_matrix(
+            matrix_path,
+            calibration_artifact=_CONTROLLED_MATRIX_CALIBRATION,
+        )
+        study_path = attempt_directory / "matrix-study.json"
+        study_sha256 = module.write_controlled_matrix_study(study, study_path)
         result = {
             "schema_version": "sloforge.branchfabric.matrix-validation/v1",
             "matrix_id": matrix.matrix_id,
             "case_count": len(cases),
+            "evaluated_case_count": study.evaluated_case_count,
+            "hardware_executed_case_count": study.hardware_executed_case_count,
             "case_digest": _case_digest(cases),
+            "matrix_study_reference": study_path.relative_to(run_directory).as_posix(),
+            "matrix_study_sha256": study_sha256,
             "distribution_claim": matrix.distribution_claim,
             "run_order_seed": matrix.run_order_seed,
             "stage_seed": stage_seed,

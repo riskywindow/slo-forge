@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
+import time
 from collections import defaultdict
 from collections.abc import Mapping
 from pathlib import Path
@@ -30,9 +31,24 @@ from sloforge.helix.characterization.lifecycle import (
 from sloforge.helix.characterization.lifecycle import (
     TraceLevel as LifecycleTraceLevel,
 )
-from sloforge.helix.characterization.lifecycle.recorder import JsonValue
+from sloforge.helix.characterization.lifecycle.recorder import (
+    JsonValue,
+    LifecycleRecorder,
+    TraceStream,
+)
 from sloforge.helix.characterization.matrix import EvidenceClass, TraceLevel
 from sloforge.helix.characterization.resources import ResourceSampler, ResourceSamplerConfig
+from sloforge.helix.characterization.trace import (
+    BoundedTraceBuffer,
+    BranchWorkloadEventV1,
+    CanonicalLifecycleRecorder,
+    SamplingConfigurationV1,
+    StateOperationEventV1,
+    canonical_hash,
+    write_jsonl,
+    write_perfetto,
+)
+from sloforge.helix.characterization.trace import TraceLevel as CanonicalTraceLevel
 
 MAX_OVERHEAD_TRIALS = 300
 
@@ -52,12 +68,18 @@ class OverheadTrial(OverheadModel):
     artifact_path: str
     source_commit: str = Field(pattern=r"^[0-9a-f]{40}$")
     wall_time_ns: int = Field(gt=0)
+    trace_persistence_time_ns: int = Field(ge=0)
+    end_to_end_wall_time_ns: int = Field(gt=0)
     cpu_time_ns: int = Field(gt=0)
     cpu_core_equivalents: float = Field(ge=0.0, allow_inf_nan=False)
     branch_event_count: int = Field(ge=0)
     state_event_count: int = Field(ge=0)
+    canonical_event_count: int = Field(ge=0)
+    canonical_events_dropped: int = Field(ge=0)
+    trace_persistence_bytes: int = Field(ge=0)
     semantic_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    branch_readiness_ns: int | None = Field(default=None, ge=0)
+    branch_readiness_ns: None = None
+    combined_branch_group_fork_span_ns: int | None = Field(default=None, ge=0)
     generated_tokens: int | None = Field(default=None, ge=0)
     rollout_throughput_tokens_per_second: float | None = Field(
         default=None, ge=0.0, allow_inf_nan=False
@@ -75,6 +97,17 @@ class OverheadTrial(OverheadModel):
     gpu_utilization_percent: None = None
 
 
+class _TeeLifecycleRecorder:
+    """Match the vertical runner's timed raw-plus-canonical recorder path."""
+
+    def __init__(self, *recorders: LifecycleRecorder) -> None:
+        self._recorders = recorders
+
+    def record(self, stream: TraceStream, event: Mapping[str, JsonValue]) -> None:
+        for recorder in self._recorders:
+            recorder.record(stream, event)
+
+
 class InstrumentationOverheadArtifact(OverheadModel):
     schema_version: Literal["sloforge.branchfabric.instrumentation-overhead/v1"]
     workload_evidence_class: Literal[EvidenceClass.SYNTHETIC]
@@ -88,8 +121,10 @@ class InstrumentationOverheadArtifact(OverheadModel):
     raw_artifact_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     trials: tuple[OverheadTrial, ...] = Field(min_length=1, max_length=MAX_OVERHEAD_TRIALS)
     wall_time_statistics: dict[str, dict[str, object]]
+    end_to_end_wall_time_statistics: dict[str, dict[str, object]]
     cpu_time_statistics: dict[str, dict[str, object]]
     wall_time_paired_effects: dict[str, dict[str, object]]
+    end_to_end_wall_time_paired_effects: dict[str, dict[str, object]]
     semantic_equivalence_verified: bool
     metric_availability: dict[str, str]
     limitations: tuple[str, ...]
@@ -164,10 +199,28 @@ def _run_trial(
     warmup: bool,
     order_index: int,
 ) -> OverheadTrial:
-    recorder = InMemoryLifecycleRecorder()
+    raw_recorder = InMemoryLifecycleRecorder()
+    trace_id = canonical_hash(
+        {
+            "schema": "sloforge.branchfabric.instrumentation-overhead-trial/v1",
+            "level": level.value,
+            "seed": seed,
+            "repetition": repetition,
+            "warmup": warmup,
+            "order_index": order_index,
+        }
+    )
+    buffer = BoundedTraceBuffer(
+        trace_id=trace_id,
+        capacity_events=100_000,
+        level=CanonicalTraceLevel(level.value),
+        sampling=SamplingConfigurationV1(),
+    )
+    canonical_recorder = CanonicalLifecycleRecorder(buffer)
     sampler = ResourceSampler(
         ResourceSamplerConfig(
-            trace_level=level,
+            # Measurement apparatus remains constant across trace levels.
+            trace_level=TraceLevel.FULL,
             workload_evidence=EvidenceClass.SYNTHETIC,
             seed=seed,
             sample_interval_ms=100,
@@ -179,22 +232,48 @@ def _run_trial(
         run = run_characterized_cpu_demo(
             output,
             seed=seed,
-            recorder=recorder,
+            recorder=_TeeLifecycleRecorder(raw_recorder, canonical_recorder),
             trace_level=LifecycleTraceLevel(level.value),
+            trace_id=trace_id,
         )
     finally:
         resource = sampler.stop(timeout_seconds=5.0)
+    trace_stats = buffer.stats()
+    events = buffer.drain()
+    persistence_started = time.perf_counter_ns()
+    if events:
+        branch_events = tuple(
+            event for event in events if isinstance(event, BranchWorkloadEventV1)
+        )
+        state_events = tuple(
+            event for event in events if isinstance(event, StateOperationEventV1)
+        )
+        write_jsonl(output / "branch-workload-trace-v1.jsonl", branch_events)
+        write_jsonl(output / "state-operation-trace-v1.jsonl", state_events)
+        write_perfetto(output / "helix-lifecycle.perfetto.json", events)
+    persistence_time_ns = time.perf_counter_ns() - persistence_started if events else 0
+    persistence_bytes = sum(
+        path.stat().st_size
+        for path in (
+            output / "branch-workload-trace-v1.jsonl",
+            output / "state-operation-trace-v1.jsonl",
+            output / "helix-lifecycle.perfetto.json",
+        )
+        if path.is_file()
+    )
     workload_bytes = _directory_bytes(output)
     resource_path = output / "resource-trace-v1.json"
     _write_json(resource_path, resource.model_dump(mode="json"))
 
     branch_forks = tuple(
-        event for event in recorder.branch_events if event.get("operation_type") == "BRANCH_FORK"
+        event
+        for event in raw_recorder.branch_events
+        if event.get("operation_type") == "BRANCH_FORK"
     )
     branch_readiness = _event_int(branch_forks[0], "duration_ns") if branch_forks else None
     rollouts = tuple(
         event
-        for event in recorder.branch_events
+        for event in raw_recorder.branch_events
         if event.get("operation_type") == "ROLLOUT_COMPLETE"
     )
     generated_tokens = (
@@ -221,12 +300,17 @@ def _run_trial(
         artifact_path=output.as_posix(),
         source_commit=_source_commit_from_trial(output),
         wall_time_ns=run.wall_time_ns,
+        trace_persistence_time_ns=persistence_time_ns,
+        end_to_end_wall_time_ns=run.wall_time_ns + persistence_time_ns,
         cpu_time_ns=run.cpu_time_ns,
         cpu_core_equivalents=run.cpu_time_ns / run.wall_time_ns,
         branch_event_count=run.branch_event_count,
         state_event_count=run.state_event_count,
+        canonical_event_count=trace_stats.accepted_events,
+        canonical_events_dropped=trace_stats.dropped_events,
+        trace_persistence_bytes=persistence_bytes,
         semantic_digest=run.semantic_digest,
-        branch_readiness_ns=branch_readiness,
+        combined_branch_group_fork_span_ns=branch_readiness,
         generated_tokens=generated_tokens,
         rollout_throughput_tokens_per_second=throughput,
         workload_artifact_bytes=workload_bytes,
@@ -248,12 +332,16 @@ def _series(
     trials: tuple[OverheadTrial, ...],
     *,
     level: TraceLevel,
-    metric: Literal["wall_time_ns", "cpu_time_ns"],
+    metric: Literal["wall_time_ns", "end_to_end_wall_time_ns", "cpu_time_ns"],
     raw_path: Path,
     raw_sha256: str,
     run_order_seed: int,
 ) -> RawSampleSeries:
-    warmups = tuple(float(getattr(trial, metric)) for trial in trials if trial.warmup)
+    warmups = tuple(
+        float(getattr(trial, metric))
+        for trial in trials
+        if trial.trace_level is level and trial.warmup
+    )
     measured = tuple(
         float(getattr(trial, metric))
         for trial in sorted(
@@ -308,15 +396,19 @@ def run_instrumentation_overhead_study(
     if output.exists() and (not output.is_dir() or output.is_symlink() or any(output.iterdir())):
         raise FileExistsError("overhead output must be a new or empty directory")
     output.mkdir(parents=True, exist_ok=True)
-    schedule: list[tuple[TraceLevel, int, int, bool]] = []
+    warmup_schedule: list[tuple[TraceLevel, int, int, bool]] = []
+    measurement_schedule: list[tuple[TraceLevel, int, int, bool]] = []
     for level in TraceLevel:
-        schedule.extend(
+        warmup_schedule.extend(
             (level, seeds[0], repetition, True) for repetition in range(warmups_per_level)
         )
-        schedule.extend(
+        measurement_schedule.extend(
             (level, seed, repetition, False) for seed in seeds for repetition in range(repetitions)
         )
-    random.Random(run_order_seed).shuffle(schedule)
+    randomizer = random.Random(run_order_seed)
+    randomizer.shuffle(warmup_schedule)
+    randomizer.shuffle(measurement_schedule)
+    schedule = [*warmup_schedule, *measurement_schedule]
     trials = tuple(
         _run_trial(
             output / "trials" / f"{order_index:03d}-{level.value}-s{seed}-r{repetition}",
@@ -386,6 +478,17 @@ def run_instrumentation_overhead_study(
         )
         for level in TraceLevel
     }
+    end_to_end_series = {
+        level.value: _series(
+            trials,
+            level=level,
+            metric="end_to_end_wall_time_ns",
+            raw_path=raw_path,
+            raw_sha256=raw_hash,
+            run_order_seed=run_order_seed,
+        )
+        for level in TraceLevel
+    }
 
     def statistics_for(series: RawSampleSeries, bootstrap_seed: int) -> dict[str, object]:
         return {
@@ -409,9 +512,20 @@ def run_instrumentation_overhead_study(
         level.value: statistics_for(cpu_series[level.value], run_order_seed + 100 + index)
         for index, level in enumerate(TraceLevel)
     }
+    end_to_end_stats = {
+        level.value: statistics_for(end_to_end_series[level.value], run_order_seed + 200 + index)
+        for index, level in enumerate(TraceLevel)
+    }
     disabled = wall_series[TraceLevel.DISABLED.value]
     paired = {
         level.value: paired_effect_size(disabled, wall_series[level.value]).model_dump(mode="json")
+        for level in (TraceLevel.MINIMAL, TraceLevel.FULL)
+    }
+    disabled_end_to_end = end_to_end_series[TraceLevel.DISABLED.value]
+    paired_end_to_end = {
+        level.value: paired_effect_size(
+            disabled_end_to_end, end_to_end_series[level.value]
+        ).model_dump(mode="json")
         for level in (TraceLevel.MINIMAL, TraceLevel.FULL)
     }
     artifact = InstrumentationOverheadArtifact(
@@ -427,19 +541,35 @@ def run_instrumentation_overhead_study(
         raw_artifact_sha256=raw_hash,
         trials=trials,
         wall_time_statistics=wall_stats,
+        end_to_end_wall_time_statistics=end_to_end_stats,
         cpu_time_statistics=cpu_stats,
         wall_time_paired_effects=paired,
+        end_to_end_wall_time_paired_effects=paired_end_to_end,
         semantic_equivalence_verified=True,
         metric_availability={
             "ttft_ns": "UNAVAILABLE: reference CPU policy demo has no model-server TTFT",
             "per_token_latency_ns": (
                 "UNAVAILABLE: fixture emits policy decisions, not model-server token timings"
             ),
-            "branch_readiness_ns": "AVAILABLE for minimal/full; disabled mode has no wrappers",
-            "rollout_throughput": "AVAILABLE for minimal/full; disabled mode has no wrappers",
+            "branch_readiness_ns": (
+                "UNKNOWN: the lifecycle wrapper reports one inclusive combined model-and-"
+                "environment branch-group fork span, not per-branch readiness"
+            ),
+            "combined_branch_group_fork_span_ns": (
+                "AVAILABLE for minimal/full; disabled mode has no lifecycle wrappers"
+            ),
+            "rollout_throughput": (
+                "NOT COMPARABLE ACROSS LEVELS: disabled mode has no lifecycle wrappers"
+            ),
             "cpu_utilization": "AVAILABLE as process CPU time divided by wall time",
-            "memory": "AVAILABLE as 100 ms sampled process RSS/VMS",
-            "storage_writes": "AVAILABLE as psutil process I/O where supported plus artifact bytes",
+            "memory": (
+                "AVAILABLE as 100 ms sampled process RSS/VMS with identical full resource "
+                "sampling apparatus across trace levels"
+            ),
+            "storage_writes": (
+                "AVAILABLE as persisted canonical JSONL/Perfetto bytes; process I/O is retained "
+                "only where psutil supports it"
+            ),
             "gpu_utilization": "UNAVAILABLE: no compatible GPU execution occurred",
             "learning_transaction_latency": "AVAILABLE as full run wall time",
         },
@@ -447,8 +577,9 @@ def run_instrumentation_overhead_study(
             "The workload is the deterministic synthetic Helix CPU demo, not production traffic.",
             "A negative overhead estimate inside the measured noise floor is not a speedup claim.",
             "Resource sampling is periodic and can miss peaks between 100 ms samples.",
-            "Lifecycle events are buffered in memory during the timed run; canonical adaptation and "
-            "trace persistence are measured separately by the vertical trace workflow.",
+            "The timed path includes the same raw plus canonical Pydantic adaptation and bounded "
+            "in-memory buffer as the vertical runner, but excludes post-run JSONL, Perfetto, and "
+            "Parquet serialization.",
         ),
     )
     _write_json(output / "instrumentation-overhead.json", artifact.model_dump(mode="json"))

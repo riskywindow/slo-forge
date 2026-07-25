@@ -406,7 +406,7 @@ def analyze_run_amdahl(*, run: Path, output: Path, replace: bool) -> dict[str, o
             continue
         is_continuum = "continuum-trace" in trace.parts
         objective = (
-            EndToEndObjective.MIGRATION_LATENCY
+            EndToEndObjective.FULL_STATE_LIFECYCLE
             if is_continuum
             else EndToEndObjective.FULL_HELIX_TRANSACTION
         )
@@ -452,7 +452,9 @@ def analyze_run_amdahl(*, run: Path, output: Path, replace: bool) -> dict[str, o
     payload = report.model_dump(mode="json")
     payload["interpretation"] = (
         "Each primitive bound is independent and non-additive. Direct operation spans are treated "
-        "as removable work; combined fork spans and nested duplicate timing spans are excluded."
+        "as removable work; combined fork spans and nested duplicate timing spans are excluded. "
+        "The Continuum harness is labeled as a full state lifecycle because its pre-migration "
+        "snapshot, branch, conversion, and copy phases are not one migration critical path."
     )
     target = _write_json(_output_file(output, "amdahl-analysis.json"), payload, replace=replace)
     return {"output": target.as_posix(), "artifact_sha256": _sha256(target), **payload}
@@ -650,27 +652,36 @@ def _available_distribution(
 ) -> DistributionRequirement:
     if not values:
         raise ValueError(f"available distribution {source} requires observations")
-    metrics = (
-        (0.50, ConfidenceOrPercentile.P50),
-        (0.95, ConfidenceOrPercentile.P95),
-        (0.99, ConfidenceOrPercentile.P99),
+    p50_value = _percentile(values, 0.50)
+    if p50_value is None:
+        raise ValueError(f"available distribution {source} has no percentile value")
+    p50 = _available_number(
+        artifact,
+        p50_value,
+        unit,
+        source=source,
+        sample_count=len(values),
+        confidence=ConfidenceOrPercentile.P50,
+        rationale=rationale,
+        evidence_class=evidence_class,
     )
-    numbers: list[NumericRequirement] = []
-    for probability, confidence in metrics:
-        value = _percentile(values, probability)
-        if value is None:
-            raise ValueError(f"available distribution {source} has no percentile value")
-        numbers.append(
-            _available_number(
+
+    def insufficient_tail(probability: str) -> NumericRequirement:
+        return NumericRequirement(
+            availability=Availability.UNKNOWN,
+            value=None,
+            unit=unit,
+            evidence=_evidence(
                 artifact,
-                value,
-                unit,
                 source=source,
                 sample_count=len(values),
-                confidence=confidence,
-                rationale=rationale,
+                confidence=ConfidenceOrPercentile.INSUFFICIENT_INDEPENDENT_SAMPLES,
                 evidence_class=evidence_class,
-            )
+            ),
+            rationale=(
+                f"{probability} is withheld: this completed run does not contain enough "
+                "independent workload clusters for a hardware-sizing tail"
+            ),
         )
     maximum = _available_number(
         artifact,
@@ -683,9 +694,9 @@ def _available_distribution(
         evidence_class=evidence_class,
     )
     return DistributionRequirement(
-        p50=numbers[0],
-        p95=numbers[1],
-        p99=numbers[2],
+        p50=p50,
+        p95=insufficient_tail("p95"),
+        p99=insufficient_tail("p99"),
         maximum=maximum,
     )
 
@@ -769,7 +780,6 @@ def _compile_requirements_from_run(
 
     metadata_path = _successful_stage_attempt(run, "metadata") / "metadata-study.json"
     metadata_artifact = bind(metadata_path)
-    metadata_document = json.loads(metadata_path.read_text(encoding="utf-8"))
 
     branch_artifact, branch_trace = next(
         (artifact, events)
@@ -958,33 +968,16 @@ def _compile_requirements_from_run(
         ),
     )
 
-    summaries = metadata_document.get("summaries", [])
-    current_throughput = tuple(
-        float(item["throughput_ops_per_second_median"])
-        for item in summaries
-        if isinstance(item, dict) and item.get("implementation") == "current_software"
-    )
-    metadata_rate = (
-        _available_distribution(
-            metadata_artifact,
-            current_throughput,
-            RequirementUnit.OPERATIONS_PER_SECOND,
-            source="metadata-current-software-summaries",
-            rationale=(
-                "distribution across measured current-software operation/thread summary medians"
-            ),
-            evidence_class=EvidenceClass.SYNTHETIC,
-        )
-        if current_throughput
-        else _unknown_distribution(
-            metadata_artifact,
-            RequirementUnit.OPERATIONS_PER_SECOND,
-            source="metadata-current-software-summaries",
-            rationale="metadata artifact contains no current-software throughput summary",
-        )
-    )
     metadata = MetadataRequirements(
-        operations_per_second=metadata_rate,
+        operations_per_second=_unknown_distribution(
+            metadata_artifact,
+            RequirementUnit.OPERATIONS_PER_SECOND,
+            source="metadata-workload-demand-rate",
+            rationale=(
+                "isolated operation microbenchmarks measure software service capacity, not the "
+                "Helix workload arrival-rate distribution required by hardware"
+            ),
+        ),
         queue_depth=_unknown_distribution(
             metadata_artifact,
             RequirementUnit.COUNT,
@@ -1290,41 +1283,105 @@ def _compile_requirements_from_run(
             dependencies=(),
         )
 
-    candidate_operations = (
-        StateOperationType.STATE_ALLOC,
-        StateOperationType.STATE_MAP,
-        StateOperationType.STATE_PUBLISH,
-        StateOperationType.STATE_FORK,
-        StateOperationType.STATE_COW,
-        StateOperationType.STATE_APPEND,
-        StateOperationType.STATE_SNAPSHOT,
-        StateOperationType.STATE_DELTA,
-        StateOperationType.STATE_RESHARD,
-        StateOperationType.STATE_REPACK,
-        StateOperationType.STATE_QUANTIZE,
-        StateOperationType.STATE_DEQUANTIZE,
-        StateOperationType.STATE_COMPRESS,
-        StateOperationType.STATE_DECOMPRESS,
-        StateOperationType.STATE_HASH,
-        StateOperationType.STATE_CHECKSUM,
-        StateOperationType.STATE_ENCRYPT,
-        StateOperationType.STATE_DECRYPT,
-        StateOperationType.STATE_SEND,
-        StateOperationType.STATE_MULTICAST,
-        StateOperationType.STATE_COMMIT,
-        StateOperationType.STATE_ABORT,
-        StateOperationType.STATE_RECLAIM,
-        StateOperationType.STATE_FREE,
-    )
-    absent_not_justified = {
-        StateOperationType.STATE_QUANTIZE,
-        StateOperationType.STATE_DEQUANTIZE,
-        StateOperationType.STATE_COMPRESS,
-        StateOperationType.STATE_DECOMPRESS,
-        StateOperationType.STATE_ENCRYPT,
-        StateOperationType.STATE_DECRYPT,
-        StateOperationType.STATE_MULTICAST,
-    }
+    def declared_fused_isa(
+        operation: StateOperationType,
+        artifact: _BoundArtifact,
+        containing_events: tuple[StateOperationEventV1, ...],
+    ) -> IsaOperationRecommendation:
+        state_types = tuple(
+            sorted({event.state_segment for event in containing_events}, key=lambda item: item.value)
+        ) or (StateSegment.UNKNOWN,)
+        rationale = (
+            "the producer declares this operation inside a fused inclusive span, but the trace "
+            "does not provide an independent event, latency, rate, or software comparison"
+        )
+        return IsaOperationRecommendation(
+            operation=operation,
+            classification=IsaClassificationRequirement(
+                availability=Availability.UNKNOWN,
+                value=None,
+                evidence=_evidence(
+                    artifact,
+                    source=f"isa-{operation.value.lower()}-declared-fused-span",
+                    sample_count=len(containing_events),
+                    confidence=ConfidenceOrPercentile.COUNTER_ABSENT,
+                ),
+                rationale=rationale,
+            ),
+            measured_frequency=_unknown_number(
+                artifact,
+                RequirementUnit.EVENTS_PER_SECOND,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            size=_available_distribution(
+                artifact,
+                tuple(event.bytes for event in containing_events),
+                RequirementUnit.BYTES,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale="inclusive fused-span bytes; not independently attributable to this operation",
+            ),
+            latency_target=_unknown_number(
+                artifact,
+                RequirementUnit.NANOSECONDS,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            throughput_target=_unknown_number(
+                artifact,
+                RequirementUnit.OPERATIONS_PER_SECOND,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            concurrency=_unknown_distribution(
+                artifact,
+                RequirementUnit.COUNT,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            fanout=_unknown_distribution(
+                artifact,
+                RequirementUnit.COUNT,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            state_types=state_types,
+            consistency=_unknown_enum(
+                artifact,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            failure_behavior=_unknown_enum(
+                artifact,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            expected_end_to_end_speedup=_unknown_number(
+                artifact,
+                RequirementUnit.RATIO,
+                source=f"isa-{operation.value.lower()}-declared-fused-span",
+                rationale=rationale,
+            ),
+            dependencies=(),
+        )
+
+    candidate_operations = tuple(StateOperationType)
+    declared_fused: dict[
+        StateOperationType,
+        list[tuple[_BoundArtifact, StateOperationEventV1]],
+    ] = defaultdict(list)
+    for artifact, events in state_streams:
+        for state_event in events:
+            raw_chain = state_event.attributes.get("operation_chain_json")
+            if not isinstance(raw_chain, str):
+                continue
+            decoded = json.loads(raw_chain)
+            if not isinstance(decoded, list) or not all(isinstance(item, str) for item in decoded):
+                raise ValueError("operation_chain_json must be an array of operation names")
+            for operation_name in decoded:
+                declared_fused[StateOperationType(operation_name)].append(
+                    (artifact, state_event)
+                )
     unresolved: list[IsaOperationRecommendation] = []
     not_justified: list[IsaOperationRecommendation] = []
     fallback_artifact, fallback_states = max(state_streams, key=lambda item: len(item[1]))
@@ -1337,7 +1394,16 @@ def _compile_requirements_from_run(
         if selected is not None:
             unresolved.append(unresolved_isa(operation, *selected))
             continue
-        if operation not in absent_not_justified:
+        if operation in declared_fused:
+            declaration_artifact = declared_fused[operation][0][0]
+            declaration_events = tuple(
+                event
+                for artifact, event in declared_fused[operation]
+                if artifact == declaration_artifact
+            )
+            unresolved.append(
+                declared_fused_isa(operation, declaration_artifact, declaration_events)
+            )
             continue
         span = _trace_span_seconds(fallback_states)
         classification_evidence = _evidence(
@@ -1605,6 +1671,7 @@ def _compile_requirements_from_run(
             "No compatible NVIDIA GPU, HBM, PCIe GPU link, multi-GPU fabric, or multi-node network was measured.",
             "Unknown values are not replaced with matrix sweep points, analytical projections, zeroes, or targets.",
             "NOT_JUSTIFIED ISA labels mean absent from this bounded corpus and must be revisited with broader real workloads.",
+            "Metadata microbenchmark throughput is service capacity and is not reported as workload operations-per-second demand.",
         ),
         workloads=(workload,),
         state=state,

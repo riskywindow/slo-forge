@@ -58,6 +58,7 @@ class ConfidenceOrPercentile(StrEnum):
     CI95_LOWER = "ci95_lower"
     CI95_UPPER = "ci95_upper"
     COUNTER_ABSENT = "counter_absent"
+    INSUFFICIENT_INDEPENDENT_SAMPLES = "insufficient_independent_samples"
     CAPABILITY_UNAVAILABLE = "capability_unavailable"
 
 
@@ -104,10 +105,14 @@ class NumericRequirement(RequirementsModel):
             raise ValueError("numeric value must be present exactly when availability is AVAILABLE")
         if self.availability is Availability.AVAILABLE and self.evidence.sample_count == 0:
             raise ValueError("available numeric requirements require at least one sample")
-        if self.availability is Availability.UNKNOWN and (
-            self.evidence.confidence_or_percentile is not ConfidenceOrPercentile.COUNTER_ABSENT
-        ):
-            raise ValueError("UNKNOWN numeric requirements require counter_absent evidence")
+        if self.availability is Availability.UNKNOWN and self.evidence.confidence_or_percentile not in {
+            ConfidenceOrPercentile.COUNTER_ABSENT,
+            ConfidenceOrPercentile.INSUFFICIENT_INDEPENDENT_SAMPLES,
+        }:
+            raise ValueError(
+                "UNKNOWN numeric requirements require counter_absent or "
+                "insufficient_independent_samples evidence"
+            )
         if self.availability is Availability.UNAVAILABLE and (
             self.evidence.confidence_or_percentile
             is not ConfidenceOrPercentile.CAPABILITY_UNAVAILABLE
@@ -169,24 +174,24 @@ class DistributionRequirement(RequirementsModel):
     @model_validator(mode="after")
     def available_values_are_ordered_and_compatible(self) -> Self:
         metrics = (self.p50, self.p95, self.p99, self.maximum)
-        if len({metric.availability for metric in metrics}) != 1:
-            raise ValueError("distribution percentiles must have one availability state")
         if len({metric.unit for metric in metrics}) != 1:
             raise ValueError("distribution percentiles must use the same unit")
-        available = [metric for metric in metrics if metric.availability is Availability.AVAILABLE]
-        if available:
-            expected_confidence = (
-                ConfidenceOrPercentile.P50,
-                ConfidenceOrPercentile.P95,
-                ConfidenceOrPercentile.P99,
-                ConfidenceOrPercentile.MAXIMUM,
-            )
-            if tuple(metric.evidence.confidence_or_percentile for metric in metrics) != (
-                expected_confidence
+        expected_confidence = (
+            ConfidenceOrPercentile.P50,
+            ConfidenceOrPercentile.P95,
+            ConfidenceOrPercentile.P99,
+            ConfidenceOrPercentile.MAXIMUM,
+        )
+        for metric, confidence in zip(metrics, expected_confidence, strict=True):
+            if (
+                metric.availability is Availability.AVAILABLE
+                and metric.evidence.confidence_or_percentile is not confidence
             ):
                 raise ValueError(
                     "available distribution fields require matching percentile evidence"
                 )
+        available = [metric for metric in metrics if metric.availability is Availability.AVAILABLE]
+        if available:
             values = [float(metric.value) for metric in metrics if metric.value is not None]
             if values != sorted(values):
                 raise ValueError("distribution percentiles must be nondecreasing")

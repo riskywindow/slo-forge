@@ -101,6 +101,17 @@ def test_resume_hashes_artifacts_and_explicitly_skips_unavailable_hardware(
             payload = (run_directory / artifact.relative_path).read_bytes()
             assert len(payload) == artifact.size_bytes
             assert hashlib.sha256(payload).hexdigest() == artifact.sha256
+    matrix_result = json.loads(
+        (
+            run_directory
+            / "attempts"
+            / "matrix_validate"
+            / "attempt-000"
+            / "matrix-validation.json"
+        ).read_bytes()
+    )
+    assert matrix_result["evaluated_case_count"] == 855
+    assert matrix_result["hardware_executed_case_count"] == 0
     for stage in (
         CharacterizationStage.GPU,
         CharacterizationStage.MULTI_GPU,

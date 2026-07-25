@@ -9,6 +9,7 @@ producer dependency IDs visible rather than turning them into false pipelines.
 from __future__ import annotations
 
 import hashlib
+import json
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Sequence
 from typing import Literal, Self
@@ -121,6 +122,19 @@ class TransformSequenceRanking(TransformModel):
     by_observed_latency: tuple[str, ...] = Field(max_length=MAX_TOP_SEQUENCES)
 
 
+class DeclaredFusedOperationChain(TransformModel):
+    """Producer-declared operations sharing one inseparable measured span."""
+
+    event_reference: str = Field(min_length=1, max_length=4096)
+    operations: tuple[StateOperationType, ...] = Field(min_length=2, max_length=128)
+    bytes: int = Field(ge=0)
+    inclusive_latency_ns: int = Field(ge=0)
+    timing_decomposable: Literal[False] = False
+    evidence_note: Literal[
+        "producer declaration preserved from operation_chain_json; per-operation latency unknown"
+    ] = "producer declaration preserved from operation_chain_json; per-operation latency unknown"
+
+
 class TransformAnalysis(TransformModel):
     schema_version: Literal["sloforge.branchfabric.transform-analysis/v1"]
     evidence: TraceAnalysisEvidence
@@ -128,6 +142,9 @@ class TransformAnalysis(TransformModel):
     operation_aggregates: tuple[TransformOperationAggregate, ...] = Field(max_length=MAX_AGGREGATES)
     sequence_aggregates: tuple[TransformSequenceAggregate, ...] = Field(max_length=MAX_SEQUENCES)
     sequence_ranking: TransformSequenceRanking
+    declared_fused_operation_chains: tuple[DeclaredFusedOperationChain, ...] = Field(
+        max_length=MAX_SEQUENCES
+    )
     unresolved_dependency_count: int = Field(ge=0)
     ambiguous_pipeline_predecessor_count: int = Field(ge=0)
     noncausal_dependency_count: int = Field(ge=0)
@@ -507,6 +524,27 @@ def analyze_transforms(
     paths, unresolved, ambiguous, noncausal, cycles = _extract_paths(retained)
     sequences = _sequence_aggregates(paths)
     transforms = [event for event in retained if event.operation_type in TRANSFORM_OPERATIONS]
+    declared_chains: list[DeclaredFusedOperationChain] = []
+    for event in retained:
+        raw_chain = event.attributes.get("operation_chain_json")
+        if not isinstance(raw_chain, str):
+            continue
+        try:
+            decoded = json.loads(raw_chain)
+        except json.JSONDecodeError as error:
+            raise ValueError("operation_chain_json must contain valid JSON") from error
+        if not isinstance(decoded, list) or len(decoded) < 2 or not all(
+            isinstance(item, str) for item in decoded
+        ):
+            raise ValueError("operation_chain_json must be a JSON array of operation names")
+        declared_chains.append(
+            DeclaredFusedOperationChain(
+                event_reference=_reference(event),
+                operations=tuple(StateOperationType(item) for item in decoded),
+                bytes=event.bytes,
+                inclusive_latency_ns=event.operation_latency_ns,
+            )
+        )
     unknown = [
         "temporary allocation bytes are not represented by StateOperationTrace v1",
         "memory read and write counters are not represented by StateOperationTrace v1",
@@ -524,6 +562,7 @@ def analyze_transforms(
         operation_aggregates=_operation_aggregates(retained),
         sequence_aggregates=sequences,
         sequence_ranking=_rank_sequences(sequences),
+        declared_fused_operation_chains=tuple(declared_chains),
         unresolved_dependency_count=unresolved,
         ambiguous_pipeline_predecessor_count=ambiguous,
         noncausal_dependency_count=noncausal,
@@ -539,6 +578,7 @@ __all__ = [
     "MAX_SEQUENCES",
     "PIPELINE_OPERATIONS",
     "TRANSFORM_OPERATIONS",
+    "DeclaredFusedOperationChain",
     "FusionUpperBound",
     "OptionalCounterTotal",
     "TransformAnalysis",

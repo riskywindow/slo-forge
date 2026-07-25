@@ -142,7 +142,18 @@ def test_requirements_and_report_compile_only_bound_evidence(
     assert requirements["state"]["divergence_rate"]["p50"]["availability"] == "UNKNOWN"
     assert requirements["bandwidth_targets"][0]["mean"]["availability"] == "UNAVAILABLE"
     assert requirements["recommended_isa"] == []
-    assert len(requirements["not_justified_operations"]) == 7
+    assert requirements["metadata"]["operations_per_second"]["p50"]["availability"] == "UNKNOWN"
+    classified_operations = {
+        item["operation"]
+        for field in (
+            "recommended_isa",
+            "software_only_operations",
+            "not_justified_operations",
+            "unresolved_isa_operations",
+        )
+        for item in requirements[field]
+    }
+    assert len(classified_operations) == 30
     cow_isa = next(
         item
         for item in requirements["unresolved_isa_operations"]

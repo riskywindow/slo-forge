@@ -195,6 +195,28 @@ def test_missing_transform_resource_counters_remain_unknown() -> None:
     assert any("CPU time" in item for item in result.unknown_counters)
 
 
+def test_producer_declared_fused_chain_is_preserved_without_fake_stage_timings() -> None:
+    event = _event(1, StateOperationType.STATE_RESHARD).model_copy(
+        update={
+            "attributes": {
+                "operation_chain_json": (
+                    '["STATE_RESHARD","STATE_REPACK","STATE_CHECKSUM"]'
+                )
+            }
+        }
+    )
+    result = _analyze([event])
+    (declared,) = result.declared_fused_operation_chains
+    assert declared.operations == (
+        StateOperationType.STATE_RESHARD,
+        StateOperationType.STATE_REPACK,
+        StateOperationType.STATE_CHECKSUM,
+    )
+    assert declared.inclusive_latency_ns == 100
+    assert declared.timing_decomposable is False
+    assert result.transform_event_count == 1
+
+
 def test_sequence_ranking_uses_frequency_bytes_and_observed_latency() -> None:
     first = [
         _event(1, StateOperationType.STATE_QUANTIZE),

@@ -108,7 +108,10 @@ def test_continuum_adapter_keeps_modeled_transport_separate() -> None:
         seed=41,
         evidence_references=("artifact.json",),
         state_segment="model",
-        metadata={"modeled_transport": True},
+        metadata={
+            "modeled_transport": True,
+            "operation_chain": ("STATE_RESHARD", "STATE_REPACK", "STATE_CHECKSUM"),
+        },
     )
     recorder.record(observation)
     (event,) = buffer.drain()
@@ -118,6 +121,9 @@ def test_continuum_adapter_keeps_modeled_transport_separate() -> None:
     assert event.transfer_time_ns == 400
     assert event.dependency_event_ids == ("trace-c:1",)
     assert event.attributes["modeled_transport"] is True
+    assert event.attributes["operation_chain_json"] == (
+        '["STATE_RESHARD","STATE_REPACK","STATE_CHECKSUM"]'
+    )
     verify_event(event)
 
 

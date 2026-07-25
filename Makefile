@@ -229,12 +229,8 @@ branchfabric-characterization-gpu:
 		record_status unavailable "nvidia-smi is unavailable; no compatible NVIDIA device was measured"; \
 		echo "BranchFabric GPU characterization unavailable: no supported NVIDIA device; no hardware-backed result is claimed"; \
 	else \
-		uv run --locked sloforge helix characterize run \
-			--matrix benchmarks/branchfabric/characterization.yaml \
-			--output artifacts/branchfabric/characterization/gpu-reference \
-			--hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 1800 \
-			--replace; \
-		record_status exercised "accessible local NVIDIA characterization completed; see gpu-reference for evidence" 1; \
+		record_status unavailable "compatible local NVIDIA may exist, but the GPU execution stage is not implemented; no hardware-backed result is claimed"; \
+		echo "BranchFabric GPU characterization unavailable: GPU execution stage is not implemented; no result is claimed"; \
 	fi
 
 branchfabric-characterization:

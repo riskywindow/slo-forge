@@ -293,6 +293,13 @@ class CanonicalContinuumRecorder:
         }
         metadata.update(
             {
+                f"{key}_json": json.dumps(value, separators=(",", ":"), sort_keys=True)
+                for key, value in observation.metadata.items()
+                if isinstance(value, (tuple, list, dict))
+            }
+        )
+        metadata.update(
+            {
                 "source_observation_sequence": observation.sequence,
                 "evidence_references_json": json.dumps(
                     observation.evidence_references, separators=(",", ":")
