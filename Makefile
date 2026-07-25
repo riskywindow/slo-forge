@@ -232,7 +232,8 @@ branchfabric-characterization-gpu:
 		uv run --locked sloforge helix characterize run \
 			--matrix benchmarks/branchfabric/characterization.yaml \
 			--output artifacts/branchfabric/characterization/gpu-reference \
-			--hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 1800; \
+			--hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 1800 \
+			--replace; \
 		record_status exercised "accessible local NVIDIA characterization completed; see gpu-reference for evidence" 1; \
 	fi
 
