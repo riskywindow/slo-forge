@@ -1317,6 +1317,14 @@ def _compile_requirements_from_run(
         )
 
     candidate_operations = tuple(StateOperationType)
+    absent_software_only = {
+        StateOperationType.STATE_HASH,
+        StateOperationType.STATE_ENCRYPT,
+        StateOperationType.STATE_DECRYPT,
+        StateOperationType.STATE_ACK,
+        StateOperationType.STATE_RETRY,
+        StateOperationType.STATE_ABORT,
+    }
     declared_fused: dict[
         StateOperationType,
         list[tuple[_BoundArtifact, StateOperationEventV1]],
@@ -1334,6 +1342,7 @@ def _compile_requirements_from_run(
                     (artifact, state_event)
                 )
     unresolved: list[IsaOperationRecommendation] = []
+    software_only: list[IsaOperationRecommendation] = []
     not_justified: list[IsaOperationRecommendation] = []
     fallback_artifact, fallback_states = max(state_streams, key=lambda item: len(item[1]))
     for operation in candidate_operations:
@@ -1363,16 +1372,27 @@ def _compile_requirements_from_run(
             sample_count=len(fallback_states),
             confidence=ConfidenceOrPercentile.POINT_ESTIMATE,
         )
-        not_justified.append(
+        classification = (
+            IsaClassification.SOFTWARE_ONLY
+            if operation in absent_software_only
+            else IsaClassification.NOT_JUSTIFIED
+        )
+        destination = software_only if classification is IsaClassification.SOFTWARE_ONLY else not_justified
+        destination.append(
             IsaOperationRecommendation(
                 operation=operation,
                 classification=IsaClassificationRequirement(
                     availability=Availability.AVAILABLE,
-                    value=IsaClassification.NOT_JUSTIFIED,
+                    value=classification,
                     evidence=classification_evidence,
                     rationale=(
                         "no explicit operation occurred in the bounded state-lifecycle corpus; "
-                        "this is a current-workload negative finding, not a universal claim"
+                        + (
+                            "control, integrity, or confidentiality semantics remain software-"
+                            "managed until workload leverage is measured"
+                            if classification is IsaClassification.SOFTWARE_ONLY
+                            else "this is a current-workload negative finding, not a universal claim"
+                        )
                     ),
                 ),
                 measured_frequency=_available_number(
@@ -1632,7 +1652,7 @@ def _compile_requirements_from_run(
         network=network,
         transactions=transactions,
         recommended_isa=(),
-        software_only_operations=(),
+        software_only_operations=tuple(software_only),
         not_justified_operations=tuple(not_justified),
         unresolved_isa_operations=tuple(unresolved),
         memory_requirements=tuple(memory_requirements),
