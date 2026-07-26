@@ -98,6 +98,28 @@ class PlatformFeasibility(GateModel):
     selected_target_fits: bool = False
 
 
+class MetricEvidenceBinding(GateModel):
+    """Bind one gate metric to its derivation and immutable raw samples."""
+
+    summary_artifact_path: NonEmpty
+    raw_artifact_paths: tuple[NonEmpty, ...] = Field(min_length=1, max_length=64)
+    workload_classes: tuple[NonEmpty, ...] = Field(min_length=1, max_length=16)
+    seeds: tuple[int, ...] = Field(min_length=1, max_length=64)
+    derivation_method: NonEmpty
+    confidence_level: Fraction | None = None
+    target_hardware_timing: bool
+
+    @model_validator(mode="after")
+    def distinct_inputs(self) -> Self:
+        if len(self.raw_artifact_paths) != len(set(self.raw_artifact_paths)):
+            raise ValueError("metric raw artifact paths must be unique")
+        if len(self.workload_classes) != len(set(self.workload_classes)):
+            raise ValueError("metric workload classes must be unique")
+        if len(self.seeds) != len(set(self.seeds)):
+            raise ValueError("metric seeds must be unique")
+        return self
+
+
 class CandidateEvidence(GateModel):
     candidate: NonEmpty
     kind: CandidateKind
@@ -115,6 +137,8 @@ class CandidateEvidence(GateModel):
     )
     critical_path: CriticalPathEvidence
     headroom: HeadroomEvidence
+    critical_path_bindings: dict[NonEmpty, MetricEvidenceBinding] = Field(default_factory=dict)
+    headroom_bindings: dict[NonEmpty, MetricEvidenceBinding] = Field(default_factory=dict)
     platform: PlatformFeasibility
     workload_value_signals: dict[NonEmpty, bool] = Field(default_factory=dict)
 
@@ -124,6 +148,16 @@ class CandidateEvidence(GateModel):
             raise ValueError("workload classes must be unique")
         if len(self.seeds) != len(set(self.seeds)):
             raise ValueError("seeds must be unique")
+        evidence_paths = {reference.path for reference in self.evidence}
+        for bindings in (self.critical_path_bindings, self.headroom_bindings):
+            for metric, binding in bindings.items():
+                bound_paths = {binding.summary_artifact_path, *binding.raw_artifact_paths}
+                missing = bound_paths - evidence_paths
+                if missing:
+                    raise ValueError(
+                        f"metric binding {metric!r} cites evidence absent from the candidate: "
+                        + ", ".join(sorted(missing))
+                    )
         return self
 
 
@@ -258,21 +292,75 @@ def _check_real_evidence(candidate: CandidateEvidence) -> GateCheck:
     )
 
 
+def _binding_has_raw_samples(candidate: CandidateEvidence, binding: MetricEvidenceBinding) -> bool:
+    references = {reference.path: reference for reference in candidate.evidence}
+    return all(references[path].raw_samples for path in binding.raw_artifact_paths)
+
+
+def _binding_has_target_hardware_samples(
+    candidate: CandidateEvidence, binding: MetricEvidenceBinding
+) -> bool:
+    references = {reference.path: reference for reference in candidate.evidence}
+    return binding.target_hardware_timing and any(
+        references[path].raw_samples
+        and references[path].sample_count > 0
+        and references[path].evidence_class is EvidenceClass.TARGET_HARDWARE_REAL
+        for path in binding.raw_artifact_paths
+    )
+
+
 def _check_relevance(candidate: CandidateEvidence) -> GateCheck:
     metrics = {
-        "target critical path": (candidate.critical_path.target_critical_path_fraction, 0.10),
-        "GPU interference": (candidate.critical_path.gpu_interference_fraction, 0.15),
-        "state-movement time": (candidate.critical_path.state_movement_time_fraction, 0.15),
-        "state-movement bytes": (candidate.critical_path.state_movement_bytes_fraction, 0.15),
-        "capacity reclamation": (candidate.critical_path.capacity_reclamation_fraction, 0.10),
-        "BranchPoint-to-readiness": (candidate.critical_path.branch_readiness_fraction, 0.10),
+        "target critical path": (
+            "target_critical_path_fraction",
+            candidate.critical_path.target_critical_path_fraction,
+            0.10,
+        ),
+        "GPU interference": (
+            "gpu_interference_fraction",
+            candidate.critical_path.gpu_interference_fraction,
+            0.15,
+        ),
+        "state-movement time": (
+            "state_movement_time_fraction",
+            candidate.critical_path.state_movement_time_fraction,
+            0.15,
+        ),
+        "state-movement bytes": (
+            "state_movement_bytes_fraction",
+            candidate.critical_path.state_movement_bytes_fraction,
+            0.15,
+        ),
+        "capacity reclamation": (
+            "capacity_reclamation_fraction",
+            candidate.critical_path.capacity_reclamation_fraction,
+            0.10,
+        ),
+        "BranchPoint-to-readiness": (
+            "branch_readiness_fraction",
+            candidate.critical_path.branch_readiness_fraction,
+            0.10,
+        ),
     }
     passing = [
         name
-        for name, (value, threshold) in metrics.items()
-        if value is not None and value >= threshold
+        for name, (field, value, threshold) in metrics.items()
+        if value is not None
+        and value >= threshold
+        and (binding := candidate.critical_path_bindings.get(field)) is not None
+        and _binding_has_raw_samples(candidate, binding)
     ]
-    observed = [f"{name}={value:.6f}" for name, (value, _) in metrics.items() if value is not None]
+    observed = [
+        f"{name}={value:.6f}"
+        + (
+            " (raw-bound)"
+            if (binding := candidate.critical_path_bindings.get(field)) is not None
+            and _binding_has_raw_samples(candidate, binding)
+            else " (unbound)"
+        )
+        for name, (field, value, _) in metrics.items()
+        if value is not None
+    ]
     return GateCheck(
         gate="mandatory_end_to_end_relevance",
         status=GateStatus.PASS if passing else GateStatus.FAIL,
@@ -292,34 +380,66 @@ def _check_relevance(candidate: CandidateEvidence) -> GateCheck:
 
 def _check_headroom(candidate: CandidateEvidence) -> GateCheck:
     metrics = {
-        "end-to-end speedup": (candidate.headroom.end_to_end_speedup_lower_bound, 1.15),
+        "end-to-end speedup": (
+            "end_to_end_speedup_lower_bound",
+            candidate.headroom.end_to_end_speedup_lower_bound,
+            1.15,
+        ),
         "p99 readiness reduction": (
+            "p99_branch_readiness_reduction_lower_bound",
             candidate.headroom.p99_branch_readiness_reduction_lower_bound,
             0.20,
         ),
         "reclamation interruption reduction": (
+            "reclamation_interruption_reduction_lower_bound",
             candidate.headroom.reclamation_interruption_reduction_lower_bound,
             0.20,
         ),
         "GPU interference reduction": (
+            "gpu_interference_reduction_lower_bound",
             candidate.headroom.gpu_interference_reduction_lower_bound,
             0.20,
         ),
         "physical movement reduction": (
+            "physical_state_movement_reduction_lower_bound",
             candidate.headroom.physical_state_movement_reduction_lower_bound,
             0.25,
         ),
         "valid trajectories/GPU-hour increase": (
+            "valid_trajectories_per_gpu_hour_increase_lower_bound",
             candidate.headroom.valid_trajectories_per_gpu_hour_increase_lower_bound,
             0.20,
         ),
     }
     passing = [
         name
-        for name, (value, threshold) in metrics.items()
-        if value is not None and value >= threshold
+        for name, (field, value, threshold) in metrics.items()
+        if value is not None
+        and value >= threshold
+        and (binding := candidate.headroom_bindings.get(field)) is not None
+        and binding.confidence_level is not None
+        and binding.confidence_level >= 0.95
+        and len(binding.workload_classes) >= 2
+        and len(binding.seeds) >= 3
+        and _binding_has_raw_samples(candidate, binding)
+        and _binding_has_target_hardware_samples(candidate, binding)
     ]
-    observed = [f"{name}={value:.6f}" for name, (value, _) in metrics.items() if value is not None]
+    observed = [
+        f"{name}={value:.6f}"
+        + (
+            " (95%+ target-hardware raw-bound)"
+            if (binding := candidate.headroom_bindings.get(field)) is not None
+            and binding.confidence_level is not None
+            and binding.confidence_level >= 0.95
+            and len(binding.workload_classes) >= 2
+            and len(binding.seeds) >= 3
+            and _binding_has_raw_samples(candidate, binding)
+            and _binding_has_target_hardware_samples(candidate, binding)
+            else " (not qualifying evidence-bound LCB)"
+        )
+        for name, (field, value, _) in metrics.items()
+        if value is not None
+    ]
     return GateCheck(
         gate="mandatory_system_level_headroom",
         status=GateStatus.PASS if passing else GateStatus.FAIL,

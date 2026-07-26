@@ -14,6 +14,7 @@ from sloforge.helix.characterization.gates import (
     GateInput,
     GateStatus,
     HeadroomEvidence,
+    MetricEvidenceBinding,
     PlatformFeasibility,
     compile_gate,
     evaluate_gate,
@@ -65,6 +66,15 @@ def _signals(kind: CandidateKind, value: bool) -> dict[str, bool]:
 
 
 def _candidate(reference: EvidenceReference, *, passing: bool) -> CandidateEvidence:
+    metric_binding = MetricEvidenceBinding(
+        summary_artifact_path=reference.path,
+        raw_artifact_paths=(reference.path,),
+        workload_classes=("coding_agent", "reasoning_verification"),
+        seeds=(41, 73, 113),
+        derivation_method="matched end-to-end bootstrap",
+        confidence_level=0.95,
+        target_hardware_timing=True,
+    )
     return CandidateEvidence(
         candidate="reshard-transform-send",
         kind=CandidateKind.DATA_PATH,
@@ -80,6 +90,8 @@ def _candidate(reference: EvidenceReference, *, passing: bool) -> CandidateEvide
         evidence=(reference,),
         critical_path=CriticalPathEvidence(target_critical_path_fraction=0.11 if passing else 0.01),
         headroom=HeadroomEvidence(end_to_end_speedup_lower_bound=1.16 if passing else 1.01),
+        critical_path_bindings={"target_critical_path_fraction": metric_binding},
+        headroom_bindings={"end_to_end_speedup_lower_bound": metric_binding},
         platform=PlatformFeasibility(
             byte_rate_bytes_per_second=1.0,
             operation_rate_per_second=1.0,
@@ -137,6 +149,19 @@ def test_isolated_speedup_does_not_override_system_headroom(tmp_path: Path) -> N
     assert candidate.mandatory_system_level_headroom.status is GateStatus.FAIL
     assert candidate.mandatory_end_to_end_relevance.status is GateStatus.FAIL
     assert candidate.disposition == "NOT_JUSTIFIED"
+
+
+def test_unbound_numeric_headroom_cannot_pass(tmp_path: Path) -> None:
+    raw = tmp_path / "raw.json"
+    raw.write_text("{}\n", encoding="utf-8")
+    reference = _reference(raw, EvidenceClass.TARGET_HARDWARE_REAL)
+    candidate = _candidate(reference, passing=True).model_copy(update={"headroom_bindings": {}})
+    result = evaluate_gate(_input(candidate), repository_root=tmp_path)
+    assert result.outcome == "FAIL_NO_BUILD"
+    assert result.candidates[0].mandatory_system_level_headroom.status is GateStatus.FAIL
+    assert "not qualifying evidence-bound LCB" in (
+        result.candidates[0].mandatory_system_level_headroom.rationale
+    )
 
 
 def test_artifact_digest_mismatch_fails_before_gate_evaluation(tmp_path: Path) -> None:

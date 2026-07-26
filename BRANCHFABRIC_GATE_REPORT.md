@@ -20,7 +20,7 @@ No threshold was loosened. CPU-reference, synthetic, simulated-hardware, and art
 ### `reshard_data_path`
 
 - `mandatory_real_evidence`: **FAIL** — no target-relevant real hardware raw samples; fewer than two workload classes.
-- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.016694.
+- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.016694 (unbound).
 - `mandatory_system_level_headroom`: **FAIL** — no lower confidence bound reached a threshold; all are unknown.
 - `mandatory_platform_feasibility`: **FAIL** — missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit.
 - `workload_value_data_path`: **FAIL** — missing: large_state_operations, repeated_frequency, bandwidth_pressure, temporary_memory_or_interference, full_system_leverage.
@@ -45,7 +45,7 @@ Evidence bindings:
 ### `branch_translation_metadata`
 
 - `mandatory_real_evidence`: **FAIL** — no target-relevant real hardware raw samples; fewer than two workload classes.
-- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.000948.
+- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.000948 (unbound).
 - `mandatory_system_level_headroom`: **FAIL** — no lower confidence bound reached a threshold; all are unknown.
 - `mandatory_platform_feasibility`: **FAIL** — missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit.
 - `workload_value_metadata`: **FAIL** — missing: optimized_software_metadata_is_critical, operation_rate_and_concurrency_measured, cache_lock_allocation_pressure_measured, hardware_working_set_and_queue_derived, full_system_leverage.
@@ -57,7 +57,7 @@ Evidence bindings:
 ### `shared_root_cow`
 
 - `mandatory_real_evidence`: **FAIL** — no target-relevant real hardware raw samples; fewer than two workload classes.
-- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.000212.
+- `mandatory_end_to_end_relevance`: **FAIL** — no measured fraction reached a threshold; target critical path=0.000212 (unbound).
 - `mandatory_system_level_headroom`: **FAIL** — no lower confidence bound reached a threshold; all are unknown.
 - `mandatory_platform_feasibility`: **FAIL** — missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit.
 - `workload_value_state_sharing`: **FAIL** — missing: real_physical_state_measured, representative_fanout, shared_root_lifetime_material, allocation_savings_affect_capacity_or_throughput, software_cow_insufficient.
