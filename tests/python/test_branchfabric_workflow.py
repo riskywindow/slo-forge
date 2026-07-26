@@ -160,8 +160,7 @@ def test_requirements_and_report_compile_only_bound_evidence(
         if item["operation"] == "STATE_COW"
     )
     assert cow_isa["classification"]["availability"] == "UNKNOWN"
-    assert cow_isa["expected_end_to_end_speedup"]["availability"] == "AVAILABLE"
-    assert cow_isa["expected_end_to_end_speedup"]["value"] >= 1.0
+    assert cow_isa["expected_end_to_end_speedup"]["availability"] == "UNKNOWN"
     assert sum(item["included_in_trace_corpus"] for item in requirements["verified_artifacts"]) == 3
 
     report_result = write_characterization_report(

@@ -408,6 +408,22 @@ def _install_wrappers(stack: ExitStack, emitter: _Emitter) -> None:
                 timing_scope="combined_model_and_environment_group_fork",
                 duration_attribution="shared_span_do_not_sum_across_branch_events",
             )
+            emitter.emit(
+                TraceStream.BRANCH_WORKLOAD,
+                "BRANCH_READY",
+                _Timing(
+                    timing.monotonic_start_ns + timing.duration_ns,
+                    0,
+                    0,
+                ),
+                branch_id=member.branch_id,
+                logical_state_id=member.checkpoint.capsule.identity.capsule_id,
+                environment_id=base.capsule_id,
+                policy_epoch=member.policy_epoch_id,
+                wait_latency_ns=timing.duration_ns,
+                readiness_scope="combined_model_and_environment_group_fork",
+                duration_attribution="zero-duration completion marker",
+            )
         return group
 
     stack.enter_context(_patched_attribute(demo, "create_branch_group", create_group))
@@ -485,6 +501,27 @@ def _install_wrappers(stack: ExitStack, emitter: _Emitter) -> None:
         return result
 
     stack.enter_context(_patched_attribute(ReferenceTrainer, "train", trainer_train))
+
+    original_evaluate = demo._evaluate_policy
+
+    def evaluate_policy(**kwargs: Any) -> Any:
+        result, timing = _call_timed(original_evaluate, **kwargs)
+        size, digest = _measured_document(result)
+        emitter.emit(
+            TraceStream.BRANCH_WORKLOAD,
+            "EVALUATE",
+            timing,
+            policy_epoch=str(result["policy_epoch_id"]),
+            logical_bytes=size,
+            metadata_bytes=size,
+            content_digest=digest,
+            evaluation_name=str(kwargs["name"]),
+            evaluation_case_count=len(cast(Sequence[object], result["cases"])),
+            evaluation_hardware_class=str(result["hardware_class"]),
+        )
+        return result
+
+    stack.enter_context(_patched_attribute(demo, "_evaluate_policy", evaluate_policy))
 
     original_transition = LearningTransactionStore.transition
 

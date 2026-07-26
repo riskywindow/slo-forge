@@ -406,9 +406,9 @@ def analyze_run_amdahl(*, run: Path, output: Path, replace: bool) -> dict[str, o
             continue
         is_continuum = "continuum-trace" in trace.parts
         objective = (
-            EndToEndObjective.FULL_STATE_LIFECYCLE
+            EndToEndObjective.CONTINUUM_LIFECYCLE_WINDOW
             if is_continuum
-            else EndToEndObjective.FULL_HELIX_TRANSACTION
+            else EndToEndObjective.HELIX_LIFECYCLE_WINDOW
         )
         total = max(
             event.normalized_timestamp_ns + event.duration_ns for event in state_events
@@ -453,8 +453,8 @@ def analyze_run_amdahl(*, run: Path, output: Path, replace: bool) -> dict[str, o
     payload["interpretation"] = (
         "Each primitive bound is independent and non-additive. Direct operation spans are treated "
         "as removable work; combined fork spans and nested duplicate timing spans are excluded. "
-        "The Continuum harness is labeled as a full state lifecycle because its pre-migration "
-        "snapshot, branch, conversion, and copy phases are not one migration critical path."
+        "These are trace-window bounds, not branch-readiness, migration, capacity-reclamation, "
+        "rollout-throughput, or full-learning-transaction bounds."
     )
     target = _write_json(_output_file(output, "amdahl-analysis.json"), payload, replace=replace)
     return {"output": target.as_posix(), "artifact_sha256": _sha256(target), **payload}
@@ -1143,38 +1143,6 @@ def _compile_requirements_from_run(
         ),
     )
 
-    amdahl_free_speedup: dict[tuple[str, CandidatePrimitive], tuple[float, int, str]] = {}
-    for artifact, events in state_streams:
-        total_duration = max(
-            event.normalized_timestamp_ns + event.duration_ns for event in events
-        ) - min(event.normalized_timestamp_ns for event in events)
-        total_duration = max(1, total_duration)
-        by_primitive: dict[CandidatePrimitive, list[StateOperationEventV1]] = defaultdict(list)
-        for state_event in events:
-            primitive = _AMDAHL_OPERATION_MAP.get(state_event.operation_type)
-            if primitive is None:
-                continue
-            if (
-                state_event.attributes.get("timing_scope")
-                == "combined_model_and_environment_group_fork"
-            ):
-                continue
-            by_primitive[primitive].append(state_event)
-        for primitive, primitive_events in by_primitive.items():
-            removable_duration = min(total_duration, _deduplicated_duration(primitive_events))
-            remaining_duration = total_duration - removable_duration
-            speedup = (
-                float("inf") if remaining_duration == 0 else total_duration / remaining_duration
-            )
-            timing_classes = ",".join(
-                sorted({event.timing_measurement_class.value for event in primitive_events})
-            )
-            amdahl_free_speedup[(artifact.reference, primitive)] = (
-                speedup,
-                len(primitive_events),
-                timing_classes,
-            )
-
     def unresolved_isa(
         operation: StateOperationType,
         artifact: _BoundArtifact,
@@ -1185,32 +1153,15 @@ def _compile_requirements_from_run(
         state_types = tuple(
             sorted({event.state_segment for event in observed}, key=lambda item: item.value)
         ) or (StateSegment.UNKNOWN,)
-        primitive = _AMDAHL_OPERATION_MAP.get(operation)
-        amdahl = (
-            amdahl_free_speedup.get((artifact.reference, primitive))
-            if primitive is not None
-            else None
+        expected_speedup = _unknown_number(
+            artifact,
+            RequirementUnit.RATIO,
+            source=f"isa-{operation.value.lower()}",
+            rationale=(
+                "available trace envelopes are lifecycle windows, not one of the required "
+                "end-to-end objectives; no end-to-end Amdahl bound is claimed"
+            ),
         )
-        if amdahl is not None and math.isfinite(amdahl[0]):
-            assert primitive is not None
-            expected_speedup = _available_number(
-                artifact,
-                amdahl[0],
-                RequirementUnit.RATIO,
-                source=f"amdahl-free-{primitive.value}",
-                sample_count=amdahl[1],
-                rationale=(
-                    "independent, non-additive maximum speedup if the directly recorded primitive "
-                    f"span becomes free; timing classes: {amdahl[2]}"
-                ),
-            )
-        else:
-            expected_speedup = _unknown_number(
-                artifact,
-                RequirementUnit.RATIO,
-                source=f"isa-{operation.value.lower()}",
-                rationale="no finite exclusive end-to-end Amdahl bound is available",
-            )
         return IsaOperationRecommendation(
             operation=operation,
             classification=IsaClassificationRequirement(

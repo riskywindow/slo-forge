@@ -39,7 +39,8 @@ class EndToEndObjective(StrEnum):
     MIGRATION_LATENCY = "migration_latency"
     CAPACITY_RECLAMATION = "capacity_reclamation"
     FULL_HELIX_TRANSACTION = "full_helix_transaction"
-    FULL_STATE_LIFECYCLE = "full_state_lifecycle"
+    HELIX_LIFECYCLE_WINDOW = "helix_lifecycle_window"
+    CONTINUUM_LIFECYCLE_WINDOW = "continuum_lifecycle_window"
 
 
 class CandidatePrimitive(StrEnum):
