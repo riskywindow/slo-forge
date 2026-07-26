@@ -15,6 +15,7 @@ from sloforge.helix.characterization.gates import (
     GateStatus,
     HeadroomEvidence,
     PlatformFeasibility,
+    compile_gate,
     evaluate_gate,
 )
 
@@ -145,3 +146,29 @@ def test_artifact_digest_mismatch_fails_before_gate_evaluation(tmp_path: Path) -
     raw.write_text('{"changed": true}\n', encoding="utf-8")
     with pytest.raises(ValueError, match="evidence digest mismatch"):
         evaluate_gate(_input(_candidate(reference, passing=True)), repository_root=tmp_path)
+
+
+def test_compiler_report_preserves_calculations_and_evidence_bindings(tmp_path: Path) -> None:
+    raw = tmp_path / "raw.json"
+    raw.write_text("{}\n", encoding="utf-8")
+    gate_input = _input(
+        _candidate(_reference(raw, EvidenceClass.CPU_REFERENCE_MODEL_STATE), passing=True)
+    )
+    input_path = tmp_path / "input.json"
+    output_path = tmp_path / "result.json"
+    report_path = tmp_path / "report.md"
+    input_path.write_text(gate_input.model_dump_json(indent=2), encoding="utf-8")
+
+    compile_gate(
+        input_path=input_path,
+        output_path=output_path,
+        report_path=report_path,
+        repository_root=tmp_path,
+        replace=False,
+    )
+
+    report = report_path.read_text(encoding="utf-8")
+    assert "no target-relevant real hardware raw samples" in report
+    assert raw.name in report
+    assert hashlib.sha256(raw.read_bytes()).hexdigest() in report
+    assert "cycle-simulator work is allowed only after a hardware gate pass: **false**" in report

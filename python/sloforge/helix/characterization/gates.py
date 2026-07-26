@@ -513,7 +513,41 @@ def _write_report(path: Path, result: GateResult, *, replace: bool) -> None:
             + " |"
         )
     lines.extend(
-        ("", "## Required action", "", result.required_action.replace("_", " ").title() + ".")
+        (
+            "",
+            "## Candidate calculations and evidence",
+            "",
+        )
+    )
+    for candidate in result.candidates:
+        lines.extend((f"### `{candidate.candidate}`", ""))
+        for check in (
+            candidate.mandatory_real_evidence,
+            candidate.mandatory_end_to_end_relevance,
+            candidate.mandatory_system_level_headroom,
+            candidate.mandatory_platform_feasibility,
+            candidate.workload_value_gate,
+        ):
+            lines.append(f"- `{check.gate}`: **{check.status.value}** — {check.rationale}.")
+        lines.append("")
+        lines.append("Evidence bindings:")
+        lines.append("")
+        for reference in candidate.evidence:
+            raw = "raw samples" if reference.raw_samples else "derived/replay"
+            lines.append(
+                f"- `{reference.path}` — SHA-256 `{reference.sha256}`; "
+                f"{reference.evidence_class.value}; n={reference.sample_count}; {raw}."
+            )
+        lines.append("")
+    lines.extend(
+        (
+            "## Required action",
+            "",
+            result.required_action.replace("_", " ").title() + ".",
+            "",
+            "Functional-model and cycle-simulator work is allowed only after a hardware gate pass: "
+            f"**{str(result.functional_model_or_cycle_simulator_allowed).lower()}**.",
+        )
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
