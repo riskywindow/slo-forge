@@ -2,6 +2,45 @@
 
 Updated: 2026-08-09 (America/Chicago)
 
+## BranchFabric gated execution
+
+Baseline recorded: 2026-08-09 (America/Chicago).
+
+- Baseline commit: `46955be24d49af7090429444a0ef68f9a5695283`.
+- Immutable tag: `sloforge-branchfabric-execution-baseline-46955be`.
+- Machine-readable baseline:
+  `artifacts/branchfabric/execution/baseline/record.json`.
+- Dependency graph: `docs/branchfabric/EXECUTION_DEPENDENCY_GRAPH.md`.
+- Four total agent slots are available, so root plus three subagents is the
+  maximum concurrency. The requested eight-agent floor is unavailable.
+- All BranchFabric GPU, multi-GPU, multi-node, RTL, FPGA-build, accelerator,
+  external-resource, target, and budget variables were absent. Authorized
+  external spend is zero; no paid resource or target-specific RTL is allowed.
+- `make check` passed with 1,248 Python tests and six declared hardware skips,
+  all warning-denied Rust workspace checks, 37 UI tests with one fixture skip,
+  and the production UI build. The historical CPU demonstrations passed.
+- `make branchfabric-trace-check` passed with 137 Python and five Rust tests.
+- All 40 designated characterization artifacts matched their recorded hashes;
+  the aggregate corpus SHA-256 reproduced. Requirements JSON and the generated
+  characterization report then reproduced byte-for-byte from the retained run.
+- The previous result remains visible and binding: zero `REQUIRED` or
+  `HIGH_VALUE` candidates, fanout/concurrency one in state transfers, zero
+  multicast opportunity, and individual lifecycle-window free-operation bounds
+  below approximately 1.02x.
+
+| Gated execution task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Raw artifacts | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline, authorization, manifests, resource/spend/cleanup ledgers | root | complete | `main` | execution baseline and ledgers; this section | prior release | corpus verifier; `make check`; historical demos | `artifacts/branchfabric/execution/` | baseline `46955be`; integration pending |
+| Prior negative reproduction and independent review | `negative_replication` | launching | `branchfabric/negative-replication` isolated worktree | execution replication review/artifacts only | sealed corpus | five central measurements reproduced from raw evidence | new replication artifacts | pending |
+| Real/highest-fidelity model-state fanout vertical | `fanout_vertical` | launching | `branchfabric/fanout-vertical` isolated worktree | new workload module/tests/artifacts only | Helix/Continuum semantics | fanout 8/16/32, two classes, seeds 41/73/113, raw readiness/sharing samples | new vertical artifacts | pending |
+| Causal reclamation and concurrent-operation vertical | `reclamation_vertical` | launching | `branchfabric/reclamation-vertical` isolated worktree | new transaction module/tests/artifacts only | Continuum transaction; Helix scheduler | serving spike through pause/checkpoint/reclaim/preserve/resume, queue percentiles, fault rejection | new reclamation artifacts | pending |
+| Strong software baselines, gate compiler, manifests, final integration | root | in progress | `main` | baseline/gate/report source and shared manifests | three evidence lanes | targeted tests; independently regenerated gate; `make check` | gate and report artifacts | pending |
+
+Hardware implementation tasks are not ready and may not be launched until
+`artifacts/branchfabric/gates/branchfabric_gate_result.json` says `PASS` from
+hardware-backed evidence. CPU-only or synthetic measurements cannot satisfy
+that gate.
+
 ## BranchFabric Characterization / SLOForge Helix Characterization
 
 Baseline recorded: 2026-08-09 (America/Chicago).

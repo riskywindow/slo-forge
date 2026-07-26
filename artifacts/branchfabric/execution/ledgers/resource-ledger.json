@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "authorization_source": "environment audit",
+      "authorized_budget_usd": 0.0,
+      "kind": "local_host",
+      "resource": "Apple M4 Pro Mac16,8",
+      "status": "active_local_only"
+    },
+    {
+      "authorization_source": "all BranchFabric authorization variables absent",
+      "authorized_budget_usd": 0.0,
+      "kind": "external_gpu_fpga_dpu_multi_node",
+      "resource": null,
+      "status": "not_authorized_not_created"
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.resource-ledger/v1"
+}

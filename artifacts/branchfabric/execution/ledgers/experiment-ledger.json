@@ -1,0 +1,35 @@
+{
+  "entries": [
+    {
+      "command": "make check",
+      "evidence_class": "LOCAL_HOST_VALIDATION",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "historical CPU demonstration set",
+      "evidence_class": "LOCAL_HOST_AND_SYNTHETIC_MIXED_AS_LABELED_BY_EACH_DEMO",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "make branchfabric-trace-check",
+      "evidence_class": "LOCAL_HOST_VALIDATION",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "verify CORPUS_MANIFEST hashes and aggregate digest",
+      "evidence_class": "ARTIFACT_INTEGRITY",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "regenerate requirements and report from retained cpu-reference run",
+      "evidence_class": "REPLAYED_FROM_RETAINED_RAW_ARTIFACTS",
+      "result": "PASS_BYTE_FOR_BYTE",
+      "seed": 20260809
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.experiment-ledger/v1"
+}
