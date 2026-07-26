@@ -1,0 +1,255 @@
+{
+  "schema_version": "sloforge.branchfabric.gate-input/v1",
+  "phase": "preliminary",
+  "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+  "generated_at": "2026-08-09T00:00:00Z",
+  "thresholds_changed": false,
+  "candidates": [
+    {
+      "candidate": "reshard_data_path",
+      "kind": "DATA_PATH",
+      "workload_classes": ["coding-agent-reference"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 18,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+          "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": 0.016693614541144108,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": null,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "large_state_operations": false,
+        "repeated_frequency": false,
+        "bandwidth_pressure": false,
+        "temporary_memory_or_interference": false,
+        "full_system_leverage": false
+      }
+    },
+    {
+      "candidate": "one_to_many_multicast",
+      "kind": "FANOUT",
+      "workload_classes": ["coding-agent-reference"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/branch-workload-trace-v1.jsonl",
+          "sha256": "1647d7ecad74914851b864a770633334c9c526066ed19fe0f5c19e8c53446dfc",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 70,
+          "raw_samples": true
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": null,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": null,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "repeated_physical_unicast": false,
+        "destination_count_gt_one": false,
+        "identical_large_source": false,
+        "unicast_material_to_bytes_or_latency": false,
+        "transforms_preserve_benefit": false
+      }
+    },
+    {
+      "candidate": "branch_translation_metadata",
+      "kind": "METADATA",
+      "workload_classes": ["coding-agent-reference"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
+          "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f",
+          "evidence_class": "SYNTHETIC",
+          "sample_count": 840,
+          "raw_samples": true
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": 0.0009481418827970806,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": null,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "optimized_software_metadata_is_critical": false,
+        "operation_rate_and_concurrency_measured": false,
+        "cache_lock_allocation_pressure_measured": false,
+        "hardware_working_set_and_queue_derived": false,
+        "full_system_leverage": false
+      }
+    },
+    {
+      "candidate": "shared_root_cow",
+      "kind": "STATE_SHARING",
+      "workload_classes": ["coding-agent-reference"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
+          "sha256": "bf4565b2db19edfdf1a9cee7a3f41810d23885fccab910b515314ab4aece6a9e",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 2,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 18,
+          "raw_samples": true
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": 0.00021217735841835223,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": null,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "real_physical_state_measured": false,
+        "representative_fanout": false,
+        "shared_root_lifetime_material": false,
+        "allocation_savings_affect_capacity_or_throughput": false,
+        "software_cow_insufficient": false
+      }
+    }
+  ]
+}

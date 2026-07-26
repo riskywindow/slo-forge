@@ -16,7 +16,7 @@ CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE
 	helix-clean-room-test branchfabric-trace-check \
 	branchfabric-characterization-cpu branchfabric-characterization-gpu \
 	branchfabric-characterization branchfabric-requirements branchfabric-report \
-	branchfabric-clean-room-test
+	branchfabric-gate branchfabric-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -248,6 +248,12 @@ branchfabric-report:
 		--run artifacts/branchfabric/characterization/cpu-reference \
 		--output reports/branchfabric-characterization \
 		--replace
+
+branchfabric-gate:
+	uv run --locked python -m sloforge.helix.characterization.gates \
+		--input artifacts/branchfabric/gates/branchfabric_gate_input.json \
+		--output artifacts/branchfabric/gates/branchfabric_gate_result.json \
+		--report BRANCHFABRIC_GATE_REPORT.md --repository-root "$(CURDIR)" --replace
 
 branchfabric-clean-room-test:
 	@set -euo pipefail; \
