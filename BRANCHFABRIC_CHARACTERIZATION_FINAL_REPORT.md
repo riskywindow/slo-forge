@@ -11,6 +11,8 @@ The defensible Phase 1 architecture is measurement plus optimized software. No c
 - Immutable baseline: `d6f77c839334a4644b4e2edf36a7543c68670a2d`, tagged `sloforge-branchfabric-characterization-baseline-d6f77c8` (`artifacts/branchfabric/baseline/record.json`).
 - Final measurement producer commit: `0f6f45629c0b40af46f8641d907b32a5a8c6a562`.
 - Final requirements compiler commit: `d5cb9b2e1833d908ccdde5c2980ad48c00ed6b08`.
+- Final release source commit: `d26d6404f4f922f318cbbf13076efce6bd7ffc63`;
+  evidence publication commit: `52bd90f5b9069dfd8ac0e6358ce597d71a78dab3`.
 - Host: Apple M4 Pro, model Mac16,8, 12 logical CPUs, 25,769,803,776 bytes unified memory, macOS arm64 (`artifacts/branchfabric/manifests/hardware-baseline.json`).
 - The Apple integrated GPU was not a compatible Helix CUDA path. CUDA GPU count was zero; CUDA, NVIDIA driver, PyTorch, vLLM, SGLang, NCCL, NVLink, RDMA, multi-GPU, and multi-node measurements were unavailable (`artifacts/branchfabric/hardware/status-seed-20260809.json`).
 - `SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD` was absent. No paid resource was created and no cloud resource remains active (`artifacts/branchfabric/hardware/status-seed-20260809.json`).
@@ -154,6 +156,21 @@ Independent replication reproduced 75% model sharing, immediate token/action div
 
 The adversarial, systems/hardware, statistical-methodology, and instrumentation-overhead reviews are preserved under `docs/branchfabric/reviews/`. Their high findings drove the matrix execution labels, complete 30-operation ISA disposition, metadata demand/capacity separation, tail withholding, fused-chain preservation, GPU fail-closed behavior, lifecycle-window Amdahl labels, branch-ready/evaluation tracing, and corrected overhead rerun. The remaining review finding is lack of broader real/hardware workloads, not a hidden positive result.
 
+## Release validation
+
+`make branchfabric-trace-check` passed with 137 Python tests and five Rust
+trace-conformance tests. `make helix-check` passed with 188 Python tests and all
+Helix Rust checks. `make check` passed with 1,248 Python tests, six declared
+no-Torch/GPU skips, all warning-denied Rust workspace tests/doc-tests, 37 UI
+tests with one fixture skip, and the production UI build. A literal Git archive
+of release source commit `d26d6404f4f922f318cbbf13076efce6bd7ffc63`
+bootstrapped from scratch, reran the trace checks, completed all six CPU
+characterization stages, regenerated the requirements/report, and built both
+the source distribution and wheel. The GPU target was then exercised with
+explicit local opt-in and recorded `unavailable` because `nvidia-smi` and a
+compatible NVIDIA device were absent; it claimed no GPU result and created no
+paid resource (`artifacts/branchfabric/characterization/gpu-status.json`).
+
 ## Remaining uncertainty
 
 The decisive missing measurements are actual KV/recurrent/sampler sizes and physical pages; real GPU fork/readiness and append; GPU-to-host, host-to-GPU, and peer-GPU transfers; HBM/PCIe/NVLink contention; real NIC/RDMA fanout and retransmission; concurrent outstanding state operations; live filesystem/database/process environment snapshots; pause/resume during a serving spike; a single causal migration/reclamation transaction; and sampled real Helix branch distributions at meaningful context and fanout.
@@ -190,4 +207,5 @@ Core artifacts:
 - Transform: `artifacts/branchfabric/analysis/transform/cpu-reference-v3.json`
 - Transport/multicast: `artifacts/branchfabric/analysis/transport/cpu-reference-v3.json`
 - Hardware status: `artifacts/branchfabric/hardware/status-seed-20260809.json`
+- Final GPU capability gate: `artifacts/branchfabric/characterization/gpu-status.json`
 - Review set: `docs/branchfabric/reviews/`

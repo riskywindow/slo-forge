@@ -109,6 +109,9 @@ This closure supersedes the launch-state and publication-state tables above.
   `0f6f45629c0b40af46f8641d907b32a5a8c6a562`.
 - Final requirements compiler commit:
   `d5cb9b2e1833d908ccdde5c2980ad48c00ed6b08`.
+- Final release source commit:
+  `d26d6404f4f922f318cbbf13076efce6bd7ffc63`; evidence publication commit:
+  `52bd90f5b9069dfd8ac0e6358ce597d71a78dab3`.
 - The restartable CPU run `a53a739f0488359750d4f70f48f8753a` completed
   matrix validation, the Helix vertical trace, Continuum state lifecycle,
   environment study, metadata study, and corrected instrumentation-overhead
@@ -133,6 +136,13 @@ This closure supersedes the launch-state and publication-state tables above.
   `docs/branchfabric/reviews/`. All high-severity and reasonable
   medium-severity findings inside the exercised boundary were fixed; lack of
   broader real/hardware evidence remains an explicit limitation.
+- Release validation passed `make branchfabric-trace-check` (137 Python and five
+  Rust trace tests), `make helix-check` (188 Python plus Rust), and `make check`
+  (1,248 Python tests, six declared hardware skips, all Rust workspace checks,
+  and the UI tests/build). A literal archive of `d26d640` bootstrapped, completed
+  all six CPU stages, regenerated requirements/report, and built the sdist and
+  wheel. The explicitly opted-in GPU gate recorded `unavailable`, zero claimed
+  GPU results, and zero paid resources.
 
 | Closed characterization workstream | Final owner | Status | Acceptance evidence | Artifacts | Commits |
 |---|---|---|---|---|---|
@@ -143,7 +153,7 @@ This closure supersedes the launch-state and publication-state tables above.
 | Matrix, orchestration, restart/resume and active prioritizer | workflow lane + root | complete and exercised | 855 cells evaluated analytically; six-stage run complete | run manifest, matrix study, ranked experiment queue | `257b184`, `1e9758a` |
 | COW, divergence, sharing, Amdahl, roofline, placement and requirements | analysis/requirements lanes + root | complete within available evidence; unsupported values explicit | focused analysis tests; requirement-reference and classification audits | final analyses and requirements JSON | `ab0beba`, `d5cb9b2` |
 | Independent replication and multidisciplinary review | replication/review lanes | complete | five-measurement replication; four independent final reviews | `artifacts/branchfabric/replication/`; `docs/branchfabric/reviews/` | `b00db0a`, `51a76ad`, `28d9705`, `6688319`, `f61a35f` |
-| Reports, design handoff, negative findings and release gates | root | complete pending the release commit recorded in Git history | `make branchfabric-clean-room-test`; `make helix-check`; `make check` | final report, design brief, what-not-to-build, generated report, corpus manifest | final release commit |
+| Reports, design handoff, negative findings and release gates | root | complete and exercised | clean archive of `d26d640`; `make branchfabric-clean-room-test`; `make helix-check`; `make check` | final report, design brief, what-not-to-build, generated report, corpus manifest | `52bd90f`, `d26d640` |
 
 ## SLOForge Helix extension
 
