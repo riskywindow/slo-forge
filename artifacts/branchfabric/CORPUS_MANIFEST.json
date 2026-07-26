@@ -1,0 +1,258 @@
+{
+  "analysis_compiler_commit": "d5cb9b2e1833d908ccdde5c2980ad48c00ed6b08",
+  "artifacts": [
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/active-experiment-queue.json",
+      "sha256": "f018475160718454d38a2aecf3ad7ab88bc74184193370afee306749b89cfa5c",
+      "size_bytes": 9347
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+      "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+      "size_bytes": 15002
+    },
+    {
+      "evidence_scope": "ANALYTICAL_OR_SYNTHETIC",
+      "path": "artifacts/branchfabric/analysis/cow/vertical-seed-41.json",
+      "sha256": "cac4f3c83b53612e478730b40f15f715a66bb0ed086a10b85fdcf82eac824d8e",
+      "size_bytes": 520385
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/hardware-placement.json",
+      "sha256": "8e5e0401997a3fa9b1c74d82aaded9ca79e2c4a349c68712c7c6eb68d344fd3a",
+      "size_bytes": 14633
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/roofline/cpu-reference-unknown.json",
+      "sha256": "6cf3c652ce584a4ee82d1582b4a6510075ef05a3c0c0ee7042e07e3d610584cd",
+      "size_bytes": 40739
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/transform/cpu-reference-v3.json",
+      "sha256": "9c87cd84d449f726e50a219337fc414dc5515afe1f24366be06552bbbf52c77f",
+      "size_bytes": 5073
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/transport/cpu-reference-v3.json",
+      "sha256": "7760078aa431e8822225e6805e58be6862b2a47f4c1ee0f60e71983b345e3e80",
+      "size_bytes": 12383
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/analysis/workload/cpu-reference-final.json",
+      "sha256": "aed70e3651dad3dafbf1f4427c422ebef2e759a93711853cd8af02f1761c7c4b",
+      "size_bytes": 24423
+    },
+    {
+      "evidence_scope": "HOST_CAPABILITY_EVIDENCE",
+      "path": "artifacts/branchfabric/baseline/record.json",
+      "sha256": "dca92b9602ceaff2e0876d81ecdcc56b17c20bd51ef5022008d538e20d98587e",
+      "size_bytes": 3197
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/continuum-lifecycle.perfetto.json",
+      "sha256": "dbbec42153ac2ecde55ced87faecb1cd09cb52be6ed492a5bd85fa7ef74f7280",
+      "size_bytes": 11771
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/continuum-trace-run.json",
+      "sha256": "e5df2ab61ae159a2ded62027c5f401bada356e4d1e5c81e71336a8621687c860",
+      "size_bytes": 2959
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/raw-continuum-observations.json",
+      "sha256": "d9d38bc61f4c5e73486dccfc0bf9b24b130f61049748f6cb3e0eecb18d160c61",
+      "size_bytes": 23819
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/resource-trace-v1.json",
+      "sha256": "656226121a134c2bb6bd665de0bc2ff5f696e490cefcd6fad7aff55f432849b6",
+      "size_bytes": 12728
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
+      "sha256": "bf4565b2db19edfdf1a9cee7a3f41810d23885fccab910b515314ab4aece6a9e",
+      "size_bytes": 687
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+      "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+      "size_bytes": 33195
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/trace-manifest-v1.json",
+      "sha256": "a4ed6a6a970c8b39baca2816fbd937ccb71996575664df83f2a361f1bfc95120",
+      "size_bytes": 4480
+    },
+    {
+      "evidence_scope": "ANALYTICAL_OR_SYNTHETIC",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/matrix_validate/attempt-000/matrix-study.json",
+      "sha256": "2758138c6d74280f33215f300ba8e1a681c7c152f14d60bd4104cd45227284ba",
+      "size_bytes": 1585071
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/branch-workload-trace-v1.jsonl",
+      "sha256": "1647d7ecad74914851b864a770633334c9c526066ed19fe0f5c19e8c53446dfc",
+      "size_bytes": 149333
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/alternative-tool.json",
+      "sha256": "fdea44e301c279ad372fb2086c2221b5b4c0de429bf1faaf7fd3c00abd892cf8",
+      "size_bytes": 3449
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/different-rng.json",
+      "sha256": "5d8d2e36f651792240340fd33dbac480c71e442629af0b353585f5b51463c803",
+      "size_bytes": 3445
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/forced-alternative.json",
+      "sha256": "09441a4df75294e54d90ef7e4825f30e0536545ca4a003d2b172d1146ea983e8",
+      "size_bytes": 3466
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/verifier-assisted.json",
+      "sha256": "1470269a0f985ede93fc0f7bd9565abe225c70feb68b13a742109548506a2dc8",
+      "size_bytes": 3466
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-lifecycle.perfetto.json",
+      "sha256": "b52f22211c0a83868e4185ec14a797ee72fca3382fe9da31249c8e9a05d9210f",
+      "size_bytes": 55667
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/raw-lifecycle-events.json",
+      "sha256": "c98aee00cb9f8304ae2d4955c3c9ddb2ff702fc58f77946eb3b2107290afecc5",
+      "size_bytes": 136520
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/resource-trace-v1.json",
+      "sha256": "9155f0e896b658a2850a54dd1d8e1e0c6f0dba084a95e030ed6e2d6ade795c06",
+      "size_bytes": 123650
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/sharing-analysis.json",
+      "sha256": "e63b8e1f6ef2a57999fffba6a5437b5131ae9008bf738cd50f119199ed34dd71",
+      "size_bytes": 1318
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl",
+      "sha256": "fb2be4a476d0508e737f2ed568d4e4cd06ed64d5289d4ba2f16a18f86598f4eb",
+      "size_bytes": 31066
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/trace-manifest-v1.json",
+      "sha256": "4d4737dc6354473b6fe2f8948c4ab4d6c237f2a48b94f29f863ea0c2891c8d95",
+      "size_bytes": 5266
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/vertical-run.json",
+      "sha256": "e4ca5d233e3aff6604eee043d06d4ab731f5ab8ed5c23b220861e105264ba5fd",
+      "size_bytes": 3567
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/characterization/cpu-reference/run-manifest.json",
+      "sha256": "8985e4f61a072d8d4d31275b9f52e831ff69b22dbd3a02aa5248b6da2bb88a7e",
+      "size_bytes": 2654
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/environment/seed-20260809/environment-study.json",
+      "sha256": "a8e67a84e2ab57d18219dcf93c01df9d66f92fc3a0a27072940af4f77c695cb6",
+      "size_bytes": 2982132
+    },
+    {
+      "evidence_scope": "HOST_CAPABILITY_EVIDENCE",
+      "path": "artifacts/branchfabric/hardware/status-seed-20260809.json",
+      "sha256": "6304be53d6d923b31e633840fe43039a80592c564d13eac5537e24a4731c97b3",
+      "size_bytes": 10002
+    },
+    {
+      "evidence_scope": "HOST_CAPABILITY_EVIDENCE",
+      "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+      "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+      "size_bytes": 1373
+    },
+    {
+      "evidence_scope": "HOST_CAPABILITY_EVIDENCE",
+      "path": "artifacts/branchfabric/manifests/software-baseline.json",
+      "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+      "size_bytes": 1051
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
+      "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f",
+      "size_bytes": 1517989
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/instrumentation-overhead.json",
+      "sha256": "137b95696861539271d3a26299c82f99a4648a552dce04897808463744da46f2",
+      "size_bytes": 100449
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/overhead-raw-samples.json",
+      "sha256": "492e90f1ea0ca35f4db4e664efacd06f9c08e20dad7f6967982a2eedd876c2df",
+      "size_bytes": 34839
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/replication/analysis/comparison.json",
+      "sha256": "b720161ea4a7f0e14908910ddeba16641a90dffe8431a1f7d45e3b793ae05a3f",
+      "size_bytes": 9095
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/requirements/branchfabric_requirements.json",
+      "sha256": "e77e68915d8e3c214e735a05079d34357b2508fe0a114e85e7852e6ec53baba2",
+      "size_bytes": 417619
+    },
+    {
+      "evidence_scope": "MIXED_SEE_ARTIFACT",
+      "path": "artifacts/branchfabric/software-baselines/seed-20260809/software-baselines.json",
+      "sha256": "017b7385ba31cf913582f85f79b20e71976c3e193ab1524c844c4b434621bb9b",
+      "size_bytes": 686684
+    }
+  ],
+  "baseline_commit": "d6f77c839334a4644b4e2edf36a7543c68670a2d",
+  "corpus_hash_algorithm": "sha256(sorted path NUL sha256 NUL size newline)",
+  "corpus_sha256": "9e000d81afc102c5a05666d6fb48859cb4e136a72ad6fc59f5ce086bfaa0b5d3",
+  "designated_artifact_count": 40,
+  "designated_bytes": 8603992,
+  "limitations": [
+    "Designated corpus files are a curated immutable evidence index, not every generated workspace artifact.",
+    "Workload semantics are synthetic; host timings are real where each artifact says HARDWARE_BACKED_REAL.",
+    "No CUDA GPU, multi-GPU, multi-node, physical NIC, HBM, PCIe-GPU, NVLink, RDMA, CXL, or FPGA measurement is present.",
+    "The 855 matrix cells are analytical controlled evaluations with distribution_claim=false and hardware_executed_case_count=0."
+  ],
+  "measurement_source_commit": "0f6f45629c0b40af46f8641d907b32a5a8c6a562",
+  "schema_version": "sloforge.branchfabric.characterization-corpus/v1"
+}

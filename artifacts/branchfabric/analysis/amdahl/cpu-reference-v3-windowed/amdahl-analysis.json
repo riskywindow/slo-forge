@@ -1,0 +1,423 @@
+{
+  "interpretation": "Each primitive bound is independent and non-additive. Direct operation spans are treated as removable work; combined fork spans and nested duplicate timing spans are excluded. These are trace-window bounds, not branch-readiness, migration, capacity-reclamation, rollout-throughput, or full-learning-transaction bounds.",
+  "results": [
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 98923521.5,
+          "projected_speedup": 1.0084170628721503,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 98423934.2,
+          "projected_speedup": 1.013535658890579,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 98257405.1,
+          "projected_speedup": 1.015253424395593,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 98090876.0,
+          "projected_speedup": 1.0169770224093013,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.016693614541144108,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 1,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 1,
+      "primitive": "reshard",
+      "primitive_exclusive_duration_ns": 1665291,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.016693614541144108,
+      "sample_fraction_p95": 0.016693614541144108,
+      "sample_fraction_p99": 0.016693614541144108,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 99453417.0,
+          "projected_speedup": 1.0030441387448759,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 99271767.0,
+          "projected_speedup": 1.0048795343795986,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 99211217.0,
+          "projected_speedup": 1.0054928264815055,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 99150667.0,
+          "projected_speedup": 1.0061068676421512,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.0060698001758628115,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 2,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 1,
+      "primitive": "delta_extraction",
+      "primitive_exclusive_duration_ns": 605500,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.0060698001758628115,
+      "sample_fraction_p95": 0.0060698001758628115,
+      "sample_fraction_p99": 0.0060698001758628115,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 99708875.5,
+          "projected_speedup": 1.0004742957912507,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 99680500.6,
+          "projected_speedup": 1.0007590892857134,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 99671042.3,
+          "projected_speedup": 1.0008540564845683,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 99661584.0,
+          "projected_speedup": 1.00094904170899,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.0009481418827970806,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 3,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 1,
+      "primitive": "transaction_commit",
+      "primitive_exclusive_duration_ns": 94583,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.0009481418827970806,
+      "sample_fraction_p95": 0.0009481418827970806,
+      "sample_fraction_p99": 0.0009481418827970806,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 99745584.0,
+          "projected_speedup": 1.0001060999352112,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 99739234.2,
+          "projected_speedup": 1.0001697707039343,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 99737117.6,
+          "projected_speedup": 1.0001909960951187,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 99735001.0,
+          "projected_speedup": 1.0002122223872039,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.00021217735841835223,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 4,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 1,
+      "primitive": "cow_handling",
+      "primitive_exclusive_duration_ns": 21166,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.00021217735841835223,
+      "sample_fraction_p95": 0.00021217735841835223,
+      "sample_fraction_p99": 0.00021217735841835223,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 99746417.0,
+          "projected_speedup": 1.0000977478719861,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 99740567.0,
+          "projected_speedup": 1.0001564057681767,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 99738617.0,
+          "projected_speedup": 1.000175959929342,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 99736667.0,
+          "projected_speedup": 1.0001955148551334,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.0001954766365471921,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 5,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 1,
+      "primitive": "reclamation",
+      "primitive_exclusive_duration_ns": 19500,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.0001954766365471921,
+      "sample_fraction_p95": 0.0001954766365471921,
+      "sample_fraction_p99": 0.0001954766365471921,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 99290312.5,
+          "projected_speedup": 1.0046918424191686,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 99010799.8,
+          "projected_speedup": 1.0075281403796923,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 98917628.9,
+          "projected_speedup": 1.0084771350599973,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 98824458.0,
+          "projected_speedup": 1.0094279191493263,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.009339863669781939,
+      "experiment_ids": [
+        "continuum-trace"
+      ],
+      "leverage_rank": 1,
+      "objective": "continuum_lifecycle_window",
+      "operation_count": 4,
+      "primitive": "transfer",
+      "primitive_exclusive_duration_ns": 931709,
+      "provenance": "SYNTHETIC",
+      "sample_count": 1,
+      "sample_fraction_p50": 0.009339863669781939,
+      "sample_fraction_p95": 0.009339863669781939,
+      "sample_fraction_p99": 0.009339863669781939,
+      "timing_measurement_class": "SIMULATED_HARDWARE",
+      "total_duration_ns": 99756167
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/000-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/004-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 1358992208.0,
+          "projected_speedup": 1.0019234841705582,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 1357423808.0,
+          "projected_speedup": 1.003081130576428,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 1356901008.0,
+          "projected_speedup": 1.0034676074173865,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 1356378208.0,
+          "projected_speedup": 1.0038543821842352,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.0038395829640635714,
+      "experiment_ids": [
+        "000-full-s20260809-r0",
+        "004-full-s20260809-r0",
+        "vertical-trace"
+      ],
+      "leverage_rank": 1,
+      "objective": "helix_lifecycle_window",
+      "operation_count": 12,
+      "primitive": "cow_handling",
+      "primitive_exclusive_duration_ns": 5228000,
+      "provenance": "SYNTHETIC",
+      "sample_count": 3,
+      "sample_fraction_p50": 0.003817132805685139,
+      "sample_fraction_p95": 0.003971771811094812,
+      "sample_fraction_p99": 0.0039855175004645605,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 1361606208
+    },
+    {
+      "artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/000-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/004-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl"
+      ],
+      "bounds": [
+        {
+          "primitive_acceleration": 2.0,
+          "projected_duration_ns": 1359954772.0,
+          "projected_speedup": 1.001214331560138,
+          "scenario": "2x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 5.0,
+          "projected_duration_ns": 1358963910.4,
+          "projected_speedup": 1.0019443471454825,
+          "scenario": "5x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": 10.0,
+          "projected_duration_ns": 1358633623.2,
+          "projected_speedup": 1.0021879222987273,
+          "scenario": "10x",
+          "unbounded": false
+        },
+        {
+          "primitive_acceleration": null,
+          "projected_duration_ns": 1358303336.0,
+          "projected_speedup": 1.0024316159082156,
+          "scenario": "free",
+          "unbounded": false
+        }
+      ],
+      "critical_path_fraction": 0.002425717494966063,
+      "experiment_ids": [
+        "000-full-s20260809-r0",
+        "004-full-s20260809-r0",
+        "vertical-trace"
+      ],
+      "leverage_rank": 2,
+      "objective": "helix_lifecycle_window",
+      "operation_count": 12,
+      "primitive": "reclamation",
+      "primitive_exclusive_duration_ns": 3302872,
+      "provenance": "SYNTHETIC",
+      "sample_count": 3,
+      "sample_fraction_p50": 0.0024183216008546483,
+      "sample_fraction_p95": 0.002472324839914374,
+      "sample_fraction_p99": 0.0024771251278307934,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL",
+      "total_duration_ns": 1361606208
+    }
+  ],
+  "sample_count": 12,
+  "schema_version": "sloforge.branchfabric.amdahl-report/v1"
+}

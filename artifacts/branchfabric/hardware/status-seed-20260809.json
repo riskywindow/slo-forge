@@ -1,0 +1,260 @@
+{
+  "schema_version": "sloforge.branchfabric.hardware-studies/v1",
+  "seed": 20260809,
+  "capabilities": {
+    "schema_version": "sloforge.branchfabric.hardware-capabilities/v1",
+    "hardware_manifest": {
+      "reference": "artifacts/branchfabric/manifests/hardware-baseline.json",
+      "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+      "size_bytes": 1373,
+      "schema_version": "sloforge.branchfabric.hardware-manifest/v1",
+      "measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    "software_manifest": {
+      "reference": "artifacts/branchfabric/manifests/software-baseline.json",
+      "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+      "size_bytes": 1051,
+      "schema_version": "sloforge.branchfabric.software-manifest/v1",
+      "measurement_class": "UNDECLARED"
+    },
+    "cuda_gpu_available": false,
+    "helix_cuda_compatible": false,
+    "gpu_count": 0,
+    "gpu_models": [],
+    "cuda_toolkit_available": false,
+    "nvidia_smi_available": false,
+    "nvlink_available": false,
+    "multi_gpu_available": false,
+    "infiniband_available": false,
+    "rdma_available": false,
+    "multi_node_available": false,
+    "pytorch_available": false,
+    "vllm_available": false,
+    "sglang_available": false,
+    "nccl_available": false,
+    "profiler_tools": {
+      "xctrace": "/usr/bin/xctrace"
+    },
+    "budget": {
+      "environment_variable": "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD",
+      "present": false,
+      "ceiling_usd": null,
+      "paid_resource_provisioning_authorized": false,
+      "provisioning_performed": false,
+      "reason": "GPU budget is absent. Existing accessible hardware may be measured; paid resource provisioning remains unauthorized and is never performed here."
+    },
+    "detection_policy": [
+      "manifests are consumed as evidence; this module performs no live hardware probe",
+      "CUDA compatibility requires real-manifest provenance, GPU availability, CUDA toolkit, nvidia-smi, and explicit Helix support",
+      "multi-GPU requires at least two declared GPUs plus Fabric multi_gpu capability",
+      "multi-node requires explicit Fabric multi_node capability; it is not inferred from a NIC",
+      "package and profiler availability requires a non-null manifest version or path"
+    ]
+  },
+  "gpu": {
+    "schema_version": "sloforge.branchfabric.hardware-study-report/v1",
+    "study": "gpu",
+    "status": "UNAVAILABLE",
+    "seed": 20260809,
+    "reason": "Preserved manifests do not establish the capabilities required for gpu; no hardware metrics were generated or inferred.",
+    "capabilities_satisfied": false,
+    "required_operations": [
+      "continuum_migration",
+      "device_to_host",
+      "gpu_interference",
+      "host_to_device",
+      "kv_size",
+      "state_convert",
+      "state_fork"
+    ],
+    "exercised_artifact": null,
+    "metrics": [],
+    "future_commands": [
+      {
+        "command_id": "characterize-gpu",
+        "study": "gpu",
+        "purpose": "Execute the existing bounded characterization matrix; the matrix/runtime must emit exercised hardware evidence for the covered operation set.",
+        "covered_operations": [
+          "continuum_migration",
+          "device_to_host",
+          "gpu_interference",
+          "host_to_device",
+          "kv_size",
+          "state_convert",
+          "state_fork"
+        ],
+        "argv": [
+          "uv",
+          "run",
+          "--locked",
+          "sloforge",
+          "helix",
+          "characterize",
+          "run",
+          "--matrix",
+          "benchmarks/branchfabric/characterization.yaml",
+          "--output",
+          "artifacts/branchfabric/characterization/hardware/gpu",
+          "--hardware",
+          "gpu",
+          "--seed",
+          "20260809",
+          "--max-experiments",
+          "100000",
+          "--timeout-seconds",
+          "3600"
+        ],
+        "shell_rendering": "uv run --locked sloforge helix characterize run --matrix benchmarks/branchfabric/characterization.yaml --output artifacts/branchfabric/characterization/hardware/gpu --hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 3600",
+        "environment": {
+          "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU": "1"
+        },
+        "timeout_seconds": 3600,
+        "expected_output": "artifacts/branchfabric/characterization/hardware/gpu",
+        "required_capabilities": [
+          "compatible CUDA GPU"
+        ],
+        "required_files": [],
+        "currently_runnable": false,
+        "provisions_resources": false,
+        "overwrites_existing_output": false
+      }
+    ],
+    "synthetic_substitution_used": false,
+    "hardware_measurement_missing": true,
+    "limitations": [
+      "No synthetic transfer, kernel, topology, bandwidth, or latency value substitutes for missing hardware evidence.",
+      "Future commands do not provision resources and do not overwrite an existing output directory."
+    ]
+  },
+  "multi_gpu": {
+    "schema_version": "sloforge.branchfabric.hardware-study-report/v1",
+    "study": "multi_gpu",
+    "status": "UNAVAILABLE",
+    "seed": 20260809,
+    "reason": "Preserved manifests do not establish the capabilities required for multi_gpu; no hardware metrics were generated or inferred.",
+    "capabilities_satisfied": false,
+    "required_operations": [
+      "gpu_peer_to_peer",
+      "nccl_collective"
+    ],
+    "exercised_artifact": null,
+    "metrics": [],
+    "future_commands": [
+      {
+        "command_id": "characterize-multi_gpu",
+        "study": "multi_gpu",
+        "purpose": "Execute the existing bounded characterization matrix; the matrix/runtime must emit exercised hardware evidence for the covered operation set.",
+        "covered_operations": [
+          "gpu_peer_to_peer",
+          "nccl_collective"
+        ],
+        "argv": [
+          "uv",
+          "run",
+          "--locked",
+          "sloforge",
+          "helix",
+          "characterize",
+          "run",
+          "--matrix",
+          "benchmarks/branchfabric/characterization.yaml",
+          "--output",
+          "artifacts/branchfabric/characterization/hardware/multi_gpu",
+          "--hardware",
+          "gpu",
+          "--seed",
+          "20260809",
+          "--max-experiments",
+          "100000",
+          "--timeout-seconds",
+          "3600"
+        ],
+        "shell_rendering": "uv run --locked sloforge helix characterize run --matrix benchmarks/branchfabric/characterization.yaml --output artifacts/branchfabric/characterization/hardware/multi_gpu --hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 3600",
+        "environment": {
+          "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU": "1"
+        },
+        "timeout_seconds": 3600,
+        "expected_output": "artifacts/branchfabric/characterization/hardware/multi_gpu",
+        "required_capabilities": [
+          "at least two compatible CUDA GPUs",
+          "NCCL"
+        ],
+        "required_files": [],
+        "currently_runnable": false,
+        "provisions_resources": false,
+        "overwrites_existing_output": false
+      }
+    ],
+    "synthetic_substitution_used": false,
+    "hardware_measurement_missing": true,
+    "limitations": [
+      "No synthetic transfer, kernel, topology, bandwidth, or latency value substitutes for missing hardware evidence.",
+      "Future commands do not provision resources and do not overwrite an existing output directory."
+    ]
+  },
+  "multi_node": {
+    "schema_version": "sloforge.branchfabric.hardware-study-report/v1",
+    "study": "multi_node",
+    "status": "UNAVAILABLE",
+    "seed": 20260809,
+    "reason": "Preserved manifests do not establish the capabilities required for multi_node; no hardware metrics were generated or inferred.",
+    "capabilities_satisfied": false,
+    "required_operations": [
+      "continuum_migration"
+    ],
+    "exercised_artifact": null,
+    "metrics": [],
+    "future_commands": [
+      {
+        "command_id": "characterize-multi_node",
+        "study": "multi_node",
+        "purpose": "Execute the existing bounded characterization matrix; the matrix/runtime must emit exercised hardware evidence for the covered operation set.",
+        "covered_operations": [
+          "continuum_migration"
+        ],
+        "argv": [
+          "uv",
+          "run",
+          "--locked",
+          "sloforge",
+          "helix",
+          "characterize",
+          "run",
+          "--matrix",
+          "benchmarks/branchfabric/characterization.yaml",
+          "--output",
+          "artifacts/branchfabric/characterization/hardware/multi_node",
+          "--hardware",
+          "gpu",
+          "--seed",
+          "20260809",
+          "--max-experiments",
+          "100000",
+          "--timeout-seconds",
+          "3600"
+        ],
+        "shell_rendering": "uv run --locked sloforge helix characterize run --matrix benchmarks/branchfabric/characterization.yaml --output artifacts/branchfabric/characterization/hardware/multi_node --hardware gpu --seed 20260809 --max-experiments 100000 --timeout-seconds 3600",
+        "environment": {
+          "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU": "1"
+        },
+        "timeout_seconds": 3600,
+        "expected_output": "artifacts/branchfabric/characterization/hardware/multi_node",
+        "required_capabilities": [
+          "multi-node allocation",
+          "network fabric"
+        ],
+        "required_files": [],
+        "currently_runnable": false,
+        "provisions_resources": false,
+        "overwrites_existing_output": false
+      }
+    ],
+    "synthetic_substitution_used": false,
+    "hardware_measurement_missing": true,
+    "limitations": [
+      "No synthetic transfer, kernel, topology, bandwidth, or latency value substitutes for missing hardware evidence.",
+      "Future commands do not provision resources and do not overwrite an existing output directory."
+    ]
+  },
+  "provisioning_performed": false
+}

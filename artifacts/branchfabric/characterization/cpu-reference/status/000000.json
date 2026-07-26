@@ -1,0 +1,21 @@
+{
+  "checkpoint_reference": null,
+  "checkpoint_sha256": null,
+  "immutable": true,
+  "observed_at": "2026-08-09T23:27:26.922960+00:00",
+  "previous_status_sha256": null,
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "run_manifest_sha256": "8985e4f61a072d8d4d31275b9f52e831ff69b22dbd3a02aa5248b6da2bb88a7e",
+  "run_state": "ACTIVE",
+  "running_stage": null,
+  "schema_version": "sloforge.branchfabric.run-status/v1",
+  "sequence": 0,
+  "stages": {
+    "continuum_state": "PENDING",
+    "environment_state": "PENDING",
+    "instrumentation_overhead": "PENDING",
+    "matrix_validate": "PENDING",
+    "metadata": "PENDING",
+    "vertical_trace": "PENDING"
+  }
+}

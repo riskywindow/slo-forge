@@ -1,0 +1,134 @@
+{
+  "schema_version": "sloforge.branchfabric.transform-analysis/v1",
+  "evidence": {
+    "schema_version": "sloforge.branchfabric.trace-analysis-evidence/v1",
+    "source_experiment": "independent-replication-continuum-seed-149",
+    "artifact_reference": "artifacts/branchfabric/replication/continuum-seed-149/state-operation-trace-v1.jsonl",
+    "artifact_sha256": "eafdd1e27287ad23083787a4ae6c24682dc93e6477e5934204be3ff48bc2e5a6",
+    "seed": 149,
+    "repetition": 0,
+    "input_event_count": 18,
+    "selected_event_count": 5,
+    "trace_ids": [
+      "f139d3dbb5aa3ebb5817a8217553b14bcd097d2dccf85c5f49e8e8bb266bdb67"
+    ],
+    "workload_provenance": [
+      "SYNTHETIC"
+    ],
+    "timing_measurement_classes": [
+      "HARDWARE_BACKED_REAL",
+      "SIMULATED_HARDWARE"
+    ],
+    "raw_artifact_immutable": true
+  },
+  "transform_event_count": 1,
+  "operation_aggregates": [
+    {
+      "operation_type": "STATE_RESHARD",
+      "state_segment": "model",
+      "source_physical_representation": "host_dram/paged_token_major_separate_kv/tp4",
+      "destination_physical_representation": "host_dram/paged_head_major_packed_kv/tp2",
+      "event_count": 1,
+      "processed_bytes": 3440,
+      "operation_latency": {
+        "observation_count": 1,
+        "minimum": 2122667,
+        "p50": 2122667,
+        "p95": 2122667,
+        "p99": 2122667,
+        "maximum": 2122667,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_latency_total_ns": {
+        "observation_count": 1,
+        "total": 2122667
+      },
+      "cpu_time_ns": {
+        "observation_count": 1,
+        "total": 1354000
+      },
+      "gpu_time_ns": {
+        "observation_count": 0,
+        "total": null
+      },
+      "temporary_bytes": null,
+      "memory_read_bytes": null,
+      "memory_write_bytes": null,
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    }
+  ],
+  "sequence_aggregates": [
+    {
+      "sequence_id": "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef",
+      "operations": [
+        "STATE_RESHARD"
+      ],
+      "stages": [
+        {
+          "operation_type": "STATE_RESHARD",
+          "source_physical_representation": "host_dram/paged_token_major_separate_kv/tp4",
+          "destination_physical_representation": "host_dram/paged_head_major_packed_kv/tp2"
+        }
+      ],
+      "occurrence_count": 1,
+      "total_event_count": 1,
+      "processed_bytes": 3440,
+      "operation_latency_ns": {
+        "observation_count": 1,
+        "total": 2122667
+      },
+      "temporary_bytes": null,
+      "fusion_upper_bound": {
+        "analytical": true,
+        "occurrence_count": 1,
+        "transform_stage_count_per_occurrence": 1,
+        "transform_stage_observation_count": 1,
+        "observed_materialized_stage_bytes": 3440,
+        "ideal_single_stream_bytes": 3440,
+        "maximum_intermediate_bytes_avoided": 0,
+        "observed_latency_count": 1,
+        "maximum_latency_reduction_ns": 2122667,
+        "temporary_capacity_bytes": null,
+        "assumptions": [
+          "the byte bound is an analytical single-stream lower bound, not measured fusion",
+          "it assumes compatible layouts and no required intermediate materialization",
+          "the latency bound makes every observed transform-stage latency free",
+          "no end-to-end speedup is implied and transfer or synchronization time is unchanged",
+          "StateOperationTrace v1 has no temporary-allocation or memory-traffic counter"
+        ]
+      },
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    }
+  ],
+  "sequence_ranking": {
+    "by_frequency": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ],
+    "by_processed_bytes": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ],
+    "by_observed_latency": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ]
+  },
+  "unresolved_dependency_count": 0,
+  "ambiguous_pipeline_predecessor_count": 0,
+  "noncausal_dependency_count": 0,
+  "dependency_cycle_count": 0,
+  "chain_extraction_method": "explicit <trace_id>:<event_sequence> or sealed-event-hash dependencies",
+  "unknown_counters": [
+    "temporary allocation bytes are not represented by StateOperationTrace v1",
+    "memory read and write counters are not represented by StateOperationTrace v1",
+    "GPU time for transform events recorded with zero/N/A"
+  ]
+}

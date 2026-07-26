@@ -1,0 +1,21 @@
+{
+  "checkpoint_reference": "checkpoints/000004-metadata-attempt-000.json",
+  "checkpoint_sha256": "5685da6ffc49d5dc05fe9ebb6da5e217beb4e108f44b75ffc7c657776697bc50",
+  "immutable": true,
+  "observed_at": "2026-08-09T23:27:40.407196+00:00",
+  "previous_status_sha256": "8e38c39318080b547ebccab52c972f8400a629d349d80aab698b94ce8e3fe797",
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "run_manifest_sha256": "8985e4f61a072d8d4d31275b9f52e831ff69b22dbd3a02aa5248b6da2bb88a7e",
+  "run_state": "ACTIVE",
+  "running_stage": null,
+  "schema_version": "sloforge.branchfabric.run-status/v1",
+  "sequence": 10,
+  "stages": {
+    "continuum_state": "SUCCEEDED",
+    "environment_state": "SUCCEEDED",
+    "instrumentation_overhead": "PENDING",
+    "matrix_validate": "SUCCEEDED",
+    "metadata": "SUCCEEDED",
+    "vertical_trace": "SUCCEEDED"
+  }
+}

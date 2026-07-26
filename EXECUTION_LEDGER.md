@@ -35,7 +35,7 @@ Baseline recorded: 2026-08-09 (America/Chicago).
 The launch-state graph is `docs/branchfabric/DEPENDENCY_GRAPH.md`; the current
 integration graph and acceptance edges are
 `docs/branchfabric/CHARACTERIZATION_DEPENDENCY_GRAPH.md`. The history below is
-reconciled through `8a9a505`. Status vocabulary:
+reconciled through requirements compiler commit `d5cb9b2`. Status vocabulary:
 
 - **implemented** means source and focused tests are committed, not that the
   final clean-room gate has passed;
@@ -100,6 +100,50 @@ CUDA GPU, multi-GPU allocation, multi-node allocation, RDMA path, or paid GPU
 budget; those measurements remain **unavailable**, not synthetic stand-ins. No
 lane is authorized to implement RTL, BranchFabric hardware, firmware, a driver,
 an FPGA simulator, or a cycle-accurate simulator.
+
+### BranchFabric Characterization final closure
+
+This closure supersedes the launch-state and publication-state tables above.
+
+- Final measurement producer commit:
+  `0f6f45629c0b40af46f8641d907b32a5a8c6a562`.
+- Final requirements compiler commit:
+  `d5cb9b2e1833d908ccdde5c2980ad48c00ed6b08`.
+- The restartable CPU run `a53a739f0488359750d4f70f48f8753a` completed
+  matrix validation, the Helix vertical trace, Continuum state lifecycle,
+  environment study, metadata study, and corrected instrumentation-overhead
+  study under `artifacts/branchfabric/characterization/cpu-reference/`.
+- BranchWorkloadTrace v1 and StateOperationTrace v1 passed strict Python/Rust
+  conformance, ordering, hash-integrity, bounded-buffer, drop-observability,
+  JSONL, Perfetto, and explicit-Parquet-capability checks.
+- The canonical final Helix trace contains 70 branch events and 17 state events;
+  the Continuum trace contains 18 state events. Both report zero dropped and
+  zero filtered events.
+- The designated 40-artifact corpus is sealed by
+  `artifacts/branchfabric/CORPUS_MANIFEST.json`. Requirements are sealed by
+  `artifacts/branchfabric/requirements/branchfabric_requirements.json`.
+- The final requirements classify all 30 StateOperationTrace operations exactly
+  once: zero `REQUIRED`/`HIGH_VALUE`, six `SOFTWARE_ONLY`, ten
+  `NOT_JUSTIFIED`, and fourteen unresolved pending real workloads/hardware.
+- Compatible CUDA GPU, multi-GPU, multi-node, RDMA, NVLink, HBM, PCIe-GPU, and
+  real-NIC measurements remained unavailable. The capability target failed
+  closed and generated no substitute hardware measurement.
+- Independent replication plus adversarial, systems/hardware, statistical, and
+  instrumentation-overhead reviews are retained under
+  `docs/branchfabric/reviews/`. All high-severity and reasonable
+  medium-severity findings inside the exercised boundary were fixed; lack of
+  broader real/hardware evidence remains an explicit limitation.
+
+| Closed characterization workstream | Final owner | Status | Acceptance evidence | Artifacts | Commits |
+|---|---|---|---|---|---|
+| Schemas, storage, Python/Rust conformance | trace-schema lane + root | complete and exercised | `make branchfabric-trace-check` | `schemas/branchfabric/`; trace specs and goldens | `061abc0`, `4d30580`, `596b6e5`, `45e05ac` |
+| Helix branch DAG and lifecycle instrumentation | Helix instrumentation lane + root | complete in deterministic CPU fixture | lifecycle tests and final 87-event trace | CPU-reference vertical trace, workload/waterfall analysis | `a97d970`, `0f6f456` |
+| Continuum state lifecycle and transport instrumentation | Continuum lane + root | complete in host/simulated-transport fixture | Continuum characterization/adaptor tests | CPU-reference Continuum trace, sharing/transform/transport analyses | `23305b1`, `0f6f456` |
+| Environment, metadata, resource and overhead studies | measurement lanes + root | complete in local CPU scope | focused tests; corrected three-seed/two-repetition overhead run | environment, metadata, software-baseline, resource and v5 overhead artifacts | `24e779b`, `1e9758a` |
+| Matrix, orchestration, restart/resume and active prioritizer | workflow lane + root | complete and exercised | 855 cells evaluated analytically; six-stage run complete | run manifest, matrix study, ranked experiment queue | `257b184`, `1e9758a` |
+| COW, divergence, sharing, Amdahl, roofline, placement and requirements | analysis/requirements lanes + root | complete within available evidence; unsupported values explicit | focused analysis tests; requirement-reference and classification audits | final analyses and requirements JSON | `ab0beba`, `d5cb9b2` |
+| Independent replication and multidisciplinary review | replication/review lanes | complete | five-measurement replication; four independent final reviews | `artifacts/branchfabric/replication/`; `docs/branchfabric/reviews/` | `b00db0a`, `51a76ad`, `28d9705`, `6688319`, `f61a35f` |
+| Reports, design handoff, negative findings and release gates | root | complete pending the release commit recorded in Git history | `make branchfabric-clean-room-test`; `make helix-check`; `make check` | final report, design brief, what-not-to-build, generated report, corpus manifest | final release commit |
 
 ## SLOForge Helix extension
 

@@ -242,12 +242,8 @@ def _run_trial(
     events = buffer.drain()
     persistence_started = time.perf_counter_ns()
     if events:
-        branch_events = tuple(
-            event for event in events if isinstance(event, BranchWorkloadEventV1)
-        )
-        state_events = tuple(
-            event for event in events if isinstance(event, StateOperationEventV1)
-        )
+        branch_events = tuple(event for event in events if isinstance(event, BranchWorkloadEventV1))
+        state_events = tuple(event for event in events if isinstance(event, StateOperationEventV1))
         write_jsonl(output / "branch-workload-trace-v1.jsonl", branch_events)
         write_jsonl(output / "state-operation-trace-v1.jsonl", state_events)
         write_perfetto(output / "helix-lifecycle.perfetto.json", events)

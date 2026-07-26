@@ -533,8 +533,10 @@ def analyze_transforms(
             decoded = json.loads(raw_chain)
         except json.JSONDecodeError as error:
             raise ValueError("operation_chain_json must contain valid JSON") from error
-        if not isinstance(decoded, list) or len(decoded) < 2 or not all(
-            isinstance(item, str) for item in decoded
+        if (
+            not isinstance(decoded, list)
+            or len(decoded) < 2
+            or not all(isinstance(item, str) for item in decoded)
         ):
             raise ValueError("operation_chain_json must be a JSON array of operation names")
         declared_chains.append(

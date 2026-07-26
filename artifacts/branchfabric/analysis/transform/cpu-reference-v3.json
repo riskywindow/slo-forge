@@ -1,0 +1,148 @@
+{
+  "ambiguous_pipeline_predecessor_count": 0,
+  "chain_extraction_method": "explicit <trace_id>:<event_sequence> or sealed-event-hash dependencies",
+  "declared_fused_operation_chains": [
+    {
+      "bytes": 3444,
+      "event_reference": "d8ba17ccd488c38079f7ed0883d54028c3c26ecdb3773fa8631b4ffbc47a3746:7",
+      "evidence_note": "producer declaration preserved from operation_chain_json; per-operation latency unknown",
+      "inclusive_latency_ns": 1665291,
+      "operations": [
+        "STATE_RESHARD",
+        "STATE_REPACK",
+        "STATE_CHECKSUM"
+      ],
+      "timing_decomposable": false
+    }
+  ],
+  "dependency_cycle_count": 0,
+  "evidence": {
+    "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+    "artifact_sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+    "input_event_count": 18,
+    "raw_artifact_immutable": true,
+    "repetition": 0,
+    "schema_version": "sloforge.branchfabric.trace-analysis-evidence/v1",
+    "seed": 20260809,
+    "selected_event_count": 5,
+    "source_experiment": "cli.transform",
+    "timing_measurement_classes": [
+      "HARDWARE_BACKED_REAL",
+      "SIMULATED_HARDWARE"
+    ],
+    "trace_ids": [
+      "d8ba17ccd488c38079f7ed0883d54028c3c26ecdb3773fa8631b4ffbc47a3746"
+    ],
+    "workload_provenance": [
+      "SYNTHETIC"
+    ]
+  },
+  "noncausal_dependency_count": 0,
+  "operation_aggregates": [
+    {
+      "cpu_time_ns": {
+        "observation_count": 1,
+        "total": 1433000
+      },
+      "destination_physical_representation": "host_dram/paged_head_major_packed_kv/tp2",
+      "event_count": 1,
+      "gpu_time_ns": {
+        "observation_count": 0,
+        "total": null
+      },
+      "memory_read_bytes": null,
+      "memory_write_bytes": null,
+      "operation_latency": {
+        "maximum": 1665291,
+        "minimum": 1665291,
+        "observation_count": 1,
+        "p50": 1665291,
+        "p95": 1665291,
+        "p99": 1665291,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_latency_total_ns": {
+        "observation_count": 1,
+        "total": 1665291
+      },
+      "operation_type": "STATE_RESHARD",
+      "processed_bytes": 3444,
+      "source_physical_representation": "host_dram/paged_token_major_separate_kv/tp4",
+      "state_segment": "model",
+      "temporary_bytes": null,
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ],
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.transform-analysis/v1",
+  "sequence_aggregates": [
+    {
+      "fusion_upper_bound": {
+        "analytical": true,
+        "assumptions": [
+          "the byte bound is an analytical single-stream lower bound, not measured fusion",
+          "it assumes compatible layouts and no required intermediate materialization",
+          "the latency bound makes every observed transform-stage latency free",
+          "no end-to-end speedup is implied and transfer or synchronization time is unchanged",
+          "StateOperationTrace v1 has no temporary-allocation or memory-traffic counter"
+        ],
+        "ideal_single_stream_bytes": 3444,
+        "maximum_intermediate_bytes_avoided": 0,
+        "maximum_latency_reduction_ns": 1665291,
+        "observed_latency_count": 1,
+        "observed_materialized_stage_bytes": 3444,
+        "occurrence_count": 1,
+        "temporary_capacity_bytes": null,
+        "transform_stage_count_per_occurrence": 1,
+        "transform_stage_observation_count": 1
+      },
+      "occurrence_count": 1,
+      "operation_latency_ns": {
+        "observation_count": 1,
+        "total": 1665291
+      },
+      "operations": [
+        "STATE_RESHARD"
+      ],
+      "processed_bytes": 3444,
+      "sequence_id": "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef",
+      "stages": [
+        {
+          "destination_physical_representation": "host_dram/paged_head_major_packed_kv/tp2",
+          "operation_type": "STATE_RESHARD",
+          "source_physical_representation": "host_dram/paged_token_major_separate_kv/tp4"
+        }
+      ],
+      "temporary_bytes": null,
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ],
+      "total_event_count": 1,
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    }
+  ],
+  "sequence_ranking": {
+    "by_frequency": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ],
+    "by_observed_latency": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ],
+    "by_processed_bytes": [
+      "80064fec19b0ebc23bdcf656a55a3334053624cee181444c35a03e5777a5a4ef"
+    ]
+  },
+  "transform_event_count": 1,
+  "unknown_counters": [
+    "temporary allocation bytes are not represented by StateOperationTrace v1",
+    "memory read and write counters are not represented by StateOperationTrace v1",
+    "GPU time for transform events recorded with zero/N/A"
+  ],
+  "unresolved_dependency_count": 0
+}

@@ -199,9 +199,7 @@ def test_producer_declared_fused_chain_is_preserved_without_fake_stage_timings()
     event = _event(1, StateOperationType.STATE_RESHARD).model_copy(
         update={
             "attributes": {
-                "operation_chain_json": (
-                    '["STATE_RESHARD","STATE_REPACK","STATE_CHECKSUM"]'
-                )
+                "operation_chain_json": ('["STATE_RESHARD","STATE_REPACK","STATE_CHECKSUM"]')
             }
         }
     )

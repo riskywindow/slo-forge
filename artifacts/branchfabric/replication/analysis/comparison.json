@@ -1,0 +1,246 @@
+{
+  "artifact_sha256": {
+    "artifacts/branchfabric/replication/analysis/helix-workload-analysis.json": "cc20d0bc7fe05a64641b758532dddf83e6c3824024e8d29f1c25cf5c584b596b",
+    "artifacts/branchfabric/replication/analysis/integrity-validation.json": "692924b79728bc263aa668c3479c5ed0eef95cc6f8656c53fc403b691f03c844",
+    "artifacts/branchfabric/replication/analysis/transform-analysis.json": "30a1ba0fed57a7ca5725221e873515aaf83b570b611d05fb6723e428e9fc49f0",
+    "artifacts/branchfabric/replication/analysis/transport-analysis.json": "e2630d6eda444660a6727a4ec9b375f7d5da04c4186297872f021f293df83844",
+    "artifacts/branchfabric/replication/continuum-seed-149/continuum-trace-run.json": "97b0f6a52c050c2fb8667efdd755e85af411c1b00e1d88375593ab3c596c8b24",
+    "artifacts/branchfabric/replication/continuum-seed-149/state-operation-trace-v1.jsonl": "eafdd1e27287ad23083787a4ae6c24682dc93e6477e5934204be3ff48bc2e5a6",
+    "artifacts/branchfabric/replication/continuum-seed-149/trace-manifest-v1.json": "dcfe4c0b75928864a687ad9a7dece075d739dc782b40aa512642d9cc0df05698",
+    "artifacts/branchfabric/replication/helix-seed-149/branch-workload-trace-v1.jsonl": "dc3fe9108cbd44d512bb2051f9f2360f4ca6997978b06e463a3dc3086245fb35",
+    "artifacts/branchfabric/replication/helix-seed-149/state-operation-trace-v1.jsonl": "67957ddaf50d6eb05d8b260d1b5f95be26bc2ea60640da7b2ab3ea82da14b260",
+    "artifacts/branchfabric/replication/helix-seed-149/trace-manifest-v1.json": "cdac890813dc5b7d24d7dcfa237efafa196e9c12a3354de19f207bccf07b939d",
+    "artifacts/branchfabric/replication/helix-seed-149/vertical-run.json": "63921f9536c36f652b401529b4dd98974cd1fd9d14881d8d96136ebc7e97fdab",
+    "artifacts/branchfabric/replication/metadata/metadata-study.json": "bb7f782c81c48cf196bfa147ad18e842ea82c86d0d04260d6d608116474b4c16",
+    "artifacts/branchfabric/replication/overhead/instrumentation-overhead.json": "03afda571abee745d68f7b502b6bc0aa24e23feea67dea9762f6a718f9cb6111",
+    "artifacts/branchfabric/replication/overhead/overhead-raw-samples.json": "d80c18aa88cfb30559fcb2c5cad8348b1fa2208cc559d428e6ab7a0be49aed61"
+  },
+  "comparison_policy": "raw artifacts unchanged; exact values retained; no outliers removed; no production-distribution claim",
+  "continuum": {
+    "assessment": "operation multiset and 512-byte/eight-page COW result replicated exactly; size differences are 1-4 bytes from seed-dependent serialized fixture content; network timings remain SIMULATED_HARDWARE",
+    "operation_multiset": "2 SNAPSHOT; 4 SEND; 4 RECEIVE; one each PUBLISH, FORK, COW, APPEND, DELTA, RESHARD, COMMIT, RECLAIM",
+    "primary": {
+      "cow_bytes": [
+        512,
+        512,
+        512
+      ],
+      "cow_page_count": [
+        8,
+        8,
+        8
+      ],
+      "event_counts": [
+        18,
+        18,
+        18
+      ],
+      "metadata_bytes_per_branch": [
+        164526,
+        164526,
+        164532
+      ],
+      "physical_allocated_bytes": [
+        3176,
+        3176,
+        3179
+      ],
+      "shared_logical_bytes": [
+        2727,
+        2727,
+        2729
+      ]
+    },
+    "primary_seeds": [
+      41,
+      73,
+      113
+    ],
+    "replication": {
+      "cow_bytes": 512,
+      "cow_page_count": 8,
+      "dropped_events": 0,
+      "event_count": 18,
+      "metadata_bytes_per_branch": 164534,
+      "physical_allocated_bytes": 3180,
+      "shared_logical_bytes": 2730,
+      "timing_measurement_counts": {
+        "HARDWARE_BACKED_REAL": 12,
+        "REPLAYED": 0,
+        "SIMULATED_HARDWARE": 6,
+        "SYNTHETIC": 0
+      }
+    },
+    "replication_seed": 149
+  },
+  "helix": {
+    "assessment": "fixture structure, 75% model-CAS sharing, immediate divergence, and 1,303 environment bytes written replicated; model bytes vary with seeded serialized fixture content; one-run timings are observations, not a latency distribution",
+    "primary": {
+      "branch_lifetime_p50_ns": [
+        384575541,
+        408458833,
+        405694625
+      ],
+      "cow_bytes_written": [
+        1303,
+        1303,
+        1303
+      ],
+      "fanout": [
+        4,
+        4,
+        4
+      ],
+      "first_divergent_action_index": [
+        0,
+        0,
+        0
+      ],
+      "first_divergent_token_index": [
+        0,
+        0,
+        0
+      ],
+      "fork_to_first_private_p50_ns": [
+        88801750,
+        95080792,
+        95365333
+      ],
+      "physical_allocated_bytes": [
+        2660,
+        2661,
+        2662
+      ],
+      "shared_root_lifetime_ns": [
+        339062750,
+        357591334,
+        352659500
+      ],
+      "sharing_efficiency": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "primary_seeds": [
+      41,
+      73,
+      113
+    ],
+    "replication": {
+      "branch_lifetime_p50_ns": 381462334,
+      "cow_bytes_written": 1303,
+      "dropped_events": 0,
+      "fanout": 4,
+      "first_divergent_action_index": 0,
+      "first_divergent_token_index": 0,
+      "fork_to_first_private_p50_ns": 90258458,
+      "physical_allocated_bytes": 2664,
+      "shared_root_lifetime_ns": 334988875,
+      "sharing_efficiency": 0.75
+    },
+    "replication_seed": 149
+  },
+  "integrity_validation_sha256": "692924b79728bc263aa668c3479c5ed0eef95cc6f8656c53fc403b691f03c844",
+  "metadata": {
+    "assessment": "all 14 current-software one-thread operation medians reproduced within 11%; portable study still cannot attribute cycles, cache misses, memory bandwidth, locks, or syscalls",
+    "comparable_current_software_thread1_operations": 14,
+    "maximum_absolute_percent_difference": 10.769599233594128,
+    "median_absolute_percent_difference": 2.422930474333984,
+    "primary_measurement_repetitions": 7,
+    "primary_seed": 20260809,
+    "replication_measurement_repetitions": 3,
+    "replication_minus_primary_median_percent_by_operation": {
+      "abort": -0.5371375765276687,
+      "allocation": -1.5721292919129715,
+      "ancestry_lookup": -3.5765853658536573,
+      "branch_create_bookkeeping": -3.0416868757612403,
+      "dirty_update": 2.058024691358029,
+      "epoch_validation": -2.787836257309939,
+      "free": -7.884731182795701,
+      "lineage_bookkeeping": 5.694426903855532,
+      "page_lookup": -4.74889434889435,
+      "publish": -1.7181082933516056,
+      "reclaim": -0.46583995602470507,
+      "refcount_update": -0.40097248880358594,
+      "state_hash_lookup": -10.769599233594128,
+      "transaction_lookup": -1.008239529820265
+    },
+    "replication_seed": 20260810
+  },
+  "overhead": {
+    "assessment": "semantic equivalence replicated; wall-time effect changed sign (-0.13% primary versus +1.34% replication), so the data do not resolve a stable wall penalty; CPU median remained higher under full tracing (+3.5% primary, +6.5% replication), but n=2 replication is too small for a population claim",
+    "primary": {
+      "cpu_median_ns": {
+        "disabled": 2029868500.0,
+        "full": 2100946000.0,
+        "minimal": 2049147500.0
+      },
+      "full_paired_median_relative_change": -0.0012617425969884029,
+      "measured_samples_per_level": 6,
+      "raw_sha256": "2c0698061964021a1472c3000acb2ff811d4dd2e906d76359ab7c2d0efec696e",
+      "wall_median_ns": {
+        "disabled": 11211085333.5,
+        "full": 11220823312.5,
+        "minimal": 11186563000.0
+      }
+    },
+    "primary_full_cpu_median_relative_to_disabled": 0.03501581506388218,
+    "replication": {
+      "cpu_median_ns": {
+        "disabled": 1943856000.0,
+        "full": 2070551000.0,
+        "minimal": 1922045000.0
+      },
+      "full_paired_median_relative_change": 0.013420867755782148,
+      "measured_samples_per_level": 2,
+      "raw_sha256": "d80c18aa88cfb30559fcb2c5cad8348b1fa2208cc559d428e6ab7a0be49aed61",
+      "semantic_equivalence_verified": true,
+      "wall_median_ns": {
+        "disabled": 11218540271.0,
+        "full": 11367568874.5,
+        "minimal": 11018660167.0
+      }
+    },
+    "replication_full_cpu_median_relative_to_disabled": 0.06517715304014282
+  },
+  "pinned_source_commit": "f1ebbf621241ca27a40645c04f95bd421079eba8",
+  "schema_version": "sloforge.branchfabric.independent-replication-comparison/v1",
+  "transport_and_transform": {
+    "assessment": "zero exact multicast opportunities and the single explicit transform chain replicated; the corpus is too small and simulated-network-only to reject multicast generally or establish bandwidth targets",
+    "primary": {
+      "multicast_opportunity_count": [
+        0,
+        0,
+        0
+      ],
+      "source_payload_bytes": [
+        8087,
+        8090,
+        8094
+      ],
+      "transform_event_count": [
+        1,
+        1,
+        1
+      ],
+      "transform_sequence_count": [
+        1,
+        1,
+        1
+      ]
+    },
+    "replication": {
+      "dependency_cycle_count": 0,
+      "logical_delivery_bytes": 8106,
+      "multicast_opportunity_count": 0,
+      "receive_payload_bytes": 8106,
+      "retry_payload_bytes": 0,
+      "source_payload_bytes": 8106,
+      "transform_event_count": 1,
+      "transform_sequence_count": 1,
+      "ungrouped_send_event_count": 4,
+      "unresolved_dependency_count": 0
+    }
+  }
+}

@@ -117,9 +117,7 @@ def evaluate_controlled_matrix(
                 ),
                 logical_unique_bytes=projection.logical_unique_bytes,
                 physical_allocated_bytes=projection.physical_allocated_bytes,
-                naive_independent_allocation_bytes=(
-                    projection.naive_independent_allocation_bytes
-                ),
+                naive_independent_allocation_bytes=(projection.naive_independent_allocation_bytes),
                 cow_faults_projected=projection.cow_faults,
                 cow_copied_bytes_projected=projection.cow_copied_bytes,
                 internal_fragmentation_bytes=projection.internal_fragmentation_bytes,

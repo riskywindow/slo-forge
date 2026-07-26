@@ -1,0 +1,743 @@
+{
+  "schema_version": "sloforge.branchfabric.workload-analysis/v1",
+  "evidence": {
+    "branch_trace": {
+      "source_experiment": "cpu-reference-final",
+      "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/branch-workload-trace-v1.jsonl",
+      "artifact_sha256": "1647d7ecad74914851b864a770633334c9c526066ed19fe0f5c19e8c53446dfc",
+      "seed": 20260809,
+      "repetition": 0,
+      "event_count": 70,
+      "trace_ids": [
+        "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87"
+      ],
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    },
+    "state_trace": {
+      "source_experiment": "cpu-reference-final",
+      "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl",
+      "artifact_sha256": "fb2be4a476d0508e737f2ed568d4e4cd06ed64d5289d4ba2f16a18f86598f4eb",
+      "seed": 20260809,
+      "repetition": 0,
+      "event_count": 17,
+      "trace_ids": [
+        "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87"
+      ],
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    },
+    "trajectories": [
+      {
+        "source_experiment": "cpu-reference-final",
+        "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/alternative-tool.json",
+        "artifact_sha256": "fdea44e301c279ad372fb2086c2221b5b4c0de429bf1faaf7fd3c00abd892cf8",
+        "seed": 20260809,
+        "repetition": 0,
+        "branch_id": "alternative-tool",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "byte_length": 3449,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "cpu-reference-final",
+        "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/different-rng.json",
+        "artifact_sha256": "5d8d2e36f651792240340fd33dbac480c71e442629af0b353585f5b51463c803",
+        "seed": 20260809,
+        "repetition": 0,
+        "branch_id": "different-rng",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "byte_length": 3445,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "cpu-reference-final",
+        "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/forced-alternative.json",
+        "artifact_sha256": "09441a4df75294e54d90ef7e4825f30e0536545ca4a003d2b172d1146ea983e8",
+        "seed": 20260809,
+        "repetition": 0,
+        "branch_id": "forced-alternative",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "byte_length": 3466,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "cpu-reference-final",
+        "artifact_reference": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/verifier-assisted.json",
+        "artifact_sha256": "1470269a0f985ede93fc0f7bd9565abe225c70feb68b13a742109548506a2dc8",
+        "seed": 20260809,
+        "repetition": 0,
+        "branch_id": "verifier-assisted",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "byte_length": 3466,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      }
+    ]
+  },
+  "branch_dag": {
+    "nodes": [
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "branch_id": "alternative-tool",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 31599708,
+        "fork_complete_timestamp_ns": 80543083,
+        "first_private_timestamp_ns": 262432708,
+        "fork_to_first_private_ns": 181889625,
+        "terminal_timestamp_ns": 454389416,
+        "lifetime_ns": 422789708,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "branch_id": "different-rng",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 31599708,
+        "fork_complete_timestamp_ns": 80543083,
+        "first_private_timestamp_ns": 86588041,
+        "fork_to_first_private_ns": 6044958,
+        "terminal_timestamp_ns": 453475625,
+        "lifetime_ns": 421875917,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "branch_id": "forced-alternative",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 31599708,
+        "fork_complete_timestamp_ns": 80543083,
+        "first_private_timestamp_ns": 177591208,
+        "fork_to_first_private_ns": 97048125,
+        "terminal_timestamp_ns": 453979333,
+        "lifetime_ns": 422379625,
+        "outcome": "SUCCEEDED",
+        "pruned": false,
+        "aborted": false,
+        "succeeded": true
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "branch_id": "verifier-assisted",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 31599708,
+        "fork_complete_timestamp_ns": 80543083,
+        "first_private_timestamp_ns": 365082458,
+        "fork_to_first_private_ns": 284539375,
+        "terminal_timestamp_ns": 454780416,
+        "lifetime_ns": 423180708,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      }
+    ],
+    "edges": [
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "alternative-tool"
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "different-rng"
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "forced-alternative"
+      },
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "verifier-assisted"
+      }
+    ],
+    "groups": [
+      {
+        "trace_id": "79fc508f0c98da6bd89569771641b4dc8b4f3df704c8b80eb9b0e9c9b77abb87",
+        "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+        "parent_branch_id": "production-session",
+        "branch_ids": [
+          "alternative-tool",
+          "different-rng",
+          "forced-alternative",
+          "verifier-assisted"
+        ],
+        "fanout": 4,
+        "pruned_count": 3,
+        "aborted_count": 0,
+        "succeeded_count": 1,
+        "active_or_unknown_count": 0,
+        "shared_root_creation_timestamp_ns": 80543083,
+        "shared_root_last_reference_timestamp_ns": 454780416,
+        "shared_root_lifetime_ns": 374237333,
+        "shared_root_logical_bytes": null,
+        "peak_refcount": 4,
+        "refcount_timeline": [
+          {
+            "normalized_timestamp_ns": 80543083,
+            "refcount": 4
+          },
+          {
+            "normalized_timestamp_ns": 453475625,
+            "refcount": 3
+          },
+          {
+            "normalized_timestamp_ns": 453979333,
+            "refcount": 2
+          },
+          {
+            "normalized_timestamp_ns": 454389416,
+            "refcount": 1
+          },
+          {
+            "normalized_timestamp_ns": 454780416,
+            "refcount": 0
+          }
+        ],
+        "active_siblings_timeline": [
+          {
+            "normalized_timestamp_ns": 80543083,
+            "active_siblings": 4
+          },
+          {
+            "normalized_timestamp_ns": 453475625,
+            "active_siblings": 3
+          },
+          {
+            "normalized_timestamp_ns": 453979333,
+            "active_siblings": 2
+          },
+          {
+            "normalized_timestamp_ns": 454389416,
+            "active_siblings": 1
+          },
+          {
+            "normalized_timestamp_ns": 454780416,
+            "active_siblings": 0
+          }
+        ]
+      }
+    ],
+    "fanout": {
+      "sample_count": 1,
+      "minimum": 4,
+      "p50": 4,
+      "p95": 4,
+      "p99": 4,
+      "maximum": 4,
+      "percentile_method": "nearest-rank"
+    },
+    "branch_lifetime_ns": {
+      "sample_count": 4,
+      "minimum": 421875917,
+      "p50": 422379625,
+      "p95": 423180708,
+      "p99": 423180708,
+      "maximum": 423180708,
+      "percentile_method": "nearest-rank"
+    },
+    "fork_to_first_private_ns": {
+      "sample_count": 4,
+      "minimum": 6044958,
+      "p50": 97048125,
+      "p95": 284539375,
+      "p99": 284539375,
+      "maximum": 284539375,
+      "percentile_method": "nearest-rank"
+    }
+  },
+  "divergence": [
+    {
+      "branch_group_id": "50cb816dc1821f8d09d2cd8554c0458158284eba3db214f2cfba53488c042697",
+      "coverage": "COMPLETE",
+      "expected_branch_ids": [
+        "alternative-tool",
+        "different-rng",
+        "forced-alternative",
+        "verifier-assisted"
+      ],
+      "compared_branch_ids": [
+        "alternative-tool",
+        "different-rng",
+        "forced-alternative",
+        "verifier-assisted"
+      ],
+      "first_divergent_token_index": 0,
+      "token_sequences_all_equal": false,
+      "first_divergent_action_index": 0,
+      "action_sequences_all_equal": false,
+      "trajectory_artifact_references": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/alternative-tool.json",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/different-rng.json",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/forced-alternative.json",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/verifier-assisted.json"
+      ]
+    }
+  ],
+  "state_composition": {
+    "segments": [
+      {
+        "state_segment": "model",
+        "logical_state_count": 5,
+        "unique_logical_state_bytes": 13340,
+        "operation_observed_bytes": 13340
+      },
+      {
+        "state_segment": "token_history",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "kv",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "recurrent",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "sampler",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "guided_decoding",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "workflow",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "environment",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "filesystem",
+        "logical_state_count": 9,
+        "unique_logical_state_bytes": 6376,
+        "operation_observed_bytes": 7325
+      },
+      {
+        "state_segment": "database",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "process_reconstruction",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "transaction",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "integrity",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "runtime_reconstructible",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "unknown",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      }
+    ],
+    "model_state_bytes": 0,
+    "environment_state_bytes": 6376,
+    "workflow_transaction_and_integrity_bytes": 0,
+    "unknown_segment_bytes": 0,
+    "byte_semantics": "max bytes per logical_state_id and segment; operation bytes reported separately"
+  },
+  "operation_queues": [
+    {
+      "operation_type": "STATE_COW",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_FORK",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_FREE",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_SNAPSHOT",
+      "event_count": 5,
+      "concurrency": {
+        "sample_count": 5,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 5,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    }
+  ],
+  "waterfall": {
+    "stages": [
+      {
+        "stage": "PRODUCTION",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "CAPTURE",
+        "observed": true,
+        "event_count": 1,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 15602500,
+        "inclusive_wall_union_ns": 15602500,
+        "wall_envelope_ns": 15602500,
+        "cpu_time_ns": 15364000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 1068,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "FORK",
+        "observed": true,
+        "event_count": 8,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 7,
+        "inclusive_span_duration_sum_ns": 48943375,
+        "inclusive_wall_union_ns": 48943375,
+        "wall_envelope_ns": 48943375,
+        "cpu_time_ns": 48731000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 10672,
+        "branch_payload_bytes": 0,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "BRANCH_READY",
+        "observed": true,
+        "event_count": 4,
+        "unique_timing_span_count": 4,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 0,
+        "inclusive_wall_union_ns": 0,
+        "wall_envelope_ns": 0,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 0,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "ROLLOUT",
+        "observed": true,
+        "event_count": 4,
+        "unique_timing_span_count": 4,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 10293624,
+        "inclusive_wall_union_ns": 10293624,
+        "wall_envelope_ns": 281453375,
+        "cpu_time_ns": 10015000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 13822,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "PRUNE",
+        "observed": true,
+        "event_count": 3,
+        "unique_timing_span_count": 3,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 780874,
+        "inclusive_wall_union_ns": 780874,
+        "wall_envelope_ns": 1623541,
+        "cpu_time_ns": 779000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 0,
+        "branch_count": 3,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "CHECKPOINT",
+        "observed": true,
+        "event_count": 5,
+        "unique_timing_span_count": 5,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 21464793,
+        "inclusive_wall_union_ns": 21464793,
+        "wall_envelope_ns": 359769625,
+        "cpu_time_ns": 21055000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 5679,
+        "branch_payload_bytes": 0,
+        "branch_count": 5,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "MIGRATE",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "RESUME",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "REWARD",
+        "observed": true,
+        "event_count": 4,
+        "unique_timing_span_count": 4,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 351185582,
+        "inclusive_wall_union_ns": 351185582,
+        "wall_envelope_ns": 361124958,
+        "cpu_time_ns": 62331000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 9109,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "TRAIN",
+        "observed": true,
+        "event_count": 2,
+        "unique_timing_span_count": 2,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 566250,
+        "inclusive_wall_union_ns": 566250,
+        "wall_envelope_ns": 678000,
+        "cpu_time_ns": 564000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 5072,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "EVALUATE",
+        "observed": true,
+        "event_count": 5,
+        "unique_timing_span_count": 5,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 10518451374,
+        "inclusive_wall_union_ns": 10518451374,
+        "wall_envelope_ns": 10539027042,
+        "cpu_time_ns": 1852636000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 35416,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "PROMOTE",
+        "observed": true,
+        "event_count": 1,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 507125,
+        "inclusive_wall_union_ns": 507125,
+        "wall_envelope_ns": 507125,
+        "cpu_time_ns": 467000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 0,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      }
+    ],
+    "end_to_end_wall_envelope_ns": 10991389792,
+    "sum_of_stage_inclusive_unions_ns": 10967795497,
+    "exclusive_critical_path_ns": null,
+    "timing_span_sidecar_entries_used": 12,
+    "timing_policy": "inclusive spans; explicit span IDs deduplicated; exclusive critical path unknown"
+  },
+  "unknowns": [
+    "exclusive critical-path time is unavailable from inclusive event spans",
+    "shared-root physical bytes are unavailable in canonical BranchWorkloadTrace v1",
+    "shared-root refcounts are derived from fork/terminal boundaries, not metadata counters",
+    "state composition is logical-state identity deduplication, not simultaneous residency"
+  ]
+}

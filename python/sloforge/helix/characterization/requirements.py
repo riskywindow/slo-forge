@@ -105,10 +105,14 @@ class NumericRequirement(RequirementsModel):
             raise ValueError("numeric value must be present exactly when availability is AVAILABLE")
         if self.availability is Availability.AVAILABLE and self.evidence.sample_count == 0:
             raise ValueError("available numeric requirements require at least one sample")
-        if self.availability is Availability.UNKNOWN and self.evidence.confidence_or_percentile not in {
-            ConfidenceOrPercentile.COUNTER_ABSENT,
-            ConfidenceOrPercentile.INSUFFICIENT_INDEPENDENT_SAMPLES,
-        }:
+        if (
+            self.availability is Availability.UNKNOWN
+            and self.evidence.confidence_or_percentile
+            not in {
+                ConfidenceOrPercentile.COUNTER_ABSENT,
+                ConfidenceOrPercentile.INSUFFICIENT_INDEPENDENT_SAMPLES,
+            }
+        ):
             raise ValueError(
                 "UNKNOWN numeric requirements require counter_absent or "
                 "insufficient_independent_samples evidence"

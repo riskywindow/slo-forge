@@ -1,0 +1,39 @@
+{
+  "artifacts": [
+    {
+      "relative_path": "attempts/matrix_validate/attempt-000/matrix-study.json",
+      "sha256": "2758138c6d74280f33215f300ba8e1a681c7c152f14d60bd4104cd45227284ba",
+      "size_bytes": 1585071
+    },
+    {
+      "relative_path": "attempts/matrix_validate/attempt-000/matrix-validation.json",
+      "sha256": "0f46c4630f8ae33c09be1a512207f930c28b966fa81f486ba4848657494862f1",
+      "size_bytes": 557
+    },
+    {
+      "relative_path": "attempts/matrix_validate/attempt-000/worker-result.json",
+      "sha256": "a3704f266f88d9a63a75701135463fb170ef519cc7055c8f38931488ae647c22",
+      "size_bytes": 151
+    }
+  ],
+  "attempt": 0,
+  "attempt_reference": "attempts/matrix_validate/attempt-000",
+  "command": [
+    "python-api",
+    "sloforge.helix.characterization.matrix.load_matrix+expand_matrix"
+  ],
+  "duration_ns": 235080208,
+  "error": null,
+  "finished_at": "2026-08-09T23:27:27.178853+00:00",
+  "immutable": true,
+  "previous_checkpoint_sha256": null,
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "schema_version": "sloforge.branchfabric.stage-checkpoint/v1",
+  "sequence": 0,
+  "stage": "matrix_validate",
+  "stage_seed": 20260809,
+  "started_at": "2026-08-09T23:27:26.943450+00:00",
+  "status": "SUCCEEDED",
+  "timeout_seconds": 300.0,
+  "worker_exit_code": 0
+}

@@ -1,0 +1,34 @@
+{
+  "artifacts": [
+    {
+      "relative_path": "attempts/metadata/attempt-000/metadata-study.json",
+      "sha256": "6dc8a14d822287f9ac7e06f86737db62860d60d53ee7b29749180a91bfdd91c4",
+      "size_bytes": 763694
+    },
+    {
+      "relative_path": "attempts/metadata/attempt-000/worker-result.json",
+      "sha256": "dda4bbb2169c257da200f7d6e64e047325ea3eb9dd3aafbe6c98f17598c9ec29",
+      "size_bytes": 159
+    }
+  ],
+  "attempt": 0,
+  "attempt_reference": "attempts/metadata/attempt-000",
+  "command": [
+    "python-api",
+    "sloforge.helix.characterization.metadata_study.run_metadata_study"
+  ],
+  "duration_ns": 386463875,
+  "error": null,
+  "finished_at": "2026-08-09T23:27:40.405140+00:00",
+  "immutable": true,
+  "previous_checkpoint_sha256": "ce202459dc05e9e7546f5b227c822b4d72a0e8701e00153cd412828f99c5f4be",
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "schema_version": "sloforge.branchfabric.stage-checkpoint/v1",
+  "sequence": 4,
+  "stage": "metadata",
+  "stage_seed": 20260809,
+  "started_at": "2026-08-09T23:27:40.018329+00:00",
+  "status": "SUCCEEDED",
+  "timeout_seconds": 300.0,
+  "worker_exit_code": 0
+}

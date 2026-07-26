@@ -683,6 +683,7 @@ def _available_distribution(
                 "independent workload clusters for a hardware-sizing tail"
             ),
         )
+
     maximum = _available_number(
         artifact,
         float(max(values)),
@@ -1240,7 +1241,9 @@ def _compile_requirements_from_run(
         containing_events: tuple[StateOperationEventV1, ...],
     ) -> IsaOperationRecommendation:
         state_types = tuple(
-            sorted({event.state_segment for event in containing_events}, key=lambda item: item.value)
+            sorted(
+                {event.state_segment for event in containing_events}, key=lambda item: item.value
+            )
         ) or (StateSegment.UNKNOWN,)
         rationale = (
             "the producer declares this operation inside a fused inclusive span, but the trace "
@@ -1338,9 +1341,7 @@ def _compile_requirements_from_run(
             if not isinstance(decoded, list) or not all(isinstance(item, str) for item in decoded):
                 raise ValueError("operation_chain_json must be an array of operation names")
             for operation_name in decoded:
-                declared_fused[StateOperationType(operation_name)].append(
-                    (artifact, state_event)
-                )
+                declared_fused[StateOperationType(operation_name)].append((artifact, state_event))
     unresolved: list[IsaOperationRecommendation] = []
     software_only: list[IsaOperationRecommendation] = []
     not_justified: list[IsaOperationRecommendation] = []
@@ -1377,7 +1378,9 @@ def _compile_requirements_from_run(
             if operation in absent_software_only
             else IsaClassification.NOT_JUSTIFIED
         )
-        destination = software_only if classification is IsaClassification.SOFTWARE_ONLY else not_justified
+        destination = (
+            software_only if classification is IsaClassification.SOFTWARE_ONLY else not_justified
+        )
         destination.append(
             IsaOperationRecommendation(
                 operation=operation,

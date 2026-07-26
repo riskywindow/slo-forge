@@ -1,0 +1,240 @@
+{
+  "candidates": [
+    {
+      "accessible_hardware": true,
+      "amdahl_leverage": 0.00344,
+      "evidence_gap": "Reference backend eagerly restores workspaces; physical filesystem COW faults and dirty granularity are unmeasured.",
+      "expected_artifacts": [
+        "filesystem-cow-trace.json",
+        "page-fault-counters.json"
+      ],
+      "experiment_id": "apfs-clone-cow-faults",
+      "measurement_cost_usd": 0.0,
+      "question": "page_size",
+      "sensitivity": 0.65,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 45.0
+    },
+    {
+      "accessible_hardware": true,
+      "amdahl_leverage": 0.00344,
+      "evidence_gap": "Portable study lacks cache-miss, cycles, and lock-wait counters; replicate under controlled low background load.",
+      "expected_artifacts": [
+        "metadata-study-replication.json"
+      ],
+      "experiment_id": "metadata-thread-replication",
+      "measurement_cost_usd": 0.0,
+      "question": "metadata_engine",
+      "sensitivity": 0.35,
+      "uncertainty": 0.35,
+      "wall_time_minutes": 20.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.023,
+      "evidence_gap": "No compatible CUDA GPU; real KV block sizes, HBM allocation, fork and append timing remain unknown.",
+      "expected_artifacts": [
+        "gpu-kv-trace.jsonl",
+        "nsight.perfetto.json"
+      ],
+      "experiment_id": "cuda-kv-page-sweep",
+      "measurement_cost_usd": 0.0,
+      "question": "page_size",
+      "sensitivity": 1.0,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 90.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.023,
+      "evidence_gap": "Only a 3434-byte host transform was measured; GPU bandwidth, temporary traffic, and interference are unknown.",
+      "expected_artifacts": [
+        "gpu-transform-trace.jsonl",
+        "nsight.perfetto.json"
+      ],
+      "experiment_id": "gpu-reshard-repack-send",
+      "measurement_cost_usd": 0.0,
+      "question": "transform_pipeline",
+      "sensitivity": 0.9,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 120.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.01,
+      "evidence_gap": "Observed trace fanout for transport is one; P2P concurrency, copy-engine queue depth, and NCCL contention are unmeasured.",
+      "expected_artifacts": [
+        "multigpu-fanout-trace.jsonl",
+        "nccl-topology.json"
+      ],
+      "experiment_id": "multigpu-fanout-2-8",
+      "measurement_cost_usd": 0.0,
+      "question": "queue_depth",
+      "sensitivity": 0.85,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 120.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.01,
+      "evidence_gap": "No multi-node hardware and no observed identical multi-destination send; multicast source/link reduction is unknown.",
+      "expected_artifacts": [
+        "network-trace.jsonl",
+        "topology.json",
+        "nic-counters.json"
+      ],
+      "experiment_id": "multinode-identical-state-fanout",
+      "measurement_cost_usd": 0.0,
+      "question": "multicast",
+      "sensitivity": 0.6,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 180.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.00344,
+      "evidence_gap": "No CXL device and no production shared-root residency distribution; capacity placement cannot be sized.",
+      "expected_artifacts": [
+        "cxl-residency-trace.jsonl"
+      ],
+      "experiment_id": "cxl-shared-root-capacity",
+      "measurement_cost_usd": 0.0,
+      "question": "memory_capacity",
+      "sensitivity": 0.4,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 180.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.0101,
+      "evidence_gap": "Migration transport is simulated; no NIC throughput, CPU involvement, retries, or overlap are measured.",
+      "expected_artifacts": [
+        "dpu-migration-trace.jsonl",
+        "nic-counters.json"
+      ],
+      "experiment_id": "dpu-migration-stream",
+      "measurement_cost_usd": 0.0,
+      "question": "nic_bandwidth",
+      "sensitivity": 0.8,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 150.0
+    },
+    {
+      "accessible_hardware": false,
+      "amdahl_leverage": 0.023,
+      "evidence_gap": "GPU, PCIe, NIC, HBM, and CXL counters are absent, so non-CPU placement ranking is unsupported.",
+      "expected_artifacts": [
+        "hardware-counter-manifest.json",
+        "roofline-inputs.json"
+      ],
+      "experiment_id": "placement-hardware-counters",
+      "measurement_cost_usd": 0.0,
+      "question": "placement",
+      "sensitivity": 1.0,
+      "uncertainty": 1.0,
+      "wall_time_minutes": 180.0
+    }
+  ],
+  "input_semantics": "Scores are explicit engineering-priority inputs, not workload measurements. Amdahl leverage uses the largest observed applicable fraction and is not a hardware speedup claim.",
+  "method": "transparent uncertainty*sensitivity*Amdahl leverage divided by normalized time/cost; eligible hardware sorts first",
+  "queue": {
+    "gpu_budget_usd": 0.0,
+    "ranked": [
+      {
+        "eligible": true,
+        "experiment_id": "apfs-clone-cow-faults",
+        "normalized_cost": 1.75,
+        "question": "page_size",
+        "rank": 1,
+        "reason": "ELIGIBLE: score = uncertainty x sensitivity x Amdahl leverage / normalized cost; Reference backend eagerly restores workspaces; physical filesystem COW faults and dirty granularity are unmeasured.",
+        "score": 0.0012777142857142859,
+        "uncertainty_reduction_value": 0.002236
+      },
+      {
+        "eligible": true,
+        "experiment_id": "metadata-thread-replication",
+        "normalized_cost": 1.3333333333333333,
+        "question": "metadata_engine",
+        "rank": 2,
+        "reason": "ELIGIBLE: score = uncertainty x sensitivity x Amdahl leverage / normalized cost; Portable study lacks cache-miss, cycles, and lock-wait counters; replicate under controlled low background load.",
+        "score": 0.00031604999999999996,
+        "uncertainty_reduction_value": 0.00042139999999999994
+      },
+      {
+        "eligible": false,
+        "experiment_id": "cuda-kv-page-sweep",
+        "normalized_cost": 2.5,
+        "question": "page_size",
+        "rank": 3,
+        "reason": "INELIGIBLE: required hardware is unavailable; No compatible CUDA GPU; real KV block sizes, HBM allocation, fork and append timing remain unknown.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.023
+      },
+      {
+        "eligible": false,
+        "experiment_id": "cxl-shared-root-capacity",
+        "normalized_cost": 4.0,
+        "question": "memory_capacity",
+        "rank": 4,
+        "reason": "INELIGIBLE: required hardware is unavailable; No CXL device and no production shared-root residency distribution; capacity placement cannot be sized.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.001376
+      },
+      {
+        "eligible": false,
+        "experiment_id": "dpu-migration-stream",
+        "normalized_cost": 3.5,
+        "question": "nic_bandwidth",
+        "rank": 5,
+        "reason": "INELIGIBLE: required hardware is unavailable; Migration transport is simulated; no NIC throughput, CPU involvement, retries, or overlap are measured.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.00808
+      },
+      {
+        "eligible": false,
+        "experiment_id": "gpu-reshard-repack-send",
+        "normalized_cost": 3.0,
+        "question": "transform_pipeline",
+        "rank": 6,
+        "reason": "INELIGIBLE: required hardware is unavailable; Only a 3434-byte host transform was measured; GPU bandwidth, temporary traffic, and interference are unknown.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.0207
+      },
+      {
+        "eligible": false,
+        "experiment_id": "multigpu-fanout-2-8",
+        "normalized_cost": 3.0,
+        "question": "queue_depth",
+        "rank": 7,
+        "reason": "INELIGIBLE: required hardware is unavailable; Observed trace fanout for transport is one; P2P concurrency, copy-engine queue depth, and NCCL contention are unmeasured.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.0085
+      },
+      {
+        "eligible": false,
+        "experiment_id": "multinode-identical-state-fanout",
+        "normalized_cost": 4.0,
+        "question": "multicast",
+        "rank": 8,
+        "reason": "INELIGIBLE: required hardware is unavailable; No multi-node hardware and no observed identical multi-destination send; multicast source/link reduction is unknown.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.006
+      },
+      {
+        "eligible": false,
+        "experiment_id": "placement-hardware-counters",
+        "normalized_cost": 4.0,
+        "question": "placement",
+        "rank": 9,
+        "reason": "INELIGIBLE: required hardware is unavailable; GPU, PCIe, NIC, HBM, and CXL counters are absent, so non-CPU placement ranking is unsupported.",
+        "score": 0.0,
+        "uncertainty_reduction_value": 0.023
+      }
+    ],
+    "reserved_rerun_fraction": 0.15,
+    "schema_version": "sloforge.branchfabric.experiment-queue/v1",
+    "seed": 20260809,
+    "spendable_budget_usd": 0.0
+  },
+  "schema_version": "sloforge.branchfabric.experiment-prioritization-artifact/v1"
+}
