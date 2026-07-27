@@ -1,0 +1,349 @@
+{
+  "schema_version": "sloforge.branchfabric.execution-hardware-adversarial-review/v1",
+  "review_status": "NO_BUILD_AFFIRMED_FINAL_GATE_TRACEABILITY_FINDING_OPEN",
+  "review_snapshot": {
+    "repository_root": "/Users/rishivinodkumar/sloforge",
+    "main_head": "9c18719b78336e415fafc5b2da30dab5c9e59c81",
+    "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+    "gate_result_worktree_modified_at_review": true,
+    "gate_result_observed_sha256": "aeecd9378628125af1142c2c9b7c5580959cee62ddfd739440ff66cdaa0d586b",
+    "reviewer_modified_existing_evidence_or_gate": false
+  },
+  "review_roles": [
+    "GPU_PERFORMANCE",
+    "NETWORKING",
+    "FPGA_DPU_ARCHITECTURE",
+    "ADVERSARIAL_HARDWARE_JUSTIFICATION",
+    "MODAL_BASETEN_HIRING"
+  ],
+  "authorization": {
+    "target_environment_value": null,
+    "effective_target": "auto",
+    "gpu_budget_usd": 0.0,
+    "accelerator_budget_usd": 0.0,
+    "allow_gpu": false,
+    "allow_multi_gpu": false,
+    "allow_multi_node": false,
+    "allow_rtl": false,
+    "allow_fpga_build": false,
+    "allow_external_resources": false,
+    "authorization_source": "All BranchFabric authorization variables absent at review time"
+  },
+  "available_target_environment": {
+    "cpu": "Apple M4 Pro",
+    "integrated_gpu": "Apple M4 Pro 16-core Metal 3, not exercised",
+    "compatible_cuda_gpu_count": 0,
+    "nvlink_available": false,
+    "rdma_available": false,
+    "physical_test_nic_path_measured": false,
+    "fpga_devices": [],
+    "dpu_devices": [],
+    "accelerator_tools": {
+      "nvcc": false,
+      "nvidia_smi": false,
+      "rocm_smi": false,
+      "rocminfo": false,
+      "xrt_smi": false,
+      "xbutil": false,
+      "vitis_hls": false,
+      "vivado": false,
+      "quartus_sh": false,
+      "verilator": false,
+      "iverilog": false,
+      "yosys": false
+    }
+  },
+  "artifact_snapshot": [
+    {
+      "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+      "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+      "role": "fanout_raw"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/fanout/summary.json",
+      "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4",
+      "role": "fanout_derived"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/fanout/fixture-evidence.jsonl",
+      "sha256": "cdc1b580d2127d11e264f264406a08969bda7447ac6f15b49f77eb663a6d802c",
+      "role": "fanout_fixture"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/fanout/manifest.json",
+      "sha256": "a55415259fd5ef81fecef2deff2d289e1daae2e2cb6ca4fd098658bee2708f9f",
+      "role": "fanout_manifest"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+      "sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+      "role": "reclamation_raw"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/reclamation/campaign.json",
+      "sha256": "0ca238f362feef351679e8426d6a763300949f7202d738b913287931e1a453c6",
+      "role": "reclamation_derived"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/reclamation/environment.json",
+      "sha256": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
+      "role": "reclamation_environment"
+    },
+    {
+      "path": "artifacts/branchfabric/execution/reclamation/MANIFEST.json",
+      "sha256": "c6a6357aaaabccde974ce07baad87f5911f83bdcc553679201342b7d28806ecf",
+      "role": "reclamation_manifest"
+    }
+  ],
+  "fanout_evidence": {
+    "evidence_class": "SYNTHETIC_CPU_REFERENCE_MODEL_STATE",
+    "timing_measurement_class": "HARDWARE_BACKED_HOST_CPU",
+    "raw_records": 144,
+    "measured_records": 108,
+    "warmup_records": 36,
+    "workload_classes": [
+      "coding_agent",
+      "reasoning_verification"
+    ],
+    "seeds": [
+      41,
+      73,
+      113
+    ],
+    "fanouts": [
+      8,
+      16,
+      32
+    ],
+    "queue_concurrency_maximum": 1,
+    "physical_network_measured": false,
+    "real_transformer_measured": false,
+    "cuda_gpu_measured": false,
+    "multi_gpu_measured": false,
+    "end_to_end_helix_transaction_measured": false,
+    "physical_byte_accounting": "DETERMINISTIC_SERIALIZED_STATE_BYTES_NOT_RSS_OS_PAGES_OR_GPU_ALLOCATION",
+    "software_effects": [
+      {
+        "workload_class": "coding_agent",
+        "fanout": 8,
+        "median_speedup": 102.27645561707448,
+        "physical_ready_byte_reduction": 0.8888888888888888,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000600597822242
+      },
+      {
+        "workload_class": "coding_agent",
+        "fanout": 16,
+        "median_speedup": 114.07700464226139,
+        "physical_ready_byte_reduction": 0.9411764705882353,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000533644088456
+      },
+      {
+        "workload_class": "coding_agent",
+        "fanout": 32,
+        "median_speedup": 123.88954860524092,
+        "physical_ready_byte_reduction": 0.9696969696969697,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000490876132113
+      },
+      {
+        "workload_class": "reasoning_verification",
+        "fanout": 8,
+        "median_speedup": 202.88759866770087,
+        "physical_ready_byte_reduction": 0.8888888888888888,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000238377684396
+      },
+      {
+        "workload_class": "reasoning_verification",
+        "fanout": 16,
+        "median_speedup": 225.37021789203357,
+        "physical_ready_byte_reduction": 0.9411764705882353,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000209972346428
+      },
+      {
+        "workload_class": "reasoning_verification",
+        "fanout": 32,
+        "median_speedup": 237.70767365757362,
+        "physical_ready_byte_reduction": 0.9696969696969697,
+        "ideal_zero_cost_local_lifecycle_speedup": 1.0000201313715205
+      }
+    ],
+    "maximum_ideal_zero_cost_local_lifecycle_speedup": 1.0000600597822242,
+    "maximum_readiness_fraction_of_local_lifecycle": 0.000060056175263484067,
+    "identical_new_suffix_bytes": {
+      "coding_agent": 163,
+      "reasoning_verification": 4259
+    },
+    "hardware_gate_eligible": false
+  },
+  "reclamation_evidence": {
+    "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+    "raw_trials": 36,
+    "trials_per_baseline": 18,
+    "seeds": [
+      41,
+      73,
+      113
+    ],
+    "repetitions": 2,
+    "trace_controls": [
+      "disabled",
+      "minimal",
+      "full"
+    ],
+    "software_baselines": [
+      "existing_serial",
+      "optimized_bounded_parallel"
+    ],
+    "root_state_bytes_range": [
+      5775,
+      5778
+    ],
+    "transferred_state_bytes_range": [
+      54496,
+      54528
+    ],
+    "maximum_host_concurrency": 4,
+    "maximum_host_queue_occupancy": 8,
+    "physical_gpu_capacity_reclaimed": 0,
+    "physical_gpu_bytes_reclaimed": 0,
+    "gpu_measured": false,
+    "network_fabric_measured": false,
+    "existing_interruption_p50_ns": 916021417,
+    "optimized_interruption_p50_ns": 803440334,
+    "software_interruption_speedup_p50": 1.1401237630671401,
+    "software_interruption_reduction_p50": 0.12290223886763119,
+    "existing_interruption_p99_ns": 967082166,
+    "optimized_interruption_p99_ns": 856559916,
+    "software_interruption_reduction_p99": 0.11428423962892109,
+    "software_migration_reduction_p50": 0.3225004453675897,
+    "software_migration_reduction_p99": 0.2622771654562369,
+    "confidence_bound_available": false,
+    "all_modeled_slo_restored": true,
+    "all_stale_and_corrupt_faults_rejected": true,
+    "all_transactions_completed": true,
+    "hidden_fallback": false,
+    "hardware_claim": false,
+    "hardware_gate_eligible": false,
+    "eligibility_rationale": "The transaction uses reference fixture state, constructed scheduler demand, local filesystem transport, one host destination store, and zero physical GPU capacity"
+  },
+  "placement_decisions": [
+    {
+      "placement": "CPU_SHARED_ROOT_LAZY_COW_AND_BOUNDED_PARALLEL_SOFTWARE",
+      "decision": "SELECT_FOR_CURRENT_EVIDENCE",
+      "rationale": "Measured software removes eager-copy cost and improves local migration without target hardware"
+    },
+    {
+      "placement": "GPU_KERNEL_OR_COPY_ENGINE",
+      "decision": "REJECT_UNMEASURED_UNAUTHORIZED",
+      "rationale": "No production KV allocation, CUDA GPU, GPU transfer, utilization, or interference evidence"
+    },
+    {
+      "placement": "FPGA",
+      "decision": "REJECT_UNAUTHORIZED_UNSIZED",
+      "rationale": "No authorization, toolchain, device, platform requirement, or credible resource envelope"
+    },
+    {
+      "placement": "DPU_SMARTNIC_MULTICAST",
+      "decision": "REJECT_UNAUTHORIZED_NO_PHYSICAL_MULTIDESTINATION_PATH",
+      "rationale": "Fanout is in-process and reclamation uses one local destination store; no physical NIC or repeated unicast to multiple destinations"
+    },
+    {
+      "placement": "CXL_OR_HBM_SHARED_ROOT_STORE",
+      "decision": "REJECT_NO_PHYSICAL_ALLOCATION_PRESSURE",
+      "rationale": "Only serialized/content-addressed byte accounting exists and optimized software is sufficient in the measured fixture"
+    },
+    {
+      "placement": "BRANCH_TRANSLATION_METADATA_UNIT",
+      "decision": "REJECT_NO_RESIDUAL_METADATA_CRITICAL_PATH",
+      "rationale": "No real metadata demand, miss, contention, working-set, queue, or system-headroom evidence"
+    }
+  ],
+  "gate_review": {
+    "observed_phase": "preliminary",
+    "observed_outcome": "FAIL_NO_BUILD",
+    "passing_candidates": [],
+    "hardware_implementation_allowed": false,
+    "functional_model_or_cycle_simulator_allowed": false,
+    "required_action": "TERMINATE_HARDWARE_PATH",
+    "outcome_correct": true,
+    "new_fanout_evidence_referenced": false,
+    "new_reclamation_evidence_referenced": false,
+    "final_gate_traceability_complete": false
+  },
+  "findings": [
+    {
+      "id": "BF-HA-H1",
+      "severity": "HIGH",
+      "title": "Mandatory real-evidence and platform gates remain impossible",
+      "impact": "No target-specific hardware work is authorized or evidence-backed",
+      "required_disposition": "TERMINATE_HARDWARE_PATH"
+    },
+    {
+      "id": "BF-HA-H2",
+      "severity": "HIGH",
+      "title": "High fanout exposes a solved software problem rather than residual hardware value",
+      "impact": "The strongest ideal-free residual bound is 1.000060x on a local reference lifecycle and no GPU capacity effect is measured",
+      "required_disposition": "RETAIN_SHARED_ROOT_LAZY_COW_SOFTWARE"
+    },
+    {
+      "id": "BF-HA-H3",
+      "severity": "HIGH",
+      "title": "The reclamation campaign is not the required physical serving and GPU transaction",
+      "impact": "Constructed scheduler evidence and zero reclaimed GPU bytes cannot establish end-to-end hardware relevance",
+      "required_disposition": "CLASSIFY_AS_CPU_REFERENCE_INTEGRATION_EVIDENCE_ONLY"
+    },
+    {
+      "id": "BF-HA-H4",
+      "severity": "HIGH",
+      "title": "The current preliminary gate omits both new campaigns",
+      "impact": "The current gate cannot be the final evidence-complete no-build artifact",
+      "required_disposition": "REFERENCE_AND_CLASSIFY_BOTH_RAW_CAMPAIGNS_IN_FINAL_GATE_WITHOUT_CHANGING_FAIL_OUTCOME"
+    },
+    {
+      "id": "BF-HA-M1",
+      "severity": "MEDIUM",
+      "title": "Measurement-producer revision is not internally reproducible",
+      "impact": "The reported baseline revision does not contain either new generator and no separate producer revision is bound",
+      "required_disposition": "DISTINGUISH_SEMANTIC_BASELINE_GENERATOR_REVISION_AND_PUBLICATION_REVISION"
+    },
+    {
+      "id": "BF-HA-M2",
+      "severity": "MEDIUM",
+      "title": "Reclamation transport is not the strongest relevant transfer baseline",
+      "impact": "Tiny per-chunk local spool fsync and one-store publication dominate the measured path",
+      "required_disposition": "BATCH_DEDUPLICATE_AND_AMORTIZE_PERSISTENCE_BEFORE_ANY_FUTURE_HARDWARE_COMPARISON"
+    },
+    {
+      "id": "BF-HA-M3",
+      "severity": "MEDIUM",
+      "title": "Reclamation tails and effect uncertainty are descriptive only",
+      "impact": "P99 equals maximum at n=18, trace levels are pooled, and no paired lower confidence bound exists",
+      "required_disposition": "DO_NOT_USE_AS_CONFIDENCE_BACKED_HARDWARE_HEADROOM"
+    }
+  ],
+  "validated_behavior": [
+    "All reviewed raw and manifest hashes match",
+    "Fanout software effects and residual ideal-free bounds reproduce",
+    "Reclamation descriptive percentiles and software speedup reproduce",
+    "All reclamation trials report completed transactions, modeled SLO restoration, stale-source rejection, corruption rejection, and no hidden fallback",
+    "No hardware claim, target RTL, BranchFabric hardware directory, or simulator directory exists",
+    "Focused fanout, reclamation, and gate tests pass"
+  ],
+  "validation": {
+    "focused_test_command": "uv run --locked pytest -q tests/python/test_branchfabric_fanout_vertical.py tests/python/test_branchfabric_reclamation.py tests/python/test_branchfabric_gates.py",
+    "focused_test_result": "PASS",
+    "focused_tests_passed": 14,
+    "manifest_hash_verification": "PASS",
+    "independent_summary_recalculation": "PASS"
+  },
+  "required_adversarial_question": {
+    "question": "Would this hardware have been selected from the measured workload if the BranchFabric name and prior architecture proposal did not already exist?",
+    "answer": "No",
+    "rationale": "A neutral architect would retain optimized CPU shared-root and bounded-parallel software and collect real model, GPU, network, and serving evidence before selecting hardware"
+  },
+  "modal_baseten_hiring_question": {
+    "question": "Does this demonstrate real hardware-software co-design, or is it a synthetic accel attached to a software project without end-to-end relevance?",
+    "answer": "It does not yet demonstrate real hardware-software co-design, and no synthetic accelerator was attached because the gate correctly stopped it",
+    "assessment": "The negative-result discipline, transaction integration, and measurement engineering are positive systems signals, but this is not a completed hardware co-design result"
+  },
+  "final_decision": "REJECT_ALL_BRANCHFABRIC_HARDWARE_RETAIN_OPTIMIZED_CPU_SOFTWARE_PUBLISH_VERIFIED_NO_BUILD"
+}
