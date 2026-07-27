@@ -1,0 +1,2027 @@
+{
+  "boundedness": {
+    "declared_branch_queue_capacity": 8,
+    "optimized_observed_maximum_concurrency": 4,
+    "optimized_observed_maximum_queue_occupancy": 8,
+    "serial_observed_maximum_concurrency": 1,
+    "serial_observed_maximum_queue_occupancy": 8
+  },
+  "early_ownership_commit_probe": {
+    "lease_unchanged": true,
+    "phase_at_attempt": "PROPOSED",
+    "rejected_as": "InvalidTransition"
+  },
+  "independent_trials": [
+    {
+      "canonical_sha256": "e9788dcb45477287c7dc2c3c288c4ea66938e849e21d82428a6e91b96f07b355",
+      "identity": {
+        "repetition": 91,
+        "seed": 73,
+        "software_baseline": "existing_serial",
+        "trace_level": "full"
+      },
+      "result": {
+        "actual_engine": "continuum-reference-cpu-local-file",
+        "admissions_stopped": true,
+        "all_transactions_completed": true,
+        "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+        "branch_count": 8,
+        "branch_readiness_ns": 124627041,
+        "candidate_fraction_scope": "summed inclusive host operation time divided by total wall time; parallel and COW/append observations overlap and fractions are not additive",
+        "candidate_operation_fraction_of_total_wall": {
+          "append": 0.010259110871788286,
+          "checkpoint": 0.20581106692421317,
+          "commit": 0.0017190394372181028,
+          "cow": 0.010259110871788286,
+          "delta": 0.006497944601156983,
+          "fork": 0.1483694378603222,
+          "reclaim": 1.6302495269806297e-05,
+          "transfer": 0.20459895011930462,
+          "transform": 0.012701587467827272
+        },
+        "corrupt_state_rejected": true,
+        "delta_bytes": 17664,
+        "end_to_end_denominator": "total_wall_ns",
+        "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+        "hidden_fallback": false,
+        "limitations": [
+          "No physical GPU, GPU memory, PCIe, NVLink, RDMA, NIC, FPGA, or DPU was exercised.",
+          "Reference model state is deterministic fixture state, not a production model KV allocation.",
+          "Reclaimed capacity is a Helix CPU scheduler unit; physical GPU reclamation is exactly zero.",
+          "Wall-clock samples are host observations and are not deterministic protocol outputs."
+        ],
+        "maximum_concurrency": 1,
+        "maximum_queue_occupancy": 8,
+        "migration_ns": 336904708,
+        "naive_branch_state_bytes": 46224,
+        "operation_samples": [
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1637958,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1656292,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1590291,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1620125,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1611208,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1627042,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1628500,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1607834,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 40466708,
+            "operation": "checkpoint",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 25610292,
+            "operation": "checkpoint",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 25791792,
+            "operation": "checkpoint",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 43668625,
+            "operation": "checkpoint",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 25902125,
+            "operation": "checkpoint",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 26113042,
+            "operation": "checkpoint",
+            "queue_occupancy": 3,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 47268584,
+            "operation": "checkpoint",
+            "queue_occupancy": 2,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 25559417,
+            "operation": "checkpoint",
+            "queue_occupancy": 1,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 136250,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 224666,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 135625,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 139500,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 113458,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 129125,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 115833,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 121125,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 141500,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 147459,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 117625,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 121333,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 140542,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 145750,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 114833,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 130208,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1637958,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1656292,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1590291,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1620125,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1611208,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1627042,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1628500,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 1038,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1607834,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1063583,
+            "operation": "delta",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1027000,
+            "operation": "delta",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1017375,
+            "operation": "delta",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1026959,
+            "operation": "delta",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1019125,
+            "operation": "delta",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1019833,
+            "operation": "delta",
+            "queue_occupancy": 3,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1027500,
+            "operation": "delta",
+            "queue_occupancy": 2,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1019459,
+            "operation": "delta",
+            "queue_occupancy": 1,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-root-73-91",
+            "bytes": 5778,
+            "concurrency": 1,
+            "detail": "eight-way content-addressed fork",
+            "duration_ns": 187708667,
+            "operation": "fork",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "branch-group",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "logical CPU rollout slots; zero physical GPU bytes",
+            "duration_ns": 20625,
+            "operation": "reclaim",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 70089833,
+            "operation": "transfer",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 24627166,
+            "operation": "transfer",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 28086417,
+            "operation": "transfer",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 28550250,
+            "operation": "transfer",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 26736500,
+            "operation": "transfer",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 28674541,
+            "operation": "transfer",
+            "queue_occupancy": 3,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 27414334,
+            "operation": "transfer",
+            "queue_occupancy": 2,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 24668042,
+            "operation": "transfer",
+            "queue_occupancy": 1,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-0",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 2553458,
+            "operation": "transform",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-1",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 2072625,
+            "operation": "transform",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-2",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 2053292,
+            "operation": "transform",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-3",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 2058625,
+            "operation": "transform",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-4",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1911209,
+            "operation": "transform",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-5",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1792625,
+            "operation": "transform",
+            "queue_occupancy": 3,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-6",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1897000,
+            "operation": "transform",
+            "queue_occupancy": 2,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-73-91-7",
+            "bytes": 6816,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1730500,
+            "operation": "transform",
+            "queue_occupancy": 1,
+            "result": "success"
+          }
+        ],
+        "operation_stats_ns": {
+          "append": {
+            "max": 1656292,
+            "p50": 1620125,
+            "p90": 1656292,
+            "p95": 1656292,
+            "p99": 1656292
+          },
+          "checkpoint": {
+            "max": 47268584,
+            "p50": 25902125,
+            "p90": 47268584,
+            "p95": 47268584,
+            "p99": 47268584
+          },
+          "commit": {
+            "max": 224666,
+            "p50": 130208,
+            "p90": 147459,
+            "p95": 224666,
+            "p99": 224666
+          },
+          "cow": {
+            "max": 1656292,
+            "p50": 1620125,
+            "p90": 1656292,
+            "p95": 1656292,
+            "p99": 1656292
+          },
+          "delta": {
+            "max": 1063583,
+            "p50": 1019833,
+            "p90": 1063583,
+            "p95": 1063583,
+            "p99": 1063583
+          },
+          "fork": {
+            "max": 187708667,
+            "p50": 187708667,
+            "p90": 187708667,
+            "p95": 187708667,
+            "p99": 187708667
+          },
+          "reclaim": {
+            "max": 20625,
+            "p50": 20625,
+            "p90": 20625,
+            "p95": 20625,
+            "p99": 20625
+          },
+          "transfer": {
+            "max": 70089833,
+            "p50": 27414334,
+            "p90": 70089833,
+            "p95": 70089833,
+            "p99": 70089833
+          },
+          "transform": {
+            "max": 2553458,
+            "p50": 1911209,
+            "p90": 2553458,
+            "p95": 2553458,
+            "p99": 2553458
+          }
+        },
+        "pause_checkpoint_ns": 278867875,
+        "physical_branch_state_bytes": 5778,
+        "physical_gpu_bytes_reclaimed": 0,
+        "physical_gpu_capacity_reclaimed": 0,
+        "reclaimed_capacity_units": 8,
+        "repetition": 91,
+        "requested_engine": "continuum-reference-cpu-local-file",
+        "resume_ns": 266097583,
+        "root_state_bytes": 5778,
+        "scheduler_plan_id": "50ba7145bfd5c744191982abb478cd6a87498d072cfc5f28db66c8dbb4bf48ce",
+        "schema_version": "sloforge.branchfabric.reclamation-trial/v1",
+        "seed": 73,
+        "sharing_saved_bytes": 40446,
+        "slo_restore_ns": 278908458,
+        "slo_restored": true,
+        "software_baseline": "existing_serial",
+        "spike_tick": 2,
+        "stale_source_rejected": true,
+        "total_interruption_ns": 909877167,
+        "total_wall_ns": 1265143750,
+        "trace_level": "full",
+        "transferred_state_bytes": 54528,
+        "work_lost_ticks": 0,
+        "work_preserved_ticks": 12,
+        "worker_bound": 1
+      }
+    },
+    {
+      "canonical_sha256": "962a0ce5d7688e5c18c1ffe05572f521365266f3aebc584b7c52a89610aa086e",
+      "identity": {
+        "repetition": 92,
+        "seed": 113,
+        "software_baseline": "optimized_bounded_parallel",
+        "trace_level": "full"
+      },
+      "result": {
+        "actual_engine": "continuum-reference-cpu-local-file",
+        "admissions_stopped": true,
+        "all_transactions_completed": true,
+        "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+        "branch_count": 8,
+        "branch_readiness_ns": 123169667,
+        "candidate_fraction_scope": "summed inclusive host operation time divided by total wall time; parallel and COW/append observations overlap and fractions are not additive",
+        "candidate_operation_fraction_of_total_wall": {
+          "append": 0.011158620897574776,
+          "checkpoint": 0.9772560050682714,
+          "commit": 0.002596595498433752,
+          "cow": 0.011158620897574776,
+          "delta": 0.02177561509946231,
+          "fork": 0.1615401573827219,
+          "reclaim": 1.849433315844503e-05,
+          "transfer": 0.5427613051049937,
+          "transform": 0.01687124354794068
+        },
+        "corrupt_state_rejected": true,
+        "delta_bytes": 17632,
+        "end_to_end_denominator": "total_wall_ns",
+        "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+        "hidden_fallback": false,
+        "limitations": [
+          "No physical GPU, GPU memory, PCIe, NVLink, RDMA, NIC, FPGA, or DPU was exercised.",
+          "Reference model state is deterministic fixture state, not a production model KV allocation.",
+          "Reclaimed capacity is a Helix CPU scheduler unit; physical GPU reclamation is exactly zero.",
+          "Wall-clock samples are host observations and are not deterministic protocol outputs."
+        ],
+        "maximum_concurrency": 4,
+        "maximum_queue_occupancy": 8,
+        "migration_ns": 225310791,
+        "naive_branch_state_bytes": 46200,
+        "operation_samples": [
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1622458,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1584792,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1659709,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1668625,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1661750,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1741167,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1670333,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1715625,
+            "operation": "append",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 6812,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 139454583,
+            "operation": "checkpoint",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 6812,
+            "concurrency": 2,
+            "detail": "",
+            "duration_ns": 108505625,
+            "operation": "checkpoint",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 6812,
+            "concurrency": 3,
+            "detail": "",
+            "duration_ns": 118822416,
+            "operation": "checkpoint",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 120193542,
+            "operation": "checkpoint",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 176959791,
+            "operation": "checkpoint",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 172548583,
+            "operation": "checkpoint",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 170870000,
+            "operation": "checkpoint",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 159582458,
+            "operation": "checkpoint",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 158917,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 259042,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 112542,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 373291,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 124917,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 190083,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 123291,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 140333,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 127750,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 252958,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 128375,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 305792,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 131125,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 265542,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 116125,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "durable SQLite ownership CAS",
+            "duration_ns": 290500,
+            "operation": "commit",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1622458,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1584792,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1659709,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1668625,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1661750,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1741167,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1670333,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 1037,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1715625,
+            "operation": "cow",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 1374708,
+            "operation": "delta",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 0,
+            "concurrency": 2,
+            "detail": "",
+            "duration_ns": 8989166,
+            "operation": "delta",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 0,
+            "concurrency": 3,
+            "detail": "",
+            "duration_ns": 3379375,
+            "operation": "delta",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 0,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 4202750,
+            "operation": "delta",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 0,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 3567291,
+            "operation": "delta",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 0,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 2504916,
+            "operation": "delta",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 0,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 1032750,
+            "operation": "delta",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 0,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 951208,
+            "operation": "delta",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-root-113-92",
+            "bytes": 5775,
+            "concurrency": 1,
+            "detail": "eight-way content-addressed fork",
+            "duration_ns": 192894375,
+            "operation": "fork",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "branch-group",
+            "bytes": 0,
+            "concurrency": 1,
+            "detail": "logical CPU rollout slots; zero physical GPU bytes",
+            "duration_ns": 22084,
+            "operation": "reclaim",
+            "queue_occupancy": 0,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 6812,
+            "concurrency": 1,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 107739791,
+            "operation": "transfer",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 6812,
+            "concurrency": 2,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 112073000,
+            "operation": "transfer",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 6812,
+            "concurrency": 3,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 99222083,
+            "operation": "transfer",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 103179458,
+            "operation": "transfer",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 62401833,
+            "operation": "transfer",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 55233917,
+            "operation": "transfer",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 49075500,
+            "operation": "transfer",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "real local filesystem spool with digest validation",
+            "duration_ns": 59183250,
+            "operation": "transfer",
+            "queue_occupancy": 4,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-0",
+            "bytes": 6812,
+            "concurrency": 1,
+            "detail": "",
+            "duration_ns": 2002792,
+            "operation": "transform",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-1",
+            "bytes": 6812,
+            "concurrency": 2,
+            "detail": "",
+            "duration_ns": 2589125,
+            "operation": "transform",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-2",
+            "bytes": 6812,
+            "concurrency": 3,
+            "detail": "",
+            "duration_ns": 5288416,
+            "operation": "transform",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-3",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 1891458,
+            "operation": "transform",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-4",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 2501667,
+            "operation": "transform",
+            "queue_occupancy": 7,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-5",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 1797667,
+            "operation": "transform",
+            "queue_occupancy": 6,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-6",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 2045209,
+            "operation": "transform",
+            "queue_occupancy": 5,
+            "result": "success"
+          },
+          {
+            "branch_id": "bf-branch-113-92-7",
+            "bytes": 6812,
+            "concurrency": 4,
+            "detail": "",
+            "duration_ns": 2029542,
+            "operation": "transform",
+            "queue_occupancy": 4,
+            "result": "success"
+          }
+        ],
+        "operation_stats_ns": {
+          "append": {
+            "max": 1741167,
+            "p50": 1661750,
+            "p90": 1741167,
+            "p95": 1741167,
+            "p99": 1741167
+          },
+          "checkpoint": {
+            "max": 176959791,
+            "p50": 139454583,
+            "p90": 176959791,
+            "p95": 176959791,
+            "p99": 176959791
+          },
+          "commit": {
+            "max": 373291,
+            "p50": 140333,
+            "p90": 305792,
+            "p95": 373291,
+            "p99": 373291
+          },
+          "cow": {
+            "max": 1741167,
+            "p50": 1661750,
+            "p90": 1741167,
+            "p95": 1741167,
+            "p99": 1741167
+          },
+          "delta": {
+            "max": 8989166,
+            "p50": 2504916,
+            "p90": 8989166,
+            "p95": 8989166,
+            "p99": 8989166
+          },
+          "fork": {
+            "max": 192894375,
+            "p50": 192894375,
+            "p90": 192894375,
+            "p95": 192894375,
+            "p99": 192894375
+          },
+          "reclaim": {
+            "max": 22084,
+            "p50": 22084,
+            "p90": 22084,
+            "p95": 22084,
+            "p99": 22084
+          },
+          "transfer": {
+            "max": 112073000,
+            "p50": 62401833,
+            "p90": 112073000,
+            "p95": 112073000,
+            "p99": 112073000
+          },
+          "transform": {
+            "max": 5288416,
+            "p50": 2029542,
+            "p90": 5288416,
+            "p95": 5288416,
+            "p99": 5288416
+          }
+        },
+        "pause_checkpoint_ns": 304097667,
+        "physical_branch_state_bytes": 5775,
+        "physical_gpu_bytes_reclaimed": 0,
+        "physical_gpu_capacity_reclaimed": 0,
+        "reclaimed_capacity_units": 8,
+        "repetition": 92,
+        "requested_engine": "continuum-reference-cpu-local-file",
+        "resume_ns": 270651083,
+        "root_state_bytes": 5775,
+        "scheduler_plan_id": "c026170cd5d29c040fe7c37c5753485ae50ad0e027584ad497a1e8c95cb1955d",
+        "schema_version": "sloforge.branchfabric.reclamation-trial/v1",
+        "seed": 113,
+        "sharing_saved_bytes": 40425,
+        "slo_restore_ns": 304142583,
+        "slo_restored": true,
+        "software_baseline": "optimized_bounded_parallel",
+        "spike_tick": 2,
+        "stale_source_rejected": true,
+        "total_interruption_ns": 827205458,
+        "total_wall_ns": 1194095500,
+        "trace_level": "full",
+        "transferred_state_bytes": 54496,
+        "work_lost_ticks": 0,
+        "work_preserved_ticks": 12,
+        "worker_bound": 4
+      }
+    }
+  ],
+  "limitations": [
+    "CPU reference transaction only; no GPU, PCIe, NVLink, RDMA, NIC, FPGA, or DPU was exercised.",
+    "Dynamic ordering instrumentation proves the exercised resume_checkpoint call order, not all possible distributed executions.",
+    "The corruption probe rejects during restore before a migration transaction begins; it does not exercise transaction abort after partial import.",
+    "The run_trial stale-source probe exercises source fencing; gateway stale-epoch rejection is covered by focused gateway tests, not the raw trial field.",
+    "The bounded Rust model checker explores its declared finite state space and is not a universal proof."
+  ],
+  "progress_guard_probe": {
+    "durable_state_version_after_rejections": 7,
+    "durable_token_index_after_rejections": 5,
+    "regression_rejected_as": "CoordinatorConflict",
+    "stale_fencing_token_rejected_as": "StaleOwner"
+  },
+  "review_role": "independent_continuum_transaction_security_bounded_verification",
+  "schema_version": "sloforge.branchfabric.reclamation-independent-replication/v1",
+  "source_artifact_hashes": {
+    "campaign": "0ca238f362feef351679e8426d6a763300949f7202d738b913287931e1a453c6",
+    "environment": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
+    "raw_trials": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d"
+  },
+  "source_campaign_matrix": {
+    "seeds": [
+      41,
+      73,
+      113
+    ],
+    "software_baselines": [
+      "existing_serial",
+      "optimized_bounded_parallel"
+    ],
+    "trace_levels": [
+      "disabled",
+      "full",
+      "minimal"
+    ]
+  },
+  "source_campaign_trial_count_verified": 36,
+  "source_manifest_verified": true,
+  "source_revision": "3ad119a7e70ed1258acc15eb11d3eed13904ea4c",
+  "transaction_visibility_order": {
+    "branch_count_verified": 16,
+    "expected": [
+      "destination_validated",
+      "ownership_committed",
+      "gateway_switched",
+      "destination_activated"
+    ],
+    "per_branch": {
+      "bf-branch-113-92-0": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-1": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-2": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-3": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-4": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-5": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-6": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-113-92-7": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-0": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-1": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-2": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-3": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-4": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-5": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-6": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ],
+      "bf-branch-73-91-7": [
+        {
+          "continuation_valid": true,
+          "event": "destination_validated",
+          "structurally_valid": true
+        },
+        {
+          "event": "ownership_committed",
+          "fencing_token": 3,
+          "owner_epoch": 3
+        },
+        {
+          "destination_epoch": 3,
+          "event": "gateway_switched",
+          "expected_epoch": 2,
+          "watermark": 15
+        },
+        {
+          "event": "destination_activated",
+          "fencing_token_present": true,
+          "owner_epoch": 3
+        }
+      ]
+    }
+  },
+  "verification_result": "PASS_WITH_SCOPE_LIMITATIONS"
+}
