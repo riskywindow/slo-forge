@@ -668,7 +668,7 @@ def run_trial(
     transport = LocalFileTransport(work_root / "spool")
     migration_started = time.perf_counter_ns()
 
-    def transfer_task(branch_id: str, checkpoint: Any) -> Callable[[int, int], Any]:
+    def transform_task(branch_id: str, checkpoint: Any) -> Callable[[int, int], Any]:
         def execute(concurrency: int, occupancy: int) -> Any:
             capture = restore_reference_capture(
                 checkpoint,
@@ -688,32 +688,82 @@ def run_trial(
                 concurrency=concurrency,
                 queue_occupancy=occupancy,
             )
-            return recorder.measure(
-                "transfer",
-                branch_id,
-                lambda: transport.transfer(
-                    source=source_store,
-                    destination=destination_store,
-                    tenant_id=_TENANT,
-                    references=checkpoint.chunk_references,
-                    deadline_us=60_000_000,
-                    seed=seed,
-                ),
-                bytes_count=sum(ref.size_bytes for ref in checkpoint.chunk_references),
-                concurrency=concurrency,
-                queue_occupancy=occupancy,
-                detail="real local filesystem spool with digest validation",
-            )
+            return checkpoint
 
         return execute
 
-    receipts, transfer_concurrency, transfer_queue = _bounded_map(
+    transformed_checkpoints, transform_concurrency, transform_queue = _bounded_map(
         [
-            transfer_task(branch_id, checkpoint)
+            transform_task(branch_id, checkpoint)
             for branch_id, checkpoint in zip(branch_ids, checkpoints, strict=True)
         ],
         workers,
     )
+    logical_transfer_bytes = sum(
+        reference.size_bytes
+        for checkpoint in transformed_checkpoints
+        for reference in checkpoint.chunk_references
+    )
+    if baseline == "optimized_bounded_parallel":
+        unique_references = {
+            reference.digest: reference
+            for checkpoint in transformed_checkpoints
+            for reference in checkpoint.chunk_references
+        }
+        references_by_digest = tuple(unique_references[key] for key in sorted(unique_references))
+        receipts = [
+            recorder.measure(
+                "transfer",
+                "branch-group",
+                lambda: transport.transfer(
+                    source=source_store,
+                    destination=destination_store,
+                    tenant_id=_TENANT,
+                    references=references_by_digest,
+                    deadline_us=60_000_000,
+                    seed=seed,
+                ),
+                bytes_count=sum(ref.size_bytes for ref in references_by_digest),
+                concurrency=1,
+                queue_occupancy=1,
+                detail=(
+                    "single batched content-addressed transfer of unique chunks with digest "
+                    "validation"
+                ),
+            )
+        ]
+        transfer_concurrency = 1
+        transfer_queue = 1
+    else:
+
+        def transfer_task(branch_id: str, checkpoint: Any) -> Callable[[int, int], Any]:
+            def execute(concurrency: int, occupancy: int) -> Any:
+                return recorder.measure(
+                    "transfer",
+                    branch_id,
+                    lambda: transport.transfer(
+                        source=source_store,
+                        destination=destination_store,
+                        tenant_id=_TENANT,
+                        references=checkpoint.chunk_references,
+                        deadline_us=60_000_000,
+                        seed=seed,
+                    ),
+                    bytes_count=sum(ref.size_bytes for ref in checkpoint.chunk_references),
+                    concurrency=concurrency,
+                    queue_occupancy=occupancy,
+                    detail="per-branch local filesystem spool with digest validation",
+                )
+
+            return execute
+
+        receipts, transfer_concurrency, transfer_queue = _bounded_map(
+            [
+                transfer_task(branch_id, checkpoint)
+                for branch_id, checkpoint in zip(branch_ids, transformed_checkpoints, strict=True)
+            ],
+            workers,
+        )
     migration_ns = max(1, time.perf_counter_ns() - migration_started)
 
     corrupt_rejected = False
@@ -849,7 +899,9 @@ def run_trial(
         "physical_branch_state_bytes": physical_branch_bytes,
         "sharing_saved_bytes": max(0, naive_branch_bytes - physical_branch_bytes),
         "delta_bytes": delta_bytes,
+        "logical_transfer_bytes_requested": logical_transfer_bytes,
         "transferred_state_bytes": state_bytes,
+        "transfer_reuse_saved_bytes": max(0, logical_transfer_bytes - state_bytes),
         "branch_readiness_ns": branch_readiness_ns,
         "pause_checkpoint_ns": pause_checkpoint_ns,
         "migration_ns": migration_ns,
@@ -857,9 +909,14 @@ def run_trial(
         "total_interruption_ns": total_interruption_ns,
         "total_wall_ns": total_ns,
         "end_to_end_denominator": "total_wall_ns",
-        "maximum_queue_occupancy": max(checkpoint_queue, transfer_queue, resume_queue),
+        "maximum_queue_occupancy": max(
+            checkpoint_queue, transform_queue, transfer_queue, resume_queue
+        ),
         "maximum_concurrency": max(
-            checkpoint_concurrency, transfer_concurrency, resume_concurrency
+            checkpoint_concurrency,
+            transform_concurrency,
+            transfer_concurrency,
+            resume_concurrency,
         ),
         "stale_source_rejected": stale_rejected,
         "corrupt_state_rejected": corrupt_rejected,
@@ -880,6 +937,7 @@ def run_trial(
             "No physical GPU, GPU memory, PCIe, NVLink, RDMA, NIC, FPGA, or DPU was exercised.",
             "Reference model state is deterministic fixture state, not a production model KV allocation.",
             "Reclaimed capacity is a Helix CPU scheduler unit; physical GPU reclamation is exactly zero.",
+            "The optimized transfer batches unique content-addressed chunks once; it remains a local-file baseline, not a physical fabric measurement.",
             "Wall-clock samples are host observations and are not deterministic protocol outputs.",
         ],
     }

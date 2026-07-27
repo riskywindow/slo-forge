@@ -31,6 +31,10 @@ def test_causal_cpu_reference_reclamation_is_transactional(tmp_path: Path) -> No
     assert 1 < result["maximum_concurrency"] <= 4
     assert result["maximum_queue_occupancy"] <= 8
     assert result["transferred_state_bytes"] > 0
+    assert result["logical_transfer_bytes_requested"] > result["transferred_state_bytes"]
+    assert result["transfer_reuse_saved_bytes"] == (
+        result["logical_transfer_bytes_requested"] - result["transferred_state_bytes"]
+    )
     assert result["sharing_saved_bytes"] > 0
     for operation in (
         "fork",
