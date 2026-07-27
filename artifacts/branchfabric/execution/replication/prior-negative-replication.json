@@ -1,0 +1,597 @@
+{
+  "schema_version": "sloforge.branchfabric.execution-prior-negative-replication/v1",
+  "scope": "Independent read-only recomputation of prior BranchFabric negative findings from tracked artifacts",
+  "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+  "replication_date": "2026-08-09",
+  "mutation_policy": "No source measurement, raw artifact, gate logic, or source performance result was modified",
+  "evidence_policy": "Workload provenance and timing measurement class remain separate; synthetic model-state accounting and simulated transport are not hardware evidence",
+  "sources": [
+    {
+      "path": "artifacts/branchfabric/CORPUS_MANIFEST.json",
+      "sha256": "bfdd1bfa2435dbc2613123e1dd8746b6b5b3e4b2b7f74f16328d6aa420f1a6e8",
+      "size_bytes": 12547,
+      "role": "designated corpus index",
+      "evidence_class": "MIXED_SEE_MANIFEST"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/raw-lifecycle-events.json",
+      "sha256": "c98aee00cb9f8304ae2d4955c3c9ddb2ff702fc58f77946eb3b2107290afecc5",
+      "size_bytes": 136520,
+      "role": "four-sibling sharing source",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/sharing-analysis.json",
+      "sha256": "e63b8e1f6ef2a57999fffba6a5437b5131ae9008bf738cd50f119199ed34dd71",
+      "size_bytes": 1318,
+      "role": "reported sharing result",
+      "evidence_class": "SYNTHETIC_MODEL_STATE_ACCOUNTING"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl",
+      "sha256": "fb2be4a476d0508e737f2ed568d4e4cd06ed64d5289d4ba2f16a18f86598f4eb",
+      "size_bytes": 31066,
+      "role": "tracked Helix Amdahl constituent",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/workload/cpu-reference-final.json",
+      "sha256": "aed70e3651dad3dafbf1f4427c422ebef2e759a93711853cd8af02f1761c7c4b",
+      "size_bytes": 24423,
+      "role": "reported divergence and workload result",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/alternative-tool.json",
+      "sha256": "fdea44e301c279ad372fb2086c2221b5b4c0de429bf1faaf7fd3c00abd892cf8",
+      "size_bytes": 3449,
+      "role": "exact trajectory source",
+      "evidence_class": "SYNTHETIC"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/different-rng.json",
+      "sha256": "5d8d2e36f651792240340fd33dbac480c71e442629af0b353585f5b51463c803",
+      "size_bytes": 3445,
+      "role": "exact trajectory source",
+      "evidence_class": "SYNTHETIC"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/forced-alternative.json",
+      "sha256": "09441a4df75294e54d90ef7e4825f30e0536545ca4a003d2b172d1146ea983e8",
+      "size_bytes": 3466,
+      "role": "exact trajectory source",
+      "evidence_class": "SYNTHETIC"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/verifier-assisted.json",
+      "sha256": "1470269a0f985ede93fc0f7bd9565abe225c70feb68b13a742109548506a2dc8",
+      "size_bytes": 3466,
+      "role": "exact trajectory source",
+      "evidence_class": "SYNTHETIC"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+      "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+      "size_bytes": 33195,
+      "role": "Continuum operation, COW, transport, and Amdahl source",
+      "evidence_class": "SYNTHETIC_WORKLOAD/MIXED_HOST_REAL_AND_SIMULATED_TRANSPORT_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
+      "sha256": "bf4565b2db19edfdf1a9cee7a3f41810d23885fccab910b515314ab4aece6a9e",
+      "size_bytes": 687,
+      "role": "reported Continuum sharing and logical COW result",
+      "evidence_class": "SYNTHETIC_LOGICAL_PAGE_ACCOUNTING"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/transport/cpu-reference-v3.json",
+      "sha256": "7760078aa431e8822225e6805e58be6862b2a47f4c1ee0f60e71983b345e3e80",
+      "size_bytes": 12383,
+      "role": "reported transport and multicast result",
+      "evidence_class": "SYNTHETIC_WORKLOAD/MIXED_HOST_REAL_AND_SIMULATED_TRANSPORT_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/software-baselines/seed-20260809/software-baselines.json",
+      "sha256": "017b7385ba31cf913582f85f79b20e71976c3e193ab1524c844c4b434621bb9b",
+      "size_bytes": 686684,
+      "role": "raw and summarized controlled software baselines",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/overhead-raw-samples.json",
+      "sha256": "492e90f1ea0ca35f4db4e664efacd06f9c08e20dad7f6967982a2eedd876c2df",
+      "size_bytes": 34839,
+      "role": "canonical instrumentation-overhead raw trials",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/instrumentation-overhead.json",
+      "sha256": "137b95696861539271d3a26299c82f99a4648a552dce04897808463744da46f2",
+      "size_bytes": 100449,
+      "role": "reported canonical instrumentation-overhead statistics",
+      "evidence_class": "SYNTHETIC/HARDWARE_BACKED_REAL_HOST_TIMING"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+      "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+      "size_bytes": 15002,
+      "role": "reported lifecycle-window Amdahl sensitivity",
+      "evidence_class": "SYNTHETIC_WORKLOAD/MIXED_TIMING_CLASS"
+    }
+  ],
+  "untracked_follow_up_evidence": {
+    "policy": "Read in place from the main workspace after the baseline-tree audit; not copied or committed because the files are user-owned and untracked",
+    "files": [
+      {
+        "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/000-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "main_workspace_absolute_path": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/000-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "sha256": "18cf226911fb4ad7f062e4ec0d958816114237a8d16a4321e777da10e6ad230b",
+        "size_bytes": 31067,
+        "git_status": "UNTRACKED",
+        "event_count": 17,
+        "total_duration_ns": 445814375,
+        "cow_handling_ns": 1778333,
+        "reclamation_ns": 1104873,
+        "cow_operation_count": 4,
+        "reclamation_operation_count": 4
+      },
+      {
+        "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/004-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "main_workspace_absolute_path": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/004-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "sha256": "fa0368960a8690c728c454b997dfc18affca428e4c1ddd105841e9abbff6447e",
+        "size_bytes": 31066,
+        "git_status": "UNTRACKED",
+        "event_count": 17,
+        "total_duration_ns": 468730875,
+        "cow_handling_ns": 1789208,
+        "reclamation_ns": 1133542,
+        "cow_operation_count": 4,
+        "reclamation_operation_count": 4
+      }
+    ],
+    "combined_with_tracked_vertical_trace": {
+      "sample_count": 3,
+      "total_duration_ns": 1361606208,
+      "cow_handling_ns": 5228000,
+      "reclamation_ns": 3302872,
+      "cow_operation_count": 12,
+      "reclamation_operation_count": 12,
+      "published_helix_aggregate_exact_match": true
+    },
+    "disposition": "NUMERICALLY_CLOSED_IN_CURRENT_LOCAL_WORKSPACE_BUT_NOT_PUBLISHED_OR_BASELINE_REPRODUCIBLE"
+  },
+  "corpus_integrity": {
+    "status": "PASS_WITH_DEPENDENCY_CLOSURE_FINDING",
+    "designated_artifact_count": 40,
+    "designated_bytes": 8603992,
+    "hash_algorithm": "sha256(sorted path NUL sha256 NUL size newline)",
+    "recorded_corpus_sha256": "9e000d81afc102c5a05666d6fb48859cb4e136a72ad6fc59f5ce086bfaa0b5d3",
+    "recomputed_corpus_sha256": "9e000d81afc102c5a05666d6fb48859cb4e136a72ad6fc59f5ce086bfaa0b5d3",
+    "entry_hash_mismatches": 0,
+    "entry_size_mismatches": 0,
+    "dependency_closure_complete": false,
+    "dependency_closure_note": "Two raw trace paths cited by the Helix Amdahl aggregate are absent from the tracked tree and from the designated corpus; later read-only inspection found matching untracked local files whose values exactly close the aggregate"
+  },
+  "recomputed_findings": {
+    "four_sibling_model_state_sharing": {
+      "status": "MATCH",
+      "branch_count": 4,
+      "logical_branch_bytes": 10672,
+      "shared_logical_bytes": 8852,
+      "physical_allocated_bytes": 2668,
+      "naive_independent_bytes": 10672,
+      "sharing_efficiency": 0.75,
+      "physical_amplification": 1.0,
+      "interpretation": "Content-addressed accounting for a tiny simulated model-state fixture; not RSS, HBM, GPU page, or allocator evidence"
+    },
+    "immediate_divergence": {
+      "status": "MATCH",
+      "branch_count": 4,
+      "token_sequences": [
+        ["ast_guided"],
+        ["naive_parse"],
+        ["guarded_parse"],
+        ["verifier_assisted"]
+      ],
+      "action_sequences": [
+        ["ast_guided"],
+        ["naive_parse"],
+        ["guarded_parse"],
+        ["verifier_assisted"]
+      ],
+      "first_divergent_token_index": 0,
+      "first_divergent_action_index": 0,
+      "interpretation": "One complete synthetic fanout-four group; no production divergence distribution"
+    },
+    "continuum_operation_multiset_and_cow": {
+      "status": "MATCH",
+      "event_count": 18,
+      "operation_multiset": {
+        "STATE_APPEND": 1,
+        "STATE_COMMIT": 1,
+        "STATE_COW": 1,
+        "STATE_DELTA": 1,
+        "STATE_FORK": 1,
+        "STATE_PUBLISH": 1,
+        "STATE_RECEIVE": 4,
+        "STATE_RECLAIM": 1,
+        "STATE_RESHARD": 1,
+        "STATE_SEND": 4,
+        "STATE_SNAPSHOT": 2
+      },
+      "cow_bytes": 512,
+      "cow_page_count": 8,
+      "interpretation": "Logical page-refcount attribution in a synthetic host fixture; not an OS or GPU page-fault measurement"
+    },
+    "transport_and_multicast": {
+      "status": "MATCH",
+      "send_event_count": 4,
+      "send_fanouts": [1, 1, 1, 1],
+      "source_payload_bytes": 8114,
+      "logical_delivery_bytes": 8114,
+      "receive_payload_bytes": 8114,
+      "retry_payload_bytes": 0,
+      "multicast_opportunity_count": 0,
+      "ungrouped_send_event_count": 4,
+      "reducible_bytes_at_minimum_fanouts_2_4_8_16_32_64_128": [0, 0, 0, 0, 0, 0, 0],
+      "interpretation": "One host-memory send and three simulated-network sends; zero observed repeated unicast is not evidence about unmeasured workloads"
+    },
+    "strongest_software_baselines": {
+      "status": "MATCH",
+      "selection_method": "Recompute the median of all seven non-warmup raw durations per case, then choose the lowest median among each recorded equivalence set",
+      "transform_comparison": {
+        "direct_case_id": "transform.continuum_direct_convert_capture",
+        "direct_median_duration_ns": 8905459,
+        "selected_case_id": "transform.trusted_canonical_staged",
+        "selected_median_duration_ns": 5899000,
+        "selected_sample_count": 7
+      },
+      "selected": [
+        {
+          "selection_id": "best.transform",
+          "case_id": "transform.trusted_canonical_staged",
+          "median_duration_ns": 5899000,
+          "median_logical_throughput_bytes_per_second": 12167486.014578743,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.hash",
+          "case_id": "hash.hashlib_sha256_whole",
+          "median_duration_ns": 79333,
+          "median_logical_throughput_bytes_per_second": 3304350018.2773876,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.in_process_transfer",
+          "case_id": "in_process_transfer.continuum_in_process.chunk_65536.concurrency_4",
+          "median_duration_ns": 296708,
+          "median_logical_throughput_bytes_per_second": 883508365.1266565,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.2",
+          "case_id": "software_fanout.repeated_unicast.fanout_2",
+          "median_duration_ns": 36000,
+          "median_logical_throughput_bytes_per_second": 14563555555.555555,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.4",
+          "case_id": "software_fanout.binary_tree.fanout_4",
+          "median_duration_ns": 80542,
+          "median_logical_throughput_bytes_per_second": 13018996300.067045,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.8",
+          "case_id": "software_fanout.repeated_unicast.fanout_8",
+          "median_duration_ns": 139792,
+          "median_logical_throughput_bytes_per_second": 15001945747.96841,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.16",
+          "case_id": "software_fanout.binary_tree.fanout_16",
+          "median_duration_ns": 294083,
+          "median_logical_throughput_bytes_per_second": 14262313700.553925,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.32",
+          "case_id": "software_fanout.repeated_unicast.fanout_32",
+          "median_duration_ns": 524875,
+          "median_logical_throughput_bytes_per_second": 15982106215.76566,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.64",
+          "case_id": "software_fanout.repeated_unicast.fanout_64",
+          "median_duration_ns": 1114750,
+          "median_logical_throughput_bytes_per_second": 15050204978.694775,
+          "sample_count": 7
+        },
+        {
+          "selection_id": "best.software_fanout.128",
+          "case_id": "software_fanout.binary_tree.fanout_128",
+          "median_duration_ns": 2374333,
+          "median_logical_throughput_bytes_per_second": 14132150797.71877,
+          "sample_count": 7
+        }
+      ],
+      "interpretation": "Controlled host-memory microbenchmarks only; software fanout timing does not create an observed multicast workload"
+    },
+    "instrumentation_overhead": {
+      "status": "MATCH_CANONICAL_V5",
+      "trial_count": 21,
+      "warmup_count": 3,
+      "measured_samples_per_level": 6,
+      "seeds": [41, 73, 113],
+      "repetitions_per_seed": 2,
+      "semantic_equivalence_verified": true,
+      "wall_time_median_ns": {
+        "disabled": 11344447395.5,
+        "minimal": 11378086833.0,
+        "full": 11389598208.0
+      },
+      "cpu_time_median_ns": {
+        "disabled": 2162809000.0,
+        "minimal": 2193251000.0,
+        "full": 2179386000.0
+      },
+      "full_minus_disabled_paired_wall": {
+        "median_difference_ns": 37781250.0,
+        "median_relative_change": 0.003328247547441236
+      },
+      "full_minus_disabled_paired_end_to_end_including_persistence": {
+        "median_difference_ns": 43978271.0,
+        "median_relative_change": 0.0038745076917397095
+      },
+      "full_persistence_median_ns": 6090458.5,
+      "full_persistence_median_bytes": 210867.0,
+      "interpretation": "Low-rate 87-event synthetic macro workload; does not validate future command-rate overhead"
+    },
+    "amdahl": {
+      "status": "ARITHMETIC_MATCH_RAW_CLOSURE_INCOMPLETE",
+      "formula": "speedup = total_duration_ns / (total_duration_ns - primitive_exclusive_duration_ns + primitive_exclusive_duration_ns / acceleration); free removes the primitive term",
+      "continuum_inputs_recomputed_from_raw": {
+        "total_duration_ns": 99756167,
+        "reshard_ns": 1665291,
+        "delta_extraction_ns": 605500,
+        "transaction_commit_ns": 94583,
+        "cow_handling_ns": 21166,
+        "reclamation_ns": 19500,
+        "transfer_ns": 931709
+      },
+      "tracked_helix_constituent_recomputed_from_raw": {
+        "total_duration_ns": 447060958,
+        "cow_handling_ns": 1660459,
+        "reclamation_ns": 1064457
+      },
+      "results": [
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "reshard",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 1665291,
+          "critical_path_fraction": 0.016693614541144108,
+          "speedup_2x": 1.0084170628721503,
+          "speedup_5x": 1.013535658890579,
+          "speedup_10x": 1.015253424395593,
+          "speedup_free": 1.0169770224093013,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "delta_extraction",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 605500,
+          "critical_path_fraction": 0.0060698001758628115,
+          "speedup_2x": 1.0030441387448759,
+          "speedup_5x": 1.0048795343795986,
+          "speedup_10x": 1.0054928264815055,
+          "speedup_free": 1.0061068676421512,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "transaction_commit",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 94583,
+          "critical_path_fraction": 0.0009481418827970806,
+          "speedup_2x": 1.0004742957912507,
+          "speedup_5x": 1.0007590892857134,
+          "speedup_10x": 1.0008540564845683,
+          "speedup_free": 1.00094904170899,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "cow_handling",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 21166,
+          "critical_path_fraction": 0.00021217735841835223,
+          "speedup_2x": 1.0001060999352112,
+          "speedup_5x": 1.0001697707039343,
+          "speedup_10x": 1.0001909960951187,
+          "speedup_free": 1.0002122223872039,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "reclamation",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 19500,
+          "critical_path_fraction": 0.0001954766365471921,
+          "speedup_2x": 1.0000977478719861,
+          "speedup_5x": 1.0001564057681767,
+          "speedup_10x": 1.000175959929342,
+          "speedup_free": 1.0001955148551334,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "continuum_lifecycle_window",
+          "primitive": "transfer",
+          "timing_measurement_class": "SIMULATED_HARDWARE",
+          "sample_count": 1,
+          "total_duration_ns": 99756167,
+          "primitive_exclusive_duration_ns": 931709,
+          "critical_path_fraction": 0.009339863669781939,
+          "speedup_2x": 1.0046918424191686,
+          "speedup_5x": 1.0075281403796923,
+          "speedup_10x": 1.0084771350599973,
+          "speedup_free": 1.0094279191493263,
+          "raw_derivation": "RECOMPUTED"
+        },
+        {
+          "objective": "helix_lifecycle_window",
+          "primitive": "cow_handling",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 3,
+          "total_duration_ns": 1361606208,
+          "primitive_exclusive_duration_ns": 5228000,
+          "critical_path_fraction": 0.0038395829640635714,
+          "speedup_2x": 1.0019234841705582,
+          "speedup_5x": 1.003081130576428,
+          "speedup_10x": 1.0034676074173865,
+          "speedup_free": 1.0038543821842352,
+          "raw_derivation": "ALL_THREE_SAMPLES_RECOMPUTED_LOCALLY; TWO_INPUTS_UNTRACKED; AGGREGATE_EXACT_MATCH"
+        },
+        {
+          "objective": "helix_lifecycle_window",
+          "primitive": "reclamation",
+          "timing_measurement_class": "HARDWARE_BACKED_REAL",
+          "sample_count": 3,
+          "total_duration_ns": 1361606208,
+          "primitive_exclusive_duration_ns": 3302872,
+          "critical_path_fraction": 0.002425717494966063,
+          "speedup_2x": 1.001214331560138,
+          "speedup_5x": 1.0019443471454825,
+          "speedup_10x": 1.0021879222987273,
+          "speedup_free": 1.0024316159082156,
+          "raw_derivation": "ALL_THREE_SAMPLES_RECOMPUTED_LOCALLY; TWO_INPUTS_UNTRACKED; AGGREGATE_EXACT_MATCH"
+        }
+      ],
+      "maximum_reported_free_speedup": 1.0169770224093013,
+      "all_reported_free_speedups_below_1_02": true,
+      "end_to_end_objective_bound_available": false,
+      "interpretation": "These are non-additive lifecycle-window sensitivities, not branch-readiness, migration, reclamation-transaction, rollout-throughput, or learning-transaction bounds"
+    }
+  },
+  "discrepancies": [
+    {
+      "id": "BF-NEG-REPL-H1",
+      "severity": "HIGH",
+      "title": "Two of three raw Helix Amdahl source traces are absent from the tracked baseline",
+      "expected": "Every aggregate Amdahl sample is reproducible from an immutable tracked raw trace",
+      "observed": "The Amdahl artifact cites two instrumentation-overhead trace paths that are absent from the tracked tree and from the 40-entry designated corpus",
+      "missing_paths": [
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/000-full-s20260809-r0/state-operation-trace-v1.jsonl",
+        "artifacts/branchfabric/characterization/cpu-reference/attempts/instrumentation_overhead/attempt-000/helix-overhead/trials/004-full-s20260809-r0/state-operation-trace-v1.jsonl"
+      ],
+      "impact": "Continuum Amdahl inputs and all published Amdahl arithmetic reproduce exactly, but only one of three Helix lifecycle samples can be independently derived from tracked raw events. Read-only follow-up found the other two as untracked user-owned files and their values exactly close the aggregate; clean checkout and published-corpus reproducibility remain incomplete",
+      "follow_up_disposition": "BASELINE_DEFECT_NUMERICALLY_CLOSED_FROM_LOCAL_EVIDENCE; FINAL_EXECUTION_TREE_FIXED_BY_COMMIT_82f386c; SEALED_PRIOR_CORPUS_UNCHANGED",
+      "resolution_commit": "82f386c",
+      "resolution_scope": "The execution lead published the two validated raw traces without rewriting the sealed prior 40-file corpus",
+      "hardware_decision_impact": "Does not create a positive hardware result; mandatory real-evidence and end-to-end gates still fail independently"
+    },
+    {
+      "id": "BF-NEG-REPL-M2",
+      "severity": "MEDIUM",
+      "title": "Gate summary metrics are not derivation-bound to evidence references",
+      "expected": "A future PASS should prove that workload classes, seeds, optimized baselines, critical-path fractions, and confidence-backed end-to-end headroom were derived from the cited raw target evidence",
+      "observed": "The gate correctly rejects CPU_REFERENCE_MODEL_STATE and leaves current headroom unknown, but EvidenceReference has no seed/workload/metric binding and HeadroomEvidence accepts bare numeric fields. The evaluator cannot distinguish a valid end-to-end lower confidence bound from a relabeled isolated free-operation projection if a future input supplies the number",
+      "current_outcome_impact": "None: every preliminary candidate fails, all headroom fields are null, and the simulator/model lane is false",
+      "future_risk": "A future authorization decision relies on the trustworthiness of the gate-input producer rather than compiler-verifiable metric provenance"
+    }
+  ],
+  "preliminary_gate_adversarial_review": {
+    "source_location": "/Users/rishivinodkumar/sloforge",
+    "source_snapshot": [
+      {
+        "path": "python/sloforge/helix/characterization/gates.py",
+        "sha256": "dd723b2452162882dec222c91bb9c4b6d45880d31fd197f1a61e351d1cce90b6"
+      },
+      {
+        "path": "tests/python/test_branchfabric_gates.py",
+        "sha256": "557cae7a951741a61d1edbb1af0a4a430669b18cf3ee62d9df7200fde5640dcd"
+      },
+      {
+        "path": "artifacts/branchfabric/gates/branchfabric_gate_input.json",
+        "sha256": "7a1f7a84a5de9518f702f71112ad8ccdc75e25378fd43f03e4d2a606cd441fe6"
+      },
+      {
+        "path": "artifacts/branchfabric/gates/branchfabric_gate_result.json",
+        "sha256": "85f7b67842a1c4be940ced1e2027f745ec64470652c206f06906130d3e24cfca"
+      },
+      {
+        "path": "BRANCHFABRIC_GATE_REPORT.md",
+        "sha256": "cef2c579b5b05a4b490bfa0b97b84544901a57f2e0c8ba1c10e3e1c09fb9f0fb"
+      }
+    ],
+    "current_result": {
+      "outcome": "FAIL_NO_BUILD",
+      "passing_candidates": [],
+      "hardware_implementation_allowed": false,
+      "functional_model_or_cycle_simulator_allowed": false,
+      "required_action": "TERMINATE_HARDWARE_PATH"
+    },
+    "semantic_checks": {
+      "cpu_reference_model_state_cannot_satisfy_target_real_evidence": "PASS",
+      "current_isolated_amdahl_free_operation_bounds_do_not_populate_headroom": "PASS",
+      "functional_model_or_cycle_simulator_requires_gate_pass": "PASS",
+      "future_headroom_metric_derivation_is_compiler_verified": "FAIL_MEDIUM"
+    }
+  },
+  "validation": {
+    "focused_python": {
+      "command": "unset VIRTUAL_ENV; export PATH=/tmp/sloforge-bf-negative/.venv/bin:$PATH; uv run --locked pytest -q tests/python/test_branchfabric_amdahl.py tests/python/test_branchfabric_workload_analysis.py tests/python/test_branchfabric_transport_analysis.py tests/python/test_branchfabric_software_baselines.py tests/python/test_branchfabric_overhead.py tests/python/test_branchfabric_trace_io.py tests/python/test_branchfabric_trace_models.py",
+      "result": "PASS",
+      "tests_passed": 37
+    },
+    "rust_trace": {
+      "command": "cargo test -p sloforge-helix-ir --test branchfabric_trace",
+      "result": "PASS",
+      "tests_passed": 5
+    },
+    "preliminary_gate_tests": {
+      "command": "uv run --locked pytest -q tests/python/test_branchfabric_gates.py",
+      "result": "PASS",
+      "tests_passed": 5
+    },
+    "repository_make_check": {
+      "result": "FAIL_UNRELATED_TEST_AFTER_ENVIRONMENT_ISOLATION",
+      "initial_result": "3 failed, 1245 passed, 6 skipped; pytest resolved from the main workspace virtual environment",
+      "isolated_rerun_result": "2 passed, 1 failed",
+      "remaining_failure": "test_actual_hidden_black_box_reward_rejects_plausible_wrong_patch rejects a valid verifier SHA when its hexadecimal representation happens to contain substring 300",
+      "owned_branchfabric_files_implicated": false
+    },
+    "artifact_json_parse": "PASS",
+    "machine_assertions": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "adversarial_hardware_review": {
+    "question": "Would this hardware have been selected from the measured workload if the BranchFabric name and prior proposal did not already exist?",
+    "answer": "No",
+    "rationale": [
+      "The only branch group has four siblings and tiny simulated model state",
+      "All trajectories diverge at token and action index zero",
+      "All observed transfers have fanout one and produce zero multicast opportunities",
+      "The strongest free-operation lifecycle-window sensitivity is 1.0169770224093013x, below 1.02x, and is not an end-to-end Helix objective",
+      "No compatible GPU, multi-GPU fabric, physical NIC, RDMA, NVLink, FPGA, or DPU path was measured",
+      "No metadata demand rate, hardware working set, queue depth, or platform-feasibility envelope is established",
+      "The raw-evidence gate cannot pass, so RTL or a target-specific accelerator would be proposal-driven rather than workload-selected"
+    ]
+  },
+  "replication_verdict": "PRIOR_NEGATIVE_HARDWARE_RESULT_PRESERVED",
+  "hardware_implementation_authorized_by_this_evidence": false
+}
