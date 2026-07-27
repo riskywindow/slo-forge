@@ -2,29 +2,43 @@
   "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
   "candidates": [
     {
-      "candidate": "reshard_data_path",
+      "candidate": "checkpoint_transform_transfer_chain",
       "disposition": "NOT_JUSTIFIED",
       "evidence": [
         {
           "evidence_class": "CPU_REFERENCE_MODEL_STATE",
-          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+          "path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
           "raw_samples": true,
-          "sample_count": 18,
-          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b"
+          "sample_count": 36,
+          "sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d"
         },
         {
           "evidence_class": "ARTIFACT_REPLAY",
-          "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+          "path": "artifacts/branchfabric/execution/reclamation/analysis.json",
+          "raw_samples": false,
+          "sample_count": 36,
+          "sha256": "1ea7ed2a49ccf4cb5119914ca4c5d20cab986eef47ef744754b5013f08bfd6a1"
+        },
+        {
+          "evidence_class": "LOCAL_CPU_REAL",
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
           "raw_samples": false,
           "sample_count": 1,
-          "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4"
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
         }
       ],
       "kind": "DATA_PATH",
       "mandatory_end_to_end_relevance": {
         "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.016694 (unbound)",
-        "status": "FAIL",
+        "rationale": "passing measured fractions: state-movement time",
+        "status": "PASS",
         "thresholds": [
           ">=10% target critical path or BranchPoint-to-readiness",
           ">=15% GPU interference, state-movement time, or state-movement bytes",
@@ -33,7 +47,7 @@
       },
       "mandatory_platform_feasibility": {
         "gate": "mandatory_platform_feasibility",
-        "rationale": "missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
+        "rationale": "missing: byte rate, operation rate, latency target, bandwidth target, credible resource estimate, selected-target fit",
         "status": "FAIL",
         "thresholds": [
           "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
@@ -67,7 +81,7 @@
       "passes_all_mandatory_and_one_value_gate": false,
       "workload_value_gate": {
         "gate": "workload_value_data_path",
-        "rationale": "missing: large_state_operations, repeated_frequency, bandwidth_pressure, temporary_memory_or_interference, full_system_leverage",
+        "rationale": "missing: large_state_operations, bandwidth_pressure, temporary_memory_or_interference, full_system_leverage",
         "status": "FAIL",
         "thresholds": [
           "large_state_operations",
@@ -79,168 +93,42 @@
       }
     },
     {
-      "candidate": "one_to_many_multicast",
-      "disposition": "NOT_JUSTIFIED",
-      "evidence": [
-        {
-          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
-          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/vertical_trace/attempt-000/vertical-trace/branch-workload-trace-v1.jsonl",
-          "raw_samples": true,
-          "sample_count": 70,
-          "sha256": "1647d7ecad74914851b864a770633334c9c526066ed19fe0f5c19e8c53446dfc"
-        }
-      ],
-      "kind": "FANOUT",
-      "mandatory_end_to_end_relevance": {
-        "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; all are unknown",
-        "status": "FAIL",
-        "thresholds": [
-          ">=10% target critical path or BranchPoint-to-readiness",
-          ">=15% GPU interference, state-movement time, or state-movement bytes",
-          ">=10% capacity-reclamation critical path"
-        ]
-      },
-      "mandatory_platform_feasibility": {
-        "gate": "mandatory_platform_feasibility",
-        "rationale": "missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
-        "status": "FAIL",
-        "thresholds": [
-          "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
-          "evidence-backed fault/interface requirements",
-          "credible resource estimate fitting selected target"
-        ]
-      },
-      "mandatory_real_evidence": {
-        "gate": "mandatory_real_evidence",
-        "rationale": "no target-relevant real hardware raw samples; fewer than two workload classes",
-        "status": "FAIL",
-        "thresholds": [
-          "target-relevant hardware-backed raw measurements",
-          ">=2 Helix workload classes",
-          ">=3 seeds",
-          "optimized software baseline and complete manifests",
-          "controlled tracing with no fallback, substitution, or fabrication"
-        ]
-      },
-      "mandatory_system_level_headroom": {
-        "gate": "mandatory_system_level_headroom",
-        "rationale": "no lower confidence bound reached a threshold; all are unknown",
-        "status": "FAIL",
-        "thresholds": [
-          ">=1.15x end-to-end speedup",
-          ">=20% p99 readiness, reclamation interruption, or GPU-interference reduction",
-          ">=25% physical state-movement reduction",
-          ">=20% valid trajectories per GPU-hour increase"
-        ]
-      },
-      "passes_all_mandatory_and_one_value_gate": false,
-      "workload_value_gate": {
-        "gate": "workload_value_fanout",
-        "rationale": "missing: repeated_physical_unicast, destination_count_gt_one, identical_large_source, unicast_material_to_bytes_or_latency, transforms_preserve_benefit",
-        "status": "FAIL",
-        "thresholds": [
-          "repeated_physical_unicast",
-          "destination_count_gt_one",
-          "identical_large_source",
-          "unicast_material_to_bytes_or_latency",
-          "transforms_preserve_benefit"
-        ]
-      }
-    },
-    {
-      "candidate": "branch_translation_metadata",
-      "disposition": "NOT_JUSTIFIED",
-      "evidence": [
-        {
-          "evidence_class": "SYNTHETIC",
-          "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
-          "raw_samples": true,
-          "sample_count": 840,
-          "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f"
-        }
-      ],
-      "kind": "METADATA",
-      "mandatory_end_to_end_relevance": {
-        "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.000948 (unbound)",
-        "status": "FAIL",
-        "thresholds": [
-          ">=10% target critical path or BranchPoint-to-readiness",
-          ">=15% GPU interference, state-movement time, or state-movement bytes",
-          ">=10% capacity-reclamation critical path"
-        ]
-      },
-      "mandatory_platform_feasibility": {
-        "gate": "mandatory_platform_feasibility",
-        "rationale": "missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
-        "status": "FAIL",
-        "thresholds": [
-          "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
-          "evidence-backed fault/interface requirements",
-          "credible resource estimate fitting selected target"
-        ]
-      },
-      "mandatory_real_evidence": {
-        "gate": "mandatory_real_evidence",
-        "rationale": "no target-relevant real hardware raw samples; fewer than two workload classes",
-        "status": "FAIL",
-        "thresholds": [
-          "target-relevant hardware-backed raw measurements",
-          ">=2 Helix workload classes",
-          ">=3 seeds",
-          "optimized software baseline and complete manifests",
-          "controlled tracing with no fallback, substitution, or fabrication"
-        ]
-      },
-      "mandatory_system_level_headroom": {
-        "gate": "mandatory_system_level_headroom",
-        "rationale": "no lower confidence bound reached a threshold; all are unknown",
-        "status": "FAIL",
-        "thresholds": [
-          ">=1.15x end-to-end speedup",
-          ">=20% p99 readiness, reclamation interruption, or GPU-interference reduction",
-          ">=25% physical state-movement reduction",
-          ">=20% valid trajectories per GPU-hour increase"
-        ]
-      },
-      "passes_all_mandatory_and_one_value_gate": false,
-      "workload_value_gate": {
-        "gate": "workload_value_metadata",
-        "rationale": "missing: optimized_software_metadata_is_critical, operation_rate_and_concurrency_measured, cache_lock_allocation_pressure_measured, hardware_working_set_and_queue_derived, full_system_leverage",
-        "status": "FAIL",
-        "thresholds": [
-          "optimized_software_metadata_is_critical",
-          "operation_rate_and_concurrency_measured",
-          "cache_lock_allocation_pressure_measured",
-          "hardware_working_set_and_queue_derived",
-          "full_system_leverage"
-        ]
-      }
-    },
-    {
       "candidate": "shared_root_cow",
       "disposition": "NOT_JUSTIFIED",
       "evidence": [
         {
           "evidence_class": "CPU_REFERENCE_MODEL_STATE",
-          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
-          "raw_samples": false,
-          "sample_count": 2,
-          "sha256": "bf4565b2db19edfdf1a9cee7a3f41810d23885fccab910b515314ab4aece6a9e"
+          "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+          "raw_samples": true,
+          "sample_count": 144,
+          "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810"
         },
         {
-          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
-          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
-          "raw_samples": true,
-          "sample_count": 18,
-          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b"
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/execution/fanout/summary.json",
+          "raw_samples": false,
+          "sample_count": 144,
+          "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4"
+        },
+        {
+          "evidence_class": "LOCAL_CPU_REAL",
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
         }
       ],
       "kind": "STATE_SHARING",
       "mandatory_end_to_end_relevance": {
         "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.000212 (unbound)",
+        "rationale": "no measured fraction reached a threshold; BranchPoint-to-readiness=0.000060 (raw-bound)",
         "status": "FAIL",
         "thresholds": [
           ">=10% target critical path or BranchPoint-to-readiness",
@@ -250,7 +138,7 @@
       },
       "mandatory_platform_feasibility": {
         "gate": "mandatory_platform_feasibility",
-        "rationale": "missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
+        "rationale": "missing: byte rate, operation rate, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
         "status": "FAIL",
         "thresholds": [
           "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
@@ -260,7 +148,7 @@
       },
       "mandatory_real_evidence": {
         "gate": "mandatory_real_evidence",
-        "rationale": "no target-relevant real hardware raw samples; fewer than two workload classes",
+        "rationale": "no target-relevant real hardware raw samples; tracing overhead not controlled",
         "status": "FAIL",
         "thresholds": [
           "target-relevant hardware-backed raw measurements",
@@ -294,15 +182,211 @@
           "software_cow_insufficient"
         ]
       }
+    },
+    {
+      "candidate": "one_to_many_multicast",
+      "disposition": "NOT_JUSTIFIED",
+      "evidence": [
+        {
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+          "raw_samples": true,
+          "sample_count": 144,
+          "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/execution/fanout/summary.json",
+          "raw_samples": false,
+          "sample_count": 144,
+          "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/analysis/transport/cpu-reference-v3.json",
+          "raw_samples": false,
+          "sample_count": 4,
+          "sha256": "7760078aa431e8822225e6805e58be6862b2a47f4c1ee0f60e71983b345e3e80"
+        },
+        {
+          "evidence_class": "LOCAL_CPU_REAL",
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
+        }
+      ],
+      "kind": "FANOUT",
+      "mandatory_end_to_end_relevance": {
+        "gate": "mandatory_end_to_end_relevance",
+        "rationale": "no measured fraction reached a threshold; all are unknown",
+        "status": "FAIL",
+        "thresholds": [
+          ">=10% target critical path or BranchPoint-to-readiness",
+          ">=15% GPU interference, state-movement time, or state-movement bytes",
+          ">=10% capacity-reclamation critical path"
+        ]
+      },
+      "mandatory_platform_feasibility": {
+        "gate": "mandatory_platform_feasibility",
+        "rationale": "missing: byte rate, operation rate, concurrency, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
+        "status": "FAIL",
+        "thresholds": [
+          "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
+          "evidence-backed fault/interface requirements",
+          "credible resource estimate fitting selected target"
+        ]
+      },
+      "mandatory_real_evidence": {
+        "gate": "mandatory_real_evidence",
+        "rationale": "no target-relevant real hardware raw samples; tracing overhead not controlled",
+        "status": "FAIL",
+        "thresholds": [
+          "target-relevant hardware-backed raw measurements",
+          ">=2 Helix workload classes",
+          ">=3 seeds",
+          "optimized software baseline and complete manifests",
+          "controlled tracing with no fallback, substitution, or fabrication"
+        ]
+      },
+      "mandatory_system_level_headroom": {
+        "gate": "mandatory_system_level_headroom",
+        "rationale": "no lower confidence bound reached a threshold; all are unknown",
+        "status": "FAIL",
+        "thresholds": [
+          ">=1.15x end-to-end speedup",
+          ">=20% p99 readiness, reclamation interruption, or GPU-interference reduction",
+          ">=25% physical state-movement reduction",
+          ">=20% valid trajectories per GPU-hour increase"
+        ]
+      },
+      "passes_all_mandatory_and_one_value_gate": false,
+      "workload_value_gate": {
+        "gate": "workload_value_fanout",
+        "rationale": "missing: repeated_physical_unicast, identical_large_source, unicast_material_to_bytes_or_latency, transforms_preserve_benefit",
+        "status": "FAIL",
+        "thresholds": [
+          "repeated_physical_unicast",
+          "destination_count_gt_one",
+          "identical_large_source",
+          "unicast_material_to_bytes_or_latency",
+          "transforms_preserve_benefit"
+        ]
+      }
+    },
+    {
+      "candidate": "branch_translation_metadata",
+      "disposition": "NOT_JUSTIFIED",
+      "evidence": [
+        {
+          "evidence_class": "SYNTHETIC",
+          "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
+          "raw_samples": true,
+          "sample_count": 840,
+          "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4"
+        },
+        {
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+          "raw_samples": true,
+          "sample_count": 18,
+          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b"
+        },
+        {
+          "evidence_class": "LOCAL_CPU_REAL",
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238"
+        },
+        {
+          "evidence_class": "ARTIFACT_REPLAY",
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "raw_samples": false,
+          "sample_count": 1,
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
+        }
+      ],
+      "kind": "METADATA",
+      "mandatory_end_to_end_relevance": {
+        "gate": "mandatory_end_to_end_relevance",
+        "rationale": "no measured fraction reached a threshold; target critical path=0.000948 (raw-bound)",
+        "status": "FAIL",
+        "thresholds": [
+          ">=10% target critical path or BranchPoint-to-readiness",
+          ">=15% GPU interference, state-movement time, or state-movement bytes",
+          ">=10% capacity-reclamation critical path"
+        ]
+      },
+      "mandatory_platform_feasibility": {
+        "gate": "mandatory_platform_feasibility",
+        "rationale": "missing: byte rate, operation rate, queue depth, working set, latency target, bandwidth target, fault behavior, interface requirement, credible resource estimate, selected-target fit",
+        "status": "FAIL",
+        "thresholds": [
+          "measured byte/operation rates, concurrency, queue, working set, latency, bandwidth",
+          "evidence-backed fault/interface requirements",
+          "credible resource estimate fitting selected target"
+        ]
+      },
+      "mandatory_real_evidence": {
+        "gate": "mandatory_real_evidence",
+        "rationale": "no target-relevant real hardware raw samples; fewer than two workload classes; fewer than three seeds",
+        "status": "FAIL",
+        "thresholds": [
+          "target-relevant hardware-backed raw measurements",
+          ">=2 Helix workload classes",
+          ">=3 seeds",
+          "optimized software baseline and complete manifests",
+          "controlled tracing with no fallback, substitution, or fabrication"
+        ]
+      },
+      "mandatory_system_level_headroom": {
+        "gate": "mandatory_system_level_headroom",
+        "rationale": "no lower confidence bound reached a threshold; all are unknown",
+        "status": "FAIL",
+        "thresholds": [
+          ">=1.15x end-to-end speedup",
+          ">=20% p99 readiness, reclamation interruption, or GPU-interference reduction",
+          ">=25% physical state-movement reduction",
+          ">=20% valid trajectories per GPU-hour increase"
+        ]
+      },
+      "passes_all_mandatory_and_one_value_gate": false,
+      "workload_value_gate": {
+        "gate": "workload_value_metadata",
+        "rationale": "missing: optimized_software_metadata_is_critical, operation_rate_and_concurrency_measured, cache_lock_allocation_pressure_measured, hardware_working_set_and_queue_derived, full_system_leverage",
+        "status": "FAIL",
+        "thresholds": [
+          "optimized_software_metadata_is_critical",
+          "operation_rate_and_concurrency_measured",
+          "cache_lock_allocation_pressure_measured",
+          "hardware_working_set_and_queue_derived",
+          "full_system_leverage"
+        ]
+      }
     }
   ],
   "functional_model_or_cycle_simulator_allowed": false,
-  "generated_at": "2026-08-09T00:00:00Z",
+  "generated_at": "2026-08-09T23:59:59Z",
   "hardware_implementation_allowed": false,
   "negative_result_preserved": true,
   "outcome": "FAIL_NO_BUILD",
   "passing_candidates": [],
-  "phase": "preliminary",
+  "phase": "final",
   "required_action": "TERMINATE_HARDWARE_PATH",
   "schema_version": "sloforge.branchfabric.gate-result/v1",
   "thresholds_changed": false
