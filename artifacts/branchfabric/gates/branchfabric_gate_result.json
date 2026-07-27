@@ -23,7 +23,7 @@
       "kind": "DATA_PATH",
       "mandatory_end_to_end_relevance": {
         "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.016694",
+        "rationale": "no measured fraction reached a threshold; target critical path=0.016694 (unbound)",
         "status": "FAIL",
         "thresholds": [
           ">=10% target critical path or BranchPoint-to-readiness",
@@ -163,7 +163,7 @@
       "kind": "METADATA",
       "mandatory_end_to_end_relevance": {
         "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.000948",
+        "rationale": "no measured fraction reached a threshold; target critical path=0.000948 (unbound)",
         "status": "FAIL",
         "thresholds": [
           ">=10% target critical path or BranchPoint-to-readiness",
@@ -240,7 +240,7 @@
       "kind": "STATE_SHARING",
       "mandatory_end_to_end_relevance": {
         "gate": "mandatory_end_to_end_relevance",
-        "rationale": "no measured fraction reached a threshold; target critical path=0.000212",
+        "rationale": "no measured fraction reached a threshold; target critical path=0.000212 (unbound)",
         "status": "FAIL",
         "thresholds": [
           ">=10% target critical path or BranchPoint-to-readiness",
