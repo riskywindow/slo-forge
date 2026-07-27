@@ -334,10 +334,15 @@ def _stats(values: Sequence[int]) -> dict[str, int]:
 
 
 def _bounded_map(
-    tasks: Sequence[Callable[[int, int], _T]], workers: int
+    tasks: Sequence[Callable[[int, int], _T]],
+    workers: int,
+    *,
+    timeout_seconds: float = 30.0,
 ) -> tuple[list[_T], int, int]:
     if not 1 <= workers <= BRANCH_COUNT:
         raise ValueError("worker count is outside the bounded branch queue")
+    if not 0.0 < timeout_seconds <= 300.0:
+        raise ValueError("bounded map timeout must be within (0, 300] seconds")
     pending: queue.Queue[tuple[int, Callable[[int, int], _T]] | None] = queue.Queue(
         maxsize=BRANCH_COUNT
     )
@@ -375,19 +380,25 @@ def _bounded_map(
             finally:
                 pending.task_done()
 
+    deadline = time.monotonic() + timeout_seconds
     threads = [threading.Thread(target=worker, daemon=True) for _ in range(workers)]
     for thread in threads:
         thread.start()
     for index, function in enumerate(tasks):
-        pending.put((index, function), timeout=30.0)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0.0:
+            raise TimeoutError("bounded reclamation queue deadline expired while submitting")
+        pending.put((index, function), timeout=remaining)
         maximum_occupancy = max(maximum_occupancy, pending.qsize())
     for _ in threads:
-        pending.put(None, timeout=30.0)
-    pending.join()
+        remaining = deadline - time.monotonic()
+        if remaining <= 0.0:
+            raise TimeoutError("bounded reclamation queue deadline expired before shutdown")
+        pending.put(None, timeout=remaining)
     for thread in threads:
-        thread.join(timeout=30.0)
+        thread.join(timeout=max(0.0, deadline - time.monotonic()))
         if thread.is_alive():
-            raise TimeoutError("bounded reclamation worker did not stop")
+            raise TimeoutError("bounded reclamation worker deadline expired")
     if errors:
         raise errors[0]
     return [value for _, value in sorted(results)], maximum_active, maximum_occupancy

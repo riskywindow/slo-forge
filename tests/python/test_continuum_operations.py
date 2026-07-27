@@ -5,6 +5,9 @@ from dataclasses import replace
 import pytest
 
 from sloforge.continuum.adapters import (
+    FailurePoint,
+    FailureRule,
+    InjectedFailureError,
     ModelContract,
     ReferenceHeadMajorAdapter,
     ReferenceTokenMajorAdapter,
@@ -36,14 +39,41 @@ from sloforge.continuum.operations import (
 )
 from sloforge.continuum.storage import MemoryContentStore
 from sloforge.continuum.transaction import (
+    CutoverPhase,
     DurableCoordinator,
     GatewayCommitLedger,
     SessionLease,
+    StateTransactionRecord,
     TokenEvent,
 )
 
 _STAMP = "2026-08-02T00:00:00Z"
 _COMMIT = "7e51ea7f7338755d23f889820558a4e046d6c42e"
+
+
+class _RecordingCoordinator(DurableCoordinator):
+    last_transaction_id: str | None = None
+
+    def begin_transaction(
+        self,
+        *,
+        session_id: str,
+        destination_candidate: str,
+        migration_plan_hash: str,
+        seed: int,
+        now_ms: int,
+        timeout_ms: int,
+    ) -> StateTransactionRecord:
+        record = super().begin_transaction(
+            session_id=session_id,
+            destination_candidate=destination_candidate,
+            migration_plan_hash=migration_plan_hash,
+            seed=seed,
+            now_ms=now_ms,
+            timeout_ms=timeout_ms,
+        )
+        self.last_transaction_id = record.transaction_id
+        return record
 
 
 def _source(*, seed: int = 19, tokens: int = 6) -> ReferenceTokenMajorAdapter:
@@ -234,6 +264,77 @@ def test_resume_commits_new_owner_before_destination_output_without_gap() -> Non
                 seed=32,
                 now_ms=100,
             )
+
+
+def test_resume_validation_failure_rolls_back_staging_and_can_retry() -> None:
+    source = _source(seed=43)
+    source.pause_session("stateful-session")
+    store = MemoryContentStore()
+    artifact = _full_checkpoint(source, store)
+    destination = ReferenceHeadMajorAdapter(page_size_tokens=5)
+    destination.inject_failure(
+        FailureRule(
+            point=FailurePoint.VALIDATE_IMPORT,
+            trigger_on_call=1,
+            session_id="stateful-session",
+        )
+    )
+    with (
+        _RecordingCoordinator(":memory:") as coordinator,
+        GatewayCommitLedger(":memory:") as gateway,
+    ):
+        coordinator.create_lease(
+            session_id="stateful-session",
+            owner_runtime=source.identity.runtime_name,
+            expiration_ms=120_000,
+            initial_token_index=5,
+        )
+        gateway.register(session_id="stateful-session", owner_epoch=1, next_token_index=6)
+
+        with pytest.raises(InjectedFailureError):
+            resume_checkpoint(
+                artifact,
+                store=store,
+                destination=destination,
+                source=source,
+                expected_tenant_id="tenant-a",
+                expected_model=source.config.model,
+                coordinator=coordinator,
+                gateway=gateway,
+                seed=43,
+                now_ms=10,
+            )
+
+        assert coordinator.last_transaction_id is not None
+        failed_transaction = coordinator.transaction(coordinator.last_transaction_id)
+        assert failed_transaction.phase is CutoverPhase.ROLLED_BACK
+        assert [entry.to_phase for entry in coordinator.journal(failed_transaction.transaction_id)][
+            -2:
+        ] == [CutoverPhase.ABORTING, CutoverPhase.ROLLED_BACK]
+        assert coordinator.recoverable_transactions() == ()
+        lease = coordinator.lease("stateful-session")
+        assert lease.owner_epoch == 1
+        assert lease.owner_runtime == source.identity.runtime_name
+        assert gateway.watermark("stateful-session") == 5
+        assert source.inspect_session("stateful-session").lifecycle is SessionLifecycle.PAUSED
+        assert destination.prepared_session_count == 0
+        assert destination.list_sessions() == ()
+
+        destination.clear_failures()
+        resumed = resume_checkpoint(
+            artifact,
+            store=store,
+            destination=destination,
+            source=source,
+            expected_tenant_id="tenant-a",
+            expected_model=source.config.model,
+            coordinator=coordinator,
+            gateway=gateway,
+            seed=44,
+            now_ms=100,
+        )
+        assert resumed.transaction.phase is CutoverPhase.COMPLETED
+        assert resumed.destination_owner_epoch == 2
 
 
 def test_fork_shares_immutable_chunks_and_clone_uses_independent_store() -> None:

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from sloforge.continuum.transaction import CoordinatorConflict, DurableCoordinator, StaleOwner
-from sloforge.helix.characterization.reclamation import run_trial
+from sloforge.helix.characterization.reclamation import _bounded_map, run_trial
 
 
 def test_causal_cpu_reference_reclamation_is_transactional(tmp_path: Path) -> None:
@@ -109,3 +109,17 @@ def test_reclamation_requires_controlled_seed(tmp_path: Path) -> None:
             work_root=tmp_path / "invalid",
             repetition=0,
         )
+
+
+def test_bounded_map_has_an_aggregate_deadline() -> None:
+    release = __import__("threading").Event()
+
+    def blocked(_concurrency: int, _occupancy: int) -> int:
+        release.wait(timeout=0.2)
+        return 1
+
+    try:
+        with pytest.raises(TimeoutError, match="deadline expired"):
+            _bounded_map((blocked,), 1, timeout_seconds=0.01)
+    finally:
+        release.set()

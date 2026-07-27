@@ -35,6 +35,48 @@ def _event_hash(label: str, capsule_id: str) -> str:
     return sha256(f"continuum-resume/v1\0{label}\0{capsule_id}".encode()).hexdigest()
 
 
+def _rollback_precommit_resume(
+    *,
+    coordinator: DurableCoordinator,
+    transaction_id: str,
+    destination: ContinuumRuntimeAdapter,
+    source: ContinuumRuntimeAdapter | None,
+    source_fenced: bool,
+    session_id: str,
+    source_epoch: int,
+    capsule_id: str,
+    at_ms: int,
+) -> None:
+    """Durably abort staged state without changing ownership or gateway state."""
+
+    destination.abort_destination(session_id)
+    current = coordinator.transaction(transaction_id)
+    if current.phase is not CutoverPhase.ABORTING:
+        current = coordinator.transition(
+            transaction_id,
+            expected=current.phase,
+            target=CutoverPhase.ABORTING,
+            event_id="resume-precommit-aborting",
+            at_ms=at_ms,
+            payload_hash=_event_hash("precommit-aborting", capsule_id),
+        )
+    coordinator.transition(
+        transaction_id,
+        expected=current.phase,
+        target=CutoverPhase.ROLLED_BACK,
+        event_id="resume-precommit-rolled-back",
+        at_ms=at_ms + 1,
+        payload_hash=_event_hash("precommit-rolled-back", capsule_id),
+    )
+    if source is not None and source_fenced:
+        source.release_source_fence(
+            session_id,
+            expected_owner_epoch=source_epoch,
+            coordinator_owner_epoch=coordinator.lease(session_id).owner_epoch,
+            ownership_committed=False,
+        )
+
+
 def resume_checkpoint(
     artifact: CheckpointArtifact,
     *,
@@ -100,56 +142,67 @@ def resume_checkpoint(
         now_ms=now_ms,
         timeout_ms=timeout_ms,
     )
-    destination.prepare_destination_session(
-        captured,
-        destination_session_id=capsule.identity.session_id,
-        proposed_owner_epoch=transaction.proposed_destination_epoch,
-    )
     current = CutoverPhase.PROPOSED
     source_fenced = False
-    for offset, target in enumerate(_PRECOMMIT_PHASES, start=1):
+    try:
+        destination.prepare_destination_session(
+            captured,
+            destination_session_id=capsule.identity.session_id,
+            proposed_owner_epoch=transaction.proposed_destination_epoch,
+        )
+        for offset, target in enumerate(_PRECOMMIT_PHASES, start=1):
+            transaction = coordinator.transition(
+                transaction.transaction_id,
+                expected=current,
+                target=target,
+                event_id=f"resume-{target.value.lower()}",
+                at_ms=now_ms + offset,
+                payload_hash=_event_hash(target.value, capsule.identity.capsule_id),
+            )
+            current = target
+            if target is CutoverPhase.SOURCE_FROZEN and source is not None:
+                source.fence_source_writer(
+                    capsule.identity.session_id,
+                    expected_owner_epoch=lease.owner_epoch,
+                )
+                source_fenced = True
+            if target is CutoverPhase.DESTINATION_IMPORTING:
+                destination.import_captured_state(capsule.identity.session_id, captured)
+        validation = destination.validate_imported_state(capsule.identity.session_id)
+        if not validation.structurally_valid or not validation.continuation_valid:
+            raise AuthorizationError("destination continuation validation did not pass")
+        if source_next_token is not None and validation.dry_run_next_token != source_next_token:
+            raise AuthorizationError("source and destination bounded continuation tokens differ")
         transaction = coordinator.transition(
             transaction.transaction_id,
-            expected=current,
-            target=target,
-            event_id=f"resume-{target.value.lower()}",
-            at_ms=now_ms + offset,
-            payload_hash=_event_hash(target.value, capsule.identity.capsule_id),
+            expected=CutoverPhase.DESTINATION_VALIDATING,
+            target=CutoverPhase.COMMIT_INTENT_RECORDED,
+            event_id="resume-commit-intent",
+            at_ms=now_ms + len(_PRECOMMIT_PHASES) + 1,
+            payload_hash=_event_hash("commit-intent", capsule.identity.capsule_id),
+            state_hashes=(captured.logical.continuation_hash,),
+            commit_watermark=capsule.transaction.commit_watermark,
+            rollback_watermark=capsule.transaction.rollback_boundary,
         )
-        current = target
-        if target is CutoverPhase.SOURCE_FROZEN and source is not None:
-            source.fence_source_writer(
-                capsule.identity.session_id,
-                expected_owner_epoch=lease.owner_epoch,
+    except Exception as resume_error:
+        try:
+            _rollback_precommit_resume(
+                coordinator=coordinator,
+                transaction_id=transaction.transaction_id,
+                destination=destination,
+                source=source,
+                source_fenced=source_fenced,
+                session_id=capsule.identity.session_id,
+                source_epoch=lease.owner_epoch,
+                capsule_id=capsule.identity.capsule_id,
+                at_ms=now_ms + len(_PRECOMMIT_PHASES) + 2,
             )
-            source_fenced = True
-        if target is CutoverPhase.DESTINATION_IMPORTING:
-            destination.import_captured_state(capsule.identity.session_id, captured)
-    validation = destination.validate_imported_state(capsule.identity.session_id)
-    if not validation.structurally_valid or not validation.continuation_valid:
-        destination.abort_destination(capsule.identity.session_id)
-        raise AuthorizationError("destination continuation validation did not pass")
-    if source_next_token is not None and validation.dry_run_next_token != source_next_token:
-        destination.abort_destination(capsule.identity.session_id)
-        if source is not None and source_fenced:
-            source.release_source_fence(
-                capsule.identity.session_id,
-                expected_owner_epoch=lease.owner_epoch,
-                coordinator_owner_epoch=lease.owner_epoch,
-                ownership_committed=False,
-            )
-        raise AuthorizationError("source and destination bounded continuation tokens differ")
-    transaction = coordinator.transition(
-        transaction.transaction_id,
-        expected=CutoverPhase.DESTINATION_VALIDATING,
-        target=CutoverPhase.COMMIT_INTENT_RECORDED,
-        event_id="resume-commit-intent",
-        at_ms=now_ms + len(_PRECOMMIT_PHASES) + 1,
-        payload_hash=_event_hash("commit-intent", capsule.identity.capsule_id),
-        state_hashes=(captured.logical.continuation_hash,),
-        commit_watermark=capsule.transaction.commit_watermark,
-        rollback_watermark=capsule.transaction.rollback_boundary,
-    )
+        except Exception as rollback_error:
+            raise AuthorizationError(
+                "pre-commit resume failed and durable rollback did not complete "
+                f"({type(rollback_error).__name__})"
+            ) from resume_error
+        raise
     transaction, committed_lease = coordinator.commit_ownership(
         transaction.transaction_id,
         event_id="resume-ownership-committed",
