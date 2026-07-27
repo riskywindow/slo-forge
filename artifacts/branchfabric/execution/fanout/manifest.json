@@ -1,0 +1,30 @@
+{
+  "artifacts": [
+    {
+      "bytes": 254930,
+      "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+      "records": 144,
+      "role": "authoritative_raw_samples",
+      "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810"
+    },
+    {
+      "bytes": 39851,
+      "path": "artifacts/branchfabric/execution/fanout/summary.json",
+      "records": 1,
+      "role": "derived_summary",
+      "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4"
+    },
+    {
+      "bytes": 9949,
+      "path": "artifacts/branchfabric/execution/fanout/fixture-evidence.jsonl",
+      "records": 6,
+      "role": "authoritative_reference_state_and_suffix_evidence",
+      "sha256": "cdc1b580d2127d11e264f264406a08969bda7447ac6f15b49f77eb663a6d802c"
+    }
+  ],
+  "hardware_gate_eligible": false,
+  "model_state_class": "CPU_REFERENCE_MODEL_STATE",
+  "physical_byte_accounting": "DETERMINISTIC_SERIALIZED_STATE_BYTES_NOT_RSS_OS_PAGES_OR_GPU_ALLOCATION",
+  "reproduction_command": "uv run --locked python -m sloforge.helix.characterization.fanout_vertical --output artifacts/branchfabric/execution/fanout --seeds 41 73 113 --fanouts 8 16 32 --warmups 1 --repetitions 3 --replace",
+  "schema_version": "sloforge.branchfabric.cpu-reference-fanout-artifacts/v1"
+}
