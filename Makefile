@@ -16,7 +16,8 @@ CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE
 	helix-clean-room-test branchfabric-trace-check \
 	branchfabric-characterization-cpu branchfabric-characterization-gpu \
 	branchfabric-characterization branchfabric-requirements branchfabric-report \
-	branchfabric-execution-analysis branchfabric-gate branchfabric-clean-room-test
+	branchfabric-execution-analysis branchfabric-gate branchfabric-no-build-verify \
+	branchfabric-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -259,6 +260,11 @@ branchfabric-execution-analysis:
 	uv run --locked python -m sloforge.helix.characterization.execution_analysis \
 		--raw artifacts/branchfabric/execution/reclamation/raw/trials.jsonl \
 		--output artifacts/branchfabric/execution/reclamation/analysis.json --replace
+
+branchfabric-no-build-verify:
+	uv run --locked python -m sloforge.helix.characterization.no_build_verifier \
+		--repository-root "$(CURDIR)" \
+		--output artifacts/branchfabric/execution/no-build-verification.json
 
 branchfabric-clean-room-test:
 	@set -euo pipefail; \
