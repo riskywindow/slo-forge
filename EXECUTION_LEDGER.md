@@ -194,6 +194,42 @@ This closure supersedes the launch-state and publication-state tables above.
 | Independent replication and multidisciplinary review | replication/review lanes | complete | five-measurement replication; four independent final reviews | `artifacts/branchfabric/replication/`; `docs/branchfabric/reviews/` | `b00db0a`, `51a76ad`, `28d9705`, `6688319`, `f61a35f` |
 | Reports, design handoff, negative findings and release gates | root | complete and exercised | clean archive of `d26d640`; `make branchfabric-clean-room-test`; `make helix-check`; `make check` | final report, design brief, what-not-to-build, generated report, corpus manifest | `52bd90f`, `d26d640` |
 
+### BranchFabric gated execution
+
+This execution starts from immutable commit
+`46955be24d49af7090429444a0ef68f9a5695283` and follows the no-build completion
+branch. The runner exposed four total agent slots, so root plus three isolated
+lanes was the maximum available concurrency; eight simultaneous agents were not
+possible. No hardware task entered the ready set because the final gate never
+reported `PASS`.
+
+Dependency order: baseline and negative-result audit unlocked the fanout,
+reclamation, software-baseline, and independent-replication lanes. Their frozen
+raw artifacts unlocked effect analysis and the fail-closed gate. The gate
+returned `FAIL_NO_BUILD`, which unlocked only verification, no-build reporting,
+future-measurement planning, and final review. Functional hardware modeling,
+cycle simulation, target selection, driver, RTL, FPGA, and DPU tasks remained
+locked.
+
+| Task | Owner | Status | Branch/worktree and files | Dependencies | Acceptance | Raw artifacts | Commit |
+|---|---|---|---|---|---|---|---|
+| Baseline, authorization, hardware/tool inventory | root | complete | `main`; execution baseline/ledgers | historical closure | immutable tag; `make check`; prior demos; corpus hash audit | `execution/baseline/record.json` | `0bf2762` |
+| Prior negative reproduction | `negative_replication` / Locke | complete; negative affirmed | `branchfabric/negative-replication`; replication JSON/review only | sealed historical corpus | raw Amdahl reconstruction and gate re-audit | `execution/replication/prior-negative-replication.json` | `d9a42ae`, `979a1df` |
+| Fanout/state-sharing vertical | `fanout_vertical` / Euclid | complete in CPU-reference scope | `branchfabric/fanout-vertical`; fanout module/tests/artifacts | Continuum reference semantics | 8/16/32 siblings, two classes, three seeds, independent regeneration | `execution/fanout/`; independent fanout replication | `aeb43fa`, `4c4f901` |
+| Causal reclamation/concurrency vertical | `reclamation_vertical` / Kant + root | complete in local CPU/file scope | `branchfabric/reclamation-vertical`; reclamation module/tests/artifacts | Helix scheduler; Continuum state/transactions | 36 randomized trials; faults; bounded queue; rollback/retry | `execution/reclamation/`; independent replication | `9c18719`, `b6279b6`, `248bb54` |
+| Strong software baseline | root | complete | `main`; shared-root COW and batched unique transfer | fanout/reclamation verticals | focused tests and matched effect analysis | fanout/reclamation raw samples | `b6279b6`, `5ae509a` |
+| Gate compiler and final gate | root | complete; zero candidates | `main`; gates source/input/result/report | frozen raw evidence and manifests | `make branchfabric-gate`; six gate tests; hash closure | `artifacts/branchfabric/gates/` | `d11f72d` through `d113e12` |
+| Transaction/formal verification | Kant independent review + root | complete in declared bounds | review files plus Continuum resume/reclamation fixes | causal transaction | Python fault/retry; five Rust model-check; nine Rust transaction tests | independent transaction replication | `d82f857`, `248bb54` |
+| Statistical, adversarial, GPU/network/FPGA/DPU review | Euclid, Locke, reviewers | complete; no-build affirmed | review files only | final gate and raw evidence | five primary conclusions independently reproduced; exact-current adversarial closure | `execution/reviews/`; `execution/replication/` | `5ef66e5`, `979a1df`, `53dae56`, `ea3c505` |
+| Final integration, reports, cleanup | root | complete no-build | `main`; ledger, verifier, reports, future plan | all prior rows | `make check`; `make helix-check`; trace check; clean archive; no-build verifier | verification/provenance/ledgers | implementation through `d113e12`; report closure follows |
+
+Final result: shared-root/lazy-COW and bounded/batched CPU software were retained.
+Checkpoint/transform/transfer, COW hardware, multicast, and metadata candidates
+are `NOT_JUSTIFIED`. The final gate requires `TERMINATE_HARDWARE_PATH`; no
+target-specific BranchFabric hardware or simulator tree exists. Spend is $0,
+no billable resource or SLOForge experiment process remains, and no fault
+configuration remains active.
+
 ## SLOForge Helix extension
 
 Baseline recorded: 2026-08-03 (America/Los_Angeles).

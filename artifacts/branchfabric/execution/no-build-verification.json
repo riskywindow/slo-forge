@@ -1,0 +1,33 @@
+{
+  "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+  "billable_resources_remaining": 0,
+  "experiment_processes_remaining": 0,
+  "fault_configuration_active": false,
+  "functional_model_or_cycle_simulator_implemented": false,
+  "gate_outcome": "FAIL_NO_BUILD",
+  "passing_candidates": [],
+  "required_action": "TERMINATE_HARDWARE_PATH",
+  "schema_version": "sloforge.branchfabric.no-build-verification/v1",
+  "status": "PASS_VERIFIED_NO_BUILD",
+  "target_hardware_implemented": false,
+  "verified_evidence": {
+    "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+    "artifacts/branchfabric/analysis/transport/cpu-reference-v3.json": "7760078aa431e8822225e6805e58be6862b2a47f4c1ee0f60e71983b345e3e80",
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+    "artifacts/branchfabric/execution/fanout/raw-samples.jsonl": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+    "artifacts/branchfabric/execution/fanout/summary.json": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4",
+    "artifacts/branchfabric/execution/reclamation/analysis.json": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+    "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
+    "artifacts/branchfabric/manifests/hardware-baseline.json": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+    "artifacts/branchfabric/manifests/software-baseline.json": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+    "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f"
+  },
+  "verified_gate_input_sha256": "4b70653b883e6a8c6a8b2cdd6f7768e33680ec7a6c1f5368a7467efb6eff8e6d",
+  "verified_gate_result_sha256": "0a96f44800ae74c36e62e5744ed877445910119afc5ecfcc75ad4b9bbf0c62b4",
+  "verified_reports": {
+    "BRANCHFABRIC_FINAL_REPORT.md": "291489b671df991ed9046ec0b59aab1c37bb9fb06090c826634b97bf20f2af4e",
+    "BRANCHFABRIC_GATE_REPORT.md": "8c0f76e435b9fdaffd8b8db9fc2e7d7c74ef959dcd150d680a8427af5d17234f",
+    "BRANCHFABRIC_NO_BUILD_REPORT.md": "7f4bc49714f1c331d59a431dbb2556cb3029b50c80c43ee11d118b7b78afe6b1",
+    "docs/branchfabric/FUTURE_MEASUREMENT_PLAN.md": "583f30b498681aef7dbdd5183c05930a3c1d7de9f4da1a7f2b087f05441baa4c"
+  }
+}

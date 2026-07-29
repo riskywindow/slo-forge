@@ -1,0 +1,49 @@
+{
+  "schema_version": "sloforge.branchfabric.execution-provenance/v1",
+  "semantic_baseline": {
+    "commit": "46955be24d49af7090429444a0ef68f9a5695283",
+    "tag": "sloforge-branchfabric-execution-baseline-46955be"
+  },
+  "measurements": [
+    {
+      "name": "cpu_reference_fanout",
+      "generator_revision": "aeb43fab12be7e45e12b4cc0ad99dad53152b432",
+      "generator_source": "python/sloforge/helix/characterization/fanout_vertical.py",
+      "generator_source_sha256": "4c53f89345099e8831fef3ef6811950d21900779da9bd8c5b61d3a94fbbf642e",
+      "publication_revision": "aeb43fab12be7e45e12b4cc0ad99dad53152b432",
+      "raw_artifact": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+      "raw_sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+      "summary_artifact": "artifacts/branchfabric/execution/fanout/summary.json",
+      "summary_sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4"
+    },
+    {
+      "name": "cpu_reference_reclamation_batched_reuse",
+      "generator_revision": "b6279b647a8ef3c96e9865ce9523b786f703a73a",
+      "generator_source": "python/sloforge/helix/characterization/reclamation.py",
+      "generator_source_sha256": "5220c87bb79816f8d4c015715d0915ea3ffcf131e3c06c4dfc34bf0845357154",
+      "publication_revision": "5ae509add7154daa92816de5f5b4a9c3a3d2de0a",
+      "raw_artifact": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+      "raw_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
+      "summary_artifact": "artifacts/branchfabric/execution/reclamation/analysis.json",
+      "summary_sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0"
+    }
+  ],
+  "analysis_producers": [
+    {
+      "name": "reclamation_effect_analysis",
+      "generator_revision": "3ad119a7e70ed1258acc15eb11d3eed13904ea4c",
+      "generator_source": "python/sloforge/helix/characterization/execution_analysis.py",
+      "generator_source_sha256": "682a6a2efb1c5403641331148d9e61e4b90dea5244f9ec9df55a15375573ba86"
+    },
+    {
+      "name": "hardware_gate",
+      "generator_revision": "d113e12b5d618fa3b39b41a30f5f272bd96a18b2",
+      "generator_source": "python/sloforge/helix/characterization/gates.py",
+      "generator_source_sha256": "d3fc8e095233e68fea92b2f539f4c604fd02a4990ff44e0259a8919c4f21cdf5",
+      "gate_input_sha256": "4b70653b883e6a8c6a8b2cdd6f7768e33680ec7a6c1f5368a7467efb6eff8e6d",
+      "gate_result_sha256": "0a96f44800ae74c36e62e5744ed877445910119afc5ecfcc75ad4b9bbf0c62b4"
+    }
+  ],
+  "dirty_state_policy": "Generator code was committed before each final campaign; publication revisions may contain generated evidence. Unrelated pre-existing untracked artifacts are outside this manifest.",
+  "hardware_claim": false
+}
