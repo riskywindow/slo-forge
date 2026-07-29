@@ -20,14 +20,14 @@
       "evidence": [
         {
           "path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "CPU_REFERENCE_MODEL_STATE",
           "sample_count": 36,
           "raw_samples": true
         },
         {
           "path": "artifacts/branchfabric/execution/reclamation/analysis.json",
-          "sha256": "1ea7ed2a49ccf4cb5119914ca4c5d20cab986eef47ef744754b5013f08bfd6a1",
+          "sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
           "evidence_class": "ARTIFACT_REPLAY",
           "sample_count": 36,
           "raw_samples": false
@@ -50,7 +50,7 @@
       "critical_path": {
         "target_critical_path_fraction": null,
         "gpu_interference_fraction": null,
-        "state_movement_time_fraction": 0.3002422267536733,
+        "state_movement_time_fraction": 0.1990330675356517,
         "state_movement_bytes_fraction": null,
         "capacity_reclamation_fraction": null,
         "branch_readiness_fraction": null
@@ -80,7 +80,7 @@
         "operation_rate_per_second": null,
         "concurrency": 4,
         "queue_depth": 8,
-        "working_set_bytes": 54528,
+        "working_set_bytes": 6816,
         "latency_target_ns": null,
         "bandwidth_target_bytes_per_second": null,
         "fault_behavior": "stale source and corrupt state rejected; bounded operations return declared failures",

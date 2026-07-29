@@ -4,18 +4,18 @@
   "optimized_full_trace_phase_fractions": {
     "branch_readiness_ns": {
       "denominator": "total_wall_ns",
-      "maximum": 0.12724671162963308,
-      "median": 0.11910246553013534,
+      "maximum": 0.1339031406849908,
+      "median": 0.12659558425875167,
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.1140086418274249,
+        "lower": 0.12072990992374011,
         "method": "deterministic percentile bootstrap",
         "metric": "branch_readiness_ns_fraction_of_total_wall_ns",
-        "observed": 0.11910246553013534,
+        "observed": 0.12659558425875167,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -32,24 +32,24 @@
         "series_id": "reclamation.optimized-full.fraction.branch_readiness_ns",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.1234023326343022
+        "upper": 0.132182198779962
       },
-      "minimum": 0.11227023322057209
+      "minimum": 0.11642146947121008
     },
     "migration_ns": {
       "denominator": "total_interruption_ns",
-      "maximum": 0.3227549560000657,
-      "median": 0.3002422267536733,
+      "maximum": 0.22817170680018967,
+      "median": 0.1990330675356517,
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.2811886653225842,
+        "lower": 0.1961207851506916,
         "method": "deterministic percentile bootstrap",
         "metric": "migration_ns_fraction_of_total_interruption_ns",
-        "observed": 0.3002422267536733,
+        "observed": 0.1990330675356517,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -66,24 +66,24 @@
         "series_id": "reclamation.optimized-full.fraction.migration_ns",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.3151330434838112
+        "upper": 0.22450218085116352
       },
-      "minimum": 0.2706195170480239
+      "minimum": 0.19562654351746436
     },
     "pause_checkpoint_ns": {
       "denominator": "total_wall_ns",
-      "maximum": 0.23694922602910715,
-      "median": 0.21938771858517966,
+      "maximum": 0.25469982306780814,
+      "median": 0.23586692419752942,
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.21331500641054318,
+        "lower": 0.22939540530286928,
         "method": "deterministic percentile bootstrap",
         "metric": "pause_checkpoint_ns_fraction_of_total_wall_ns",
-        "observed": 0.21938771858517966,
+        "observed": 0.23586692419752942,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -100,24 +100,24 @@
         "series_id": "reclamation.optimized-full.fraction.pause_checkpoint_ns",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.2363275458604899
+        "upper": 0.24826689676862246
       },
-      "minimum": 0.21010135408293246
+      "minimum": 0.2292916889265375
     },
     "resume_ns": {
       "denominator": "total_wall_ns",
-      "maximum": 0.2383421597797665,
-      "median": 0.23216536372771207,
+      "maximum": 0.27112409140931476,
+      "median": 0.25853363798839724,
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.2291934850457184,
+        "lower": 0.24858310536897535,
         "method": "deterministic percentile bootstrap",
         "metric": "resume_ns_fraction_of_total_wall_ns",
-        "observed": 0.23216536372771207,
+        "observed": 0.25853363798839724,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -134,24 +134,24 @@
         "series_id": "reclamation.optimized-full.fraction.resume_ns",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.23684103528128186
+        "upper": 0.26964907118720327
       },
-      "minimum": 0.22915783790239672
+      "minimum": 0.24825681632830446
     },
     "total_interruption_ns": {
       "denominator": "total_wall_ns",
-      "maximum": 0.6965611066085292,
-      "median": 0.6806138280250273,
+      "maximum": 0.6652334245769758,
+      "median": 0.6557518590263034,
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.6779192971159113,
+        "lower": 0.6494266237573163,
         "method": "deterministic percentile bootstrap",
         "metric": "total_interruption_ns_fraction_of_total_wall_ns",
-        "observed": 0.6806138280250273,
+        "observed": 0.6557518590263034,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -168,9 +168,9 @@
         "series_id": "reclamation.optimized-full.fraction.total_interruption_ns",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.6925997115587024
+        "upper": 0.6635268304209503
       },
-      "minimum": 0.6771360314349468
+      "minimum": 0.6441354033787298
     }
   },
   "outliers_removed": false,
@@ -178,14 +178,14 @@
     "branch_readiness_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 137220541.5,
+        "lower": 129343812.5,
         "method": "deterministic percentile bootstrap",
         "metric": "branch_readiness_ns",
-        "observed": 139757916.5,
+        "observed": 134938500.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -202,18 +202,18 @@
         "series_id": "reclamation.serial.branch_readiness_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 143713416.5
+        "upper": 137599792.0
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 138052270.5,
+        "lower": 133840541.5,
         "method": "deterministic percentile bootstrap",
         "metric": "branch_readiness_ns",
-        "observed": 139211979.0,
+        "observed": 136711604.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -230,12 +230,12 @@
         "series_id": "reclamation.optimized.branch_readiness_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 141044771.0
+        "upper": 140165687.5
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -248,7 +248,7 @@
         "baseline_series_id": "reclamation.serial.branch_readiness_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -260,14 +260,14 @@
         },
         "candidate_series_id": "reclamation.optimized.branch_readiness_ns",
         "direction": "candidate minus baseline",
-        "matched_pairs_rank_biserial": 0.08771929824561403,
-        "mean_difference": 351120.22222222225,
-        "median_difference": 455354.5,
-        "median_relative_change": 0.003234772424551331,
+        "matched_pairs_rank_biserial": 0.4152046783625731,
+        "mean_difference": 3846881.777777778,
+        "median_difference": 2729750.0,
+        "median_relative_change": 0.02013312233433833,
         "metric": "branch_readiness_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": 0.027271398830838924,
+        "paired_cohens_dz": 0.35984102071729773,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -276,14 +276,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.9680182459822164,
+        "lower": 0.938044520468376,
         "method": "deterministic percentile bootstrap",
         "metric": "branch_readiness_ns_speedup",
-        "observed": 0.9967776889235385,
+        "observed": 0.9802642309420913,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -300,20 +300,20 @@
         "series_id": "reclamation.paired-speedup.branch_readiness_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 1.0171367305495926
+        "upper": 0.9996431060205808
       }
     },
     "migration_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 349136750.0,
+        "lower": 325263324.4875,
         "method": "deterministic percentile bootstrap",
         "metric": "migration_ns",
-        "observed": 353088291.5,
+        "observed": 334265645.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -330,18 +330,18 @@
         "series_id": "reclamation.serial.migration_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 361692687.0
+        "upper": 344811916.5
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 227742166.5,
+        "lower": 139224229.0,
         "method": "deterministic percentile bootstrap",
         "metric": "migration_ns",
-        "observed": 239185521.0,
+        "observed": 143462812.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -358,12 +358,12 @@
         "series_id": "reclamation.optimized.migration_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 241837403.97499996
+        "upper": 159145437.5
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -376,7 +376,7 @@
         "baseline_series_id": "reclamation.serial.migration_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -389,13 +389,13 @@
         "candidate_series_id": "reclamation.optimized.migration_ns",
         "direction": "candidate minus baseline",
         "matched_pairs_rank_biserial": -1.0,
-        "mean_difference": -118883708.33333333,
-        "median_difference": -122604041.5,
-        "median_relative_change": -0.3372564234945705,
+        "mean_difference": -189087284.6111111,
+        "median_difference": -186240917.0,
+        "median_relative_change": -0.5609752041899632,
         "metric": "migration_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": -5.898390198742384,
+        "paired_cohens_dz": -8.314237160585874,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -404,14 +404,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 1.4420457695856137,
+        "lower": 2.166316906443428,
         "method": "deterministic percentile bootstrap",
         "metric": "migration_ns_speedup",
-        "observed": 1.5089419381763953,
+        "observed": 2.2778306139041344,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -428,20 +428,20 @@
         "series_id": "reclamation.paired-speedup.migration_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 1.5694255878974865
+        "upper": 2.3870827536842123
       }
     },
     "pause_checkpoint_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 263767541.5,
+        "lower": 262696125.0,
         "method": "deterministic percentile bootstrap",
         "metric": "pause_checkpoint_ns",
-        "observed": 266240896.0,
+        "observed": 266003833.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -458,18 +458,18 @@
         "series_id": "reclamation.serial.pause_checkpoint_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 268506229.0
+        "upper": 273649854.5
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 257591646.0,
+        "lower": 252378354.0,
         "method": "deterministic percentile bootstrap",
         "metric": "pause_checkpoint_ns",
-        "observed": 260234750.0,
+        "observed": 259514145.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -486,12 +486,12 @@
         "series_id": "reclamation.optimized.pause_checkpoint_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 274468379.6874997
+        "upper": 271886646.0
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -504,7 +504,7 @@
         "baseline_series_id": "reclamation.serial.pause_checkpoint_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -516,14 +516,14 @@
         },
         "candidate_series_id": "reclamation.optimized.pause_checkpoint_ns",
         "direction": "candidate minus baseline",
-        "matched_pairs_rank_biserial": -0.21637426900584794,
-        "mean_difference": -2812310.222222222,
-        "median_difference": -5353958.5,
-        "median_relative_change": -0.02004760163392822,
+        "matched_pairs_rank_biserial": -0.3333333333333333,
+        "mean_difference": -8011937.722222222,
+        "median_difference": -5683521.0,
+        "median_relative_change": -0.022254724745256478,
         "metric": "pause_checkpoint_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": -0.1922442004791129,
+        "paired_cohens_dz": -0.30694295004253536,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -532,14 +532,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.9851954181840326,
+        "lower": 0.9638418254763336,
         "method": "deterministic percentile bootstrap",
         "metric": "pause_checkpoint_ns_speedup",
-        "observed": 1.0204597838725489,
+        "observed": 1.02287129829429,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -556,20 +556,20 @@
         "series_id": "reclamation.paired-speedup.pause_checkpoint_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 1.0297762733891012
+        "upper": 1.0707563291299105
       }
     },
     "resume_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 263806333.0,
+        "lower": 256605250.0,
         "method": "deterministic percentile bootstrap",
         "metric": "resume_ns",
-        "observed": 269601271.0,
+        "observed": 260766604.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -586,18 +586,18 @@
         "series_id": "reclamation.serial.resume_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 271970937.5
+        "upper": 284964145.5
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 272126000.5,
+        "lower": 266965812.5,
         "method": "deterministic percentile bootstrap",
         "metric": "resume_ns",
-        "observed": 274957583.5,
+        "observed": 268457708.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -614,12 +614,12 @@
         "series_id": "reclamation.optimized.resume_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 279530083.0
+        "upper": 281798333.5
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -632,7 +632,7 @@
         "baseline_series_id": "reclamation.serial.resume_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -644,14 +644,14 @@
         },
         "candidate_series_id": "reclamation.optimized.resume_ns",
         "direction": "candidate minus baseline",
-        "matched_pairs_rank_biserial": 0.8713450292397661,
-        "mean_difference": 8259539.333333333,
-        "median_difference": 10561166.5,
-        "median_relative_change": 0.03874675952918232,
+        "matched_pairs_rank_biserial": 0.3333333333333333,
+        "mean_difference": 5608307.777777778,
+        "median_difference": 6529833.5,
+        "median_relative_change": 0.02515262115138228,
         "metric": "resume_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": 0.9920401304660615,
+        "paired_cohens_dz": 0.25324856756231157,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -660,14 +660,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 0.9567373736935194,
+        "lower": 0.9140004525792802,
         "method": "deterministic percentile bootstrap",
         "metric": "resume_ns_speedup",
-        "observed": 0.962698815905526,
+        "observed": 0.9755180567885235,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -684,20 +684,20 @@
         "series_id": "reclamation.paired-speedup.resume_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 0.991627098286628
+        "upper": 1.0635158966502098
       }
     },
     "total_interruption_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 911787771.0,
+        "lower": 885973132.125,
         "method": "deterministic percentile bootstrap",
         "metric": "total_interruption_ns",
-        "observed": 916174021.0,
+        "observed": 903373166.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -714,18 +714,18 @@
         "series_id": "reclamation.serial.total_interruption_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 926881812.5
+        "upper": 916349396.0
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 794810687.5,
+        "lower": 703141625.5,
         "method": "deterministic percentile bootstrap",
         "metric": "total_interruption_ns",
-        "observed": 804355334.0,
+        "observed": 707209771.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -742,12 +742,12 @@
         "series_id": "reclamation.optimized.total_interruption_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 814499729.0
+        "upper": 717604062.5
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -760,7 +760,7 @@
         "baseline_series_id": "reclamation.serial.total_interruption_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -773,13 +773,13 @@
         "candidate_series_id": "reclamation.optimized.total_interruption_ns",
         "direction": "candidate minus baseline",
         "matched_pairs_rank_biserial": -1.0,
-        "mean_difference": -112545296.3888889,
-        "median_difference": -111286416.5,
-        "median_relative_change": -0.12071313727164801,
+        "mean_difference": -192422872.5,
+        "median_difference": -192231478.5,
+        "median_relative_change": -0.213835672434498,
         "metric": "total_interruption_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": -4.430624909530468,
+        "paired_cohens_dz": -4.919311618268607,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -788,14 +788,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 1.1276194874302945,
+        "lower": 1.2445075107013515,
         "method": "deterministic percentile bootstrap",
         "metric": "total_interruption_ns_speedup",
-        "observed": 1.137286289055435,
+        "observed": 1.2720844760027905,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -812,20 +812,20 @@
         "series_id": "reclamation.paired-speedup.total_interruption_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 1.156193181695723
+        "upper": 1.2979926622703524
       }
     },
     "total_wall_ns": {
       "baseline_median_ci": {
         "confidence_level": 0.95,
-        "lower": 1287572458.5,
+        "lower": 1251268583.5,
         "method": "deterministic percentile bootstrap",
         "metric": "total_wall_ns",
-        "observed": 1294048250.0,
+        "observed": 1271658792.0,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -842,18 +842,18 @@
         "series_id": "reclamation.serial.total_wall_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 1306658688.0
+        "upper": 1292482417.0
       },
       "optimized_median_ci": {
         "confidence_level": 0.95,
-        "lower": 1168664750.0,
+        "lower": 1072032250.0,
         "method": "deterministic percentile bootstrap",
         "metric": "total_wall_ns",
-        "observed": 1181592354.0,
+        "observed": 1078465958.5,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -870,12 +870,12 @@
         "series_id": "reclamation.optimized.total_wall_ns",
         "statistic": "median",
         "unit": "ns",
-        "upper": 1200965542.0
+        "upper": 1096716021.0
       },
       "paired_effect_size": {
         "baseline_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -888,7 +888,7 @@
         "baseline_series_id": "reclamation.serial.total_wall_ns",
         "candidate_provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -901,13 +901,13 @@
         "candidate_series_id": "reclamation.optimized.total_wall_ns",
         "direction": "candidate minus baseline",
         "matched_pairs_rank_biserial": -1.0,
-        "mean_difference": -114132293.8888889,
-        "median_difference": -119730104.0,
-        "median_relative_change": -0.09220139181020201,
+        "mean_difference": -183100108.7222222,
+        "median_difference": -180976520.5,
+        "median_relative_change": -0.14341921670880092,
         "metric": "total_wall_ns",
         "pair_count": 18,
         "pair_order": "preserved by sample index",
-        "paired_cohens_dz": -3.374030563590092,
+        "paired_cohens_dz": -3.969231830931786,
         "relative_denominator": "absolute baseline",
         "relative_pairs_used": 18,
         "schema_version": "sloforge.branchfabric.paired-effect-size/v1",
@@ -916,14 +916,14 @@
       },
       "paired_speedup_median_ci": {
         "confidence_level": 0.95,
-        "lower": 1.078473652883162,
+        "lower": 1.1448266923475403,
         "method": "deterministic percentile bootstrap",
         "metric": "total_wall_ns_speedup",
-        "observed": 1.1015663804883054,
+        "observed": 1.1675466328731288,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -940,12 +940,12 @@
         "series_id": "reclamation.paired-speedup.total_wall_ns",
         "statistic": "median",
         "unit": "ratio",
-        "upper": 1.1089306412926963
+        "upper": 1.18750295933445
       }
     }
   },
   "raw_artifact": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-  "raw_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+  "raw_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
   "raw_trial_count": 36,
   "schema_version": "sloforge.branchfabric.reclamation-execution-analysis/v1",
   "seeds": [
@@ -957,21 +957,21 @@
     "hardware_gate_interpretation": "end-to-end relevance context only; no target-hardware service curve or confidence-backed hardware headroom is available",
     "metric": "migration_ns / total_interruption_ns",
     "raw_bound": true,
-    "value": 0.3002422267536733
+    "value": 0.1990330675356517
   },
   "target_hardware_measured": false,
   "tracing_controls": {
     "existing_serial": {
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": -0.0431023418755862,
+        "lower": -0.03576338535662758,
         "method": "deterministic percentile bootstrap",
         "metric": "full_minus_disabled_total_wall_relative_change",
-        "observed": -0.012695444503271772,
+        "observed": -0.006370136068649767,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -988,22 +988,22 @@
         "series_id": "reclamation.trace-overhead.existing_serial",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.01993677386574639
+        "upper": 0.05814399576277909
       },
-      "median_relative_change": -0.012695444503271772,
+      "median_relative_change": -0.006370136068649767,
       "pair_count": 6
     },
     "optimized_bounded_parallel": {
       "median_ci": {
         "confidence_level": 0.95,
-        "lower": -0.002727211809102306,
+        "lower": -0.03635539586523116,
         "method": "deterministic percentile bootstrap",
         "metric": "full_minus_disabled_total_wall_relative_change",
-        "observed": 0.009054014806874424,
+        "observed": -0.01602856556489745,
         "percentile_method": "Hyndman-Fan type 7",
         "provenance": {
           "artifact_reference": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
-          "artifact_sha256": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d",
+          "artifact_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
           "evidence_class": "SYNTHETIC",
           "raw_artifact_immutable": true,
           "repetition": 0,
@@ -1020,9 +1020,9 @@
         "series_id": "reclamation.trace-overhead.optimized_bounded_parallel",
         "statistic": "median",
         "unit": "fraction",
-        "upper": 0.04228611137687953
+        "upper": 0.018897317569361884
       },
-      "median_relative_change": 0.009054014806874424,
+      "median_relative_change": -0.01602856556489745,
       "pair_count": 6
     }
   },
