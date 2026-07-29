@@ -54,7 +54,9 @@ def verify_no_build(repository_root: Path) -> dict[str, Any]:
     )
     _require(gate_result.get("passing_candidates") == [], "gate has passing candidates")
     candidates = gate_result.get("candidates")
-    _require(isinstance(candidates, list) and candidates, "gate has no candidate audit")
+    if not isinstance(candidates, list):
+        raise NoBuildVerificationError("gate candidate audit is malformed")
+    _require(bool(candidates), "gate has no candidate audit")
     _require(
         all(
             isinstance(candidate, dict)
@@ -93,7 +95,9 @@ def verify_no_build(repository_root: Path) -> dict[str, Any]:
     _require(float(spend.get("total_authorized", -1)) == 0.0, "authorized spend is nonzero")
     _require(float(spend.get("spent", -1)) == 0.0, "BranchFabric spend is nonzero")
     cleanup_entries = cleanup.get("entries")
-    _require(isinstance(cleanup_entries, list) and cleanup_entries, "cleanup ledger is empty")
+    if not isinstance(cleanup_entries, list):
+        raise NoBuildVerificationError("cleanup ledger is malformed")
+    _require(bool(cleanup_entries), "cleanup ledger is empty")
     _require(
         all(
             isinstance(entry, dict)
