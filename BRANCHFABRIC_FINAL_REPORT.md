@@ -1,7 +1,9 @@
 # SLOForge BranchFabric final report
 
-Final outcome: `FAIL_NO_BUILD`  
-Hardware justified: **no**  
+Final outcome: `FAIL_NO_BUILD`
+
+Hardware justified: **no**
+
 Completion branch: verified no-build
 
 ## Revisions and decision integrity
@@ -12,6 +14,8 @@ Completion branch: verified no-build
   `d113e12b5d618fa3b39b41a30f5f272bd96a18b2`.
 - Final batched-reclamation evidence publication:
   `5ae509add7154daa92816de5f5b4a9c3a3d2de0a`.
+- Final no-build report publication:
+  `26ecc48ca8c2e9302a6744e98cb4ed4013c90e96`.
 - No gate threshold was loosened. No synthetic or CPU-reference metric was
   reclassified as target-hardware evidence.
 - The historical negative characterization remains in the corpus and reports.

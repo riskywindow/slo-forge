@@ -1,7 +1,9 @@
 # BranchFabric verified no-build report
 
-Decision: `FAIL_NO_BUILD`  
-Required action: `TERMINATE_HARDWARE_PATH`  
+Decision: `FAIL_NO_BUILD`
+
+Required action: `TERMINATE_HARDWARE_PATH`
+
 Hardware implementation allowed: **false**
 
 ## Executive decision
