@@ -27,7 +27,7 @@ No threshold was loosened. CPU-reference, synthetic, simulated-hardware, and art
 
 Evidence bindings:
 
-- `artifacts/branchfabric/execution/reclamation/raw/trials.jsonl` — SHA-256 `795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408`; CPU_REFERENCE_MODEL_STATE; n=36; raw samples.
+- `artifacts/branchfabric/execution/reclamation/raw/trials.jsonl` — SHA-256 `795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408`; CPU_REFERENCE_LOCAL_TRANSACTION; n=36; raw samples.
 - `artifacts/branchfabric/execution/reclamation/analysis.json` — SHA-256 `cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0`; ARTIFACT_REPLAY; n=36; derived/replay.
 - `artifacts/branchfabric/manifests/hardware-baseline.json` — SHA-256 `c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238`; LOCAL_CPU_REAL; n=1; derived/replay.
 - `artifacts/branchfabric/manifests/software-baseline.json` — SHA-256 `f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd`; ARTIFACT_REPLAY; n=1; derived/replay.
