@@ -552,6 +552,213 @@
       "future_headroom_metric_derivation_is_compiler_verified": "FAIL_MEDIUM"
     }
   },
+  "final_gate_reaudit": {
+    "review_snapshot": {
+      "main_head": "b6279b647a8ef3c96e9865ce9523b786f703a73a",
+      "main_execution_outputs_modified_at_review": true,
+      "interpretation": "Exact output hashes were reviewed before publication; generator source was clean at the named main commit"
+    },
+    "five_independently_recomputed_conclusions": {
+      "historical_maximum_amdahl": {
+        "artifact": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+        "artifact_sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+        "objective": "continuum_lifecycle_window",
+        "primitive": "reshard",
+        "scenario": "free",
+        "projected_speedup": 1.0169770224093013,
+        "all_bound_arithmetic_recomputed": true,
+        "hardware_gate_interpretation": "Below 1.02x and not an end-to-end target-hardware headroom bound"
+      },
+      "fanout_readiness": {
+        "raw_artifact": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+        "raw_sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+        "summary_artifact": "artifacts/branchfabric/execution/fanout/summary.json",
+        "summary_sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4",
+        "maximum_case": {
+          "workload_class": "coding_agent",
+          "fanout": 8,
+          "optimized_readiness_median_ns": 44792,
+          "suffix_path_median_ns": 745790250,
+          "readiness_fraction_of_local_lifecycle": 0.000060056175263484067,
+          "ideal_zero_cost_local_lifecycle_speedup": 1.0000600597822242
+        },
+        "all_six_cases_recomputed_from_raw": true,
+        "hardware_gate_interpretation": "Fails the 10 percent BranchPoint-to-readiness relevance gate and is CPU-reference state"
+      },
+      "paired_reclamation_interruption": {
+        "raw_artifact": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+        "raw_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
+        "analysis_artifact": "artifacts/branchfabric/execution/reclamation/analysis.json",
+        "analysis_sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+        "pair_key": [
+          "seed",
+          "trace_level",
+          "repetition"
+        ],
+        "pair_count": 18,
+        "all_optimized_faster": true,
+        "paired_median_speedup": 1.2720844760027905,
+        "paired_speedup_bootstrap_95_lower": 1.2445075107013515,
+        "paired_speedup_bootstrap_95_upper": 1.2979926622703524,
+        "median_relative_change": -0.213835672434498,
+        "hardware_gate_interpretation": "Measured software improvement only; no target-hardware service curve or hardware lower confidence bound"
+      },
+      "unique_transfer_byte_savings": {
+        "optimized_trial_count": 18,
+        "logical_transfer_bytes_range": [
+          54496,
+          54528
+        ],
+        "unique_transferred_bytes_range": [
+          6812,
+          6816
+        ],
+        "saved_bytes_range": [
+          47684,
+          47712
+        ],
+        "median_logical_transfer_bytes": 54528.0,
+        "median_unique_transferred_bytes": 6816.0,
+        "median_saved_bytes": 47712.0,
+        "saved_fraction_every_optimized_trial": 0.875,
+        "all_raw_byte_identities_recomputed": true,
+        "hardware_gate_interpretation": "Batched content-addressed CPU software removes repeated bytes before hardware selection; this is not physical multicast"
+      },
+      "candidate_gate_outcomes": {
+        "phase": "final",
+        "outcome": "FAIL_NO_BUILD",
+        "passing_candidates": [],
+        "hardware_implementation_allowed": false,
+        "functional_model_or_cycle_simulator_allowed": false,
+        "required_action": "TERMINATE_HARDWARE_PATH",
+        "candidates": [
+          {
+            "candidate": "checkpoint_transform_transfer_chain",
+            "mandatory_real_evidence": "FAIL",
+            "mandatory_end_to_end_relevance": "PASS",
+            "mandatory_system_level_headroom": "FAIL",
+            "mandatory_platform_feasibility": "FAIL",
+            "workload_value": "FAIL",
+            "disposition": "NOT_JUSTIFIED"
+          },
+          {
+            "candidate": "shared_root_cow",
+            "mandatory_real_evidence": "FAIL",
+            "mandatory_end_to_end_relevance": "FAIL",
+            "mandatory_system_level_headroom": "FAIL",
+            "mandatory_platform_feasibility": "FAIL",
+            "workload_value": "FAIL",
+            "disposition": "NOT_JUSTIFIED"
+          },
+          {
+            "candidate": "one_to_many_multicast",
+            "mandatory_real_evidence": "FAIL",
+            "mandatory_end_to_end_relevance": "FAIL",
+            "mandatory_system_level_headroom": "FAIL",
+            "mandatory_platform_feasibility": "FAIL",
+            "workload_value": "FAIL",
+            "disposition": "NOT_JUSTIFIED"
+          },
+          {
+            "candidate": "branch_translation_metadata",
+            "mandatory_real_evidence": "FAIL",
+            "mandatory_end_to_end_relevance": "FAIL",
+            "mandatory_system_level_headroom": "FAIL",
+            "mandatory_platform_feasibility": "FAIL",
+            "workload_value": "FAIL",
+            "disposition": "NOT_JUSTIFIED"
+          }
+        ],
+        "checkpoint_relevance_context": {
+          "optimized_full_trace_migration_fraction_of_interruption": 0.1990330675356517,
+          "interpretation": "Raw-bound relevance PASS only; it cannot compensate for the other four failed gates"
+        }
+      }
+    },
+    "final_artifact_hashes": [
+      {
+        "path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+        "sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408"
+      },
+      {
+        "path": "artifacts/branchfabric/execution/reclamation/analysis.json",
+        "sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0"
+      },
+      {
+        "path": "artifacts/branchfabric/execution/reclamation/campaign.json",
+        "sha256": "daac0cf1f595984d2eb2c5452524ec4ca174285986d934fcd42e68e43cc6287c"
+      },
+      {
+        "path": "artifacts/branchfabric/execution/reclamation/MANIFEST.json",
+        "sha256": "cf1e1f363ce95d894416c3abbf56d9735fb55c48db8387126251e376ec846a79"
+      },
+      {
+        "path": "artifacts/branchfabric/gates/branchfabric_gate_input.json",
+        "sha256": "dd5e92bd4945c2b8faecd27dd4e9ec187e2150d78d3a661086c6a7bfd951a6c1"
+      },
+      {
+        "path": "artifacts/branchfabric/gates/branchfabric_gate_result.json",
+        "sha256": "1f8aeed7f91eb954564ac3fd1f6e8224d585265d646e1fc1afdf19db6ea09df8"
+      },
+      {
+        "path": "BRANCHFABRIC_GATE_REPORT.md",
+        "sha256": "3d350568dd1caafa5138b8218f1e3771c51db4f7fe3305e1513a5b4a552aaa2e"
+      }
+    ],
+    "integrity_checks": {
+      "gate_evidence_reference_count": 18,
+      "all_gate_evidence_paths_exist": true,
+      "all_gate_evidence_hashes_match": true,
+      "fanout_manifest_hashes_and_sizes_match": true,
+      "reclamation_campaign_environment_raw_manifest_matches": true,
+      "reclamation_analysis_separately_bound_by_gate_input": true,
+      "gate_result_recompiled_byte_for_byte": true,
+      "gate_report_recompiled_byte_for_byte": true,
+      "hardware_branchfabric_directory_absent": true,
+      "sim_branchfabric_directory_absent": true,
+      "raw_engines_match_requested": true,
+      "raw_hidden_fallback": false,
+      "raw_physical_gpu_capacity_reclaimed": 0,
+      "raw_physical_gpu_bytes_reclaimed": 0,
+      "campaign_hardware_claim": false,
+      "campaign_gpu_measurement": false,
+      "analysis_target_hardware_measured": false,
+      "analysis_calibrated_hardware_model_available": false,
+      "authorization_variables_absent": true
+    },
+    "prior_adversarial_finding_disposition": [
+      {
+        "id": "BF-HA-H4",
+        "disposition": "RESOLVED",
+        "evidence": "Final phase gate input/result bind both fanout and reclamation evidence"
+      },
+      {
+        "id": "BF-HA-M1",
+        "disposition": "NOT_SCHEMA_RESOLVED_EXPLICITLY_BOUNDED",
+        "evidence": "Reclamation generator source is clean at main commit b6279b6 with SHA-256 5220c87bb79816f8d4c015715d0915ea3ffcf131e3c06c4dfc34bf0845357154 and paired-analysis source is from 3ad119a with SHA-256 682a6a2efb1c5403641331148d9e61e4b90dea5244f9ec9df55a15375573ba86; artifacts still lack a distinct embedded producer revision",
+        "impact": "Documented reproducibility limitation; cannot support a hardware PASS"
+      },
+      {
+        "id": "BF-HA-M2",
+        "disposition": "RESOLVED",
+        "evidence": "Optimized software performs one batch of unique content-addressed digests and all 18 trials show exactly 87.5 percent reuse savings"
+      },
+      {
+        "id": "BF-HA-M3",
+        "disposition": "RESOLVED_FOR_GATE_USE_TAILS_EXPLICITLY_BOUNDED",
+        "evidence": "Matched paired effects, deterministic 95 percent bootstrap intervals, and trace controls exist; empirical p99 remains descriptive and is not used as hardware headroom"
+      }
+    ],
+    "validation": {
+      "focused_test_command": "uv run --locked pytest -q tests/python/test_branchfabric_amdahl.py tests/python/test_branchfabric_fanout_vertical.py tests/python/test_branchfabric_reclamation.py tests/python/test_branchfabric_execution_analysis.py tests/python/test_branchfabric_gates.py",
+      "focused_test_result": "PASS",
+      "focused_tests_passed": 21,
+      "independent_raw_recomputation": "PASS",
+      "json_parse": "PASS",
+      "git_diff_check": "PASS"
+    },
+    "verdict": "FINAL_FAIL_NO_BUILD_REPRODUCED"
+  },
   "validation": {
     "focused_python": {
       "command": "unset VIRTUAL_ENV; export PATH=/tmp/sloforge-bf-negative/.venv/bin:$PATH; uv run --locked pytest -q tests/python/test_branchfabric_amdahl.py tests/python/test_branchfabric_workload_analysis.py tests/python/test_branchfabric_transport_analysis.py tests/python/test_branchfabric_software_baselines.py tests/python/test_branchfabric_overhead.py tests/python/test_branchfabric_trace_io.py tests/python/test_branchfabric_trace_models.py",
@@ -583,13 +790,13 @@
     "question": "Would this hardware have been selected from the measured workload if the BranchFabric name and prior proposal did not already exist?",
     "answer": "No",
     "rationale": [
-      "The only branch group has four siblings and tiny simulated model state",
-      "All trajectories diverge at token and action index zero",
-      "All observed transfers have fanout one and produce zero multicast opportunities",
-      "The strongest free-operation lifecycle-window sensitivity is 1.0169770224093013x, below 1.02x, and is not an end-to-end Helix objective",
+      "Controlled fanout 8, 16, and 32 remains CPU-reference model state rather than physical transformer or GPU allocation evidence",
+      "The batched content-addressed software baseline removes exactly 87.5 percent of repeated local transfer bytes",
+      "No physically repeated unicast to multiple destinations or physical multicast opportunity was measured",
+      "The strongest free-operation lifecycle-window sensitivity is 1.0169770224093013x and the strongest ideal-free readiness bound is 1.0000600597822242x; neither is an end-to-end target-hardware objective",
       "No compatible GPU, multi-GPU fabric, physical NIC, RDMA, NVLink, FPGA, or DPU path was measured",
-      "No metadata demand rate, hardware working set, queue depth, or platform-feasibility envelope is established",
-      "The raw-evidence gate cannot pass, so RTL or a target-specific accelerator would be proposal-driven rather than workload-selected"
+      "The only candidate to pass relevance still fails real evidence, hardware headroom, platform feasibility, and workload value",
+      "The final gate has zero passing candidates, so RTL or a target-specific accelerator would be proposal-driven rather than workload-selected"
     ]
   },
   "replication_verdict": "PRIOR_NEGATIVE_HARDWARE_RESULT_PRESERVED",

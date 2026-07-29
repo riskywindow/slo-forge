@@ -23,6 +23,98 @@ Machine-readable result:
 No raw artifact, source measurement, gate logic, or source performance result
 was changed.
 
+## Final gate re-audit after batched content reuse
+
+The final execution gate was independently re-audited against the main-tree
+snapshot at `b6279b647a8ef3c96e9865ce9523b786f703a73a`. The regenerated execution
+artifacts were still modified-but-uncommitted in that workspace during review,
+so this audit binds their exact hashes below. The gate input, result, and report
+recompiled byte-for-byte from that snapshot.
+
+The stronger software baseline changes the software result materially, but not
+the hardware decision. It converts the optimized reclamation transfer from
+eight per-branch local spools to one batch of unique content-addressed chunks.
+All 18 optimized trials request a logical 54,496 or 54,528 bytes and physically
+spool only 6,812 or 6,816 unique bytes. The saved fraction is exactly 87.5% in
+every trial. This resolves the earlier weak-transfer-baseline finding and is
+evidence for software reuse, not a hardware multicast result.
+
+### Five independently recomputed conclusions
+
+| Conclusion | Raw recomputation | Gate interpretation |
+|---|---:|---|
+| Historical maximum free-operation Amdahl sensitivity | `1.0169770224093013x` for Continuum reshard | Below 1.02x and not an end-to-end hardware bound |
+| Maximum optimized fanout-readiness fraction | `0.000060056175263484067` at coding fanout 8 | Ideal free readiness improves the local lifecycle only `1.0000600597822242x` |
+| Paired reclamation interruption effect | median `1.2720844760027905x`; 95% bootstrap interval `1.2445075107013515x`--`1.2979926622703524x`; median relative change `-21.383567%` | Strong software benefit; not target-hardware headroom |
+| Unique transfer reuse | median logical `54,528` bytes, unique `6,816` bytes, saved `47,712` bytes; exact `87.5%` reduction | Strongest local software baseline eliminates most repeated movement before hardware selection |
+| Final candidate result | four candidates, zero passing | `FAIL_NO_BUILD`; hardware/model/simulator permissions remain false |
+
+The paired interruption series contains 18 exact matches by seed, trace level,
+and repetition; every optimized observation is faster. The raw-bound optimized
+full-trace migration fraction is `0.1990330675356517`, so the
+checkpoint/transform/transfer candidate passes only mandatory end-to-end
+relevance. It still fails target-real evidence, system-level hardware
+headroom, platform feasibility, and workload value. The high software speedup
+and byte reduction are deliberately not copied into hardware-headroom fields.
+
+Final candidate gate matrix:
+
+| Candidate | Real evidence | Relevance | Hardware headroom | Platform | Workload value | Final disposition |
+|---|---|---|---|---|---|---|
+| `checkpoint_transform_transfer_chain` | FAIL | PASS | FAIL | FAIL | FAIL | `NOT_JUSTIFIED` |
+| `shared_root_cow` | FAIL | FAIL | FAIL | FAIL | FAIL | `NOT_JUSTIFIED` |
+| `one_to_many_multicast` | FAIL | FAIL | FAIL | FAIL | FAIL | `NOT_JUSTIFIED` |
+| `branch_translation_metadata` | FAIL | FAIL | FAIL | FAIL | FAIL | `NOT_JUSTIFIED` |
+
+### Final artifact closure
+
+| Artifact | SHA-256 |
+|---|---|
+| Reclamation raw trials | `795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408` |
+| Reclamation paired analysis | `cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0` |
+| Reclamation campaign | `daac0cf1f595984d2eb2c5452524ec4ca174285986d934fcd42e68e43cc6287c` |
+| Reclamation manifest | `cf1e1f363ce95d894416c3abbf56d9735fb55c48db8387126251e376ec846a79` |
+| Final gate input | `dd5e92bd4945c2b8faecd27dd4e9ec187e2150d78d3a661086c6a7bfd951a6c1` |
+| Final gate result | `1f8aeed7f91eb954564ac3fd1f6e8224d585265d646e1fc1afdf19db6ea09df8` |
+| Final gate report | `3d350568dd1caafa5138b8218f1e3771c51db4f7fe3305e1513a5b4a552aaa2e` |
+
+All 18 evidence references in the gate input exist and match their declared
+SHA-256 values. The three fanout-manifest entries and the reclamation
+campaign/environment/raw manifest entries also match. The reclamation analysis
+is separately hash-bound by the gate input. Recompiling the gate produced the
+same result and Markdown report byte-for-byte.
+
+No `hardware/branchfabric` or `sim/branchfabric` directory exists. Every raw
+trial uses the requested CPU-reference local-file engine, reports no hidden
+fallback, and reclaims zero physical GPU capacity and bytes. The campaign says
+`hardware_claim=false` and `gpu_measurement=false`; the analysis says
+`target_hardware_measured=false` and
+`calibrated_hardware_model_available=false`. All authorization variables remain
+absent.
+
+### Prior adversarial-finding disposition
+
+- `BF-HA-H4` is **resolved**: the final gate is phase `final` and binds both
+  fanout and reclamation raw/derived evidence.
+- `BF-HA-M1` is **not schema-resolved but explicitly bounded**: the artifacts
+  still record the semantic baseline rather than a distinct producer revision.
+  This audit binds the clean generator source at `b6279b6` with SHA-256
+  `5220c87bb79816f8d4c015715d0915ea3ffcf131e3c06c4dfc34bf0845357154`
+  and the paired-analysis source from `3ad119a` with SHA-256
+  `682a6a2efb1c5403641331148d9e61e4b90dea5244f9ec9df55a15375573ba86`,
+  plus the exact output hashes above. It remains a documented reproducibility
+  limitation and cannot support a hardware PASS.
+- `BF-HA-M2` is **resolved**: the optimized path batches unique digests once,
+  and the rerun proves the 87.5% byte reduction.
+- `BF-HA-M3` is **resolved for gate use and bounded for tails**: matched paired
+  effects, deterministic bootstrap intervals, and full-minus-disabled tracing
+  controls now exist. Empirical p99 remains a descriptive maximum at 18 samples
+  and is not used as a hardware-headroom lower bound.
+
+Focused re-audit acceptance passed 21 tests covering Amdahl, fanout,
+reclamation, execution analysis, and gates. JSON parsing, manifest checks,
+independent formulas, gate recompilation, and `git diff --check` passed.
+
 ## Audit boundary and evidence classes
 
 The audit started at commit
@@ -428,12 +520,14 @@ BranchFabric name and prior proposal did not already exist?**
 
 No.
 
-The workload-selected decision would be to retain optimized CPU software and
-collect representative model/GPU/network/transaction evidence. The only
-branch group has four siblings, state is tiny and simulated, divergence is
-immediate, every transfer has fanout one, metadata demand is unmeasured, queue
-concurrency is serialized, and no end-to-end Helix objective has a measured
-hardware headroom bound. The maximum lifecycle-window free-operation
-sensitivity is only 1.016977x. No neutral architect would select an FPGA, DPU,
-multicast engine, hardware page table, or shared-root HBM/CXL store from this
-evidence.
+The workload-selected decision would be to retain shared-root/lazy-COW and
+batched content-reuse CPU software, then collect representative
+model/GPU/network/transaction evidence. The execution now includes controlled
+fanout 8, 16, and 32 plus a local reclamation transaction, but state remains a
+small CPU reference fixture, there is no physical multi-destination transfer,
+and no end-to-end Helix objective has measured target-hardware headroom. The
+strong software baseline itself removes 87.5% of repeated local transfer bytes.
+The historical maximum free-operation sensitivity is only 1.016977x and the
+new maximum ideal-free readiness bound is 1.000060x. No neutral architect would
+select an FPGA, DPU, multicast engine, hardware page table, GPU kernel, or
+shared-root HBM/CXL store from this evidence.
