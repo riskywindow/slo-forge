@@ -1,17 +1,181 @@
 {
   "boundedness": {
+    "aggregate_deadline_probe_elapsed_seconds": 0.014985832996899262,
+    "aggregate_deadline_probe_error": "TimeoutError: bounded reclamation worker deadline expired",
+    "aggregate_deadline_probe_timeout_seconds": 0.01,
+    "aggregate_deadline_returned_before_task_natural_timeout": true,
     "declared_branch_queue_capacity": 8,
     "optimized_observed_maximum_concurrency": 4,
     "optimized_observed_maximum_queue_occupancy": 8,
     "serial_observed_maximum_concurrency": 1,
     "serial_observed_maximum_queue_occupancy": 8
   },
+  "campaign_regeneration": {
+    "canonical": {
+      "analysis_sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+      "campaign_sha256": "daac0cf1f595984d2eb2c5452524ec4ca174285986d934fcd42e68e43cc6287c",
+      "environment_sha256": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
+      "manifest_sha256": "cf1e1f363ce95d894416c3abbf56d9735fb55c48db8387126251e376ec846a79",
+      "raw_trials_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408"
+    },
+    "conclusion_comparison": {
+      "canonical_migration_speedup_ci95": [
+        2.166316906443428,
+        2.3870827536842123
+      ],
+      "canonical_migration_speedup_median": 2.2778306139041344,
+      "canonical_total_interruption_speedup_ci95": [
+        1.2445075107013515,
+        1.2979926622703524
+      ],
+      "canonical_total_interruption_speedup_median": 1.2720844760027905,
+      "canonical_total_wall_speedup_ci95": [
+        1.1448266923475403,
+        1.18750295933445
+      ],
+      "canonical_total_wall_speedup_median": 1.1675466328731288,
+      "conclusion_unchanged": true,
+      "regenerated_migration_speedup_ci95": [
+        2.0778388497998765,
+        2.327431804606067
+      ],
+      "regenerated_migration_speedup_median": 2.1954636014016997,
+      "regenerated_total_interruption_speedup_ci95": [
+        1.2064272973268337,
+        1.2886804900248379
+      ],
+      "regenerated_total_interruption_speedup_median": 1.2480221647562695,
+      "regenerated_total_wall_speedup_ci95": [
+        1.1259626845859554,
+        1.1941094343933836
+      ],
+      "regenerated_total_wall_speedup_median": 1.1493691285867231,
+      "target_hardware_measured_in_either": false,
+      "verdict": "SOFTWARE_BATCHING_REPRODUCED; HARDWARE_GATE_REMAINS_FAILED"
+    },
+    "deterministic_field_comparison": {
+      "field_count": 22,
+      "matched_trial_identities": 36,
+      "mismatch_count": 0
+    },
+    "hashes_expected_to_differ": true,
+    "hash_variance_reason": "Raw trials contain measured host durations; analysis provenance also binds the raw path and raw hash.",
+    "regenerated": {
+      "analysis_sha256": "f075f98dc48892d9107f0ca77d5fa8e703b8e4483afb00094e08179c8b383761",
+      "campaign_sha256": "f75d9f04b451402a447142093e6da78cecaba5144dec23bfe851473c9999610c",
+      "environment_sha256": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
+      "manifest_sha256": "efd6c32af1b9ed38f2aeb163b2edcde1ee3aef12d3da0e5cf18ffc5018963c99",
+      "raw_trials_sha256": "50f6796e9d57e9e885662f76900448fc6991846461f040ad1426e50a7c8c4a29"
+    },
+    "trial_count": 36
+  },
   "early_ownership_commit_probe": {
     "lease_unchanged": true,
     "phase_at_attempt": "PROPOSED",
     "rejected_as": "InvalidTransition"
   },
-  "independent_trials": [
+  "gate_observation": {
+    "functional_model_or_cycle_simulator_allowed": false,
+    "hardware_implementation_allowed": false,
+    "negative_result_preserved": true,
+    "outcome": "FAIL_NO_BUILD",
+    "passing_candidates": [],
+    "required_action": "TERMINATE_HARDWARE_PATH"
+  },
+  "post_change_independent_trials": [
+    {
+      "canonical_sha256": "c5726b21cbd4cda00b41faa5b541bc8dd395e5266eab068c62dff4f56d1048d4",
+      "identity": {
+        "repetition": 191,
+        "seed": 73,
+        "software_baseline": "existing_serial",
+        "trace_level": "full"
+      },
+      "outcome": {
+        "actual_engine": "continuum-reference-cpu-local-file",
+        "admissions_stopped": true,
+        "all_transactions_completed": true,
+        "corrupt_state_rejected": true,
+        "hidden_fallback": false,
+        "maximum_concurrency": 1,
+        "maximum_queue_occupancy": 8,
+        "migration_ns": 291368917,
+        "resume_ns": 232735083,
+        "slo_restored": true,
+        "stale_source_rejected": true,
+        "total_interruption_ns": 819900333,
+        "total_wall_ns": 1167757125
+      },
+      "semantic_projection_sha256": "cc0f28e06246968d24535d2c3176921c8217173eb45cda3c137044f23de424c2",
+      "transfer": {
+        "detail": "per-branch local filesystem spool with digest validation",
+        "logical_bytes_requested": 54528,
+        "physical_unique_bytes": 54528,
+        "reuse_saved_bytes": 0,
+        "reuse_saved_fraction": 0.0,
+        "sample_count": 8
+      }
+    },
+    {
+      "canonical_sha256": "2896fc8a9458bea7d919d7496970d2e91c6e75d28ed6cbc4695a593860c3fcc2",
+      "identity": {
+        "repetition": 192,
+        "seed": 113,
+        "software_baseline": "optimized_bounded_parallel",
+        "trace_level": "full"
+      },
+      "outcome": {
+        "actual_engine": "continuum-reference-cpu-local-file",
+        "admissions_stopped": true,
+        "all_transactions_completed": true,
+        "corrupt_state_rejected": true,
+        "hidden_fallback": false,
+        "maximum_concurrency": 4,
+        "maximum_queue_occupancy": 8,
+        "migration_ns": 135549167,
+        "resume_ns": 278036917,
+        "slo_restored": true,
+        "stale_source_rejected": true,
+        "total_interruption_ns": 708548167,
+        "total_wall_ns": 1071487708
+      },
+      "semantic_projection_sha256": "189ce550cd11ab6cb09022ff1816e55484b8c48f111958aa4d518049c93667f0",
+      "transfer": {
+        "detail": "single batched content-addressed transfer of unique chunks with digest validation",
+        "logical_bytes_requested": 54496,
+        "physical_unique_bytes": 6812,
+        "reuse_saved_bytes": 47684,
+        "reuse_saved_fraction": 0.875,
+        "sample_count": 1
+      }
+    }
+  ],
+  "post_prepare_rollback_retry_probe": {
+    "after_retry": {
+      "destination_lifecycle": "active",
+      "destination_owner_epoch": 2,
+      "lease_owner_epoch": 2,
+      "phase": "COMPLETED",
+      "source_lifecycle": "fenced"
+    },
+    "before_retry": {
+      "destination_session_count": 0,
+      "gateway_watermark": 5,
+      "journal_tail": [
+        "ABORTING",
+        "ROLLED_BACK"
+      ],
+      "lease_owner_epoch": 1,
+      "phase": "ROLLED_BACK",
+      "prepared_destination_count": 0,
+      "recoverable_transaction_count": 0,
+      "rejected_as": "InjectedFailureError",
+      "source_lifecycle": "paused"
+    },
+    "failure_point": "VALIDATE_IMPORT",
+    "retry_succeeded": true
+  },
+  "pre_hardening_independent_trials": [
     {
       "canonical_sha256": "e9788dcb45477287c7dc2c3c288c4ea66938e849e21d82428a6e91b96f07b355",
       "identity": {
@@ -1608,9 +1772,11 @@
   "limitations": [
     "CPU reference transaction only; no GPU, PCIe, NVLink, RDMA, NIC, FPGA, or DPU was exercised.",
     "Dynamic ordering instrumentation proves the exercised resume_checkpoint call order, not all possible distributed executions.",
-    "The corruption probe rejects during restore before a migration transaction begins; it does not exercise transaction abort after partial import.",
+    "The post-prepare probe covers validation failure, durable rollback, cleanup, and retry; it does not cover every import, rollback-cleanup, process-crash, or post-ownership-commit failure point.",
+    "The aggregate deadline bounds caller waiting, but a timed-out daemon worker can continue its in-flight task until that task returns.",
     "The run_trial stale-source probe exercises source fencing; gateway stale-epoch rejection is covered by focused gateway tests, not the raw trial field.",
-    "The bounded Rust model checker explores its declared finite state space and is not a universal proof."
+    "The bounded Rust model checker explores its declared finite state space and is not a universal proof.",
+    "The 87.5% transfer reduction is content-addressed local-file software reuse over reference fixture state, not a measured GPU or network multicast result."
   ],
   "progress_guard_probe": {
     "durable_state_version_after_rejections": 7,
@@ -1619,11 +1785,17 @@
     "stale_fencing_token_rejected_as": "StaleOwner"
   },
   "review_role": "independent_continuum_transaction_security_bounded_verification",
-  "schema_version": "sloforge.branchfabric.reclamation-independent-replication/v1",
+  "reviewed_changes": {
+    "batched_content_addressed_transfer_commit": "b6279b647a8ef3c96e9865ce9523b786f703a73a",
+    "bounded_queue_and_resume_rollback_commit": "d82f857755c336107431f88d56b094f7d6f53c98"
+  },
+  "schema_version": "sloforge.branchfabric.reclamation-independent-replication/v2",
   "source_artifact_hashes": {
-    "campaign": "0ca238f362feef351679e8426d6a763300949f7202d738b913287931e1a453c6",
+    "analysis": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+    "campaign": "daac0cf1f595984d2eb2c5452524ec4ca174285986d934fcd42e68e43cc6287c",
     "environment": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
-    "raw_trials": "5cd3dd64e0e0ff01286f8cb7b893ae0ac690c6a923a0e069102db8eb093a340d"
+    "manifest": "cf1e1f363ce95d894416c3abbf56d9735fb55c48db8387126251e376ec846a79",
+    "raw_trials": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408"
   },
   "source_campaign_matrix": {
     "seeds": [
@@ -1643,8 +1815,8 @@
   },
   "source_campaign_trial_count_verified": 36,
   "source_manifest_verified": true,
-  "source_revision": "3ad119a7e70ed1258acc15eb11d3eed13904ea4c",
-  "transaction_visibility_order": {
+  "source_revision": "d113e12b5d618fa3b39b41a30f5f272bd96a18b2",
+  "pre_hardening_transaction_visibility_order": {
     "branch_count_verified": 16,
     "expected": [
       "destination_validated",
