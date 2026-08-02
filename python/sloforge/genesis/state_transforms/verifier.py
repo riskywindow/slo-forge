@@ -32,6 +32,19 @@ def _violation(event: StateEvent, invariant: str, detail: str) -> StateViolation
     return StateViolation(event.sequence, invariant, detail)
 
 
+_CURRENT_OWNER_ACTIONS = frozenset(
+    {
+        StateAction.BEGIN_MIGRATION,
+        StateAction.COMMIT_MIGRATION,
+        StateAction.ABORT_MIGRATION,
+        StateAction.CHECKPOINT,
+        StateAction.ROLLBACK,
+        StateAction.CANCEL_REQUEST,
+        StateAction.RELEASE,
+    }
+)
+
+
 def verify_state_trace(
     region: StateRegion,
     events: tuple[StateEvent, ...],
@@ -93,6 +106,15 @@ def verify_state_trace(
         if allocation is None or allocation.released:
             violations.append(_violation(event, "no_use_after_free", "state is absent or released"))
             continue
+        if event.action in _CURRENT_OWNER_ACTIONS and event.actor != allocation.owner:
+            violations.append(
+                _violation(
+                    event,
+                    "control_action_authority",
+                    f"{event.action.value} requires the current state owner",
+                )
+            )
+            continue
         if event.epoch != allocation.epoch and event.action not in {
             StateAction.ROLLBACK,
             StateAction.COMMIT_MIGRATION,
@@ -131,7 +153,11 @@ def verify_state_trace(
                     _violation(event, "migration_atomicity", "write during migration")
                 )
         elif event.action is StateAction.BEGIN_MIGRATION:
-            if allocation.pending_target is not None:
+            if allocation.acquired_by:
+                violations.append(
+                    _violation(event, "migration_quiescence", "leases remain at migration start")
+                )
+            elif allocation.pending_target is not None:
                 violations.append(
                     _violation(event, "single_migration", "migration already pending")
                 )
@@ -161,6 +187,12 @@ def verify_state_trace(
                 violations.append(
                     _violation(event, "active_stream_migration", "leases remain during commit")
                 )
+            elif event.epoch != allocation.epoch + 1:
+                violations.append(
+                    _violation(
+                        event, "migration_epoch", "migration commit must advance exactly one epoch"
+                    )
+                )
             else:
                 allocation.owner = allocation.pending_target
                 allocation.pending_target = None
@@ -179,6 +211,14 @@ def verify_state_trace(
         elif event.action is StateAction.ROLLBACK:
             if allocation.checkpoint_epoch is None:
                 violations.append(_violation(event, "rollback_checkpoint", "no checkpoint exists"))
+            elif event.epoch != allocation.epoch:
+                violations.append(
+                    _violation(event, "rollback_fence", "rollback must fence the current epoch")
+                )
+            elif allocation.acquired_by or allocation.pending_target is not None:
+                violations.append(
+                    _violation(event, "rollback_quiescence", "rollback requires quiescent state")
+                )
             else:
                 allocation.epoch = allocation.checkpoint_epoch
                 allocation.pending_target = None

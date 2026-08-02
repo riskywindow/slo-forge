@@ -160,6 +160,77 @@ def test_migration_target_must_be_an_explicit_allowed_owner() -> None:
     assert "migration_target_owner" in {item.invariant for item in result.violations}
 
 
+@pytest.mark.parametrize(
+    "action",
+    (
+        StateAction.BEGIN_MIGRATION,
+        StateAction.COMMIT_MIGRATION,
+        StateAction.ABORT_MIGRATION,
+        StateAction.CHECKPOINT,
+        StateAction.ROLLBACK,
+        StateAction.CANCEL_REQUEST,
+        StateAction.RELEASE,
+    ),
+)
+def test_control_actions_require_current_owner_authority(action: StateAction) -> None:
+    setup = [
+        StateEvent(0, StateAction.ALLOCATE, "decoder-state", "r1", "worker-0", 1, 2),
+    ]
+    if action in {StateAction.COMMIT_MIGRATION, StateAction.ABORT_MIGRATION}:
+        setup.append(
+            StateEvent(
+                1,
+                StateAction.BEGIN_MIGRATION,
+                "decoder-state",
+                "r1",
+                "worker-0",
+                1,
+                target_actor="worker-1",
+                target_genome_hash="genome-b",
+            )
+        )
+    if action is StateAction.ROLLBACK:
+        setup.append(StateEvent(1, StateAction.CHECKPOINT, "decoder-state", "r1", "worker-0", 1))
+    sequence = len(setup)
+    setup.append(
+        StateEvent(
+            sequence,
+            action,
+            "decoder-state",
+            "r1",
+            "attacker",
+            2 if action is StateAction.COMMIT_MIGRATION else 1,
+            target_actor="worker-1" if action is StateAction.BEGIN_MIGRATION else None,
+            target_genome_hash="genome-b" if action is StateAction.BEGIN_MIGRATION else None,
+        )
+    )
+    result = verify_state_trace(
+        _region(), tuple(setup), memory_capacity_bytes=1024, require_quiescent=False
+    )
+    assert "control_action_authority" in {item.invariant for item in result.violations}
+
+
+def test_migration_commit_requires_exactly_next_epoch_and_source_owner() -> None:
+    events = (
+        StateEvent(0, StateAction.ALLOCATE, "decoder-state", "r1", "worker-0", 7, 2),
+        StateEvent(
+            1,
+            StateAction.BEGIN_MIGRATION,
+            "decoder-state",
+            "r1",
+            "worker-0",
+            7,
+            target_actor="worker-1",
+            target_genome_hash="genome-b",
+        ),
+        StateEvent(2, StateAction.COMMIT_MIGRATION, "decoder-state", "r1", "worker-0", 9),
+    )
+    result = verify_state_trace(
+        _region(), events, memory_capacity_bytes=1024, require_quiescent=False
+    )
+    assert "migration_epoch" in {item.invariant for item in result.violations}
+
+
 def test_compiler_validates_kind_preconditions_rollback_and_resource_delta() -> None:
     source = _region()
     target = replace(source, layout=StateLayout.PAGED)

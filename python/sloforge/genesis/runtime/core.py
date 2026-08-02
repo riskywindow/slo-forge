@@ -302,6 +302,19 @@ class BaselineStreamingRuntime:
                     self._active.pop(first[0].request.request_id, None)
                 self._admission.task_done()
                 continue
+            if batch_limit == 0:
+                self._terminal(
+                    first[0],
+                    first[1],
+                    lifecycle=RequestLifecycle.CANCELLED,
+                    kind=EventKind.CANCELLED,
+                    sequence=0,
+                    message="synthesized policy suppressed a cancelled request before scheduling",
+                )
+                with self._active_lock:
+                    self._active.pop(first[0].request.request_id, None)
+                self._admission.task_done()
+                continue
             if first[0].request.batching_eligible and batch_limit > 1:
                 deadline = monotonic() + self._limits.batch_wait_seconds
                 while len(batch) < batch_limit:
@@ -361,7 +374,11 @@ class BaselineStreamingRuntime:
         result = execute_bytecode(self._policy, {name: available[name] for name in names})
         if type(result) is not int:
             raise RuntimeError("runtime batching policy must return an integer")
-        return max(1, min(self._limits.maximum_batch_size, result))
+        if result == 0:
+            if not control.cancellation.is_set():
+                raise RuntimeError("runtime policy may return zero only for a cancelled request")
+            return 0
+        return min(self._limits.maximum_batch_size, result)
 
     def _validate_policy_contract(self) -> None:
         if self._policy is None:
