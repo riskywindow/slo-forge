@@ -15,6 +15,12 @@ from .model import (
     VerificationError,
 )
 
+_MAXIMUM_UINT64 = (1 << 64) - 1
+_MAXIMUM_SAMPLES_PER_ALTERNATIVE = 100_000
+_MAXIMUM_EFFECT_SIZE_PAIRS = 10_000_000
+_MAXIMUM_BOOTSTRAP_ROUNDS = 100_000
+_MAXIMUM_BOOTSTRAP_WORK = 10_000_000
+
 
 def _improvement(baseline: float, candidate: float, direction: MetricDirection) -> float:
     if baseline <= 0 or candidate <= 0:
@@ -46,14 +52,25 @@ def evaluate_performance(
     seed: int,
     run_order: tuple[str, ...],
 ) -> PerformanceEvidence:
-    if not contract.benchmark_id or not contract.workload_fingerprint:
-        raise VerificationError("benchmark identity and workload fingerprint are required")
+    if not contract.benchmark_id or not contract.metric or not contract.unit:
+        raise VerificationError("benchmark identity, metric, and unit are required")
+    if not contract.workload_fingerprint:
+        raise VerificationError("workload fingerprint is required")
     if not contract.hardware_fingerprint or not contract.software_manifest_hash:
         raise VerificationError("hardware and software provenance are required")
     if len(baseline_samples) < 7 or len(candidate_samples) < 7:
         raise VerificationError("at least seven measured samples per alternative are required")
-    if seed < 0:
-        raise VerificationError("performance seed must be non-negative")
+    if (
+        len(baseline_samples) > _MAXIMUM_SAMPLES_PER_ALTERNATIVE
+        or len(candidate_samples) > _MAXIMUM_SAMPLES_PER_ALTERNATIVE
+    ):
+        raise VerificationError("performance sample count exceeds the bounded evaluator limit")
+    if len(baseline_samples) * len(candidate_samples) > _MAXIMUM_EFFECT_SIZE_PAIRS:
+        raise VerificationError("performance effect-size comparison exceeds the bounded pair limit")
+    if not 0 <= seed <= _MAXIMUM_UINT64:
+        raise VerificationError("performance seed must be an unsigned 64-bit integer")
+    if not isinstance(contract.direction, MetricDirection):
+        raise VerificationError("performance metric direction must be typed")
     if any(not math.isfinite(value) or value <= 0 for value in baseline_samples):
         raise VerificationError("baseline performance samples must be finite and positive")
     if any(not math.isfinite(value) or value <= 0 for value in candidate_samples):
@@ -69,8 +86,11 @@ def evaluate_performance(
         raise VerificationError("run order contains an unknown alternative")
     if contract.warmup_count <= 0:
         raise VerificationError("warmup policy must be explicit and positive")
-    if not 100 <= contract.bootstrap_rounds <= 1_000_000:
-        raise VerificationError("bootstrap rounds must be in [100, 1000000]")
+    if not 100 <= contract.bootstrap_rounds <= _MAXIMUM_BOOTSTRAP_ROUNDS:
+        raise VerificationError(f"bootstrap rounds must be in [100, {_MAXIMUM_BOOTSTRAP_ROUNDS}]")
+    bootstrap_work = contract.bootstrap_rounds * (len(baseline_samples) + len(candidate_samples))
+    if bootstrap_work > _MAXIMUM_BOOTSTRAP_WORK:
+        raise VerificationError("bootstrap work exceeds the bounded evaluator limit")
     if not 0.5 < contract.confidence < 1:
         raise VerificationError("confidence must be in (0.5, 1)")
     if (

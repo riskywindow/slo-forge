@@ -31,6 +31,10 @@ _DTYPES: dict[str, npt.DTypeLike] = {
     "bool": np.bool_,
 }
 
+_MAXIMUM_UINT64 = (1 << 64) - 1
+_MAXIMUM_RANK = 64
+_MAXIMUM_TOTAL_GENERATED_ELEMENTS = 10_000_000
+
 
 def _digest(array: Array) -> str:
     value = np.ascontiguousarray(array)
@@ -44,13 +48,13 @@ def _error_digest(error: Exception) -> str:
 
 
 def _shape(
-    contract: OperatorContract, index: int, generator: np.random.Generator
+    contract: OperatorContract, shape_case: int, generator: np.random.Generator
 ) -> tuple[int, ...]:
     result: list[int] = []
     for dimension_index, bound in enumerate(contract.shape):
-        if bound.minimum <= 0 or bound.maximum < bound.minimum:
-            raise VerificationError("shape bounds must be positive and ordered")
-        selector = (index + dimension_index) % 3
+        if bound.minimum < 0 or bound.maximum < bound.minimum:
+            raise VerificationError("shape bounds must be non-negative and ordered")
+        selector = (shape_case + dimension_index) % 3
         if selector == 0:
             result.append(bound.minimum)
         elif selector == 1:
@@ -104,6 +108,13 @@ def _non_contiguous(value: Array) -> Array:
     return result
 
 
+def _clone_input(value: Array, variant: str) -> Array:
+    contiguous = value.copy()
+    if variant == "non_contiguous":
+        return _non_contiguous(contiguous)
+    return contiguous
+
+
 def _compare(expected: Array, observed: Array, contract: OperatorContract) -> str | None:
     if expected.shape != observed.shape:
         return "output_shape"
@@ -155,8 +166,27 @@ def verify_operator(
         raise VerificationError("operator identity, shape and dtype domains are required")
     if not 1 <= contract.maximum_cases <= 100_000:
         raise VerificationError("maximum_cases must be in [1, 100000]")
-    if seed < 0:
-        raise VerificationError("operator verification seed must be non-negative")
+    if not 0 <= seed <= _MAXIMUM_UINT64:
+        raise VerificationError("operator verification seed must be an unsigned 64-bit integer")
+    if len(contract.shape) > _MAXIMUM_RANK:
+        raise VerificationError(f"operator rank must not exceed {_MAXIMUM_RANK}")
+    if len(set(contract.dtypes)) != len(contract.dtypes):
+        raise VerificationError("operator dtype domain must not contain duplicates")
+    unsupported_dtypes = sorted(set(contract.dtypes) - _DTYPES.keys())
+    if unsupported_dtypes:
+        raise VerificationError(f"unsupported verifier dtypes: {unsupported_dtypes!r}")
+    stride_classes = 2 if contract.allow_non_contiguous else 1
+    required_coverage_cases = len(contract.dtypes) * stride_classes * 3
+    if contract.maximum_cases < required_coverage_cases:
+        raise VerificationError(
+            "maximum_cases must cover every dtype, stride class, and shape boundary class "
+            f"(requires at least {required_coverage_cases})"
+        )
+    maximum_elements = math.prod(bound.maximum for bound in contract.shape)
+    if maximum_elements * contract.maximum_cases > _MAXIMUM_TOTAL_GENERATED_ELEMENTS:
+        raise VerificationError(
+            "declared operator case domain exceeds the bounded generated-element budget"
+        )
     tolerances = (contract.maximum_absolute_error, contract.maximum_relative_error)
     if any(not math.isfinite(value) or value < 0 for value in tolerances):
         raise VerificationError("numerical tolerances must be finite and non-negative")
@@ -164,9 +194,15 @@ def verify_operator(
     executed = 0
     for index in range(contract.maximum_cases):
         dtype = contract.dtypes[index % len(contract.dtypes)]
-        shape = _shape(contract, index, generator)
+        stride_class = (index // len(contract.dtypes)) % stride_classes
+        shape_case = (index // (len(contract.dtypes) * stride_classes)) % 3
+        shape = _shape(contract, shape_case, generator)
         value = _values(shape, dtype, index, generator)
-        variant = "non_contiguous" if contract.allow_non_contiguous and index % 2 else "contiguous"
+        variant = (
+            "non_contiguous"
+            if contract.allow_non_contiguous and stride_class == 1 and value.size > 0
+            else "contiguous"
+        )
         if variant == "non_contiguous":
             value = _non_contiguous(value)
         original = value.copy()
@@ -208,9 +244,11 @@ def verify_operator(
         violation = _compare(expected, observed, contract)
         if not contract.allow_aliasing and not np.array_equal(value, original, equal_nan=True):
             violation = violation or "unexpected_input_mutation"
+        if not contract.allow_aliasing and np.shares_memory(observed, value):
+            violation = violation or "unexpected_output_alias"
         if contract.deterministic:
             try:
-                repeated = np.asarray(candidate(original.copy()))
+                repeated = np.asarray(candidate(_clone_input(original, variant)))
             except Exception:
                 violation = violation or "nondeterministic_exception"
             else:

@@ -17,6 +17,7 @@ from sloforge.genesis.search import CandidateDesign
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 PositiveInt = Annotated[int, Field(gt=0)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
+UInt64 = Annotated[int, Field(ge=0, le=(1 << 64) - 1)]
 
 
 class SynthesisModel(BaseModel):
@@ -83,7 +84,7 @@ class MinimizationResult(SynthesisModel):
 
 
 class CegisConfiguration(SynthesisModel):
-    seed: NonNegativeInt
+    seed: UInt64
     maximum_candidates: PositiveInt
     maximum_minimization_evaluations: PositiveInt = 256
     maximum_events: PositiveInt = 4096

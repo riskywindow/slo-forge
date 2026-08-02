@@ -254,6 +254,7 @@ pub fn check(
     let invariants = InvariantId::ALL
         .into_iter()
         .map(|invariant| {
+            let applicability = invariant_applicability(invariant, request);
             let counterexample = first_failures
                 .get(&invariant)
                 .map(|(state, minimal)| trace_for(invariant, state, &nodes, *minimal));
@@ -261,15 +262,15 @@ pub fn check(
                 invariant,
                 status: if counterexample.is_some() {
                     CheckStatus::Failed
-                } else if complete {
+                } else if complete && applicability.is_ok() {
                     CheckStatus::Passed
                 } else {
                     CheckStatus::Inconclusive
                 },
-                passed: counterexample.is_none() && complete,
+                passed: counterexample.is_none() && complete && applicability.is_ok(),
                 states_checked,
                 verification_level: 3,
-                scope_statement: scope_statement(invariant, request),
+                scope_statement: scope_statement(invariant, request, applicability.err()),
                 counterexample,
             }
         })
@@ -279,7 +280,11 @@ pub fn check(
         .any(|outcome| outcome.status == CheckStatus::Failed);
     let status = if any_failed {
         CheckStatus::Failed
-    } else if complete {
+    } else if complete
+        && invariants
+            .iter()
+            .all(|outcome| outcome.status == CheckStatus::Passed)
+    {
         CheckStatus::Passed
     } else {
         CheckStatus::Inconclusive
@@ -291,8 +296,16 @@ pub fn check(
             .to_owned(),
         "token and state effects are atomic at the transition granularity shown in traces"
             .to_owned(),
+        "properties whose protocol feature is disabled are reported as inconclusive, not as "
+            .to_owned()
+            + "vacuously passed",
     ];
-    assumptions.extend(request.assumptions.iter().cloned());
+    assumptions.extend(
+        request
+            .assumptions
+            .iter()
+            .map(|assumption| format!("caller assumption: {assumption}")),
+    );
 
     Ok(ModelCheckResult {
         schema_version: RESULT_SCHEMA_VERSION.to_owned(),
@@ -930,15 +943,55 @@ fn trace_for(
     }
 }
 
-fn scope_statement(invariant: InvariantId, request: &ModelCheckRequest) -> String {
-    format!(
-        "{invariant} checked by explicit enumeration for <= {} requests, <= {} tokens/request, <= {} workers, depth <= {}, and <= {} states",
+fn scope_statement(
+    invariant: InvariantId,
+    request: &ModelCheckRequest,
+    inapplicable_reason: Option<&'static str>,
+) -> String {
+    let bounded_scope = format!(
+        "{invariant} checked by explicit enumeration for <= {} requests, <= {} tokens/request, <= {} workers, depth <= {}, <= {} states, and protocol {}",
         request.bounds.max_requests,
         request.bounds.max_tokens_per_request,
         request.bounds.worker_count,
         request.bounds.max_depth,
-        request.bounds.max_states
-    )
+        request.bounds.max_states,
+        serde_json::to_string(&request.protocol)
+            .unwrap_or_else(|_| "<protocol serialization failed>".to_owned())
+    );
+    inapplicable_reason.map_or(bounded_scope.clone(), |reason| {
+        format!("{bounded_scope}; inconclusive because {reason}")
+    })
+}
+
+fn invariant_applicability(
+    invariant: InvariantId,
+    request: &ModelCheckRequest,
+) -> Result<(), &'static str> {
+    match invariant {
+        InvariantId::NoUnsafeRetryAfterOutput
+            if !request.protocol.worker_failure_enabled
+                || request.bounds.max_worker_failures == 0 =>
+        {
+            Err("worker-failure and retry behavior is disabled")
+        }
+        InvariantId::UnambiguousStateOwnership
+        | InvariantId::NoPartialStateRead
+        | InvariantId::NoIncompatibleStateMigration
+            if !request.protocol.state_transfer_enabled =>
+        {
+            Err("state-transfer behavior is disabled")
+        }
+        InvariantId::PromotionPreservesActiveRequests
+        | InvariantId::RollbackRestoresValidChampion
+            if !request.protocol.rollout_enabled =>
+        {
+            Err("rollout behavior is disabled")
+        }
+        InvariantId::RecoveryTerminates if !request.protocol.controller_crash_enabled => {
+            Err("controller crash/recovery behavior is disabled")
+        }
+        _ => Ok(()),
+    }
 }
 
 /// Replay a returned trace against the same request and verify its final state
@@ -1148,11 +1201,59 @@ mod tests {
     }
 
     #[test]
+    fn disabled_protocol_features_are_inconclusive_not_vacuously_passed() {
+        let mut request = ModelCheckRequest::safe(7);
+        request.protocol.state_transfer_enabled = false;
+        request.protocol.rollout_enabled = false;
+        request.protocol.worker_failure_enabled = false;
+        request.protocol.controller_crash_enabled = false;
+        let result = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
+        assert_eq!(result.status, CheckStatus::Inconclusive);
+        for invariant in [
+            InvariantId::NoUnsafeRetryAfterOutput,
+            InvariantId::UnambiguousStateOwnership,
+            InvariantId::NoPartialStateRead,
+            InvariantId::NoIncompatibleStateMigration,
+            InvariantId::PromotionPreservesActiveRequests,
+            InvariantId::RollbackRestoresValidChampion,
+            InvariantId::RecoveryTerminates,
+        ] {
+            let outcome = result
+                .invariants
+                .iter()
+                .find(|outcome| outcome.invariant == invariant)
+                .unwrap_or_else(|| panic!("missing invariant {invariant}"));
+            assert_eq!(outcome.status, CheckStatus::Inconclusive);
+            assert!(!outcome.passed);
+            assert!(outcome.scope_statement.contains("behavior is disabled"));
+        }
+        validate_result(&request, &result)
+            .unwrap_or_else(|errors| panic!("valid scoped result was rejected: {errors:?}"));
+    }
+
+    #[test]
     fn seed_is_deterministic() {
         let request = ModelCheckRequest::safe(41);
         let first = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
         let second = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
         assert_eq!(first, second);
+    }
+
+    #[test]
+    fn result_scope_binds_protocol_and_labels_caller_assumptions() {
+        let mut request = ModelCheckRequest::safe(41);
+        request.assumptions = vec!["storage writes are atomic".to_owned()];
+        let result = check(&request).unwrap_or_else(|errors| panic!("invalid request: {errors:?}"));
+        assert!(
+            result
+                .assumptions
+                .contains(&"caller assumption: storage writes are atomic".to_owned())
+        );
+        assert!(result.invariants.iter().all(|outcome| {
+            outcome
+                .scope_statement
+                .contains("\"token_delivery\":\"reliable\"")
+        }));
     }
 
     #[test]

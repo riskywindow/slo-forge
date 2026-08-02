@@ -98,6 +98,51 @@ def test_operator_verifier_detects_signed_zero_contract_violation() -> None:
     assert verification.counterexample.violation == "signed_zero_behavior"
 
 
+def test_operator_verifier_rejects_forbidden_output_alias() -> None:
+    contract = replace(_operator_contract(), dtypes=("float32",), maximum_cases=6)
+    verification = verify_operator(
+        lambda value: value.copy(), lambda value: value, contract, seed=5
+    )
+    assert verification.status is EvidenceStatus.FAILED
+    assert verification.counterexample is not None
+    assert verification.counterexample.violation == "unexpected_output_alias"
+
+
+def test_operator_verifier_repeats_the_same_stride_class() -> None:
+    contract = replace(_operator_contract(), dtypes=("float32",), maximum_cases=6)
+    observed_contiguity: list[bool] = []
+
+    def candidate(value: np.ndarray) -> np.ndarray:
+        observed_contiguity.append(bool(value.flags.c_contiguous))
+        return value * 2
+
+    result = verify_operator(lambda value: value * 2, candidate, contract, seed=11)
+    assert result.status is EvidenceStatus.PASSED
+    assert observed_contiguity
+    assert all(
+        observed_contiguity[index] == observed_contiguity[index + 1]
+        for index in range(0, len(observed_contiguity), 2)
+    )
+    assert False in observed_contiguity
+
+
+def test_operator_verifier_rejects_vacuous_case_and_seed_domains() -> None:
+    with pytest.raises(VerificationError, match="cover every dtype"):
+        verify_operator(
+            lambda value: value,
+            lambda value: value,
+            replace(_operator_contract(), maximum_cases=3),
+            seed=1,
+        )
+    with pytest.raises(VerificationError, match="unsigned 64-bit"):
+        verify_operator(
+            lambda value: value,
+            lambda value: value,
+            _operator_contract(),
+            seed=1 << 64,
+        )
+
+
 @pytest.mark.parametrize("tolerance", [float("nan"), float("inf"), -1.0])
 def test_operator_verifier_rejects_invalid_numerical_tolerances(tolerance: float) -> None:
     contract = replace(_operator_contract(), exact=False, maximum_absolute_error=tolerance)
@@ -129,6 +174,15 @@ def test_quality_contract_rejects_nonfinite_logits_and_invalid_tokens() -> None:
             np.asarray([0], dtype=np.int64),
             contract,
         )
+
+    with pytest.raises(VerificationError, match="non-empty"):
+        evaluate_quality(
+            np.empty((1, 0), dtype=np.float64),
+            np.empty((1, 0), dtype=np.float64),
+            np.asarray([0], dtype=np.int64),
+            np.asarray([0], dtype=np.int64),
+            contract,
+        )
     with pytest.raises(VerificationError, match="vocabulary"):
         evaluate_quality(
             np.asarray([[1.0, 0.0]], dtype=np.float64),
@@ -139,6 +193,21 @@ def test_quality_contract_rejects_nonfinite_logits_and_invalid_tokens() -> None:
         )
 
 
+def test_quality_metrics_are_finite_for_extreme_finite_logits() -> None:
+    limit = np.finfo(np.float64).max
+    evidence = evaluate_quality(
+        np.asarray([[limit, -limit]], dtype=np.float64),
+        np.asarray([[-limit, limit]], dtype=np.float64),
+        np.asarray([0], dtype=np.int64),
+        np.asarray([1], dtype=np.int64),
+        QualityContract(1.0, 1.0, 1, 1.0, 0.1, 0.1, 0.1),
+    )
+    assert evidence.status is EvidenceStatus.FAILED
+    assert np.isfinite(evidence.maximum_absolute_error)
+    assert np.isfinite(evidence.kl_divergence)
+    assert np.isfinite(evidence.js_divergence)
+
+
 def test_resource_gate_includes_challenger_conversion_and_fragmentation() -> None:
     evidence = analyze_resources(
         ResourceContract(1000, 1000, 0.1, 0.1, 4, 16, 128),
@@ -146,6 +215,15 @@ def test_resource_gate_includes_challenger_conversion_and_fragmentation() -> Non
     )
     assert evidence.status is EvidenceStatus.FAILED
     assert "peak_device_memory" in evidence.violations
+    assert evidence.conservative_peak_host_bytes == 334
+
+
+def test_resource_gate_rejects_nonfinite_or_untyped_contract_values() -> None:
+    demand = ResourceDemand(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+    with pytest.raises(VerificationError, match="safety margin"):
+        analyze_resources(ResourceContract(100, 100, float("nan"), 0.1, 1, 1, 1), demand)
+    with pytest.raises(VerificationError, match="must be integers"):
+        analyze_resources(ResourceContract(100.0, 100, 0.1, 0.1, 1, 1, 1), demand)  # type: ignore[arg-type]
 
 
 def test_performance_gate_requires_raw_repeated_significant_evidence() -> None:
@@ -222,4 +300,38 @@ def test_performance_gate_rejects_fabricated_order_and_nonfinite_samples() -> No
             candidate,
             seed=7,
             run_order=("baseline", "candidate") * 7,
+        )
+    with pytest.raises(VerificationError, match="unsigned 64-bit"):
+        evaluate_performance(
+            contract,
+            baseline,
+            candidate,
+            seed=1 << 64,
+            run_order=("baseline", "candidate") * 7,
+        )
+
+
+def test_performance_gate_bounds_total_bootstrap_work() -> None:
+    samples = (10.0,) * 100
+    contract = BenchmarkContract(
+        "bounded-bootstrap",
+        "latency",
+        "ms",
+        MetricDirection.LOWER_IS_BETTER,
+        "workload",
+        "hardware",
+        "software",
+        warmup_count=1,
+        practical_significance_percent=1.0,
+        noise_floor_percent=0.5,
+        bootstrap_rounds=100_000,
+        confidence=0.95,
+    )
+    with pytest.raises(VerificationError, match="bootstrap work"):
+        evaluate_performance(
+            contract,
+            samples,
+            samples,
+            seed=7,
+            run_order=("baseline", "candidate") * 100,
         )
