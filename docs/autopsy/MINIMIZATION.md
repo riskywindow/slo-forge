@@ -10,11 +10,14 @@
 3. Apply ddmin to remaining events, increasing chunk granularity when no
    complement preserves the predicate.
 4. Apply ddmin to event-counter pairs.
-5. Repair parent and dependency references after each removal.
-6. Revalidate the canonical event graph and predicate.
+5. Apply ddmin to ground-truth fault intervals; labels are never implicitly
+   retained just because they were present in the source capture.
+6. Repair parent and dependency references after each event removal.
+7. Revalidate the canonical event graph and predicate.
 
-The result records original/minimized event, rank, and counter counts; removed
-IDs; predicate evaluation count; and a SHA-256 over the minimized bundle.
+The result records original/minimized event, rank, counter, and fault counts;
+removed IDs; predicate evaluation count; and a SHA-256 over the minimized
+bundle.
 
 ## Predicate design
 
@@ -26,9 +29,8 @@ performance reproducer.
 
 ## Boundaries
 
-The current reducer operates on ranks, events, and counters. It does not yet
-rewrite model layers, physical parallelism degrees, or a runtime command. Those
-can be represented by an outer reducer that regenerates and validates the run.
-All reductions are deterministic, but predicate cost can be high if it performs
-counterfactual simulation.
-
+The current reducer operates on ranks, events, counters, and fault intervals. It
+does not rewrite model layers, physical parallelism degrees, or a runtime
+command. Those can be represented by an outer reducer that regenerates and
+validates the run. All reductions are deterministic, but predicate cost can be
+high if it performs counterfactual simulation.

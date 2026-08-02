@@ -27,7 +27,11 @@ changes have separate false-by-default controls.
 
 ## Failure behavior
 
-An action failure aborts before traffic migration. Canary regression rolls back.
+An action failure aborts before traffic migration. Canary regression rolls back
+the guarded traffic/state transition in the local reference implementation.
+The executor does not generally invoke inverse infrastructure actions referenced
+by `rollback_action_id`; automated external compensating rollback is therefore
+not claimed.
 If old workers cannot drain without interrupting streams, the machine enters
 `OPERATOR_REQUIRED` rather than killing them. Invalid or stale snapshots fail
 hash validation. Audit truncation retains the newest bounded records and does
@@ -39,4 +43,3 @@ Simulation validation, action idempotency, shadow, canary, promotion, drain,
 rollback, timeout, and restart behavior are covered by deterministic tests. The
 flagship local simulated recovery completed. No external Kubernetes, Dynamo,
 Modal, Truss, GPU, NIC, or cloud resource was mutated on the current machine.
-

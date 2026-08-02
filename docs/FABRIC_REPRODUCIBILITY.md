@@ -46,6 +46,8 @@ Reports load generated artifacts; they do not embed expected benchmark values.
 To audit a quoted metric, start from:
 
 - Fabric: `artifacts/fabric-demo/manifest.json`;
+- H1-H4 matrix: `artifacts/fabric/evaluation/manifest.json` and
+  `artifacts/fabric/evaluation/result.json`;
 - ForgeCI: `artifacts/forgeci/demo/evaluation.json`;
 - WarmPath: `artifacts/warmpath/manifest.json`;
 - rank ordering: raw experiment artifact referenced by
@@ -59,6 +61,11 @@ Do not combine a profile with a different topology: compilation verifies the
 canonical fingerprint. Preserve driver, CUDA, NCCL, runtime, container, clock,
 power, placement, command, and topology metadata with the raw samples.
 
+The current binding hashes the complete canonical topology, including capture
+timestamps. Re-discovering an equivalent host therefore requires a fresh profile
+instead of reusing the old one. This is intentionally fail closed, but it is
+functional reproducibility rather than a compatibility-aware calibration cache.
+
 The current development host had no NVIDIA GPU or RDMA device. Multi-GPU and
 multi-node paths are implemented and fixture-tested but no hardware result is
 reported for them.
@@ -70,4 +77,3 @@ background work vary. Repeated trials and robust intervals quantify within-run
 noise, not all environmental drift. Git commit and hardware fingerprint must be
 held constant when comparing runs. A regenerated artifact can have different
 capture timestamps and hashes even when its seeded synthetic metrics agree.
-

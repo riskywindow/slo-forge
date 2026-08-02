@@ -30,7 +30,7 @@ SLOForge is infrastructure software that executes profilers and emits deployment
 
 ## Deployment requirements
 
-The gateway intentionally does not implement authentication, tenant billing or TLS. Put it behind a trusted ingress/service mesh that provides TLS, authentication, request-size policy, network ACLs and rate limits. Bind health, metrics and mock-admin endpoints to private interfaces. Never ship the mock backend's `/admin/fault` endpoint in a public production service.
+The gateway intentionally does not implement authentication, tenant billing or TLS. Put it behind a trusted ingress/service mesh that provides TLS, authentication, request-size policy, network ACLs and rate limits. Bind health and metrics endpoints to private interfaces. The Rust mock backend disables `/admin/fault` unless its config explicitly sets `fault_api_enabled: true`; only scoped demo/test configurations opt in, and the endpoint must never be exposed by a public production service. Gateway configuration also bounds requested output tokens, timeouts, capacities, and queue sizes before serving traffic.
 
 Backend URLs are operator-controlled but still create an SSRF-capable configuration surface. Validate plans in a trusted pipeline, restrict egress and disallow link-local/cloud-metadata ranges at the network layer. Do not compile or serve arbitrary user-submitted plan files.
 

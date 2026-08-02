@@ -46,7 +46,7 @@ flowchart LR
     G --> O
 ```
 
-Autopsy is a structured causal debugger, not an LLM wrapper. It aligns cross-host clocks with explicit uncertainty, matches comparable workload slices, scores supporting and contradicting evidence, removes each suspected cause in the digital twin, and records why alternatives were rejected. The recovery controller cannot mutate production by default: disruptive proposals must pass simulation, shadow, minimum-sample canary, promotion, drain, and rollback guards.
+Autopsy is a structured causal debugger, not an LLM wrapper. It aligns cross-host clocks with explicit uncertainty, matches identical event/operation/rank/request identities, scores supporting and contradicting evidence, removes each suspected cause in the digital twin, and records why alternatives were rejected. The recovery controller cannot mutate production by default: disruptive proposals must pass simulation, shadow, minimum-sample canary, promotion, drain, and rollback guards.
 
 The complete no-GPU path is reproducible locally:
 
@@ -91,7 +91,11 @@ sloforge recovery apply --proposal artifacts/recovery/proposal.json --mode shado
 
 ForgeCI uses repeated trials, bootstrap intervals, an explicit noise floor, practical significance, inconclusive classification, and a portable fixture repository to validate performance bisection without external projects. WarmPath profiles a real local artifact DAG and chooses among storage, cache, host-memory, lazy-restore, and warm-capacity strategies under readiness, cost, compatibility, capacity, and failure constraints.
 
+The checked CPU-only Fabric evaluation retains negative results. Across 180 synthetic plan trials (four topology fixtures, three workload regimes, three seeds, and five methods), sequential placement was fastest at 616.434 ms median p95 TTFT; the hierarchical compiler reached 626.120 ms, 1.57% slower. Random placement reached 2831.682 ms with 43.75% median SLO attainment. This fixture therefore does not support H1 against an already topology-aligned sequential order. The twin ranked alternatives with Spearman 0.881, but its 28.35% median relative error and 0% prediction-interval coverage are an explicit uncertainty-calibration failure. Autopsy reached top-1/top-3 accuracy 1.0 over 24 deterministic cases from two fault families; its 0.925 median confidence is an uncalibrated evidence score. Diagnosis-driven and threshold recovery both restored 100% of those modeled cases; their 90.5 s/$0 and 60 s/$0.0667 medians use declared action-time/cost policies, with post-action requests simulated rather than live. Full inputs, intervals, and caveats are in [the Fabric evaluation](reports/fabric-evaluation.md), [the Autopsy/recovery evaluation](reports/autopsy-evaluation.md), and `artifacts/fabric/evaluation/result.json`.
+
 On this checked-in development host, topology discovery and local memory profiling are hardware-backed, but NVIDIA GPU, NVLink, NCCL, RDMA, InfiniBand/RoCE, and multi-node runtime execution are unavailable. Those adapters are version-gated and fixture-tested; the repository does not present synthetic measurements as hardware results. See the [Fabric architecture](docs/fabric/ARCHITECTURE.md), [Autopsy diagnosis model](docs/autopsy/DIAGNOSIS.md), [recovery safety model](docs/recovery/SAFETY.md), [Fabric limitations](docs/FABRIC_LIMITATIONS.md), and [extension report](paper/fabric_extension/SLOFORGE_FABRIC.md).
+
+Runtime lowering is deliberately fail closed. Direct vLLM and SGLang plans reject replicas spanning hosts; tagged NVIDIA Dynamo v1beta1 DGD is the supported multi-node engine path. vLLM expert parallelism must match the runtime TP-by-DP product, SGLang expert parallelism never implicitly enables DP attention, native vLLM NIXL transfer flags remain separate from Dynamo wrapper flags, and generic Kubernetes multi-node export is rejected without an atomic gang contract. Modal and Truss receive advisory metadata only. Exact reviewed versions, fields, and unexercised boundaries are in [Runtime adapters](docs/fabric/RUNTIME_ADAPTERS.md) and [the adapter review](RUNTIME_ADAPTER_REVIEW.md).
 
 ## Three-minute CPU quickstart
 

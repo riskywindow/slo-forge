@@ -34,6 +34,13 @@ The path model uses graph search over healthy bidirectional edges. Curve latency
 is selected near the message size; bottleneck bandwidth is the minimum on the
 path. Unknown bandwidth is deliberately punitive rather than optimistic.
 
+NIC choice is a deterministic same-NUMA/high-advertised-speed heuristic; path
+evaluation happens afterward, but placement search can miss a better
+GPU-to-NIC or rail-balanced assignment. The hierarchical strategy is inspectable
+and topology-aware, not a proof of global optimality. Canonical collective
+profiles currently aggregate several collective primitives into one category,
+so per-algorithm selection is only as specific as the imported profile.
+
 ## Objective and uncertainty
 
 Candidate objective terms are normalized expected cost, TTFT/TPOT violation,
@@ -60,4 +67,3 @@ The deterministic flagship compile emitted a 16-rank disaggregated plan, 174
 rejected alternatives, and three recovery variants in
 `artifacts/fabric-demo/physical-plan.json`. Those counts are synthetic-demo
 results, not evidence that the selected degrees are suitable for real hardware.
-

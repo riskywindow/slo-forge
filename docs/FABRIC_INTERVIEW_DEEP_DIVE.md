@@ -59,11 +59,30 @@ deadline. External mutation requires explicit two-sided authorization.
 ## What the artifacts show
 
 The synthetic flagship in `artifacts/fabric-demo/manifest.json` injected a rail
-rate reduction and rank slowdown. Simulated p95 TTFT rose from 955.883 ms to
-2484.092 ms and returned to 955.883 ms after the selected combined
-counterfactual; seven alternatives were evaluated and recovery completed. The
-important caveat is that Autopsy top-1 was the rank straggler while the network
-fault did not reach top-3 in the aggregate comparison.
+rate reduction and rank slowdown. Simulated p95 TTFT rose from 947.314 ms to
+2470.966 ms and returned to 947.314 ms after the selected combined
+counterfactual; seven alternatives were evaluated and recovery completed.
+Autopsy ranked network bandwidth degradation first and the rank straggler
+second. That is one deterministic synthetic two-fault run, not evidence of
+calibrated confidence or general multi-fault accuracy.
+
+The broader artifact-derived matrix is deliberately less flattering. Across 180
+synthetic plan trials, the already topology-aligned sequential fixture was
+fastest at 616.434 ms median p95 TTFT; the hierarchical compiler was 1.57%
+slower at 626.120 ms. Twin ranking correlation was 0.881, but 28.35% median
+relative error and 0% interval coverage expose a calibration failure. Autopsy
+was top-1/top-3 correct on 24 cases from two fault families, while threshold
+recovery matched diagnosis-driven restoration with a shorter declared action
+time. Those results support the evidence workflow, not claims of optimizer or
+controller superiority.
+
+The offline adapter boundary is deliberately narrow. Direct vLLM and SGLang
+plans reject multi-host replicas; Dynamo's tagged v1beta1 DGD is the multi-node
+engine path. vLLM expert parallelism must match the runtime TP-by-DP product,
+SGLang expert parallelism never implies DP attention, native vLLM NIXL transfer
+flags are kept distinct from Dynamo wrapper disaggregation flags, and generic
+Kubernetes multi-node output is rejected without a gang contract. Modal and
+Truss receive advisory metadata only.
 
 ForgeCI's local fixture found the exact first regressing commit with corrected
 bootstrap intervals. WarmPath evaluated 243 artifact placements and executed a
@@ -94,4 +113,3 @@ candidate-by-candidate.
 **What is not validated?** Real NVIDIA/RDMA discovery and measurement,
 multi-node runtime execution, production action drivers, provider snapshots, and
 hardware rank-ordering benefit on the current machine.
-
