@@ -1,21 +1,19 @@
 # SLOForge Fabric final report
 
-Report state: **release-candidate draft; final exact-HEAD verification is pending**.
+Report state: **final**.
 
-This draft was assembled from source revision
-`2781ce9d12c189c246a61bf5f2783664d9b05c7b` and the evidence present in the
-working tree on 2026-08-02. Creating this report advances the repository beyond
-that revision, so `2781ce9` is an inspected source snapshot, not the final
-release commit. The final source commit, regenerated artifact publication
-commit, and clean-archive result must replace the pending entries below before
-this document is marked final.
+The implementation and evidence source was frozen at
+`ca39d5e7859d26cd7bcac96e439e23825aff6d76`. All generated artifacts and
+reports were regenerated from that source and atomically published in
+`4eb0066e6c51e1942e4d13b55a69a552b20459ab`. A literal committed archive of
+`4eb0066` then passed the expanded clean-room gate. This report and the final
+ledger are the documentation-only successor to that verified publication;
+they do not alter source, packages, or generated evidence.
 
-The current Fabric evaluation records source commit
-`704bea5ba9a0e0a794589c8ab3df4f38cde3bdec`, while the current flagship
-physical plan records `001d53b50bcab2b1a0382c17f0e0fff19ce3add4`.
-Consequently, the numerical results in this draft are evidence-backed snapshots
-but are **not yet source-fresh release evidence**. Final regeneration and
-atomic publication remain release blockers.
+The canonical evaluation and flagship physical plan both record `ca39d5e` as
+their source revision. Their file SHA-256 digests are respectively
+`55df589ef5b04169f5c618440296873b14b1b15843e993643af4fc59cd1cd39d`
+and `2891a004ec1a88b6c580478ddcea3921f0ff558c8f14c24868a7cd0a139d3d17`.
 
 ## Baseline
 
@@ -146,42 +144,37 @@ runtime evidence -> Autopsy differential diagnosis -> counterfactual replay
   integration decision is `measure_on_hardware`; it remains disabled by
   default and is not a hardware speedup claim.
 
-## Tests and demonstrations already executed
+## Final tests and demonstrations
 
-These results are tied to the named snapshots. They demonstrate implemented
-behavior but do not replace the pending final exact-HEAD gates.
-
-| Snapshot | Command or audit | Recorded result |
+| Revision | Command or audit | Recorded result |
 |---|---|---|
-| Baseline `c67e082` | `make bootstrap` | Passed with locked Python, Cargo, and npm dependencies. |
-| Baseline `c67e082` | `make check` | Passed: 67 Python tests, 3 expected no-Torch skips, 62 Rust tests, 11 UI tests, and production UI build. |
-| Baseline `c67e082` | `make demo` | Passed: 120 live gateway and 120 simulated requests. |
-| Integrated source `606680f`, after regenerating its worktree evidence | `make fabric-demo` | Passed; generated canonical trace, 588-operation simulations, seven counterfactuals, telemetry, runtime evidence, and derived report. |
-| Same regenerated snapshot | `make fabric-check` | Passed: Ruff, strict mypy over 118 source files, 280 Python tests, warning-denied Fabric Rust Clippy, and 31 Fabric Rust tests. |
-| Same regenerated snapshot | `make check` | Passed: 350 Python tests plus 3 expected GPU/Torch skips, all 98 Rust tests, and UI typecheck/lint/28 tests/build. |
-| Same regenerated snapshot | public `fabric simulate` | Passed: 588 operations, 1,523 processed events, and 1,775.586 ms makespan. |
-| Same regenerated snapshot | standalone `autopsy replay` | Passed: hash-verified bundle, seven scenarios, `remove-both-faults` selected, six alternatives rejected. |
-| Same regenerated snapshot | public `fabric validate` | Expected fail-closed exit 1 with a structured artifact for 14.430933 relative TTFT error and interval miss. |
-| Same clean-room review | `make package` and independent wheel smoke | Passed: wheel/sdist built; isolated wheel ran help, seeded trace, local topology discovery, and CPU hardware probe. |
-| Same clean-room review | lock/audit checks | `uv lock --check`, offline locked Cargo metadata, and npm high-severity audit passed; npm reported zero known vulnerabilities. |
-| Source through `4aad2ef` in `FABRIC_FINAL_ADVERSARIAL_REVIEW.md` | `make fabric-check` | Passed: 280 Fabric/Autopsy/ForgeCI/WarmPath Python tests plus Fabric protocol/simulator format, warning-denied Clippy, and tests. |
-| Same adversarial review | public Fabric workflow | Discover, measured host-memory benchmark, model inspection, compile, simulate, intentional validation failure, Autopsy compare/diagnose/replay/minimize/report, and local shadow-canary recovery passed. The standalone compile recorded 175 candidates, 4 Pareto candidates, 174 rejected alternatives, and 10 simulator calls. |
-| Same adversarial review | UI | Typecheck, lint, 28 tests, and production build passed. |
-| Review fixes `704bea5` and `4aad2ef` | focused checks | Ruff and mypy passed; 3 focused Autopsy tests and 5 artifact-derived documentation tests passed. |
+| Baseline `c67e082` | `make bootstrap && make check && make demo` | Passed: 67 Python tests plus 3 expected no-Torch skips, 62 Rust tests, 11 UI tests/build, and 120 live plus 120 simulated requests. |
+| Source `ca39d5e` | `make check` | Passed: Ruff format/lint, strict mypy over 118 source files, 362 Python tests plus 3 expected GPU/Torch skips, the complete Rust workspace, and UI typecheck/lint/28 tests/build. |
+| Source `ca39d5e` | `make fabric-check` | Passed: 292 Fabric/Autopsy/ForgeCI/WarmPath Python tests, Rust format, warning-denied Clippy, 10 Fabric protocol conformance tests, and 21 Fabric simulator tests. |
+| Source `ca39d5e` | `make demo` | Passed: 120 live gateway requests, 120 simulated requests, and artifact-derived diagnosis accuracy 1.0. |
+| Source `ca39d5e` | `make fabric-demo` | Passed: physical compile, 588-operation twin runs, two physical faults, seven counterfactuals, local Rust gateway replay, guarded recovery, telemetry, hashes, timeline, and static report. |
+| Source `ca39d5e` | `make autopsy-demo` | Passed independently with comparison, diagnosis, hash-verified replay, minimization, recovery, and report artifacts. |
+| Source `ca39d5e` | `make forgeci-demo` | Passed: the intentional regression was detected and the exact first bad fixture commit was identified after three unique commit evaluations. |
+| Source `ca39d5e` | `make warmpath-demo` | Passed: 243 candidates, measured local stages, hash-verified restore, and artifact-derived report. |
+| Source `ca39d5e` | `make extension-evaluation` | Passed: 180 plan/twin trials, 24 diagnosis trials, 120 recovery trials, ForgeCI and WarmPath evaluations, reports, plots, manifests, and raw artifacts. |
+| Publication `4eb0066` | `make docker-smoke` | Passed: both Rust images built, health/SSE contracts passed, and labeled containers/processes were removed. |
+| Publication `4eb0066` | `make clean-room-test` | Passed from a literal committed archive: locked bootstrap, all checks, original/Fabric/ForgeCI/WarmPath demos, package build, public simulation and Autopsy replay, and expected fail-closed hard-SLO validation. |
+| Publication `4eb0066` | `make benchmark-gpu` | Exited successfully with a typed `unavailable` artifact and zero measurements because no working `nvidia-smi` inventory existed. |
+| Publication `4eb0066` | public passing validation | Passed with explicit relaxed error/interval gates and hard `p95_ttft_ms`/`p99_tpot_ms` SLOs; the strict clean-room invocation exited 1 and preserved all failure reasons. |
+| Final hygiene | scans and process audit | No bare `pass`, no core TODO/FIXME/placeholder/stub/`NotImplementedError`/fake-result/hard-coded-benchmark match, no tracked credential-like file, no labeled Docker container or SLOForge child process, and `git diff --check` passed. |
 
-The earlier clean-room archive deliberately exposed a publication defect: a
-literal archive of `606680f` failed three artifact-contract tests before demo
-generation, then passed after regeneration. This is why source-fresh artifact
-publication and a subsequent archive test remain mandatory rather than being
-inferred from worktree success.
+The earlier clean-room archive exposed stale generated evidence before source
+regeneration. That defect is closed: publication `4eb0066` contains the
+source-fresh bundle and the subsequent committed-archive test passed.
 
-## Current evaluation snapshot
+## Final evaluation snapshot
 
 Canonical input: `artifacts/fabric/evaluation/result.json`, SHA-256
-`8a0c6292ddbb88fb7353602b7fd996436ff16a00f00aa85a2fd12b62ee840c9d`.
-It is marked `synthetic_cpu`, explicitly records hardware-backed validation as
-`not_exercised_no_compatible_hardware`, and records source `704bea5`; therefore
-all values below are provisional until final source-fresh regeneration.
+`55df589ef5b04169f5c618440296873b14b1b15843e993643af4fc59cd1cd39d`;
+its manifest SHA-256 is
+`d1dd0bc15de0231184dc3b4691e87d8974110e2482e73d6aa6c6e138b7947c0f`.
+It is marked `synthetic_cpu`, records hardware-backed validation as
+`not_exercised_no_compatible_hardware`, and records source `ca39d5e`.
 
 The matrix contains 180 physical-plan trials: five methods, four two-node
 topology fixtures, three workload regimes, and seeds 13, 29, and 47. Each method
@@ -222,9 +215,9 @@ validator remains a separate fail-closed loaded-trace gate.
 
 ### H3: Autopsy
 
-The current evaluation contains 24 deterministic cases over two injected fault
+The final evaluation contains 24 deterministic cases over two injected fault
 families. Top-1 and top-3 accuracy are both 1.0, median deterministic evidence
-confidence is 0.925, median diagnosis latency is 6.035 ms, and median
+confidence is 0.925, median diagnosis latency is 5.590 ms, and median
 counterfactual residual is 0 ms. The confidence is an evidence score, not a
 calibrated posterior probability. The narrow two-family fixture set does not
 establish general production diagnosis accuracy.
@@ -239,18 +232,18 @@ full replacement. These times and costs are policy inputs; post-action request
 performance is simulated. The result establishes deterministic state-machine
 and action-selection behavior, not live-cluster recovery time.
 
-### ForgeCI and WarmPath snapshots
+### ForgeCI and WarmPath results
 
 - `artifacts/forgeci/demo/evaluation.json` records the deterministic fixture's
   intentional 12.00% p99-TTFT regression, corrected 97.5% interval
   11.4676%-12.5349%, zero inconclusive rate, three unique commits evaluated,
   and the exact expected first bad fixture commit. This is not an external
   runtime bisection.
-- `artifacts/warmpath/evaluation/result.json` records a 0.955416 ms WarmPath p95
-  for a small synthetic snapshot: 11.641% faster than measured local-disk cache
-  but 0.822% slower than the modeled pinned-host-memory proxy. Page-cache and
-  local file stages are measured; pinned memory is an ordinary host-copy proxy
-  and the ready warm replica is modeled.
+- `artifacts/warmpath/evaluation/result.json` records a 0.898432 ms WarmPath p95
+  for a small synthetic snapshot: 10.039% faster than measured local-disk cache
+  and 1.077% faster than the best non-warm strategy, measured page cache.
+  Pinned memory is an ordinary host-copy proxy and the ready warm replica is
+  modeled; `all_timings_hardware_measured` is therefore false.
 
 ## Current-host hardware evidence
 
@@ -259,17 +252,17 @@ following facts are actual local discovery/CPU measurements, not synthetic GPU
 results:
 
 - `artifacts/fabric/local/topology.json`, SHA-256
-  `06998272c03f70f8f4134b5461ae2e0b7952d90d1574014f01c3cc3672c65f33`,
-  captured 2026-08-02T07:42:01Z: 53 typed nodes and 26 edges comprising one
+  `55a6c707787aca0fe572d2f19384a223b3be75ff61943a4a378c2b1fb57afaf3`,
+  captured 2026-08-02T07:55:46.183820Z: 53 typed nodes and 26 edges comprising one
   host, one CPU socket, one NUMA domain, 25 visible NIC interfaces, and 25
   network-rail nodes. It explicitly warns that no NVIDIA GPU or InfiniBand
   device was visible and does not infer either capability.
 - `artifacts/fabric/local/measurements/host-memory.json`, SHA-256
-  `e452b05ea7564a4e4f7fd8c826e937433c24690562c985c6d53f93d57d8852aa`,
+  `68896b25fc4181d1b5de9b01b9f03536f46571bfbd24c93d3c3b3e56066ca685`,
   is a measured 1 MiB `numpy.copyto` host-memory case using 3 warmups and 11
   samples on macOS 15.6.1 arm64/Python 3.12.7/NumPy 2.3.5. Median latency was
-  12.416 us, p95 12.646 us, p99 12.663 us, median absolute deviation 0.251 us,
-  and the recorded 95% median interval was [11.333, 12.625] us.
+  12.875 us, p95 13.2295 us, p99 13.4795 us, median absolute deviation
+  0.042 us, and the recorded 95% median interval was [12.792, 12.917] us.
 - `artifacts/fabric/local/profile/host-memory.json`, SHA-256
   `9fbb0b2c0a4998204b224c9855acf722d4532303a737ab70b4240108847bfdd1`,
   is a separate 9-sample measured calibration case with 3 warmups and median
@@ -324,9 +317,9 @@ rule, or production mutation was created by this work.
     claimed pending matched hardware trials.
 11. Canonical topology fingerprints include capture metadata. This safely
     rejects stale profiles but limits reuse across equivalent rediscovery.
-12. Current generated artifacts have stale source provenance. Until atomic
-    regeneration, publication, and a clean archive pass, this draft must not be
-    treated as the release completion record.
+12. Generated evidence is source-fresh at `ca39d5e` and published in `4eb0066`;
+    later documentation-only commits must not be mistaken for benchmark source
+    revisions.
 
 ## Artifact and documentation locations
 
@@ -364,31 +357,29 @@ rule, or production mutation was created by this work.
   `FABRIC_DOCUMENTATION_REVIEW.md`, `FABRIC_CLEANROOM_REVIEW.md`, and
   `FABRIC_FINAL_ADVERSARIAL_REVIEW.md`.
 
-At the draft snapshot, the flagship manifest listed 140 artifacts; every file
+The final flagship manifest lists 140 artifacts; every file
 existed and all 140 SHA-256 values matched. The manifest itself has SHA-256
-`f30bd33d4ee4bcafbaa7baf6a98c6e4a0482b5795bd703d1c4a2d69c44bbacc1`.
-This integrity result does not cure its stale source provenance.
+`6a37e7d5110752bc54d32c32e442f116bac4f3a3e28467dec8fed07073937fbd`.
+Its physical plan and evaluation record the frozen source `ca39d5e`.
 
 ## Final-release verification table
 
-Rows marked pending have **not** been rerun at the eventual final source and
-artifact-publication commits. They are deliberately not claimed.
-
-| Release gate | Status | Required release evidence |
+| Release gate | Status | Release evidence |
 |---|---|---|
-| Freeze and record final source commit | **PENDING** | Full SHA after all source/review fixes. |
-| Regenerate original SLOForge CPU evidence | **PENDING** | `make demo` at final source. |
-| Regenerate flagship physical evidence | **PENDING** | `make fabric-demo` at final source; plan/evaluation provenance must name that source. |
-| Standalone Autopsy demonstration | **PENDING** | `make autopsy-demo` at final source. |
-| ForgeCI fixture demonstration | **PENDING** | `make forgeci-demo` at final source. |
-| WarmPath local demonstration | **PENDING** | `make warmpath-demo` at final source. |
-| H1-H6 evaluation regeneration | **PENDING** | `make extension-evaluation`; atomically update raw results, reports, plots, manifests, and hashes. |
-| Existing and extension fast checks | **PENDING** | `make check` and `make fabric-check` at final source with exact counts recorded. |
-| Docker smoke | **PENDING** | `make docker-smoke` at final source, or an exact environmental failure record. |
-| CPU benchmark and explicit GPU-unavailable path | **PENDING** | Final CPU command plus GPU command that records unavailable hardware without a fabricated result. |
-| Public CLI workflow | **PENDING** | discover, benchmark, model inspect, compile, explain, simulate, fail-closed and success validation, export, Autopsy, and recovery commands against final artifacts. |
-| Artifact publication | **PENDING** | Commit regenerated `artifacts/` and `reports/`; reconcile every manifest, evidence, plan, diagnosis, recovery, and UI cross-reference hash. |
-| Clean archive | **PENDING** | `make clean-room-test` from the committed publication revision; must pass before generation as well as after. |
-| Source quality scan | **PENDING** | Review TODO/FIXME/placeholder/stub/`NotImplementedError`/bare `pass`/fake-result/hard-coded-benchmark matches in core paths. |
-| Safety and release hygiene | **PENDING** | Secret/path scan, no orphan process, no active fault/tc rule, no paid resource, no external mutation, `git diff --check`, and clean status. |
-| Final report verification | **PENDING** | Replace draft/current-source wording, record source and publication commits, verify all cited paths/hashes/numbers, and commit this report. |
+| Frozen source and evidence revision | **PASS** | Source `ca39d5e7859d26cd7bcac96e439e23825aff6d76`; artifact publication `4eb0066e6c51e1942e4d13b55a69a552b20459ab`. |
+| Original SLOForge CPU evidence | **PASS** | Final `make demo`: 120 live and 120 simulated requests. |
+| Flagship physical evidence | **PASS** | Final `make fabric-demo`: two faults, diagnosis, seven repairs, shadow/canary promotion, SLO restoration, 140 hash-verified artifacts. |
+| Standalone Autopsy demonstration | **PASS** | `make autopsy-demo` completed from the final source. |
+| ForgeCI fixture demonstration | **PASS** | `make forgeci-demo` detected the 12% regression and exact first bad commit. |
+| WarmPath local demonstration | **PASS** | `make warmpath-demo` evaluated 243 plans and checksum-verified the restore. |
+| H1-H6 evaluation | **PASS** | `make extension-evaluation` regenerated machine-readable results, Markdown/HTML reports, plots, manifests, and raw artifacts. |
+| Existing and extension checks | **PASS** | `make check` and `make fabric-check` passed with the counts recorded above. |
+| Docker smoke | **PASS** | Images, health, SSE, and cleanup passed with no residual labeled containers. |
+| CPU and GPU benchmark disposition | **PASS** | Real current-host topology/host-memory artifacts retained; GPU command produced explicit `unavailable`, zero-measurement evidence SHA-256 `932f6e6a828ce7e34267b324f09ee96d8a764bb97d42005ce4751e935d314b4b`. |
+| Public CLI workflow | **PASS** | Discover, measured host memory, model inspect, compile/explain/simulate, strict fail-closed and relaxed passing validation, export, Autopsy, and local recovery paths were exercised. |
+| Artifact publication | **PASS** | Commit `4eb0066` publishes source-fresh `artifacts/` and `reports/`; manifest hashes and cross-artifact identities reconcile. |
+| Clean archive | **PASS** | `make clean-room-test` passed from committed publication `4eb0066`, including the pre-generation archive contracts. |
+| Source quality scan | **PASS** | No core lexical match and no bare `pass`; remaining lexical matches occur only in historical audits and this completed gate description. |
+| Safety and release hygiene | **PASS** | No tracked credential-like file, paid resource, external mutation, fault rule, labeled container, or orphan SLOForge process; `git diff --check` passed. |
+| Fresh adversarial review | **PASS** | `FABRIC_FINAL_ADVERSARIAL_REVIEW.md`: no unresolved high severity; verdict is deep production-shaped reference system with explicit hardware boundaries. |
+| Final report verification | **PASS** | Paths, file hashes, source provenance, counts, metrics, negative results, and unexercised paths were reconciled against the published filesystem. |
