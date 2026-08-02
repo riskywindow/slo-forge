@@ -42,3 +42,37 @@ Updated: 2026-08-01 (America/Los_Angeles)
 - UI: typecheck/lint passed, 11 tests passed, and the production build passed.
 - System: clean-archive `make bootstrap`, `make demo`, `make benchmark-cpu`, CPU-safe `make benchmark-gpu`, report round trip, and `make docker-smoke` passed.
 - Evidence: final report values derive from the retained raw artifacts; H1/H2, GPU performance, live controller actuation, and cloud deployment remain explicitly unestablished or unexercised.
+
+## SLOForge Fabric extension
+
+Baseline recorded: 2026-08-01 (America/Los_Angeles)
+
+- Baseline commit: `c67e082a13fc6882d7849a862c6667a787b43a72`
+- Baseline tag: `sloforge-fabric-baseline-c67e082`
+- Validation environment: Apple Silicon macOS 15.6.1, 12 logical CPUs, 24 GiB RAM; no NVIDIA device, RDMA device, privileged probe authorization, cloud credentials, or GPU budget.
+- Clean detached-worktree bootstrap: passed with 114 locked Python packages, all five Rust crates, and 231 locked UI packages.
+- Baseline `make check`: passed; Python 67 passed/3 expected no-Torch skips, Rust 62 passed, UI 11 passed plus production build, Ruff/mypy/fmt/clippy all clean.
+- Baseline `make demo`: passed; selected `cfg-aad9cd4cfa41`, 120 live gateway requests, 120 simulated requests, diagnosis accuracy 1.0. The detached worktree preserved committed release evidence.
+
+| Fabric task | Owner | Status | Branch/worktree | Files owned | Dependencies | Acceptance command | Artifact | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline validation and extension integration | root | complete; integration ongoing | `main` | root manifests, CLI integration, ledger, final release | existing system | `make check && make demo` | detached baseline logs | baseline `c67e082` |
+| PhysicalExecutionPlan, schemas, migrations, conformance | IR/protocol lane | queued | shared worktree, disjoint ownership | `python/sloforge/fabric/ir`, `crates/sloforge-fabric-protocol`, `schemas/fabric`, golden fixtures | baseline IR | Python/Rust canonical round trip and schema tests | golden physical plan | pending |
+| Topology discovery, fixtures, and fabric profiling | topology/profiling lane | queued | shared worktree, disjoint ownership | `python/sloforge/fabric/{topology,profiling}`, topology fixtures | Fabric IR | fixture discovery and benchmark artifact tests | topology/profile fixtures | pending |
+| Communication-aware simulator | simulator lane | queued | shared worktree, disjoint ownership | `crates/sloforge-fabric-sim` | Fabric IR/profile | deterministic resource, contention, failure, and analytical tests | physical simulation trace | pending |
+| Physical compiler and baselines | compiler lane | pending | shared worktree, disjoint ownership | `python/sloforge/fabric/{model_graph,optimizer,compiler}` | IR, topology, simulator | optimizer invariants and compiled-plan validation | physical plan/frontier | pending |
+| Autopsy event model, alignment, diagnosis, replay, minimization | Autopsy lanes | pending | shared worktree, disjoint ownership | `python/sloforge/autopsy`, optional Rust ingestion | simulator/evidence | deterministic injected-fault diagnosis suite | diagnosis bundle | pending |
+| Recovery planner and guarded executor | recovery lane | pending | shared worktree, disjoint ownership | `python/sloforge/recovery` | physical plan, Autopsy | restart-safe shadow/canary/promotion/rollback tests | recovery proposal/audit | pending |
+| Synthetic fabric demo, reports, and UI | integration/UI lanes | pending | shared worktree, disjoint ownership | demo/report/UI Fabric additions | Tier 1 | `make fabric-demo && make autopsy-demo` | retained flagship bundle | pending |
+| ForgeCI | ForgeCI lane | pending | shared worktree, disjoint ownership | `python/sloforge/forgeci`, fixtures | Tier 1 | `make forgeci-demo` | bisection/issue bundle | pending |
+| WarmPath | WarmPath lane | pending | shared worktree, disjoint ownership | `python/sloforge/warmpath` | Tier 1 | `make warmpath-demo` | artifact DAG/plan/run | pending |
+| Adapters and low-level experiment | performance/adapters lanes | pending | shared worktree, disjoint ownership | Fabric exporters/adapters, benchmark experiment | Tier 1 traces | offline validation and correctness benchmark | adapter manifests/raw experiment | pending |
+| Evaluation, documentation, reviews, clean-room release | review lanes + root | pending | shared worktree, disjoint ownership | `docs/{fabric,autopsy,recovery,forgeci,warmpath}`, reports, paper | integrated extension | `make extension-evaluation && make clean-room-test` | evaluation/report/reviews | pending |
+
+### Fabric dependency graph
+
+1. Typed physical IR and topology/profile fixtures unblock the simulator and compiler.
+2. The simulator and compiler jointly unblock Autopsy counterfactuals and recovery variants.
+3. Autopsy plus recovery unblock the flagship fault-to-restoration demonstration.
+4. Stable Tier 1 artifacts unblock ForgeCI, WarmPath, adapters, the low-level experiment, visualization, and evaluation.
+5. All hardware-dependent paths must emit explicit unavailable records on this host; synthetic measurements must retain `synthetic` provenance and may never be labeled hardware-measured.
