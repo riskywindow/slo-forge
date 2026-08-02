@@ -1,0 +1,338 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "BenchmarkInvocation": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Argv",
+          "type": "array"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "process_placement": {
+          "minLength": 1,
+          "title": "Process Placement",
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "argv",
+        "timeout_seconds",
+        "process_placement",
+        "environment_digest"
+      ],
+      "title": "BenchmarkInvocation",
+      "type": "object"
+    },
+    "DocumentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "minLength": 1,
+          "title": "Api Version",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "uid": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uid"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "api_version",
+        "uri",
+        "digest"
+      ],
+      "title": "DocumentReference",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "FabricMeasurementSeries": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "concurrency": {
+          "exclusiveMinimum": 0,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "confidence_high_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Confidence High Us",
+          "type": "number"
+        },
+        "confidence_low_us": {
+          "minimum": 0.0,
+          "title": "Confidence Low Us",
+          "type": "number"
+        },
+        "invocation": {
+          "$ref": "#/$defs/BenchmarkInvocation"
+        },
+        "measurement_id": {
+          "minLength": 1,
+          "title": "Measurement Id",
+          "type": "string"
+        },
+        "message_bytes": {
+          "minimum": 0,
+          "title": "Message Bytes",
+          "type": "integer"
+        },
+        "primitive": {
+          "enum": [
+            "launch",
+            "synchronize",
+            "memory",
+            "gemm",
+            "copy",
+            "p2p",
+            "collective",
+            "expert",
+            "kv_transfer",
+            "startup"
+          ],
+          "title": "Primitive",
+          "type": "string"
+        },
+        "rank_count": {
+          "exclusiveMinimum": 0,
+          "title": "Rank Count",
+          "type": "integer"
+        },
+        "samples": {
+          "items": {
+            "$ref": "#/$defs/FabricRawSample"
+          },
+          "title": "Samples",
+          "type": "array"
+        },
+        "summary_median_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Summary Median Us",
+          "type": "number"
+        },
+        "summary_p95_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Summary P95 Us",
+          "type": "number"
+        },
+        "transport": {
+          "minLength": 1,
+          "title": "Transport",
+          "type": "string"
+        },
+        "warmup_count": {
+          "minimum": 0,
+          "title": "Warmup Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "measurement_id",
+        "primitive",
+        "transport",
+        "rank_count",
+        "message_bytes",
+        "concurrency",
+        "warmup_count",
+        "samples",
+        "summary_median_us",
+        "summary_p95_us",
+        "confidence_low_us",
+        "confidence_high_us",
+        "invocation",
+        "artifact_digest"
+      ],
+      "title": "FabricMeasurementSeries",
+      "type": "object"
+    },
+    "FabricRawSample": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_transferred": {
+          "minimum": 0,
+          "title": "Bytes Transferred",
+          "type": "integer"
+        },
+        "duration_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Duration Us",
+          "type": "number"
+        },
+        "failure_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Reason"
+        },
+        "success": {
+          "title": "Success",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "duration_us",
+        "bytes_transferred",
+        "success"
+      ],
+      "title": "FabricRawSample",
+      "type": "object"
+    },
+    "JsonValue": {}
+  },
+  "$id": "urn:sloforge:fabric:fabric-profile-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/fabric/v1",
+      "default": "sloforge.io/fabric/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "hardware_manifest": {
+      "$ref": "#/$defs/DocumentReference"
+    },
+    "kind": {
+      "const": "FabricProfile",
+      "default": "FabricProfile",
+      "title": "Kind",
+      "type": "string"
+    },
+    "measurements": {
+      "items": {
+        "$ref": "#/$defs/FabricMeasurementSeries"
+      },
+      "title": "Measurements",
+      "type": "array"
+    },
+    "profile_id": {
+      "minLength": 1,
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "raw_artifacts": {
+      "items": {
+        "$ref": "#/$defs/DocumentReference"
+      },
+      "title": "Raw Artifacts",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "software_manifest": {
+      "$ref": "#/$defs/DocumentReference"
+    },
+    "topology_fingerprint": {
+      "$ref": "#/$defs/ArtifactDigest"
+    }
+  },
+  "required": [
+    "profile_id",
+    "topology_fingerprint",
+    "created_at",
+    "hardware_manifest",
+    "software_manifest",
+    "measurements",
+    "raw_artifacts"
+  ],
+  "title": "FabricProfile",
+  "type": "object"
+}

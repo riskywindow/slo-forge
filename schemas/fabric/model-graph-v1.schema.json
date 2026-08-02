@@ -1,0 +1,332 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "CommunicationRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_per_token": {
+          "minimum": 0.0,
+          "title": "Bytes Per Token",
+          "type": "number"
+        },
+        "operation": {
+          "enum": [
+            "all_reduce",
+            "all_gather",
+            "reduce_scatter",
+            "all_to_all",
+            "broadcast",
+            "send_recv"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "parallelism_dimension": {
+          "enum": [
+            "tensor",
+            "pipeline",
+            "data",
+            "expert",
+            "context"
+          ],
+          "title": "Parallelism Dimension",
+          "type": "string"
+        },
+        "synchronization_required": {
+          "title": "Synchronization Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "operation",
+        "bytes_per_token",
+        "synchronization_required",
+        "parallelism_dimension"
+      ],
+      "title": "CommunicationRequirement",
+      "type": "object"
+    },
+    "ExpertSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_bytes_per_token": {
+          "exclusiveMinimum": 0,
+          "title": "Activation Bytes Per Token",
+          "type": "integer"
+        },
+        "expected_load": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Load",
+          "type": "number"
+        },
+        "expert_id": {
+          "minLength": 1,
+          "title": "Expert Id",
+          "type": "string"
+        },
+        "parameter_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Parameter Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expert_id",
+        "parameter_bytes",
+        "activation_bytes_per_token",
+        "expected_load"
+      ],
+      "title": "ExpertSpec",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LayerKind": {
+      "enum": [
+        "embedding",
+        "attention",
+        "feed_forward",
+        "moe",
+        "normalization",
+        "output"
+      ],
+      "title": "LayerKind",
+      "type": "string"
+    },
+    "LayerSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_bytes_per_token": {
+          "minimum": 0,
+          "title": "Activation Bytes Per Token",
+          "type": "integer"
+        },
+        "allowed_stage_boundaries_after": {
+          "default": true,
+          "title": "Allowed Stage Boundaries After",
+          "type": "boolean"
+        },
+        "communication": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CommunicationRequirement"
+          },
+          "title": "Communication",
+          "type": "array"
+        },
+        "experts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ExpertSpec"
+          },
+          "title": "Experts",
+          "type": "array"
+        },
+        "indivisible": {
+          "default": false,
+          "title": "Indivisible",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/LayerKind"
+        },
+        "kv_bytes_per_token": {
+          "minimum": 0,
+          "title": "Kv Bytes Per Token",
+          "type": "integer"
+        },
+        "layer_id": {
+          "minLength": 1,
+          "title": "Layer Id",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 0,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "parameter_bytes": {
+          "minimum": 0,
+          "title": "Parameter Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "layer_id",
+        "ordinal",
+        "kind",
+        "parameter_bytes",
+        "activation_bytes_per_token",
+        "kv_bytes_per_token"
+      ],
+      "title": "LayerSpec",
+      "type": "object"
+    },
+    "PrecisionMode": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "float32",
+            "float16",
+            "bfloat16",
+            "fp8",
+            "int8",
+            "int4"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "runtime_features": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Runtime Features",
+          "type": "array"
+        },
+        "weight_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "weight_bytes"
+      ],
+      "title": "PrecisionMode",
+      "type": "object"
+    }
+  },
+  "$id": "urn:sloforge:fabric:model-graph-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/fabric/v1",
+      "default": "sloforge.io/fabric/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "attention_heads": {
+      "exclusiveMinimum": 0,
+      "title": "Attention Heads",
+      "type": "integer"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "hidden_size": {
+      "exclusiveMinimum": 0,
+      "title": "Hidden Size",
+      "type": "integer"
+    },
+    "key_value_heads": {
+      "exclusiveMinimum": 0,
+      "title": "Key Value Heads",
+      "type": "integer"
+    },
+    "kind": {
+      "const": "ModelGraph",
+      "default": "ModelGraph",
+      "title": "Kind",
+      "type": "string"
+    },
+    "layers": {
+      "items": {
+        "$ref": "#/$defs/LayerSpec"
+      },
+      "title": "Layers",
+      "type": "array"
+    },
+    "maximum_sequence_length": {
+      "exclusiveMinimum": 0,
+      "title": "Maximum Sequence Length",
+      "type": "integer"
+    },
+    "model_digest": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "model_id": {
+      "minLength": 1,
+      "title": "Model Id",
+      "type": "string"
+    },
+    "model_revision": {
+      "minLength": 1,
+      "title": "Model Revision",
+      "type": "string"
+    },
+    "precision_modes": {
+      "items": {
+        "$ref": "#/$defs/PrecisionMode"
+      },
+      "title": "Precision Modes",
+      "type": "array"
+    },
+    "runtime_features": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Runtime Features",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tokenizer_digest": {
+      "$ref": "#/$defs/ArtifactDigest"
+    }
+  },
+  "required": [
+    "model_id",
+    "model_revision",
+    "model_digest",
+    "tokenizer_digest",
+    "hidden_size",
+    "attention_heads",
+    "key_value_heads",
+    "maximum_sequence_length",
+    "layers",
+    "precision_modes"
+  ],
+  "title": "ModelGraph",
+  "type": "object"
+}

@@ -1,0 +1,1434 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "CollectiveOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "enum": [
+            "ring",
+            "tree",
+            "recursive_doubling",
+            "direct",
+            "pairwise",
+            "auto"
+          ],
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "channel_count": {
+          "exclusiveMinimum": 0,
+          "title": "Channel Count",
+          "type": "integer"
+        },
+        "depends_on": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "expected_duration_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Expected Duration Us",
+          "type": "number"
+        },
+        "fallback": {
+          "enum": [
+            "serialize",
+            "tcp",
+            "host_staged",
+            "abort"
+          ],
+          "title": "Fallback",
+          "type": "string"
+        },
+        "message_size_bytes_per_token": {
+          "minimum": 0.0,
+          "title": "Message Size Bytes Per Token",
+          "type": "number"
+        },
+        "message_size_intercept_bytes": {
+          "minimum": 0,
+          "title": "Message Size Intercept Bytes",
+          "type": "integer"
+        },
+        "operation": {
+          "enum": [
+            "all_reduce",
+            "all_gather",
+            "reduce_scatter",
+            "broadcast",
+            "send_recv",
+            "all_to_all"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "minLength": 1,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "overlap_window_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Overlap Window Id"
+        },
+        "participating_ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Participating Ranks",
+          "type": "array"
+        },
+        "rail_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Rail Ids",
+          "type": "array"
+        },
+        "rank_order": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Rank Order",
+          "type": "array"
+        },
+        "transport": {
+          "enum": [
+            "shared_memory",
+            "nvlink",
+            "pcie",
+            "infiniband",
+            "roce",
+            "tcp"
+          ],
+          "title": "Transport",
+          "type": "string"
+        },
+        "uncertainty_us": {
+          "minimum": 0.0,
+          "title": "Uncertainty Us",
+          "type": "number"
+        }
+      },
+      "required": [
+        "operation_id",
+        "operation",
+        "participating_ranks",
+        "message_size_intercept_bytes",
+        "message_size_bytes_per_token",
+        "algorithm",
+        "transport",
+        "channel_count",
+        "rail_ids",
+        "rank_order",
+        "expected_duration_us",
+        "uncertainty_us",
+        "fallback"
+      ],
+      "title": "CollectiveOperation",
+      "type": "object"
+    },
+    "CollectivePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "operations": {
+          "items": {
+            "$ref": "#/$defs/CollectiveOperation"
+          },
+          "title": "Operations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operations"
+      ],
+      "title": "CollectivePlan",
+      "type": "object"
+    },
+    "CommunicationOverlapPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "windows": {
+          "items": {
+            "$ref": "#/$defs/OverlapWindow"
+          },
+          "title": "Windows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "windows"
+      ],
+      "title": "CommunicationOverlapPlan",
+      "type": "object"
+    },
+    "DocumentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "minLength": 1,
+          "title": "Api Version",
+          "type": "string"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "uid": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uid"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "api_version",
+        "uri",
+        "digest"
+      ],
+      "title": "DocumentReference",
+      "type": "object"
+    },
+    "ExpertAssignment": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_factor": {
+          "exclusiveMinimum": 0.0,
+          "title": "Capacity Factor",
+          "type": "number"
+        },
+        "expected_load": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Load",
+          "type": "number"
+        },
+        "expert_id": {
+          "minLength": 1,
+          "title": "Expert Id",
+          "type": "string"
+        },
+        "rank_ids": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Rank Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "expert_id",
+        "rank_ids",
+        "expected_load",
+        "capacity_factor"
+      ],
+      "title": "ExpertAssignment",
+      "type": "object"
+    },
+    "ExpertPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "assignments": {
+          "items": {
+            "$ref": "#/$defs/ExpertAssignment"
+          },
+          "title": "Assignments",
+          "type": "array"
+        },
+        "hot_expert_strategy": {
+          "enum": [
+            "none",
+            "replicate",
+            "rebalance",
+            "reserve_capacity"
+          ],
+          "title": "Hot Expert Strategy",
+          "type": "string"
+        },
+        "maximum_replicas_per_expert": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Replicas Per Expert",
+          "type": "integer"
+        },
+        "rebalance_minimum_interval_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Rebalance Minimum Interval Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "assignments",
+        "hot_expert_strategy",
+        "maximum_replicas_per_expert",
+        "rebalance_minimum_interval_seconds"
+      ],
+      "title": "ExpertPlacement",
+      "type": "object"
+    },
+    "Extensions": {
+      "additionalProperties": false,
+      "description": "Validated vendor extension fields serialized as a plain JSON object.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "FailureExposure": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_rank_ids": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Affected Rank Ids",
+          "type": "array"
+        },
+        "expected_slo_impact_ms": {
+          "minimum": 0.0,
+          "title": "Expected Slo Impact Ms",
+          "type": "number"
+        },
+        "fault_domain": {
+          "minLength": 1,
+          "title": "Fault Domain",
+          "type": "string"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fault_domain",
+        "affected_rank_ids",
+        "probability",
+        "expected_slo_impact_ms"
+      ],
+      "title": "FailureExposure",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "KVTransferPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "backpressure_limit_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Backpressure Limit Bytes",
+          "type": "integer"
+        },
+        "routes": {
+          "items": {
+            "$ref": "#/$defs/KVTransferRoute"
+          },
+          "title": "Routes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "routes",
+        "backpressure_limit_bytes"
+      ],
+      "title": "KVTransferPlan",
+      "type": "object"
+    },
+    "KVTransferRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_owner": {
+          "enum": [
+            "prefill",
+            "decode",
+            "shared"
+          ],
+          "title": "Cache Owner",
+          "type": "string"
+        },
+        "chunk_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Chunk Bytes",
+          "type": "integer"
+        },
+        "consumer_rank_ids": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Consumer Rank Ids",
+          "type": "array"
+        },
+        "edge_path": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Edge Path",
+          "type": "array"
+        },
+        "eviction_policy": {
+          "enum": [
+            "lru",
+            "clock",
+            "deadline"
+          ],
+          "title": "Eviction Policy",
+          "type": "string"
+        },
+        "expected_cost_usd": {
+          "minimum": 0.0,
+          "title": "Expected Cost Usd",
+          "type": "number"
+        },
+        "expected_latency_us": {
+          "exclusiveMinimum": 0.0,
+          "title": "Expected Latency Us",
+          "type": "number"
+        },
+        "fallback": {
+          "enum": [
+            "host_staged",
+            "recompute",
+            "reject"
+          ],
+          "title": "Fallback",
+          "type": "string"
+        },
+        "maximum_inflight_chunks": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Inflight Chunks",
+          "type": "integer"
+        },
+        "overlap_with_decode": {
+          "title": "Overlap With Decode",
+          "type": "boolean"
+        },
+        "producer_rank_ids": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Producer Rank Ids",
+          "type": "array"
+        },
+        "retry_limit": {
+          "minimum": 0,
+          "title": "Retry Limit",
+          "type": "integer"
+        },
+        "route_id": {
+          "minLength": 1,
+          "title": "Route Id",
+          "type": "string"
+        },
+        "serialization_format": {
+          "enum": [
+            "raw",
+            "paged",
+            "nixl",
+            "runtime_native"
+          ],
+          "title": "Serialization Format",
+          "type": "string"
+        },
+        "transport_adapter": {
+          "minLength": 1,
+          "title": "Transport Adapter",
+          "type": "string"
+        }
+      },
+      "required": [
+        "route_id",
+        "producer_rank_ids",
+        "consumer_rank_ids",
+        "edge_path",
+        "serialization_format",
+        "chunk_bytes",
+        "maximum_inflight_chunks",
+        "overlap_with_decode",
+        "cache_owner",
+        "eviction_policy",
+        "retry_limit",
+        "fallback",
+        "transport_adapter",
+        "expected_latency_us",
+        "expected_cost_usd"
+      ],
+      "title": "KVTransferRoute",
+      "type": "object"
+    },
+    "MemoryPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "allocations": {
+          "items": {
+            "$ref": "#/$defs/RankMemoryAllocation"
+          },
+          "title": "Allocations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "allocations"
+      ],
+      "title": "MemoryPlan",
+      "type": "object"
+    },
+    "MetricInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "estimate": {
+          "minimum": 0.0,
+          "title": "Estimate",
+          "type": "number"
+        },
+        "lower": {
+          "minimum": 0.0,
+          "title": "Lower",
+          "type": "number"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "minimum": 0.0,
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "estimate",
+        "lower",
+        "upper",
+        "confidence",
+        "unit"
+      ],
+      "title": "MetricInterval",
+      "type": "object"
+    },
+    "OptimizerTraceEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "evaluate",
+            "promote",
+            "reject",
+            "select"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "feasibility",
+            "lower_bound",
+            "placement",
+            "simulation",
+            "refinement"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "simulator_calls": {
+          "minimum": 0,
+          "title": "Simulator Calls",
+          "type": "integer"
+        },
+        "solver_time_ms": {
+          "minimum": 0.0,
+          "title": "Solver Time Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "sequence",
+        "candidate_id",
+        "phase",
+        "decision",
+        "reason_code",
+        "simulator_calls",
+        "solver_time_ms"
+      ],
+      "title": "OptimizerTraceEntry",
+      "type": "object"
+    },
+    "OverlapWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "communication_operation_id": {
+          "minLength": 1,
+          "title": "Communication Operation Id",
+          "type": "string"
+        },
+        "compute_operation_id": {
+          "minLength": 1,
+          "title": "Compute Operation Id",
+          "type": "string"
+        },
+        "depends_on": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "expected_overlap_fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Expected Overlap Fraction",
+          "type": "number"
+        },
+        "fallback_serialization": {
+          "enum": [
+            "compute_first",
+            "communication_first",
+            "critical_path"
+          ],
+          "title": "Fallback Serialization",
+          "type": "string"
+        },
+        "resource_contention": {
+          "enum": [
+            "none",
+            "copy_engine",
+            "hbm",
+            "compute",
+            "network"
+          ],
+          "title": "Resource Contention",
+          "type": "string"
+        },
+        "stream": {
+          "minLength": 1,
+          "title": "Stream",
+          "type": "string"
+        },
+        "window_id": {
+          "minLength": 1,
+          "title": "Window Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_id",
+        "compute_operation_id",
+        "communication_operation_id",
+        "stream",
+        "expected_overlap_fraction",
+        "resource_contention",
+        "fallback_serialization"
+      ],
+      "title": "OverlapWindow",
+      "type": "object"
+    },
+    "ParallelGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ParallelismKind"
+        },
+        "rank_ids": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Rank Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "group_id",
+        "kind",
+        "rank_ids"
+      ],
+      "title": "ParallelGroup",
+      "type": "object"
+    },
+    "ParallelismKind": {
+      "enum": [
+        "tensor",
+        "pipeline",
+        "data",
+        "expert",
+        "context",
+        "prefill",
+        "decode"
+      ],
+      "title": "ParallelismKind",
+      "type": "string"
+    },
+    "ParallelismPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "context_parallel_degree": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Context Parallel Degree",
+          "type": "integer"
+        },
+        "data_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "title": "Data Parallel Degree",
+          "type": "integer"
+        },
+        "expert_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "title": "Expert Parallel Degree",
+          "type": "integer"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/ParallelGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "pipeline_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "title": "Pipeline Parallel Degree",
+          "type": "integer"
+        },
+        "prefill_decode_disaggregated": {
+          "title": "Prefill Decode Disaggregated",
+          "type": "boolean"
+        },
+        "replica_groups": {
+          "items": {
+            "$ref": "#/$defs/ParallelGroup"
+          },
+          "title": "Replica Groups",
+          "type": "array"
+        },
+        "tensor_parallel_degree": {
+          "exclusiveMinimum": 0,
+          "title": "Tensor Parallel Degree",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tensor_parallel_degree",
+        "pipeline_parallel_degree",
+        "data_parallel_degree",
+        "expert_parallel_degree",
+        "prefill_decode_disaggregated",
+        "groups",
+        "replica_groups"
+      ],
+      "title": "ParallelismPlan",
+      "type": "object"
+    },
+    "PhysicalMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "communication_overhead_fraction": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "cost_usd_per_million_tokens": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "goodput_tokens_per_second": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p95_end_to_end_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p95_ttft_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "p99_tpot_ms": {
+          "$ref": "#/$defs/MetricInterval"
+        },
+        "throughput_tokens_per_second": {
+          "$ref": "#/$defs/MetricInterval"
+        }
+      },
+      "required": [
+        "p95_ttft_ms",
+        "p99_tpot_ms",
+        "p95_end_to_end_ms",
+        "throughput_tokens_per_second",
+        "goodput_tokens_per_second",
+        "cost_usd_per_million_tokens",
+        "availability",
+        "communication_overhead_fraction"
+      ],
+      "title": "PhysicalMetrics",
+      "type": "object"
+    },
+    "RankBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "fault_domain": {
+          "minLength": 1,
+          "title": "Fault Domain",
+          "type": "string"
+        },
+        "gpu_id": {
+          "minLength": 1,
+          "title": "Gpu Id",
+          "type": "string"
+        },
+        "host_id": {
+          "minLength": 1,
+          "title": "Host Id",
+          "type": "string"
+        },
+        "network_rail_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Network Rail Id"
+        },
+        "nic_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nic Id"
+        },
+        "numa_domain_id": {
+          "minLength": 1,
+          "title": "Numa Domain Id",
+          "type": "string"
+        },
+        "process_cpu_affinity": {
+          "pattern": "^[0-9]+(?:[-,][0-9]+)*$",
+          "title": "Process Cpu Affinity",
+          "type": "string"
+        },
+        "rank_id": {
+          "minimum": 0,
+          "title": "Rank Id",
+          "type": "integer"
+        },
+        "replica_id": {
+          "minLength": 1,
+          "title": "Replica Id",
+          "type": "string"
+        },
+        "worker_role": {
+          "$ref": "#/$defs/WorkerRole"
+        }
+      },
+      "required": [
+        "rank_id",
+        "host_id",
+        "gpu_id",
+        "numa_domain_id",
+        "process_cpu_affinity",
+        "worker_role",
+        "replica_id",
+        "fault_domain"
+      ],
+      "title": "RankBinding",
+      "type": "object"
+    },
+    "RankMemoryAllocation": {
+      "additionalProperties": false,
+      "properties": {
+        "activations_bytes": {
+          "minimum": 0,
+          "title": "Activations Bytes",
+          "type": "integer"
+        },
+        "capacity_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Capacity Bytes",
+          "type": "integer"
+        },
+        "communication_buffers_bytes": {
+          "minimum": 0,
+          "title": "Communication Buffers Bytes",
+          "type": "integer"
+        },
+        "cuda_graph_bytes": {
+          "minimum": 0,
+          "title": "Cuda Graph Bytes",
+          "type": "integer"
+        },
+        "fragmentation_allowance_bytes": {
+          "minimum": 0,
+          "title": "Fragmentation Allowance Bytes",
+          "type": "integer"
+        },
+        "host_pinned_buffers_bytes": {
+          "minimum": 0,
+          "title": "Host Pinned Buffers Bytes",
+          "type": "integer"
+        },
+        "kv_cache_bytes": {
+          "minimum": 0,
+          "title": "Kv Cache Bytes",
+          "type": "integer"
+        },
+        "local_nvme_bytes": {
+          "minimum": 0,
+          "title": "Local Nvme Bytes",
+          "type": "integer"
+        },
+        "rank_id": {
+          "minimum": 0,
+          "title": "Rank Id",
+          "type": "integer"
+        },
+        "remote_artifacts_bytes": {
+          "minimum": 0,
+          "title": "Remote Artifacts Bytes",
+          "type": "integer"
+        },
+        "runtime_workspace_bytes": {
+          "minimum": 0,
+          "title": "Runtime Workspace Bytes",
+          "type": "integer"
+        },
+        "safety_margin_bytes": {
+          "minimum": 0,
+          "title": "Safety Margin Bytes",
+          "type": "integer"
+        },
+        "weights_bytes": {
+          "minimum": 0,
+          "title": "Weights Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rank_id",
+        "capacity_bytes",
+        "weights_bytes",
+        "kv_cache_bytes",
+        "activations_bytes",
+        "cuda_graph_bytes",
+        "runtime_workspace_bytes",
+        "communication_buffers_bytes",
+        "host_pinned_buffers_bytes",
+        "local_nvme_bytes",
+        "remote_artifacts_bytes",
+        "fragmentation_allowance_bytes",
+        "safety_margin_bytes"
+      ],
+      "title": "RankMemoryAllocation",
+      "type": "object"
+    },
+    "RankPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "items": {
+            "$ref": "#/$defs/RankBinding"
+          },
+          "title": "Bindings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "bindings"
+      ],
+      "title": "RankPlacement",
+      "type": "object"
+    },
+    "RecoveryTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "diagnosis_code": {
+          "minLength": 1,
+          "title": "Diagnosis Code",
+          "type": "string"
+        },
+        "minimum_confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Minimum Confidence",
+          "type": "number"
+        },
+        "minimum_duration_seconds": {
+          "minimum": 0.0,
+          "title": "Minimum Duration Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "diagnosis_code",
+        "minimum_confidence",
+        "minimum_duration_seconds"
+      ],
+      "title": "RecoveryTrigger",
+      "type": "object"
+    },
+    "RecoveryVariant": {
+      "additionalProperties": false,
+      "properties": {
+        "alternate_collectives": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CollectivePlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternate_kv_transfer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KVTransferPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternate_parallelism": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParallelismPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternate_rank_placement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RankPlacement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternate_worker_ratio": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alternate Worker Ratio"
+        },
+        "compatibility_constraints": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Compatibility Constraints",
+          "type": "array"
+        },
+        "expected_degraded_metrics": {
+          "$ref": "#/$defs/PhysicalMetrics"
+        },
+        "rebuild_required": {
+          "title": "Rebuild Required",
+          "type": "boolean"
+        },
+        "transition_cost_usd": {
+          "minimum": 0.0,
+          "title": "Transition Cost Usd",
+          "type": "number"
+        },
+        "transition_seconds": {
+          "minimum": 0.0,
+          "title": "Transition Seconds",
+          "type": "number"
+        },
+        "triggers": {
+          "items": {
+            "$ref": "#/$defs/RecoveryTrigger"
+          },
+          "title": "Triggers",
+          "type": "array"
+        },
+        "variant_id": {
+          "minLength": 1,
+          "title": "Variant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variant_id",
+        "triggers",
+        "expected_degraded_metrics",
+        "transition_cost_usd",
+        "transition_seconds",
+        "rebuild_required"
+      ],
+      "title": "RecoveryVariant",
+      "type": "object"
+    },
+    "RejectedPhysicalCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "reason_code": {
+          "minLength": 1,
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "stage": {
+          "minLength": 1,
+          "title": "Stage",
+          "type": "string"
+        },
+        "violated_constraints": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Violated Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "stage",
+        "reason_code",
+        "explanation"
+      ],
+      "title": "RejectedPhysicalCandidate",
+      "type": "object"
+    },
+    "ReproducibilityMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seed",
+        "generated_at",
+        "environment_digest",
+        "command"
+      ],
+      "title": "ReproducibilityMetadata",
+      "type": "object"
+    },
+    "WorkerRole": {
+      "enum": [
+        "aggregated",
+        "prefill",
+        "decode",
+        "expert",
+        "coordinator"
+      ],
+      "title": "WorkerRole",
+      "type": "string"
+    }
+  },
+  "$id": "urn:sloforge:fabric:physical-execution-plan-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/fabric/v1",
+      "default": "sloforge.io/fabric/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "bottleneck_prediction": {
+      "minLength": 1,
+      "title": "Bottleneck Prediction",
+      "type": "string"
+    },
+    "collectives": {
+      "$ref": "#/$defs/CollectivePlan"
+    },
+    "communication_overlap": {
+      "$ref": "#/$defs/CommunicationOverlapPlan"
+    },
+    "compiler_version": {
+      "minLength": 1,
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/DocumentReference"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "expert_placement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExpertPlacement"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "fabric_profile_hash": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "failure_exposure": {
+      "items": {
+        "$ref": "#/$defs/FailureExposure"
+      },
+      "title": "Failure Exposure",
+      "type": "array"
+    },
+    "git_commit": {
+      "minLength": 1,
+      "title": "Git Commit",
+      "type": "string"
+    },
+    "kind": {
+      "const": "PhysicalExecutionPlan",
+      "default": "PhysicalExecutionPlan",
+      "title": "Kind",
+      "type": "string"
+    },
+    "kv_transfer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/KVTransferPlan"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "logical_deployment_plan": {
+      "$ref": "#/$defs/DocumentReference"
+    },
+    "memory": {
+      "$ref": "#/$defs/MemoryPlan"
+    },
+    "model_graph_hash": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "optimizer_history": {
+      "items": {
+        "$ref": "#/$defs/OptimizerTraceEntry"
+      },
+      "title": "Optimizer History",
+      "type": "array"
+    },
+    "parallelism": {
+      "$ref": "#/$defs/ParallelismPlan"
+    },
+    "plan_id": {
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "predicted_metrics": {
+      "$ref": "#/$defs/PhysicalMetrics"
+    },
+    "rank_placement": {
+      "$ref": "#/$defs/RankPlacement"
+    },
+    "recovery_variants": {
+      "items": {
+        "$ref": "#/$defs/RecoveryVariant"
+      },
+      "title": "Recovery Variants",
+      "type": "array"
+    },
+    "rejected_alternatives": {
+      "items": {
+        "$ref": "#/$defs/RejectedPhysicalCandidate"
+      },
+      "title": "Rejected Alternatives",
+      "type": "array"
+    },
+    "reproducibility": {
+      "$ref": "#/$defs/ReproducibilityMetadata"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "topology_fingerprint": {
+      "$ref": "#/$defs/ArtifactDigest"
+    }
+  },
+  "required": [
+    "plan_id",
+    "logical_deployment_plan",
+    "model_graph_hash",
+    "topology_fingerprint",
+    "fabric_profile_hash",
+    "parallelism",
+    "rank_placement",
+    "collectives",
+    "memory",
+    "communication_overlap",
+    "predicted_metrics",
+    "bottleneck_prediction",
+    "failure_exposure",
+    "optimizer_history",
+    "rejected_alternatives",
+    "recovery_variants",
+    "evidence",
+    "compiler_version",
+    "git_commit",
+    "reproducibility"
+  ],
+  "title": "PhysicalExecutionPlan",
+  "type": "object"
+}

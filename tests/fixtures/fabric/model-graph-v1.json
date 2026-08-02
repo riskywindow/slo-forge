@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0.0","api_version":"sloforge.io/fabric/v1","kind":"ModelGraph",
+  "model_id":"fixture/moe-small","model_revision":"fixture-v1",
+  "model_digest":{"algorithm":"sha256","value":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+  "tokenizer_digest":{"algorithm":"sha256","value":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+  "hidden_size":1024,"attention_heads":16,"key_value_heads":4,"maximum_sequence_length":8192,
+  "layers":[
+    {"layer_id":"embed","ordinal":0,"kind":"embedding","parameter_bytes":131072000,"activation_bytes_per_token":2048,"kv_bytes_per_token":0,"experts":[],"communication":[],"indivisible":true,"allowed_stage_boundaries_after":true},
+    {"layer_id":"attn-0","ordinal":1,"kind":"attention","parameter_bytes":16777216,"activation_bytes_per_token":4096,"kv_bytes_per_token":4096,"experts":[],"communication":[{"operation":"all_reduce","bytes_per_token":2048.0,"synchronization_required":true,"parallelism_dimension":"tensor"}],"indivisible":false,"allowed_stage_boundaries_after":true},
+    {"layer_id":"moe-0","ordinal":2,"kind":"moe","parameter_bytes":0,"activation_bytes_per_token":4096,"kv_bytes_per_token":0,
+      "experts":[{"expert_id":"expert-0","parameter_bytes":8388608,"activation_bytes_per_token":2048,"expected_load":0.6},{"expert_id":"expert-1","parameter_bytes":8388608,"activation_bytes_per_token":2048,"expected_load":0.4}],
+      "communication":[{"operation":"all_to_all","bytes_per_token":4096.0,"synchronization_required":true,"parallelism_dimension":"expert"}],"indivisible":false,"allowed_stage_boundaries_after":true}
+  ],
+  "precision_modes":[{"name":"bfloat16","weight_bytes":164626432,"runtime_features":["tensor_parallel","expert_parallel"]}],
+  "runtime_features":["prefill_decode_disaggregation","kv_transfer"],
+  "extensions":{}
+}
