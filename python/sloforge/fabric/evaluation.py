@@ -555,6 +555,12 @@ def _compile_request(
     # Fixed parallelism isolates rank placement for random/sequential/greedy/
     # hierarchical comparisons. The topology-unaware optimizer is additionally
     # allowed to select degrees, matching its intended baseline semantics.
+    # Compiler SLO bounds are intentionally non-filtering in this evaluation:
+    # an infeasible random or sequential baseline is still an important H1
+    # observation and must be simulated rather than censoring the matrix. The
+    # declared EvaluationConfig SLO is applied to every observed trial in
+    # _output_metrics, so bad plans retain zero attainment instead of aborting
+    # the experiment. Production compilation remains fail closed.
     fixed = method is not EvaluationMethod.TOPOLOGY_UNAWARE
     return CompilerRequest(
         logical_deployment_plan=_logical_reference(repository_root),
@@ -565,10 +571,10 @@ def _compile_request(
             prompt_tokens_p95=_representative_prompt_tokens(workload_regime),
             output_tokens_p95=_representative_output_tokens(workload_regime),
             maximum_concurrent_requests=32,
-            p95_ttft_ms=5_000.0,
-            p99_tpot_ms=45.0,
-            minimum_goodput_tokens_per_second=100.0,
-            minimum_availability=0.95,
+            p95_ttft_ms=1_000_000_000.0,
+            p99_tpot_ms=1_000_000_000.0,
+            minimum_goodput_tokens_per_second=0.001,
+            minimum_availability=0.001,
             maximum_ranks=16,
             tensor_parallel_degree=8 if fixed else None,
             pipeline_parallel_degree=1 if fixed else None,
