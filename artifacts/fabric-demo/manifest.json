@@ -1,0 +1,113 @@
+{
+  "artifacts": [
+    {
+      "path": "topology.json",
+      "sha256": "d7e67e922b9da9322db38b36a6ca2d39d69d01135ea0aab29472867d0658bd36"
+    },
+    {
+      "path": "fabric-profile.json",
+      "sha256": "fa09ceb75babe338617b24fc2119a855045173adc1cf954ac1f8f0a99aa6edfe"
+    },
+    {
+      "path": "model-graph.json",
+      "sha256": "1ce629c74f379507a941d6354ca73313be760bf8ff3304948aad563af787f00a"
+    },
+    {
+      "path": "physical-plan.json",
+      "sha256": "3ab99a5f8b39409e2b6fc476e960e8ea12fe3b377b2266370103ad5bfd104575"
+    },
+    {
+      "path": "physical-plan-topology-unaware.json",
+      "sha256": "8a25281f0cc1ab08617e992f32c6602ea4eeefadb379a98266df40918473d1ec"
+    },
+    {
+      "path": "mixed-bursty.jsonl",
+      "sha256": "99a473c138773bb5f8c447d86a9e24d6f78a3fbc874ae6f3e8dec8221d0bdc69"
+    },
+    {
+      "path": "simulations/healthy.json",
+      "sha256": "5ecd00daa04dcdbe467ab3db9a7938215830f82357a4dde981ee9661237ba3a0"
+    },
+    {
+      "path": "simulations/degraded.json",
+      "sha256": "9eff8d5f790d7705fedddd0bfb0c2daefced689d5f704125bffa3cf1f2291fba"
+    },
+    {
+      "path": "simulations/restored.json",
+      "sha256": "d3a9df70b103262ae0894540c048b6cf275dddc1d27a3540c92026bce65fb9e7"
+    },
+    {
+      "path": "autopsy/comparison.json",
+      "sha256": "181e7ec9a8b8368c15a08f859b3922861489181fee4beeeb54eec29112f6082f"
+    },
+    {
+      "path": "autopsy/diagnosis.json",
+      "sha256": "7b080df36c21019097cfc6b1abf52905e321b54c93fbd083bfa6dd9188ea0675"
+    },
+    {
+      "path": "autopsy/counterfactuals.json",
+      "sha256": "395d2d0867c8c047187d82570a468efcf16eb4985704350ec26a32378c48d592"
+    },
+    {
+      "path": "recovery/proposal.json",
+      "sha256": "4ba1e2b6955212ed75ecba1f8cded0a2ebee1d8dfa4ad3ff3def1d36c24d0cde"
+    },
+    {
+      "path": "recovery/execution.json",
+      "sha256": "d6ce12ec12ea842cac143a99b137b9272c3d141b92a63ecd1e16c575bded28b1"
+    },
+    {
+      "path": "traces/degraded.perfetto.json",
+      "sha256": "9e5414dc0f31ea91a9ed382d69bf8b85b117135ac13e6772222fcc515dca4454"
+    },
+    {
+      "path": "traces/otel.json",
+      "sha256": "51e7e9be20b540a599af81daea0120a90a7c3ac7c8f1f10a32800427b2dc53af"
+    },
+    {
+      "path": "metrics/degraded.prom",
+      "sha256": "c0efe75a83826e5a7e11352e5d18041fb3e081b734c7dd7693c469f3b213077a"
+    },
+    {
+      "path": "timeline.json",
+      "sha256": "d606825f374023921c878bed467a6f54eff62f6a019efd4d3c0f57671aef370c"
+    }
+  ],
+  "baseline_plan_id": "physical-plan-7bd103bcf82bbb88",
+  "counterfactuals_evaluated": 7,
+  "degraded": {
+    "makespan_ms": 5627.629373107173,
+    "p95_end_to_end_ms": 5524.591773107173,
+    "p95_ttft_ms": 2484.091773107173,
+    "p99_tpot_ms": 5.0
+  },
+  "degraded_slo_attained": false,
+  "diagnosis": "rank_straggler",
+  "diagnosis_confidence": 0.9,
+  "ground_truth_faults": [
+    "network_bandwidth_degradation",
+    "rank_specific_gpu_slowdown"
+  ],
+  "healthy": {
+    "makespan_ms": 1039.420113933413,
+    "p95_end_to_end_ms": 985.8825139334131,
+    "p95_ttft_ms": 955.8825139334131,
+    "p99_tpot_ms": 1.2500000000000007
+  },
+  "healthy_slo_attained": true,
+  "p95_ttft_slo_ms": 1051.4707653267544,
+  "physical_plan_id": "physical-plan-8255ccdd8b3d846d",
+  "recovery_final_state": "COMPLETED",
+  "restored": {
+    "makespan_ms": 1039.420113933413,
+    "p95_end_to_end_ms": 985.8825139334131,
+    "p95_ttft_ms": 955.8825139334131,
+    "p99_tpot_ms": 1.2500000000000007
+  },
+  "restored_slo_attained": true,
+  "schema_version": "sloforge.fabric.demo/v1",
+  "seed": 41,
+  "selected_counterfactual": "remove-both-faults",
+  "synthetic_hardware": true,
+  "topology_fingerprint": "a2aa126d593f073e8a8969ee15a9d2e8542efc652f8635f819865d42fb111468"
+}

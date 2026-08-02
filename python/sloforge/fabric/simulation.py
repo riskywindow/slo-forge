@@ -681,11 +681,22 @@ def request_latencies(output: FabricSimulationOutput) -> tuple[RequestLatency, .
             (operation.end_us for operation in operations if ":prefill" in operation.operation_id),
             default=start,
         )
+        first_decode_start = min(
+            (
+                operation.start_us
+                for operation in operations
+                if operation.operation_id.endswith(":decode")
+            ),
+            default=prefill_end,
+        )
         end = max(operation.end_us for operation in operations)
         result.append(
             RequestLatency(
                 request_id=request_id,
-                ttft_us=prefill_end - start,
+                # Prefill completion is not a first-token boundary for a
+                # disaggregated plan: collectives and KV transfer must finish
+                # before decode can start.
+                ttft_us=first_decode_start - start,
                 end_to_end_us=end - start,
             )
         )

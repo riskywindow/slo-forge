@@ -1,0 +1,54 @@
+<!doctype html><meta charset='utf-8'><title>SLOForge Fabric demo</title><style>body{font:16px system-ui;max-width:1000px;margin:2rem auto;white-space:pre-wrap}</style><body># SLOForge Fabric CPU demonstration
+
+All values below are loaded from the manifest and raw simulator artifacts.
+Synthetic hardware curves are labeled synthetic and are not GPU measurements.
+
+## Outcome
+
+- Physical plan: `physical-plan-8255ccdd8b3d846d`
+- Diagnosis: `rank_straggler` (0.900 confidence)
+- Counterfactuals evaluated: 7
+- Selected repair: `remove-both-faults`
+- Recovery state: `COMPLETED`
+
+| run | p95 TTFT ms | p99 TPOT ms | p95 E2E ms | SLO attained |
+|---|---:|---:|---:|:---:|
+| healthy | 955.883 | 1.250 | 985.883 | yes |
+| degraded | 2484.092 | 5.000 | 5524.592 | no |
+| restored | 955.883 | 1.250 | 985.883 | yes |
+
+## Artifact-derived timeline
+
+- +0.000s **SLO_REGRESSION** — p95 TTFT 2484.092 ms exceeded 1051.471 ms (`autopsy/comparison.json`)
+- +0.001s **CAUSAL_DIAGNOSIS** — rank_straggler confidence=0.900 (`autopsy/diagnosis.json`)
+- +0.002s **COUNTERFACTUAL_SELECTION** — evaluated 7 repairs; selected remove-both-faults (`autopsy/counterfactuals.json`)
+- +1.000s **VALIDATED_IN_SIMULATION** — counterfactual simulation validation passed (`recovery/execution.json`)
+- +2.000s **BUILDING_REPLACEMENT** — simulated action change_rank_placement completed (`recovery/execution.json`)
+- +3.000s **SHADOWING** — replacement is ready; starting shadow traffic (`recovery/execution.json`)
+- +4.000s **CANARYING** — shadow sample and SLO criteria passed (`recovery/execution.json`)
+- +5.000s **PROMOTING** — canary sample and SLO criteria passed (`recovery/execution.json`)
+- +6.000s **DRAINING_OLD** — traffic migrated; old workers no longer receive new requests (`recovery/execution.json`)
+- +8.000s **COMPLETED** — old workers drained; recovery completed (`recovery/execution.json`)
+- +9.000s **SLO_RESTORED** — p95 TTFT restored to 955.883 ms (`simulations/restored.json`)
+
+## Artifact integrity
+
+- `topology.json` — `d7e67e922b9da9322db38b36a6ca2d39d69d01135ea0aab29472867d0658bd36`
+- `fabric-profile.json` — `fa09ceb75babe338617b24fc2119a855045173adc1cf954ac1f8f0a99aa6edfe`
+- `model-graph.json` — `1ce629c74f379507a941d6354ca73313be760bf8ff3304948aad563af787f00a`
+- `physical-plan.json` — `3ab99a5f8b39409e2b6fc476e960e8ea12fe3b377b2266370103ad5bfd104575`
+- `physical-plan-topology-unaware.json` — `8a25281f0cc1ab08617e992f32c6602ea4eeefadb379a98266df40918473d1ec`
+- `mixed-bursty.jsonl` — `99a473c138773bb5f8c447d86a9e24d6f78a3fbc874ae6f3e8dec8221d0bdc69`
+- `simulations/healthy.json` — `5ecd00daa04dcdbe467ab3db9a7938215830f82357a4dde981ee9661237ba3a0`
+- `simulations/degraded.json` — `9eff8d5f790d7705fedddd0bfb0c2daefced689d5f704125bffa3cf1f2291fba`
+- `simulations/restored.json` — `d3a9df70b103262ae0894540c048b6cf275dddc1d27a3540c92026bce65fb9e7`
+- `autopsy/comparison.json` — `181e7ec9a8b8368c15a08f859b3922861489181fee4beeeb54eec29112f6082f`
+- `autopsy/diagnosis.json` — `7b080df36c21019097cfc6b1abf52905e321b54c93fbd083bfa6dd9188ea0675`
+- `autopsy/counterfactuals.json` — `395d2d0867c8c047187d82570a468efcf16eb4985704350ec26a32378c48d592`
+- `recovery/proposal.json` — `4ba1e2b6955212ed75ecba1f8cded0a2ebee1d8dfa4ad3ff3def1d36c24d0cde`
+- `recovery/execution.json` — `d6ce12ec12ea842cac143a99b137b9272c3d141b92a63ecd1e16c575bded28b1`
+- `traces/degraded.perfetto.json` — `9e5414dc0f31ea91a9ed382d69bf8b85b117135ac13e6772222fcc515dca4454`
+- `traces/otel.json` — `51e7e9be20b540a599af81daea0120a90a7c3ac7c8f1f10a32800427b2dc53af`
+- `metrics/degraded.prom` — `c0efe75a83826e5a7e11352e5d18041fb3e081b734c7dd7693c469f3b213077a`
+- `timeline.json` — `d606825f374023921c878bed467a6f54eff62f6a019efd4d3c0f57671aef370c`
+</body>
