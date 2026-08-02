@@ -309,6 +309,7 @@ class SimulationRequestShape(SimulationModel):
     output_tokens: Annotated[int, Field(gt=0, le=4_096)]
     priority: Literal["high", "normal", "low"]
     request_class: str = Field(min_length=1)
+    expert_skew_factor: Annotated[float, Field(ge=1.0, le=64.0)] = 1.0
 
 
 class SimulationWorkload(SimulationModel):
@@ -531,6 +532,26 @@ def _collective_resource_ids(
     return edge_path
 
 
+def _lower_collective_before_kv(
+    participating_ranks: set[int],
+    prefill_ranks: set[int],
+    decode_ranks: set[int],
+) -> bool:
+    """Return whether the operation belongs on the explicit prefill critical path.
+
+    New compiler output keeps parallel groups inside a role-specific replica, so
+    decode-only collectives remain represented by the calibrated opaque TPOT
+    operation. Mixed-role collectives are accepted only for backwards-compatible
+    v1 plans whose worker-role split predates whole-replica disaggregation.
+    """
+
+    if participating_ranks <= prefill_ranks:
+        return True
+    return bool(participating_ranks & prefill_ranks) and participating_ranks <= (
+        prefill_ranks | decode_ranks
+    )
+
+
 def build_simulation_request(
     plan: PhysicalExecutionPlan,
     topology: TopologyGraph,
@@ -653,12 +674,13 @@ def build_simulation_request(
             prefill_ids.append(prefill_id)
         dependency_ids: tuple[str, ...] = tuple(prefill_ids)
         for collective_index, collective in enumerate(plan.collectives.operations):
-            # Lower only collectives belonging to the routed prefill/decode
-            # replica pair. The union preserves v1 plans that split roles within
-            # one replica while new compiler output keeps each group within a
-            # complete role-specific replica.
-            if not set(collective.participating_ranks) <= (
-                active_prefill_ranks | active_decode_ranks
+            # Decode-side collectives are already represented by calibrated
+            # opaque TPOT. Lowering them here as pre-KV operations would both
+            # mis-stage and double-count communication.
+            if not _lower_collective_before_kv(
+                set(collective.participating_ranks),
+                active_prefill_ranks,
+                active_decode_ranks,
             ):
                 continue
             operation_id = f"{request_id}:collective-{collective_index}"
@@ -667,6 +689,11 @@ def build_simulation_request(
                 collective.message_size_intercept_bytes
                 + round(collective.message_size_bytes_per_token * shape.prompt_tokens),
             )
+            if collective.operation == "all_to_all":
+                # Expert hot-spotting increases dispatch/combination traffic on
+                # the collective critical path; dense TP/DP collectives retain
+                # their calibrated message shape.
+                message_bytes = max(1, round(message_bytes * shape.expert_skew_factor))
             resource_ids = _collective_resource_ids(
                 collective,
                 plan,
