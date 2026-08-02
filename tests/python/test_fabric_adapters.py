@@ -228,6 +228,22 @@ def test_context_rejects_topology_that_does_not_cover_rank_binding() -> None:
         )
 
 
+def test_context_rejects_node_kind_and_host_ownership_mismatch() -> None:
+    context = _context()
+    first, *remaining = context.plan.rank_placement.bindings
+    mismatched = context.plan.model_copy(
+        update={
+            "rank_placement": RankPlacement(
+                bindings=(first.model_copy(update={"host_id": "gpu-0"}), *remaining)
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="host_id is absent or not a host"):
+        FabricAdapterContext.model_validate(
+            {**context.model_dump(mode="python"), "plan": mismatched.model_dump(mode="python")}
+        )
+
+
 def test_validated_version_manifest_has_official_provenance() -> None:
     manifest = json.loads(
         (Path(__file__).parents[2] / "deploy/fabric/validated-versions.json").read_text()

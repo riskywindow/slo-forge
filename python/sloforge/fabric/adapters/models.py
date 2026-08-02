@@ -9,7 +9,15 @@ from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
-from sloforge.fabric.ir import PhysicalExecutionPlan, TopologyGraph
+from sloforge.fabric.ir import (
+    GpuNode,
+    HostNode,
+    NetworkRailNode,
+    NicNode,
+    NumaDomainNode,
+    PhysicalExecutionPlan,
+    TopologyGraph,
+)
 
 NonEmptyString = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -84,19 +92,33 @@ class FabricAdapterContext(AdapterModel):
 
     @model_validator(mode="after")
     def validate_composition(self) -> Self:
-        topology_ids = {node.node_id for node in self.topology.nodes}
+        topology_nodes = {node.node_id: node for node in self.topology.nodes}
         for binding in self.plan.rank_placement.bindings:
-            for field_name, value in (
-                ("host_id", binding.host_id),
-                ("gpu_id", binding.gpu_id),
-                ("numa_domain_id", binding.numa_domain_id),
+            host = topology_nodes.get(binding.host_id)
+            gpu = topology_nodes.get(binding.gpu_id)
+            numa = topology_nodes.get(binding.numa_domain_id)
+            if not isinstance(host, HostNode):
+                raise ValueError(f"rank {binding.rank_id} host_id is absent or not a host")
+            if not isinstance(gpu, GpuNode) or gpu.host_id != binding.host_id:
+                raise ValueError(
+                    f"rank {binding.rank_id} gpu_id is absent or belongs to another host"
+                )
+            if not isinstance(numa, NumaDomainNode) or numa.host_id != binding.host_id:
+                raise ValueError(
+                    f"rank {binding.rank_id} numa_domain_id is absent or belongs to another host"
+                )
+            if binding.nic_id is not None:
+                nic = topology_nodes.get(binding.nic_id)
+                if not isinstance(nic, NicNode) or nic.host_id != binding.host_id:
+                    raise ValueError(
+                        f"rank {binding.rank_id} nic_id is absent or belongs to another host"
+                    )
+            if binding.network_rail_id is not None and not isinstance(
+                topology_nodes.get(binding.network_rail_id), NetworkRailNode
             ):
-                if value not in topology_ids:
-                    raise ValueError(f"rank {binding.rank_id} {field_name} is absent from topology")
-            if binding.nic_id is not None and binding.nic_id not in topology_ids:
-                raise ValueError(f"rank {binding.rank_id} nic_id is absent from topology")
-            if binding.network_rail_id is not None and binding.network_rail_id not in topology_ids:
-                raise ValueError(f"rank {binding.rank_id} network_rail_id is absent from topology")
+                raise ValueError(
+                    f"rank {binding.rank_id} network_rail_id is absent or not a network rail"
+                )
         if self.runtime is RuntimeKind.DYNAMO and self.dynamo_backend is None:
             raise ValueError("Dynamo runtime requires dynamo_backend")
         if self.runtime is not RuntimeKind.DYNAMO and self.dynamo_backend is not None:
