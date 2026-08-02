@@ -1,0 +1,392 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloforge.dev/schemas/genesis-capsule-v1.schema.json",
+  "title": "SLOForge GenesisCapsule v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identity",
+    "capsule_digest",
+    "artifacts",
+    "dependencies",
+    "hardware",
+    "evidence",
+    "claims",
+    "benchmarks",
+    "known_unsupported_cases",
+    "unverified_assumptions"
+  ],
+  "properties": {
+    "identity": { "$ref": "#/$defs/identity" },
+    "capsule_digest": {
+      "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "hardware": { "$ref": "#/$defs/hardware" },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "benchmarks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/benchmark" }
+    },
+    "known_unsupported_cases": { "$ref": "#/$defs/stringArray" },
+    "unverified_assumptions": { "$ref": "#/$defs/stringArray" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "value": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capsule_schema_version",
+        "candidate_genome_hash",
+        "source_model_hash",
+        "tokenizer_hash",
+        "workload_contract_hash",
+        "hardware_contract_hash",
+        "compiler_version",
+        "verifier_version",
+        "git_commit",
+        "dependency_lock_hash",
+        "generated_at",
+        "parent_capsule"
+      ],
+      "properties": {
+        "capsule_schema_version": { "const": "1.0.0" },
+        "candidate_genome_hash": { "$ref": "#/$defs/digest" },
+        "source_model_hash": { "$ref": "#/$defs/digest" },
+        "tokenizer_hash": { "$ref": "#/$defs/digest" },
+        "workload_contract_hash": { "$ref": "#/$defs/digest" },
+        "hardware_contract_hash": { "$ref": "#/$defs/digest" },
+        "compiler_version": { "$ref": "#/$defs/nonEmptyString" },
+        "verifier_version": { "$ref": "#/$defs/nonEmptyString" },
+        "git_commit": { "$ref": "#/$defs/nonEmptyString" },
+        "dependency_lock_hash": { "$ref": "#/$defs/digest" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "parent_capsule": {
+          "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "role",
+        "origin",
+        "digest",
+        "size_bytes",
+        "path",
+        "media_type",
+        "executable"
+      ],
+      "properties": {
+        "artifact_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$" },
+        "role": {
+          "enum": [
+            "source_code",
+            "compiled_binary",
+            "generated_runtime",
+            "generated_policy",
+            "generated_kernel",
+            "deployment",
+            "rollback",
+            "state_conversion",
+            "semantic_evidence",
+            "quality_evidence",
+            "resource_evidence",
+            "performance_samples",
+            "benchmark_definition",
+            "software_manifest",
+            "dependency_lock",
+            "operational_evidence",
+            "counterexample_corpus",
+            "model_check_result",
+            "property_test_result",
+            "differential_test_result",
+            "fuzz_result"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "trusted",
+            "generated_untrusted",
+            "external_runtime",
+            "verified_evidence",
+            "performance_evidence",
+            "formal_or_bounded_evidence"
+          ]
+        },
+        "digest": { "$ref": "#/$defs/digest" },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+        },
+        "media_type": { "$ref": "#/$defs/nonEmptyString" },
+        "executable": { "type": "boolean" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "package_digest"],
+      "properties": {
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "version": { "$ref": "#/$defs/nonEmptyString" },
+        "package_digest": {
+          "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }]
+        }
+      }
+    },
+    "hardware": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hardware_contract_hash",
+        "allowed_fingerprints",
+        "architectures",
+        "minimum_device_count",
+        "restrictions"
+      ],
+      "properties": {
+        "hardware_contract_hash": { "$ref": "#/$defs/digest" },
+        "allowed_fingerprints": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/digest" }
+        },
+        "architectures": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "minimum_device_count": { "type": "integer", "minimum": 1 },
+        "restrictions": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "level": {
+      "enum": [
+        "level_0_build",
+        "level_1_differential",
+        "level_2_property",
+        "level_3_bounded_exhaustive",
+        "level_4_solver_backed",
+        "level_5_hardware_operational"
+      ]
+    },
+    "result": { "enum": ["pass", "fail", "inconclusive"] },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "evidence_class",
+        "level",
+        "result",
+        "issuer",
+        "issuer_version",
+        "artifact_ids",
+        "observed_at",
+        "valid_until",
+        "deterministic_seed",
+        "assumptions"
+      ],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_class": {
+          "enum": [
+            "build",
+            "semantic",
+            "quality",
+            "resource",
+            "performance",
+            "operational",
+            "model_check",
+            "property_test",
+            "fuzz",
+            "differential"
+          ]
+        },
+        "level": { "$ref": "#/$defs/level" },
+        "result": { "$ref": "#/$defs/result" },
+        "issuer": {
+          "enum": [
+            "trusted_validator",
+            "operator_verifier",
+            "quality_harness",
+            "resource_analyzer",
+            "benchmark_harness",
+            "model_checker",
+            "property_harness",
+            "fuzz_harness",
+            "sandbox"
+          ]
+        },
+        "issuer_version": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "valid_until": {
+          "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
+        },
+        "deterministic_seed": { "type": ["integer", "null"] },
+        "assumptions": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_domain",
+        "shape_domain",
+        "dtype_domain",
+        "hardware_fingerprints",
+        "dependency_requirements",
+        "assumptions",
+        "exclusions"
+      ],
+      "properties": {
+        "input_domain": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "shape_domain": { "$ref": "#/$defs/stringArray" },
+        "dtype_domain": { "$ref": "#/$defs/stringArray" },
+        "hardware_fingerprints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/digest" }
+        },
+        "dependency_requirements": { "$ref": "#/$defs/stringArray" },
+        "assumptions": { "$ref": "#/$defs/stringArray" },
+        "exclusions": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "category",
+        "statement",
+        "scope",
+        "level",
+        "result",
+        "evidence_ids",
+        "promotion_required"
+      ],
+      "properties": {
+        "claim_id": { "$ref": "#/$defs/nonEmptyString" },
+        "category": {
+          "enum": ["build", "semantic", "quality", "resource", "performance", "operational"]
+        },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "level": { "$ref": "#/$defs/level" },
+        "result": { "$ref": "#/$defs/result" },
+        "evidence_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "promotion_required": { "type": "boolean" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric",
+        "unit",
+        "objective",
+        "tail_quantile",
+        "median",
+        "tail_percentile",
+        "confidence_low",
+        "confidence_high",
+        "effect_size",
+        "regression_probability",
+        "practical_significance_threshold"
+      ],
+      "properties": {
+        "metric": { "$ref": "#/$defs/nonEmptyString" },
+        "unit": { "$ref": "#/$defs/nonEmptyString" },
+        "objective": { "enum": ["minimize", "maximize"] },
+        "tail_quantile": { "type": "number", "exclusiveMinimum": 0.5, "exclusiveMaximum": 1.0 },
+        "median": { "type": "number", "minimum": 0 },
+        "tail_percentile": { "type": "number", "minimum": 0 },
+        "confidence_low": { "type": "number", "minimum": 0 },
+        "confidence_high": { "type": "number", "minimum": 0 },
+        "effect_size": { "type": "number" },
+        "regression_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "practical_significance_threshold": { "type": "number", "minimum": 0 }
+      }
+    },
+    "benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "benchmark_id",
+        "definition_artifact_id",
+        "raw_samples_artifact_id",
+        "software_manifest_artifact_id",
+        "baseline_artifact_id",
+        "workload_fingerprint",
+        "hardware_fingerprint",
+        "sample_count",
+        "warmup_iterations",
+        "repetitions",
+        "randomized_run_order",
+        "noise_floor",
+        "summary"
+      ],
+      "properties": {
+        "benchmark_id": { "$ref": "#/$defs/nonEmptyString" },
+        "definition_artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "raw_samples_artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "software_manifest_artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "baseline_artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "workload_fingerprint": { "$ref": "#/$defs/digest" },
+        "hardware_fingerprint": { "$ref": "#/$defs/digest" },
+        "sample_count": { "type": "integer", "minimum": 2 },
+        "warmup_iterations": { "type": "integer", "minimum": 1 },
+        "repetitions": { "type": "integer", "minimum": 2 },
+        "randomized_run_order": { "type": "boolean" },
+        "noise_floor": { "type": "number", "minimum": 0 },
+        "summary": { "$ref": "#/$defs/summary" }
+      }
+    }
+  }
+}
