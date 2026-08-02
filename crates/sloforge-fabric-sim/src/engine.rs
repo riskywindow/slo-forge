@@ -505,15 +505,16 @@ impl Engine {
     fn output(self, input_sha256: String) -> Result<FabricSimulationOutput, SimError> {
         let (mut outcomes, mut traces, uncertainty_squared) = self.outcomes_and_traces()?;
         outcomes.sort_by(|left, right| left.operation_id.cmp(&right.operation_id));
+        let makespan_us = outcomes
+            .iter()
+            .map(|outcome| outcome.end_us)
+            .fold(0.0, f64::max);
+        traces.extend(self.fault_trace_events(makespan_us)?);
         traces.sort_by(|left, right| {
             left.ts
                 .total_cmp(&right.ts)
                 .then_with(|| left.name.cmp(&right.name))
         });
-        let makespan_us = outcomes
-            .iter()
-            .map(|outcome| outcome.end_us)
-            .fold(0.0, f64::max);
         let total_work_us: f64 = outcomes
             .iter()
             .map(|outcome| outcome.base_duration_us)
@@ -654,6 +655,30 @@ impl Engine {
                 },
                 transferred_bytes: accounting.transferred_bytes,
                 max_concurrent: accounting.max_concurrent,
+            })
+            .collect()
+    }
+
+    fn fault_trace_events(&self, makespan_us: f64) -> Result<Vec<ChromeTraceEvent>, SimError> {
+        self.input
+            .faults
+            .iter()
+            .filter(|fault| self.applied_faults.contains(&fault.id))
+            .map(|fault| {
+                let mut args = BTreeMap::new();
+                args.insert("ground_truth_label".into(), json!(fault.ground_truth_label));
+                args.insert("effect".into(), serde_json::to_value(&fault.effect)?);
+                Ok(ChromeTraceEvent {
+                    name: fault.id.clone(),
+                    cat: "fabric_fault".into(),
+                    ph: "X".into(),
+                    ts: fault.start_us,
+                    dur: fault.end_us.unwrap_or(makespan_us).min(makespan_us)
+                        - fault.start_us.min(makespan_us),
+                    pid: 1,
+                    tid: "fault-injector".into(),
+                    args,
+                })
             })
             .collect()
     }
