@@ -5,8 +5,9 @@ import os
 import subprocess
 from pathlib import Path
 
-from sloforge.genesis.ir import load_counterexample
+from sloforge.genesis.ir import load_counterexample, write_canonical
 from sloforge.genesis.synthesis import ConstraintStore
+from sloforge.genesis.synthesis.cegis import _counterexample
 from sloforge.genesis.synthesis.fixture import (
     CancellationPolicyVerifier,
     cancellation_fixture_candidates,
@@ -96,6 +97,48 @@ def test_counterexample_reproduction_command_executes_real_verifier(tmp_path: Pa
     outcome = json.loads(completed.stdout)
     assert outcome["passed"] is False
     assert outcome["failure"]["violated_contract"] == counterexample.violated_contract
+
+
+def test_counterexample_replay_recovers_non_first_population_candidate(
+    tmp_path: Path,
+) -> None:
+    population_seed = 41
+    verification_seed = 997
+    candidate = cancellation_fixture_candidates(population_seed)[1]
+    verifier = CancellationPolicyVerifier()
+    outcome = verifier.verify(candidate, None, seed=verification_seed)
+    assert not outcome.passed
+    assert outcome.failure is not None
+    counterexample = _counterexample(
+        candidate,
+        outcome.failure,
+        outcome.failure.witness,
+        verification_seed=verification_seed,
+        population_seed=population_seed,
+        minimized=False,
+        parent_id=None,
+        counterexample_directory=tmp_path,
+    )
+    counterexample_path = tmp_path / f"{counterexample.counterexample_id}.json"
+    write_canonical(counterexample, counterexample_path)
+
+    completed = subprocess.run(
+        [counterexample.reproduction.executable, *counterexample.reproduction.arguments],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=counterexample.reproduction.timeout_seconds,
+        env={**os.environ, "PYTHONPATH": str(ROOT / "python")},
+    )
+
+    assert completed.returncode == 1
+    replayed = json.loads(completed.stdout)
+    assert replayed["passed"] is False
+    assert replayed["evidence_id"] == outcome.evidence_id
+    arguments = counterexample.reproduction.arguments
+    assert arguments[arguments.index("--seed") + 1] == str(population_seed)
+    assert arguments[arguments.index("--verification-seed") + 1] == str(verification_seed)
 
 
 def test_cegis_artifacts_are_deterministic_across_runs(tmp_path: Path) -> None:

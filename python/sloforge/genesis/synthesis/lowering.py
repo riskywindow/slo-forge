@@ -38,6 +38,8 @@ def _batching_delta(
     baseline: InferenceGenome,
     design: CandidateDesign,
     mutation: MutationChoice,
+    *,
+    applied_transformation_ids: tuple[str, ...],
 ) -> tuple[InferenceGenome, Transformation]:
     if set(mutation.regions) != {"request", "serving"}:
         raise ValueError("deadline batching lowering requires request and serving regions")
@@ -58,6 +60,12 @@ def _batching_delta(
     safe = parameters["cancel_check_before_emit"] == "true"
 
     source_hash = canonical_hash(baseline)
+    prior_candidate = baseline.extensions.root.get("sloforge.dev/synthesis-candidate")
+    root_parent_hash = (
+        prior_candidate.get("parent_genome_hash") if isinstance(prior_candidate, dict) else None
+    )
+    if not isinstance(root_parent_hash, str):
+        root_parent_hash = source_hash
     policy_extension: dict[str, JsonValue] = {
         "cancel_check_before_emit": safe,
         "candidate_id": design.candidate_id,
@@ -105,8 +113,9 @@ def _batching_delta(
                     **baseline.extensions.root,
                     "sloforge.dev/synthesis-candidate": {
                         "candidate_id": design.candidate_id,
-                        "parent_genome_hash": source_hash,
-                        "transformation_ids": [mutation.transformation_id],
+                        "parent_genome_hash": root_parent_hash,
+                        "immediate_parent_genome_hash": source_hash,
+                        "transformation_ids": list(applied_transformation_ids),
                     },
                 }
             ),
@@ -162,6 +171,7 @@ def _batching_delta(
         required_benchmark_stages=("deterministic_cpu_runtime",),
         rollback_strategy=f"restore genome {source_hash}",
         proposal_source=design.proposal_engine,
+        parent_transformations=applied_transformation_ids[-2:-1],
         extensions=Extensions(
             root={
                 "sloforge.dev/applied-delta": {
@@ -191,7 +201,16 @@ def lower_candidate(
     for mutation in design.mutations:
         if mutation.family is not TransformationFamily.BATCHING:
             raise ValueError(f"no trusted lowering registered for {mutation.family.value}")
-        current, transformation = _batching_delta(current, design, mutation)
+        applied_ids = (
+            *tuple(item.transformation_id for item in transformations),
+            mutation.transformation_id,
+        )
+        current, transformation = _batching_delta(
+            current,
+            design,
+            mutation,
+            applied_transformation_ids=applied_ids,
+        )
         if learned_constraints or counterexample_references:
             transformation = transformation.model_copy(
                 update={
