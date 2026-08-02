@@ -34,6 +34,12 @@ from sloforge.trace.format import (
 )
 from sloforge.util import load_json, sha256_file, write_json
 
+from .autopsy import autopsy_app
+from .fabric import fabric_app
+from .forgeci import forgeci_app
+from .recovery import recovery_app
+from .warmpath import warmpath_app
+
 app = typer.Typer(
     name="sloforge",
     help="Compile measured inference deployments from workload, hardware, budget, and SLO constraints.",
@@ -43,6 +49,11 @@ trace_app = typer.Typer(help="Validate and generate canonical workload traces.")
 hardware_app = typer.Typer(help="Probe hardware without silently changing devices.")
 app.add_typer(trace_app, name="trace")
 app.add_typer(hardware_app, name="hardware")
+app.add_typer(fabric_app, name="fabric")
+app.add_typer(autopsy_app, name="autopsy")
+app.add_typer(recovery_app, name="recovery")
+app.add_typer(forgeci_app, name="forgeci")
+app.add_typer(warmpath_app, name="warmpath")
 console = Console()
 
 
