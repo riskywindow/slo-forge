@@ -112,6 +112,14 @@ def _compare(expected: Array, observed: Array, contract: OperatorContract) -> st
         return "nan_behavior"
     if contract.preserve_infinity and not np.array_equal(np.isinf(expected), np.isinf(observed)):
         return "infinity_behavior"
+    if contract.preserve_signed_zero and np.issubdtype(expected.dtype, np.floating):
+        expected_zero = expected == 0
+        observed_zero = observed == 0
+        shared_zero = expected_zero & observed_zero
+        if not np.array_equal(
+            np.signbit(expected)[shared_zero], np.signbit(observed)[shared_zero]
+        ):
+            return "signed_zero_behavior"
     if contract.exact:
         if not np.array_equal(expected, observed, equal_nan=True):
             return "exact_value"

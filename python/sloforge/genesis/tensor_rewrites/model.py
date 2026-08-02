@@ -40,6 +40,14 @@ class RewriteKind(StrEnum):
     QUANTIZE_OUTPUT = "quantize_output"
 
 
+class StateOwnershipEvidence(StrEnum):
+    EXCLUSIVE = "exclusive"
+
+
+class StateAtomicityEvidence(StrEnum):
+    PER_TOKEN = "per_token"
+
+
 Dimension: TypeAlias = int | str
 
 
@@ -73,6 +81,8 @@ class OperatorParameters:
     axis: int | None = None
     scale: float | None = None
     state_key: str | None = None
+    state_ownership: StateOwnershipEvidence | None = None
+    state_atomicity: StateAtomicityEvidence | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -12,12 +12,7 @@ from typing import Any, cast
 
 from sloforge.genesis.frontend.models import DiagnosticSeverity, InspectionResult
 from sloforge.genesis.frontend.package import load_reference_package
-from sloforge.genesis.policy_dsl import (
-    BytecodeProgram,
-    Instruction,
-    ScalarType,
-    VariableSpec,
-)
+from sloforge.genesis.policy_dsl import BytecodeProgram, load_bytecode_document
 from sloforge.util import sha256_file
 
 from .adapter import ReferenceRuntimeAdapter
@@ -73,10 +68,14 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from threading import Lock, Thread
 
 from sloforge.genesis.runtime import GeneratedRuntimeApplication, load_generated_runtime
 
 MAXIMUM_REQUEST_BYTES = 65536
+MAXIMUM_CONCURRENT_REQUESTS = 36
+MAXIMUM_TIMEOUT_SECONDS = 30.0
+_write_lock = Lock()
 
 
 def application(*, seed: int) -> GeneratedRuntimeApplication:
@@ -85,8 +84,36 @@ def application(*, seed: int) -> GeneratedRuntimeApplication:
 
 
 def _write(value: object) -> None:
-    sys.stdout.write(json.dumps(value, sort_keys=True, separators=(",", ":")) + "\\n")
-    sys.stdout.flush()
+    with _write_lock:
+        sys.stdout.write(json.dumps(value, sort_keys=True, separators=(",", ":")) + "\\n")
+        sys.stdout.flush()
+
+
+def _stream(handle, timeout_seconds: float, active: dict, active_lock: Lock) -> None:
+    try:
+        for event in handle.events(timeout_seconds):
+            _write(
+                {
+                    "kind": event.kind.value,
+                    "message": event.message,
+                    "request_id": event.request_id,
+                    "sequence": event.sequence,
+                    "text": event.text,
+                    "token_id": event.token_id,
+                }
+            )
+    except TimeoutError as error:
+        handle.cancel()
+        _write(
+            {
+                "kind": "error",
+                "message": f"TimeoutError: {error}",
+                "request_id": handle.request_id,
+            }
+        )
+    finally:
+        with active_lock:
+            active.pop(handle.request_id, None)
 
 
 def main() -> int:
@@ -94,6 +121,9 @@ def main() -> int:
     parser.add_argument("--seed", type=int, required=True)
     args = parser.parse_args()
     app = application(seed=args.seed)
+    active = {}
+    active_lock = Lock()
+    stream_threads = []
     app.start()
     try:
         while True:
@@ -107,34 +137,62 @@ def main() -> int:
                 request = json.loads(encoded)
                 if not isinstance(request, dict):
                     raise TypeError("request must be a JSON object")
-                if request.get("operation") in {"health", "metrics"}:
-                    path = "/healthz" if request["operation"] == "health" else "/metrics"
+                operation = request.get("operation", "submit")
+                if operation in {"health", "metrics"}:
+                    path = "/healthz" if operation == "health" else "/metrics"
                     status, body = app.handle_get(path)
                     _write({"body": body, "kind": "control", "status": status})
                     continue
+                if operation == "cancel":
+                    request_id = request["request_id"]
+                    with active_lock:
+                        handle = active.get(request_id)
+                    if handle is None:
+                        raise ValueError("request is not active")
+                    if not handle.cancel():
+                        raise ValueError("request has already reached a terminal state")
+                    _write({"kind": "control", "operation": "cancel", "request_id": request_id})
+                    continue
+                if operation == "shutdown":
+                    _write({"kind": "control", "operation": "shutdown"})
+                    return 0
+                if operation != "submit":
+                    raise ValueError("unsupported operation")
+                timeout_seconds = float(request["timeout_seconds"])
+                if not 0.0 < timeout_seconds <= MAXIMUM_TIMEOUT_SECONDS:
+                    raise ValueError("timeout_seconds is outside the bounded subprocess domain")
+                with active_lock:
+                    if len(active) >= MAXIMUM_CONCURRENT_REQUESTS:
+                        raise ValueError("bounded concurrent request registry is full")
                 handle = app.runtime.submit_text(
                     request_id=request["request_id"],
                     text=request["text"],
                     maximum_new_tokens=request["maximum_new_tokens"],
                     seed=request["seed"],
-                    timeout_seconds=request["timeout_seconds"],
+                    timeout_seconds=timeout_seconds,
                     batching_eligible=request.get("batching_eligible", True),
                 )
-                for event in handle.events(request["timeout_seconds"]):
-                    _write(
-                        {
-                            "kind": event.kind.value,
-                            "message": event.message,
-                            "request_id": event.request_id,
-                            "sequence": event.sequence,
-                            "text": event.text,
-                            "token_id": event.token_id,
-                        }
-                    )
+                with active_lock:
+                    active[handle.request_id] = handle
+                thread = Thread(
+                    target=_stream,
+                    args=(handle, timeout_seconds, active, active_lock),
+                    name=f"genesis-stream-{handle.request_id}",
+                    daemon=False,
+                )
+                thread.start()
+                stream_threads = [item for item in stream_threads if item.is_alive()]
+                stream_threads.append(thread)
             except (KeyError, TypeError, ValueError, TimeoutError) as error:
                 _write({"kind": "error", "message": f"{type(error).__name__}: {error}"})
     finally:
+        with active_lock:
+            handles = tuple(active.values())
+        for handle in handles:
+            handle.cancel()
         app.shutdown()
+        for thread in stream_threads:
+            thread.join(MAXIMUM_TIMEOUT_SECONDS)
 
 
 if __name__ == "__main__":
@@ -335,38 +393,7 @@ def _load_policy_bytecode(config_path: Path, config: dict[str, Any]) -> Bytecode
     payload = path.read_bytes()
     if hashlib.sha256(payload).hexdigest() != digest:
         raise ValueError("runtime policy bytecode digest mismatch")
-    document = json.loads(payload)
-    if not isinstance(document, dict):
-        raise ValueError("runtime policy bytecode must be an object")
-
-    def variable(item: object) -> VariableSpec:
-        if not isinstance(item, dict):
-            raise ValueError("runtime policy variable must be an object")
-        return VariableSpec(
-            name=str(item["name"]),
-            scalar_type=ScalarType(str(item["scalar_type"])),
-            lower=item["lower"],
-            upper=item["upper"],
-        )
-
-    instructions = document.get("instructions")
-    if not isinstance(instructions, list) or any(
-        not isinstance(item, dict) for item in instructions
-    ):
-        raise ValueError("runtime policy instructions must be a list")
-    inputs = document.get("inputs")
-    if not isinstance(inputs, list):
-        raise ValueError("runtime policy inputs must be a list")
-    return BytecodeProgram(
-        name=str(document["name"]),
-        inputs=tuple(variable(item) for item in inputs),
-        output=variable(document["output"]),
-        instructions=tuple(
-            Instruction(opcode=str(item["opcode"]), operand=item.get("operand"))
-            for item in instructions
-        ),
-        maximum_operations=int(document["maximum_operations"]),
-    )
+    return load_bytecode_document(payload)
 
 
 def load_generated_runtime(

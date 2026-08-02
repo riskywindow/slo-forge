@@ -52,6 +52,22 @@ class TransformationKind(StrEnum):
     RECOMPUTE = "recompute"
 
 
+class StatePrecondition(StrEnum):
+    REQUEST_BOUNDARY = "request_boundary"
+    QUIESCENT_STATE = "quiescent_state"
+    EXCLUSIVE_OWNERSHIP = "exclusive_ownership"
+    STATE_CONVERSION_VERIFIED = "state_conversion_verified"
+    QUALITY_CONTRACT = "quality_contract"
+    CHECKPOINT_AVAILABLE = "checkpoint_available"
+    OWNER_ALLOWLIST = "owner_allowlist"
+
+
+class RollbackStrategy(StrEnum):
+    RETAIN_SOURCE_UNTIL_COMMIT = "retain_source_until_commit"
+    RESTORE_CHECKPOINT = "restore_checkpoint"
+    REVERSE_CONVERSION = "reverse_conversion"
+
+
 class StateAction(StrEnum):
     ALLOCATE = "allocate"
     ACQUIRE = "acquire"
@@ -83,6 +99,7 @@ class StateRegion:
     mutable: bool
     checkpointed: bool
     compatible_genome_hashes: tuple[str, ...]
+    migration_target_owners: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,9 +112,10 @@ class StateTransformation:
     expected_quality_cost: float
     expected_memory_delta_bytes: int
     migration_chunk_bytes: int
-    preconditions: tuple[str, ...]
+    preconditions: tuple[StatePrecondition, ...]
     proof_obligations: tuple[str, ...]
-    rollback_strategy: str
+    rollback_strategy: RollbackStrategy
+    conversion_evidence: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

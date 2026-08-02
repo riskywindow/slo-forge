@@ -32,6 +32,7 @@ def _operator_contract() -> OperatorContract:
         maximum_relative_error=0.0,
         preserve_nan=True,
         preserve_infinity=True,
+        preserve_signed_zero=True,
         deterministic=True,
         maximum_cases=24,
     )
@@ -78,6 +79,21 @@ def test_operator_verifier_records_candidate_exception_as_counterexample() -> No
     assert verification.status is EvidenceStatus.FAILED
     assert verification.counterexample is not None
     assert verification.counterexample.violation == "candidate_exception:RuntimeError"
+
+
+def test_operator_verifier_detects_signed_zero_contract_violation() -> None:
+    def reference(value: np.ndarray) -> np.ndarray:
+        return value
+
+    def loses_negative_zero(value: np.ndarray) -> np.ndarray:
+        result = value.copy()
+        result[(result == 0) & np.signbit(result)] = 0.0
+        return result
+
+    verification = verify_operator(reference, loses_negative_zero, _operator_contract(), seed=5)
+    assert verification.status is EvidenceStatus.FAILED
+    assert verification.counterexample is not None
+    assert verification.counterexample.violation == "signed_zero_behavior"
 
 
 def test_quality_contract_detects_distribution_and_token_regression() -> None:

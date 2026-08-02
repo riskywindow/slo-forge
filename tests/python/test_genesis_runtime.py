@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import cast
 import pytest
 
 from sloforge.genesis.frontend import inspect_reference_package
+from sloforge.genesis.policy_dsl import BytecodeProgram, Instruction, ScalarType, VariableSpec
 from sloforge.genesis.runtime import (
     BaselineStreamingRuntime,
     DecodeResult,
@@ -30,10 +32,10 @@ ROOT = Path(__file__).resolve().parents[2]
 HYBRID = ROOT / "models" / "reference_tasks" / "hybrid_decoder"
 
 
-def _generated(tmp_path: Path, *, seed: int = 73129) -> Path:
-    inspection = inspect_reference_package(HYBRID)
+def _generated(tmp_path: Path, *, seed: int = 73129, package: Path = HYBRID) -> Path:
+    inspection = inspect_reference_package(package)
     output = tmp_path / "runtime"
-    generate_baseline_runtime(HYBRID, inspection, output, seed=seed)
+    generate_baseline_runtime(package, inspection, output, seed=seed)
     return output
 
 
@@ -129,10 +131,73 @@ def test_generated_correctness_harness_executes_reference_fixture(tmp_path: Path
     assert all(case["exact_match"] for case in evidence["cases"])
 
 
+def test_generated_subprocess_multiplexes_requests_and_cancellation(tmp_path: Path) -> None:
+    package = tmp_path / "slow-reference"
+    shutil.copytree(HYBRID, package)
+    reference = package / "reference.py"
+    source = reference.read_text(encoding="utf-8")
+    marker = "    _advance(model, previous_token, state)\n"
+    assert marker in source
+    reference.write_text(
+        source.replace(
+            marker,
+            "    for delay_index in range(200000):\n"
+            "        _delay_value = delay_index * delay_index\n"
+            "    _advance(model, previous_token, state)\n",
+            1,
+        ),
+        encoding="utf-8",
+    )
+    output = _generated(tmp_path, package=package)
+    process = subprocess.Popen(
+        [sys.executable, "runtime.py", "--seed", "73129"],
+        cwd=output,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env={**os.environ, "PYTHONPATH": str(ROOT / "python")},
+    )
+    assert process.stdin is not None
+    requests = [
+        {
+            "operation": "submit",
+            "request_id": f"multiplex-{index}",
+            "text": "hybrid" * 8,
+            "maximum_new_tokens": 16,
+            "seed": 100 + index,
+            "timeout_seconds": 3.0,
+        }
+        for index in range(8)
+    ]
+    for request in requests:
+        process.stdin.write(json.dumps(request) + "\n")
+    process.stdin.write(json.dumps({"operation": "cancel", "request_id": "multiplex-7"}) + "\n")
+    process.stdin.write(json.dumps({"operation": "health"}) + "\n")
+    process.stdin.write(json.dumps({"operation": "shutdown"}) + "\n")
+    process.stdin.flush()
+    stdout, stderr = process.communicate(timeout=15)
+
+    assert process.returncode == 0, stderr
+    events = [json.loads(line) for line in stdout.splitlines()]
+    assert any(
+        item.get("kind") == "control"
+        and item.get("operation") == "cancel"
+        and item.get("request_id") == "multiplex-7"
+        for item in events
+    )
+    assert any(item.get("kind") == "control" and "body" in item for item in events)
+    terminal = [
+        item
+        for item in events
+        if item.get("request_id") == "multiplex-7"
+        and item.get("kind") in {"cancelled", "completed", "error", "timed_out"}
+    ]
+    assert terminal and terminal[-1]["kind"] == "cancelled"
+
+
 def test_runtime_detects_reference_source_tampering(tmp_path: Path) -> None:
     package = tmp_path / "package"
-    import shutil
-
     shutil.copytree(HYBRID, package)
     inspection = inspect_reference_package(package)
     output = tmp_path / "runtime"
@@ -214,6 +279,16 @@ class _EmissionRaceAdapter(_BlockingAdapter):
         return str(token_id)
 
 
+class _RecordingBlockingAdapter(_BlockingAdapter):
+    def __init__(self) -> None:
+        super().__init__()
+        self.allocation_order: list[str] = []
+
+    def allocate_state(self, request_id: str, prompt_tokens: tuple[int, ...], seed: int) -> object:
+        self.allocation_order.append(request_id)
+        return super().allocate_state(request_id, prompt_tokens, seed)
+
+
 def _blocking_runtime(adapter: _BlockingAdapter) -> BaselineStreamingRuntime:
     return BaselineStreamingRuntime(
         cast(ReferenceRuntimeAdapter, adapter),
@@ -284,3 +359,119 @@ def test_bounded_admission_queue_rejects_saturation() -> None:
 
     assert runtime.metrics()["rejected_queue_full"] == 1
     assert runtime.health()["queue_depth"] == 0
+
+
+def test_runtime_rejects_policy_inputs_it_cannot_supply_before_start() -> None:
+    policy = BytecodeProgram(
+        name="unsupported-priority",
+        inputs=(VariableSpec("priority", ScalarType.INT, 0, 7),),
+        output=VariableSpec("batch", ScalarType.INT, 1, 1),
+        instructions=(Instruction("literal", 1),),
+        maximum_operations=1,
+    )
+    runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, _BlockingAdapter()),
+        limits=RuntimeLimits(maximum_queue_depth=1, maximum_batch_size=1),
+        runtime_seed=11,
+        policy=policy,
+    )
+
+    with pytest.raises(RuntimeError, match="unsupported inputs"):
+        runtime.start()
+    assert runtime.health()["accepting_requests"] is False
+
+
+def test_policy_execution_failure_terminalizes_request_without_killing_worker() -> None:
+    policy = BytecodeProgram(
+        name="divide-by-zero",
+        inputs=(),
+        output=VariableSpec("batch", ScalarType.INT, 1, 4),
+        instructions=(
+            Instruction("literal", 1),
+            Instruction("literal", 0),
+            Instruction("floor_div"),
+        ),
+        maximum_operations=3,
+    )
+    runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, _BlockingAdapter()),
+        limits=RuntimeLimits(
+            maximum_queue_depth=2,
+            maximum_batch_size=1,
+            maximum_prompt_tokens=8,
+            maximum_generated_tokens=2,
+            maximum_output_events_per_request=3,
+            worker_poll_seconds=0.01,
+        ),
+        runtime_seed=11,
+        policy=policy,
+    )
+    runtime.start()
+    try:
+        first = runtime.submit(RuntimeRequest("policy-error-1", (1,), 1, 1, 1.0))
+        assert [event.kind for event in first.events(1.0)] == [EventKind.ERROR]
+        assert first.wait(0.1)
+        assert first.lifecycle is RequestLifecycle.FAILED
+        assert runtime.health()["accepting_requests"] is True
+
+        second = runtime.submit(RuntimeRequest("policy-error-2", (1,), 1, 2, 1.0))
+        assert [event.kind for event in second.events(1.0)] == [EventKind.ERROR]
+    finally:
+        runtime.shutdown()
+
+    assert runtime.metrics()["failed"] == 2
+    assert runtime.health()["queue_depth"] == 0
+
+
+def test_synthesized_deadline_policy_changes_request_order_and_batch_behavior() -> None:
+    policy = BytecodeProgram(
+        name="deadline_cancel_batch",
+        inputs=(),
+        output=VariableSpec("batch", ScalarType.INT, 1, 4),
+        instructions=(Instruction("literal", 4),),
+        maximum_operations=1,
+    )
+    adapter = _RecordingBlockingAdapter()
+    runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, adapter),
+        limits=RuntimeLimits(
+            maximum_queue_depth=4,
+            maximum_batch_size=4,
+            maximum_prompt_tokens=8,
+            maximum_generated_tokens=2,
+            maximum_output_events_per_request=3,
+            batch_wait_seconds=0.05,
+            worker_poll_seconds=0.01,
+            shutdown_timeout_seconds=2.0,
+        ),
+        runtime_seed=11,
+        policy=policy,
+    )
+    runtime.start()
+    long_deadline = runtime.submit(RuntimeRequest("long", (1,), 1, 1, 2.0))
+    short_deadline = runtime.submit(RuntimeRequest("short", (1,), 1, 2, 0.5))
+    assert adapter.prefill_entered.wait(1.0)
+    assert adapter.allocation_order == ["short"]
+    adapter.release_prefill.set()
+    list(long_deadline.events(2.0))
+    list(short_deadline.events(2.0))
+    runtime.shutdown()
+
+    metrics = runtime.metrics()
+    assert metrics["maximum_observed_batch"] == 2
+    assert metrics["deadline_reorders"] == 1
+
+
+def test_wait_cannot_observe_terminal_state_before_terminal_event_publication() -> None:
+    adapter = _EmissionRaceAdapter()
+    runtime = _blocking_runtime(adapter)
+    adapter.release_detokenize.set()
+    runtime.start()
+    try:
+        handle = runtime.submit(RuntimeRequest("terminal-order", (1,), 1, 7, 1.0))
+        assert handle.wait(1.0)
+        events = list(handle.events(0.1))
+        assert events[-1].kind is EventKind.COMPLETED
+        assert handle.lifecycle is RequestLifecycle.COMPLETED
+    finally:
+        runtime.shutdown()

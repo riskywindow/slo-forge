@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+import math
+import re
+
+from .limits import (
+    MAX_POLICY_FLOAT_ABS,
+    MAX_POLICY_INSTRUCTIONS,
+    MAX_POLICY_INTEGER_ABS,
+    MAX_POLICY_NAME_BYTES,
+    MAX_POLICY_VARIABLES,
+)
 from .model import (
     Analysis,
     Binary,
+    Clamp,
     Conditional,
     Expr,
     Literal,
@@ -17,18 +28,43 @@ from .model import (
     VariableSpec,
 )
 
+_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _checked_scalar(value: object, label: str) -> Scalar:
+    if type(value) is bool:
+        return value
+    if type(value) is int:
+        if abs(value) > MAX_POLICY_INTEGER_ABS:
+            raise PolicyError(f"{label} integer exceeds the absolute policy bound")
+        return value
+    if type(value) is float:
+        if not math.isfinite(value) or abs(value) > MAX_POLICY_FLOAT_ABS:
+            raise PolicyError(f"{label} must be a bounded finite number")
+        return value
+    raise PolicyError(f"{label} must be a boolean, integer, or float")
+
 
 def _validate_spec(spec: VariableSpec) -> None:
-    if not spec.name or not spec.name.replace("_", "a").isalnum():
+    if (
+        type(spec) is not VariableSpec
+        or type(spec.scalar_type) is not ScalarType
+        or not isinstance(spec.name, str)
+        or not spec.name
+        or len(spec.name.encode("utf-8")) > MAX_POLICY_NAME_BYTES
+        or _NAME.fullmatch(spec.name) is None
+    ):
         raise PolicyError(f"invalid variable name {spec.name!r}")
     expected = {
         ScalarType.BOOL: bool,
         ScalarType.INT: int,
         ScalarType.FLOAT: float,
     }[spec.scalar_type]
-    if type(spec.lower) is not expected or type(spec.upper) is not expected:
+    lower = _checked_scalar(spec.lower, f"{spec.name} lower bound")
+    upper = _checked_scalar(spec.upper, f"{spec.name} upper bound")
+    if type(lower) is not expected or type(upper) is not expected:
         raise PolicyError(f"{spec.name} bounds do not match {spec.scalar_type.value}")
-    if spec.lower > spec.upper:
+    if lower > upper:
         raise PolicyError(f"{spec.name} lower bound exceeds upper bound")
 
 
@@ -73,7 +109,7 @@ def _binary_range(operator: str, left: Analysis, right: Analysis) -> tuple[Scala
 
 def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> Analysis:
     if isinstance(expression, Literal):
-        value = expression.value
+        value = _checked_scalar(expression.value, "literal")
         scalar_type = (
             ScalarType.BOOL
             if type(value) is bool
@@ -94,11 +130,15 @@ def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> 
             if operand.scalar_type is not ScalarType.BOOL:
                 raise PolicyError("not requires a boolean operand")
             return Analysis(ScalarType.BOOL, False, True, operand.operation_count + 1)
+        if expression.operator != "neg":
+            raise PolicyError(f"unary operator {expression.operator!r} is not allowed")
         _numeric(operand, "neg")
+        lower = _checked_scalar(-operand.upper, "neg lower range")
+        upper = _checked_scalar(-operand.lower, "neg upper range")
         return Analysis(
             operand.scalar_type,
-            -operand.upper,
-            -operand.lower,
+            lower,
+            upper,
             operand.operation_count + 1,
         )
     if isinstance(expression, Binary):
@@ -117,9 +157,13 @@ def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> 
             _numeric(left, expression.operator)
             _numeric(right, expression.operator)
             return Analysis(ScalarType.BOOL, False, True, count)
+        if expression.operator not in {"add", "sub", "mul", "floor_div", "min", "max"}:
+            raise PolicyError(f"binary operator {expression.operator!r} is not allowed")
         _numeric(left, expression.operator)
         _numeric(right, expression.operator)
         lower, upper = _binary_range(expression.operator, left, right)
+        lower = _checked_scalar(lower, f"{expression.operator} lower range")
+        upper = _checked_scalar(upper, f"{expression.operator} upper range")
         return Analysis(_promote(left.scalar_type, right.scalar_type), lower, upper, count)
     if isinstance(expression, Conditional):
         condition = analyze_expression(expression.condition, variables)
@@ -135,6 +179,8 @@ def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> 
             max(when_true.upper, when_false.upper),
             condition.operation_count + when_true.operation_count + when_false.operation_count + 1,
         )
+    if not isinstance(expression, Clamp):
+        raise PolicyError("expression contains an unsupported node")
     value_analysis = analyze_expression(expression.value, variables)
     lower_analysis = analyze_expression(expression.lower, variables)
     upper_analysis = analyze_expression(expression.upper, variables)
@@ -145,13 +191,17 @@ def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> 
     _numeric(upper_analysis, "clamp")
     if lower_analysis.lower > upper_analysis.upper:
         raise PolicyError("clamp lower bound exceeds upper bound")
+    # Clamp is monotonic, so independently clamp both ordered endpoints.  The
+    # older max(lower), min(upper) calculation inverted disjoint intervals.
+    clamp_lower = min(max(value_analysis.lower, lower_analysis.lower), upper_analysis.upper)
+    clamp_upper = min(max(value_analysis.upper, lower_analysis.lower), upper_analysis.upper)
     return Analysis(
         _promote(
             value_analysis.scalar_type,
             _promote(lower_analysis.scalar_type, upper_analysis.scalar_type),
         ),
-        max(value_analysis.lower, lower_analysis.lower),
-        min(value_analysis.upper, upper_analysis.upper),
+        _checked_scalar(clamp_lower, "clamp lower range"),
+        _checked_scalar(clamp_upper, "clamp upper range"),
         value_analysis.operation_count
         + lower_analysis.operation_count
         + upper_analysis.operation_count
@@ -160,8 +210,19 @@ def analyze_expression(expression: Expr, variables: dict[str, VariableSpec]) -> 
 
 
 def check_policy(program: PolicyProgram) -> Analysis:
-    if not 1 <= program.maximum_operations <= 4096:
-        raise PolicyError("operation limit must be in [1, 4096]")
+    if (
+        not isinstance(program.name, str)
+        or not program.name
+        or len(program.name.encode("utf-8")) > MAX_POLICY_NAME_BYTES
+        or _NAME.fullmatch(program.name) is None
+    ):
+        raise PolicyError(f"invalid policy name {program.name!r}")
+    if type(program.maximum_operations) is not int or not (
+        1 <= program.maximum_operations <= MAX_POLICY_INSTRUCTIONS
+    ):
+        raise PolicyError(f"operation limit must be in [1, {MAX_POLICY_INSTRUCTIONS}]")
+    if len(program.inputs) > MAX_POLICY_VARIABLES:
+        raise PolicyError(f"policy has more than {MAX_POLICY_VARIABLES} inputs")
     variables: dict[str, VariableSpec] = {}
     for spec in program.inputs:
         _validate_spec(spec)
@@ -169,6 +230,8 @@ def check_policy(program: PolicyProgram) -> Analysis:
             raise PolicyError(f"duplicate input {spec.name!r}")
         variables[spec.name] = spec
     _validate_spec(program.output)
+    if program.output.name in variables:
+        raise PolicyError(f"output name collides with input {program.output.name!r}")
     analysis = analyze_expression(program.expression, variables)
     if analysis.operation_count > program.maximum_operations:
         raise PolicyError(

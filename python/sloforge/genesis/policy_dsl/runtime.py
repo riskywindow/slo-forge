@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from .bytecode import validate_bytecode
 from .checker import check_policy
+from .limits import MAX_POLICY_FLOAT_ABS, MAX_POLICY_INTEGER_ABS
 from .model import (
     Binary,
     BytecodeProgram,
@@ -34,6 +37,10 @@ def _validate_value(spec: VariableSpec, value: Scalar) -> None:
     }[spec.scalar_type]
     if type(value) is not expected:
         raise PolicyError(f"input {spec.name!r} must be {spec.scalar_type.value}")
+    if type(value) is int and abs(value) > MAX_POLICY_INTEGER_ABS:
+        raise PolicyError(f"input {spec.name!r} integer exceeds the absolute policy bound")
+    if type(value) is float and (not math.isfinite(value) or abs(value) > MAX_POLICY_FLOAT_ABS):
+        raise PolicyError(f"input {spec.name!r} must be a bounded finite number")
     if value < spec.lower or value > spec.upper:
         raise PolicyError(f"input {spec.name!r}={value} is outside [{spec.lower}, {spec.upper}]")
 
@@ -48,9 +55,11 @@ def _binary(operator: str, left: Scalar, right: Scalar) -> Scalar:
     if operator == "floor_div":
         return left // right
     if operator == "min":
-        return min(left, right)
+        result = min(left, right)
+        return float(result) if type(left) is float or type(right) is float else result
     if operator == "max":
-        return max(left, right)
+        result = max(left, right)
+        return float(result) if type(left) is float or type(right) is float else result
     if operator == "and":
         return bool(left) and bool(right)
     if operator == "or":
@@ -100,16 +109,19 @@ def compile_policy(program: PolicyProgram) -> BytecodeProgram:
     _compile(program.expression, instructions)
     if len(instructions) > program.maximum_operations:
         raise PolicyError("compiled instruction count exceeds declared limit")
-    return BytecodeProgram(
+    bytecode = BytecodeProgram(
         name=program.name,
         inputs=program.inputs,
         output=program.output,
         instructions=tuple(instructions),
         maximum_operations=program.maximum_operations,
     )
+    validate_bytecode(bytecode)
+    return bytecode
 
 
 def execute_bytecode(program: BytecodeProgram, inputs: Mapping[str, Scalar]) -> Scalar:
+    validate_bytecode(program)
     expected_names = {item.name for item in program.inputs}
     if set(inputs) != expected_names:
         raise PolicyError(f"inputs must be exactly {sorted(expected_names)}")
@@ -145,7 +157,12 @@ def execute_bytecode(program: BytecodeProgram, inputs: Mapping[str, Scalar]) -> 
             upper = stack.pop()
             lower = stack.pop()
             value = stack.pop()
-            stack.append(min(max(value, lower), upper))
+            result = min(max(value, lower), upper)
+            stack.append(
+                float(result)
+                if type(value) is float or type(lower) is float or type(upper) is float
+                else result
+            )
         else:
             if len(stack) < 2:
                 raise PolicyError("bytecode stack underflow")
