@@ -33,9 +33,13 @@ from .models import (
     TriggerObservation,
 )
 from .store import EvolutionStore
+from .transition import TransitionCompatibility, validate_transition_compatibility
 
 CapsuleValidator = Callable[[Path], CapsuleValidationReport]
 GateEvidenceValidator = Callable[[GateObservation, ChallengerSpec], bool]
+TransitionCompatibilityValidator = Callable[
+    [CapsuleReference, CapsuleReference, TransitionCategory], TransitionCompatibility
+]
 _LIVE_PROMOTION_ENV = "SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION"
 
 
@@ -111,12 +115,14 @@ class EvolutionController:
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
         gate_evidence_validator: GateEvidenceValidator | None,
+        transition_compatibility_validator: TransitionCompatibilityValidator,
         config: EvolutionConfig,
         snapshot: EvolutionSnapshot,
     ) -> None:
         self.store = store
         self.capsule_validator = capsule_validator
         self.gate_evidence_validator = gate_evidence_validator
+        self.transition_compatibility_validator = transition_compatibility_validator
         self.config = config
         self._mutation_lock = RLock()
         if snapshot.processed_event_ids and not snapshot.processed_events:
@@ -138,6 +144,9 @@ class EvolutionController:
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
         gate_evidence_validator: GateEvidenceValidator | None = None,
+        transition_compatibility_validator: TransitionCompatibilityValidator = (
+            validate_transition_compatibility
+        ),
         config: EvolutionConfig,
         deployment_id: str,
         champion: CapsuleReference,
@@ -196,6 +205,7 @@ class EvolutionController:
             store=store,
             capsule_validator=capsule_validator,
             gate_evidence_validator=gate_evidence_validator,
+            transition_compatibility_validator=transition_compatibility_validator,
             config=config,
             snapshot=snapshot,
         )
@@ -207,6 +217,9 @@ class EvolutionController:
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
         gate_evidence_validator: GateEvidenceValidator | None = None,
+        transition_compatibility_validator: TransitionCompatibilityValidator = (
+            validate_transition_compatibility
+        ),
         config: EvolutionConfig,
     ) -> EvolutionController:
         if config.execution_target is ExecutionTarget.EXTERNAL and gate_evidence_validator is None:
@@ -216,10 +229,41 @@ class EvolutionController:
             raise EvolutionError("persisted challenger population exceeds the configured bound")
         if len(snapshot.active_streams) > config.maximum_active_streams:
             raise EvolutionError("persisted stream registry exceeds the configured bound")
+        champion_report = capsule_validator(Path(snapshot.champion.path))
+        if not cls._capsule_reference_is_eligible(
+            snapshot.champion,
+            champion_report,
+            require_level_five=config.execution_target is ExecutionTarget.EXTERNAL,
+        ):
+            raise EvolutionError("restored champion failed independent capsule revalidation")
+        if snapshot.selected_candidate_id is not None and snapshot.phase in {
+            EvolutionPhase.SHADOWING,
+            EvolutionPhase.SHADOW_VALIDATED,
+            EvolutionPhase.CANARYING,
+            EvolutionPhase.READY_TO_PROMOTE,
+        }:
+            selected = next(
+                (
+                    record
+                    for record in snapshot.challengers
+                    if record.spec.candidate_id == snapshot.selected_candidate_id
+                ),
+                None,
+            )
+            if selected is None:
+                raise EvolutionError("restored controller selected challenger is missing")
+            challenger_report = capsule_validator(Path(selected.spec.capsule.path))
+            if not cls._capsule_reference_is_eligible(
+                selected.spec.capsule,
+                challenger_report,
+                require_level_five=config.execution_target is ExecutionTarget.EXTERNAL,
+            ):
+                raise EvolutionError("restored challenger failed independent capsule revalidation")
         return cls(
             store=store,
             capsule_validator=capsule_validator,
             gate_evidence_validator=gate_evidence_validator,
+            transition_compatibility_validator=transition_compatibility_validator,
             config=config,
             snapshot=snapshot,
         )
@@ -344,16 +388,17 @@ class EvolutionController:
         *,
         require_level_five: bool = False,
     ) -> bool:
+        eligible_for_target = (
+            report.external_production_eligible
+            if require_level_five
+            else report.local_evolution_eligible
+        )
         return (
-            report.promotion_eligible
+            eligible_for_target
             and report.capsule_digest is not None
             and report.capsule_digest.value == capsule.capsule_digest
             and report.candidate_genome_hash is not None
             and report.candidate_genome_hash.value == capsule.genome_hash
-            and (
-                not require_level_five
-                or report.promotion_verification_level is VerificationLevel.HARDWARE_OPERATIONAL
-            )
         )
 
     def _capsule_is_eligible(self, spec: ChallengerSpec, report: CapsuleValidationReport) -> bool:
@@ -459,8 +504,15 @@ class EvolutionController:
         if self.snapshot.phase is not EvolutionPhase.CHALLENGER_READY:
             raise EvolutionError("shadowing requires a capsule-validated challenger")
         index, record = self._selected()
+        report = self.capsule_validator(Path(record.spec.capsule.path))
+        if not self._capsule_is_eligible(record.spec, report):
+            raise EvolutionError("challenger failed capsule revalidation before shadowing")
         replacement = ChallengerRecord.model_validate(
-            {**record.model_dump(mode="python"), "status": ChallengerStatus.SHADOWING}
+            {
+                **record.model_dump(mode="python"),
+                "status": ChallengerStatus.SHADOWING,
+                "capsule_validation": report,
+            }
         )
         return self._commit(
             event_id=event_id,
@@ -567,8 +619,15 @@ class EvolutionController:
             raise EvolutionError("canarying requires accepted shadow evidence")
         self._require_live_opt_in()
         index, record = self._selected()
+        report = self.capsule_validator(Path(record.spec.capsule.path))
+        if not self._capsule_is_eligible(record.spec, report):
+            raise EvolutionError("challenger failed capsule revalidation before canarying")
         replacement = ChallengerRecord.model_validate(
-            {**record.model_dump(mode="python"), "status": ChallengerStatus.CANARYING}
+            {
+                **record.model_dump(mode="python"),
+                "status": ChallengerStatus.CANARYING,
+                "capsule_validation": report,
+            }
         )
         return self._commit(
             event_id=event_id,
@@ -682,13 +741,6 @@ class EvolutionController:
         index, record = self._selected()
         if record.spec.transition_category is TransitionCategory.OPERATOR_REQUIRED:
             raise EvolutionError("operator-required transitions cannot be autonomously promoted")
-        active = self.snapshot.active_streams
-        boundary_safe = record.spec.transition_category in {
-            TransitionCategory.POLICY_ONLY_HOT_SWAP,
-            TransitionCategory.REQUEST_BOUNDARY_SWAP,
-        }
-        if active and not (boundary_safe or record.spec.active_stream_compatible):
-            raise EvolutionError("transition cannot preserve active streams; drain is required")
         report = self.capsule_validator(Path(record.spec.capsule.path))
         if not self._capsule_is_eligible(record.spec, report):
             replacement = ChallengerRecord.model_validate(
@@ -712,6 +764,30 @@ class EvolutionController:
                     "selected_candidate_id": None,
                 },
             )
+        champion_report = self.capsule_validator(Path(self.snapshot.champion.path))
+        if not self._capsule_reference_is_eligible(
+            self.snapshot.champion,
+            champion_report,
+            require_level_five=self.config.execution_target is ExecutionTarget.EXTERNAL,
+        ):
+            raise EvolutionError("champion failed independent revalidation before transition")
+        active = self.snapshot.active_streams
+        if active:
+            try:
+                compatibility = self.transition_compatibility_validator(
+                    self.snapshot.champion,
+                    record.spec.capsule,
+                    record.spec.transition_category,
+                )
+            except (OSError, ValueError) as error:
+                raise EvolutionError(
+                    f"trusted transition compatibility validation failed: {error}"
+                ) from error
+            if not compatibility.compatible:
+                raise EvolutionError(
+                    f"transition cannot preserve active streams; drain is required: "
+                    f"{compatibility.reason}"
+                )
         replacement = ChallengerRecord.model_validate(
             {
                 **record.model_dump(mode="python"),

@@ -5,8 +5,10 @@ from .controller import (
     EvolutionController,
     EvolutionError,
     GateEvidenceValidator,
+    TransitionCompatibilityValidator,
     classify_trigger,
 )
+from .evidence import collect_local_gate_evidence
 from .fixture import run_local_evolution_fixture
 from .models import (
     EVOLUTION_SCHEMA_VERSION,
@@ -32,6 +34,7 @@ from .models import (
     TriggerObservation,
 )
 from .store import EvolutionPersistenceError, EvolutionStore
+from .transition import TransitionCompatibility, validate_transition_compatibility
 
 __all__ = [
     "EVOLUTION_SCHEMA_VERSION",
@@ -60,7 +63,11 @@ __all__ = [
     "ProcessedEventRecord",
     "StreamLease",
     "TransitionCategory",
+    "TransitionCompatibility",
+    "TransitionCompatibilityValidator",
     "TriggerObservation",
     "classify_trigger",
+    "collect_local_gate_evidence",
     "run_local_evolution_fixture",
+    "validate_transition_compatibility",
 ]

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 
 from ..capsule.models import VerificationLevel
 from .controller import EvolutionController
+from .evidence import collect_local_gate_evidence
 from .models import (
     ChallengerSpec,
     EvolutionSnapshot,
@@ -20,8 +22,9 @@ def run_local_evolution_fixture(
     challenger: ChallengerSpec,
     *,
     start_at_ms: int = 10,
+    evidence_directory: Path | None = None,
 ) -> EvolutionSnapshot:
-    """Exercise drift, isolation, gates, and promotion using artifact-backed validation."""
+    """Exercise evolution; real capsule replay is required when an evidence path is supplied."""
 
     seed = controller.snapshot.seed
 
@@ -45,8 +48,8 @@ def run_local_evolution_fixture(
         observed_at_ms=start_at_ms + 10,
     )
     controller.begin_shadow(event_id="fixture-begin-shadow", observed_at_ms=start_at_ms + 20)
-    controller.record_gate(
-        GateObservation(
+    if evidence_directory is None:
+        shadow_observation = GateObservation(
             event_id="fixture-shadow-evidence",
             candidate_id=challenger.candidate_id,
             capsule_digest=challenger.capsule.capsule_digest,
@@ -62,10 +65,21 @@ def run_local_evolution_fixture(
             quality_regression=0.0,
             interrupted_streams=0,
         )
-    )
+    else:
+        shadow_observation = collect_local_gate_evidence(
+            champion=controller.snapshot.champion,
+            challenger=challenger.capsule,
+            candidate_id=challenger.candidate_id,
+            stage=GateStage.SHADOW,
+            sample_count=controller.config.minimum_shadow_samples,
+            seed=seed,
+            observed_at_ms=start_at_ms + 30,
+            output_directory=evidence_directory / "shadow",
+        )
+    controller.record_gate(shadow_observation)
     controller.begin_canary(event_id="fixture-begin-canary", observed_at_ms=start_at_ms + 40)
-    controller.record_gate(
-        GateObservation(
+    if evidence_directory is None:
+        canary_observation = GateObservation(
             event_id="fixture-canary-evidence",
             candidate_id=challenger.candidate_id,
             capsule_digest=challenger.capsule.capsule_digest,
@@ -81,5 +95,16 @@ def run_local_evolution_fixture(
             quality_regression=0.0,
             interrupted_streams=0,
         )
-    )
+    else:
+        canary_observation = collect_local_gate_evidence(
+            champion=controller.snapshot.champion,
+            challenger=challenger.capsule,
+            candidate_id=challenger.candidate_id,
+            stage=GateStage.CANARY,
+            sample_count=controller.config.minimum_canary_samples,
+            seed=seed,
+            observed_at_ms=start_at_ms + 50,
+            output_directory=evidence_directory / "canary",
+        )
+    controller.record_gate(canary_observation)
     return controller.promote(event_id="fixture-promote", observed_at_ms=start_at_ms + 60)

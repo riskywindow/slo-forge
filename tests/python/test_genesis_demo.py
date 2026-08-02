@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,7 +23,7 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> 
     assert result.rejected_candidate_ids
     assert result.minimized_counterexample_ids
     assert result.learned_constraint_ids
-    assert result.capsule_promotion_eligible
+    assert not result.capsule_promotion_eligible
     assert result.redteam_finding_count == result.redteam_replayed_count
     assert result.kernel_candidate_count == 2
     assert result.kernel_speedup_claim_count == 0
@@ -35,6 +36,20 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> 
     timeline = json.loads((tmp_path / "demo/evolution/timeline.json").read_text(encoding="utf-8"))
     assert timeline["source"] == "controller_audit_records"
     assert any(item["action"] == "promote" for item in timeline["events"])
+    promoted = json.loads(
+        (tmp_path / "demo/evolution/promoted-snapshot.json").read_text(encoding="utf-8")
+    )
+    challenger = promoted["challengers"][0]
+    for stage in ("shadow", "canary"):
+        artifact_path = tmp_path / f"demo/evolution/runtime-gates/{stage}/gate-evidence.json"
+        payload = artifact_path.read_bytes()
+        artifact = json.loads(payload)
+        observation = challenger[f"{stage}_observation"]
+        assert observation["evidence_digest"] == hashlib.sha256(payload).hexdigest()
+        assert artifact["comparison"]["mismatches"] == []
+        assert artifact["champion_sandbox"]["termination"] == "success"
+        assert artifact["challenger_sandbox"]["termination"] == "success"
+        assert artifact["trace_request_count"] == observation["sample_count"]
 
 
 def test_demo_reset_rejects_symlink_output(tmp_path: Path) -> None:
