@@ -5,7 +5,7 @@ Synthetic hardware curves are labeled synthetic and are not GPU measurements.
 
 ## Outcome
 
-- Physical plan: `physical-plan-8255ccdd8b3d846d`
+- Physical plan: `physical-plan-ba44cefbb6a8b469`
 - Diagnosis: `rank_straggler` (0.900 confidence)
 - Counterfactuals evaluated: 7
 - Selected repair: `remove-both-faults`
@@ -34,20 +34,20 @@ Synthetic hardware curves are labeled synthetic and are not GPU measurements.
 ## Artifact integrity
 
 - `topology.json` — `d7e67e922b9da9322db38b36a6ca2d39d69d01135ea0aab29472867d0658bd36`
-- `fabric-profile.json` — `fa09ceb75babe338617b24fc2119a855045173adc1cf954ac1f8f0a99aa6edfe`
+- `fabric-profile.json` — `81a12962d77e9427e721ca8dbcc897fcc6923e5eda4af857157741f9bbed46d9`
 - `model-graph.json` — `1ce629c74f379507a941d6354ca73313be760bf8ff3304948aad563af787f00a`
-- `physical-plan.json` — `3ab99a5f8b39409e2b6fc476e960e8ea12fe3b377b2266370103ad5bfd104575`
-- `physical-plan-topology-unaware.json` — `8a25281f0cc1ab08617e992f32c6602ea4eeefadb379a98266df40918473d1ec`
+- `physical-plan.json` — `9bcf2fa01a978305483591b5227af09e5376618b2050d5d29fff8bc26ab4009b`
+- `physical-plan-topology-unaware.json` — `b6e05735ca4dadc5766db6ca9b93be0fe7cba7ece94aa8856c10ac8e701ba1dc`
 - `mixed-bursty.jsonl` — `99a473c138773bb5f8c447d86a9e24d6f78a3fbc874ae6f3e8dec8221d0bdc69`
-- `simulations/healthy.json` — `5ecd00daa04dcdbe467ab3db9a7938215830f82357a4dde981ee9661237ba3a0`
-- `simulations/degraded.json` — `9eff8d5f790d7705fedddd0bfb0c2daefced689d5f704125bffa3cf1f2291fba`
-- `simulations/restored.json` — `d3a9df70b103262ae0894540c048b6cf275dddc1d27a3540c92026bce65fb9e7`
+- `simulations/healthy.json` — `8bc485293cd277ddc68f2d09a6e69d3698bfefebb0050888c1391c8c582e612a`
+- `simulations/degraded.json` — `9344f93f1f2a5217e76559cc5d9d19b20a4f829cfd838568e75f7220fdf000a6`
+- `simulations/restored.json` — `2a312190f8a84e0f55e932e409014b7690f8985c21c067c2f0b5eae2f5c766f5`
 - `autopsy/comparison.json` — `181e7ec9a8b8368c15a08f859b3922861489181fee4beeeb54eec29112f6082f`
-- `autopsy/diagnosis.json` — `7b080df36c21019097cfc6b1abf52905e321b54c93fbd083bfa6dd9188ea0675`
-- `autopsy/counterfactuals.json` — `395d2d0867c8c047187d82570a468efcf16eb4985704350ec26a32378c48d592`
-- `recovery/proposal.json` — `4ba1e2b6955212ed75ecba1f8cded0a2ebee1d8dfa4ad3ff3def1d36c24d0cde`
-- `recovery/execution.json` — `d6ce12ec12ea842cac143a99b137b9272c3d141b92a63ecd1e16c575bded28b1`
-- `traces/degraded.perfetto.json` — `9e5414dc0f31ea91a9ed382d69bf8b85b117135ac13e6772222fcc515dca4454`
-- `traces/otel.json` — `51e7e9be20b540a599af81daea0120a90a7c3ac7c8f1f10a32800427b2dc53af`
+- `autopsy/diagnosis.json` — `f3f97a62dca6b1eaa6538cae54acbaca950fed29ec4fcb6b2ffb2477e508f0f5`
+- `autopsy/counterfactuals.json` — `8106cf58c8bf770a9ff53f9cfd76a09d6313da326632f17bc49ca2a942723554`
+- `recovery/proposal.json` — `d06070aa1d1e556c9fe4c52a02d4c7ef6f3648e67f54dc7610a1aa20a037710c`
+- `recovery/execution.json` — `e4f33b6f78f2010a6db043e3fac16f0c762ccd746c9e69e9aaca5cc1d91b0975`
+- `traces/degraded.perfetto.json` — `ab03e4aed3b2d0eac45871428d0aa0380ca65f895b909da27a8a2e2d762744b1`
+- `traces/otel.json` — `3fb038f5e84eb6c83e1021b0192325e064c7f66b060e4b24cf71993308d814e6`
 - `metrics/degraded.prom` — `c0efe75a83826e5a7e11352e5d18041fb3e081b734c7dd7693c469f3b213077a`
 - `timeline.json` — `d606825f374023921c878bed467a6f54eff62f6a019efd4d3c0f57671aef370c`
