@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from sloforge.controller import ControllerConfig, PredictiveController, evaluate_controllers
 from sloforge.controller.core import ObservedState
 from sloforge.faults import execute_scenario, load_scenario
@@ -34,6 +36,16 @@ def test_all_required_fault_labels_are_diagnosed() -> None:
     assert result.false_positive_count == 0
     assert result.false_positive_rate == 0
     assert sum(sum(row.values()) for row in result.confusion_matrix.values()) == 8
+
+
+def test_fault_loader_rejects_yaml_references(tmp_path: Path) -> None:
+    scenario = tmp_path / "alias.yaml"
+    scenario.write_text(
+        "schema_version: &version sloforge.chaos/v1\nname: fixture\nseed: 1\nevents: *version\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="anchors or aliases"):
+        load_scenario(scenario)
 
 
 def test_material_routing_change_canaries_and_rolls_back() -> None:

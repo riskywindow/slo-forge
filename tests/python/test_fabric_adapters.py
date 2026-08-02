@@ -21,9 +21,11 @@ from sloforge.fabric.ir import (
     RankBinding,
     RankPlacement,
     WorkerRole,
+    canonical_hash,
     load_physical_execution_plan,
     load_topology_graph,
 )
+from sloforge.ir import ArtifactDigest
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
 
@@ -35,9 +37,14 @@ def _context(
     dynamo_backend: DynamoBackend | None = None,
     allow_advisory_cloud_metadata: bool = False,
 ) -> FabricAdapterContext:
+    topology = load_topology_graph(FIXTURES / "topology-graph-v1.json")
+    plan = load_physical_execution_plan(FIXTURES / "physical-execution-plan-v1.json")
+    plan = plan.model_copy(
+        update={"topology_fingerprint": ArtifactDigest(value=canonical_hash(topology))}
+    )
     return FabricAdapterContext(
-        plan=load_physical_execution_plan(FIXTURES / "physical-execution-plan-v1.json"),
-        topology=load_topology_graph(FIXTURES / "topology-graph-v1.json"),
+        plan=plan,
+        topology=topology,
         model_id="Qwen/Qwen3-0.6B",
         model_revision="main",
         image="ghcr.io/sloforge/runtime:0.1.0",
@@ -46,6 +53,29 @@ def _context(
         dynamo_backend=dynamo_backend,
         allow_advisory_cloud_metadata=allow_advisory_cloud_metadata,
     )
+
+
+def test_adapter_rejects_plan_topology_artifact_mismatch() -> None:
+    context = _context()
+    mismatched = context.plan.model_copy(
+        update={"topology_fingerprint": ArtifactDigest(value="f" * 64)}
+    )
+    with pytest.raises(ValueError, match="fingerprint does not match"):
+        FabricAdapterContext.model_validate(
+            {**context.model_dump(mode="python"), "plan": mismatched}
+        )
+
+
+def test_adapter_rejects_symlink_output_directory(tmp_path: Path) -> None:
+    target = tmp_path / "real"
+    target.mkdir()
+    output = tmp_path / "linked"
+    try:
+        output.symlink_to(target, target_is_directory=True)
+    except OSError:
+        pytest.skip("symbolic links are unavailable")
+    with pytest.raises(ValueError, match="symbolic link"):
+        export_physical_plan(context=_context(), target=DeploymentTarget.LOCAL, output=output)
 
 
 def _aggregated_dynamo_context() -> FabricAdapterContext:

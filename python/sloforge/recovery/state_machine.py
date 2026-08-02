@@ -69,6 +69,9 @@ class RecoveryStateMachine:
         self.plan = plan
         self.config = config or RecoveryMachineConfig()
         self.plan_hash = canonical_hash(plan)
+        action_keys = [action.idempotency_key for action in plan.actions]
+        if len(action_keys) != len(set(action_keys)):
+            raise ValueError("recovery action idempotency keys must be unique")
 
     def start(self, *, now_ms: int) -> RecoverySnapshot:
         if now_ms < 0:
@@ -101,6 +104,21 @@ class RecoveryStateMachine:
             raise ValueError("snapshot recovery identifier does not match plan")
         if snapshot.recovery_plan_hash != self.plan_hash:
             raise ValueError("snapshot plan hash does not match plan")
+        if len(snapshot.audit) > self.config.maximum_audit_records:
+            raise ValueError("snapshot audit exceeds configured bound")
+        if len(snapshot.processed_idempotency_keys) > self.config.maximum_idempotency_keys:
+            raise ValueError("snapshot idempotency history exceeds configured bound")
+        actions = {action.action_id: action for action in self.plan.actions}
+        attempt_ids = [attempt.action_id for attempt in snapshot.action_attempts]
+        if len(attempt_ids) != len(set(attempt_ids)):
+            raise ValueError("snapshot contains duplicate recovery action attempts")
+        for attempt in snapshot.action_attempts:
+            action = actions.get(attempt.action_id)
+            if action is None or attempt.idempotency_key != action.idempotency_key:
+                raise ValueError("snapshot action attempt identity does not match plan")
+        succeeded = {attempt.action_id for attempt in snapshot.action_attempts if attempt.succeeded}
+        if set(snapshot.applied_action_ids) != succeeded:
+            raise ValueError("snapshot applied actions do not match successful attempt evidence")
         return snapshot
 
     def _timeout_ms(self, state: RecoveryState) -> int:
@@ -180,6 +198,12 @@ class RecoveryStateMachine:
         known = {action.action_id for action in self.plan.actions}
         if any(attempt.action_id not in known for attempt in attempts):
             raise ValueError("action attempt references an unknown recovery action")
+        attempt_ids = [attempt.action_id for attempt in attempts]
+        if len(attempt_ids) != len(set(attempt_ids)):
+            raise ValueError("one action-attempt batch cannot contain duplicate actions")
+        expected_keys = {action.action_id: action.idempotency_key for action in self.plan.actions}
+        if any(attempt.idempotency_key != expected_keys[attempt.action_id] for attempt in attempts):
+            raise ValueError("action attempt idempotency key does not match recovery plan")
         previous = {attempt.action_id for attempt in snapshot.action_attempts}
         if any(attempt.action_id in previous for attempt in attempts):
             raise ValueError("recovery actions are idempotent and may be attempted only once")

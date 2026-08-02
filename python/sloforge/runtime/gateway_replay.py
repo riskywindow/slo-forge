@@ -13,6 +13,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from sloforge.trace import TraceRequest
 from sloforge.util import percentile, utc_now, write_json
 
+MAX_REPLAY_REQUESTS = 100_000
+MAX_REPLAY_WORKERS = 128
+MAX_REPLAY_QUEUE = 256
+
 
 class GatewayRequestResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -168,20 +172,59 @@ async def replay_gateway(
 ) -> GatewayReplayResult:
     if not 0 < time_scale <= 10:
         raise ValueError("time_scale must be in (0, 10]")
+    if not trace:
+        raise ValueError("gateway replay requires at least one request")
+    if len(trace) > MAX_REPLAY_REQUESTS:
+        raise ValueError(f"gateway replay is limited to {MAX_REPLAY_REQUESTS} requests")
+    if not backend_urls or len(backend_urls) > 256:
+        raise ValueError("gateway replay requires between 1 and 256 backend URLs")
     base_arrival = trace[0].arrival_ms
     delays = [(item.arrival_ms - base_arrival) / 1000.0 * time_scale for item in trace]
     duration_s = max(delays[-1] + 0.5, 1.0)
     limits = httpx.Limits(max_connections=128, max_keepalive_connections=32)
     async with httpx.AsyncClient(timeout=30.0, limits=limits) as client:
-        request_tasks = [
-            asyncio.create_task(_one_request(client, gateway_url, item, delay_s=delay))
-            for item, delay in zip(trace, delays, strict=True)
-        ]
-        fault_task = asyncio.create_task(
-            _inject_faults(backend_urls=backend_urls, duration_s=duration_s, client=client)
+        worker_count = min(MAX_REPLAY_WORKERS, len(trace))
+        queue: asyncio.Queue[tuple[int, TraceRequest, float] | None] = asyncio.Queue(
+            maxsize=MAX_REPLAY_QUEUE
         )
-        results = await asyncio.gather(*request_tasks)
-        faults = await fault_task
+        ordered_results: list[GatewayRequestResult | None] = [None] * len(trace)
+        replay_started = time.monotonic()
+
+        async def produce() -> None:
+            for index, (item, delay) in enumerate(zip(trace, delays, strict=True)):
+                await queue.put((index, item, delay))
+            for _ in range(worker_count):
+                await queue.put(None)
+
+        async def consume() -> None:
+            while True:
+                work = await queue.get()
+                try:
+                    if work is None:
+                        return
+                    index, item, delay = work
+                    remaining_delay = delay - (time.monotonic() - replay_started)
+                    ordered_results[index] = await _one_request(
+                        client,
+                        gateway_url,
+                        item,
+                        delay_s=max(0.0, remaining_delay),
+                    )
+                finally:
+                    queue.task_done()
+
+        async with asyncio.TaskGroup() as task_group:
+            task_group.create_task(produce())
+            workers = [task_group.create_task(consume()) for _ in range(worker_count)]
+            fault_task = task_group.create_task(
+                _inject_faults(backend_urls=backend_urls, duration_s=duration_s, client=client)
+            )
+        if any(item is None for item in ordered_results) or any(
+            not worker.done() for worker in workers
+        ):
+            raise RuntimeError("bounded gateway replay workers did not complete")
+        results = [item for item in ordered_results if item is not None]
+        faults = fault_task.result()
     successes = [
         item
         for item in results

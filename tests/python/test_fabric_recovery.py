@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import os
+import stat
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -11,8 +15,14 @@ from sloforge.autopsy import (
     EvidenceRef,
 )
 from sloforge.autopsy.models import CounterfactualEstimate, EvidenceStatement
-from sloforge.fabric.ir import RecoveryActionKind, RecoveryPlan, load_physical_execution_plan
+from sloforge.fabric.ir import (
+    RecoveryAction,
+    RecoveryActionKind,
+    RecoveryPlan,
+    load_physical_execution_plan,
+)
 from sloforge.recovery import (
+    ActionAttempt,
     DeterministicRecoveryExecutor,
     ExecutionTarget,
     MetricObservation,
@@ -273,3 +283,99 @@ def test_drain_timeout_escalates_without_interrupting_started_stream() -> None:
     escalated = executor.tick(_observation(7, streams=1))
     assert escalated.state is RecoveryState.OPERATOR_REQUIRED
     assert "deadline" in escalated.audit[-1].reason
+
+
+def test_concurrent_duplicate_observation_is_applied_once() -> None:
+    executor = DeterministicRecoveryExecutor(_plan(), now_ms=0)
+    observation = _observation(1, simulation=True)
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        snapshots = tuple(pool.map(lambda _: executor.tick(observation), range(64)))
+    assert all(item.state is RecoveryState.VALIDATED_IN_SIMULATION for item in snapshots)
+    assert executor.snapshot.processed_idempotency_keys.count(observation.idempotency_key) == 1
+    assert (
+        sum(item.idempotency_key == observation.idempotency_key for item in executor.snapshot.audit)
+        == 1
+    )
+
+
+def test_driver_cannot_substitute_another_action_identity() -> None:
+    plan = _plan()
+
+    class MismatchedDriver:
+        allow_external_mutation = False
+
+        def apply(self, action: RecoveryAction, *, now_ms: int) -> ActionAttempt:
+            substituted = plan.actions[-1]
+            return ActionAttempt(
+                action_id=substituted.action_id,
+                idempotency_key=substituted.idempotency_key,
+                attempted_at_ms=now_ms,
+                succeeded=True,
+                detail=f"claimed {action.action_id}",
+            )
+
+    executor = DeterministicRecoveryExecutor(plan, now_ms=0, driver=MismatchedDriver())
+    executor.tick(_observation(1, simulation=True))
+    building = executor.tick(_observation(2))
+    assert building.action_attempts[0].action_id == plan.actions[0].action_id
+    assert not building.action_attempts[0].succeeded
+    assert "mismatched" in building.action_attempts[0].detail
+    assert executor.tick(_observation(3)).state is RecoveryState.ABORTED
+
+
+def test_restore_rejects_tampered_action_evidence_and_oversized_snapshot() -> None:
+    plan = _plan()
+    executor = DeterministicRecoveryExecutor(plan, now_ms=0)
+    executor.tick(_observation(1, simulation=True))
+    executor.tick(_observation(2))
+    payload = json.loads(executor.dump_state())
+    payload["action_attempts"] = []
+    with pytest.raises(ValueError, match="do not match successful attempt evidence"):
+        DeterministicRecoveryExecutor.restore(plan, json.dumps(payload))
+    with pytest.raises(ValueError, match="bounded input size"):
+        DeterministicRecoveryExecutor.restore(plan, b" " * (8 * 1024 * 1024 + 1))
+
+
+@pytest.mark.skipif(os.name == "nt", reason="symlink replacement mode is POSIX-specific")
+def test_persist_state_is_atomic_private_and_does_not_follow_final_symlink(
+    tmp_path: Path,
+) -> None:
+    executor = DeterministicRecoveryExecutor(_plan(), now_ms=0)
+    victim = tmp_path / "victim.json"
+    victim.write_text("do-not-overwrite", encoding="utf-8")
+    output = tmp_path / "snapshot.json"
+    output.symlink_to(victim)
+    executor.persist_state(output)
+    assert victim.read_text(encoding="utf-8") == "do-not-overwrite"
+    assert not output.is_symlink()
+    assert stat.S_IMODE(output.stat().st_mode) == 0o600
+    restored = DeterministicRecoveryExecutor.restore(_plan(), output.read_bytes())
+    assert restored.snapshot == executor.snapshot
+
+
+def test_restored_executor_never_replays_persisted_action_attempts() -> None:
+    plan = _plan()
+    executor = DeterministicRecoveryExecutor(plan, now_ms=0)
+    executor.tick(_observation(1, simulation=True))
+    executor.tick(_observation(2))
+
+    class RecordingDriver:
+        allow_external_mutation = False
+
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def apply(self, action: RecoveryAction, *, now_ms: int) -> ActionAttempt:
+            self.calls += 1
+            return ActionAttempt(
+                action_id=action.action_id,
+                idempotency_key=action.idempotency_key,
+                attempted_at_ms=now_ms,
+                succeeded=True,
+                detail="unexpected replay",
+            )
+
+    driver = RecordingDriver()
+    restored = DeterministicRecoveryExecutor.restore(plan, executor.dump_state(), driver=driver)
+    restored.tick(_observation(3))
+    assert driver.calls == 0

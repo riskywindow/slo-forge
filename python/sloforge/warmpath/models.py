@@ -138,9 +138,17 @@ class ArtifactNode(WarmPathModel):
             raise ValueError("non-readiness artifacts must allow lazy restoration")
         if self.kind == ArtifactKind.GPU_MEMORY_IMAGE and self.compatibility.portable:
             raise ValueError("GPU memory images must declare non-portable compatibility")
-        if self.source_relative_path.startswith(
-            ("/", "\\")
-        ) or ".." in self.source_relative_path.split("/"):
+        normalized_path = self.source_relative_path.replace("\\", "/")
+        path_parts = normalized_path.split("/")
+        if (
+            normalized_path.startswith("/")
+            or (len(normalized_path) >= 2 and normalized_path[1] == ":")
+            or any(part in (".", "..") for part in path_parts)
+            or any(
+                ord(character) < 32 or ord(character) == 127
+                for character in self.source_relative_path
+            )
+        ):
             raise ValueError("artifact source path must be relative and cannot traverse parents")
         return self
 

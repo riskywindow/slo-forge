@@ -9,6 +9,7 @@ from typing import Annotated, Literal, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from yaml.tokens import AliasToken, AnchorToken
 
 from sloforge.fabric.simulation import (
     Collective,
@@ -116,8 +117,18 @@ class PhysicalFaultScenario(_FaultModel):
         return self
 
 
+MAX_PHYSICAL_FAULT_SCENARIO_BYTES = 4 * 1024 * 1024
+
+
 def load_physical_fault_scenario(path: Path) -> PhysicalFaultScenario:
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    with path.open("rb") as handle:
+        raw = handle.read(MAX_PHYSICAL_FAULT_SCENARIO_BYTES + 1)
+    if len(raw) > MAX_PHYSICAL_FAULT_SCENARIO_BYTES:
+        raise ValueError("physical fault scenario exceeds 4 MiB")
+    text = raw.decode("utf-8")
+    if any(isinstance(token, (AliasToken, AnchorToken)) for token in yaml.scan(text)):
+        raise ValueError("physical fault scenarios do not permit YAML anchors or aliases")
+    payload = yaml.safe_load(text)
     # JSON-mode validation retains strict scalar checks while translating YAML
     # sequences into the immutable tuples required by the canonical model.
     return PhysicalFaultScenario.model_validate_json(json.dumps(payload))

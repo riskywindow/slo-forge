@@ -4,7 +4,7 @@
 //! silently substitute it for a configured engine.
 
 use axum::body::{Body, Bytes};
-use axum::extract::State;
+use axum::extract::{DefaultBodyLimit, State};
 use axum::http::{HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
@@ -21,6 +21,11 @@ use std::time::Duration;
 use tokio::sync::Semaphore;
 
 const NO_TOKEN_FAULT: usize = usize::MAX;
+const MAX_MOCK_DELAY_MS: u64 = 5 * 60 * 1_000;
+const MAX_MOCK_DELAY_US: u64 = 5 * 60 * 1_000 * 1_000;
+const MAX_MOCK_ITEMS: usize = 1_000_000;
+const MAX_MOCK_COUNT: u64 = 1_000_000;
+const MAX_MOCK_BODY_BYTES: usize = 1024 * 1024;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -50,6 +55,8 @@ pub struct MockBackendConfig {
     pub price_per_hour_usd: f64,
     #[serde(default)]
     pub failure_rate: f64,
+    #[serde(default)]
+    pub fault_api_enabled: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -69,7 +76,7 @@ impl MockBackendConfig {
     ///
     /// Returns an error when the file cannot be read, parsed, or validated.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, MockConfigError> {
-        let bytes = std::fs::read(path)?;
+        let bytes = crate::config::read_bounded_config(path)?;
         let config: Self = serde_json::from_slice(&bytes)?;
         config.validate()?;
         Ok(config)
@@ -84,6 +91,18 @@ impl MockBackendConfig {
         if self.name.trim().is_empty() || self.max_concurrency == 0 || self.max_output_tokens == 0 {
             return Err(MockConfigError::Invalid(
                 "name and positive concurrency/output limits are required".to_owned(),
+            ));
+        }
+        if self.max_concurrency > MAX_MOCK_ITEMS
+            || u64::from(self.max_output_tokens) > MAX_MOCK_COUNT
+            || self.startup_ms > MAX_MOCK_DELAY_MS
+            || self.startup_jitter_ms > MAX_MOCK_DELAY_MS
+            || self.prefill_base_ms > MAX_MOCK_DELAY_MS
+            || self.prefill_per_token_us > MAX_MOCK_DELAY_US
+            || self.decode_per_token_ms > MAX_MOCK_DELAY_MS
+        {
+            return Err(MockConfigError::Invalid(
+                "mock capacities, token limits, and delays exceed safety bounds".to_owned(),
             ));
         }
         if !(0.0..=1.0).contains(&self.failure_rate)
@@ -147,12 +166,18 @@ impl MockBackend {
     }
 
     pub fn router(self: &Arc<Self>) -> Router {
-        Router::new()
+        let router = Router::new()
             .route("/v1/completions", post(completion))
             .route("/v1/chat/completions", post(chat_completion))
             .route("/health", get(mock_health))
-            .route("/metrics", get(mock_metrics))
-            .route("/admin/fault", post(inject_fault))
+            .route("/metrics", get(mock_metrics));
+        let router = if self.config.fault_api_enabled {
+            router.route("/admin/fault", post(inject_fault))
+        } else {
+            router
+        };
+        router
+            .layer(DefaultBodyLimit::max(MAX_MOCK_BODY_BYTES))
             .with_state(Arc::clone(self))
     }
 }
@@ -389,21 +414,33 @@ fn apply_fault(faults: &FaultState, command: FaultCommand) -> Result<(), String>
                 .store(multiplier.to_bits(), Ordering::Relaxed);
         }
         FaultCommand::ColdStart { next_delay_ms } => {
+            if next_delay_ms > MAX_MOCK_DELAY_MS {
+                return Err("cold-start delay must not exceed 300000 ms".to_owned());
+            }
             faults
                 .cold_start_next_ms
                 .store(next_delay_ms, Ordering::Relaxed);
         }
         FaultCommand::MalformedSse { after_tokens } => {
+            if after_tokens > MAX_MOCK_ITEMS {
+                return Err("malformed-SSE token count must not exceed 1000000".to_owned());
+            }
             faults
                 .malformed_after_tokens
                 .store(after_tokens, Ordering::Relaxed);
         }
         FaultCommand::Disconnect { after_tokens } => {
+            if after_tokens > MAX_MOCK_ITEMS {
+                return Err("disconnect token count must not exceed 1000000".to_owned());
+            }
             faults
                 .disconnect_after_tokens
                 .store(after_tokens, Ordering::Relaxed);
         }
         FaultCommand::RequestErrors { count } => {
+            if count > MAX_MOCK_COUNT {
+                return Err("request-error count must not exceed 1000000".to_owned());
+            }
             faults.request_error_count.store(count, Ordering::Relaxed);
         }
         FaultCommand::Clear => {
@@ -527,6 +564,8 @@ const fn default_request_tokens() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use axum::body::Body;
+    use tower::ServiceExt;
 
     fn config() -> MockBackendConfig {
         MockBackendConfig {
@@ -543,6 +582,7 @@ mod tests {
             max_output_tokens: 10,
             price_per_hour_usd: 0.1,
             failure_rate: 0.0,
+            fault_api_enabled: true,
         }
     }
 
@@ -565,11 +605,53 @@ mod tests {
     }
 
     #[test]
+    fn rejects_unbounded_fault_parameters() {
+        let faults = FaultState::default();
+        assert!(
+            apply_fault(
+                &faults,
+                FaultCommand::ColdStart {
+                    next_delay_ms: MAX_MOCK_DELAY_MS + 1,
+                }
+            )
+            .is_err()
+        );
+        assert!(
+            apply_fault(
+                &faults,
+                FaultCommand::RequestErrors {
+                    count: MAX_MOCK_COUNT + 1,
+                }
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
     fn fault_state_clears() {
         let faults = FaultState::default();
         assert!(apply_fault(&faults, FaultCommand::Crash { enabled: true }).is_ok());
         assert!(faults.crashed.load(Ordering::Relaxed));
         assert!(apply_fault(&faults, FaultCommand::Clear).is_ok());
         assert!(!faults.crashed.load(Ordering::Relaxed));
+    }
+
+    #[tokio::test]
+    async fn fault_api_requires_explicit_opt_in() -> Result<(), Box<dyn std::error::Error>> {
+        let mut disabled = config();
+        disabled.fault_api_enabled = false;
+        let backend = MockBackend::new(disabled)?;
+        let response = backend
+            .router()
+            .oneshot(
+                axum::http::Request::builder()
+                    .method("POST")
+                    .uri("/admin/fault")
+                    .header("content-type", "application/json")
+                    .body(Body::from(r#"{"fault":"clear"}"#))?,
+            )
+            .await?;
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+        Ok(())
     }
 }

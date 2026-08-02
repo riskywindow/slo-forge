@@ -134,6 +134,17 @@ def test_matrix_loader_is_versioned_and_strict() -> None:
         type(matrix).model_validate(invalid)
 
 
+def test_matrix_loader_bounds_input_and_rejects_yaml_references(tmp_path: Path) -> None:
+    alias = tmp_path / "alias.yaml"
+    alias.write_text("schema_version: &version '1.0.0'\nmatrix_id: fixture\ncases: *version\n")
+    with pytest.raises(ValueError, match="anchors or aliases"):
+        load_matrix(alias)
+    oversized = tmp_path / "oversized.yaml"
+    oversized.write_bytes(b" " * (4 * 1024 * 1024 + 1))
+    with pytest.raises(ValueError, match="exceeds 4 MiB"):
+        load_matrix(oversized)
+
+
 def test_runner_separates_warmup_and_detects_two_metric_regression(tmp_path: Path) -> None:
     repository = tmp_path / "fixture"
     good, _, bad = create_regression_fixture(repository)
@@ -304,6 +315,38 @@ def test_metric_parser_rejects_hard_coded_or_malformed_output(tmp_path: Path) ->
     assert all(error is not None for error in errors)
     payload = json.loads(Path(failed.artifact_directory, "run.json").read_text())
     assert payload["success"] is False
+
+
+def test_runner_caps_output_and_does_not_inherit_host_secrets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repository = tmp_path / "bounded-output"
+    repository.mkdir()
+    (repository / "benchmark.py").write_text(
+        """import json
+import os
+
+assert "HOST_API_KEY" not in os.environ
+assert "GITHUB_TOKEN" not in os.environ
+print("x" * (1024 * 1024 + 128))
+print(json.dumps({"p99_ttft_ms": 10.0, "throughput_rps": 20.0}))
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("HOST_API_KEY", "must-not-reach-benchmark")
+    monkeypatch.setenv("GITHUB_TOKEN", "also-must-not-reach-benchmark")
+    case = _case(repository, "fixture", repetitions=3)
+    benchmark = case.benchmark.model_copy(update={"warmup_trials": 0, "failed_trial_retries": 0})
+    run = run_case(
+        case.model_copy(update={"benchmark": benchmark}),
+        checkout=repository,
+        output_directory=tmp_path / "runs",
+    )
+    assert not run.success
+    assert all("output exceeded" in (trial.error or "") for trial in run.trials)
+    for log in Path(run.artifact_directory).glob("trials/*.stdout"):
+        assert log.stat().st_size <= 1024 * 1024 + 64
+        assert "must-not-reach-benchmark" not in log.read_text(encoding="utf-8")
 
 
 def test_matrix_runner_uses_isolated_local_checkout(tmp_path: Path) -> None:

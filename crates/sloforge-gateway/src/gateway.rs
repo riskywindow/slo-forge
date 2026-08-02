@@ -654,6 +654,15 @@ async fn handle_inference(
     request: InferenceRequest,
     context: RequestContext,
 ) -> Result<Response, HandlerError> {
+    if request.max_tokens > gateway.config.max_output_tokens {
+        return Err(invalid_request(
+            &context,
+            format!(
+                "max_tokens must not exceed {}",
+                gateway.config.max_output_tokens
+            ),
+        ));
+    }
     let admission = gateway.admit(&context)?;
     let request_id = context.request_id.clone();
     let traceparent = context.traceparent.clone();
