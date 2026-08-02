@@ -19,11 +19,26 @@ from sloforge.genesis.capsule import (
     seal_capsule,
     validate_capsule,
 )
+from sloforge.genesis.capsule.builder import _trusted_temporary_output
 from sloforge.genesis.runtime import load_generated_runtime
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "models/reference_tasks/hybrid_decoder"
 runner = CliRunner()
+
+
+def test_trusted_temporary_output_canonicalizes_only_the_orchestrator_root(
+    tmp_path: Path,
+) -> None:
+    actual = tmp_path / "private-temporary"
+    actual.mkdir()
+    alias = tmp_path / "public-temporary"
+    alias.symlink_to(actual, target_is_directory=True)
+
+    output = _trusted_temporary_output(str(alias))
+
+    assert output == actual.resolve(strict=True) / "artifacts"
+    assert not output.exists()
 
 
 def _accepted_candidate(tmp_path: Path) -> Path:
