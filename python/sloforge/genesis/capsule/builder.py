@@ -564,7 +564,14 @@ def _validate_transformation_chain(
 ) -> list[tuple[Path, Transformation]]:
     if len(transformation_paths) != len(transformation_ids):
         raise ValueError("candidate transformation artifact set is incomplete")
-    loaded_transformations = [(path, load_transformation(path)) for path in transformation_paths]
+    loaded_transformations: list[tuple[Path, Transformation]] = []
+    for path in transformation_paths:
+        try:
+            loaded_transformations.append((path, load_transformation(path)))
+        except (OSError, ValueError) as error:
+            raise ValueError(
+                f"persisted transformation failed trusted lowering derivation validation: {error}"
+            ) from error
     transformations_by_id = {
         transformation.transformation_id: (path, transformation)
         for path, transformation in loaded_transformations

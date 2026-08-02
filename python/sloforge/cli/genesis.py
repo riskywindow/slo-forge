@@ -508,11 +508,12 @@ def _validated_capsule(
     hardware: Path | None = None,
 ) -> tuple[GenesisCapsule, Path, CapsuleValidationReport]:
     manifest_path, root = _capsule_manifest(capsule)
+    context_is_inside_capsule = True
     try:
         context.resolve(strict=True).relative_to(root.resolve(strict=True))
     except ValueError:
-        pass
-    else:
+        context_is_inside_capsule = False
+    if context_is_inside_capsule:
         raise typer.BadParameter(
             "--context must be supplied from outside the untrusted capsule directory"
         )
@@ -1030,7 +1031,7 @@ def evolve_command(
     controller = EvolutionController.restore(
         store=EvolutionStore(state_path),
         capsule_validator=validator,
-        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+        config=_local_cli_evolution_config(),
     )
     if controller.snapshot.deployment_id != deployment:
         raise typer.BadParameter("controller state belongs to another deployment")
@@ -1146,7 +1147,9 @@ def replay_command(
     if not report.local_evolution_eligible:
         raise typer.BadParameter("capsule failed independent validation")
     with tempfile.TemporaryDirectory(prefix="sloforge-genesis-replay-") as temporary:
-        temporary_root = Path(temporary)
+        # Resolve only the trusted, freshly created temporary root before deriving
+        # children. On macOS tempfile may spell /private/var through the /var alias.
+        temporary_root = Path(temporary).resolve(strict=True)
         runtime_root = temporary_root / "runtime"
         runtime_root.mkdir()
         _extract_runtime_bundle(document, root, runtime_root)
