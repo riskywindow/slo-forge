@@ -198,6 +198,8 @@ def compare_runs(healthy: AutopsyRun, degraded: AutopsyRun) -> DifferentialCompa
             CounterDelta(
                 name=name,
                 unit=unit,
+                healthy_count=len(healthy_counters[(name, unit)]),
+                degraded_count=len(degraded_counters[(name, unit)]),
                 healthy_median=healthy_median,
                 degraded_median=degraded_median,
                 absolute_delta=degraded_median - healthy_median,
