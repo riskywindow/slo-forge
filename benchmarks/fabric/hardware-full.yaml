@@ -1,0 +1,16 @@
+schema_version: sloforge.fabric.benchmark-suite/v1
+name: hardware-full
+mode: measured
+requires:
+  gpu: nvidia
+  multi_gpu: true
+  optional_transports: [nccl, ibverbs]
+safety:
+  timeout_seconds_per_case: 120
+  allow_device_fallback: false
+  allow_transport_fallback: false
+warmup_count: 5
+sample_count: 25
+message_bytes: [1024, 4096, 65536, 1048576, 16777216, 268435456]
+rank_counts: [2, 4, 8]
+concurrency: [1, 2]

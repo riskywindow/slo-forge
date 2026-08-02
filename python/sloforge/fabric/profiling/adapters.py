@@ -50,7 +50,11 @@ class AdapterCommand(BaseModel):
 _TOOL_PROBES: tuple[tuple[str, tuple[str, ...], str], ...] = (
     ("cuda", ("nvcc", "--version"), r"release\s+([0-9]+(?:\.[0-9]+)+)"),
     ("nvml", ("nvidia-smi", "--version"), r"NVIDIA-SMI\s+([0-9]+(?:\.[0-9]+)+)"),
-    ("nccl-all-reduce", ("all_reduce_perf", "--help"), r"NCCL(?: VERSION)?\s*([0-9]+(?:\.[0-9]+)+)"),
+    (
+        "nccl-all-reduce",
+        ("all_reduce_perf", "--help"),
+        r"NCCL(?: VERSION)?\s*([0-9]+(?:\.[0-9]+)+)",
+    ),
     ("ibverbs", ("ibv_devinfo", "--version"), r"([0-9]+(?:\.[0-9]+)+)"),
     ("ib-perftest", ("ib_write_bw", "--version"), r"([0-9]+(?:\.[0-9]+)+)"),
     ("ucx", ("ucx_info", "-v"), r"version:\s*([0-9]+(?:\.[0-9]+)+)"),
@@ -192,7 +196,9 @@ def build_nccl_tests_command(
     if channels is not None:
         if channels < 1:
             raise ValueError("NCCL channel count must be positive")
-        environment.extend((('NCCL_MIN_NCHANNELS', str(channels)), ('NCCL_MAX_NCHANNELS', str(channels))))
+        environment.extend(
+            (("NCCL_MIN_NCHANNELS", str(channels)), ("NCCL_MAX_NCHANNELS", str(channels)))
+        )
     return AdapterCommand(
         adapter="nccl-tests",
         executable=resolved,

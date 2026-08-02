@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
 import math
-import os
 import platform
 import random
 import statistics
@@ -25,13 +25,20 @@ from sloforge.fabric.profiling.models import (
     Placement,
     Primitive,
     RawSample,
+    RawSampleArtifact,
     RobustSummary,
     finalize_profile,
     finalize_result,
 )
-from sloforge.fabric.topology.models import EdgeKind, FactState, NodeKind, TopologyEdge, TopologyGraph
+from sloforge.fabric.topology.models import (
+    DiscoveryTopologyGraph,
+    EdgeKind,
+    FactState,
+    NodeKind,
+    ObservedFact,
+    TopologyEdge,
+)
 from sloforge.util import percentile, utc_now, write_json
-
 
 _FULL_PRIMITIVES = tuple(Primitive)
 _QUICK_PRIMITIVES = (
@@ -61,7 +68,12 @@ _GPU_LOCAL = {
     Primitive.PREFILL,
     Primitive.DECODE,
 }
-_NO_PAYLOAD = {Primitive.KERNEL_LAUNCH, Primitive.DEVICE_SYNCHRONIZE, Primitive.STARTUP, Primitive.GROUP_INITIALIZATION}
+_NO_PAYLOAD = {
+    Primitive.KERNEL_LAUNCH,
+    Primitive.DEVICE_SYNCHRONIZE,
+    Primitive.STARTUP,
+    Primitive.GROUP_INITIALIZATION,
+}
 
 
 def _environment() -> tuple[EnvironmentFact, ...]:
@@ -69,13 +81,16 @@ def _environment() -> tuple[EnvironmentFact, ...]:
         EnvironmentFact(name="platform", value=platform.platform(), source="python-platform"),
         EnvironmentFact(name="machine", value=platform.machine(), source="python-platform"),
         EnvironmentFact(name="python", value=sys.version.split()[0], source="python-runtime"),
-        EnvironmentFact(name="process_id", value=os.getpid(), source="python-runtime"),
         EnvironmentFact(name="numpy", value=np.__version__, source="python-package"),
     )
 
 
 def summarize_samples(
-    samples: tuple[RawSample, ...], *, seed: int, confidence_level: float = 0.95, bootstrap_rounds: int = 500
+    samples: tuple[RawSample, ...],
+    *,
+    seed: int,
+    confidence_level: float = 0.95,
+    bootstrap_rounds: int = 500,
 ) -> RobustSummary:
     if not samples:
         raise ValueError("cannot summarize zero samples")
@@ -86,8 +101,7 @@ def summarize_samples(
     deviations = [abs(value - median) for value in durations]
     rng = random.Random(seed)
     bootstrapped = sorted(
-        statistics.median(rng.choices(durations, k=len(durations)))
-        for _ in range(bootstrap_rounds)
+        statistics.median(rng.choices(durations, k=len(durations))) for _ in range(bootstrap_rounds)
     )
     alpha = (1.0 - confidence_level) / 2.0
     return RobustSummary(
@@ -111,7 +125,7 @@ def _numeric_fact(edge: TopologyEdge, name: str) -> float | None:
     return None
 
 
-def _path_for(graph: TopologyGraph, primitive: Primitive) -> tuple[TopologyEdge, ...]:
+def _path_for(graph: DiscoveryTopologyGraph, primitive: Primitive) -> tuple[TopologyEdge, ...]:
     kinds: set[EdgeKind]
     if primitive is Primitive.GPU_P2P:
         kinds = {EdgeKind.GPU_GPU}
@@ -140,19 +154,24 @@ def _path_for(graph: TopologyGraph, primitive: Primitive) -> tuple[TopologyEdge,
     return (ranked[0],)
 
 
-def _resources(graph: TopologyGraph) -> tuple[float, float]:
+def _resources(graph: DiscoveryTopologyGraph) -> tuple[float, float]:
     gpu_bandwidths: list[float] = []
     for node in graph.nodes:
         if node.kind is not NodeKind.GPU:
             continue
         fact = node.fact("memory_bandwidth")
-        if fact and fact.state is FactState.KNOWN and isinstance(fact.value, (int, float)) and not isinstance(fact.value, bool):
+        if (
+            fact
+            and fact.state is FactState.KNOWN
+            and isinstance(fact.value, (int, float))
+            and not isinstance(fact.value, bool)
+        ):
             gpu_bandwidths.append(float(fact.value))
     return (min(gpu_bandwidths, default=900_000_000_000.0), 4.0)
 
 
 def _base_curve(
-    graph: TopologyGraph,
+    graph: DiscoveryTopologyGraph,
     primitive: Primitive,
     message_bytes: int,
     rank_count: int,
@@ -182,7 +201,11 @@ def _base_curve(
             volume_factor = 2.0 * (rank_count - 1) / rank_count
         elif primitive in {Primitive.ALL_GATHER, Primitive.REDUCE_SCATTER}:
             volume_factor = (rank_count - 1) / rank_count
-        elif primitive in {Primitive.ALL_TO_ALL, Primitive.EXPERT_DISPATCH, Primitive.EXPERT_COMBINE}:
+        elif primitive in {
+            Primitive.ALL_TO_ALL,
+            Primitive.EXPERT_DISPATCH,
+            Primitive.EXPERT_COMBINE,
+        }:
             volume_factor = (rank_count - 1) / rank_count * 1.18
         elif primitive is Primitive.BROADCAST:
             volume_factor = math.ceil(math.log2(max(2, rank_count)))
@@ -205,12 +228,17 @@ def _base_curve(
     return duration, effective_throughput, path
 
 
-def _placement(graph: TopologyGraph, rank_count: int) -> Placement:
+def _placement(graph: DiscoveryTopologyGraph, rank_count: int) -> Placement:
     visible_ids = set(graph.visibility.visible_gpu_ids)
+
+    def visible(node_id: str, uuid_fact: object) -> bool:
+        uuid = uuid_fact.value if isinstance(uuid_fact, ObservedFact) else None
+        return not visible_ids or node_id in visible_ids or str(uuid or "") in visible_ids
+
     gpu_nodes = [
         node
         for node in graph.nodes
-        if node.kind is NodeKind.GPU and (not visible_ids or node.node_id in visible_ids or str(node.fact("uuid").value if node.fact("uuid") else "") in visible_ids)
+        if node.kind is NodeKind.GPU and visible(node.node_id, node.fact("uuid"))
     ]
     selected = gpu_nodes[:rank_count]
     hosts = tuple(dict.fromkeys(node.host_id for node in selected)) or (graph.topology_id,)
@@ -228,7 +256,7 @@ def _case_id(primitive: Primitive, message_bytes: int, rank_count: int, concurre
 
 
 def benchmark_synthetic_fabric(
-    graph: TopologyGraph,
+    graph: DiscoveryTopologyGraph,
     *,
     seed: int,
     suite: str = "quick",
@@ -260,7 +288,9 @@ def benchmark_synthetic_fabric(
                     base_us, _, path = _base_curve(
                         graph, primitive, message_bytes, rank_count, concurrency
                     )
-                    case_seed = seed ^ int.from_bytes(case_id.encode()[:8].ljust(8, b"\0"), "big")
+                    case_seed = seed ^ int.from_bytes(
+                        hashlib.sha256(case_id.encode()).digest()[:8], "big"
+                    )
                     rng = random.Random(case_seed)
                     # Warmups affect generator state and are retained in invocation
                     # metadata, but are intentionally excluded from raw measurements.
@@ -322,9 +352,7 @@ def benchmark_synthetic_fabric(
                             timeout_seconds=30.0,
                         ),
                     )
-                    raw_artifact = (
-                        str(Path("raw") / f"{case_id}.json") if output_dir is not None else None
-                    )
+                    raw_artifact = str(Path("raw") / f"{case_id}.json")
                     samples = tuple(raw)
                     results.append(
                         finalize_result(
@@ -371,6 +399,10 @@ def benchmark_host_memory(
     target = np.empty_like(source)
     started_suite = time.monotonic()
     measured: list[RawSample] = []
+    status: BenchmarkStatus
+    failure_reason: str | None
+    samples: tuple[RawSample, ...]
+    summary: RobustSummary | None
     try:
         for iteration in range(warmup_count + sample_count):
             if time.monotonic() - started_suite > timeout_seconds:
@@ -391,7 +423,7 @@ def benchmark_host_memory(
     except TimeoutError as error:
         status = BenchmarkStatus.FAILED
         failure_reason = str(error)
-        samples: tuple[RawSample, ...] = ()
+        samples = ()
         summary = None
     else:
         status = BenchmarkStatus.SUCCESS
@@ -447,19 +479,35 @@ def save_profile(output_dir: Path, profile: FabricProfile) -> None:
         resolved_output = output_dir.resolve()
         if resolved_output not in artifact_path.resolve().parents:
             raise ValueError(f"raw artifact escapes output directory: {result.raw_artifact}")
-        write_json(
-            artifact_path,
-            {
-                "schema_version": "sloforge.fabric.raw-samples/v1",
-                "case_id": result.case.case_id,
-                "mode": result.mode,
-                "samples": [sample.model_dump(mode="json") for sample in result.raw_samples],
-                "benchmark_artifact_hash": result.artifact_hash,
-            },
+        artifact = RawSampleArtifact(
+            case_id=result.case.case_id,
+            mode=result.mode,
+            samples=result.raw_samples,
+            benchmark_artifact_hash=result.artifact_hash,
         )
+        write_json(artifact_path, artifact.model_dump(mode="json"))
     write_json(output_dir / "profile.json", profile.model_dump(mode="json"))
 
 
 def load_profile(path: Path) -> FabricProfile:
     profile_path = path / "profile.json" if path.is_dir() else path
-    return FabricProfile.model_validate_json(profile_path.read_text(encoding="utf-8"))
+    profile = FabricProfile.model_validate_json(profile_path.read_text(encoding="utf-8"))
+    if path.is_dir():
+        resolved_output = path.resolve()
+        for result in profile.results:
+            if result.raw_artifact is None:
+                continue
+            artifact_path = path / result.raw_artifact
+            if resolved_output not in artifact_path.resolve().parents:
+                raise ValueError(f"raw artifact escapes profile directory: {result.raw_artifact}")
+            artifact = RawSampleArtifact.model_validate_json(
+                artifact_path.read_text(encoding="utf-8")
+            )
+            if (
+                artifact.case_id != result.case.case_id
+                or artifact.mode is not result.mode
+                or artifact.samples != result.raw_samples
+                or artifact.benchmark_artifact_hash != result.artifact_hash
+            ):
+                raise ValueError(f"raw artifact does not match profile: {result.raw_artifact}")
+    return profile

@@ -13,7 +13,15 @@ import subprocess
 from collections.abc import Iterable
 from pathlib import Path
 
+from sloforge.fabric.ir import (
+    TopologyGraph as CanonicalTopologyGraph,
+)
+from sloforge.fabric.ir import (
+    load_topology_graph,
+    save_topology_graph,
+)
 from sloforge.fabric.topology.models import (
+    DiscoveryTopologyGraph,
     EdgeKind,
     FactState,
     HealthState,
@@ -23,7 +31,6 @@ from sloforge.fabric.topology.models import (
     Provenance,
     SoftwareComponent,
     TopologyEdge,
-    TopologyGraph,
     TopologyNode,
     Visibility,
     finalize_graph,
@@ -58,7 +65,9 @@ def observed(
 ) -> ObservedFact:
     """Normalize source observations without hiding disagreements."""
     normalized = tuple(
-        Observation(value=value if isinstance(value, (str, int, float, bool)) else None, provenance=p)
+        Observation(
+            value=value if isinstance(value, (str, int, float, bool)) else None, provenance=p
+        )
         for value, p in observations
     )
     if not normalized:
@@ -122,6 +131,19 @@ def _memory_bytes() -> int | None:
     return None
 
 
+def _visible_memory_bytes() -> int | None:
+    for candidate in (
+        Path("/sys/fs/cgroup/memory.max"),
+        Path("/sys/fs/cgroup/memory/memory.limit_in_bytes"),
+    ):
+        value = _read_text(candidate)
+        if value and value != "max":
+            parsed = _parse_int(value)
+            if parsed is not None and parsed > 0:
+                return parsed
+    return _memory_bytes()
+
+
 def _cpu_model() -> str | None:
     if platform.system() == "Linux":
         text = _read_text(Path("/proc/cpuinfo"))
@@ -133,6 +155,21 @@ def _cpu_model() -> str | None:
             if result and result.returncode == 0 and result.stdout.strip():
                 return result.stdout.strip()
     return platform.processor() or None
+
+
+def _physical_cpu_count() -> int | None:
+    if platform.system() == "Darwin":
+        result = _run(("sysctl", "-n", "hw.physicalcpu"))
+        return _parse_int(result.stdout.strip()) if result and result.returncode == 0 else None
+    if platform.system() == "Linux":
+        text = _read_text(Path("/proc/cpuinfo"))
+        if text:
+            pairs = set(
+                re.findall(r"physical id\s*:\s*(\d+).*?core id\s*:\s*(\d+)", text, re.DOTALL)
+            )
+            if pairs:
+                return len(pairs)
+    return None
 
 
 def _socket_ids() -> tuple[int, ...]:
@@ -158,8 +195,10 @@ def _numa_ids() -> tuple[int, ...]:
 def _container_state() -> tuple[bool, tuple[str, ...], bool | None]:
     restrictions: list[str] = []
     cgroup = _read_text(Path("/proc/1/cgroup")) or ""
-    in_container = Path("/.dockerenv").exists() or "container" in os.environ or bool(
-        re.search(r"docker|kubepods|containerd", cgroup)
+    in_container = (
+        Path("/.dockerenv").exists()
+        or "container" in os.environ
+        or bool(re.search(r"docker|kubepods|containerd", cgroup))
     )
     nvidia_visible = os.environ.get("NVIDIA_VISIBLE_DEVICES")
     if nvidia_visible is not None:
@@ -207,7 +246,11 @@ def _software(captured_at: str) -> tuple[SoftwareComponent, ...]:
     records: list[SoftwareComponent] = []
     specifications = (
         ("cuda", ("nvcc", "--version"), r"release\s+([0-9.]+)"),
-        ("nvidia-driver", ("nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"), r"([0-9.]+)"),
+        (
+            "nvidia-driver",
+            ("nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"),
+            r"([0-9.]+)",
+        ),
         ("nccl", ("nccl-tests", "--version"), r"([0-9]+(?:\.[0-9]+)+)"),
         ("ibverbs", ("ibv_devinfo", "--version"), r"([0-9]+(?:\.[0-9]+)+)"),
         ("hwloc", ("lstopo", "--version"), r"([0-9]+(?:\.[0-9]+)+)"),
@@ -247,7 +290,7 @@ def _software(captured_at: str) -> tuple[SoftwareComponent, ...]:
     return tuple(records)
 
 
-def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
+def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTopologyGraph:
     """Discover only hardware visible to the current process.
 
     Host-invisible devices are recorded as a visibility limitation; they are not
@@ -270,11 +313,15 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 observed("cpu_model", [(_cpu_model(), proc_prov)]),
                 observed("logical_cpu_count", [(os.cpu_count(), sys_prov)], unit="count"),
                 observed("memory_capacity", [(_memory_bytes(), proc_prov)], unit="bytes"),
+                observed(
+                    "visible_memory_capacity", [(_visible_memory_bytes(), proc_prov)], unit="bytes"
+                ),
             ),
         )
     ]
     edges: list[TopologyEdge] = []
     sockets = _socket_ids()
+    physical_cpu_count = _physical_cpu_count()
     for socket_id in sockets:
         node_id = f"{host_id}/socket/{socket_id}"
         nodes.append(
@@ -283,7 +330,27 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 kind=NodeKind.CPU_SOCKET,
                 host_id=host_id,
                 health=HealthState.HEALTHY,
-                facts=(observed("socket_index", [(socket_id, proc_prov)]),),
+                facts=(
+                    observed("socket_index", [(socket_id, proc_prov)]),
+                    observed("cpu_model", [(_cpu_model(), proc_prov)]),
+                    observed(
+                        "physical_core_count",
+                        [
+                            (
+                                physical_cpu_count // len(sockets)
+                                if physical_cpu_count is not None
+                                else None,
+                                sys_prov,
+                            )
+                        ],
+                        unit="count",
+                    ),
+                    observed(
+                        "logical_cpu_count",
+                        [((os.cpu_count() or 1) // len(sockets), sys_prov)],
+                        unit="count",
+                    ),
+                ),
             )
         )
         edges.append(
@@ -301,6 +368,11 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
         memory_text = _read_text(Path(f"/sys/devices/system/node/node{numa_id}/meminfo"))
         memory_match = re.search(r"MemTotal:\s+(\d+)\s+kB", memory_text or "")
         capacity = int(memory_match.group(1)) * 1024 if memory_match else None
+        if capacity is None and len(_numa_ids()) == 1:
+            capacity = _visible_memory_bytes()
+        cpu_set = _read_text(Path(f"/sys/devices/system/node/node{numa_id}/cpulist"))
+        if cpu_set is None and len(_numa_ids()) == 1:
+            cpu_set = f"0-{max(0, (os.cpu_count() or 1) - 1)}"
         nodes.append(
             TopologyNode(
                 node_id=node_id,
@@ -309,6 +381,7 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 health=HealthState.HEALTHY,
                 facts=(
                     observed("numa_index", [(numa_id, proc_prov)]),
+                    observed("cpu_set", [(cpu_set, proc_prov)]),
                     observed("memory_capacity", [(capacity, proc_prov)], unit="bytes"),
                 ),
             )
@@ -325,7 +398,9 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 sharing_group=f"numa-{numa_id}",
                 contention_domain=f"numa-memory-{numa_id}",
                 health=HealthState.HEALTHY,
-                facts=(observed("measured_bandwidth", [(None, proc_prov)], unit="bytes_per_second"),),
+                facts=(
+                    observed("measured_bandwidth", [(None, proc_prov)], unit="bytes_per_second"),
+                ),
             )
         )
 
@@ -350,8 +425,24 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                     observed("uuid", [(uuid, gpu_prov)]),
                     observed("product_name", [(name, gpu_prov)]),
                     observed(
+                        "architecture",
+                        [
+                            (
+                                f"compute-{compute}"
+                                if compute and compute not in {"N/A", "[N/A]"}
+                                else None,
+                                gpu_prov,
+                            )
+                        ],
+                    ),
+                    observed(
                         "memory_capacity",
-                        [(memory_bytes * 1024 * 1024 if memory_bytes is not None else None, gpu_prov)],
+                        [
+                            (
+                                memory_bytes * 1024 * 1024 if memory_bytes is not None else None,
+                                gpu_prov,
+                            )
+                        ],
                         unit="bytes",
                     ),
                     observed("pci_bus_id", [(pci_bus, gpu_prov)]),
@@ -360,13 +451,17 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                     observed("mig_mode", [(mig, gpu_prov)]),
                     observed("uncorrected_ecc_errors", [(_parse_int(ecc), gpu_prov)], unit="count"),
                     observed("sm_clock", [(_parse_int(clocks), gpu_prov)], unit="megahertz"),
-                    observed("power_draw", [(float(power) if power.replace('.', '', 1).isdigit() else None, gpu_prov)], unit="watts"),
+                    observed(
+                        "power_draw",
+                        [(float(power) if power.replace(".", "", 1).isdigit() else None, gpu_prov)],
+                        unit="watts",
+                    ),
                 ),
             )
         )
         numa_path = Path("/sys/bus/pci/devices") / pci_bus.lower() / "numa_node"
-        numa_id = _parse_int(_read_text(numa_path))
-        target_numa = max(0, numa_id or 0)
+        gpu_numa_id = _parse_int(_read_text(numa_path))
+        target_numa = max(0, gpu_numa_id or 0)
         cpu_node = f"{host_id}/numa/{target_numa}"
         edges.append(
             TopologyEdge(
@@ -404,10 +499,19 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 health=HealthState.HEALTHY if carrier == 1 else HealthState.UNKNOWN,
                 facts=(
                     observed("interface_name", [(ifname, network_prov)]),
-                    observed("link_speed", [(speed_mbps, network_prov)], unit="megabits_per_second"),
+                    observed(
+                        "link_speed", [(speed_mbps, network_prov)], unit="megabits_per_second"
+                    ),
                     observed("transport", [(transport, network_prov)]),
-                    observed("active_port", [(carrier == 1 if carrier is not None else None, network_prov)]),
+                    observed(
+                        "active_port",
+                        [(carrier == 1 if carrier is not None else None, network_prov)],
+                    ),
                     observed("roce_capable", [(None, network_prov)]),
+                    observed(
+                        "rdma_capable",
+                        [(True if transport == "infiniband" else None, network_prov)],
+                    ),
                 ),
             )
         )
@@ -418,7 +522,10 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                 kind=NodeKind.NETWORK_RAIL,
                 host_id=host_id,
                 health=HealthState.HEALTHY if carrier == 1 else HealthState.UNKNOWN,
-                facts=(observed("transport", [(transport, network_prov)]),),
+                facts=(
+                    observed("name", [(ifname, network_prov)]),
+                    observed("transport", [(transport, network_prov)]),
+                ),
             )
         )
         edges.extend(
@@ -444,10 +551,17 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
                     facts=(
                         observed(
                             "theoretical_bandwidth",
-                            [(speed_mbps * 125_000 if speed_mbps is not None else None, network_prov)],
+                            [
+                                (
+                                    speed_mbps * 125_000 if speed_mbps is not None else None,
+                                    network_prov,
+                                )
+                            ],
                             unit="bytes_per_second",
                         ),
-                        observed("measured_bandwidth", [(None, network_prov)], unit="bytes_per_second"),
+                        observed(
+                            "measured_bandwidth", [(None, network_prov)], unit="bytes_per_second"
+                        ),
                         observed("latency", [(None, network_prov)], unit="microseconds"),
                     ),
                 ),
@@ -485,9 +599,24 @@ def discover_topology(*, topology_id: str | None = None) -> TopologyGraph:
     )
 
 
-def save_topology(path: Path, graph: TopologyGraph) -> None:
+def discover_topology(*, topology_id: str | None = None) -> CanonicalTopologyGraph:
+    """Discover and finalize the current host into the canonical Fabric IR."""
+    from sloforge.fabric.topology.conversion import to_canonical_topology
+
+    return to_canonical_topology(discover_topology_records(topology_id=topology_id))
+
+
+def save_topology(path: Path, graph: CanonicalTopologyGraph) -> None:
+    save_topology_graph(path, graph)
+
+
+def load_topology(path: Path) -> CanonicalTopologyGraph:
+    return load_topology_graph(path)
+
+
+def save_discovery_records(path: Path, graph: DiscoveryTopologyGraph) -> None:
     write_json(path, graph.model_dump(mode="json"))
 
 
-def load_topology(path: Path) -> TopologyGraph:
-    return TopologyGraph.model_validate_json(path.read_text(encoding="utf-8"))
+def load_discovery_records(path: Path) -> DiscoveryTopologyGraph:
+    return DiscoveryTopologyGraph.model_validate_json(path.read_text(encoding="utf-8"))
