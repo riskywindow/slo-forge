@@ -136,12 +136,24 @@ class WholeStackSeedResult(_Model):
 
 class PairedEffect(_Model):
     comparison: Literal["configuration_only_minus_genesis", "best_single_layer_minus_genesis"]
+    positive_difference_favors: Literal["genesis"] = "genesis"
+    resampling_unit: Literal["paired_workload_seed"] = "paired_workload_seed"
     per_seed_differences: tuple[float, ...]
     mean_difference: float
     confidence_low: float
     confidence_high: float
     confidence_level: Annotated[float, Field(ge=0.95, le=0.95)] = 0.95
     bootstrap_resamples: Literal[4000] = 4000
+
+    @model_validator(mode="after")
+    def coherent_paired_effect(self) -> PairedEffect:
+        if len(self.per_seed_differences) < 3:
+            raise ValueError("paired effect requires at least three workload seeds")
+        if self.mean_difference != round(statistics.fmean(self.per_seed_differences), 9):
+            raise ValueError("paired effect mean is not derived from per-seed differences")
+        if not self.confidence_low <= self.mean_difference <= self.confidence_high:
+            raise ValueError("paired interval does not contain its observed mean")
+        return self
 
 
 class WholeStackCampaignReport(_Model):
@@ -485,6 +497,7 @@ def run_whole_stack_campaign(
         ),
         limitations=(
             "service time is a deterministic model unit, not a wall-clock or hardware measurement",
+            "paired bootstrap intervals resample seeded workload fixtures; they are descriptive of this finite deterministic campaign and are seed-sensitive",
             "the Fabric mutation is deliberately ineligible until its complete revalidation pipeline runs",
             "the exact tensor rewrite is verified but not lowered into the flagship generated runtime",
             "the paged allocator trades bounded fragmentation for transition-friendly state units",

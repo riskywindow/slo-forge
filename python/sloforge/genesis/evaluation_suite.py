@@ -266,9 +266,7 @@ def _reference(root: Path, path: Path) -> ArtifactReference:
 
 
 def _campaign_seeds(configuration: EvaluationSuiteConfiguration) -> tuple[int, ...]:
-    return tuple(
-        configuration.seed + 1000 + index for index in range(configuration.campaign_seed_count)
-    )
+    return tuple(configuration.seed + index for index in range(configuration.campaign_seed_count))
 
 
 def _h1_synthesis_seeds(configuration: EvaluationSuiteConfiguration) -> tuple[int, ...]:
@@ -383,6 +381,7 @@ def _h1_records(root: Path, report: H1CampaignReport) -> tuple[CampaignRecord, H
     limitations = (
         report.hardware_validation_reason,
         "Task-level Wilson intervals do not establish behavior outside the typed task grammar.",
+        "Synthesis-seed Wilson intervals are descriptive repeated deterministic attempts, not independent population samples.",
     )
     campaign = CampaignRecord(
         campaign_id="h1",
@@ -411,6 +410,18 @@ def _h1_records(root: Path, report: H1CampaignReport) -> tuple[CampaignRecord, H
         metrics=(
             _metric("task_count", aggregate.task_count, "unseen_tasks", scope),
             _metric("valid_system_rate", aggregate.valid_system_rate, "fraction", scope),
+            _metric(
+                "valid_system_95_wilson_low",
+                aggregate.valid_system_interval.lower,
+                "fraction",
+                scope,
+            ),
+            _metric(
+                "valid_system_95_wilson_high",
+                aggregate.valid_system_interval.upper,
+                "fraction",
+                scope,
+            ),
             _metric("exact_hidden_case_rate", aggregate.exact_hidden_case_rate, "fraction", scope),
             _metric(
                 "human_authored_model_specific_lines",
@@ -492,6 +503,24 @@ def _h3_records(root: Path, report: H3CampaignReport) -> tuple[CampaignRecord, H
     full = next(
         item for item in report.aggregates if item.strategy is VerificationStrategy.FULL_CEGIS
     )
+    tests_only = next(
+        item for item in report.aggregates if item.strategy is VerificationStrategy.TESTS_ONLY
+    )
+    fuzz_only = next(
+        item for item in report.aggregates if item.strategy is VerificationStrategy.FUZZING_ONLY
+    )
+    model_check_only = next(
+        item for item in report.aggregates if item.strategy is VerificationStrategy.MODEL_CHECK_ONLY
+    )
+    comparator_escapes = (
+        tests_only.escaped_faults,
+        fuzz_only.escaped_faults,
+        model_check_only.escaped_faults,
+    )
+    strictly_better_all = all(full.escaped_faults < value for value in comparator_escapes)
+    no_worse_with_some_reduction = all(
+        full.escaped_faults <= value for value in comparator_escapes
+    ) and any(full.escaped_faults < value for value in comparator_escapes)
     scope = report.scope.evidence_scope
     campaign = CampaignRecord(
         campaign_id="h3",
@@ -509,7 +538,9 @@ def _h3_records(root: Path, report: H3CampaignReport) -> tuple[CampaignRecord, H
         status=EvaluationStatus.COMPLETED,
         outcome=(
             HypothesisOutcome.SUPPORTED_IN_DECLARED_SCOPE
-            if full.escaped_faults == 0 and full.learned_constraint_reuses > 0
+            if strictly_better_all and full.learned_constraint_reuses > 0
+            else HypothesisOutcome.MIXED_IN_DECLARED_SCOPE
+            if no_worse_with_some_reduction and full.learned_constraint_reuses > 0
             else HypothesisOutcome.NOT_SUPPORTED_IN_DECLARED_SCOPE
         ),
         source_campaign_id="h3",
@@ -518,6 +549,24 @@ def _h3_records(root: Path, report: H3CampaignReport) -> tuple[CampaignRecord, H
         metrics=(
             _metric("fault_instances", full.fault_instances, "candidate_fault_instances", scope),
             _metric("escaped_faults", full.escaped_faults, "candidate_fault_instances", scope),
+            _metric(
+                "tests_only_escaped_faults",
+                tests_only.escaped_faults,
+                "candidate_fault_instances",
+                scope,
+            ),
+            _metric(
+                "fuzzing_only_escaped_faults",
+                fuzz_only.escaped_faults,
+                "candidate_fault_instances",
+                scope,
+            ),
+            _metric(
+                "model_check_only_escaped_faults",
+                model_check_only.escaped_faults,
+                "candidate_fault_instances",
+                scope,
+            ),
             _metric("learned_constraint_reuses", full.learned_constraint_reuses, "reuses", scope),
             _metric(
                 "median_minimized_counterexample_events",
@@ -537,7 +586,9 @@ def _h4_records(
     validate_autopsy_guided_campaign(report)
     scope = report.scope.evidence_scope
     comparisons_positive = all(
-        item.mean_time_to_improvement_reduction is not None
+        item.candidates_evaluated_reduction >= 0
+        and item.invalid_candidate_reduction >= 0
+        and item.mean_time_to_improvement_reduction is not None
         and item.mean_time_to_improvement_reduction > 0
         and item.mean_final_objective_delta is not None
         and item.mean_final_objective_delta > 0
@@ -560,14 +611,34 @@ def _h4_records(
         for item in report.guided_deltas
         for metric in (
             _metric(
+                f"{item.baseline.value}_candidate_reduction",
+                item.candidates_evaluated_reduction,
+                "candidates",
+                scope,
+            ),
+            _metric(
+                f"{item.baseline.value}_invalid_candidate_reduction",
+                item.invalid_candidate_reduction,
+                "candidates",
+                scope,
+            ),
+            _metric(
                 f"{item.baseline.value}_time_reduction",
-                item.mean_time_to_improvement_reduction or 0.0,
+                (
+                    item.mean_time_to_improvement_reduction
+                    if item.mean_time_to_improvement_reduction is not None
+                    else "not_available"
+                ),
                 "synthetic_seconds",
                 scope,
             ),
             _metric(
                 f"{item.baseline.value}_final_objective_delta",
-                item.mean_final_objective_delta or 0.0,
+                (
+                    item.mean_final_objective_delta
+                    if item.mean_final_objective_delta is not None
+                    else "not_available"
+                ),
                 "normalized_utility_points",
                 scope,
             ),
@@ -941,9 +1012,9 @@ def _load_native_records(
     seeds = _campaign_seeds(configuration)
     if whole.seeds != seeds or h8.seeds != seeds or h5.seeds != seeds:
         raise EvaluationSuiteValidationError("campaign seeds differ from suite configuration")
-    if h3.base_seed != configuration.seed + 4000 or len(h3.run_seeds) != len(seeds):
+    if h3.base_seed != configuration.seed or len(h3.run_seeds) != len(seeds):
         raise EvaluationSuiteValidationError("H3 seeds differ from suite configuration")
-    if h4.campaign_seed != configuration.seed + 5000 or len(h4.run_seeds) != len(seeds):
+    if h4.campaign_seed != configuration.seed or len(h4.run_seeds) != len(seeds):
         raise EvaluationSuiteValidationError("H4 seeds differ from suite configuration")
     core_record = _core_record(root, core)
     h1_record, h1_hypothesis = _h1_records(root, h1)
@@ -1022,14 +1093,14 @@ def run_genesis_evaluation_suite(
     )
     run_cegis_campaign(
         output / "campaigns/h3",
-        base_seed=configuration.seed + 4000,
+        base_seed=configuration.seed,
         seed_count=configuration.campaign_seed_count,
         fuzz_cases_per_candidate=configuration.h3_fuzz_cases_per_candidate,
     )
     run_autopsy_guided_campaign(
         output / "campaigns/h4",
         diagnosis_path=diagnosis_copy,
-        seed=configuration.seed + 5000,
+        seed=configuration.seed,
         count=configuration.campaign_seed_count,
         maximum_candidates=configuration.h4_maximum_candidates,
         improvement_threshold=configuration.h4_improvement_threshold,

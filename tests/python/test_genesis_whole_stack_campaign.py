@@ -28,8 +28,12 @@ def test_whole_stack_campaign_replays_real_cross_layer_candidate(tmp_path: Path)
     assert report.hardware_backed_runs == 0
     assert report.h2_conclusion == "supported_in_declared_synthetic_scope"
     assert report.h2_effect.confidence_low > 0
+    assert report.h2_effect.positive_difference_favors == "genesis"
+    assert report.h2_effect.resampling_unit == "paired_workload_seed"
+    assert all(value > 0 for value in report.h2_effect.per_seed_differences)
     assert report.h9_conclusion == "not_supported"
     assert report.h9_effect.confidence_high < 0
+    assert all(value < 0 for value in report.h9_effect.per_seed_differences)
     for result in report.results:
         assert result.transformation_families == (
             TransformationFamily.BATCHING,
