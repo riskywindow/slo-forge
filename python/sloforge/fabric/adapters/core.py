@@ -12,7 +12,10 @@ from typing import Any
 
 import yaml
 
-from sloforge.fabric.adapters.compatibility import validate_runtime
+from sloforge.fabric.adapters.compatibility import (
+    sglang_disaggregation_backend,
+    validate_runtime,
+)
 from sloforge.fabric.adapters.models import (
     AdapterCapabilities,
     DeploymentTarget,
@@ -94,6 +97,7 @@ def _runtime_command(
     context: FabricAdapterContext,
     *,
     role: WorkerRole,
+    bindings: list[RankBinding],
 ) -> list[str]:
     plan = context.plan
     if context.runtime is RuntimeKind.NATIVE:
@@ -115,7 +119,7 @@ def _runtime_command(
             "--pipeline-parallel-size",
             str(plan.parallelism.pipeline_parallel_degree),
             "--data-parallel-size",
-            str(plan.parallelism.data_parallel_degree),
+            "1",
         ]
         if plan.parallelism.expert_parallel_degree > 1:
             command.append("--enable-expert-parallel")
@@ -133,21 +137,35 @@ def _runtime_command(
             "sglang.launch_server",
             "--model-path",
             context.model_id,
-            "--tp",
+            "--tp-size",
             str(plan.parallelism.tensor_parallel_degree),
-            "--pp",
+            "--pp-size",
             str(plan.parallelism.pipeline_parallel_degree),
-            "--dp",
-            str(plan.parallelism.data_parallel_degree),
+            "--dp-size",
+            "1",
             "--ep-size",
             str(plan.parallelism.expert_parallel_degree),
         ]
-        if plan.parallelism.expert_parallel_degree > 1:
-            command.append("--enable-dp-attention")
         if plan.parallelism.prefill_decode_disaggregated:
             if role not in {WorkerRole.PREFILL, WorkerRole.DECODE}:
                 raise ValueError("disaggregated SGLang group must have one worker role")
-            command.extend(["--disaggregation-mode", role.value])
+            command.extend(
+                [
+                    "--disaggregation-mode",
+                    role.value,
+                    "--disaggregation-transfer-backend",
+                    sglang_disaggregation_backend(context),
+                ]
+            )
+            interfaces = sorted(
+                {
+                    interface
+                    for binding in bindings
+                    if (interface := _nic_interface(context, binding.nic_id)) is not None
+                }
+            )
+            if interfaces:
+                command.extend(["--disaggregation-ib-device", ",".join(interfaces)])
         return command
     raise ValueError("Dynamo commands are emitted as DynamoGraphDeployment components")
 
@@ -215,7 +233,7 @@ def _render_local(context: FabricAdapterContext, output: Path) -> None:
                 "host_id": host_id,
                 "rank_bindings": _binding_payload(context, bindings),
                 "cpu_affinity": _cpu_union(bindings),
-                "command": _runtime_command(context, role=_role(bindings)),
+                "command": _runtime_command(context, role=_role(bindings), bindings=bindings),
                 "environment": _base_environment(context, bindings),
                 "startup_timeout_seconds": 600,
                 "shutdown_grace_seconds": context.shutdown_grace_seconds,
@@ -254,7 +272,7 @@ def _render_docker(context: FabricAdapterContext, output: Path) -> None:
         environment["SLOFORGE_EXPECTED_HOST_ID"] = host_id
         services[name] = {
             "image": context.image,
-            "command": _runtime_command(context, role=_role(bindings)),
+            "command": _runtime_command(context, role=_role(bindings), bindings=bindings),
             "environment": environment,
             "cpuset": _cpu_union(bindings),
             "cpus": context.cpu_limit_per_rank * len(bindings),
@@ -431,7 +449,9 @@ def _render_kubernetes(context: FabricAdapterContext, output: Path) -> None:
                             {
                                 "name": "worker",
                                 "image": context.image,
-                                "command": _runtime_command(context, role=_role(bindings)),
+                                "command": _runtime_command(
+                                    context, role=_role(bindings), bindings=bindings
+                                ),
                                 "env": [
                                     {"name": key, "value": value}
                                     for key, value in sorted(environment.items())
@@ -485,10 +505,17 @@ def _render_kubernetes(context: FabricAdapterContext, output: Path) -> None:
     )
 
 
-def _dynamo_worker_args(context: FabricAdapterContext) -> list[str]:
+def _dynamo_worker_args(context: FabricAdapterContext, role: WorkerRole) -> list[str]:
     plan = context.plan.parallelism
     if context.dynamo_backend is None:
         raise ValueError("Dynamo backend missing")
+    role_replica_count = len(
+        {
+            binding.replica_id
+            for binding in context.plan.rank_placement.bindings
+            if binding.worker_role is role
+        }
+    )
     if context.dynamo_backend.value == "vllm":
         args = [
             "--model",
@@ -498,25 +525,34 @@ def _dynamo_worker_args(context: FabricAdapterContext) -> list[str]:
             "--pipeline-parallel-size",
             str(plan.pipeline_parallel_degree),
             "--data-parallel-size",
-            str(plan.data_parallel_degree),
+            str(role_replica_count),
         ]
         if plan.expert_parallel_degree > 1:
             args.append("--enable-expert-parallel")
+        if plan.prefill_decode_disaggregated:
+            args.extend(["--disaggregation-mode", role.value])
         return args
     args = [
         "--model-path",
         context.model_id,
-        "--tp",
+        "--tp-size",
         str(plan.tensor_parallel_degree),
-        "--pp",
+        "--pp-size",
         str(plan.pipeline_parallel_degree),
-        "--dp",
-        str(plan.data_parallel_degree),
+        "--dp-size",
+        str(role_replica_count),
         "--ep-size",
         str(plan.expert_parallel_degree),
     ]
-    if plan.expert_parallel_degree > 1:
-        args.append("--enable-dp-attention")
+    if plan.prefill_decode_disaggregated:
+        args.extend(
+            [
+                "--disaggregation-mode",
+                role.value,
+                "--disaggregation-transfer-backend",
+                sglang_disaggregation_backend(context),
+            ]
+        )
     return args
 
 
@@ -536,7 +572,7 @@ def _render_dynamo(context: FabricAdapterContext, output: Path) -> None:
         limits: dict[str, str] = {context.gpu_resource_name: str(per_host)}
         if context.rdma_resource_name is not None:
             limits[context.rdma_resource_name] = "1"
-        args = _dynamo_worker_args(context)
+        args = _dynamo_worker_args(context, role)
         if context.plan.parallelism.prefill_decode_disaggregated:
             if role not in {WorkerRole.PREFILL, WorkerRole.DECODE}:
                 raise ValueError("Dynamo disaggregated component has a non-P/D worker role")
@@ -564,6 +600,10 @@ def _render_dynamo(context: FabricAdapterContext, output: Path) -> None:
                             sort_keys=True,
                         ),
                         "sloforge.dev/binding-policy": "fail-on-mismatch",
+                        # Dynamo v1.2-v1.3 injects backend-aware startup,
+                        # readiness, and liveness probes into `main`. Supplying
+                        # guessed probes here would override that contract.
+                        "sloforge.dev/health-probes": "dynamo-operator-v1beta1-defaults",
                     }
                 },
                 "spec": {
@@ -592,17 +632,13 @@ def _render_dynamo(context: FabricAdapterContext, output: Path) -> None:
                             "image": context.image,
                             "command": ["python3", "-m", f"dynamo.{backend.value}"],
                             "args": args,
+                            "env": [
+                                {"name": key, "value": value}
+                                for key, value in sorted(
+                                    _base_environment(context, bindings).items()
+                                )
+                            ],
                             "resources": {"limits": limits, "requests": dict(limits)},
-                            "readinessProbe": {
-                                "httpGet": {"path": "/health", "port": 8000},
-                                "periodSeconds": 5,
-                                "failureThreshold": 12,
-                            },
-                            "livenessProbe": {
-                                "httpGet": {"path": "/health", "port": 8000},
-                                "periodSeconds": 15,
-                                "failureThreshold": 4,
-                            },
                         }
                     ],
                 },
@@ -667,7 +703,7 @@ def _render_cloud_metadata(
             {
                 "api": "modal.Image.env",
                 "variables": metadata["environment_variables"],
-                "source": "https://modal.com/docs/reference/modal.Image#env",
+                "source": "https://modal.com/docs/sdk/py/latest/Image#modal.Image.env",
             },
         )
     else:
