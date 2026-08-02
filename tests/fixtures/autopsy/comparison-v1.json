@@ -2,11 +2,11 @@
   "comparison_id": "comparison-159cf71a0008ffda",
   "counter_deltas": [
     {
-      "absolute_delta": -50,
+      "absolute_delta": -50.0,
       "degraded_count": 1,
-      "degraded_median": 50,
+      "degraded_median": 50.0,
       "healthy_count": 1,
-      "healthy_median": 100,
+      "healthy_median": 100.0,
       "name": "network_bandwidth_gbps",
       "relative_delta": -0.5,
       "unit": "Gb/s"
@@ -17,22 +17,22 @@
   "first_divergence_ns": 1000000,
   "healthy_run_id": "healthy-golden",
   "matched_event_count": 1,
-  "maximum_rank_skew": 1,
+  "maximum_rank_skew": 1.0,
   "schema_version": "sloforge.autopsy.comparison/v1",
   "stage_deltas": [
     {
-      "absolute_delta_ms": 2,
+      "absolute_delta_ms": 2.0,
       "degraded_count": 1,
-      "degraded_median_ms": 3,
-      "degraded_p95_ms": 3,
+      "degraded_median_ms": 3.0,
+      "degraded_p95_ms": 3.0,
       "event_type": "network_transfer",
       "healthy_count": 1,
-      "healthy_median_ms": 1,
-      "healthy_p95_ms": 1,
+      "healthy_median_ms": 1.0,
+      "healthy_p95_ms": 1.0,
       "matched_count": 1,
       "operation": "expert-dispatch",
       "rank": 0,
-      "relative_delta": 2,
+      "relative_delta": 2.0,
       "signature": "network_transfer:expert-dispatch:rank=0:request=request-0"
     }
   ],

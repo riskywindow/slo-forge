@@ -1,25 +1,25 @@
 {
   "degraded": {
-    "makespan_us": 10000,
+    "makespan_us": 10000.0,
     "operation_count": 1,
     "output_sha256": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
-    "predicted_lower_us": 9900,
-    "predicted_upper_us": 10100,
+    "predicted_lower_us": 9900.0,
+    "predicted_upper_us": 10100.0,
     "processed_events": 3
   },
   "diagnosis_id": "diagnosis-b3135065d22eff90",
   "evaluations": [
     {
       "confidence": 0.7763636363636364,
-      "expected_improvement_ms": 4,
+      "expected_improvement_ms": 4.0,
       "healthy_reference_residual_ms": 0.1,
       "lower_improvement_ms": 3.8,
       "observation": {
-        "makespan_us": 6000,
+        "makespan_us": 6000.0,
         "operation_count": 1,
         "output_sha256": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
-        "predicted_lower_us": 5900,
-        "predicted_upper_us": 6100,
+        "predicted_lower_us": 5900.0,
+        "predicted_upper_us": 6100.0,
         "processed_events": 3
       },
       "rejected_reason": null,
@@ -39,7 +39,7 @@
       "upper_improvement_ms": 4.2
     }
   ],
-  "healthy_reference_us": 5900,
+  "healthy_reference_us": 5900.0,
   "rejected_scenario_ids": [],
   "schema_version": "sloforge.autopsy.counterfactual/v1",
   "selected_scenario_id": "restore-rail",

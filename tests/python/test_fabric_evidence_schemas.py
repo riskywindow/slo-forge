@@ -97,12 +97,12 @@ CASES: tuple[SchemaCase, ...] = (
 )
 
 EXPECTED_CANONICAL_HASHES = {
-    "comparison-v1.json": "603a1e0e8f43b0930ac7a5871e7ed4304dc424ebc21cd8ab239d22655ab364ef",
-    "counterfactual-v1.json": "0eaf9b00ce2f35d67fa9a9affc5ed64e29e179a3c974efa65d049919e6cbab67",
-    "diagnosis-v1.json": "eba9fd2fa39367842d3db99c4203df1a577d6480aaa9898c7c3a1e7338cf4d90",
-    "event-v1.json": "7358842c12ce67595e789860a094a9e68ed73b3ff8dc03830a617be44ba7a6aa",
-    "minimization-v1.json": "2f63a51455263503296bd4ab75b69d2aab8e52bb029a3e2579e95509b62155a9",
-    "run-v1.json": "dba373186e9bedc14113038886ba81526544669e0e1c81366a374d3aa703b053",
+    "comparison-v1.json": "d59c43b1f4329e5d85baccc9e3b8eb1518d4881449a3461c01b6fa3caa4cddee",
+    "counterfactual-v1.json": "ee738f70f06c4e758b6c8912628d6ff6809102f2025d39e11151a4ea4ad22391",
+    "diagnosis-v1.json": "2a9180691b8f4f30e5aca136b6776a857aec8dc1485c4ec796bdc9731a10ce59",
+    "event-v1.json": "10dfcbed7efce7c37fa3589947069f63a3749276066a0e340eb59d425ebf955d",
+    "minimization-v1.json": "588fee895a639da6190f521ebc9fdd3ae87742e29ddefe038d0a4451fe60b80b",
+    "run-v1.json": "9e2cc63215041bd297d2b8d27da6f0098d5429f39fa9c08a1590a2c1ad620184",
     "artifact-graph-v1.json": "388b47de3fd3e27af426e132c25098cc6c5cd2ba3793b518fbd23f838ec5f2c8",
     "execution-v1.json": "a1bc0ca74bf57ed54fb58aab8d7ff3ffa80574cf5a0238d3e8d9bb757cff2ee1",
     "plan-v1.json": "7f992ca9d82ca19b79eb69a7825ad49600d76e2acd9b5b2bffbc304ff19805db",
@@ -164,6 +164,7 @@ def test_versioned_golden_records_validate_and_round_trip(
 
     parsed = model.model_validate_json(fixture_path.read_text(encoding="utf-8"))
     assert parsed.model_dump(mode="json") == document
+    assert canonical_json(parsed.model_dump(mode="json")) == canonical_json(document)
     assert document["schema_version"] == schema_version
     assert (
         sha256_bytes(canonical_json(document).encode())
