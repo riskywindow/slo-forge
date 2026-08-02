@@ -43,6 +43,7 @@ __all__ = [
     "ExpertPlacement",
     "ExpertSpec",
     "FabricMeasurementSeries",
+    "FabricModel",
     "FabricProfile",
     "FabricRawSample",
     "FactProvenance",
