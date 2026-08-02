@@ -1,0 +1,33 @@
+{
+  "schema_version": "genesis.modelcheck.request.v1",
+  "model_version": "genesis-invalid-rollback-candidate.v1",
+  "seed": 991,
+  "bounds": {
+    "max_requests": 1,
+    "queue_capacity": 1,
+    "max_tokens_per_request": 1,
+    "worker_count": 1,
+    "max_worker_failures": 0,
+    "max_depth": 14,
+    "max_states": 5000,
+    "fairness_window": 2
+  },
+  "protocol": {
+    "queue_overflow": "reject",
+    "token_delivery": "reliable",
+    "retry_after_output": "forbid",
+    "cancellation_release": "guaranteed",
+    "state_transfer_enabled": false,
+    "replicated_state_declared": false,
+    "state_ownership": "atomic_handoff",
+    "partial_state_read": "rejected",
+    "state_compatibility": "compatible",
+    "rollout_enabled": true,
+    "promotion": "drain_active",
+    "rollback": "lose_previous",
+    "worker_failure_enabled": false,
+    "controller_crash_enabled": false,
+    "recovery": "guaranteed"
+  },
+  "assumptions": []
+}

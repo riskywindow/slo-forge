@@ -1591,6 +1591,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sloforge-genesis-modelcheck"
+version = "0.1.0"
+dependencies = [
+ "schemars",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "sloforge-loadgen"
 version = "0.1.0"
 dependencies = [
