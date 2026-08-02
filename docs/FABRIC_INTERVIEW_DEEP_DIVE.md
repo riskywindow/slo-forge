@@ -37,12 +37,15 @@ packet dynamics. The simulator therefore schedules DAG operations over exclusive
 and fair-share resources with explicit sharing groups. This captures barriers,
 stragglers, overlap, and bottleneck contention while keeping deterministic CPU CI.
 
-### Keep analytical selection honest
+### Keep multi-fidelity selection honest
 
-The compiler scores finite candidates from calibrated curves, but does not call
-the event simulator in its ranking loop. It emits zero simulator calls and makes
-validation a separate pass. That avoids overstating fidelity and makes it clear
-where future hardware-guided refinement would attach.
+The compiler first scores the finite candidate set from calibrated curves, then
+promotes the analytical Pareto set and leading recovery alternatives into the
+Rust event simulator. Simulator-refined metrics and feasibility feed back into
+selection, with every call and deterministic work unit retained in the optimizer
+artifact. A separate loaded-trace validation pass remains necessary because the
+ranking loop intentionally simulates an isolated p95-shape request, not an
+engine-specific continuous-batching scheduler.
 
 ### Make RCA falsifiable
 
@@ -59,8 +62,8 @@ deadline. External mutation requires explicit two-sided authorization.
 ## What the artifacts show
 
 The synthetic flagship in `artifacts/fabric-demo/manifest.json` injected a rail
-rate reduction and rank slowdown. Simulated p95 TTFT rose from 947.314 ms to
-2470.966 ms and returned to 947.314 ms after the selected combined
+rate reduction and rank slowdown. Simulated p95 TTFT rose from 1152.714 ms to
+7045.952 ms and returned to 1152.714 ms after the selected combined
 counterfactual; seven alternatives were evaluated and recovery completed.
 Autopsy ranked network bandwidth degradation first and the rank straggler
 second. That is one deterministic synthetic two-fault run, not evidence of

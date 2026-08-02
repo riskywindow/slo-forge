@@ -14,7 +14,7 @@ audited before use.
 - Implemented structured causal diagnosis and guarded self-healing that evaluated
   seven synthetic counterfactual repairs, moved through simulation, shadow,
   canary, promotion, and stream-preserving drain, and restored simulated p95 TTFT
-  from 2470.966 ms to 947.314 ms after simultaneous network/rank faults.
+  from 7045.952 ms to 1152.714 ms after simultaneous network/rank faults.
 
 <!-- source: artifacts/forgeci/demo/evaluation.json; deterministic local fixture repository -->
 - Built a robust performance-regression CI/bisector that identified the exact
