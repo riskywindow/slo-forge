@@ -1,7 +1,8 @@
 {
-  "bind": "127.0.0.1:60090",
+  "bind": "127.0.0.1:55042",
   "decode_per_token_ms": 1,
   "failure_rate": 0.0,
+  "fault_api_enabled": true,
   "max_concurrency": 4,
   "max_output_tokens": 32,
   "name": "fabric-backend-0",

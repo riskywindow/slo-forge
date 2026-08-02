@@ -8,18 +8,18 @@
     {
       "artifact_uri": "artifacts/fabric/evaluation/autopsy/two_node_infiniband/seed-47/network-bandwidth-degradation/degraded-simulation.json.gz",
       "record_index": null,
-      "sha256": "42e622eb7b248e7191b6e57fe0993708fc113652dd97cc1ffee85b9bd3968cac",
+      "sha256": "7969b2917c4d610f7a3f120acc9929b9930bfd05bea856d98539175f4fa5aad8",
       "source": "sloforge-fabric-sim"
     },
     {
       "artifact_uri": "artifacts/fabric/evaluation/trials/two_node_infiniband/seed-47/mixed_bursty/hierarchical_compiler/simulation.json.gz",
       "record_index": null,
-      "sha256": "bc845de110d53bd1ddd66cdf066a036fa73ce2582671ae09a5745570073bc776",
+      "sha256": "577b0722df73c03d882da297ad3a5afd6967eb5718fa875bdf44aee2e49d8812",
       "source": "sloforge-fabric-sim"
     }
   ],
-  "first_divergence_event_id": "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0",
-  "first_divergence_ns": 51367000,
+  "first_divergence_event_id": "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0",
+  "first_divergence_ns": 53200963,
   "hypotheses": [
     {
       "confidence": 0.95,
@@ -31,11 +31,11 @@
       "supporting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "network_bandwidth_drop=0.905229 exceeds 0.15",
+          "explanation": "network_bandwidth_drop=0.896226 exceeds 0.15",
           "metric": "network_bandwidth_drop",
-          "observed": 0.905229075566906,
+          "observed": 0.8962259624745968,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.15
@@ -53,11 +53,11 @@
       "supporting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "kv_transfer_delta=19.5834 exceeds 0.2",
+          "explanation": "kv_transfer_delta=18.753 exceeds 0.2",
           "metric": "kv_transfer_delta",
-          "observed": 19.58340376558295,
+          "observed": 18.7529922143224,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
@@ -66,33 +66,33 @@
       "target": "kv_transfer"
     },
     {
-      "confidence": 0.87,
+      "confidence": 0.6007425997161253,
       "contradicting_evidence": [],
       "counterfactual": null,
-      "hypothesis_id": "hypothesis-13-nvlink_degradation",
-      "kind": "nvlink_degradation",
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "kind": "rank_straggler",
       "rejected_reason": null,
       "supporting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "nvlink_delta=1.18809 exceeds 0.2",
-          "metric": "nvlink_delta",
-          "observed": 1.1880948554423971,
+          "explanation": "rank_skew=1.20297 exceeds 1.2",
+          "metric": "rank_skew",
+          "observed": 1.2029703988645013,
           "relation": "greater_than",
           "supports_hypothesis": true,
-          "threshold": 0.2
+          "threshold": 1.2
         }
       ],
-      "target": "nvlink_path"
+      "target": "rank_group"
     },
     {
       "confidence": 0.2,
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "arrival_capacity_ratio=1 does not exceed 1",
           "metric": "arrival_capacity_ratio",
@@ -110,33 +110,33 @@
       "target": "deployment"
     },
     {
-      "confidence": 0.1844851124691198,
+      "confidence": 0.09993362982716829,
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "rank_skew=1.10691 does not exceed 1.2",
-          "metric": "rank_skew",
-          "observed": 1.1069106748147186,
+          "explanation": "nvlink_delta=0.0999336 does not exceed 0.2",
+          "metric": "nvlink_delta",
+          "observed": 0.09993362982716829,
           "relation": "greater_than",
           "supports_hypothesis": false,
-          "threshold": 1.2
+          "threshold": 0.2
         }
       ],
       "counterfactual": null,
-      "hypothesis_id": "hypothesis-16-rank_straggler",
-      "kind": "rank_straggler",
+      "hypothesis_id": "hypothesis-13-nvlink_degradation",
+      "kind": "nvlink_degradation",
       "rejected_reason": "primary signal did not cross its threshold",
       "supporting_evidence": [],
-      "target": "rank_group"
+      "target": "nvlink_path"
     },
     {
       "confidence": 0.01,
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "backend_queue_delta=0 does not exceed 0.2",
           "metric": "backend_queue_delta",
@@ -158,7 +158,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "startup_delta=0 does not exceed 0.2",
           "metric": "startup_delta",
@@ -180,7 +180,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "collective_delta=0 does not exceed 0.2",
           "metric": "collective_delta",
@@ -202,7 +202,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "collective_wait_delta=0 does not exceed 0.2",
           "metric": "collective_wait_delta",
@@ -224,7 +224,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "cpu_launch_delta=0 does not exceed 0.2",
           "metric": "cpu_launch_delta",
@@ -246,11 +246,11 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
-          "explanation": "decode_delta=3.30838e-08 does not exceed 0.2",
+          "explanation": "decode_delta=1.24064e-08 does not exceed 0.2",
           "metric": "decode_delta",
-          "observed": 3.3083759411724325e-08,
+          "observed": 1.2406409581401197e-08,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -268,7 +268,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "kernel_count_delta=0 does not exceed 0.2",
           "metric": "kernel_count_delta",
@@ -290,7 +290,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "expert_imbalance=0 does not exceed 0.15",
           "metric": "expert_imbalance",
@@ -312,7 +312,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "gateway_queue_delta=0 does not exceed 0.2",
           "metric": "gateway_queue_delta",
@@ -334,7 +334,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "gpu_clock_drop=0 does not exceed 0.1",
           "metric": "gpu_clock_drop",
@@ -356,7 +356,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "gpu_compute_delta=0 does not exceed 0.2",
           "metric": "gpu_compute_delta",
@@ -378,7 +378,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "gpu_memory_delta=0 does not exceed 0.2",
           "metric": "gpu_memory_delta",
@@ -400,7 +400,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "warm_fraction_drop=0 does not exceed 0.15",
           "metric": "warm_fraction_drop",
@@ -422,7 +422,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "invalid_plan_assumption=0 does not exceed 0.5",
           "metric": "invalid_plan_assumption",
@@ -444,7 +444,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "model_load_delta=0 does not exceed 0.2",
           "metric": "model_load_delta",
@@ -466,7 +466,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "network_latency_delta=0 does not exceed 0.2",
           "metric": "network_latency_delta",
@@ -488,7 +488,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "numa_remote_delta=0 does not exceed 0.15",
           "metric": "numa_remote_delta",
@@ -510,7 +510,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "pcie_delta=0 does not exceed 0.2",
           "metric": "pcie_delta",
@@ -532,7 +532,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "prefill_delta=0 does not exceed 0.2",
           "metric": "prefill_delta",
@@ -554,7 +554,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "topology_mismatch=0 does not exceed 0.5",
           "metric": "topology_mismatch",
@@ -576,7 +576,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "unhealthy_worker=0 does not exceed 0.5",
           "metric": "unhealthy_worker",
@@ -598,7 +598,7 @@
       "contradicting_evidence": [
         {
           "event_ids": [
-            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000000:collective-0:rank-0"
+            "degraded-two_node_infiniband-47-network-bandwidth-degradation:request-000001:kv-0:rank-0"
           ],
           "explanation": "worker_crash=0 does not exceed 0.5",
           "metric": "worker_crash",
@@ -622,7 +622,9 @@
   "top_three": [
     "network_bandwidth_degradation",
     "kv_transfer_bottleneck",
-    "nvlink_degradation"
+    "rank_straggler"
   ],
-  "warnings": []
+  "warnings": [
+    "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+  ]
 }

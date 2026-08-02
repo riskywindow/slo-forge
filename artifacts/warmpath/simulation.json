@@ -2,17 +2,17 @@
   "estimate_sources": [
     "measured"
   ],
-  "interval_high_ms": 1.1338862097017852,
-  "interval_low_ms": 0.8832764079874325,
-  "p50_ready_time_ms": 0.9602924525878037,
-  "p95_ready_time_ms": 1.1124290987711072,
+  "interval_high_ms": 0.9076115151670062,
+  "interval_low_ms": 0.8643159850489718,
+  "p50_ready_time_ms": 0.8786048633520626,
+  "p95_ready_time_ms": 0.9041873257969582,
   "restore_failure_probability": 0.0,
   "seed": 2026,
   "stage_predictions": [
     {
       "artifact_id": "model-config",
       "estimate_source": "measured",
-      "finish_ms": 0.0005296999999999999,
+      "finish_ms": 0.0005161,
       "resource": "host-memory",
       "stage": "restore",
       "start_ms": 0.0
@@ -20,211 +20,211 @@
     {
       "artifact_id": "tokenizer",
       "estimate_source": "measured",
-      "finish_ms": 0.0010716999999999999,
+      "finish_ms": 0.0010581,
       "resource": "host-memory",
       "stage": "restore",
-      "start_ms": 0.0005296999999999999
+      "start_ms": 0.0005161
     },
     {
       "artifact_id": "model-weights",
       "estimate_source": "measured",
-      "finish_ms": 0.9823712999999998,
+      "finish_ms": 0.8822455999999999,
       "resource": "page-cache",
       "stage": "restore",
-      "start_ms": 0.0005296999999999999
+      "start_ms": 0.0005161
     },
     {
       "artifact_id": "runtime-cache",
       "estimate_source": "measured",
-      "finish_ms": 1.0743410999999998,
+      "finish_ms": 0.9634579999999998,
       "resource": "host-memory",
       "stage": "restore",
-      "start_ms": 0.9823712999999998
+      "start_ms": 0.8822455999999999
     }
   ],
   "trials": [
     {
-      "ready_time_ms": 1.0437846988136,
+      "ready_time_ms": 0.8929516852057594,
       "restore_failed": false,
       "trial_index": 0,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.038509774940402,
+      "ready_time_ms": 0.8922000611019791,
       "restore_failed": false,
       "trial_index": 1,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.944057858422535,
+      "ready_time_ms": 0.8756817064398578,
       "restore_failed": false,
       "trial_index": 2,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9571798991577434,
+      "ready_time_ms": 0.8780411585668598,
       "restore_failed": false,
       "trial_index": 3,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9409561170093543,
+      "ready_time_ms": 0.8750247420789908,
       "restore_failed": false,
       "trial_index": 4,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.8832764079874325,
+      "ready_time_ms": 0.8643159850489718,
       "restore_failed": false,
       "trial_index": 5,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9908840321175683,
+      "ready_time_ms": 0.8839656717098506,
       "restore_failed": false,
       "trial_index": 6,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.953654353390981,
+      "ready_time_ms": 0.8773099613277825,
       "restore_failed": false,
       "trial_index": 7,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9362793773552992,
+      "ready_time_ms": 0.8742519594244529,
       "restore_failed": false,
       "trial_index": 8,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.0469984309453195,
+      "ready_time_ms": 0.8935852816496633,
       "restore_failed": false,
       "trial_index": 9,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.1038297613560293,
+      "ready_time_ms": 0.9027903548582615,
       "restore_failed": false,
       "trial_index": 10,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9380382006849615,
+      "ready_time_ms": 0.8745731324993229,
       "restore_failed": false,
       "trial_index": 11,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9812321250352106,
+      "ready_time_ms": 0.8823432436297463,
       "restore_failed": false,
       "trial_index": 12,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.957918680138754,
+      "ready_time_ms": 0.8781823476231624,
       "restore_failed": false,
       "trial_index": 13,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.0884120274142615,
+      "ready_time_ms": 0.900278965745043,
       "restore_failed": false,
       "trial_index": 14,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9132630931613894,
+      "ready_time_ms": 0.8699318764165151,
       "restore_failed": false,
       "trial_index": 15,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9944254565852871,
+      "ready_time_ms": 0.8846040198837539,
       "restore_failed": false,
       "trial_index": 16,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9602924525878037,
+      "ready_time_ms": 0.8786048633520626,
       "restore_failed": false,
       "trial_index": 17,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.1338862097017852,
+      "ready_time_ms": 0.9076115151670062,
       "restore_failed": false,
       "trial_index": 18,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9637486683519412,
+      "ready_time_ms": 0.879213814042355,
       "restore_failed": false,
       "trial_index": 19,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9420154440483287,
+      "ready_time_ms": 0.8752799039925185,
       "restore_failed": false,
       "trial_index": 20,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9012041611250781,
+      "ready_time_ms": 0.8677259657715494,
       "restore_failed": false,
       "trial_index": 21,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.8997137267561129,
+      "ready_time_ms": 0.8673535627526069,
       "restore_failed": false,
       "trial_index": 22,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9166180106355186,
+      "ready_time_ms": 0.8705977576407745,
       "restore_failed": false,
       "trial_index": 23,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.121028436186185,
+      "ready_time_ms": 0.9055842967356548,
       "restore_failed": false,
       "trial_index": 24,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.014622193949626,
+      "ready_time_ms": 0.8881196895381257,
       "restore_failed": false,
       "trial_index": 25,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9411112050707683,
+      "ready_time_ms": 0.8751089743061813,
       "restore_failed": false,
       "trial_index": 26,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9931688893673952,
+      "ready_time_ms": 0.8843493447504203,
       "restore_failed": false,
       "trial_index": 27,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 1.0393414579626752,
+      "ready_time_ms": 0.8922799090814235,
       "restore_failed": false,
       "trial_index": 28,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.8889201767476974,
+      "ready_time_ms": 0.8653974469826904,
       "restore_failed": false,
       "trial_index": 29,
       "used_rebuild_fallback": false
     },
     {
-      "ready_time_ms": 0.9618301697138356,
+      "ready_time_ms": 0.8788882747302769,
       "restore_failed": false,
       "trial_index": 30,
       "used_rebuild_fallback": false

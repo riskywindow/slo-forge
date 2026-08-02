@@ -20,7 +20,7 @@
     }
   },
   "diagnosis_accuracy": 1.0,
-  "executed_at": "2026-08-02T02:56:40.419263+00:00",
+  "executed_at": "2026-08-02T07:51:04.434442+00:00",
   "executions": [
     {
       "applied": true,
@@ -56,7 +56,7 @@
         "confidence": 0.8041237113402062,
         "correct": true,
         "counterfactual_improvement_ms": 156.0,
-        "diagnosis_latency_ms": 0.018041,
+        "diagnosis_latency_ms": 0.014125,
         "evidence": [
           "decode contribution 156.0ms"
         ],
@@ -108,7 +108,7 @@
         "confidence": 0.625,
         "correct": true,
         "counterfactual_improvement_ms": 17.5,
-        "diagnosis_latency_ms": 0.006375,
+        "diagnosis_latency_ms": 0.006542,
         "evidence": [
           "error rate 0.62, healthy fraction 0.38"
         ],
@@ -160,7 +160,7 @@
         "confidence": 0.99,
         "correct": true,
         "counterfactual_improvement_ms": 180.0,
-        "diagnosis_latency_ms": 0.004541,
+        "diagnosis_latency_ms": 0.004542,
         "evidence": [
           "startup 180.0ms dominates service"
         ],
@@ -212,7 +212,7 @@
         "confidence": 0.5,
         "correct": true,
         "counterfactual_improvement_ms": 7.0,
-        "diagnosis_latency_ms": 0.003166,
+        "diagnosis_latency_ms": 0.003375,
         "evidence": [
           "error rate 0.36, healthy fraction 1.00"
         ],
@@ -264,7 +264,7 @@
         "confidence": 0.99,
         "correct": true,
         "counterfactual_improvement_ms": 162.0,
-        "diagnosis_latency_ms": 0.003792,
+        "diagnosis_latency_ms": 0.003875,
         "evidence": [
           "gateway queue 160.0ms and network 2.0ms"
         ],
@@ -316,7 +316,7 @@
         "confidence": 0.8111111111111111,
         "correct": true,
         "counterfactual_improvement_ms": 56.0,
-        "diagnosis_latency_ms": 0.0035,
+        "diagnosis_latency_ms": 0.003667,
         "evidence": [
           "warm fraction 0.50 with backend queue 56.0ms"
         ],
@@ -368,7 +368,7 @@
         "confidence": 0.8083333333333333,
         "correct": true,
         "counterfactual_improvement_ms": 166.5,
-        "diagnosis_latency_ms": 0.003083,
+        "diagnosis_latency_ms": 0.003125,
         "evidence": [
           "gateway queue 41.5ms and network 125.0ms"
         ],
@@ -420,7 +420,7 @@
         "confidence": 0.99,
         "correct": true,
         "counterfactual_improvement_ms": 210.0,
-        "diagnosis_latency_ms": 0.002833,
+        "diagnosis_latency_ms": 0.002958,
         "evidence": [
           "6 memory admission rejections"
         ],
@@ -441,7 +441,7 @@
   ],
   "false_positive_count": 0,
   "false_positive_rate": 0.0,
-  "mean_diagnosis_latency_ms": 0.005666375,
+  "mean_diagnosis_latency_ms": 0.005276125,
   "negative_window_count": 8,
   "scenario_name": "cpu-demo-required-faults",
   "schema_version": "sloforge.chaos-result/v1",

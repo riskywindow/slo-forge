@@ -9,31 +9,31 @@
         "points": [
           {
             "x": 32.0,
-            "median_ms": 33.95425,
-            "p95_ms": 34.8676744,
+            "median_ms": 31.464833,
+            "p95_ms": 31.8081461,
             "sample_count": 3
           },
           {
             "x": 128.0,
-            "median_ms": 50.012542,
-            "p95_ms": 50.014792,
+            "median_ms": 47.37325,
+            "p95_ms": 48.0951247,
             "sample_count": 3
           },
           {
             "x": 512.0,
-            "median_ms": 116.834667,
-            "p95_ms": 120.7484673,
+            "median_ms": 109.337334,
+            "p95_ms": 109.3419834,
             "sample_count": 3
           },
           {
             "x": 2048.0,
-            "median_ms": 364.205125,
-            "p95_ms": 368.6151619,
+            "median_ms": 355.291209,
+            "p95_ms": 360.0445959,
             "sample_count": 3
           }
         ],
-        "residual_p95_ms": 227.67980567187504,
-        "conformal_radius_ms": 227.67980567187504,
+        "residual_p95_ms": 228.66411816406242,
+        "conformal_radius_ms": 228.66411816406242,
         "calibration_sample_count": 16,
         "nominal_coverage": 0.95
       },
@@ -42,33 +42,33 @@
         "points": [
           {
             "x": 1.0,
-            "median_ms": 4.581208999999998,
-            "p95_ms": 5.123346499999996,
+            "median_ms": 4.3628750000000025,
+            "p95_ms": 4.447925,
             "sample_count": 2
           },
           {
             "x": 2.0,
-            "median_ms": 5.188197999999996,
-            "p95_ms": 5.2189951,
+            "median_ms": 4.629604249999998,
+            "p95_ms": 5.1540227749999925,
             "sample_count": 2
           },
           {
             "x": 4.0,
-            "median_ms": 5.188197999999996,
-            "p95_ms": 5.188197999999996,
+            "median_ms": 4.744656000000013,
+            "p95_ms": 5.173215300000013,
             "sample_count": 2
           }
         ],
-        "residual_p95_ms": 1.1326559999999937,
-        "conformal_radius_ms": 1.1326559999999937,
+        "residual_p95_ms": 0.7687919999999906,
+        "conformal_radius_ms": 0.7687919999999906,
         "calibration_sample_count": 15,
         "nominal_coverage": 0.95
       },
-      "startup_median_ms": 228.57708300000002,
-      "startup_p95_ms": 247.624175,
-      "held_out_mape": 0.10951029628942598,
+      "startup_median_ms": 226.82039600000002,
+      "startup_p95_ms": 245.87530900000002,
+      "held_out_mape": 0.03621526647772642,
       "interval_coverage": 1.0,
-      "decode_held_out_mape": 0.10016577506765643,
+      "decode_held_out_mape": 0.08385622484091515,
       "decode_interval_coverage": 1.0,
       "held_out_sample_count": 12
     },
@@ -79,31 +79,31 @@
         "points": [
           {
             "x": 32.0,
-            "median_ms": 25.954042,
-            "p95_ms": 27.625754199999996,
+            "median_ms": 24.627875,
+            "p95_ms": 34.7808875,
             "sample_count": 3
           },
           {
             "x": 128.0,
-            "median_ms": 33.300208,
-            "p95_ms": 34.553008899999995,
+            "median_ms": 32.162125,
+            "p95_ms": 32.6505253,
             "sample_count": 3
           },
           {
             "x": 512.0,
-            "median_ms": 67.754666,
-            "p95_ms": 68.71511629999999,
+            "median_ms": 64.514333,
+            "p95_ms": 64.6532336,
             "sample_count": 3
           },
           {
             "x": 2048.0,
-            "median_ms": 194.653125,
-            "p95_ms": 200.43521189999998,
+            "median_ms": 193.824833,
+            "p95_ms": 195.794708,
             "sample_count": 3
           }
         ],
-        "residual_p95_ms": 34.2592039876302,
-        "conformal_radius_ms": 34.2592039876302,
+        "residual_p95_ms": 35.99229003906251,
+        "conformal_radius_ms": 35.99229003906251,
         "calibration_sample_count": 16,
         "nominal_coverage": 0.95
       },
@@ -112,33 +112,33 @@
         "points": [
           {
             "x": 1.0,
-            "median_ms": 3.8382704999999966,
-            "p95_ms": 3.8672770499999993,
+            "median_ms": 3.9223960000000027,
+            "p95_ms": 3.9449149000000014,
             "sample_count": 2
           },
           {
             "x": 2.0,
-            "median_ms": 3.8382704999999966,
-            "p95_ms": 3.8469998500000013,
+            "median_ms": 3.926385249999999,
+            "p95_ms": 3.9862449250000016,
             "sample_count": 2
           },
           {
             "x": 4.0,
-            "median_ms": 3.8382704999999966,
-            "p95_ms": 3.8727002999999947,
+            "median_ms": 3.926385249999999,
+            "p95_ms": 4.030837499999993,
             "sample_count": 2
           }
         ],
-        "residual_p95_ms": 0.15943800000000508,
-        "conformal_radius_ms": 0.15943800000000508,
+        "residual_p95_ms": 0.0911459999999984,
+        "conformal_radius_ms": 0.0911459999999984,
         "calibration_sample_count": 15,
         "nominal_coverage": 0.95
       },
-      "startup_median_ms": 486.2764585,
-      "startup_p95_ms": 533.6959839,
-      "held_out_mape": 0.08400927607014826,
+      "startup_median_ms": 488.026771,
+      "startup_p95_ms": 529.95972765,
+      "held_out_mape": 0.07891548540509921,
       "interval_coverage": 0.9166666666666666,
-      "decode_held_out_mape": 0.010090668367036012,
+      "decode_held_out_mape": 0.004036064190393465,
       "decode_interval_coverage": 1.0,
       "held_out_sample_count": 12
     },
@@ -149,31 +149,31 @@
         "points": [
           {
             "x": 32.0,
-            "median_ms": 39.112416,
-            "p95_ms": 40.0942791,
+            "median_ms": 42.825833,
+            "p95_ms": 43.044908299999996,
             "sample_count": 3
           },
           {
             "x": 128.0,
-            "median_ms": 62.557875,
-            "p95_ms": 62.5846131,
+            "median_ms": 63.987458,
+            "p95_ms": 64.5010952,
             "sample_count": 3
           },
           {
             "x": 512.0,
-            "median_ms": 150.185917,
-            "p95_ms": 151.0807798,
+            "median_ms": 150.281417,
+            "p95_ms": 151.38421670000002,
             "sample_count": 3
           },
           {
             "x": 2048.0,
-            "median_ms": 504.062625,
-            "p95_ms": 504.6513753,
+            "median_ms": 505.013292,
+            "p95_ms": 510.3598167,
             "sample_count": 3
           }
         ],
-        "residual_p95_ms": 92.92411208072923,
-        "conformal_radius_ms": 92.92411208072923,
+        "residual_p95_ms": 81.80841706575518,
+        "conformal_radius_ms": 81.80841706575518,
         "calibration_sample_count": 16,
         "nominal_coverage": 0.95
       },
@@ -182,27 +182,27 @@
         "points": [
           {
             "x": 1.0,
-            "median_ms": 7.5308959999999985,
-            "p95_ms": 7.673189600000006,
+            "median_ms": 7.5692710000000005,
+            "p95_ms": 7.61087710000001,
             "sample_count": 2
           },
           {
             "x": 2.0,
-            "median_ms": 7.724333250000001,
-            "p95_ms": 7.731758474999997,
+            "median_ms": 7.5692710000000005,
+            "p95_ms": 7.687048575000001,
             "sample_count": 2
           }
         ],
-        "residual_p95_ms": 1.342041750000007,
-        "conformal_radius_ms": 1.342041750000007,
+        "residual_p95_ms": 0.5812290000000502,
+        "conformal_radius_ms": 0.5812290000000502,
         "calibration_sample_count": 14,
         "nominal_coverage": 0.95
       },
-      "startup_median_ms": 122.84633349999999,
-      "startup_p95_ms": 145.99063485,
-      "held_out_mape": 0.07716577323543569,
+      "startup_median_ms": 117.4922085,
+      "startup_p95_ms": 141.11992494999998,
+      "held_out_mape": 0.1255730623336341,
       "interval_coverage": 0.9166666666666666,
-      "decode_held_out_mape": 0.021516168777550946,
+      "decode_held_out_mape": 0.030851340958452326,
       "decode_interval_coverage": 1.0,
       "held_out_sample_count": 12
     }

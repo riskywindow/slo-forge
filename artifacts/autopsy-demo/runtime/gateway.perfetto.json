@@ -1,0 +1,346 @@
+{
+  "traceEvents": [
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 19309,
+      "pid": 12838,
+      "tid": 11008125999686562283,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000000"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 19209,
+      "pid": 12838,
+      "tid": 11008125999686562283,
+      "dur": 40719,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000000"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 71127,
+      "pid": 12838,
+      "tid": 11008124900174934072,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000001"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 71023,
+      "pid": 12838,
+      "tid": 11008124900174934072,
+      "dur": 15150,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000001"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 98326,
+      "pid": 12838,
+      "tid": 11008128198709818705,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000002"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 98218,
+      "pid": 12838,
+      "tid": 11008128198709818705,
+      "dur": 15617,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000002"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 124613,
+      "pid": 12838,
+      "tid": 11008127099198190494,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000003"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 124514,
+      "pid": 12838,
+      "tid": 11008127099198190494,
+      "dur": 35932,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000003"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 171835,
+      "pid": 12838,
+      "tid": 11008130397733075127,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000004"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 171743,
+      "pid": 12838,
+      "tid": 11008130397733075127,
+      "dur": 35760,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000004"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 219777,
+      "pid": 12838,
+      "tid": 11008129298221446916,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000005"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 219685,
+      "pid": 12838,
+      "tid": 11008129298221446916,
+      "dur": 13538,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000005"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 245465,
+      "pid": 12838,
+      "tid": 11008132596756331549,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000006"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 245369,
+      "pid": 12838,
+      "tid": 11008132596756331549,
+      "dur": 35622,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000006"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 294226,
+      "pid": 12838,
+      "tid": 11008131497244703338,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000007"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 294121,
+      "pid": 12838,
+      "tid": 11008131497244703338,
+      "dur": 15531,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000007"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 326239,
+      "pid": 12838,
+      "tid": 11008117203593536595,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000008"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 326125,
+      "pid": 12838,
+      "tid": 11008117203593536595,
+      "dur": 36573,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000008"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 375045,
+      "pid": 12838,
+      "tid": 11008116104081908384,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000009"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 374932,
+      "pid": 12838,
+      "tid": 11008116104081908384,
+      "dur": 36855,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000009"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 424939,
+      "pid": 12838,
+      "tid": 11007134240198105186,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000010"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 424837,
+      "pid": 12838,
+      "tid": 11007134240198105186,
+      "dur": 17227,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000010"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 455321,
+      "pid": 12838,
+      "tid": 11007135339709733397,
+      "dur": 0,
+      "args": {
+        "backend": "fabric-backend-0",
+        "policy": "slo_slack_aware",
+        "request_id": "request-000011"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 455230,
+      "pid": 12838,
+      "tid": 11007135339709733397,
+      "dur": 14949,
+      "args": {
+        "backend": "fabric-backend-0",
+        "outcome": "success",
+        "request_id": "request-000011"
+      }
+    }
+  ],
+  "provenance": {
+    "component": "sloforge-gateway",
+    "physical_plan_id": "physical-plan-27594db07b07719d"
+  },
+  "dropped_events": 0,
+  "displayTimeUnit": "ms"
+}

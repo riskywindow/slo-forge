@@ -8,13 +8,13 @@
     {
       "artifact_uri": "artifacts/fabric/evaluation/autopsy/two_node_oversubscribed/seed-29/rank-2-straggler/degraded-simulation.json.gz",
       "record_index": null,
-      "sha256": "5ac21f18b9ee783ef725a9c7ef18a77980f02cf78e414ac26dae07449484cdbe",
+      "sha256": "73bda97637ea39c8852d89f47e2161004d64672f670c76eb9d30e6e8468172b2",
       "source": "sloforge-fabric-sim"
     },
     {
       "artifact_uri": "artifacts/fabric/evaluation/trials/two_node_oversubscribed/seed-29/mixed_bursty/hierarchical_compiler/simulation.json.gz",
       "record_index": null,
-      "sha256": "2aed407db5f00dbdfe673b0a1251a06a1a6eb6df599471d70adc303787663558",
+      "sha256": "ec244bb3b69a65a1bf1c99465546b96c3d0214df368f49295e1d8b41023db4dc",
       "source": "sloforge-fabric-sim"
     }
   ],
@@ -35,35 +35,13 @@
           ],
           "explanation": "rank_skew=2.85714 exceeds 1.2",
           "metric": "rank_skew",
-          "observed": 2.85714375,
+          "observed": 2.857142857142857,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 1.2
         }
       ],
       "target": "rank_group"
-    },
-    {
-      "confidence": 0.87,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-22-kv_transfer_bottleneck",
-      "kind": "kv_transfer_bottleneck",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
-          ],
-          "explanation": "kv_transfer_delta=0.751158 exceeds 0.2",
-          "metric": "kv_transfer_delta",
-          "observed": 0.7511582730356504,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 0.2
-        }
-      ],
-      "target": "kv_transfer"
     },
     {
       "confidence": 0.87,
@@ -79,35 +57,13 @@
           ],
           "explanation": "prefill_delta=1.85714 exceeds 0.2",
           "metric": "prefill_delta",
-          "observed": 1.85714375,
+          "observed": 1.857142857142857,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
         }
       ],
       "target": "prefill_pool"
-    },
-    {
-      "confidence": 0.7228327397052351,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
-      "kind": "network_bandwidth_degradation",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
-          ],
-          "explanation": "network_bandwidth_drop=0.186416 exceeds 0.15",
-          "metric": "network_bandwidth_drop",
-          "observed": 0.18641636985261756,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 0.15
-        }
-      ],
-      "target": "network_rail"
     },
     {
       "confidence": 0.2,
@@ -132,15 +88,15 @@
       "target": "deployment"
     },
     {
-      "confidence": 0.053449919819702756,
+      "confidence": 0.1419944651848366,
       "contradicting_evidence": [
         {
           "event_ids": [
             "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
           ],
-          "explanation": "nvlink_delta=0.0534499 does not exceed 0.2",
+          "explanation": "nvlink_delta=0.141994 does not exceed 0.2",
           "metric": "nvlink_delta",
-          "observed": 0.053449919819702756,
+          "observed": 0.1419944651848366,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -270,9 +226,9 @@
           "event_ids": [
             "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
           ],
-          "explanation": "decode_delta=3.30838e-08 does not exceed 0.2",
+          "explanation": "decode_delta=0 does not exceed 0.2",
           "metric": "decode_delta",
-          "observed": 3.3083759411724325e-08,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -468,6 +424,28 @@
           "event_ids": [
             "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
           ],
+          "explanation": "kv_transfer_delta=-0.274813 does not exceed 0.2",
+          "metric": "kv_transfer_delta",
+          "observed": -0.2748130197185868,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-22-kv_transfer_bottleneck",
+      "kind": "kv_transfer_bottleneck",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "kv_transfer"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
           "explanation": "model_load_delta=0 does not exceed 0.2",
           "metric": "model_load_delta",
           "observed": 0.0,
@@ -482,6 +460,28 @@
       "rejected_reason": "primary signal did not cross its threshold",
       "supporting_evidence": [],
       "target": "model_loader"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_oversubscribed-29-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "network_bandwidth_drop=0 does not exceed 0.15",
+          "metric": "network_bandwidth_drop",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.15
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "kind": "network_bandwidth_degradation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "network_rail"
     },
     {
       "confidence": 0.01,
@@ -621,8 +621,10 @@
   "top_hypothesis": "rank_straggler",
   "top_three": [
     "rank_straggler",
-    "kv_transfer_bottleneck",
-    "prefill_pool_saturation"
+    "prefill_pool_saturation",
+    "arrival_overload"
   ],
-  "warnings": []
+  "warnings": [
+    "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+  ]
 }

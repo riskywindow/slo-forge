@@ -7,13 +7,13 @@ Random, sequential, greedy, and hierarchical placement hold TP=8/PP=1/DP=2/EP=4 
 
 | method | p95 TTFT ms (median, 95% bootstrap CI) | communication ms | SLO attainment |
 |---|---:|---:|---:|
-| random_placement | 4682.008 [1879.982, 5663.687] | 17855.536 | 0.188 |
-| sequential_placement | 557.995 [556.411, 844.755] | 239.617 | 1.000 |
-| topology_unaware_optimizer | 546.120 [521.525, 548.589] | 173.271 | 1.000 |
-| topology_aware_greedy | 562.910 [527.113, 837.809] | 239.617 | 1.000 |
-| hierarchical_compiler | 562.910 [527.113, 837.743] | 239.617 | 1.000 |
+| random_placement | 2831.615 [1222.045, 3638.931] | 12734.204 | 0.438 |
+| sequential_placement | 616.428 [595.017, 904.418] | 1345.048 | 1.000 |
+| topology_unaware_optimizer | 1015.728 [1014.782, 1077.551] | 193.218 | 1.000 |
+| topology_aware_greedy | 626.068 [594.526, 927.493] | 1441.225 | 1.000 |
+| hierarchical_compiler | 626.068 [594.536, 930.817] | 1441.225 | 1.000 |
 
-Fastest median: `topology_unaware_optimizer` at 546.120 ms. The hierarchical compiler was +3.07% relative to that baseline. This comparison is reported even when the primary method loses.
+Fastest median: `sequential_placement` at 616.428 ms. The hierarchical compiler was +1.56% relative to that baseline. This comparison is reported even when the primary method loses.
 
 ### H1 by topology and workload
 
@@ -21,92 +21,92 @@ Each row is the median across configured seeds. Full per-seed values and confide
 
 | topology class | topology | workload | method | p95 TTFT ms | communication ms | SLO attainment |
 |---|---|---|---|---:|---:|---:|
-| asymmetric | two_node_asymmetric_nvlink | expert_skewed | random_placement | 5292.497 | 38356.944 | 0.000 |
-| asymmetric | two_node_asymmetric_nvlink | expert_skewed | sequential_placement | 571.050 | 444.052 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | expert_skewed | topology_unaware_optimizer | 546.087 | 90.937 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | expert_skewed | topology_aware_greedy | 570.892 | 444.052 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | expert_skewed | hierarchical_compiler | 570.892 | 444.052 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | long_context | random_placement | 8606.031 | 53795.344 | 0.000 |
-| asymmetric | two_node_asymmetric_nvlink | long_context | sequential_placement | 1170.226 | 1426.108 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | long_context | topology_unaware_optimizer | 1083.046 | 866.483 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | long_context | topology_aware_greedy | 1170.187 | 1426.108 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | long_context | hierarchical_compiler | 1170.187 | 1426.108 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | random_placement | 1520.707 | 3847.081 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | sequential_placement | 493.469 | 219.955 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | topology_unaware_optimizer | 492.694 | 173.271 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | topology_aware_greedy | 493.381 | 219.955 | 1.000 |
-| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | hierarchical_compiler | 493.381 | 219.955 | 1.000 |
-| degraded | two_node_degraded_network | expert_skewed | random_placement | 5663.687 | 40426.909 | 0.000 |
-| degraded | two_node_degraded_network | expert_skewed | sequential_placement | 556.443 | 206.697 | 1.000 |
-| degraded | two_node_degraded_network | expert_skewed | topology_unaware_optimizer | 546.165 | 92.816 | 1.000 |
-| degraded | two_node_degraded_network | expert_skewed | topology_aware_greedy | 566.403 | 212.463 | 1.000 |
-| degraded | two_node_degraded_network | expert_skewed | hierarchical_compiler | 566.403 | 212.463 | 1.000 |
-| degraded | two_node_degraded_network | long_context | random_placement | 14869.127 | 95536.772 | 0.000 |
-| degraded | two_node_degraded_network | long_context | sequential_placement | 1118.523 | 1091.212 | 1.000 |
-| degraded | two_node_degraded_network | long_context | topology_unaware_optimizer | 1082.983 | 863.396 | 1.000 |
-| degraded | two_node_degraded_network | long_context | topology_aware_greedy | 1109.115 | 1024.129 | 1.000 |
-| degraded | two_node_degraded_network | long_context | hierarchical_compiler | 1109.115 | 1024.129 | 1.000 |
-| degraded | two_node_degraded_network | mixed_bursty | random_placement | 1954.449 | 5339.203 | 1.000 |
-| degraded | two_node_degraded_network | mixed_bursty | sequential_placement | 492.682 | 179.766 | 1.000 |
-| degraded | two_node_degraded_network | mixed_bursty | topology_unaware_optimizer | 492.075 | 163.061 | 1.000 |
-| degraded | two_node_degraded_network | mixed_bursty | topology_aware_greedy | 497.467 | 180.091 | 1.000 |
-| degraded | two_node_degraded_network | mixed_bursty | hierarchical_compiler | 497.467 | 180.091 | 1.000 |
-| favorable | two_node_infiniband | expert_skewed | random_placement | 5292.241 | 38356.944 | 0.000 |
-| favorable | two_node_infiniband | expert_skewed | sequential_placement | 556.573 | 196.474 | 1.000 |
-| favorable | two_node_infiniband | expert_skewed | topology_unaware_optimizer | 545.930 | 90.937 | 1.000 |
-| favorable | two_node_infiniband | expert_skewed | topology_aware_greedy | 556.573 | 196.474 | 1.000 |
-| favorable | two_node_infiniband | expert_skewed | hierarchical_compiler | 556.573 | 196.474 | 1.000 |
-| favorable | two_node_infiniband | long_context | random_placement | 8605.792 | 53795.344 | 0.000 |
-| favorable | two_node_infiniband | long_context | sequential_placement | 1119.116 | 1094.299 | 1.000 |
-| favorable | two_node_infiniband | long_context | topology_unaware_optimizer | 1083.038 | 866.483 | 1.000 |
-| favorable | two_node_infiniband | long_context | topology_aware_greedy | 1119.116 | 1094.299 | 1.000 |
-| favorable | two_node_infiniband | long_context | hierarchical_compiler | 1119.116 | 1094.299 | 1.000 |
-| favorable | two_node_infiniband | mixed_bursty | random_placement | 1520.694 | 3847.081 | 1.000 |
-| favorable | two_node_infiniband | mixed_bursty | sequential_placement | 493.158 | 187.462 | 1.000 |
-| favorable | two_node_infiniband | mixed_bursty | topology_unaware_optimizer | 492.606 | 173.271 | 1.000 |
-| favorable | two_node_infiniband | mixed_bursty | topology_aware_greedy | 493.158 | 187.462 | 1.000 |
-| favorable | two_node_infiniband | mixed_bursty | hierarchical_compiler | 493.158 | 187.462 | 1.000 |
-| oversubscribed | two_node_oversubscribed | expert_skewed | random_placement | 12711.936 | 96758.810 | 0.000 |
-| oversubscribed | two_node_oversubscribed | expert_skewed | sequential_placement | 559.429 | 256.542 | 1.000 |
-| oversubscribed | two_node_oversubscribed | expert_skewed | topology_unaware_optimizer | 548.569 | 118.494 | 1.000 |
-| oversubscribed | two_node_oversubscribed | expert_skewed | topology_aware_greedy | 559.429 | 256.542 | 1.000 |
-| oversubscribed | two_node_oversubscribed | expert_skewed | hierarchical_compiler | 559.429 | 256.542 | 1.000 |
-| oversubscribed | two_node_oversubscribed | long_context | random_placement | 34426.199 | 235986.403 | 0.000 |
-| oversubscribed | two_node_oversubscribed | long_context | sequential_placement | 1122.471 | 1118.906 | 1.000 |
-| oversubscribed | two_node_oversubscribed | long_context | topology_unaware_optimizer | 1086.076 | 891.090 | 1.000 |
-| oversubscribed | two_node_oversubscribed | long_context | topology_aware_greedy | 1122.471 | 1118.906 | 1.000 |
-| oversubscribed | two_node_oversubscribed | long_context | hierarchical_compiler | 1122.471 | 1118.906 | 1.000 |
-| oversubscribed | two_node_oversubscribed | mixed_bursty | random_placement | 4444.009 | 12728.794 | 0.625 |
-| oversubscribed | two_node_oversubscribed | mixed_bursty | sequential_placement | 497.632 | 222.693 | 1.000 |
-| oversubscribed | two_node_oversubscribed | mixed_bursty | topology_unaware_optimizer | 497.080 | 210.181 | 1.000 |
-| oversubscribed | two_node_oversubscribed | mixed_bursty | topology_aware_greedy | 497.632 | 222.693 | 1.000 |
-| oversubscribed | two_node_oversubscribed | mixed_bursty | hierarchical_compiler | 497.632 | 222.693 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | expert_skewed | random_placement | 2884.292 | 19149.452 | 0.000 |
+| asymmetric | two_node_asymmetric_nvlink | expert_skewed | sequential_placement | 564.580 | 352.880 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | expert_skewed | topology_unaware_optimizer | 546.237 | 91.816 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | expert_skewed | topology_aware_greedy | 564.265 | 352.880 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | expert_skewed | hierarchical_compiler | 564.265 | 352.880 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | long_context | random_placement | 4572.425 | 25480.192 | 0.000 |
+| asymmetric | two_node_asymmetric_nvlink | long_context | sequential_placement | 1257.686 | 1866.141 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | long_context | topology_unaware_optimizer | 1975.346 | 296.291 | 0.875 |
+| asymmetric | two_node_asymmetric_nvlink | long_context | topology_aware_greedy | 1257.608 | 1866.141 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | long_context | hierarchical_compiler | 1257.608 | 1866.141 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | random_placement | 843.248 | 2097.174 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | sequential_placement | 614.035 | 1338.474 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | topology_unaware_optimizer | 1016.685 | 199.761 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | topology_aware_greedy | 613.882 | 1338.474 | 1.000 |
+| asymmetric | two_node_asymmetric_nvlink | mixed_bursty | hierarchical_compiler | 613.882 | 1338.474 | 1.000 |
+| degraded | two_node_degraded_network | expert_skewed | random_placement | 3071.042 | 19991.681 | 0.000 |
+| degraded | two_node_degraded_network | expert_skewed | sequential_placement | 558.135 | 229.064 | 1.000 |
+| degraded | two_node_degraded_network | expert_skewed | topology_unaware_optimizer | 547.019 | 99.331 | 1.000 |
+| degraded | two_node_degraded_network | expert_skewed | topology_aware_greedy | 557.996 | 196.934 | 1.000 |
+| degraded | two_node_degraded_network | expert_skewed | hierarchical_compiler | 557.996 | 196.934 | 1.000 |
+| degraded | two_node_degraded_network | long_context | random_placement | 7775.077 | 45426.263 | 0.000 |
+| degraded | two_node_degraded_network | long_context | sequential_placement | 1150.855 | 1425.723 | 1.000 |
+| degraded | two_node_degraded_network | long_context | topology_unaware_optimizer | 1972.347 | 276.339 | 0.875 |
+| degraded | two_node_degraded_network | long_context | topology_aware_greedy | 1272.558 | 1911.860 | 1.000 |
+| degraded | two_node_degraded_network | long_context | hierarchical_compiler | 1272.558 | 1911.860 | 1.000 |
+| degraded | two_node_degraded_network | mixed_bursty | random_placement | 1044.483 | 2815.857 | 1.000 |
+| degraded | two_node_degraded_network | mixed_bursty | sequential_placement | 618.004 | 1336.069 | 1.000 |
+| degraded | two_node_degraded_network | mixed_bursty | topology_unaware_optimizer | 1014.782 | 193.218 | 1.000 |
+| degraded | two_node_degraded_network | mixed_bursty | topology_aware_greedy | 637.285 | 1530.829 | 1.000 |
+| degraded | two_node_degraded_network | mixed_bursty | hierarchical_compiler | 637.285 | 1530.829 | 1.000 |
+| favorable | two_node_infiniband | expert_skewed | random_placement | 2884.228 | 19149.452 | 0.000 |
+| favorable | two_node_infiniband | expert_skewed | sequential_placement | 557.327 | 226.693 | 1.000 |
+| favorable | two_node_infiniband | expert_skewed | topology_unaware_optimizer | 546.080 | 91.816 | 1.000 |
+| favorable | two_node_infiniband | expert_skewed | topology_aware_greedy | 557.327 | 226.693 | 1.000 |
+| favorable | two_node_infiniband | expert_skewed | hierarchical_compiler | 557.327 | 226.693 | 1.000 |
+| favorable | two_node_infiniband | long_context | random_placement | 4572.381 | 25480.192 | 0.000 |
+| favorable | two_node_infiniband | long_context | sequential_placement | 1217.761 | 1700.128 | 1.000 |
+| favorable | two_node_infiniband | long_context | topology_unaware_optimizer | 1972.347 | 276.339 | 0.875 |
+| favorable | two_node_infiniband | long_context | topology_aware_greedy | 1217.761 | 1700.128 | 1.000 |
+| favorable | two_node_infiniband | long_context | hierarchical_compiler | 1217.761 | 1700.128 | 1.000 |
+| favorable | two_node_infiniband | mixed_bursty | random_placement | 843.243 | 2097.174 | 1.000 |
+| favorable | two_node_infiniband | mixed_bursty | sequential_placement | 614.862 | 1351.622 | 1.000 |
+| favorable | two_node_infiniband | mixed_bursty | topology_unaware_optimizer | 1014.782 | 193.218 | 1.000 |
+| favorable | two_node_infiniband | mixed_bursty | topology_aware_greedy | 614.862 | 1351.622 | 1.000 |
+| favorable | two_node_infiniband | mixed_bursty | hierarchical_compiler | 614.862 | 1351.622 | 1.000 |
+| oversubscribed | two_node_oversubscribed | expert_skewed | random_placement | 6614.092 | 48194.529 | 0.000 |
+| oversubscribed | two_node_oversubscribed | expert_skewed | sequential_placement | 575.202 | 650.279 | 1.000 |
+| oversubscribed | two_node_oversubscribed | expert_skewed | topology_unaware_optimizer | 1077.530 | 23.421 | 1.000 |
+| oversubscribed | two_node_oversubscribed | expert_skewed | topology_aware_greedy | 575.202 | 650.279 | 1.000 |
+| oversubscribed | two_node_oversubscribed | expert_skewed | hierarchical_compiler | 575.202 | 650.279 | 1.000 |
+| oversubscribed | two_node_oversubscribed | long_context | random_placement | 17550.556 | 115613.169 | 0.000 |
+| oversubscribed | two_node_oversubscribed | long_context | sequential_placement | 2146.567 | 7678.385 | 0.750 |
+| oversubscribed | two_node_oversubscribed | long_context | topology_unaware_optimizer | 1972.347 | 276.339 | 0.875 |
+| oversubscribed | two_node_oversubscribed | long_context | topology_aware_greedy | 2146.567 | 7678.385 | 0.750 |
+| oversubscribed | two_node_oversubscribed | long_context | hierarchical_compiler | 2146.567 | 7678.385 | 0.750 |
+| oversubscribed | two_node_oversubscribed | mixed_bursty | random_placement | 2294.912 | 6389.884 | 0.750 |
+| oversubscribed | two_node_oversubscribed | mixed_bursty | sequential_placement | 901.279 | 3642.272 | 1.000 |
+| oversubscribed | two_node_oversubscribed | mixed_bursty | topology_unaware_optimizer | 1014.782 | 193.218 | 1.000 |
+| oversubscribed | two_node_oversubscribed | mixed_bursty | topology_aware_greedy | 901.279 | 3642.272 | 1.000 |
+| oversubscribed | two_node_oversubscribed | mixed_bursty | hierarchical_compiler | 901.279 | 3642.272 | 1.000 |
 
 ## H2 — digital-twin ranking
 
-- Mean absolute TTFT error: 232.417 ms
-- Median relative TTFT error: 0.224
-- Spearman rank correlation: 0.862
-- Prediction-interval coverage: 0.067
-- Median loaded-workload queueing delta: 526.790 ms
-- Hierarchical selection regret: 15.549 ms
-- Pareto-selection regret: 0.022
+- Mean absolute TTFT error: 16.295 ms
+- Median relative TTFT error: 0.000
+- Spearman rank correlation: 0.993
+- Prediction-interval coverage: 0.733
+- Median loaded-workload queueing delta: 802.787 ms
+- Hierarchical selection regret: 5.488 ms
+- Pareto-selection regret: 0.010
 
 ### Prediction error by regime
 
 | dimension | value | samples | MAE ms | median relative error | rank correlation | interval coverage |
 |---|---|---:|---:|---:|---:|---:|
-| topology | two_node_asymmetric_nvlink | 45 | 198.241 | 0.307 | 0.762 | 0.000 |
-| topology | two_node_degraded_network | 45 | 166.653 | 0.208 | 0.684 | 0.000 |
-| topology | two_node_infiniband | 45 | 186.315 | 0.224 | 1.000 | 0.000 |
-| topology | two_node_oversubscribed | 45 | 378.459 | 0.160 | 1.000 | 0.267 |
-| workload | expert_skewed | 60 | 129.889 | 0.376 | 0.842 | 0.050 |
-| workload | long_context | 60 | 425.268 | 0.221 | 0.900 | 0.000 |
-| workload | mixed_bursty | 60 | 142.095 | 0.218 | 0.842 | 0.150 |
-| message_size | 67108864 | 120 | 135.992 | 0.266 | 0.842 | 0.100 |
-| message_size | 201326592 | 60 | 425.268 | 0.221 | 0.900 | 0.000 |
-| contention | nominal | 135 | 183.736 | 0.305 | 0.815 | 0.000 |
-| contention | oversubscribed | 45 | 378.459 | 0.160 | 1.000 | 0.267 |
+| topology | two_node_asymmetric_nvlink | 45 | 13.131 | 0.000 | 0.973 | 0.733 |
+| topology | two_node_degraded_network | 45 | 12.667 | 0.000 | 1.000 | 0.733 |
+| topology | two_node_infiniband | 45 | 12.534 | 0.000 | 1.000 | 0.733 |
+| topology | two_node_oversubscribed | 45 | 26.849 | 0.000 | 1.000 | 0.733 |
+| workload | expert_skewed | 60 | 48.821 | 0.184 | 1.000 | 0.200 |
+| workload | long_context | 60 | 0.032 | 0.000 | 1.000 | 1.000 |
+| workload | mixed_bursty | 60 | 0.032 | 0.000 | 0.979 | 1.000 |
+| message_size | 67108864 | 120 | 24.427 | 0.001 | 0.990 | 0.600 |
+| message_size | 201326592 | 60 | 0.032 | 0.000 | 1.000 | 1.000 |
+| contention | nominal | 135 | 12.777 | 0.000 | 0.991 | 0.733 |
+| contention | oversubscribed | 45 | 26.849 | 0.000 | 1.000 | 0.733 |
 
 Compiler isolated-service intervals are compared with one representative p95-shape request in the deterministic Rust simulator; loaded p95 and queueing are reported separately. This remains synthetic internal validation, not hardware accuracy.
 
@@ -114,7 +114,7 @@ Compiler isolated-service intervals are compared with one representative p95-sha
 
 - Mode: `synthetic_cpu`
 - Hardware-backed validation: `not_exercised_no_compatible_hardware`
-- Git commit: `ab0e51fedb79f70f3d79687b26150080bd7f3ebf`
+- Git commit: `ca39d5e7859d26cd7bcac96e439e23825aff6d76`
 - Raw results: `artifacts/fabric/evaluation/result.json`
 - Artifact manifest: `artifacts/fabric/evaluation/manifest.json`
 

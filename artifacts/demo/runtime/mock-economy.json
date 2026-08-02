@@ -1,7 +1,8 @@
 {
-  "bind": "127.0.0.1:50679",
+  "bind": "127.0.0.1:54664",
   "decode_per_token_ms": 5,
   "failure_rate": 0.015,
+  "fault_api_enabled": true,
   "max_concurrency": 2,
   "max_output_tokens": 256,
   "name": "mock-economy",

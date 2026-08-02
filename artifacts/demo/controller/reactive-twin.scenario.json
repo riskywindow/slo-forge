@@ -1622,19 +1622,19 @@
   "service_curve": {
     "chunk_overhead_ms": 0.1,
     "chunk_size_tokens": 512,
-    "decode_intercept_ms": 3.8382704999999966,
-    "decode_ms_per_active_sequence": 0.0,
+    "decode_intercept_ms": 3.921066250000004,
+    "decode_ms_per_active_sequence": 0.0013297499999988343,
     "decode_ms_per_context_token": 0.0005,
     "id": "mock-fast/calibrated-v1",
     "measurement_artifact": "artifacts/demo/evidence",
-    "prefill_intercept_ms": 23.27627877777778,
+    "prefill_intercept_ms": 21.942209,
     "prefill_ms_per_batch_item": 0.05,
-    "prefill_ms_per_prompt_token": 0.08368010069444443,
+    "prefill_ms_per_prompt_token": 0.08392706250000001,
     "startup": {
       "kind": "empirical",
       "samples_ms": [
-        486.2764585,
-        533.6959839
+        488.026771,
+        529.95972765
       ]
     }
   }

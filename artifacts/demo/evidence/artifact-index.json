@@ -4,7 +4,7 @@
       "media_type": "application/json",
       "name": "chaos",
       "path": "artifacts/demo/chaos/result.json",
-      "sha256": "b12e2fe7f16f6cd6b9495dcca2c41c87bb6b0cdc7c0868dd28815375cdd6f167"
+      "sha256": "9ca1b1c153477f58da39568de781e176f0dbfee5fe9581fa55f9f72e7010122a"
     },
     {
       "media_type": "text/plain",
@@ -16,145 +16,145 @@
       "media_type": "application/json",
       "name": "controller",
       "path": "artifacts/demo/controller/evaluation.json",
-      "sha256": "664a0df90324367e325dc454ef53ffc80eabb15682b0a5b5155c4cc3f95d2d9b"
+      "sha256": "25895bae371e4a685f947efdd8713cd4214fd55aec679ed26f1ba394b9a9e10f"
     },
     {
       "media_type": "application/json",
       "name": "evidence",
       "path": "artifacts/demo/evidence/evidence.json",
-      "sha256": "8952367e3a94e3447f206a489354ebeec19add8e0279fb6ae9b1213435f8521f"
+      "sha256": "29b4f8607bb1466f7555253fca3857ebdcfa8b379803adc66a4acc632d386d84"
     },
     {
       "media_type": "text/plain",
       "name": "gateway_metrics",
       "path": "artifacts/demo/gateway/metrics.prom",
-      "sha256": "b213dce28f40d7e868b85ae1974e18e93dd2a4813f94d0f0d6f8fb9f1be740f0"
+      "sha256": "3c791942e9a58e1d0f420b07a1af29f483a4665d5c091b42b54a07231f569b7f"
     },
     {
       "media_type": "application/json",
       "name": "gateway_replay",
       "path": "artifacts/demo/gateway/replay.json",
-      "sha256": "498a09cd709cdf6024652b8aca319e1992ddbb73e61ee46763d6dc62db598702"
+      "sha256": "b60103e704b27ece38b5533aa2bd3d7e211c49618b4170cbacfbc35beb193ec4"
     },
     {
       "media_type": "application/json",
       "name": "gateway_trace",
       "path": "artifacts/demo/runtime/gateway-trace.json",
-      "sha256": "d300e91a7f7d2d7d2ec5b128a680c641a8231c698729f396adba7bb00d7d466c"
+      "sha256": "59aeaaae80c94c66bbea4cfdf2248a3e6efd82f41b96be281f5f00418f627924"
     },
     {
       "media_type": "application/json",
       "name": "hardware",
       "path": "artifacts/demo/hardware/local-cpu.json",
-      "sha256": "c632adbcbfcff3da8f7a375e965eba8dd7fe40c433b963d5e74ffc370ff67466"
+      "sha256": "47ccea47fe1ea1728de4098c15a9eeb62e89e239dc28afd0a23114e23fa552d4"
     },
     {
       "media_type": "application/json",
       "name": "models",
       "path": "artifacts/demo/models/service-curves.json",
-      "sha256": "f8bef9f7a773990a6adde6ccb503b0649481ff04aa2264ac9d9591d6b98e25a1"
+      "sha256": "30dc5c7e911684eef1f7c2a297e5c058d8c5198f70768c493ce7de0ff39fd88f"
     },
     {
       "media_type": "application/json",
       "name": "optimization",
       "path": "artifacts/demo/optimization/result.json",
-      "sha256": "74758533a9e534185ed18c5c613c186442ec4ab40c5206aeac922d2641506347"
+      "sha256": "77fd1ad951e17801d59bac4f449e3018168104dcf5bc2bdb58dcb542af42fd64"
     },
     {
       "media_type": "application/json",
       "name": "plan",
       "path": "artifacts/demo/plans/qwen3-coding-agent.json",
-      "sha256": "87db601413b3d455789d3d30ef80067ef1805414455dab10997558e53feb125d"
+      "sha256": "5539d265ab6115951dfc218aa41bf71be0cf628afd536604d91e2994fb60ef57"
     },
     {
       "media_type": "application/json",
       "name": "predictive_controller_raw",
       "path": "artifacts/demo/controller/predictive-twin.raw.json",
-      "sha256": "f658655709a9df27928ad49e6033942ded3d7da0c56320954370ae7a9c017c5e"
+      "sha256": "06243a2f485900704851dbfaa112a69dbec0abd1952e9c390da32502b9248d10"
     },
     {
       "media_type": "application/json",
       "name": "predictive_controller_scenario",
       "path": "artifacts/demo/controller/predictive-twin.scenario.json",
-      "sha256": "2b4b5f41bb27de13cb6c9d5b4cc343b01d5961d0dd71bc88ab95ee893ed3716c"
+      "sha256": "59e8232453317394dc5ae624104c5c06b4632c1806d173ec6883a7b293781e27"
     },
     {
       "media_type": "application/json",
       "name": "predictive_controller_trace",
       "path": "artifacts/demo/controller/predictive-twin-trace.json",
-      "sha256": "e3af8d9406569230d165482fd2db03fad4394b0003ed9a2a4ef1dbbd9cdfae39"
+      "sha256": "4534c42d039fa890fe09359607c8b2676d71923d14da2084acc78f91ef12d5f1"
     },
     {
       "media_type": "application/json",
       "name": "predictive_controller_twin",
       "path": "artifacts/demo/controller/predictive-twin.json",
-      "sha256": "1f94d1ae731a42d17a34291bb5ced5297e3037d0eeb5ed94c775fdde353921f2"
+      "sha256": "11a5f4aa54ba86d9329f668bd9d7e8bf66275e662875105e7fd2ebfa82b6368b"
     },
     {
       "media_type": "application/json",
       "name": "profile",
       "path": "artifacts/demo/profiles/qwen3-cpu-mocks/profile.json",
-      "sha256": "5b81303edd471f8c5fc38090c09f8189eb1e34df8fdc539c906497cd589ff2c5"
+      "sha256": "b56bf125bac1e068c8dead83f93fcfe117151d52f470894b0cd979e15790125d"
     },
     {
       "media_type": "application/x-ndjson",
       "name": "raw_measurements",
       "path": "artifacts/demo/profiles/qwen3-cpu-mocks/measurements.jsonl",
-      "sha256": "4ad972f25b149d59c85cd6083f1d85f5f4a26a2b13ecab6ed10d0558f4b3d75e"
+      "sha256": "57dfbda40ac687ba1ec70c00551c52128fe8b9e001c363b2b2a2f00146fb9dc8"
     },
     {
       "media_type": "application/json",
       "name": "reactive_controller_raw",
       "path": "artifacts/demo/controller/reactive-twin.raw.json",
-      "sha256": "9b88b4fa0edf1c0457fed9b195332d9c0bd7952c7f718c0a0d7521466bd3c449"
+      "sha256": "94940e1496c6b5a607c3dd333c7d146afb5b89dcf11601c51f4e1ea4879720e2"
     },
     {
       "media_type": "application/json",
       "name": "reactive_controller_scenario",
       "path": "artifacts/demo/controller/reactive-twin.scenario.json",
-      "sha256": "601a8ed4e4d7de89d4f39dd89c6f2ffe01dc6a040de7a44eceaff588668cfcb2"
+      "sha256": "6329f93e9b1ea11f038783b54938cb64b7aa0924f09bc1fc63e3051b635ddb9a"
     },
     {
       "media_type": "application/json",
       "name": "reactive_controller_trace",
       "path": "artifacts/demo/controller/reactive-twin-trace.json",
-      "sha256": "f33513c4d9d5e5f5ee9a8e07743083b5f2e1520c08300622a229c73d5b48dec0"
+      "sha256": "ed4c7268190ea63ebd47e46c1dd571daabaebae787c19ed5ce720204fe85e2d2"
     },
     {
       "media_type": "application/json",
       "name": "reactive_controller_twin",
       "path": "artifacts/demo/controller/reactive-twin.json",
-      "sha256": "6d8a9c7c94db00c98dfaba62cc3472953a3d46d537fc4d52ca18dec8406f2cfb"
+      "sha256": "747fa2c7732cafaee9ea06d0907b349ea530ac197c7ccec000f15c921e01723d"
     },
     {
       "media_type": "application/json",
       "name": "replay",
       "path": "artifacts/demo/simulator/replay.json",
-      "sha256": "50ad5a370551b949d53d741d75b5220d553658142015202622f50a127c6ee9bc"
+      "sha256": "5ba93f4fc6e4eca416d76b0052d068f433e25c9fcc49b1616b7846d57446db35"
     },
     {
       "media_type": "application/json",
       "name": "serving_baselines",
       "path": "artifacts/demo/benchmarks/serving-baselines.json",
-      "sha256": "9dd553cb9ed1a5351afd8e4e5da60cfaa5fb7c113f0aad1e9e142fff4ece0f68"
+      "sha256": "f277220aed6ad150d113ee5dc72aeaaba0aa89438c10806816aa322b6b2779b3"
     },
     {
       "media_type": "application/json",
       "name": "simulator_raw",
       "path": "artifacts/demo/simulator/replay.raw.json",
-      "sha256": "ec4b810d2ba19ac5100b5abcaa0f5972f1879a638f0bfaffdb0328aac8c7d5c6"
+      "sha256": "05cd401bbe2ae851676836e0bf48f4e654fbe4346477c8eb00abc06848713f00"
     },
     {
       "media_type": "application/json",
       "name": "simulator_scenario",
       "path": "artifacts/demo/simulator/replay.scenario.json",
-      "sha256": "a32a4cb6135fa211f6654fecc10b6e5b781339acde37b570a9b76ce53ba916df"
+      "sha256": "0775de4e1243a77b4b6a6144f821cf1202a4b3fe85f513e97c6b154636ee41fd"
     },
     {
       "media_type": "application/json",
       "name": "simulator_trace",
       "path": "artifacts/demo/simulator/trace.json",
-      "sha256": "f8157139160638724bfde7e03a7734fc1f2b5118a9d68b7bdeee053bea9a752f"
+      "sha256": "e231ac68f032db167dab7d99ea2c9e91b3c1a15ac634c9239935fec8c4733c10"
     },
     {
       "media_type": "application/x-ndjson",
@@ -163,6 +163,6 @@
       "sha256": "cefef52050e51049d4562e38aed554cd2ddbc9c32c1bb64c6266c086cbb34e52"
     }
   ],
-  "generated_at": "2026-08-02T02:56:41.293330+00:00",
+  "generated_at": "2026-08-02T07:51:05.333419+00:00",
   "schema_version": "sloforge.artifact-index/v1"
 }

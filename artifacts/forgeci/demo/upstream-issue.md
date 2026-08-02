@@ -13,9 +13,9 @@ noise floor are applied in addition to statistical significance.
 
 ## Suspected range
 
-- Known good: `61853d2250324d26b71a79307ed527686caf5db8`
-- Known bad: `f2047b539634bef041c7a3a0712e11604c37ac82`
-- First likely regressing commit: `a4a027eeb5d87c6b67e5f347e3a67e2679929651`
+- Known good: `583df29a9e065e79b10a0ff9459e0c1bf05517b5`
+- Known bad: `da5d1c5ed8a27aad176e46bff4c87780fc8d84f9`
+- First likely regressing commit: `2d43c4d468c9c49986cfba9f516d2a4a20a3a63d`
 - Bisection confidence: 97.5%
 
 This identifies a change point, not a proven source-code cause.
@@ -29,7 +29,7 @@ This identifies a change point, not a proven source-code cause.
 - Confidence interval: family-wise 95% bootstrap intervals exclude zero
 
 ```console
-    git checkout --detach f2047b539634bef041c7a3a0712e11604c37ac82
+    git checkout --detach da5d1c5ed8a27aad176e46bff4c87780fc8d84f9
     /Users/rishivinodkumar/sloforge/.venv/bin/python3 benchmark.py
 ```
 
@@ -43,7 +43,7 @@ This identifies a change point, not a proven source-code cause.
 ## Evidence artifacts
 
 - `artifacts/forgeci/demo/bisect/bisect-result.json`
-- `artifacts/forgeci/demo/bisect/comparisons/a4a027eeb5d87c6b67e5f347e3a67e2679929651-0.json`
+- `artifacts/forgeci/demo/bisect/comparisons/2d43c4d468c9c49986cfba9f516d2a4a20a3a63d-0.json`
 - `artifacts/forgeci/demo/minimization`
 
 ## Caveats

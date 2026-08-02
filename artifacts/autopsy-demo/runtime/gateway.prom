@@ -1,0 +1,45 @@
+# TYPE sloforge_gateway_backend_healthy gauge
+sloforge_gateway_backend_healthy{backend="fabric-backend-0"} 1
+sloforge_gateway_backend_healthy{backend="fabric-backend-1"} 1
+# TYPE sloforge_gateway_backend_outstanding gauge
+sloforge_gateway_backend_outstanding{backend="fabric-backend-0"} 0
+sloforge_gateway_backend_outstanding{backend="fabric-backend-1"} 0
+# TYPE sloforge_gateway_circuit_open gauge
+sloforge_gateway_circuit_open{backend="fabric-backend-0"} 0
+sloforge_gateway_circuit_open{backend="fabric-backend-1"} 0
+# TYPE sloforge_gateway_request_duration_seconds histogram
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.01"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.025"} 6
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.05"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.1"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.25"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="0.5"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="1"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="2.5"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="5"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="10"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="30"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="120"} 12
+sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="+Inf"} 12
+sloforge_gateway_request_duration_seconds_sum{backend="fabric-backend-0"} 0.313478499
+sloforge_gateway_request_duration_seconds_count{backend="fabric-backend-0"} 12
+# TYPE sloforge_gateway_requests_total counter
+sloforge_gateway_requests_total 12
+# TYPE sloforge_gateway_route_decisions_total counter
+sloforge_gateway_route_decisions_total{backend="fabric-backend-0",policy="slo_slack_aware"} 12
+# TYPE sloforge_gateway_stream_events_total counter
+sloforge_gateway_stream_events_total{backend="fabric-backend-0"} 48
+# TYPE sloforge_gateway_ttft_seconds histogram
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.01"} 6
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.025"} 6
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.05"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.1"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.25"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="0.5"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="1"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="2.5"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="5"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="10"} 12
+sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="+Inf"} 12
+sloforge_gateway_ttft_seconds_sum{backend="fabric-backend-0"} 0.22583791800000003
+sloforge_gateway_ttft_seconds_count{backend="fabric-backend-0"} 12

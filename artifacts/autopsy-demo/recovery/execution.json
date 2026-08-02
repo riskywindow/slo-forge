@@ -1,0 +1,204 @@
+{
+  "action_attempts": [
+    {
+      "action_id": "action-00-quarantine_rail",
+      "attempted_at_ms": 2000,
+      "detail": "simulated action quarantine_rail completed",
+      "idempotency_key": "recovery-b57a251e140ac448/0/quarantine_rail",
+      "succeeded": true
+    },
+    {
+      "action_id": "action-01-change_nic_affinity",
+      "attempted_at_ms": 2000,
+      "detail": "simulated action change_nic_affinity completed",
+      "idempotency_key": "recovery-b57a251e140ac448/1/change_nic_affinity",
+      "succeeded": true
+    },
+    {
+      "action_id": "action-02-change_rank_placement",
+      "attempted_at_ms": 2000,
+      "detail": "simulated action change_rank_placement completed",
+      "idempotency_key": "recovery-b57a251e140ac448/2/change_rank_placement",
+      "succeeded": true
+    }
+  ],
+  "applied_action_ids": [
+    "action-00-quarantine_rail",
+    "action-01-change_nic_affinity",
+    "action-02-change_rank_placement"
+  ],
+  "audit": [
+    {
+      "at_ms": 0,
+      "event": "created",
+      "fields": [],
+      "idempotency_key": "recovery-b57a251e140ac448:start",
+      "reason": "recovery proposal loaded; no mutation performed",
+      "record_id": "recovery-b57a251e140ac448:000000:created",
+      "sequence": 0,
+      "state_after": "PROPOSED",
+      "state_before": "PROPOSED"
+    },
+    {
+      "at_ms": 1000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "simulation-validated",
+      "reason": "counterfactual simulation validation passed",
+      "record_id": "recovery-b57a251e140ac448:000001:transition",
+      "sequence": 1,
+      "state_after": "VALIDATED_IN_SIMULATION",
+      "state_before": "PROPOSED"
+    },
+    {
+      "at_ms": 2000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "replacement-build",
+      "reason": "beginning idempotent recovery actions",
+      "record_id": "recovery-b57a251e140ac448:000002:transition",
+      "sequence": 2,
+      "state_after": "BUILDING_REPLACEMENT",
+      "state_before": "VALIDATED_IN_SIMULATION"
+    },
+    {
+      "at_ms": 2000,
+      "event": "action",
+      "fields": [
+        {
+          "name": "succeeded",
+          "value": "true"
+        }
+      ],
+      "idempotency_key": "recovery-b57a251e140ac448/0/quarantine_rail",
+      "reason": "simulated action quarantine_rail completed",
+      "record_id": "recovery-b57a251e140ac448:000002:action:action-00-quarantine_rail",
+      "sequence": 2,
+      "state_after": "BUILDING_REPLACEMENT",
+      "state_before": "BUILDING_REPLACEMENT"
+    },
+    {
+      "at_ms": 2000,
+      "event": "action",
+      "fields": [
+        {
+          "name": "succeeded",
+          "value": "true"
+        }
+      ],
+      "idempotency_key": "recovery-b57a251e140ac448/1/change_nic_affinity",
+      "reason": "simulated action change_nic_affinity completed",
+      "record_id": "recovery-b57a251e140ac448:000002:action:action-01-change_nic_affinity",
+      "sequence": 2,
+      "state_after": "BUILDING_REPLACEMENT",
+      "state_before": "BUILDING_REPLACEMENT"
+    },
+    {
+      "at_ms": 2000,
+      "event": "action",
+      "fields": [
+        {
+          "name": "succeeded",
+          "value": "true"
+        }
+      ],
+      "idempotency_key": "recovery-b57a251e140ac448/2/change_rank_placement",
+      "reason": "simulated action change_rank_placement completed",
+      "record_id": "recovery-b57a251e140ac448:000002:action:action-02-change_rank_placement",
+      "sequence": 2,
+      "state_after": "BUILDING_REPLACEMENT",
+      "state_before": "BUILDING_REPLACEMENT"
+    },
+    {
+      "at_ms": 3000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "replacement-ready",
+      "reason": "replacement is ready; starting shadow traffic",
+      "record_id": "recovery-b57a251e140ac448:000003:transition",
+      "sequence": 3,
+      "state_after": "SHADOWING",
+      "state_before": "BUILDING_REPLACEMENT"
+    },
+    {
+      "at_ms": 4000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "shadow-complete",
+      "reason": "shadow sample and SLO criteria passed",
+      "record_id": "recovery-b57a251e140ac448:000004:transition",
+      "sequence": 4,
+      "state_after": "CANARYING",
+      "state_before": "SHADOWING"
+    },
+    {
+      "at_ms": 5000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "canary-complete",
+      "reason": "canary sample and SLO criteria passed",
+      "record_id": "recovery-b57a251e140ac448:000005:transition",
+      "sequence": 5,
+      "state_after": "PROMOTING",
+      "state_before": "CANARYING"
+    },
+    {
+      "at_ms": 6000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "traffic-migrated",
+      "reason": "traffic migrated; old workers no longer receive new requests",
+      "record_id": "recovery-b57a251e140ac448:000006:transition",
+      "sequence": 6,
+      "state_after": "DRAINING_OLD",
+      "state_before": "PROMOTING"
+    },
+    {
+      "at_ms": 7000,
+      "event": "wait",
+      "fields": [
+        {
+          "name": "active_started_streams",
+          "value": "2"
+        }
+      ],
+      "idempotency_key": "draining-streams",
+      "reason": "preserving started streaming requests during graceful drain",
+      "record_id": "recovery-b57a251e140ac448:000006:wait",
+      "sequence": 6,
+      "state_after": "DRAINING_OLD",
+      "state_before": "DRAINING_OLD"
+    },
+    {
+      "at_ms": 8000,
+      "event": "transition",
+      "fields": [],
+      "idempotency_key": "drain-complete",
+      "reason": "old workers drained; recovery completed",
+      "record_id": "recovery-b57a251e140ac448:000007:transition",
+      "sequence": 7,
+      "state_after": "COMPLETED",
+      "state_before": "DRAINING_OLD"
+    }
+  ],
+  "cooldown_until_ms": 5000,
+  "deadline_ms": 900000,
+  "last_observed_at_ms": 8000,
+  "processed_idempotency_keys": [
+    "simulation-validated",
+    "replacement-build",
+    "replacement-ready",
+    "shadow-complete",
+    "canary-complete",
+    "traffic-migrated",
+    "draining-streams",
+    "drain-complete"
+  ],
+  "recovery_id": "recovery-b57a251e140ac448",
+  "recovery_plan_hash": "8fdb9865f7ace8c75abd09cbe4f69fcd78ce2e6d4e83b6528c558c0501e86613",
+  "schema_version": "sloforge.recovery.execution/v1",
+  "sequence": 7,
+  "started_at_ms": 0,
+  "state": "COMPLETED",
+  "state_entered_at_ms": 8000
+}

@@ -21,7 +21,7 @@ sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="
 sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="30"} 12
 sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="120"} 12
 sloforge_gateway_request_duration_seconds_bucket{backend="fabric-backend-0",le="+Inf"} 12
-sloforge_gateway_request_duration_seconds_sum{backend="fabric-backend-0"} 0.30251454299999997
+sloforge_gateway_request_duration_seconds_sum{backend="fabric-backend-0"} 0.31563174699999996
 sloforge_gateway_request_duration_seconds_count{backend="fabric-backend-0"} 12
 # TYPE sloforge_gateway_requests_total counter
 sloforge_gateway_requests_total 12
@@ -41,5 +41,5 @@ sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="2.5"} 12
 sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="5"} 12
 sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="10"} 12
 sloforge_gateway_ttft_seconds_bucket{backend="fabric-backend-0",le="+Inf"} 12
-sloforge_gateway_ttft_seconds_sum{backend="fabric-backend-0"} 0.22460608300000004
+sloforge_gateway_ttft_seconds_sum{backend="fabric-backend-0"} 0.22985174900000002
 sloforge_gateway_ttft_seconds_count{backend="fabric-backend-0"} 12

@@ -8,13 +8,13 @@
     {
       "artifact_uri": "artifacts/fabric/evaluation/autopsy/two_node_infiniband/seed-47/rank-2-straggler/degraded-simulation.json.gz",
       "record_index": null,
-      "sha256": "905fd71717c1e9a8f07799795360a76a0f25ba59d4d0b916a8250db67d5afc6e",
+      "sha256": "d90527ce7f9960bea615f58d3ad8798769a29ab3a0deddb48b38a23d463426d0",
       "source": "sloforge-fabric-sim"
     },
     {
       "artifact_uri": "artifacts/fabric/evaluation/trials/two_node_infiniband/seed-47/mixed_bursty/hierarchical_compiler/simulation.json.gz",
       "record_index": null,
-      "sha256": "bc845de110d53bd1ddd66cdf066a036fa73ce2582671ae09a5745570073bc776",
+      "sha256": "577b0722df73c03d882da297ad3a5afd6967eb5718fa875bdf44aee2e49d8812",
       "source": "sloforge-fabric-sim"
     }
   ],
@@ -35,35 +35,13 @@
           ],
           "explanation": "rank_skew=2.85714 exceeds 1.2",
           "metric": "rank_skew",
-          "observed": 2.85714375,
+          "observed": 2.857142857142857,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 1.2
         }
       ],
       "target": "rank_group"
-    },
-    {
-      "confidence": 0.87,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-22-kv_transfer_bottleneck",
-      "kind": "kv_transfer_bottleneck",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-two_node_infiniband-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
-          ],
-          "explanation": "kv_transfer_delta=0.423652 exceeds 0.2",
-          "metric": "kv_transfer_delta",
-          "observed": 0.4236519448665011,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 0.2
-        }
-      ],
-      "target": "kv_transfer"
     },
     {
       "confidence": 0.87,
@@ -79,13 +57,35 @@
           ],
           "explanation": "prefill_delta=1.85714 exceeds 0.2",
           "metric": "prefill_delta",
-          "observed": 1.85714375,
+          "observed": 1.857142857142857,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
         }
       ],
       "target": "prefill_pool"
+    },
+    {
+      "confidence": 0.6848692250823719,
+      "contradicting_evidence": [],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-22-kv_transfer_bottleneck",
+      "kind": "kv_transfer_bottleneck",
+      "rejected_reason": null,
+      "supporting_evidence": [
+        {
+          "event_ids": [
+            "degraded-two_node_infiniband-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
+          ],
+          "explanation": "kv_transfer_delta=0.276579 exceeds 0.2",
+          "metric": "kv_transfer_delta",
+          "observed": 0.27657948338824795,
+          "relation": "greater_than",
+          "supports_hypothesis": true,
+          "threshold": 0.2
+        }
+      ],
+      "target": "kv_transfer"
     },
     {
       "confidence": 0.2,
@@ -110,15 +110,15 @@
       "target": "deployment"
     },
     {
-      "confidence": 0.18611648208397988,
+      "confidence": 0.03699760550777009,
       "contradicting_evidence": [
         {
           "event_ids": [
             "degraded-two_node_infiniband-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
           ],
-          "explanation": "nvlink_delta=0.186116 does not exceed 0.2",
+          "explanation": "nvlink_delta=0.0369976 does not exceed 0.2",
           "metric": "nvlink_delta",
-          "observed": 0.18611648208397988,
+          "observed": 0.03699760550777009,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -248,9 +248,9 @@
           "event_ids": [
             "degraded-two_node_infiniband-47-rank-2-straggler:request-000000:rank-2:prefill:rank-2"
           ],
-          "explanation": "decode_delta=1.24064e-08 does not exceed 0.2",
+          "explanation": "decode_delta=0 does not exceed 0.2",
           "metric": "decode_delta",
-          "observed": 1.2406409581401197e-08,
+          "observed": 0.0,
           "relation": "greater_than",
           "supports_hypothesis": false,
           "threshold": 0.2
@@ -621,8 +621,10 @@
   "top_hypothesis": "rank_straggler",
   "top_three": [
     "rank_straggler",
-    "kv_transfer_bottleneck",
-    "prefill_pool_saturation"
+    "prefill_pool_saturation",
+    "kv_transfer_bottleneck"
   ],
-  "warnings": []
+  "warnings": [
+    "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+  ]
 }

@@ -1,0 +1,237 @@
+{
+  "degraded": {
+    "makespan_us": 7129752.3699276205,
+    "operation_count": 588,
+    "output_sha256": "704f73fc5099ffd3643712d53d01c9d8691f7422a95bc7627f6b5ebe15e4e793",
+    "predicted_lower_us": 6925108.867421635,
+    "predicted_upper_us": 7334395.872433606,
+    "processed_events": 1536
+  },
+  "diagnosis_id": "diagnosis-cb7c905c387c51e0",
+  "evaluations": [
+    {
+      "confidence": 0.8327462604058866,
+      "expected_improvement_ms": 5813.583840247169,
+      "healthy_reference_residual_ms": 79.6542765235051,
+      "lower_improvement_ms": 5404.296835235199,
+      "observation": {
+        "makespan_us": 1316168.5296804511,
+        "operation_count": 588,
+        "output_sha256": "80f8efb1d4cdd6f22865ee392d94d582d145ff64965c3dbedfe52f594532bbab",
+        "predicted_lower_us": 1111525.0271744663,
+        "predicted_upper_us": 1520812.032186436,
+        "processed_events": 1536
+      },
+      "rejected_reason": null,
+      "scenario": {
+        "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+        "hypothesis_kind": "network_bandwidth_degradation",
+        "modifications": [
+          {
+            "from_resource_id": "nic-network:host-0/nic/0:rail-0",
+            "to_resource_id": "nic-network:host-0/nic/1:rail-1",
+            "type": "replace_resource"
+          }
+        ],
+        "rationale": "route affected operations onto the alternate rail",
+        "scenario_id": "move-network-resource"
+      },
+      "status": "supported",
+      "upper_improvement_ms": 6222.870845259139
+    },
+    {
+      "confidence": 0.8341378014115949,
+      "expected_improvement_ms": 5893.238116770674,
+      "healthy_reference_residual_ms": 0.0,
+      "lower_improvement_ms": 5483.951111758704,
+      "observation": {
+        "makespan_us": 1236514.253156946,
+        "operation_count": 588,
+        "output_sha256": "650a175c68cc0f33280a30fafc4dde69fedea256e737e5046ab41c8d7e584156",
+        "predicted_lower_us": 1031870.7506509612,
+        "predicted_upper_us": 1441157.755662931,
+        "processed_events": 1524
+      },
+      "rejected_reason": null,
+      "scenario": {
+        "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+        "hypothesis_kind": "network_bandwidth_degradation",
+        "modifications": [
+          {
+            "fault_id": "degrade-primary-rail",
+            "type": "remove_fault"
+          },
+          {
+            "fault_id": "slow-rank-six",
+            "type": "remove_fault"
+          }
+        ],
+        "rationale": "restore both independently observed physical resources",
+        "scenario_id": "remove-both-faults"
+      },
+      "status": "supported",
+      "upper_improvement_ms": 6302.525121782644
+    },
+    {
+      "confidence": 0.8327462604058866,
+      "expected_improvement_ms": 5813.583840247169,
+      "healthy_reference_residual_ms": 79.6542765235051,
+      "lower_improvement_ms": 5404.296835235199,
+      "observation": {
+        "makespan_us": 1316168.5296804511,
+        "operation_count": 588,
+        "output_sha256": "2088cb6a4acbdc3b5740d1e584a4c8e616957cff1559ea38847e3ec0cb8617e9",
+        "predicted_lower_us": 1111525.0271744663,
+        "predicted_upper_us": 1520812.032186436,
+        "processed_events": 1536
+      },
+      "rejected_reason": null,
+      "scenario": {
+        "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+        "hypothesis_kind": "network_bandwidth_degradation",
+        "modifications": [
+          {
+            "fault_id": "degrade-primary-rail",
+            "type": "remove_fault"
+          }
+        ],
+        "rationale": "remove the measured network-path degradation",
+        "scenario_id": "remove-network-fault"
+      },
+      "status": "supported",
+      "upper_improvement_ms": 6222.870845259139
+    },
+    {
+      "confidence": 0.03423209644933691,
+      "expected_improvement_ms": -146.88794047903457,
+      "healthy_reference_residual_ms": 6040.126057249709,
+      "lower_improvement_ms": -556.1749454910048,
+      "observation": {
+        "makespan_us": 7276640.310406655,
+        "operation_count": 588,
+        "output_sha256": "fcb2095525cb16ea9073835471b597f646572f573d19b11cf4accb61a54fa0f5",
+        "predicted_lower_us": 7071996.80790067,
+        "predicted_upper_us": 7481283.81291264,
+        "processed_events": 1524
+      },
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
+      "scenario": {
+        "hypothesis_id": "hypothesis-16-rank_straggler",
+        "hypothesis_kind": "rank_straggler",
+        "modifications": [
+          {
+            "fault_id": "slow-rank-six",
+            "type": "remove_fault"
+          }
+        ],
+        "rationale": "remove the rank-specific service-rate degradation",
+        "scenario_id": "remove-rank-fault"
+      },
+      "status": "inconclusive",
+      "upper_improvement_ms": 262.3990645329356
+    },
+    {
+      "confidence": 0.593224974310793,
+      "expected_improvement_ms": 1360.072977066666,
+      "healthy_reference_residual_ms": 4533.165139704009,
+      "lower_improvement_ms": 951.0881126854028,
+      "observation": {
+        "makespan_us": 5769679.392860955,
+        "operation_count": 588,
+        "output_sha256": "f3d954ba3febdc90c1b34fac6627bd9f0eb60bead8f807a7a82eac676a999899",
+        "predicted_lower_us": 5565338.030985677,
+        "predicted_upper_us": 5974020.754736233,
+        "processed_events": 1536
+      },
+      "rejected_reason": null,
+      "scenario": {
+        "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+        "hypothesis_kind": "network_bandwidth_degradation",
+        "modifications": [
+          {
+            "bandwidth_multiplier": 20.0,
+            "latency_multiplier": 1.0,
+            "resource_id": "nic-network:host-0/nic/0:rail-0",
+            "type": "scale_resource_curve"
+          }
+        ],
+        "rationale": "restore calibrated bandwidth while retaining the fault interval",
+        "scenario_id": "restore-network-curve"
+      },
+      "status": "supported",
+      "upper_improvement_ms": 1769.057841447929
+    },
+    {
+      "confidence": 0.03428451683286285,
+      "expected_improvement_ms": -146.88794047903457,
+      "healthy_reference_residual_ms": 6040.126057249709,
+      "lower_improvement_ms": -555.4368588793166,
+      "observation": {
+        "makespan_us": 7276640.310406655,
+        "operation_count": 588,
+        "output_sha256": "a61282ccd80e3f4ab1e08fe65a6a070a71f4c67b998362bdd3ba49465b50a1e0",
+        "predicted_lower_us": 7072734.894512358,
+        "predicted_upper_us": 7480545.726300952,
+        "processed_events": 1524
+      },
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
+      "scenario": {
+        "hypothesis_id": "hypothesis-16-rank_straggler",
+        "hypothesis_kind": "rank_straggler",
+        "modifications": [
+          {
+            "duration_multiplier": 0.25,
+            "rank_id": "rank-6",
+            "type": "scale_rank"
+          }
+        ],
+        "rationale": "counteract the measured rank service-time multiplier",
+        "scenario_id": "restore-rank-rate"
+      },
+      "status": "inconclusive",
+      "upper_improvement_ms": 261.6609779212475
+    },
+    {
+      "confidence": 2.745716742021928e-07,
+      "expected_improvement_ms": 0.0,
+      "healthy_reference_residual_ms": 5893.238116770674,
+      "lower_improvement_ms": -409.72858194876557,
+      "observation": {
+        "makespan_us": 7129752.3699276205,
+        "operation_count": 588,
+        "output_sha256": "1c2dc2ad2435af57a96b8cc0d7b1e11a49c2e1899ab79be294af7fa54cbcc097",
+        "predicted_lower_us": 6924667.29048484,
+        "predicted_upper_us": 7334837.449370401,
+        "processed_events": 1548
+      },
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
+      "scenario": {
+        "hypothesis_id": "hypothesis-16-rank_straggler",
+        "hypothesis_kind": "rank_straggler",
+        "modifications": [
+          {
+            "duration_multiplier": 1.25,
+            "rank_id": "rank-1",
+            "type": "scale_rank"
+          }
+        ],
+        "rationale": "negative control: slow an unaffected rank",
+        "scenario_id": "wrong-rank-control"
+      },
+      "status": "inconclusive",
+      "upper_improvement_ms": 409.72858194876557
+    }
+  ],
+  "healthy_reference_us": 1236514.253156946,
+  "rejected_scenario_ids": [
+    "move-network-resource",
+    "remove-network-fault",
+    "remove-rank-fault",
+    "restore-network-curve",
+    "restore-rank-rate",
+    "wrong-rank-control"
+  ],
+  "schema_version": "sloforge.autopsy.counterfactual/v1",
+  "selected_scenario_id": "remove-both-faults",
+  "simulation_input_sha256": "74bc027dedb0995515dbf507958b51ed4c1ff57d6a2a3d621b2a33eb61b01d15"
+}

@@ -1,4 +1,4 @@
-planId: opt-0c27332ab6ce05d9
+planId: opt-6bc8aed6c3b3caee
 image:
   repository: ghcr.io/sloforge/runtime
   tag: 0.1.0
@@ -23,7 +23,7 @@ backendCommand:
 - mock-backend
 - --config
 - /etc/sloforge/mock-backend.json
-estimatedServiceMs: 994.2425667853829
+estimatedServiceMs: 1013.9980433535762
 hourlyPriceUsd: 2.2
 gpuCount: 0
 concurrency: 6

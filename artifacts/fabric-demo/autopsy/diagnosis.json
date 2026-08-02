@@ -1,76 +1,54 @@
 {
   "baseline_run_id": "healthy-run",
-  "comparison_id": "comparison-00894339b3302ecb",
-  "confidence": 0.9,
+  "comparison_id": "comparison-1b424d00f35f8e4f",
+  "confidence": 0.8341378014115949,
   "degraded_run_id": "degraded-run",
-  "diagnosis_id": "diagnosis-9540d986a8a317da",
+  "diagnosis_id": "diagnosis-cb7c905c387c51e0",
   "evidence": [
     {
       "artifact_uri": "artifacts/fabric-demo/simulations/degraded.json",
       "record_index": null,
-      "sha256": "f16134495a26c91e8c79746a83e357d34389505b1a721c87efda93b7277ee786",
+      "sha256": "ccddae8206cd06635482bf8a9f4f0d412029d9df94e4f6c13c5fcae73e184693",
       "source": "sloforge-fabric-sim"
     },
     {
       "artifact_uri": "artifacts/fabric-demo/simulations/healthy.json",
       "record_index": null,
-      "sha256": "a31a1cad1cc7a4c71ea45482fbfd41b8a9731428faf196cacaefe35241a523b9",
+      "sha256": "5819e1dfa8a23e0fbd15390531e8e4d808ccb006ce0e50fd282335a19790d351",
       "source": "sloforge-fabric-sim"
     }
   ],
   "first_divergence_event_id": "degraded-run:request-000000:rank-6:prefill:rank-6",
-  "first_divergence_ns": 176000,
+  "first_divergence_ns": 161000,
   "hypotheses": [
     {
-      "confidence": 0.715908157298632,
+      "confidence": 0.8341378014115949,
       "contradicting_evidence": [],
       "counterfactual": {
-        "expected_improvement_ms": 4254.988404830379,
-        "healthy_gap_remaining_ms": 333.2208543433801,
-        "lower_improvement_ms": 3707.9149791874365,
-        "scenario_id": "restore-rank-rate",
+        "expected_improvement_ms": 5893.238116770674,
+        "healthy_gap_remaining_ms": 0.0,
+        "lower_improvement_ms": 5483.951111758704,
+        "scenario_id": "remove-both-faults",
         "simulation_artifact": null,
-        "upper_improvement_ms": 4802.0618304733225
+        "upper_improvement_ms": 6302.525121782644
       },
-      "hypothesis_id": "hypothesis-16-rank_straggler",
-      "kind": "rank_straggler",
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "kind": "network_bandwidth_degradation",
       "rejected_reason": null,
       "supporting_evidence": [
         {
           "event_ids": [
             "degraded-run:request-000000:rank-6:prefill:rank-6"
           ],
-          "explanation": "rank_skew=4.00002 exceeds 1.2",
-          "metric": "rank_skew",
-          "observed": 4.000019995600968,
+          "explanation": "network_bandwidth_drop=0.966205 exceeds 0.15",
+          "metric": "network_bandwidth_drop",
+          "observed": 0.9662050535613794,
           "relation": "greater_than",
           "supports_hypothesis": true,
-          "threshold": 1.2
+          "threshold": 0.15
         }
       ],
-      "target": "rank_group"
-    },
-    {
-      "confidence": 0.87,
-      "contradicting_evidence": [],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-21-decode_pool_saturation",
-      "kind": "decode_pool_saturation",
-      "rejected_reason": null,
-      "supporting_evidence": [
-        {
-          "event_ids": [
-            "degraded-run:request-000000:rank-6:prefill:rank-6"
-          ],
-          "explanation": "decode_delta=3 exceeds 0.2",
-          "metric": "decode_delta",
-          "observed": 3.0,
-          "relation": "greater_than",
-          "supports_hypothesis": true,
-          "threshold": 0.2
-        }
-      ],
-      "target": "decode_pool"
+      "target": "network_rail"
     },
     {
       "confidence": 0.87,
@@ -84,9 +62,9 @@
           "event_ids": [
             "degraded-run:request-000000:rank-6:prefill:rank-6"
           ],
-          "explanation": "kv_transfer_delta=268.866 exceeds 0.2",
+          "explanation": "kv_transfer_delta=71.9154 exceeds 0.2",
           "metric": "kv_transfer_delta",
-          "observed": 268.8656557741121,
+          "observed": 71.91537040429172,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
@@ -106,9 +84,9 @@
           "event_ids": [
             "degraded-run:request-000000:rank-6:prefill:rank-6"
           ],
-          "explanation": "prefill_delta=3.00002 exceeds 0.2",
+          "explanation": "prefill_delta=3 exceeds 0.2",
           "metric": "prefill_delta",
-          "observed": 3.000019995600968,
+          "observed": 3.0,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
@@ -117,26 +95,55 @@
       "target": "prefill_pool"
     },
     {
-      "confidence": 0.8324999999999999,
+      "confidence": 0.5814153270693505,
       "contradicting_evidence": [],
       "counterfactual": null,
-      "hypothesis_id": "hypothesis-06-cpu_launch_bottleneck",
-      "kind": "cpu_launch_bottleneck",
+      "hypothesis_id": "hypothesis-13-nvlink_degradation",
+      "kind": "nvlink_degradation",
       "rejected_reason": null,
       "supporting_evidence": [
         {
           "event_ids": [
             "degraded-run:request-000000:rank-6:prefill:rank-6"
           ],
-          "explanation": "cpu_launch_delta=0.375 exceeds 0.2",
-          "metric": "cpu_launch_delta",
-          "observed": 0.375,
+          "explanation": "nvlink_delta=0.20761 exceeds 0.2",
+          "metric": "nvlink_delta",
+          "observed": 0.20761021804623372,
           "relation": "greater_than",
           "supports_hypothesis": true,
           "threshold": 0.2
         }
       ],
-      "target": "cpu_launch"
+      "target": "nvlink_path"
+    },
+    {
+      "confidence": 0.03428451683286285,
+      "contradicting_evidence": [],
+      "counterfactual": {
+        "expected_improvement_ms": -146.88794047903457,
+        "healthy_gap_remaining_ms": 6040.126057249709,
+        "lower_improvement_ms": -555.4368588793166,
+        "scenario_id": "restore-rank-rate",
+        "simulation_artifact": null,
+        "upper_improvement_ms": 261.6609779212475
+      },
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "kind": "rank_straggler",
+      "rejected_reason": "counterfactual prediction interval crosses zero improvement",
+      "supporting_evidence": [
+        {
+          "event_ids": [
+            "degraded-run:request-000000:rank-6:prefill:rank-6"
+          ],
+          "explanation": "rank_skew=4 exceeds 1.2",
+          "metric": "rank_skew",
+          "observed": 4.0,
+          "relation": "greater_than",
+          "supports_hypothesis": true,
+          "threshold": 1.2
+        }
+      ],
+      "target": "rank_group"
     },
     {
       "confidence": 0.2,
@@ -247,6 +254,50 @@
       "rejected_reason": "primary signal did not cross its threshold",
       "supporting_evidence": [],
       "target": "collective_group"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-run:request-000000:rank-6:prefill:rank-6"
+          ],
+          "explanation": "cpu_launch_delta=0 does not exceed 0.2",
+          "metric": "cpu_launch_delta",
+          "observed": 0.0,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-06-cpu_launch_bottleneck",
+      "kind": "cpu_launch_bottleneck",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "cpu_launch"
+    },
+    {
+      "confidence": 0.01,
+      "contradicting_evidence": [
+        {
+          "event_ids": [
+            "degraded-run:request-000000:rank-6:prefill:rank-6"
+          ],
+          "explanation": "decode_delta=3.31458e-08 does not exceed 0.2",
+          "metric": "decode_delta",
+          "observed": 3.314580203527962e-08,
+          "relation": "greater_than",
+          "supports_hypothesis": false,
+          "threshold": 0.2
+        }
+      ],
+      "counterfactual": null,
+      "hypothesis_id": "hypothesis-21-decode_pool_saturation",
+      "kind": "decode_pool_saturation",
+      "rejected_reason": "primary signal did not cross its threshold",
+      "supporting_evidence": [],
+      "target": "decode_pool"
     },
     {
       "confidence": 0.01,
@@ -447,35 +498,6 @@
       "target": "model_loader"
     },
     {
-      "confidence": 0.0080510829293839,
-      "contradicting_evidence": [
-        {
-          "event_ids": [
-            "degraded-run:request-000000:rank-6:prefill:rank-6"
-          ],
-          "explanation": "network_bandwidth_drop=0 does not exceed 0.15",
-          "metric": "network_bandwidth_drop",
-          "observed": 0.0,
-          "relation": "greater_than",
-          "supports_hypothesis": false,
-          "threshold": 0.15
-        }
-      ],
-      "counterfactual": {
-        "expected_improvement_ms": 4588.209259173759,
-        "healthy_gap_remaining_ms": 0.0,
-        "lower_improvement_ms": 4032.8777946246255,
-        "scenario_id": "remove-both-faults",
-        "simulation_artifact": null,
-        "upper_improvement_ms": 5143.540723722893
-      },
-      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
-      "kind": "network_bandwidth_degradation",
-      "rejected_reason": null,
-      "supporting_evidence": [],
-      "target": "network_rail"
-    },
-    {
       "confidence": 0.01,
       "contradicting_evidence": [
         {
@@ -518,28 +540,6 @@
       "rejected_reason": "primary signal did not cross its threshold",
       "supporting_evidence": [],
       "target": "numa_affinity"
-    },
-    {
-      "confidence": 0.01,
-      "contradicting_evidence": [
-        {
-          "event_ids": [
-            "degraded-run:request-000000:rank-6:prefill:rank-6"
-          ],
-          "explanation": "nvlink_delta=0 does not exceed 0.2",
-          "metric": "nvlink_delta",
-          "observed": 0.0,
-          "relation": "greater_than",
-          "supports_hypothesis": false,
-          "threshold": 0.2
-        }
-      ],
-      "counterfactual": null,
-      "hypothesis_id": "hypothesis-13-nvlink_degradation",
-      "kind": "nvlink_degradation",
-      "rejected_reason": "primary signal did not cross its threshold",
-      "supporting_evidence": [],
-      "target": "nvlink_path"
     },
     {
       "confidence": 0.01,
@@ -632,11 +632,13 @@
   ],
   "schema_version": "sloforge.autopsy.diagnosis/v1",
   "sufficient_alignment": true,
-  "top_hypothesis": "rank_straggler",
+  "top_hypothesis": "network_bandwidth_degradation",
   "top_three": [
-    "rank_straggler",
-    "decode_pool_saturation",
-    "kv_transfer_bottleneck"
+    "network_bandwidth_degradation",
+    "kv_transfer_bottleneck",
+    "prefill_pool_saturation"
   ],
-  "warnings": []
+  "warnings": [
+    "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+  ]
 }

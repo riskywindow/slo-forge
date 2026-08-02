@@ -1,7 +1,8 @@
 {
-  "bind": "127.0.0.1:50677",
+  "bind": "127.0.0.1:54662",
   "decode_per_token_ms": 3,
   "failure_rate": 0.008,
+  "fault_api_enabled": true,
   "max_concurrency": 4,
   "max_output_tokens": 256,
   "name": "mock-balanced",

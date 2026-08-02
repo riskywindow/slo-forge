@@ -2,8 +2,8 @@
   "all_candidates": [
     {
       "availability": 0.998001,
-      "candidate_id": "physical-d70c949fb133",
-      "communication_us": 7196.546648788827,
+      "candidate_id": "physical-e9fae72f7adf",
+      "communication_us": 14509.954819577044,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -20,8 +20,8 @@
         "host-0/gpu/6",
         "host-0/gpu/5",
         "host-0/gpu/7",
-        "host-1/gpu/0",
         "host-1/gpu/2",
+        "host-1/gpu/0",
         "host-1/gpu/3",
         "host-1/gpu/1",
         "host-1/gpu/4",
@@ -29,19 +29,20 @@
         "host-1/gpu/5",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.72470826811992,
-      "p95_ttft_ms": 19.99654664878883,
-      "p99_tpot_ms": 1.26451448982906,
+      "objective_score": 79.65544369831424,
+      "p95_ttft_ms": 27.349954819577047,
+      "p99_tpot_ms": 1.2641444687179486,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
     }
   ],
+  "deterministic_solver_work_units": 126,
   "pareto_frontier": [
     {
       "availability": 0.998001,
-      "candidate_id": "physical-d70c949fb133",
-      "communication_us": 7196.546648788827,
+      "candidate_id": "physical-e9fae72f7adf",
+      "communication_us": 14509.954819577044,
       "cost_per_million_tokens": 24.154589371980677,
       "data_parallel": 2,
       "disaggregated": true,
@@ -58,8 +59,8 @@
         "host-0/gpu/6",
         "host-0/gpu/5",
         "host-0/gpu/7",
-        "host-1/gpu/0",
         "host-1/gpu/2",
+        "host-1/gpu/0",
         "host-1/gpu/3",
         "host-1/gpu/1",
         "host-1/gpu/4",
@@ -67,9 +68,9 @@
         "host-1/gpu/5",
         "host-1/gpu/7"
       ],
-      "objective_score": 58.72470826811992,
-      "p95_ttft_ms": 19.99654664878883,
-      "p99_tpot_ms": 1.26451448982906,
+      "objective_score": 79.65544369831424,
+      "p95_ttft_ms": 27.349954819577047,
+      "p99_tpot_ms": 1.2641444687179486,
       "pipeline_parallel": 1,
       "rejection_codes": [],
       "tensor_parallel": 8
@@ -208,7 +209,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -386,7 +387,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -564,7 +565,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -742,7 +743,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -920,7 +921,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1098,7 +1099,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1276,7 +1277,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -1454,7 +1455,7 @@
           "algorithm": "pairwise",
           "channel_count": 4,
           "depends_on": [],
-          "expected_duration_us": 16.445382716049384,
+          "expected_duration_us": 13.156306172839507,
           "fallback": "host_staged",
           "message_size_bytes_per_token": 8192.0,
           "message_size_intercept_bytes": 0,
@@ -2601,7 +2602,7 @@
     "extensions": {},
     "fabric_profile_hash": {
       "algorithm": "sha256",
-      "value": "4a316efdc2c7f85f5793c68abc2f9bba761b1ed081c2ec361b18ec4aa2fba717"
+      "value": "0f71818251519314f3d940db20cf79697c36748158d8473775e3216f6f29db47"
     },
     "failure_exposure": [
       {
@@ -2615,7 +2616,7 @@
           6,
           7
         ],
-        "expected_slo_impact_ms": 19.99654664878883,
+        "expected_slo_impact_ms": 27.349954819577047,
         "fault_domain": "host-0",
         "probability": 0.0010000000000000009
       },
@@ -2630,12 +2631,12 @@
           14,
           15
         ],
-        "expected_slo_impact_ms": 19.99654664878883,
+        "expected_slo_impact_ms": 27.349954819577047,
         "fault_domain": "host-1",
         "probability": 0.0010000000000000009
       }
     ],
-    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "git_commit": "ca39d5e7859d26cd7bcac96e439e23825aff6d76",
     "kind": "PhysicalExecutionPlan",
     "kv_transfer": {
       "backpressure_limit_bytes": 134217728,
@@ -2657,13 +2658,13 @@
             "gpu-nic:host-0/gpu/2:host-0/nic/0",
             "nic-network:host-0/nic/0:rail-0",
             "nic-network:host-1/nic/0:rail-0",
-            "gpu-nic:host-1/gpu/0:host-1/nic/0"
+            "gpu-nic:host-1/gpu/2:host-1/nic/0"
           ],
           "eviction_policy": "deadline",
           "expected_cost_usd": 0.0,
           "expected_latency_us": 6267.619299728998,
           "fallback": "recompute",
-          "maximum_inflight_chunks": 4,
+          "maximum_inflight_chunks": 32,
           "overlap_with_decode": true,
           "producer_rank_ids": [
             0,
@@ -2676,7 +2677,7 @@
             7
           ],
           "retry_limit": 1,
-          "route_id": "kv-prefill-decode-0",
+          "route_id": "kv-prefill-0-decode-0",
           "serialization_format": "nixl",
           "transport_adapter": "sloforge.infiniband"
         }
@@ -2943,13 +2944,13 @@
     },
     "optimizer_history": [
       {
-        "candidate_id": "physical-d70c949fb133",
+        "candidate_id": "physical-e9fae72f7adf",
         "decision": "select",
-        "phase": "lower_bound",
-        "reason_code": "minimum_robust_objective",
+        "phase": "simulation",
+        "reason_code": "simulator_validated_minimum_robust_objective",
         "sequence": 0,
-        "simulator_calls": 0,
-        "solver_time_ms": 0.0
+        "simulator_calls": 1,
+        "solver_time_ms": 0.126
       }
     ],
     "parallelism": {
@@ -3152,7 +3153,7 @@
       ],
       "tensor_parallel_degree": 8
     },
-    "plan_id": "physical-plan-b8bdfb85f35872b0",
+    "plan_id": "physical-plan-66860df39849460f",
     "predicted_metrics": {
       "availability": {
         "confidence": 0.95,
@@ -3163,10 +3164,10 @@
       },
       "communication_overhead_fraction": {
         "confidence": 0.9,
-        "estimate": 0.07130555214377521,
-        "lower": 0.06417499692939768,
+        "estimate": 0.1340347134364004,
+        "lower": 0.12063124209276035,
         "unit": "fraction",
-        "upper": 0.07843610735815273
+        "upper": 0.14743818478004042
       },
       "cost_usd_per_million_tokens": {
         "confidence": 0.9,
@@ -3184,24 +3185,24 @@
       },
       "p95_end_to_end_ms": {
         "confidence": 0.9,
-        "estimate": 100.92547399784866,
-        "lower": 90.83292659806379,
+        "estimate": 108.25520081752576,
+        "lower": 97.42968073577319,
         "unit": "ms",
-        "upper": 111.01802139763352
+        "upper": 119.08072089927833
       },
       "p95_ttft_ms": {
         "confidence": 0.9,
-        "estimate": 19.99654664878883,
-        "lower": 17.996891983909947,
+        "estimate": 27.349954819577047,
+        "lower": 24.614959337619343,
         "unit": "ms",
-        "upper": 21.99620131366771
+        "upper": 30.08495030153475
       },
       "p99_tpot_ms": {
         "confidence": 0.9,
-        "estimate": 1.26451448982906,
-        "lower": 1.1380630408461538,
+        "estimate": 1.2641444687179486,
+        "lower": 1.1377300218461537,
         "unit": "ms",
-        "upper": 1.390965938811966
+        "upper": 1.3905589155897435
       },
       "throughput_tokens_per_second": {
         "confidence": 0.9,
@@ -3311,7 +3312,7 @@
         },
         {
           "fault_domain": "host-1",
-          "gpu_id": "host-1/gpu/0",
+          "gpu_id": "host-1/gpu/2",
           "host_id": "host-1",
           "network_rail_id": "rail-0",
           "nic_id": "host-1/nic/0",
@@ -3323,7 +3324,7 @@
         },
         {
           "fault_domain": "host-1",
-          "gpu_id": "host-1/gpu/2",
+          "gpu_id": "host-1/gpu/0",
           "host_id": "host-1",
           "network_rail_id": "rail-0",
           "nic_id": "host-1/nic/0",
@@ -3417,7 +3418,7 @@
       ],
       "environment_digest": {
         "algorithm": "sha256",
-        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+        "value": "292286086b0826cee4b83c10fda822b0417b8f96fce45466568fa4ff0c7fcd41"
       },
       "generated_at": "2026-01-01T00:00:13Z",
       "seed": 13
@@ -3428,7 +3429,10 @@
       "value": "621891bd3aa5795663dba351e72a660ab13401f43290a740813556490e95ec60"
     }
   },
-  "simulator_calls": 0,
-  "solver_time_ms": 0.0,
+  "simulator_calls": 1,
+  "simulator_validated_candidate_ids": [
+    "physical-e9fae72f7adf"
+  ],
+  "solver_time_ms": 289.283083,
   "strategy": "hierarchical"
 }

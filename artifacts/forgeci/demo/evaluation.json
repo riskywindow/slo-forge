@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0.0",
-  "expected_first_regressing_commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
-  "identified_first_regressing_commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
+  "expected_first_regressing_commit": "2d43c4d468c9c49986cfba9f516d2a4a20a3a63d",
+  "identified_first_regressing_commit": "2d43c4d468c9c49986cfba9f516d2a4a20a3a63d",
   "bisection_correct": true,
   "commits_in_range": 4,
   "unique_commits_evaluated": 3,
   "inconclusive_rate": 0.0,
   "comparison": {
     "schema_version": "1.0.0",
-    "comparison_id": "forgeci-intentional-regression-61853d225032-9425f7684e--forgeci-intentional-regression-a4a027eeb5d8-74d857e487",
-    "baseline_run_id": "forgeci-intentional-regression-61853d225032-9425f7684e",
-    "candidate_run_id": "forgeci-intentional-regression-a4a027eeb5d8-74d857e487",
+    "comparison_id": "forgeci-intentional-regression-583df29a9e06-0bc0767e71--forgeci-intentional-regression-2d43c4d468c9-d4813f02cb",
+    "baseline_run_id": "forgeci-intentional-regression-583df29a9e06-0bc0767e71",
+    "candidate_run_id": "forgeci-intentional-regression-2d43c4d468c9-d4813f02cb",
     "classification": "regression",
     "metrics": [
       {
@@ -48,29 +48,29 @@
   "bisection": {
     "schema_version": "1.0.0",
     "repository": "/Users/rishivinodkumar/sloforge/artifacts/forgeci/demo/fixture-repository",
-    "good_commit": "61853d2250324d26b71a79307ed527686caf5db8",
-    "bad_commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
-    "first_regressing_commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
+    "good_commit": "583df29a9e065e79b10a0ff9459e0c1bf05517b5",
+    "bad_commit": "da5d1c5ed8a27aad176e46bff4c87780fc8d84f9",
+    "first_regressing_commit": "2d43c4d468c9c49986cfba9f516d2a4a20a3a63d",
     "confidence": 0.975,
     "steps": [
       {
-        "commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
+        "commit": "da5d1c5ed8a27aad176e46bff4c87780fc8d84f9",
         "classification": "regression",
-        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/f2047b539634bef041c7a3a0712e11604c37ac82-0.json",
+        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/da5d1c5ed8a27aad176e46bff4c87780fc8d84f9-0.json",
         "repetitions": 7,
         "attempt": 0
       },
       {
-        "commit": "c17280f4aa3eddb91665acb963784880c0a18652",
+        "commit": "731624a3ca3471a580db2f79103c5d6c2520ed5c",
         "classification": "unchanged",
-        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/c17280f4aa3eddb91665acb963784880c0a18652-0.json",
+        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/731624a3ca3471a580db2f79103c5d6c2520ed5c-0.json",
         "repetitions": 7,
         "attempt": 0
       },
       {
-        "commit": "a4a027eeb5d87c6b67e5f347e3a67e2679929651",
+        "commit": "2d43c4d468c9c49986cfba9f516d2a4a20a3a63d",
         "classification": "regression",
-        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/a4a027eeb5d87c6b67e5f347e3a67e2679929651-0.json",
+        "comparison_artifact": "artifacts/forgeci/demo/bisect/comparisons/2d43c4d468c9c49986cfba9f516d2a4a20a3a63d-0.json",
         "repetitions": 7,
         "attempt": 0
       }
@@ -81,8 +81,8 @@
   },
   "reproducer": {
     "schema_version": "1.0.0",
-    "good_commit": "61853d2250324d26b71a79307ed527686caf5db8",
-    "bad_commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
+    "good_commit": "583df29a9e065e79b10a0ff9459e0c1bf05517b5",
+    "bad_commit": "da5d1c5ed8a27aad176e46bff4c87780fc8d84f9",
     "benchmark": {
       "command": {
         "executable": "/Users/rishivinodkumar/sloforge/.venv/bin/python3",
@@ -248,7 +248,7 @@
       }
     ],
     "reproduction_commands": [
-      "git checkout --detach f2047b539634bef041c7a3a0712e11604c37ac82",
+      "git checkout --detach da5d1c5ed8a27aad176e46bff4c87780fc8d84f9",
       "/Users/rishivinodkumar/sloforge/.venv/bin/python3 benchmark.py"
     ],
     "expected_regression": "both p99 TTFT and throughput degrade by at least 5%",
@@ -265,7 +265,7 @@
     },
     "artifact_references": [
       "artifacts/forgeci/demo/bisect/bisect-result.json",
-      "artifacts/forgeci/demo/bisect/comparisons/a4a027eeb5d87c6b67e5f347e3a67e2679929651-0.json",
+      "artifacts/forgeci/demo/bisect/comparisons/2d43c4d468c9c49986cfba9f516d2a4a20a3a63d-0.json",
       "artifacts/forgeci/demo/minimization"
     ]
   },

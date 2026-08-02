@@ -1,0 +1,12 @@
+{
+  "baseline": "healthy-run.json",
+  "baseline_sha256": "ff7d00f95a500598fbb524193fb81a5b27f08473118d66602d1e03fe30b6f28e",
+  "degraded": "degraded-run.json",
+  "degraded_sha256": "cff1ddf85606abfce7fab0bbf2e5182d54d6e7772982b3f4194d49d97b5aa8c6",
+  "healthy_reference_us": 1236514.253156946,
+  "scenarios": "scenarios.json",
+  "scenarios_sha256": "7ab93d17274e810f5377e1a599b1c13209b407ed3d971081832425f2274023bb",
+  "schema_version": "sloforge.autopsy.replay-bundle/v1",
+  "simulation_input": "../simulations/degraded-request.json",
+  "simulation_input_sha256": "b3eeeeac9afc7a58a8e92162b453fd09aa05294257e073cd4184bf2b80db56ce"
+}
