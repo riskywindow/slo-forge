@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from sloforge.fabric.ir import canonical_hash
 from sloforge.fabric.profiling import (
     BenchmarkStatus,
     MeasurementMode,
@@ -21,7 +22,7 @@ from sloforge.fabric.profiling import (
     to_canonical_profile,
 )
 from sloforge.fabric.profiling.models import FabricProfile
-from sloforge.fabric.topology import build_discovery_fixture
+from sloforge.fabric.topology import build_canonical_fixture, build_discovery_fixture
 
 
 def _executable(tmp_path: Path, name: str) -> Path:
@@ -85,14 +86,32 @@ def test_full_suite_covers_required_categories_and_curves() -> None:
 
 
 def test_synthetic_profile_converts_to_canonical_fabric_ir() -> None:
+    topology = build_canonical_fixture("two_node_infiniband")
     raw = benchmark_synthetic_fabric(
         build_discovery_fixture("two_node_infiniband"), seed=31, suite="quick", sample_count=3
     )
-    canonical = to_canonical_profile(raw)
+    canonical = to_canonical_profile(raw, topology=topology)
     assert canonical.kind == "FabricProfile"
     assert len(canonical.measurements) == len(raw.results)
     assert len(canonical.raw_artifacts) == len(raw.results)
     assert canonical.extensions.root["sloforge.io/measurement-modes"] == ["synthetic_calibrated"]
+    assert canonical.topology_fingerprint.value == canonical_hash(topology)
+
+
+def test_canonical_topology_input_is_compile_compatible() -> None:
+    topology = build_canonical_fixture("two_node_infiniband")
+    raw = benchmark_synthetic_fabric(topology, seed=37, suite="quick", sample_count=3)
+    canonical = to_canonical_profile(raw, topology=topology)
+    assert raw.topology_fingerprint == canonical_hash(topology)
+    assert canonical.topology_fingerprint.value == canonical_hash(topology)
+
+
+def test_canonical_profile_rejects_mismatched_topology() -> None:
+    raw = benchmark_synthetic_fabric(
+        build_discovery_fixture("single_gpu_workstation"), seed=41, suite="quick", sample_count=3
+    )
+    with pytest.raises(ValueError, match="does not correspond"):
+        to_canonical_profile(raw, topology=build_canonical_fixture("eight_gpu_nvlink"))
 
 
 def test_degraded_link_increases_synthetic_collective_latency() -> None:
@@ -115,6 +134,21 @@ def test_degraded_link_increases_synthetic_collective_latency() -> None:
     )
     assert degraded_case.summary is not None and healthy_case.summary is not None
     assert degraded_case.summary.median_microseconds > healthy_case.summary.median_microseconds
+
+
+def test_limited_visibility_is_unavailable_not_a_rank_one_fallback() -> None:
+    profile = benchmark_synthetic_fabric(
+        build_discovery_fixture("limited_container"), seed=7, suite="quick", sample_count=3
+    )
+    collectives = [
+        result
+        for result in profile.results
+        if result.case.primitive in {Primitive.ALL_REDUCE, Primitive.ALL_TO_ALL}
+    ]
+    assert collectives
+    assert all(result.case.rank_count == 2 for result in collectives)
+    assert all(result.status is BenchmarkStatus.UNAVAILABLE for result in collectives)
+    assert all(not result.raw_samples and result.failure_reason for result in collectives)
 
 
 def test_actual_host_memory_benchmark_is_labeled_measured() -> None:

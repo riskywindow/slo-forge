@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+from sloforge.fabric.ir import TopologyGraph as CanonicalTopologyGraph
 from sloforge.fabric.profiling.models import (
     BenchmarkCase,
     BenchmarkResult,
@@ -30,6 +31,7 @@ from sloforge.fabric.profiling.models import (
     finalize_profile,
     finalize_result,
 )
+from sloforge.fabric.profiling.topology_input import normalize_benchmark_topology
 from sloforge.fabric.topology.models import (
     DiscoveryTopologyGraph,
     EdgeKind,
@@ -256,7 +258,7 @@ def _case_id(primitive: Primitive, message_bytes: int, rank_count: int, concurre
 
 
 def benchmark_synthetic_fabric(
-    graph: DiscoveryTopologyGraph,
+    graph: DiscoveryTopologyGraph | CanonicalTopologyGraph,
     *,
     seed: int,
     suite: str = "quick",
@@ -269,15 +271,16 @@ def benchmark_synthetic_fabric(
         raise ValueError("suite must be quick or full")
     if warmup_count < 0 or sample_count < 3:
         raise ValueError("warmup_count must be non-negative and sample_count at least three")
+    benchmark_graph, input_fingerprint = normalize_benchmark_topology(graph)
     primitives = _QUICK_PRIMITIVES if suite == "quick" else _FULL_PRIMITIVES
-    visible_gpu_count = max(1, len(graph.visibility.visible_gpu_ids))
+    visible_gpu_count = len(benchmark_graph.visibility.visible_gpu_ids)
     results: list[BenchmarkResult] = []
     for primitive in primitives:
         sizes = (0,) if primitive in _NO_PAYLOAD else (1_024, 65_536, 1_048_576, 16_777_216)
         if primitive in _COLLECTIVES:
-            ranks = tuple(value for value in (2, 4, 8) if value <= visible_gpu_count) or (1,)
+            ranks = tuple(value for value in (2, 4, 8) if value <= visible_gpu_count) or (2,)
         elif primitive in {Primitive.GPU_P2P, Primitive.KV_TRANSFER}:
-            ranks = (min(2, visible_gpu_count),)
+            ranks = (2,)
         else:
             ranks = (1,)
         concurrencies = (1,) if primitive in _NO_PAYLOAD else (1, 2)
@@ -286,11 +289,82 @@ def benchmark_synthetic_fabric(
                 for concurrency in concurrencies:
                     case_id = _case_id(primitive, message_bytes, rank_count, concurrency)
                     base_us, _, path = _base_curve(
-                        graph, primitive, message_bytes, rank_count, concurrency
+                        benchmark_graph, primitive, message_bytes, rank_count, concurrency
                     )
                     case_seed = seed ^ int.from_bytes(
                         hashlib.sha256(case_id.encode()).digest()[:8], "big"
                     )
+                    topology_path = tuple(edge.edge_id for edge in path)
+                    contention_domains = tuple(
+                        dict.fromkeys(
+                            edge.contention_domain
+                            for edge in path
+                            if edge.contention_domain is not None
+                        )
+                    )
+                    case = BenchmarkCase(
+                        case_id=case_id,
+                        primitive=primitive,
+                        message_bytes=message_bytes,
+                        rank_count=rank_count,
+                        concurrency=concurrency,
+                        direction=(
+                            Direction.BIDIRECTIONAL
+                            if primitive in {Primitive.GPU_P2P, Primitive.KV_TRANSFER}
+                            else Direction.NOT_APPLICABLE
+                        ),
+                        topology_path=topology_path,
+                        contention_domains=contention_domains,
+                        placement=_placement(benchmark_graph, rank_count),
+                        warmup_count=warmup_count,
+                        sample_count=sample_count,
+                        invocation=Invocation(
+                            adapter="sloforge-synthetic-calibrated-v1",
+                            adapter_version="1.0.0",
+                            argv=(
+                                "sloforge",
+                                "fabric",
+                                "benchmark",
+                                "--mode",
+                                "synthetic",
+                                "--seed",
+                                str(seed),
+                            ),
+                            timeout_seconds=30.0,
+                        ),
+                    )
+                    raw_artifact = str(Path("raw") / f"{case_id}.json")
+                    required_gpu_count = (
+                        0 if primitive is Primitive.HOST_MEMCPY else max(1, rank_count)
+                    )
+                    path_required = primitive in {
+                        Primitive.GPU_P2P,
+                        Primitive.H2D_PAGEABLE,
+                        Primitive.H2D_PINNED,
+                        Primitive.D2H,
+                        Primitive.KV_TRANSFER,
+                        *_COLLECTIVES,
+                    }
+                    if visible_gpu_count < required_gpu_count or (path_required and not path):
+                        reason = (
+                            f"requires {required_gpu_count} visible GPUs, found {visible_gpu_count}"
+                            if visible_gpu_count < required_gpu_count
+                            else f"no calibrated physical path for {primitive.value}"
+                        )
+                        results.append(
+                            finalize_result(
+                                schema_version="sloforge.fabric.benchmark-result/v1",
+                                case=case,
+                                mode=MeasurementMode.UNAVAILABLE,
+                                status=BenchmarkStatus.UNAVAILABLE,
+                                raw_samples=(),
+                                summary=None,
+                                environment=_environment(),
+                                failure_reason=reason,
+                                raw_artifact=raw_artifact,
+                            )
+                        )
+                        continue
                     rng = random.Random(case_seed)
                     # Warmups affect generator state and are retained in invocation
                     # metadata, but are intentionally excluded from raw measurements.
@@ -313,46 +387,6 @@ def benchmark_synthetic_fabric(
                                 seed=case_seed,
                             )
                         )
-                    topology_path = tuple(edge.edge_id for edge in path)
-                    contention_domains = tuple(
-                        dict.fromkeys(
-                            edge.contention_domain
-                            for edge in path
-                            if edge.contention_domain is not None
-                        )
-                    )
-                    case = BenchmarkCase(
-                        case_id=case_id,
-                        primitive=primitive,
-                        message_bytes=message_bytes,
-                        rank_count=rank_count,
-                        concurrency=concurrency,
-                        direction=(
-                            Direction.BIDIRECTIONAL
-                            if primitive in {Primitive.GPU_P2P, Primitive.KV_TRANSFER}
-                            else Direction.NOT_APPLICABLE
-                        ),
-                        topology_path=topology_path,
-                        contention_domains=contention_domains,
-                        placement=_placement(graph, rank_count),
-                        warmup_count=warmup_count,
-                        sample_count=sample_count,
-                        invocation=Invocation(
-                            adapter="sloforge-synthetic-calibrated-v1",
-                            adapter_version="1.0.0",
-                            argv=(
-                                "sloforge",
-                                "fabric",
-                                "benchmark",
-                                "--mode",
-                                "synthetic",
-                                "--seed",
-                                str(seed),
-                            ),
-                            timeout_seconds=30.0,
-                        ),
-                    )
-                    raw_artifact = str(Path("raw") / f"{case_id}.json")
                     samples = tuple(raw)
                     results.append(
                         finalize_result(
@@ -369,9 +403,9 @@ def benchmark_synthetic_fabric(
                     )
     profile = finalize_profile(
         schema_version="sloforge.fabric.profile/v1",
-        profile_id=f"synthetic-{graph.topology_id}-{seed}",
+        profile_id=f"synthetic-{benchmark_graph.topology_id}-{seed}",
         captured_at=utc_now(),
-        topology_fingerprint=graph.fingerprint,
+        topology_fingerprint=input_fingerprint,
         seed=seed,
         suite=suite,
         results=tuple(results),
