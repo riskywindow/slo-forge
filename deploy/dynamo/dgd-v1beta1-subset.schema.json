@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloforge.dev/schemas/dynamo/dgd-v1beta1-subset.schema.json",
+  "title": "NVIDIA DynamoGraphDeployment v1beta1 fields emitted by SLOForge Fabric",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {"const": "nvidia.com/v1beta1"},
+    "kind": {"const": "DynamoGraphDeployment"},
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "namespace", "annotations"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 253},
+        "namespace": {"type": "string", "minLength": 1, "maxLength": 63},
+        "annotations": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backendFramework", "annotations", "components"],
+      "properties": {
+        "backendFramework": {"enum": ["vllm", "sglang"]},
+        "annotations": {"type": "object", "additionalProperties": {"type": "string"}},
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type", "replicas"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9]([-A-Za-z0-9]*[A-Za-z0-9])?$",
+                "maxLength": 63
+              },
+              "type": {"enum": ["frontend", "worker", "prefill", "decode"]},
+              "replicas": {"type": "integer", "minimum": 0},
+              "multinode": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["nodeCount"],
+                "properties": {"nodeCount": {"type": "integer", "minimum": 2}}
+              },
+              "podTemplate": {"type": "object"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
