@@ -51,3 +51,5 @@ PYTHONPATH=python pytest -q tests/python/test_genesis_cegis.py
 ```
 
 This CEGIS surface currently minimizes bounded request schedules. Tensor, topology, dependency, and resource counterexample IRs exist in the trusted core and can be connected through additional verifier adapters; this module does not claim those adapter-specific minimizers are implemented here.
+
+The cancellation failure, delta-debugging, constraint persistence, repeated-family suppression and corrected candidate are exercised in CPU tests and the local synthesis path. Tensor-value, shape/stride, topology, dependency-version and resource-boundary CEGIS loops remain unexercised in this module.

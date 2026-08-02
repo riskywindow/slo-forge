@@ -46,19 +46,29 @@ The Python trust lane consists of:
   process setup, resource limits, bounded output, timeout, and process-group cleanup;
 - `schemas/genesis_capsule/genesis-capsule-v1.schema.json`: the public wire schema.
 
-At the snapshot that introduced the trust lane, these Python files total approximately 2,110
-physical lines including comments, declarations, and package exports. Reproduce the measurement
-with:
+On 2026-08-02 the narrow Python TCB listed above measured 2,016 physical lines. The conservative
+package envelope, which also includes the untrusted capsule builder and package exports, measured
+2,839 lines. Reproduce both measurements from the repository root with:
 
 ```bash
+wc -l \
+  python/sloforge/genesis/capsule/{models,canonical,io,validator}.py \
+  python/sloforge/genesis/artifacts/store.py \
+  python/sloforge/genesis/sandbox/{models,executor}.py
 wc -l python/sloforge/genesis/{capsule,artifacts,sandbox}/*.py
-rg '^import |^from ' python/sloforge/genesis/{capsule,artifacts,sandbox} -g '*.py'
+rg '^import |^from ' python/sloforge/genesis/{capsule,artifacts,sandbox} -g '*.py' \
+  | sed -E 's/^.*:(from|import) ([A-Za-z0-9_.]+).*$/\2/' \
+  | cut -d. -f1 | sort -u
 ```
 
-The direct non-standard Python dependency is Pydantic. The sandbox additionally depends on the
-standard-library process/resource APIs and either macOS `sandbox-exec` or Linux `bubblewrap`.
-Hashing uses the standard-library SHA-256 implementation. Synthesis, search, generated runtimes,
-PyTorch, Triton, external coding agents, and their reasoning are outside this TCB.
+The narrow source count excludes the JSON Schema, Python interpreter, operating-system kernel,
+`sandbox-exec`/bubblewrap implementation, and transitive dependencies. The only direct
+non-standard import in the narrow Python TCB is Pydantic; internal `sloforge` imports and Python
+standard-library modules appear in the dependency command. The sandbox additionally depends on
+the OS process/resource APIs and either macOS `sandbox-exec` or Linux `bubblewrap`. Hashing uses
+the standard-library SHA-256 implementation. The capsule builder is intentionally outside the TCB:
+its output must pass the independent validator. Synthesis, search, generated runtimes, PyTorch,
+Triton, external coding agents, and their reasoning are also outside this TCB.
 
 TCB size is reported as an approximate auditable surface, not as a proof of absence of bugs.
 Generated line counts, vendored dependency lines, the OS kernel, Python interpreter, and crypto
@@ -110,8 +120,9 @@ or other credentials; credential-shaped caller variables are rejected. `HOME` an
 inside the artifact directory. User site packages and bytecode writes are disabled.
 
 On macOS, the generated process runs under a profile that denies network operations and child
-forks, denies writes except to the artifact directory, denies reads from the user/workspace trust
-root, and re-allows only the runtime plus declared inputs and output. On Linux, bubblewrap creates
+forks, denies writes except to the artifact directory, and protects the user/workspace roots while
+allowing declared inputs and required runtime files. This is not a system-wide read allowlist:
+system-readable paths outside protected roots may remain readable. On Linux, bubblewrap creates
 new namespaces, unshares networking, mounts runtime and inputs read-only, and binds only the
 artifact directory writable. If a required isolation capability is missing, the result is
 `policy_unavailable` and no candidate code runs.
@@ -133,8 +144,31 @@ and aggregate byte bounds and rejects symlinks, devices, and other non-regular o
 - `RLIMIT_AS` and `RLIMIT_NPROC` are not portable cgroup substitutes. Capability records identify
   them as best-effort.
 - Windows has no accepted backend and therefore cannot execute with strict defaults.
-- Host-device access is absent from the default namespace/profile. A future GPU path requires an
-  explicit, separately reviewed capability and cannot silently fall back.
+- Linux bubblewrap supplies a private minimal `/dev`. The macOS profile does not create a device
+  namespace, so it must not be described as proof that all readable device nodes or ioctls are
+  unavailable. No GPU device is intentionally granted by the orchestrator. A future GPU path
+  requires an explicit, separately reviewed capability and cannot silently fall back.
+
+### Exercised and unexercised isolation
+
+| Boundary | Status in this workspace | Evidence scope |
+| --- | --- | --- |
+| macOS `sandbox-exec` | Implemented and exercised on Darwin on 2026-08-02 | Environment sanitization, deterministic seed, blocked undeclared workspace read, blocked loopback connection, blocked source write, artifact write, child-fork denial, timeout cleanup, output cap, credential-name rejection, and symlink-output rejection |
+| Linux bubblewrap | Implemented but unexercised in this workspace | Command construction and fail-closed capability reporting exist; no Linux kernel/user-namespace execution result is claimed |
+| No supported backend | Implemented as a fail-closed path | Strict requests return `policy_unavailable`; generated code is not run |
+| Windows | Not implemented | Strict generated-code execution is unavailable |
+
+The current targeted verification command is:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 uv run pytest -q \
+  tests/python/test_genesis_sandbox.py \
+  tests/python/test_genesis_capsule.py \
+  tests/python/test_genesis_artifacts.py
+```
+
+That command passed 27 tests on the recorded macOS workspace. It is not evidence for Linux,
+Windows, GPU isolation, container escape resistance, or protection against kernel vulnerabilities.
 
 ## Threats and controls
 

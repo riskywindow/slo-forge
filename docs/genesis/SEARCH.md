@@ -69,3 +69,7 @@ PYTHONPATH=python pytest -q tests/python/test_genesis_search.py
 ```
 
 The direct evaluator interface is intentionally synchronous. A production generated-code or external-tool adapter must run inside the Genesis sandbox, which supplies the hard process wall-clock and cleanup boundary. The search core itself never launches an uncontrolled subprocess.
+
+## Integration status
+
+Focused tests exercise the proposal portfolio, mutable-region enforcement, lifecycle ordering, all nine budget dimensions, Pareto pruning/crowding, surrogate ranking, hardware opt-in rejection and atomic event-log reload. The deterministic local synthesis fixture uses a smaller cancellation-policy candidate set rather than the complete multi-fidelity `SearchEngine`. Real GPU experiment selection, external coding-agent proposals, asynchronous evaluation and live shadow/canary adapters are unexercised by the search unit suite.
