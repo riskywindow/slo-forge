@@ -14,6 +14,10 @@ from .runner import corpus_from_report, replay_regression_corpus, run_red_team
 
 
 def run_demo(output_directory: Path, *, seed: int = 73129) -> RedTeamDemoResult:
+    if output_directory.exists() and output_directory.is_symlink():
+        raise ValueError("red-team output directory must not be a symlink")
+    if output_directory.exists() and any(output_directory.iterdir()):
+        raise FileExistsError("red-team output directory must be empty")
     target = UnsafeStreamingCandidate()
     report = run_red_team(
         target=target,

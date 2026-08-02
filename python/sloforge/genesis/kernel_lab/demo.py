@@ -29,6 +29,10 @@ def run_kernel_lab_demo(
     config = benchmark_config or KernelBenchmarkConfig(deterministic_seed=seed)
     if config.deterministic_seed != seed:
         raise ValueError("demo and benchmark seeds must match")
+    if output_root.exists() and output_root.is_symlink():
+        raise ValueError("kernel-lab output directory must not be a symlink")
+    if output_root.exists() and any(output_root.iterdir()):
+        raise FileExistsError("kernel-lab output directory must be empty")
     output_root.mkdir(parents=True, exist_ok=True)
     generated = generate_candidates(seed=seed)[:candidate_limit]
     cases = generate_correctness_cases(seed=seed)

@@ -259,6 +259,7 @@ class CaseResult(KernelModel):
     case_id: Identifier
     observed: tuple[int, ...] | None
     error_type: str | None
+    previous_storage_after: tuple[int, ...]
 
 
 class CorrectnessMismatch(KernelModel):

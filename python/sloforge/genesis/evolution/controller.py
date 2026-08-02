@@ -5,10 +5,15 @@ from __future__ import annotations
 import hashlib
 import os
 from collections.abc import Callable
+from functools import wraps
 from pathlib import Path
+from threading import RLock
 from typing import Any
 
-from ..capsule.models import CapsuleValidationReport
+from pydantic import BaseModel
+
+from ..capsule.models import CapsuleValidationReport, VerificationLevel
+from ..ir import canonical_json
 from .models import (
     CapsuleReference,
     ChallengerRecord,
@@ -19,8 +24,10 @@ from .models import (
     EvolutionPhase,
     EvolutionSnapshot,
     EvolutionTrigger,
+    ExecutionTarget,
     GateObservation,
     GateStage,
+    ProcessedEventRecord,
     StreamLease,
     TransitionCategory,
     TriggerObservation,
@@ -28,11 +35,45 @@ from .models import (
 from .store import EvolutionStore
 
 CapsuleValidator = Callable[[Path], CapsuleValidationReport]
+GateEvidenceValidator = Callable[[GateObservation, ChallengerSpec], bool]
 _LIVE_PROMOTION_ENV = "SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION"
 
 
 class EvolutionError(RuntimeError):
     """Raised when a state transition violates an evolution safety guard."""
+
+
+def _jsonable_event_value(value: object) -> object:
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    if isinstance(value, dict):
+        return {str(key): _jsonable_event_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable_event_value(item) for item in value]
+    if isinstance(value, Path):
+        return str(value)
+    return value
+
+
+def _event_digest(action: str, payload: object) -> str:
+    return hashlib.sha256(
+        canonical_json({"action": action, "payload": _jsonable_event_value(payload)})
+    ).hexdigest()
+
+
+def _legacy_event_digest(event_id: str) -> str:
+    return hashlib.sha256(f"legacy-event\0{event_id}".encode()).hexdigest()
+
+
+def _serialized(
+    method: Callable[..., EvolutionSnapshot],
+) -> Callable[..., EvolutionSnapshot]:
+    @wraps(method)
+    def wrapper(self: EvolutionController, *args: Any, **kwargs: Any) -> EvolutionSnapshot:
+        with self._mutation_lock:
+            return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 def classify_trigger(
@@ -69,12 +110,25 @@ class EvolutionController:
         *,
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
+        gate_evidence_validator: GateEvidenceValidator | None,
         config: EvolutionConfig,
         snapshot: EvolutionSnapshot,
     ) -> None:
         self.store = store
         self.capsule_validator = capsule_validator
+        self.gate_evidence_validator = gate_evidence_validator
         self.config = config
+        self._mutation_lock = RLock()
+        if snapshot.processed_event_ids and not snapshot.processed_events:
+            values = snapshot.model_dump(mode="python")
+            values["processed_events"] = tuple(
+                ProcessedEventRecord(
+                    event_id=event_id,
+                    payload_sha256=_legacy_event_digest(event_id),
+                )
+                for event_id in snapshot.processed_event_ids
+            )
+            snapshot = EvolutionSnapshot.model_validate(values)
         self.snapshot = snapshot
 
     @classmethod
@@ -83,16 +137,26 @@ class EvolutionController:
         *,
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
+        gate_evidence_validator: GateEvidenceValidator | None = None,
         config: EvolutionConfig,
         deployment_id: str,
         champion: CapsuleReference,
         seed: int,
         now_ms: int,
     ) -> EvolutionController:
+        if config.execution_target is ExecutionTarget.EXTERNAL and gate_evidence_validator is None:
+            raise EvolutionError("external evolution requires a trusted gate-evidence validator")
         if store.exists:
             raise EvolutionError("refusing to overwrite an existing evolution state")
         if seed < 0 or now_ms < 0:
             raise EvolutionError("seed and initialization time must be non-negative")
+        champion_report = capsule_validator(Path(champion.path))
+        if not cls._capsule_reference_is_eligible(
+            champion,
+            champion_report,
+            require_level_five=config.execution_target is ExecutionTarget.EXTERNAL,
+        ):
+            raise EvolutionError("initial champion must be an independently validated capsule")
         audit = EvolutionAuditRecord(
             sequence=0,
             event_id="controller-initialized",
@@ -100,7 +164,16 @@ class EvolutionController:
             action="initialize",
             phase_before=EvolutionPhase.IDLE,
             phase_after=EvolutionPhase.IDLE,
-            reason="trusted champion loaded; production mutation remains disabled",
+            reason="independently validated champion loaded; production mutation remains disabled",
+        )
+        initialization_digest = _event_digest(
+            "initialize",
+            {
+                "deployment_id": deployment_id,
+                "champion": champion,
+                "seed": seed,
+                "now_ms": now_ms,
+            },
         )
         snapshot = EvolutionSnapshot(
             deployment_id=deployment_id,
@@ -109,13 +182,20 @@ class EvolutionController:
             phase=EvolutionPhase.IDLE,
             champion=champion,
             processed_event_ids=("controller-initialized",),
+            processed_events=(
+                ProcessedEventRecord(
+                    event_id="controller-initialized",
+                    payload_sha256=initialization_digest,
+                ),
+            ),
             audit=(audit,),
             last_observed_at_ms=now_ms,
         )
-        store.save(snapshot)
+        store.save(snapshot, expected_sequence=None)
         return cls(
             store=store,
             capsule_validator=capsule_validator,
+            gate_evidence_validator=gate_evidence_validator,
             config=config,
             snapshot=snapshot,
         )
@@ -126,8 +206,11 @@ class EvolutionController:
         *,
         store: EvolutionStore,
         capsule_validator: CapsuleValidator,
+        gate_evidence_validator: GateEvidenceValidator | None = None,
         config: EvolutionConfig,
     ) -> EvolutionController:
+        if config.execution_target is ExecutionTarget.EXTERNAL and gate_evidence_validator is None:
+            raise EvolutionError("external evolution requires a trusted gate-evidence validator")
         snapshot = store.load()
         if len(snapshot.challengers) > config.maximum_challengers:
             raise EvolutionError("persisted challenger population exceeds the configured bound")
@@ -136,12 +219,23 @@ class EvolutionController:
         return cls(
             store=store,
             capsule_validator=capsule_validator,
+            gate_evidence_validator=gate_evidence_validator,
             config=config,
             snapshot=snapshot,
         )
 
-    def _already_processed(self, event_id: str) -> bool:
-        return event_id in self.snapshot.processed_event_ids
+    def _already_processed(self, event_id: str, payload_sha256: str) -> bool:
+        for record in self.snapshot.processed_events:
+            if record.event_id != event_id:
+                continue
+            if record.payload_sha256 != payload_sha256:
+                raise EvolutionError("idempotency key was reused with a different event payload")
+            return True
+        if event_id in self.snapshot.processed_event_ids:
+            raise EvolutionError(
+                "legacy idempotency key cannot be safely replayed without a payload digest"
+            )
+        return False
 
     def _commit(
         self,
@@ -149,6 +243,7 @@ class EvolutionController:
         event_id: str,
         observed_at_ms: int,
         action: str,
+        payload_sha256: str,
         reason: str,
         phase: EvolutionPhase | None = None,
         candidate_id: str | None = None,
@@ -157,6 +252,10 @@ class EvolutionController:
         if observed_at_ms < self.snapshot.last_observed_at_ms:
             raise EvolutionError("evolution events must have monotonic timestamps")
         next_phase = phase or self.snapshot.phase
+        if len(self.snapshot.processed_events) >= self.config.maximum_processed_events:
+            raise EvolutionError(
+                "bounded idempotency registry is full; an audited checkpoint is required"
+            )
         sequence = self.snapshot.sequence + 1
         audit = EvolutionAuditRecord(
             sequence=sequence,
@@ -176,7 +275,14 @@ class EvolutionController:
             "processed_event_ids": (
                 *self.snapshot.processed_event_ids,
                 event_id,
-            )[-self.config.maximum_processed_events :],
+            ),
+            "processed_events": (
+                *self.snapshot.processed_events,
+                ProcessedEventRecord(
+                    event_id=event_id,
+                    payload_sha256=payload_sha256,
+                ),
+            ),
             "audit": (*self.snapshot.audit, audit)[-self.config.maximum_audit_records :],
         }
         if updates:
@@ -186,12 +292,14 @@ class EvolutionController:
             raise EvolutionError("challenger population exceeds its configured bound")
         if len(next_snapshot.active_streams) > self.config.maximum_active_streams:
             raise EvolutionError("active stream registry exceeds its configured bound")
-        self.store.save(next_snapshot)
+        self.store.save(next_snapshot, expected_sequence=self.snapshot.sequence)
         self.snapshot = next_snapshot
         return next_snapshot
 
+    @_serialized
     def observe_trigger(self, observation: TriggerObservation) -> EvolutionSnapshot:
-        if self._already_processed(observation.event_id):
+        payload_sha256 = _event_digest("observe_trigger", observation)
+        if self._already_processed(observation.event_id, payload_sha256):
             return self.snapshot
         trigger = classify_trigger(observation, self.config)
         if trigger is None:
@@ -199,6 +307,7 @@ class EvolutionController:
                 event_id=observation.event_id,
                 observed_at_ms=observation.observed_at_ms,
                 action="observe_trigger",
+                payload_sha256=payload_sha256,
                 reason="observation did not cross an evolution threshold",
             )
         evolution_in_progress = self.snapshot.phase in {
@@ -213,6 +322,7 @@ class EvolutionController:
                 event_id=observation.event_id,
                 observed_at_ms=observation.observed_at_ms,
                 action="coalesce_trigger",
+                payload_sha256=payload_sha256,
                 reason=(
                     f"{trigger.value} observed while an existing challenger remains proof-gated"
                 ),
@@ -221,23 +331,73 @@ class EvolutionController:
             event_id=observation.event_id,
             observed_at_ms=observation.observed_at_ms,
             action="begin_evolution",
+            payload_sha256=payload_sha256,
             reason=f"{trigger.value}: {observation.detail}",
             phase=EvolutionPhase.EVOLVING,
             updates={"active_trigger": trigger, "selected_candidate_id": None},
         )
 
     @staticmethod
-    def _capsule_is_eligible(spec: ChallengerSpec, report: CapsuleValidationReport) -> bool:
+    def _capsule_reference_is_eligible(
+        capsule: CapsuleReference,
+        report: CapsuleValidationReport,
+        *,
+        require_level_five: bool = False,
+    ) -> bool:
         return (
             report.promotion_eligible
             and report.capsule_digest is not None
-            and report.capsule_digest.value == spec.capsule.capsule_digest
+            and report.capsule_digest.value == capsule.capsule_digest
+            and report.candidate_genome_hash is not None
+            and report.candidate_genome_hash.value == capsule.genome_hash
+            and (
+                not require_level_five
+                or report.promotion_verification_level is VerificationLevel.HARDWARE_OPERATIONAL
+            )
         )
 
+    def _capsule_is_eligible(self, spec: ChallengerSpec, report: CapsuleValidationReport) -> bool:
+        return self._capsule_reference_is_eligible(
+            spec.capsule,
+            report,
+            require_level_five=self.config.execution_target is ExecutionTarget.EXTERNAL,
+        )
+
+    def _gate_evidence_is_valid(
+        self, observation: GateObservation, record: ChallengerRecord
+    ) -> None:
+        if observation.candidate_id != record.spec.candidate_id:
+            raise EvolutionError("gate observation belongs to another candidate")
+        if observation.capsule_digest != record.spec.capsule.capsule_digest:
+            raise EvolutionError("gate observation belongs to another capsule")
+        if observation.deterministic_seed != self.snapshot.seed:
+            raise EvolutionError("gate observation seed does not match the controller seed")
+        consumed = {
+            item.evidence_digest
+            for challenger in self.snapshot.challengers
+            for item in (challenger.shadow_observation, challenger.canary_observation)
+            if item is not None
+        }
+        if observation.evidence_digest in consumed:
+            raise EvolutionError("gate evidence digest has already been consumed")
+        if self.config.execution_target is not ExecutionTarget.EXTERNAL:
+            return
+        if observation.verification_level is not VerificationLevel.HARDWARE_OPERATIONAL:
+            raise EvolutionError("external gate observations require Level-5 evidence")
+        if self.gate_evidence_validator is None or not self.gate_evidence_validator(
+            observation, record.spec
+        ):
+            raise EvolutionError("external gate evidence failed trusted validation")
+
+    @_serialized
     def register_challenger(
         self, spec: ChallengerSpec, *, event_id: str, observed_at_ms: int
     ) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "register_challenger",
+            {"spec": spec, "event_id": event_id, "observed_at_ms": observed_at_ms},
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if self.snapshot.phase not in {EvolutionPhase.EVOLVING, EvolutionPhase.ROLLED_BACK}:
             raise EvolutionError("challengers may be registered only for an active evolution")
@@ -261,6 +421,7 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="register_challenger",
+            payload_sha256=payload_sha256,
             reason=(
                 "challenger remains isolated and passed capsule validation"
                 if eligible
@@ -288,8 +449,12 @@ class EvolutionController:
         records[index] = replacement
         return tuple(records)
 
+    @_serialized
     def begin_shadow(self, *, event_id: str, observed_at_ms: int) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "begin_shadow", {"event_id": event_id, "observed_at_ms": observed_at_ms}
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if self.snapshot.phase is not EvolutionPhase.CHALLENGER_READY:
             raise EvolutionError("shadowing requires a capsule-validated challenger")
@@ -301,6 +466,7 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="begin_shadow",
+            payload_sha256=payload_sha256,
             reason="deterministic replay is routed to the isolated challenger",
             phase=EvolutionPhase.SHADOWING,
             candidate_id=record.spec.candidate_id,
@@ -322,8 +488,10 @@ class EvolutionController:
             and observation.interrupted_streams == 0
         )
 
+    @_serialized
     def record_gate(self, observation: GateObservation) -> EvolutionSnapshot:
-        if self._already_processed(observation.event_id):
+        payload_sha256 = _event_digest("record_gate", observation)
+        if self._already_processed(observation.event_id, payload_sha256):
             return self.snapshot
         expected_phase = {
             GateStage.SHADOW: EvolutionPhase.SHADOWING,
@@ -332,6 +500,7 @@ class EvolutionController:
         if expected_phase is None or self.snapshot.phase is not expected_phase:
             raise EvolutionError("gate observation does not match the controller phase")
         index, record = self._selected()
+        self._gate_evidence_is_valid(observation, record)
         passed = self._gate_passes(observation)
         if observation.stage is GateStage.SHADOW:
             status = (
@@ -363,6 +532,7 @@ class EvolutionController:
             event_id=observation.event_id,
             observed_at_ms=observation.observed_at_ms,
             action=f"record_{observation.stage.value}_gate",
+            payload_sha256=payload_sha256,
             reason=(
                 f"{observation.stage.value} evidence satisfied all promotion criteria"
                 if passed
@@ -386,8 +556,12 @@ class EvolutionController:
                 f"live traffic requires config authorization and {_LIVE_PROMOTION_ENV}=1"
             )
 
+    @_serialized
     def begin_canary(self, *, event_id: str, observed_at_ms: int) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "begin_canary", {"event_id": event_id, "observed_at_ms": observed_at_ms}
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if self.snapshot.phase is not EvolutionPhase.SHADOW_VALIDATED:
             raise EvolutionError("canarying requires accepted shadow evidence")
@@ -400,6 +574,7 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="begin_canary",
+            payload_sha256=payload_sha256,
             reason="bounded canary routing enabled after shadow acceptance",
             phase=EvolutionPhase.CANARYING,
             candidate_id=record.spec.candidate_id,
@@ -409,17 +584,19 @@ class EvolutionController:
     def route_request(self, request_id: str) -> CapsuleReference:
         """Choose a runtime deterministically without mutating controller state."""
 
-        if self.snapshot.phase is not EvolutionPhase.CANARYING:
-            return self.snapshot.champion
-        _, challenger = self._selected()
-        digest = hashlib.sha256(f"{self.snapshot.seed}:{request_id}".encode()).digest()
-        fraction = int.from_bytes(digest[:8], "big") / float(2**64)
-        return (
-            challenger.spec.capsule
-            if fraction < self.config.canary_fraction
-            else self.snapshot.champion
-        )
+        with self._mutation_lock:
+            if self.snapshot.phase is not EvolutionPhase.CANARYING:
+                return self.snapshot.champion
+            _, challenger = self._selected()
+            digest = hashlib.sha256(f"{self.snapshot.seed}:{request_id}".encode()).digest()
+            fraction = int.from_bytes(digest[:8], "big") / float(2**64)
+            return (
+                challenger.spec.capsule
+                if fraction < self.config.canary_fraction
+                else self.snapshot.champion
+            )
 
+    @_serialized
     def open_stream(
         self,
         stream_id: str,
@@ -428,7 +605,16 @@ class EvolutionController:
         observed_at_ms: int,
         externally_visible_output: bool = False,
     ) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "open_stream",
+            {
+                "stream_id": stream_id,
+                "event_id": event_id,
+                "observed_at_ms": observed_at_ms,
+                "externally_visible_output": externally_visible_output,
+            },
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if any(stream.stream_id == stream_id for stream in self.snapshot.active_streams):
             raise EvolutionError("stream identifier is already active")
@@ -443,14 +629,20 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="open_stream",
+            payload_sha256=payload_sha256,
             reason=f"stream is pinned to capsule {capsule.capsule_id} until completion",
             updates={"active_streams": (*self.snapshot.active_streams, lease)},
         )
 
+    @_serialized
     def close_stream(
         self, stream_id: str, *, event_id: str, observed_at_ms: int
     ) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "close_stream",
+            {"stream_id": stream_id, "event_id": event_id, "observed_at_ms": observed_at_ms},
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if not any(stream.stream_id == stream_id for stream in self.snapshot.active_streams):
             raise EvolutionError("cannot close an unknown stream")
@@ -472,12 +664,17 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="close_stream",
+            payload_sha256=payload_sha256,
             reason="stream lease released without interrupting visible output",
             updates={"active_streams": active, "retained_capsule_ids": retained},
         )
 
+    @_serialized
     def promote(self, *, event_id: str, observed_at_ms: int) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "promote", {"event_id": event_id, "observed_at_ms": observed_at_ms}
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if self.snapshot.phase is not EvolutionPhase.READY_TO_PROMOTE:
             raise EvolutionError("promotion requires accepted shadow and canary gates")
@@ -506,6 +703,7 @@ class EvolutionController:
                 event_id=event_id,
                 observed_at_ms=observed_at_ms,
                 action="reject_promotion",
+                payload_sha256=payload_sha256,
                 reason="capsule revalidation failed immediately before promotion",
                 phase=EvolutionPhase.EVOLVING,
                 candidate_id=record.spec.candidate_id,
@@ -528,6 +726,7 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="promote",
+            payload_sha256=payload_sha256,
             reason=(
                 "capsule revalidated; new requests use the challenger while existing stream leases "
                 "remain pinned"
@@ -542,14 +741,26 @@ class EvolutionController:
             },
         )
 
+    @_serialized
     def rollback(self, *, event_id: str, observed_at_ms: int, reason: str) -> EvolutionSnapshot:
-        if self._already_processed(event_id):
+        payload_sha256 = _event_digest(
+            "rollback",
+            {"event_id": event_id, "observed_at_ms": observed_at_ms, "reason": reason},
+        )
+        if self._already_processed(event_id, payload_sha256):
             return self.snapshot
         if self.snapshot.phase is not EvolutionPhase.PROMOTED:
             raise EvolutionError("rollback is available only after promotion")
         previous = self.snapshot.previous_champion
         if previous is None:
             raise EvolutionError("rollback champion is unavailable")
+        previous_report = self.capsule_validator(Path(previous.path))
+        if not self._capsule_reference_is_eligible(
+            previous,
+            previous_report,
+            require_level_five=self.config.execution_target is ExecutionTarget.EXTERNAL,
+        ):
+            raise EvolutionError("rollback champion failed independent capsule revalidation")
         current = self.snapshot.champion
         records = []
         for record in self.snapshot.challengers:
@@ -575,6 +786,7 @@ class EvolutionController:
             event_id=event_id,
             observed_at_ms=observed_at_ms,
             action="rollback",
+            payload_sha256=payload_sha256,
             reason=reason,
             phase=EvolutionPhase.ROLLED_BACK,
             updates={

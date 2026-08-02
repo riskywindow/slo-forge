@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import statistics
+import zipfile
 from pathlib import Path
 
 from pydantic import ValidationError
 
-from .canonical import calculate_capsule_digest
+from .canonical import calculate_capsule_digest, canonical_json
 from .models import (
     ArtifactRef,
     ArtifactRole,
@@ -17,6 +19,7 @@ from .models import (
     CapsuleValidationReport,
     ClaimCategory,
     CounterexampleCorpus,
+    Digest,
     EvidenceClass,
     EvidenceIssuer,
     EvidenceResult,
@@ -27,6 +30,7 @@ from .models import (
     ValidationIssueCode,
     verification_level_rank,
 )
+from .statistics import bootstrap_median_interval, paired_regression_probability
 
 _PROMOTION_ARTIFACT_ROLES = frozenset(
     {ArtifactRole.GENERATED_RUNTIME, ArtifactRole.DEPLOYMENT, ArtifactRole.ROLLBACK}
@@ -74,9 +78,7 @@ _EVIDENCE_CLASS_BY_CLAIM = {
     ClaimCategory.OPERATIONAL: EvidenceClass.OPERATIONAL,
 }
 _ARTIFACT_ROLE_BY_EVIDENCE = {
-    EvidenceClass.BUILD: frozenset(
-        {ArtifactRole.COMPILED_BINARY, ArtifactRole.GENERATED_RUNTIME}
-    ),
+    EvidenceClass.BUILD: frozenset({ArtifactRole.COMPILED_BINARY, ArtifactRole.GENERATED_RUNTIME}),
     EvidenceClass.SEMANTIC: frozenset(
         {ArtifactRole.SEMANTIC_EVIDENCE, ArtifactRole.DIFFERENTIAL_TEST_RESULT}
     ),
@@ -104,10 +106,14 @@ def _sha256_file(path: Path) -> str:
 def _resolve_artifact(root: Path, artifact: ArtifactRef) -> Path | None:
     """Resolve an artifact without allowing symlinks to escape the capsule."""
 
-    candidate = root.joinpath(*artifact.path.split("/"))
     try:
-        if candidate.is_symlink():
+        if root.is_symlink():
             return None
+        candidate = root
+        for component in artifact.path.split("/"):
+            candidate = candidate / component
+            if candidate.is_symlink():
+                return None
         resolved_root = root.resolve(strict=True)
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(resolved_root)
@@ -122,6 +128,134 @@ def _append(
     issues: list[ValidationIssue], code: ValidationIssueCode, path: str, message: str
 ) -> None:
     issues.append(ValidationIssue(code=code, path=path, message=message))
+
+
+def _validate_runtime_bundle(
+    capsule: GenesisCapsule,
+    artifact: ArtifactRef,
+    path: Path,
+    issues: list[ValidationIssue],
+) -> None:
+    prefix = f"artifacts.{artifact.artifact_id}"
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)) or any(
+                name.startswith("/") or ".." in Path(name).parts for name in names
+            ):
+                raise ValueError("bundle contains duplicate or unsafe paths")
+            required = {
+                "runtime.py",
+                "runtime_config.json",
+                "correctness_harness.py",
+                "policy.slo",
+                "policy.bytecode.json",
+                "bundle_manifest.json",
+                "reference_package/reference_package.json",
+            }
+            if not required.issubset(names):
+                raise ValueError(f"bundle is missing {sorted(required - set(names))}")
+            manifest = json.loads(archive.read("bundle_manifest.json"))
+            config = json.loads(archive.read("runtime_config.json"))
+            package_manifest = json.loads(archive.read("reference_package/reference_package.json"))
+            declared = manifest["entries"]
+            actual_entries = set(names) - {"bundle_manifest.json"}
+            if set(declared) != actual_entries:
+                raise ValueError("bundle manifest does not cover every dependency")
+            for name, digest in declared.items():
+                if hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                    raise ValueError(f"bundle entry digest mismatch: {name}")
+            if manifest["candidate_genome_hash"] != capsule.identity.candidate_genome_hash.value:
+                raise ValueError("bundle candidate genome does not match capsule identity")
+            if config["genome_hash"] != capsule.identity.candidate_genome_hash.value:
+                raise ValueError("runtime config genome does not match capsule identity")
+            if config["package_hash"] != capsule.identity.source_model_hash.value:
+                raise ValueError("runtime source package does not match capsule identity")
+            policy_path = str(config["policy_bytecode_path"])
+            if policy_path not in actual_entries:
+                raise ValueError("runtime policy dependency is absent")
+            if (
+                hashlib.sha256(archive.read(policy_path)).hexdigest()
+                != config["policy_bytecode_sha256"]
+            ):
+                raise ValueError("runtime policy dependency digest mismatch")
+            tokenizer = f"reference_package/{package_manifest['tokenizer_module']}"
+            if tokenizer not in actual_entries or hashlib.sha256(
+                archive.read(tokenizer)
+            ).hexdigest() != (capsule.identity.tokenizer_hash.value):
+                raise ValueError("runtime tokenizer dependency does not match capsule identity")
+    except (KeyError, OSError, TypeError, ValueError, zipfile.BadZipFile) as error:
+        _append(
+            issues,
+            ValidationIssueCode.ARTIFACT_TAMPERED,
+            prefix,
+            f"generated runtime bundle is incomplete or inconsistent: {error}",
+        )
+
+
+def _validate_quality_artifact(path: Path) -> str | None:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+        cases = document["cases"]
+        if not isinstance(cases, list) or not cases:
+            return "quality evidence has no replayable cases"
+        exact = 0
+        for case in cases:
+            if not isinstance(case, dict):
+                return "quality case is not an object"
+            reproduced = bool(case.get("expected") == case.get("observed"))
+            if case.get("exact_match") is not reproduced:
+                return "quality case exact-match flag is inconsistent"
+            exact += reproduced
+        observed = exact / len(cases)
+        if document.get("case_count") != len(cases) or not math.isclose(
+            float(document["observed"]), observed, rel_tol=0.0, abs_tol=0.0
+        ):
+            return "quality summary is not derived from its cases"
+        if document.get("passed") is not True or observed < float(document["threshold"]):
+            return "quality evidence does not satisfy its declared threshold"
+    except (KeyError, OSError, TypeError, ValueError):
+        return "quality evidence is not a valid replayable document"
+    return None
+
+
+def _validate_resource_artifact(path: Path, *, runtime_bundle_bytes: int | None) -> str | None:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+        request_bytes = (
+            (int(document["maximum_prompt_tokens"]) + int(document["maximum_generated_tokens"])) * 8
+            + int(document["maximum_output_events_per_request"]) * 128
+            + int(document["persistent_state_bytes_per_request"])
+            + 512
+        )
+        queue_bytes = int(document["runtime_queue_depth"]) * request_bytes
+        single = max(
+            int(document["genome_declared_peak_host_bytes"]),
+            int(document["interpreter_and_model_reserve_bytes"])
+            + queue_bytes
+            + int(document["runtime_bundle_bytes"]),
+        )
+        coexistence = single * 2
+        usable = int(
+            int(document["capacity_bytes"]) * (1.0 - float(document["safety_margin_fraction"]))
+        )
+        passed = usable >= coexistence
+        if (
+            int(document["bounded_request_bytes"]) != request_bytes
+            or int(document["bounded_queue_bytes"]) != queue_bytes
+            or int(document["single_runtime_peak_bytes"]) != single
+            or int(document["champion_challenger_coexistence_bytes"]) != coexistence
+            or int(document["usable_capacity_bytes"]) != usable
+            or (
+                runtime_bundle_bytes is not None
+                and int(document["runtime_bundle_bytes"]) != runtime_bundle_bytes
+            )
+            or document.get("passed") is not passed
+        ):
+            return "resource summary is not derived from runtime and genome bounds"
+    except (KeyError, OSError, TypeError, ValueError):
+        return "resource evidence is not a valid replayable document"
+    return None
 
 
 def _validate_benchmark(
@@ -159,16 +293,18 @@ def _validate_benchmark(
             prefix,
             "benchmark artifact roles do not match their declared provenance fields",
         )
+    definition_path = resolved.get(benchmark.definition_artifact_id)
     raw_path = resolved.get(benchmark.raw_samples_artifact_id)
     baseline_path = resolved.get(benchmark.baseline_artifact_id)
-    if raw_path is None or baseline_path is None:
+    if definition_path is None or raw_path is None or baseline_path is None:
         return
     try:
+        definition = json.loads(definition_path.read_text(encoding="utf-8"))
         samples = RawBenchmarkSamples.model_validate_json(raw_path.read_bytes(), strict=True)
         baseline_samples = RawBenchmarkSamples.model_validate_json(
             baseline_path.read_bytes(), strict=True
         )
-    except (OSError, ValidationError) as exc:
+    except (OSError, ValidationError, ValueError) as exc:
         _append(
             issues,
             ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID,
@@ -176,14 +312,16 @@ def _validate_benchmark(
             f"raw samples are not a valid evidence document: {exc}",
         )
         return
-    definition = artifacts[benchmark.definition_artifact_id]
+    definition_artifact = artifacts[benchmark.definition_artifact_id]
     software = artifacts[benchmark.software_manifest_artifact_id]
     mismatches: list[str] = []
     if len(samples.samples) != benchmark.sample_count:
         mismatches.append("sample count")
+    if len(baseline_samples.samples) != benchmark.sample_count:
+        mismatches.append("baseline sample count")
     if benchmark.repetitions != benchmark.sample_count:
         mismatches.append("repetition count")
-    if samples.benchmark_definition_digest != definition.digest:
+    if samples.benchmark_definition_digest != definition_artifact.digest:
         mismatches.append("benchmark definition digest")
     if samples.software_manifest_digest != software.digest:
         mismatches.append("software manifest digest")
@@ -191,7 +329,7 @@ def _validate_benchmark(
         mismatches.append("workload fingerprint")
     if samples.hardware_fingerprint != benchmark.hardware_fingerprint:
         mismatches.append("hardware fingerprint")
-    if baseline_samples.benchmark_definition_digest != definition.digest:
+    if baseline_samples.benchmark_definition_digest != definition_artifact.digest:
         mismatches.append("baseline benchmark definition digest")
     if baseline_samples.software_manifest_digest != software.digest:
         mismatches.append("baseline software manifest digest")
@@ -203,6 +341,29 @@ def _validate_benchmark(
         mismatches.append("validation hardware fingerprint")
     if not benchmark.randomized_run_order:
         mismatches.append("randomized run order")
+    candidate_trials = {sample.trial: sample.seed for sample in samples.samples}
+    baseline_trials = {sample.trial: sample.seed for sample in baseline_samples.samples}
+    if candidate_trials != baseline_trials:
+        mismatches.append("paired trial or seed identity")
+    expected_execution = {
+        (alternative, trial)
+        for trial in candidate_trials
+        for alternative in ("baseline", "candidate")
+    }
+    execution_order = definition.get("execution_order") if isinstance(definition, dict) else None
+    try:
+        if not isinstance(execution_order, list):
+            raise TypeError("execution order must be a list")
+        observed_execution = [
+            (str(item["alternative"]), int(item["trial"])) for item in execution_order
+        ]
+    except (KeyError, TypeError, ValueError):
+        observed_execution = []
+    if (
+        len(observed_execution) != len(expected_execution)
+        or set(observed_execution) != expected_execution
+    ):
+        mismatches.append("recorded randomized execution order")
     values = sorted(sample.value for sample in samples.samples)
     median = statistics.median(values)
     baseline_median = statistics.median(sample.value for sample in baseline_samples.samples)
@@ -225,6 +386,42 @@ def _validate_benchmark(
         expected_effect, benchmark.summary.effect_size, rel_tol=1e-12, abs_tol=1e-12
     ):
         mismatches.append("reported effect size")
+    try:
+        bootstrap_rounds = int(definition["bootstrap_rounds"])
+        confidence = float(definition["confidence"])
+        statistical_seed = int(definition["statistical_seed"])
+        expected_low, expected_high = bootstrap_median_interval(
+            tuple(sample.value for sample in samples.samples),
+            seed=statistical_seed,
+            rounds=bootstrap_rounds,
+            confidence=confidence,
+        )
+    except (KeyError, TypeError, ValueError):
+        expected_low = expected_high = math.nan
+    if not math.isclose(
+        expected_low, benchmark.summary.confidence_low, rel_tol=1e-12, abs_tol=1e-12
+    ) or not math.isclose(
+        expected_high, benchmark.summary.confidence_high, rel_tol=1e-12, abs_tol=1e-12
+    ):
+        mismatches.append("reported confidence interval")
+    expected_regression_probability = paired_regression_probability(
+        tuple(sample.value for sample in baseline_samples.samples),
+        tuple(sample.value for sample in samples.samples),
+        objective=benchmark.summary.objective,
+    )
+    if not math.isclose(
+        expected_regression_probability,
+        benchmark.summary.regression_probability,
+        rel_tol=1e-12,
+        abs_tol=1e-12,
+    ):
+        mismatches.append("reported regression probability")
+    threshold = max(
+        benchmark.summary.practical_significance_threshold,
+        benchmark.noise_floor,
+    )
+    if expected_effect <= threshold:
+        mismatches.append("practical significance gate")
     if mismatches:
         _append(
             issues,
@@ -258,6 +455,13 @@ def validate_capsule(
             "capsule_digest",
             "manifest content does not match its declared digest",
         )
+    elif capsule.capsule_digest != context.expected_capsule_digest:
+        _append(
+            issues,
+            ValidationIssueCode.MANIFEST_TAMPERED,
+            "capsule_digest",
+            "capsule digest does not match the externally supplied expected digest",
+        )
 
     artifacts = {artifact.artifact_id: artifact for artifact in capsule.artifacts}
     resolved: dict[str, Path] = {}
@@ -288,8 +492,14 @@ def validate_capsule(
                 f"artifacts.{artifact.artifact_id}",
                 "artifact content does not match its declared digest",
             )
+        if (
+            artifact.role is ArtifactRole.GENERATED_RUNTIME
+            and artifact.media_type == "application/zip"
+        ):
+            _validate_runtime_bundle(capsule, artifact, path, issues)
 
     evidence = {record.evidence_id: record for record in capsule.evidence}
+    trust_anchors = {item.evidence_id: item for item in context.trusted_evidence_anchors}
     for record in capsule.evidence:
         prefix = f"evidence.{record.evidence_id}"
         if any(artifact_id not in artifacts for artifact_id in record.artifact_ids):
@@ -306,6 +516,35 @@ def validate_capsule(
                 prefix,
                 "evidence has unavailable or invalid artifact content",
             )
+        for artifact_id in record.artifact_ids:
+            path = resolved.get(artifact_id)
+            if path is None:
+                continue
+            diagnostic = (
+                _validate_quality_artifact(path)
+                if record.evidence_class is EvidenceClass.QUALITY
+                else _validate_resource_artifact(
+                    path,
+                    runtime_bundle_bytes=next(
+                        (
+                            artifact.size_bytes
+                            for artifact in capsule.artifacts
+                            if artifact.role is ArtifactRole.GENERATED_RUNTIME
+                            and artifact.media_type == "application/zip"
+                        ),
+                        None,
+                    ),
+                )
+                if record.evidence_class is EvidenceClass.RESOURCE
+                else None
+            )
+            if diagnostic is not None:
+                _append(
+                    issues,
+                    ValidationIssueCode.EVIDENCE_INCOMPLETE,
+                    prefix,
+                    diagnostic,
+                )
         if record.result is not EvidenceResult.PASS:
             _append(
                 issues,
@@ -344,19 +583,25 @@ def validate_capsule(
         referenced_roles = {
             artifacts[item].role for item in record.artifact_ids if item in artifacts
         }
-        if referenced_roles and not referenced_roles.intersection(
+        incompatible_roles = referenced_roles.difference(
             _ARTIFACT_ROLE_BY_EVIDENCE[record.evidence_class]
-        ):
+        )
+        if referenced_roles and incompatible_roles:
             _append(
                 issues,
                 ValidationIssueCode.EVIDENCE_INCOMPLETE,
                 prefix,
-                "evidence does not reference an artifact with a compatible evidence role",
+                "evidence references an artifact incompatible with its evidence class",
             )
 
     for claim in capsule.claims:
         prefix = f"claims.{claim.claim_id}"
         records = [evidence[item] for item in claim.evidence_ids if item in evidence]
+        matching_records = [
+            item
+            for item in records
+            if item.evidence_class is _EVIDENCE_CLASS_BY_CLAIM[claim.category]
+        ]
         if len(records) != len(claim.evidence_ids):
             _append(
                 issues,
@@ -371,24 +616,49 @@ def validate_capsule(
                 prefix,
                 f"claim result is {claim.result.value}",
             )
-        if records and max(verification_level_rank(item.level) for item in records) < (
-            verification_level_rank(claim.level)
-        ):
+        if matching_records and max(
+            verification_level_rank(item.level) for item in matching_records
+        ) < verification_level_rank(claim.level):
             _append(
                 issues,
                 ValidationIssueCode.EVIDENCE_LEVEL_MISMATCH,
                 prefix,
-                "claim level exceeds every referenced evidence level",
+                "claim level exceeds its matching evidence-class level",
             )
-        if records and not any(
-            item.evidence_class is _EVIDENCE_CLASS_BY_CLAIM[claim.category] for item in records
-        ):
+        if records and not matching_records:
             _append(
                 issues,
                 ValidationIssueCode.EVIDENCE_INCOMPLETE,
                 prefix,
                 "claim category is not supported by matching evidence",
             )
+        if claim.promotion_required:
+            for record in matching_records:
+                anchor = trust_anchors.get(record.evidence_id)
+                anchored_artifacts = (
+                    {item.artifact_id: item.digest for item in anchor.artifacts}
+                    if anchor is not None
+                    else {}
+                )
+                referenced_artifacts = {
+                    artifact_id: artifacts[artifact_id].digest
+                    for artifact_id in record.artifact_ids
+                    if artifact_id in artifacts
+                }
+                record_digest = Digest(value=hashlib.sha256(canonical_json(record)).hexdigest())
+                if (
+                    anchor is None
+                    or anchor.evidence_record_digest != record_digest
+                    or anchor.issuer is not record.issuer
+                    or anchor.issuer_version != record.issuer_version
+                    or anchored_artifacts != referenced_artifacts
+                ):
+                    _append(
+                        issues,
+                        ValidationIssueCode.EVIDENCE_UNTRUSTED,
+                        f"{prefix}.evidence.{record.evidence_id}",
+                        "promotion evidence is not bound to an externally trusted record and artifact digest",
+                    )
         if claim.scope.hardware_fingerprints and context.hardware_fingerprint not in (
             claim.scope.hardware_fingerprints
         ):
@@ -603,8 +873,16 @@ def validate_capsule(
     evidence_complete = not any(
         issue.code not in integrity_codes | compatibility_codes for issue in issues
     )
+    promotion_claims = tuple(claim for claim in capsule.claims if claim.promotion_required)
+    promotion_level = (
+        min(promotion_claims, key=lambda claim: verification_level_rank(claim.level)).level
+        if promotion_claims
+        else None
+    )
     return CapsuleValidationReport(
         capsule_digest=capsule.capsule_digest,
+        candidate_genome_hash=capsule.identity.candidate_genome_hash,
+        promotion_verification_level=promotion_level,
         integrity_valid=integrity_valid,
         contract_compatible=contract_compatible,
         evidence_complete=evidence_complete,

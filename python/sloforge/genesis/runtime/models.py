@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import StrEnum
 from threading import Event, Lock
@@ -39,15 +40,31 @@ class RuntimeRequest:
     def validate(self, *, maximum_prompt_tokens: int, maximum_generated_tokens: int) -> None:
         if not self.request_id or any(ord(character) < 32 for character in self.request_id):
             raise ValueError("request_id must be a non-empty printable string")
-        if not self.prompt_tokens:
+        if not isinstance(self.prompt_tokens, tuple) or not self.prompt_tokens:
             raise ValueError("prompt_tokens cannot be empty")
         if len(self.prompt_tokens) > maximum_prompt_tokens:
             raise ValueError("prompt exceeds the declared maximum_prompt_tokens")
-        if not 1 <= self.maximum_new_tokens <= maximum_generated_tokens:
+        if (
+            not isinstance(self.maximum_new_tokens, int)
+            or isinstance(self.maximum_new_tokens, bool)
+            or not 1 <= self.maximum_new_tokens <= maximum_generated_tokens
+        ):
             raise ValueError("maximum_new_tokens is outside the declared bounded domain")
-        if self.timeout_seconds <= 0:
-            raise ValueError("timeout_seconds must be positive")
-        if any(token < 0 for token in self.prompt_tokens):
+        if not isinstance(self.seed, int) or isinstance(self.seed, bool) or self.seed < 0:
+            raise ValueError("seed must be a non-negative integer")
+        if (
+            not isinstance(self.timeout_seconds, (int, float))
+            or isinstance(self.timeout_seconds, bool)
+            or not math.isfinite(self.timeout_seconds)
+            or self.timeout_seconds <= 0
+        ):
+            raise ValueError("timeout_seconds must be finite and positive")
+        if not isinstance(self.batching_eligible, bool):
+            raise ValueError("batching_eligible must be Boolean")
+        if any(
+            not isinstance(token, int) or isinstance(token, bool) or token < 0
+            for token in self.prompt_tokens
+        ):
             raise ValueError("prompt token identifiers must be non-negative")
 
 
@@ -81,7 +98,10 @@ class RuntimeLimits:
             self.maximum_generated_tokens,
             self.maximum_output_events_per_request,
         )
-        if any(value <= 0 for value in integer_bounds):
+        if any(
+            not isinstance(value, int) or isinstance(value, bool) or value <= 0
+            for value in integer_bounds
+        ):
             raise ValueError("runtime integer limits must be positive")
         if self.maximum_output_events_per_request < self.maximum_generated_tokens + 1:
             raise ValueError("output event bound must fit generated tokens and a terminal event")
@@ -93,8 +113,14 @@ class RuntimeLimits:
             self.worker_poll_seconds,
             self.shutdown_timeout_seconds,
         )
-        if any(value <= 0 for value in timeouts):
-            raise ValueError("runtime timeouts must be positive")
+        if any(
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or not math.isfinite(value)
+            or value <= 0
+            for value in timeouts
+        ):
+            raise ValueError("runtime timeouts must be finite and positive")
 
 
 @dataclass
@@ -105,6 +131,13 @@ class RequestControl:
     cancellation: Event = field(default_factory=Event)
     finished: Event = field(default_factory=Event)
     lifecycle_lock: Lock = field(default_factory=Lock)
+    commit_lock: Lock = field(default_factory=Lock)
+
+    def cancel(self) -> None:
+        """Publish cancellation atomically with respect to token commitment."""
+
+        with self.commit_lock:
+            self.cancellation.set()
 
     def transition(self, target: RequestLifecycle) -> None:
         allowed = {

@@ -373,18 +373,32 @@ def _capsule_manifest(path: Path) -> tuple[Path, Path]:
 @capsule_app.command("validate")
 def capsule_validate_command(
     capsule: Annotated[Path, typer.Argument(exists=True)],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False, readable=True)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
     hardware: Annotated[
         Path | None, typer.Option("--hardware", exists=True, dir_okay=False)
     ] = None,
 ) -> None:
-    """Validate a capsule against current time, dependency lock, and optional hardware."""
+    """Validate a capsule against caller-supplied trust context and expected identity."""
 
     manifest_path, root = _capsule_manifest(capsule)
-    context_path = root / "validation_context.json"
-    if not context_path.is_file():
-        raise typer.BadParameter("capsule validation context is missing")
-    context = ValidationContext.model_validate_json(context_path.read_bytes(), strict=True)
-    updates: dict[str, object] = {"now": datetime.now(UTC)}
+    try:
+        context.resolve(strict=True).relative_to(root.resolve(strict=True))
+    except ValueError:
+        pass
+    else:
+        raise typer.BadParameter(
+            "--context must be supplied from outside the untrusted capsule directory"
+        )
+    try:
+        trusted_context = ValidationContext.model_validate_json(context.read_bytes(), strict=True)
+        expected = Digest(value=expected_digest)
+    except (OSError, ValueError) as error:
+        raise typer.BadParameter(f"external validation context is invalid: {error}") from error
+    updates: dict[str, object] = {
+        "expected_capsule_digest": expected,
+        "now": datetime.now(UTC),
+    }
     repository = Path(__file__).resolve().parents[3]
     lock_path = repository / "uv.lock"
     if lock_path.is_file():
@@ -401,9 +415,9 @@ def capsule_validate_command(
                 "hardware_architecture": str(document.get("architecture", "unknown")),
             }
         )
-    context = context.model_copy(update=updates)
+    trusted_context = trusted_context.model_copy(update=updates)
     document = load_capsule(manifest_path)
-    report = validate_capsule(document, root, context)
+    report = validate_capsule(document, root, trusted_context)
     _json_result(
         {
             **report.model_dump(mode="json"),

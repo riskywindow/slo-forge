@@ -173,6 +173,14 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
             if summary.status is BaselineStatus.NOT_APPLICABLE
         ]
         assert measured and unavailable
+        assert next(
+            item for item in measured if item.baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+        ).reason.startswith("direct dependency-free eager reference")
+        assert all(
+            "request-order surrogate" in item.reason
+            for item in measured
+            if item.baseline is not BaselineKind.PYTHON_EAGER_REFERENCE
+        )
         assert all(summary.reason for summary in unavailable)
         assert all(summary.valid_request_rate == 1.0 for summary in measured)
         assert all(summary.human_authored_model_specific_lines == 0 for summary in measured)

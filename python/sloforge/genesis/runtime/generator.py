@@ -12,6 +12,12 @@ from typing import Any, cast
 
 from sloforge.genesis.frontend.models import DiagnosticSeverity, InspectionResult
 from sloforge.genesis.frontend.package import load_reference_package
+from sloforge.genesis.policy_dsl import (
+    BytecodeProgram,
+    Instruction,
+    ScalarType,
+    VariableSpec,
+)
 from sloforge.util import sha256_file
 
 from .adapter import ReferenceRuntimeAdapter
@@ -153,6 +159,7 @@ def main() -> int:
     args = parser.parse_args()
     app = application(seed=args.seed)
     failures = []
+    cases = []
     try:
         app.start()
         for line_number, line in enumerate(args.samples.read_text(encoding="utf-8").splitlines(), 1):
@@ -168,11 +175,21 @@ def main() -> int:
             )
             observed = [event.token_id for event in handle.events(args.timeout_seconds) if event.token_id is not None]
             expected = sample.get("expected_tokens")
+            exact = expected is None or observed == expected
+            cases.append(
+                {
+                    "line": line_number,
+                    "request_seed": sample["seed"],
+                    "expected": expected,
+                    "observed": observed,
+                    "exact_match": exact,
+                }
+            )
             if expected is not None and observed != expected:
                 failures.append({"line": line_number, "expected": expected, "observed": observed})
     finally:
         app.shutdown()
-    print(json.dumps({"failures": failures, "passed": not failures}, sort_keys=True))
+    print(json.dumps({"cases": cases, "failures": failures, "passed": bool(cases) and not failures}, sort_keys=True))
     return 1 if failures else 0
 
 
@@ -220,6 +237,8 @@ def generate_baseline_runtime(
         ).hexdigest(),
         "genome_hash": genome_hash,
         "generation_seed": seed,
+        "policy_bytecode_path": None,
+        "policy_bytecode_sha256": None,
         "limits": {
             "maximum_queue_depth": 32,
             "maximum_batch_size": 4,
@@ -289,17 +308,65 @@ def _load_config(path: Path) -> dict[str, Any]:
         "schema_version",
         "runtime_id",
         "reference_package_root",
-            "package_hash",
-            "inspection_hash",
-            "genome_hash",
-            "generation_seed",
+        "package_hash",
+        "inspection_hash",
+        "genome_hash",
+        "generation_seed",
         "limits",
     }
-    if set(config) != required:
-        raise ValueError(f"generated runtime config fields differ: {set(config) ^ required}")
+    optional = {"policy_bytecode_path", "policy_bytecode_sha256"}
+    if not required.issubset(config) or not set(config).issubset(required | optional):
+        raise ValueError("generated runtime config contains missing or unknown fields")
     if config["schema_version"] != GENERATED_RUNTIME_SCHEMA_VERSION:
         raise ValueError("unsupported generated runtime schema version")
     return config
+
+
+def _load_policy_bytecode(config_path: Path, config: dict[str, Any]) -> BytecodeProgram | None:
+    value = config.get("policy_bytecode_path")
+    digest = config.get("policy_bytecode_sha256")
+    if value is None and digest is None:
+        return None
+    if not isinstance(value, str) or not value or not isinstance(digest, str):
+        raise ValueError("runtime policy path and digest must be declared together")
+    path = Path(value)
+    if not path.is_absolute():
+        path = config_path.parent / path
+    payload = path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != digest:
+        raise ValueError("runtime policy bytecode digest mismatch")
+    document = json.loads(payload)
+    if not isinstance(document, dict):
+        raise ValueError("runtime policy bytecode must be an object")
+
+    def variable(item: object) -> VariableSpec:
+        if not isinstance(item, dict):
+            raise ValueError("runtime policy variable must be an object")
+        return VariableSpec(
+            name=str(item["name"]),
+            scalar_type=ScalarType(str(item["scalar_type"])),
+            lower=item["lower"],
+            upper=item["upper"],
+        )
+
+    instructions = document.get("instructions")
+    if not isinstance(instructions, list) or any(
+        not isinstance(item, dict) for item in instructions
+    ):
+        raise ValueError("runtime policy instructions must be a list")
+    inputs = document.get("inputs")
+    if not isinstance(inputs, list):
+        raise ValueError("runtime policy inputs must be a list")
+    return BytecodeProgram(
+        name=str(document["name"]),
+        inputs=tuple(variable(item) for item in inputs),
+        output=variable(document["output"]),
+        instructions=tuple(
+            Instruction(opcode=str(item["opcode"]), operand=item.get("operand"))
+            for item in instructions
+        ),
+        maximum_operations=int(document["maximum_operations"]),
+    )
 
 
 def load_generated_runtime(
@@ -310,7 +377,10 @@ def load_generated_runtime(
     """Load a generated runtime after revalidating its source package hash."""
 
     config = _load_config(config_path)
-    package = load_reference_package(Path(str(config["reference_package_root"])))
+    package_root = Path(str(config["reference_package_root"]))
+    if not package_root.is_absolute():
+        package_root = config_path.parent / package_root
+    package = load_reference_package(package_root)
     if package.package_hash != config["package_hash"]:
         raise ValueError("reference package changed after runtime generation")
     limits_value = config["limits"]
@@ -324,7 +394,12 @@ def load_generated_runtime(
         identity=f"genesis_{config['runtime_id']}",
         seed=seed,
     )
-    return BaselineStreamingRuntime(adapter, limits=limits, runtime_seed=seed)
+    return BaselineStreamingRuntime(
+        adapter,
+        limits=limits,
+        runtime_seed=seed,
+        policy=_load_policy_bytecode(config_path, config),
+    )
 
 
 class GeneratedRuntimeApplication:

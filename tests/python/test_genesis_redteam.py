@@ -216,6 +216,8 @@ def test_demo_artifacts_are_canonical_reproducible_and_loadable(tmp_path: Path) 
         )
     loaded = load_counterexample(Path(first.counterexample_paths[0]))
     assert loaded.counterexample_id.startswith("cex-")
+    with pytest.raises(FileExistsError, match="must be empty"):
+        run_demo(tmp_path / "first", seed=1234)
 
 
 def test_redteam_models_reject_untyped_extensions() -> None:

@@ -31,9 +31,12 @@ from sloforge.genesis.capsule import (
     RawBenchmarkSample,
     RawBenchmarkSamples,
     ScopedClaim,
+    TrustedArtifactAnchor,
+    TrustedEvidenceAnchor,
     ValidationContext,
     ValidationIssueCode,
     VerificationLevel,
+    canonical_json,
     load_capsule,
     publish_capsule,
     seal_capsule,
@@ -79,11 +82,27 @@ def _add_artifact(
 def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
     candidate_hash = _constant_digest("candidate")
     hardware_hash = _constant_digest("hardware")
-    definition = _add_artifact(root, "definition", ArtifactRole.BENCHMARK_DEFINITION, b"{}")
-    software = _add_artifact(root, "software", ArtifactRole.SOFTWARE_MANIFEST, b"{}")
-    lock = _add_artifact(
-        root, "dependency-lock", ArtifactRole.DEPENDENCY_LOCK, b"runtime==1.0.0\n"
+    definition = _add_artifact(
+        root,
+        "definition",
+        ArtifactRole.BENCHMARK_DEFINITION,
+        json.dumps(
+            {
+                "execution_order": [
+                    {"alternative": "baseline", "trial": 0},
+                    {"alternative": "candidate", "trial": 1},
+                    {"alternative": "candidate", "trial": 0},
+                    {"alternative": "baseline", "trial": 1},
+                ],
+                "bootstrap_rounds": 2000,
+                "confidence": 0.95,
+                "statistical_seed": 0,
+            },
+            sort_keys=True,
+        ).encode(),
     )
+    software = _add_artifact(root, "software", ArtifactRole.SOFTWARE_MANIFEST, b"{}")
+    lock = _add_artifact(root, "dependency-lock", ArtifactRole.DEPENDENCY_LOCK, b"runtime==1.0.0\n")
     workload_hash = _constant_digest("workload")
     baseline_document = RawBenchmarkSamples(
         benchmark_definition_digest=definition.digest,
@@ -91,8 +110,8 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         hardware_fingerprint=hardware_hash,
         software_manifest_digest=software.digest,
         samples=(
-            RawBenchmarkSample(trial=0, seed=21, value=12.0),
-            RawBenchmarkSample(trial=1, seed=22, value=14.0),
+            RawBenchmarkSample(trial=0, seed=11, value=12.0),
+            RawBenchmarkSample(trial=1, seed=12, value=14.0),
         ),
     )
     baseline = _add_artifact(
@@ -137,10 +156,51 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         EvidenceClass.OPERATIONAL: ArtifactRole.OPERATIONAL_EVIDENCE,
     }
     for evidence_class, role in role_by_class.items():
+        payload = b"{}"
+        if evidence_class is EvidenceClass.QUALITY:
+            payload = json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "cases": [
+                        {
+                            "expected": [1],
+                            "observed": [1],
+                            "exact_match": True,
+                        }
+                    ],
+                    "case_count": 1,
+                    "observed": 1.0,
+                    "threshold": 1.0,
+                    "passed": True,
+                },
+                sort_keys=True,
+            ).encode()
+        elif evidence_class is EvidenceClass.RESOURCE:
+            payload = json.dumps(
+                {
+                    "maximum_prompt_tokens": 1,
+                    "maximum_generated_tokens": 1,
+                    "maximum_output_events_per_request": 2,
+                    "persistent_state_bytes_per_request": 8,
+                    "runtime_queue_depth": 1,
+                    "bounded_request_bytes": 792,
+                    "bounded_queue_bytes": 792,
+                    "genome_declared_peak_host_bytes": 0,
+                    "interpreter_and_model_reserve_bytes": 1024,
+                    "runtime_bundle_bytes": 0,
+                    "single_runtime_peak_bytes": 1816,
+                    "champion_challenger_coexistence_bytes": 3632,
+                    "capacity_bytes": 5120,
+                    "safety_margin_fraction": 0.2,
+                    "usable_capacity_bytes": 4096,
+                    "passed": True,
+                },
+                sort_keys=True,
+            ).encode()
         evidence_artifacts[evidence_class] = (
             samples
             if evidence_class is EvidenceClass.PERFORMANCE
-            else _add_artifact(root, f"evidence-{evidence_class.value}", role, b"{}")
+            else _add_artifact(root, f"evidence-{evidence_class.value}", role, payload)
         )
     corpus_document = CounterexampleCorpus(
         candidate_genome_hash=candidate_hash,
@@ -256,7 +316,7 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                 warmup_iterations=2,
                 repetitions=2,
                 randomized_run_order=True,
-                noise_floor=0.5,
+                noise_floor=0.05,
                 summary=BenchmarkSummary(
                     metric="latency",
                     unit="milliseconds",
@@ -267,13 +327,16 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                     confidence_low=9.0,
                     confidence_high=11.0,
                     effect_size=3.0 / 13.0,
-                    regression_probability=0.01,
+                    regression_probability=0.0,
                     practical_significance_threshold=0.1,
                 ),
             ),
         ),
     )
+    sealed = seal_capsule(capsule)
+    assert sealed.capsule_digest is not None
     context = ValidationContext(
+        expected_capsule_digest=sealed.capsule_digest,
         source_model_hash=_constant_digest("model"),
         tokenizer_hash=_constant_digest("tokenizer"),
         workload_contract_hash=workload_hash,
@@ -283,10 +346,30 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         device_count=1,
         dependency_lock_hash=lock.digest,
         dependencies=(CurrentDependency(name="runtime", version="1.0.0"),),
+        trusted_evidence_anchors=tuple(
+            TrustedEvidenceAnchor(
+                evidence_id=record.evidence_id,
+                evidence_record_digest=_digest(canonical_json(record)),
+                issuer=record.issuer,
+                issuer_version=record.issuer_version,
+                artifacts=tuple(
+                    TrustedArtifactAnchor(
+                        artifact_id=artifact_id,
+                        digest=next(
+                            item.digest
+                            for item in capsule.artifacts
+                            if item.artifact_id == artifact_id
+                        ),
+                    )
+                    for artifact_id in record.artifact_ids
+                ),
+            )
+            for record in evidence
+        ),
         trusted_verifier_version="1.0.0",
         now=NOW,
     )
-    return seal_capsule(capsule), context
+    return sealed, context
 
 
 def _codes(capsule: GenesisCapsule, root: Path, context: ValidationContext) -> set[str]:
@@ -315,6 +398,37 @@ def test_manifest_and_artifact_tampering_are_detected(tmp_path: Path) -> None:
     codes = _codes(capsule, tmp_path, context)
     assert ValidationIssueCode.ARTIFACT_TAMPERED.value in codes
     assert ValidationIssueCode.ARTIFACT_SIZE_MISMATCH.value in codes
+
+
+def test_external_expected_digest_and_evidence_anchors_reject_forgery(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    wrong_expected = context.model_copy(
+        update={"expected_capsule_digest": _constant_digest("attacker-selected-capsule")}
+    )
+    assert ValidationIssueCode.MANIFEST_TAMPERED.value in _codes(capsule, tmp_path, wrong_expected)
+
+    semantic = next(
+        item for item in capsule.evidence if item.evidence_class is EvidenceClass.SEMANTIC
+    )
+    forged_record = semantic.model_copy(update={"issuer": EvidenceIssuer.TRUSTED_VALIDATOR})
+    forged = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "evidence": tuple(
+                    forged_record if item.evidence_id == semantic.evidence_id else item
+                    for item in capsule.evidence
+                ),
+            }
+        )
+    )
+    assert forged.capsule_digest is not None
+    attacker_expected_forgery = context.model_copy(
+        update={"expected_capsule_digest": forged.capsule_digest}
+    )
+    assert ValidationIssueCode.EVIDENCE_UNTRUSTED.value in _codes(
+        forged, tmp_path, attacker_expected_forgery
+    )
 
 
 @pytest.mark.parametrize(
@@ -383,11 +497,80 @@ def test_missing_counterexample_or_evidence_rejects_promotion(tmp_path: Path) ->
     assert ValidationIssueCode.EVIDENCE_INCOMPLETE.value in codes
 
 
-def test_resealed_benchmark_with_altered_result_is_rejected(tmp_path: Path) -> None:
+def test_claim_level_cannot_be_borrowed_from_an_unrelated_evidence_class(
+    tmp_path: Path,
+) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    semantic = next(item for item in capsule.claims if item.category is ClaimCategory.SEMANTIC)
+    elevated = semantic.model_copy(
+        update={
+            "level": VerificationLevel.HARDWARE_OPERATIONAL,
+            "evidence_ids": (
+                "evidence:semantic",
+                "evidence:operational",
+            ),
+        }
+    )
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "claims": tuple(
+                    elevated if item.claim_id == semantic.claim_id else item
+                    for item in capsule.claims
+                ),
+            }
+        )
+    )
+
+    assert ValidationIssueCode.EVIDENCE_LEVEL_MISMATCH.value in _codes(resealed, tmp_path, context)
+
+
+def test_evidence_cannot_mix_compatible_and_incompatible_artifact_roles(
+    tmp_path: Path,
+) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    semantic = next(
+        item for item in capsule.evidence if item.evidence_class is EvidenceClass.SEMANTIC
+    )
+    altered = semantic.model_copy(
+        update={
+            "artifact_ids": (
+                *semantic.artifact_ids,
+                "generated-runtime",
+            )
+        }
+    )
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "evidence": tuple(
+                    altered if item.evidence_id == semantic.evidence_id else item
+                    for item in capsule.evidence
+                ),
+            }
+        )
+    )
+
+    assert ValidationIssueCode.EVIDENCE_INCOMPLETE.value in _codes(resealed, tmp_path, context)
+
+
+@pytest.mark.parametrize(
+    "summary_update",
+    (
+        {"median": 9.5},
+        {"confidence_low": 9.1},
+        {"regression_probability": 0.5},
+    ),
+)
+def test_resealed_benchmark_with_altered_result_is_rejected(
+    tmp_path: Path, summary_update: dict[str, float]
+) -> None:
     capsule, context = _complete_capsule(tmp_path)
     benchmark = capsule.benchmarks[0]
     altered = benchmark.model_copy(
-        update={"summary": benchmark.summary.model_copy(update={"median": 9.5})}
+        update={"summary": benchmark.summary.model_copy(update=summary_update)}
     )
     resealed = seal_capsule(
         capsule.model_copy(update={"capsule_digest": None, "benchmarks": (altered,)})
@@ -405,6 +588,15 @@ def test_symlinked_capsule_artifact_is_rejected(tmp_path: Path) -> None:
     outside.write_bytes(runtime_path.read_bytes())
     runtime_path.unlink()
     runtime_path.symlink_to(outside)
+    assert ValidationIssueCode.UNSAFE_ARTIFACT_PATH.value in _codes(capsule, tmp_path, context)
+
+
+def test_intermediate_symlink_inside_capsule_is_rejected(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    artifacts = tmp_path / "artifacts"
+    relocated = tmp_path / "relocated-artifacts"
+    artifacts.rename(relocated)
+    artifacts.symlink_to(relocated, target_is_directory=True)
     assert ValidationIssueCode.UNSAFE_ARTIFACT_PATH.value in _codes(capsule, tmp_path, context)
 
 

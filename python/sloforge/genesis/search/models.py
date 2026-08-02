@@ -105,6 +105,105 @@ class FidelityStage(StrEnum):
     CANARY = "canary_validation"
 
 
+_FAILURE_STATES_BY_STAGE: dict[FidelityStage, frozenset[CandidateFailureState]] = {
+    FidelityStage.STATIC_PRUNING: frozenset(
+        {
+            CandidateFailureState.STATIC_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.ANALYTICAL_BOUND: frozenset(
+        {
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.PERFORMANCE_REJECTED,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.COMPILE: frozenset(
+        {
+            CandidateFailureState.COMPILE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.DIGITAL_TWIN: frozenset(
+        {
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.PERFORMANCE_REJECTED,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.DETERMINISTIC_TESTS: frozenset(
+        {
+            CandidateFailureState.SEMANTIC_REJECTED,
+            CandidateFailureState.QUALITY_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.PROPERTY_VERIFICATION: frozenset(
+        {
+            CandidateFailureState.SEMANTIC_REJECTED,
+            CandidateFailureState.QUALITY_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.MODEL_CHECK: frozenset(
+        {
+            CandidateFailureState.MODEL_CHECK_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.SIMULATION: frozenset(
+        {
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.PERFORMANCE_REJECTED,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.HARDWARE_MICROBENCHMARK: frozenset(
+        {
+            CandidateFailureState.SEMANTIC_REJECTED,
+            CandidateFailureState.QUALITY_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.PERFORMANCE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.END_TO_END_BENCHMARK: frozenset(
+        {
+            CandidateFailureState.SEMANTIC_REJECTED,
+            CandidateFailureState.QUALITY_REJECTED,
+            CandidateFailureState.RESOURCE_REJECTED,
+            CandidateFailureState.PERFORMANCE_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.SHADOW: frozenset(
+        {
+            CandidateFailureState.SHADOW_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+    FidelityStage.CANARY: frozenset(
+        {
+            CandidateFailureState.CANARY_REJECTED,
+            CandidateFailureState.SANDBOX_VIOLATION,
+            CandidateFailureState.SUPERSEDED,
+        }
+    ),
+}
+
+
 class ObjectiveVector(SearchModel):
     correctness_confidence: Annotated[float, Field(ge=0.0, le=1.0)]
     quality: Annotated[float, Field(ge=0.0, le=1.0)]
@@ -155,6 +254,11 @@ class StageResult(SearchModel):
             raise ValueError("passing stage cannot declare a failure state")
         if not self.passed and self.failure_state is None:
             raise ValueError("failed stage must declare a terminal failure state")
+        if (
+            self.failure_state is not None
+            and self.failure_state not in _FAILURE_STATES_BY_STAGE[self.stage]
+        ):
+            raise ValueError("failure state is incompatible with the fidelity stage")
         if self.hardware_backed and self.stage not in {
             FidelityStage.HARDWARE_MICROBENCHMARK,
             FidelityStage.END_TO_END_BENCHMARK,

@@ -58,9 +58,7 @@ def publish_capsule(capsule: GenesisCapsule, directory: Path) -> Path:
             os.link(temporary, target)
         except FileExistsError as exc:
             if target.is_symlink() or not target.is_file() or target.read_bytes() != payload:
-                raise CapsuleIOError(
-                    "capsule publication collided with different content"
-                ) from exc
+                raise CapsuleIOError("capsule publication collided with different content") from exc
         temporary.unlink(missing_ok=True)
         temporary = None
     finally:

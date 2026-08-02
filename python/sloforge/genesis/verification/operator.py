@@ -37,6 +37,11 @@ def _digest(array: Array) -> str:
     return hashlib.sha256(header + value.tobytes()).hexdigest()
 
 
+def _error_digest(error: Exception) -> str:
+    payload = f"{type(error).__name__}:{error}".encode()
+    return hashlib.sha256(payload).hexdigest()
+
+
 def _shape(
     contract: OperatorContract, index: int, generator: np.random.Generator
 ) -> tuple[int, ...]:
@@ -65,6 +70,11 @@ def _values(
         value = generator.integers(0, 2, size=shape).astype(dtype)
     elif np.issubdtype(dtype, np.integer):
         value = generator.integers(-8, 9, size=shape).astype(dtype)
+        flat = value.reshape(-1)
+        if flat.size and index % 5 == 0:
+            flat[0] = np.iinfo(dtype).min
+        if flat.size > 1 and index % 5 == 0:
+            flat[1] = np.iinfo(dtype).max
     else:
         value = generator.normal(0.0, 3.0, size=shape).astype(dtype)
         flat = value.reshape(-1)
@@ -74,6 +84,11 @@ def _values(
             flat[1] = np.inf
         if flat.size > 2 and index % 13 == 0:
             flat[2] = -0.0
+        limits = np.finfo(dtype)  # type: ignore[arg-type]
+        if flat.size > 3 and index % 5 == 0:
+            flat[3] = limits.max
+        if flat.size > 4 and index % 5 == 0:
+            flat[4] = limits.smallest_subnormal
     return value
 
 
@@ -133,6 +148,8 @@ def verify_operator(
         raise VerificationError("operator identity, shape and dtype domains are required")
     if not 1 <= contract.maximum_cases <= 100_000:
         raise VerificationError("maximum_cases must be in [1, 100000]")
+    if seed < 0:
+        raise VerificationError("operator verification seed must be non-negative")
     if contract.maximum_absolute_error < 0 or contract.maximum_relative_error < 0:
         raise VerificationError("numerical tolerances must be non-negative")
     generator = np.random.default_rng(seed)
@@ -145,16 +162,52 @@ def verify_operator(
         if variant == "non_contiguous":
             value = _non_contiguous(value)
         original = value.copy()
-        expected = np.asarray(reference(value.copy()))
-        observed = np.asarray(candidate(value))
+        try:
+            expected = np.asarray(reference(value.copy()))
+        except Exception as error:
+            raise VerificationError(
+                f"reference implementation failed inside its declared domain: "
+                f"{type(error).__name__}: {error}"
+            ) from error
+        try:
+            observed = np.asarray(candidate(value))
+        except Exception as error:
+            executed += 1
+            exception_violation = f"candidate_exception:{type(error).__name__}"
+            if not contract.allow_aliasing and not np.array_equal(value, original, equal_nan=True):
+                exception_violation = "unexpected_input_mutation_before_exception"
+            return OperatorVerificationResult(
+                claim=f"operator:{contract.operator_id}",
+                level=VerificationLevel.PROPERTY,
+                status=EvidenceStatus.FAILED,
+                seed=seed,
+                cases_executed=executed,
+                domain=contract,
+                counterexample=OperatorCounterexample(
+                    case_index=index,
+                    seed=seed,
+                    shape=shape,
+                    dtype=dtype,
+                    stride_variant=variant,
+                    violation=exception_violation,
+                    expected_digest=_digest(expected),
+                    observed_digest=_error_digest(error),
+                    minimized_values=_minimized_values(original),
+                ),
+                assumptions=("numpy_reference", "bounded_generated_domain"),
+            )
         executed += 1
         violation = _compare(expected, observed, contract)
         if not contract.allow_aliasing and not np.array_equal(value, original, equal_nan=True):
             violation = violation or "unexpected_input_mutation"
         if contract.deterministic:
-            repeated = np.asarray(candidate(original.copy()))
-            if _compare(observed, repeated, contract) is not None:
-                violation = violation or "nondeterministic_output"
+            try:
+                repeated = np.asarray(candidate(original.copy()))
+            except Exception:
+                violation = violation or "nondeterministic_exception"
+            else:
+                if _compare(observed, repeated, contract) is not None:
+                    violation = violation or "nondeterministic_output"
         if violation is not None:
             return OperatorVerificationResult(
                 claim=f"operator:{contract.operator_id}",

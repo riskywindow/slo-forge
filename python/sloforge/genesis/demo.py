@@ -5,10 +5,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import platform
 import random
 import shutil
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -91,11 +93,27 @@ def _write(path: Path, value: BaseModel | dict[str, object]) -> None:
 def _safe_reset(output: Path, repository: Path) -> None:
     if not output.exists():
         return
+    if output.is_symlink():
+        raise ValueError(f"refusing to reset symlinked output path: {output}")
     resolved = output.resolve()
     forbidden = {Path("/").resolve(), Path.home().resolve(), repository.resolve()}
     if resolved in forbidden or len(resolved.parts) < 4:
         raise ValueError(f"refusing to reset unsafe output path: {resolved}")
     shutil.rmtree(resolved)
+
+
+def _local_hardware_identity() -> dict[str, object]:
+    return {
+        "system": platform.system(),
+        "release": platform.release(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+        "logical_cpu_count": os.cpu_count(),
+    }
+
+
+def _local_hardware_fingerprint() -> str:
+    return hashlib.sha256(canonical_json(_local_hardware_identity())).hexdigest()
 
 
 def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
@@ -123,6 +141,7 @@ def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
         seed=seed,
     )
     _write(path, raw)
+    hardware_fingerprint = _local_hardware_fingerprint()
     return BottleneckEvidence(
         evidence_id="cpu-profile-hybrid-quantized-state",
         source=EvidenceSource.CPU_PROFILE_MEASURED,
@@ -133,7 +152,7 @@ def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
         deterministic_seed=seed,
         raw_evidence_path=str(path.resolve()),
         raw_evidence_sha256=sha256_file(path),
-        hardware_fingerprint=f"cpu-{hashlib.sha256(str(Path('/')).encode()).hexdigest()[:12]}",
+        hardware_fingerprint=f"cpu-{hardware_fingerprint[:12]}",
         workload_fingerprint=hashlib.sha256(b"hybrid-quantized-state-token-loop").hexdigest(),
         synthetic=False,
     )
@@ -143,6 +162,7 @@ def run_genesis_demo(
     output: Path,
     *,
     seed: int = 73129,
+    runtime_seed: int | None = None,
     reset: bool = False,
     observed_at: datetime | None = None,
 ) -> GenesisDemoResult:
@@ -150,6 +170,8 @@ def run_genesis_demo(
 
     if seed < 0:
         raise ValueError("seed must be non-negative")
+    if output.exists() and output.is_symlink():
+        raise ValueError(f"refusing to use symlinked output path: {output}")
     repository = Path(__file__).resolve().parents[3]
     if reset:
         _safe_reset(output, repository)
@@ -171,6 +193,8 @@ def run_genesis_demo(
             "memory_bytes": 8 * 1024**3,
             "device_count": 1,
             "measurement_mode": "local-cpu",
+            "measured_identity": _local_hardware_identity(),
+            "measured_fingerprint": _local_hardware_fingerprint(),
         },
     )
     inspection_directory = output / "inspection"
@@ -190,11 +214,12 @@ def run_genesis_demo(
         },
     )
     run_directory = output / "run"
+    effective_runtime_seed = seed if runtime_seed is None else runtime_seed
     initialized = initialize_genesis_run(
         package_root,
         inspection,
         run_directory,
-        seed=seed,
+        seed=effective_runtime_seed,
         workload_contract_hash=sha256_file(workload),
         hardware_contract_hash=sha256_file(hardware),
     )
@@ -203,6 +228,7 @@ def run_genesis_demo(
         {
             "schema_version": "1.0.0",
             "seed": seed,
+            "runtime_seed": effective_runtime_seed,
             "genome_hash": initialized.genome_hash,
             "runtime_id": initialized.runtime.runtime_id,
             "package_hash": initialized.runtime.package_hash,
@@ -220,12 +246,62 @@ def run_genesis_demo(
     if synthesis.accepted_candidate_id is None or synthesis.accepted_genome_hash is None:
         raise RuntimeError("local CEGIS produced no accepted candidate")
     candidate_directory = run_directory / "candidates" / synthesis.accepted_candidate_id
-    timestamp = (observed_at or datetime.now(UTC)).astimezone(UTC)
+    default_timestamp = datetime(2026, 1, 1, tzinfo=UTC) + timedelta(
+        seconds=seed % (366 * 24 * 60 * 60)
+    )
+    timestamp = (observed_at or default_timestamp).astimezone(UTC)
     capsule_directory = output / "capsule"
     capsule_result = build_local_capsule(
         candidate_directory,
         capsule_directory,
         observed_at=timestamp,
+    )
+
+    # Evolve from one independently validated capsule to another.  The
+    # challenger is synthesized in a separate immutable run with a distinct
+    # search seed while retaining the fixed reference-model seed and contracts.
+    challenger_run = output / "evolution/challenger-run"
+    challenger_initialized = initialize_genesis_run(
+        package_root,
+        inspection,
+        challenger_run,
+        seed=effective_runtime_seed,
+        workload_contract_hash=sha256_file(workload),
+        hardware_contract_hash=sha256_file(hardware),
+    )
+    _write(
+        challenger_run / "run_manifest.json",
+        {
+            "schema_version": "1.0.0",
+            "seed": seed + 1,
+            "runtime_seed": effective_runtime_seed,
+            "genome_hash": challenger_initialized.genome_hash,
+            "runtime_id": challenger_initialized.runtime.runtime_id,
+            "package_hash": challenger_initialized.runtime.package_hash,
+            "workload_contract": {
+                "path": str(workload.resolve()),
+                "sha256": sha256_file(workload),
+            },
+            "hardware_contract": {
+                "path": str(hardware.resolve()),
+                "sha256": sha256_file(hardware),
+            },
+        },
+    )
+    challenger_synthesis = synthesize_local_run(challenger_run, seed=seed + 1, budget_usd=0.0)
+    if (
+        challenger_synthesis.accepted_candidate_id is None
+        or challenger_synthesis.accepted_genome_hash is None
+    ):
+        raise RuntimeError("evolution synthesis produced no accepted challenger")
+    challenger_candidate_directory = (
+        challenger_run / "candidates" / challenger_synthesis.accepted_candidate_id
+    )
+    challenger_capsule_directory = output / "evolution/challenger-capsule"
+    challenger_capsule_result = build_local_capsule(
+        challenger_candidate_directory,
+        challenger_capsule_directory,
+        observed_at=timestamp + timedelta(seconds=1),
     )
 
     redteam = run_redteam_demo(output / "redteam", seed=seed)
@@ -251,30 +327,39 @@ def run_genesis_demo(
     context = ValidationContext.model_validate_json(
         Path(capsule_result.context_path).read_bytes(), strict=True
     )
+    challenger_capsule = load_capsule(Path(challenger_capsule_result.capsule_path))
+    challenger_context = ValidationContext.model_validate_json(
+        Path(challenger_capsule_result.context_path).read_bytes(), strict=True
+    )
 
     def validator(path: Path) -> CapsuleValidationReport:
-        if path.resolve() != Path(capsule_result.capsule_path).resolve():
-            raise ValueError("controller requested validation of an unknown capsule")
-        return validate_capsule(capsule, capsule_directory, context)
+        resolved = path.resolve()
+        if resolved == Path(capsule_result.capsule_path).resolve():
+            return validate_capsule(capsule, capsule_directory, context)
+        if resolved == Path(challenger_capsule_result.capsule_path).resolve():
+            return validate_capsule(
+                challenger_capsule,
+                challenger_capsule_directory,
+                challenger_context,
+            )
+        raise ValueError("controller requested validation of an unknown capsule")
 
     champion = CapsuleReference(
-        capsule_id="baseline-runtime",
-        capsule_digest=hashlib.sha256(
-            (run_directory / "generated_runtime/artifact_manifest.json").read_bytes()
-        ).hexdigest(),
-        genome_hash=synthesis.baseline_genome_hash,
-        path=str((run_directory / "generated_runtime").resolve()),
-    )
-    challenger = CapsuleReference(
-        capsule_id="genesis-corrected",
+        capsule_id="genesis-champion",
         capsule_digest=capsule_result.capsule_digest,
         genome_hash=synthesis.accepted_genome_hash,
         path=capsule_result.capsule_path,
     )
+    challenger = CapsuleReference(
+        capsule_id="genesis-corrected",
+        capsule_digest=challenger_capsule_result.capsule_digest,
+        genome_hash=challenger_synthesis.accepted_genome_hash,
+        path=challenger_capsule_result.capsule_path,
+    )
     isolation = output / "evolution/challenger-isolation"
     isolation.mkdir(parents=True)
     spec = ChallengerSpec(
-        candidate_id=synthesis.accepted_candidate_id,
+        candidate_id=challenger_synthesis.accepted_candidate_id,
         capsule=challenger,
         transition_category=TransitionCategory.REQUEST_BOUNDARY_SWAP,
         isolation=IsolationContract(

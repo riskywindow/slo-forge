@@ -160,8 +160,10 @@ class ArtifactRef(CapsuleModel):
     def validate_relative_path(cls, value: str) -> str:
         normalized = value.replace("\\", "/")
         parts = normalized.split("/")
-        if value != normalized or normalized.startswith("/") or any(
-            part in {"", ".", ".."} for part in parts
+        if (
+            value != normalized
+            or normalized.startswith("/")
+            or any(part in {"", ".", ".."} for part in parts)
         ):
             raise ValueError("artifact path must be a normalized, safe relative path")
         if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", normalized) is None:
@@ -409,7 +411,30 @@ class CurrentDependency(CapsuleModel):
     package_digest: Digest | None = None
 
 
+class TrustedArtifactAnchor(CapsuleModel):
+    artifact_id: NonEmptyString
+    digest: Digest
+
+
+class TrustedEvidenceAnchor(CapsuleModel):
+    evidence_id: NonEmptyString
+    evidence_record_digest: Digest
+    issuer: EvidenceIssuer
+    issuer_version: NonEmptyString
+    artifacts: tuple[TrustedArtifactAnchor, ...]
+
+    @model_validator(mode="after")
+    def validate_anchor(self) -> Self:
+        artifact_ids = [item.artifact_id for item in self.artifacts]
+        if not artifact_ids:
+            raise ValueError("trusted evidence must anchor at least one artifact")
+        if len(artifact_ids) != len(set(artifact_ids)):
+            raise ValueError("trusted artifact anchors must be unique")
+        return self
+
+
 class ValidationContext(CapsuleModel):
+    expected_capsule_digest: Digest
     source_model_hash: Digest
     tokenizer_hash: Digest
     workload_contract_hash: Digest
@@ -419,9 +444,17 @@ class ValidationContext(CapsuleModel):
     device_count: PositiveInt
     dependency_lock_hash: Digest
     dependencies: tuple[CurrentDependency, ...]
+    trusted_evidence_anchors: tuple[TrustedEvidenceAnchor, ...]
     trusted_verifier_version: NonEmptyString
     now: AwareDatetime
     require_promotion_evidence: bool = True
+
+    @model_validator(mode="after")
+    def validate_trust_anchors(self) -> Self:
+        evidence_ids = [item.evidence_id for item in self.trusted_evidence_anchors]
+        if len(evidence_ids) != len(set(evidence_ids)):
+            raise ValueError("trusted evidence anchors must have unique evidence identifiers")
+        return self
 
 
 class ValidationIssueCode(StrEnum):
@@ -435,6 +468,7 @@ class ValidationIssueCode(StrEnum):
     EVIDENCE_STALE = "evidence_stale"
     EVIDENCE_FAILED = "evidence_failed"
     EVIDENCE_LEVEL_MISMATCH = "evidence_level_mismatch"
+    EVIDENCE_UNTRUSTED = "evidence_untrusted"
     CLAIM_SCOPE_MISMATCH = "claim_scope_mismatch"
     CONTRACT_MISMATCH = "contract_mismatch"
     HARDWARE_MISMATCH = "hardware_mismatch"
@@ -455,6 +489,8 @@ class ValidationIssue(CapsuleModel):
 
 class CapsuleValidationReport(CapsuleModel):
     capsule_digest: Digest | None
+    candidate_genome_hash: Digest | None
+    promotion_verification_level: VerificationLevel | None
     integrity_valid: bool
     contract_compatible: bool
     evidence_complete: bool
