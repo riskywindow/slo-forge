@@ -26,7 +26,10 @@ def test_compiler_recovers_complete_deterministic_genome() -> None:
 
     assert canonical_hash(first) == canonical_hash(second)
     assert first.source_model.value == inspection.package_hash
-    assert len(first.tensor.operators) == len(inspection.graph.operators)
+    assert not first.tensor.operators
+    recovered = first.tensor.node.extensions.root["sloforge.dev/recovered-graph"]
+    assert recovered["algebraic_graph_status"] == "unresolved_static_call_inventory"
+    assert len(recovered["unresolved_operators"]) == len(inspection.graph.operators)
     assert {state.precision for state in first.state.states} == {
         Precision.FLOAT64,
         Precision.INT64,
