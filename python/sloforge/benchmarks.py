@@ -51,7 +51,11 @@ def finalize_cpu_report(*, source: Path, output: Path) -> Path:
         {
             "schema_version": "sloforge.cpu-benchmark/v1",
             "generated_at": utc_now(),
-            "source_report": str(source),
+            "source_report": (
+                str(source.relative_to(Path.cwd().resolve()))
+                if source.is_relative_to(Path.cwd().resolve())
+                else str(source)
+            ),
             "verified_artifact_count": int(manifest["verified_artifact_count"]),
             "output_hashes": hashes,
             "metrics": manifest.get("metrics", {}),

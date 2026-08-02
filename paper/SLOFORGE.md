@@ -61,7 +61,7 @@ The subprocess boundary adds serialization only to experiment/control operations
 
 The `sloforge.io/v1` plan contains `ModelSpec`, `EngineSpec`, `HardwareSpec`, `WorkloadSpec`, `SLOSpec`, `BudgetSpec` and deployment policies. Strict types reject unknown fields. Cross-field validators enforce dtype permission, batching/engine agreement, tensor-parallel agreement and topology/capacity consistency. Namespaced extensions are the only extensibility mechanism.
 
-Every metric estimate stores a point, lower/upper bound, confidence, unit, sample count and measurement IDs. Provenance binds profile, optimizer run, workload digest, hardware fingerprint, evidence URI, compiler version and Git state. The `EvidenceBundle` includes environment, assumptions, measurement references, calibration metrics, optimizer decisions, rejected candidates, benchmark results and artifact hashes.
+Every metric estimate stores a point, lower/upper bound, empirical coverage value, unit, sample count and stage-specific measurement IDs. TTFT binds prefill/load probes, ITL binds decode/load probes, startup binds startup probes, load-derived metrics bind load probes, and hardware has its own reference. Requested nominal coverage stays in the curve model rather than being relabeled as achieved confidence. Provenance binds profile, optimizer run, workload digest, hardware fingerprint, evidence URI, compiler version and Git state. The `EvidenceBundle` includes environment, assumptions, measurement references, calibration metrics, optimizer decisions, rejected candidates, benchmark results and artifact hashes.
 
 Canonical JSON sorts object keys, uses compact separators, preserves UTF-8 and rejects non-finite values. SHA-256 of those bytes is the cross-language content identifier. Known alpha documents migrate through explicit lossless renames; unknown versions fail.
 
@@ -99,17 +99,17 @@ Profiling advances through five fidelities. Static feasibility estimates weight 
 
 Every sample records candidate, stage, shape, latency, warmup/failure flags and seed. A mutable budget meter reserves projected seconds and dollar cost before each probe. Exceeding either bound aborts rather than silently truncating a candidate.
 
-For each dimension, non-warm successful samples form median/p95 points. The fitted median is monotonic, linearly interpolated within the grid and extrapolated with nonnegative terminal slope. In the reviewed implementation, residual quantiles from those same probe samples produce a nominal radius, and all representative-load observations report mean absolute percentage error and empirical interval coverage. There is no disjoint calibration/test split, so the serialized `conformal` and `held_out` names overstate the procedure. SLOForge makes no extrapolation claim to unmeasured hardware.
+For each dimension, non-warm successful samples are grouped by coordinate. A seeded split holds out calibration observations at every coordinate, fits a monotonic median to the remaining observations, interpolates within the grid and extrapolates with nonnegative terminal slope. The radius is the finite-sample conformal rank over absolute calibration residuals at nominal 95% coverage. Representative-load observations are a separate held-out test for prefill/decode MAPE and empirical coverage. The small coordinate-stratified split does not imply independent requests or cross-hardware generalization, so nominal and achieved coverage remain separate.
 
 Real adapters exist for Transformers, vLLM and SGLang on explicitly requested CUDA hardware. They parse incremental OpenAI SSE, bound server readiness and requests, collect Torch/Perfetto traces and can generate Nsight commands. These adapters were not exercised in the present CPU study.
 
 ## 6. Configuration optimization
 
-The optimizer enumerates valid topology/concurrency/batch/chunking/routing combinations. Each configuration receives a stable content-derived ID. Low-fidelity prediction computes all metrics and uncertainty. Acquisition ranks direction-aware objective improvement plus uncertainty, with penalties for constraint misses. A budgeted prefix is promoted to a profile-derived measured estimator.
+The optimizer enumerates valid topology/concurrency/batch/chunking/routing combinations. Each configuration receives a stable content-derived ID. Low-fidelity prediction computes all metrics and uncertainty. Acquisition ranks direction-aware objective improvement plus uncertainty, with penalties for constraint misses. The proposal budget records a budgeted acquisition prefix. Direct measured fidelity is reserved for exact profiler load-test shapes; scaled topology, batching and routing configurations remain predictions.
 
 Pareto dominance minimizes TTFT, ITL, E2E, cost and cold-start p95 while maximizing goodput, throughput and availability. A point is retained when no other feasible point is no worse in every metric and strictly better in at least one.
 
-Four outcomes are reported: exhaustive, seeded random, successive halving and uncertainty-aware acquisition. All failed constraints and null incumbents remain visible. The current measured-fidelity transformation reuses candidate load summaries and analytically applies configuration scale factors. Fresh full-configuration GPU launches are required for a strong H1 claim.
+Four outcomes are reported: exhaustive, seeded random, successive halving and uncertainty-aware acquisition. All failed constraints and null incumbents remain visible. These baselines expose entries from one shared predicted table and are therefore search-plumbing comparisons, not measurement-efficiency evidence. Fresh independently budgeted full-configuration trials are required for a strong H1 claim.
 
 ## 7. Discrete-event digital twin
 
@@ -131,13 +131,13 @@ Prometheus metrics expose request/attempt/route/stream counters, health/outstand
 
 The predictive baseline constructs an exponentially weighted arrival forecast plus positive trend and an upper uncertainty envelope. It evaluates replicas, concurrency and routing against a TTFT queue model and chooses the least-cost action inside a safety margin. Minimum samples, cooldown and hourly change budget can force a hold. Routing/variant changes enter canary and restore the prior action if observed TTFT exceeds the promotion limit.
 
-The reactive baseline changes one replica across utilization hysteresis thresholds. Both produce complete decision records with state, forecast, alternatives, safety checks, action, outcome and rollback.
+The reactive baseline changes one replica across utilization hysteresis thresholds. Both produce complete decision records with state, forecast, alternatives, safety checks, action, outcome and rollback. For the CPU experiment, their selected replica/concurrency actions are converted to timed actions in otherwise identical calibrated Rust-simulator scenarios; request deadline misses and integrated cost are taken from those replays rather than the controller's internal TTFT estimate.
 
-Fault diagnosis consumes phase timings, queues, arrivals/capacity, warm fraction, backend health/errors and memory rejections. Guarded rules distinguish overload, gateway queueing, insufficient warm capacity, cold start, prefill, decode, unhealthy backend and infeasible configuration. The explanation contains measured evidence and approximate counterfactual improvement; no LLM is involved.
+Fault diagnosis consumes phase timings, queues, arrivals/capacity, warm fraction, backend health/errors and memory rejections. Guarded rules distinguish overload, gateway queueing, insufficient warm capacity, cold start, prefill, decode, unhealthy backend and infeasible configuration. The evaluation pairs injected cases with no-fault negative windows, emits a confusion matrix and directly times classifier execution; this is not end-to-end detection latency. The explanation contains observed counters and approximate counterfactual improvement; no LLM is involved.
 
 ## 10. Deployment and reporting
 
-Offline emitters produce local launcher, Docker/Compose, Kubernetes Helm, Modal and Truss artifacts. Target validators parse configs, inspect required probes/decorators, compile generated Python and optionally invoke local tools. They never deploy. Modal/Truss generation pins SDK/runtime dependencies but currently uses a Transformers model wrapper for every engine; therefore it is packaging generation, not a semantics-preserving lowering for non-Transformers plans.
+Offline emitters produce local launcher, Docker/Compose, Kubernetes Helm, Modal and Truss artifacts. Target validators parse configs, inspect required probes/decorators, compile generated Python and optionally invoke local tools. They never deploy. Modal/Truss generation pins SDK/runtime dependencies and emits engine-specific Transformers, vLLM, SGLang, TensorRT-LLM or explicit-mock loading and generation code. These are still partial provider lowerings: non-mock cloud execution, distributed topology and the full controller contract remain unexercised.
 
 The report generator accepts an evidence bundle and SHA-256 artifact index. It resolves repository-local paths, recomputes all hashes, validates the canonical plan digest, loads typed inputs and only then renders Markdown, HTML, SVG plots, Prometheus text, OTEL-shaped archival JSON and Chrome trace JSON. A static TypeScript UI parses the generated report artifact with runtime validation and visualizes plan/frontier/controller/fault data without a service or database.
 
@@ -177,10 +177,10 @@ The closed-set diagnosis evaluator applied all 8 fault types and matched all exp
 
 | Hypothesis | Current result |
 |---|---|
-| H1: multi-fidelity reduces GPU measurement | not evaluated; CPU search showed no primary-strategy advantage |
-| H2: compiled plan beats defaults | not established; no real engine/default comparison |
-| H3: predictive handles bursts better | one fewer violation at slightly higher modeled cost in one CPU/mock seed |
-| H4: injected bottlenecks are identified | 8/8 closed-set labels; external validity unmeasured |
+| H1: multi-fidelity reduces GPU measurement | not established; CPU strategies consume one shared prediction table rather than independent paid trials |
+| H2: compiled plan beats defaults | not established; default/manual/compiled rows are calibrated predictions, not measured real-engine comparisons |
+| H3: predictive handles bursts better | one-seed matched Rust-twin comparison; live-provider and multi-seed validity unmeasured |
+| H4: injected bottlenecks are identified | closed-set label agreement plus no-fault controls; external validity unmeasured |
 
 ## 12. Related work
 
@@ -192,13 +192,13 @@ The full comparison and primary links are in [`docs/RELATED_WORK.md`](../docs/RE
 
 ## 13. Limitations
 
-The present evidence is CPU/mock and single-seed. Real GPU engines and cloud targets are implemented paths but unexercised. Prediction intervals under-cover. Promoted trials transform profile summaries rather than launching every configuration. The simulator omits KV transfer, cache eviction, collective contention and cycle-level GPU overlap. The controller is evaluated analytically rather than applying live provider capacity. Diagnosis is closed set. The gateway needs trusted ingress for TLS/auth/quotas. Modal and Truss generators are not yet engine-faithful beyond a Transformers wrapper.
+The present evidence is CPU/mock and single-seed. Real GPU engines and cloud targets are implemented paths but unexercised. Nominal and empirical coverage differ, especially for decode. Only three exact load-test shapes are measured; the rest of the configuration space is predicted. The simulator omits KV transfer, cache eviction, collective contention and cycle-level GPU overlap. Controller actions are compared in the Rust twin rather than applied to live provider capacity. Diagnosis is closed set despite negative controls. The gateway needs trusted ingress for TLS/auth/quotas. Modal and Truss have engine-specific code generation but have not executed their non-mock paths here.
 
 These limitations are not incidental footnotes: they bound every reported number and motivate the validation-first architecture.
 
 ## 14. Future work
 
-The next evaluation should run multiple seeds on a small licensed open-weight model across Transformers, vLLM and SGLang, with fresh full-configuration trials and held-out burst traces. Modeling work should target calibrated quantile coverage and explicitly learn heteroscedastic residuals. Simulator work should add prefill/decode pools, KV-transfer bandwidth, cache state and collective contention. Control work should apply actions to live local replicas and force canary failure/rollback. Exporters should generate engine-native Modal and Truss launchers and validate provider SDK imports in pinned isolated environments.
+The next evaluation should run multiple seeds on a small licensed open-weight model across Transformers, vLLM and SGLang, with fresh full-configuration trials and held-out burst traces. Modeling work should increase independent calibration data, add E2E/startup coverage and explicitly model heteroscedastic residuals. Simulator work should add prefill/decode pools, KV-transfer bandwidth, cache state and collective contention. Control work should apply actions to live local replicas and force canary failure/rollback. Exporter work should execute each generated engine path in pinned no-cloud environments before any provider deployment.
 
 A focused Triton fused-logits experiment is present behind an explicit opt-in flag, with reference correctness tests, warmup and robust timing. It must remain disabled until a compatible GPU run demonstrates benefit in its intended regime; absence of a GPU result is not a speedup.
 

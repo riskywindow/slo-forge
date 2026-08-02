@@ -38,13 +38,13 @@ The classifier consumes a `CounterSnapshot`:
 
 It distinguishes arrival overload, gateway queueing, insufficient warm capacity, cold-start dominance, prefill dominance, decode dominance, unhealthy backend and configuration infeasibility. Concrete signals use guarded precedence: memory rejection, health failure, dominant startup, dominant gateway/network queue, insufficient warm capacity and prefill/decode split. The remaining cases use normalized scores.
 
-The output contains expected and predicted labels, confidence, evidence string, counterfactual improvement, correctness and modeled diagnosis latency. The latency is a deterministic function of configured fault duration, not measured classifier wall time. Confidence is a rule score, not a calibrated probability. This is deterministic rules-and-counters analysis; no LLM generates the explanation.
+The output contains expected and predicted labels, confidence, evidence string, counterfactual improvement, correctness and measured classifier execution time. Execution time is measured around the in-process rule classifier with a monotonic high-resolution clock; it is not end-to-end detection latency from fault onset. Confidence is a rule score, not a calibrated probability. This is deterministic rules-and-counters analysis; no LLM generates the explanation.
 
 ## Current evaluation
 
 <!-- Metrics source: ../artifacts/demo/chaos/result.json -->
 
-All 8 required events were applied in the seed-41 CPU scenario and all 8 labels matched, for 100% label agreement, 0 reported false-positive rate and 17.54 ms mean modeled diagnosis latency. The scenario had no non-applied events, so the zero false-positive value has no denominator and is not evidence of specificity. Rule scores ranged from 0.50 to 0.99. This is a closed-set self-consistency test: the injector and classifier share known counter mappings. It does not establish accuracy, latency or calibrated confidence on unlabeled production incidents.
+All 8 required events are paired with 8 no-fault negative-control windows. The generated result reports closed-set label agreement, a confusion matrix, false-positive count/rate with a real negative denominator, and mean classifier execution time. This remains a self-consistency test because the injector and classifier share known counter mappings; negative windows verify the normal-state abstention path but do not establish specificity on production telemetry, overlapping faults or unseen perturbations.
 
 The live gateway run separately applied slowdown, crash, recovery and cold-start commands while 120 requests completed. The simulator replay produced 4 failed requests and 49 deadline misses under its timed actions. Keeping the live, simulator and classifier artifacts separate prevents a synthetic classifier score from being mistaken for transport failure evidence.
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
 import os
 import platform
@@ -61,22 +62,16 @@ def environment_manifest(*, include_packages: bool = True) -> dict[str, Any]:
         "platform": platform.platform(),
         "machine": platform.machine(),
         "python": sys.version.split()[0],
-        "executable": sys.executable,
+        "executable": Path(sys.executable).name,
         "cpu_count": os.cpu_count(),
     }
     if include_packages:
-        completed = subprocess.run(
-            [sys.executable, "-m", "pip", "freeze", "--all"],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        manifest["packages"] = (
-            sorted(completed.stdout.splitlines()) if completed.returncode == 0 else []
-        )
-        if completed.returncode != 0:
-            manifest["package_capture_error"] = completed.stderr.strip()
+        packages: list[str] = []
+        for distribution in importlib.metadata.distributions():
+            name = distribution.metadata["Name"]
+            if name:
+                packages.append(f"{name}=={distribution.version}")
+        manifest["packages"] = sorted(packages)
     return manifest
 
 

@@ -461,7 +461,10 @@ def _modal_gpu(context: ExportContext) -> str | None:
 
 def _export_modal(context: ExportContext, output: Path) -> None:
     gpu = _modal_gpu(context)
-    region = context.regions or None
+    # IR region `local` describes the CPU development target and is not a Modal region. Omitting
+    # it lets Modal use the workspace default instead of producing an app that imports offline but
+    # cannot be scheduled.
+    region = [item for item in context.regions if item != "local"] or None
     engine_packages = {
         "transformers": ("torch==2.8.0", "transformers==4.56.2"),
         "vllm": ("vllm==0.10.2",),

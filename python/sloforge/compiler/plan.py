@@ -250,7 +250,10 @@ def compile_deployment(
         )
         for stage in ("startup", "prefill", "decode", "load")
     }
-    selected_metrics = selected.measured or selected.predicted
+    # DeploymentPlan metrics describe the representative workload after topology and queueing.
+    # Stage-E direct measurements remain linked as calibration evidence, but are not substitutes
+    # for workload-level predictions.
+    selected_metrics = selected.predicted
     coverage_by_metric = {
         "p95_ttft_ms": model_fit.interval_coverage,
         "p99_itl_ms": model_fit.decode_interval_coverage,

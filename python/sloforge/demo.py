@@ -252,11 +252,12 @@ def _benchmark(
     seed: int,
     metrics: dict[str, tuple[float, str]],
     when: datetime,
+    repository_root: Path,
 ) -> BenchmarkResult:
     return BenchmarkResult(
         benchmark_id=benchmark_id,
         command=command,
-        raw_result_uri=str(raw_path),
+        raw_result_uri=str(raw_path.resolve().relative_to(repository_root.resolve())),
         raw_result_digest=ArtifactDigest(value=sha256_file(raw_path)),
         seed=seed,
         started_at=when,
@@ -274,6 +275,27 @@ def _benchmark(
             for name, (value, unit) in metrics.items()
         },
     )
+
+
+def _portable_arguments(
+    command: list[str] | tuple[str, ...], repository_root: Path
+) -> tuple[str, ...]:
+    rendered: list[str] = []
+    root = repository_root.resolve()
+    for argument in command:
+        path = Path(argument)
+        rendered_argument = argument
+        if path.is_absolute():
+            try:
+                rendered_argument = str(path.resolve().relative_to(root))
+            except ValueError:
+                rendered_argument = argument
+        rendered.append(rendered_argument)
+    return tuple(rendered)
+
+
+def _display_command(command: list[str] | tuple[str, ...], repository_root: Path) -> str:
+    return " ".join(_portable_arguments(command, repository_root))
 
 
 def _controller_simulator_actions(
@@ -371,7 +393,7 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
             config_path = runtime_dir / f"{candidate.candidate_id}.json"
             write_json(config_path, _mock_config(candidate, port, seed + index))
             command = [str(gateway_binary), "mock-backend", "--config", str(config_path)]
-            transcript.append(" ".join(command))
+            transcript.append(_display_command(command, repository_root))
             process = ManagedProcess(
                 name=candidate.candidate_id, command=command, cwd=repository_root, log_dir=log_dir
             )
@@ -500,25 +522,65 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
             model_metadata=mock_qwen3_metadata(requested_model="Qwen/Qwen3-0.6B"),
             repository_root=repository_root,
         )
+        selected_configuration = optimization.selected.configuration
+        selected_candidate = next(
+            candidate
+            for candidate in candidates
+            if candidate.candidate_id == selected_configuration.backend_candidate_id
+        )
+        selected_endpoints = [endpoints[selected_candidate.candidate_id]]
+        # The running validation must exercise the compiled replica topology, not route across
+        # every candidate that happened to be profiled. Start distinct selected-backend processes
+        # so replica capacity and crash isolation are real rather than duplicated endpoint labels.
+        for replica_index in range(1, selected_configuration.replicas):
+            replica_port = _port()
+            replica_name = f"{selected_candidate.candidate_id}-replica-{replica_index}"
+            replica_config = runtime_dir / f"{replica_name}.json"
+            write_json(
+                replica_config,
+                _mock_config(selected_candidate, replica_port, seed + 100 + replica_index),
+            )
+            replica_command = [
+                str(gateway_binary),
+                "mock-backend",
+                "--config",
+                str(replica_config),
+            ]
+            transcript.append(_display_command(replica_command, repository_root))
+            replica_process = ManagedProcess(
+                name=replica_name,
+                command=replica_command,
+                cwd=repository_root,
+                log_dir=log_dir,
+            )
+            backend_processes.append(replica_process)
+            replica_endpoint = f"http://127.0.0.1:{replica_port}"
+            _wait_ready(f"{replica_endpoint}/health", replica_process)
+            selected_endpoints.append(replica_endpoint)
         gateway_port = _port()
         gateway_trace = runtime_dir / "gateway-trace.json"
         gateway_config = {
             "bind": f"127.0.0.1:{gateway_port}",
             "backends": [
                 {
-                    "name": candidate.candidate_id,
-                    "base_url": endpoints[candidate.candidate_id],
-                    "capacity": candidate.max_concurrency,
-                    "estimated_service_ms": candidate.prefill_base_ms
-                    + candidate.decode_base_ms * 16,
-                    "price_per_hour_usd": candidate.hourly_price_usd,
+                    "name": f"{selected_candidate.candidate_id}-replica-{replica_index}",
+                    "base_url": endpoint,
+                    "capacity": selected_configuration.concurrency,
+                    "estimated_service_ms": selected_candidate.prefill_base_ms
+                    + selected_candidate.decode_base_ms * 16,
+                    "price_per_hour_usd": selected_candidate.hourly_price_usd,
                     "health_path": "/health",
                     "weight": 1,
                 }
-                for candidate in candidates
+                for replica_index, endpoint in enumerate(selected_endpoints)
             ],
-            "routing_policy": "slo_slack_aware",
-            "admission_capacity": 96,
+            "routing_policy": {
+                "round_robin": "round_robin",
+                "least_outstanding": "least_outstanding",
+                "earliest_finish": "estimated_earliest_finish",
+                "slo_slack": "slo_slack_aware",
+            }[selected_configuration.routing_policy],
+            "admission_capacity": compiled.plan.admission.queue_capacity,
             "stream_buffer_bytes": 262144,
             "max_request_bytes": 1048576,
             "queue_timeout_ms": 800,
@@ -529,14 +591,14 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
             "retry_attempts": 1,
             "breaker_failures": 2,
             "breaker_cooldown_ms": 500,
-            "trace_output": str(gateway_trace),
+            "trace_output": str(gateway_trace.resolve().relative_to(repository_root.resolve())),
             "max_trace_events": 100000,
             "provenance": {"plan_id": compiled.plan.metadata.uid, "profile_id": profile.profile_id},
         }
         gateway_config_path = runtime_dir / "gateway.json"
         write_json(gateway_config_path, gateway_config)
         command = [str(gateway_binary), "serve", "--config", str(gateway_config_path)]
-        transcript.append(" ".join(command))
+        transcript.append(_display_command(command, repository_root))
         gateway_process = ManagedProcess(
             name="gateway", command=command, cwd=repository_root, log_dir=log_dir
         )
@@ -546,9 +608,11 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
         gateway_replay = asyncio.run(
             replay_gateway(
                 gateway_url=gateway_url,
-                backend_urls=list(endpoints.values()),
+                backend_urls=selected_endpoints,
                 trace=trace,
-                time_scale=0.18,
+                # Preserve the workload arrival process used by optimization. Compressing time
+                # here would silently turn runtime validation into a different, 5.6x-heavier SLO.
+                time_scale=1.0,
                 output_path=gateway_replay_path,
             )
         )
@@ -595,7 +659,7 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
         seed=seed,
         inject_required_faults=True,
     )
-    transcript.append(" ".join(simulator.command))
+    transcript.append(_display_command(simulator.command, repository_root))
     selected_model = next(
         item
         for item in models.candidates
@@ -655,7 +719,12 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
         control_actions=reactive_actions,
         routing_policy_override=reactive_routing,
     )
-    transcript.extend((" ".join(predictive_twin.command), " ".join(reactive_twin.command)))
+    transcript.extend(
+        (
+            _display_command(predictive_twin.command, repository_root),
+            _display_command(reactive_twin.command, repository_root),
+        )
+    )
     controller = controller.model_copy(
         update={
             "predictive": controller.predictive.model_copy(
@@ -725,10 +794,13 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
                 "slo_attainment": (float(simulator.summary["slo_attainment"]), "ratio"),
             },
             when=when,
+            repository_root=repository_root,
         ),
         _benchmark(
             benchmark_id="cpu-rust-gateway-replay",
-            command=("sloforge", "replay", "--gateway", str(gateway_config_path)),
+            command=_portable_arguments(
+                ("sloforge", "replay", "--gateway", str(gateway_config_path)), repository_root
+            ),
             raw_path=gateway_replay_path,
             seed=seed,
             metrics={
@@ -736,6 +808,7 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
                 "availability": (float(gateway_replay.summary["availability"]), "ratio"),
             },
             when=when,
+            repository_root=repository_root,
         ),
         _benchmark(
             benchmark_id="predictive-controller-comparison",
@@ -753,6 +826,7 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
                 ),
             },
             when=when,
+            repository_root=repository_root,
         ),
         _benchmark(
             benchmark_id="fault-diagnosis",
@@ -761,6 +835,7 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
             seed=seed,
             metrics={"accuracy": (chaos.diagnosis_accuracy, "ratio")},
             when=when,
+            repository_root=repository_root,
         ),
     )
     evidence_artifacts = {
@@ -768,10 +843,37 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
         "optimization": ArtifactDigest(value=sha256_file(optimization_path)),
         "models": ArtifactDigest(value=sha256_file(models_path)),
         "simulator_replay": ArtifactDigest(value=sha256_file(simulator_output)),
+        "simulator_scenario": ArtifactDigest(
+            value=sha256_file(simulator_output.with_suffix(".scenario.json"))
+        ),
+        "simulator_raw": ArtifactDigest(
+            value=sha256_file(simulator_output.with_suffix(".raw.json"))
+        ),
+        "simulator_trace": ArtifactDigest(
+            value=sha256_file(artifact_dir / "simulator" / "trace.json")
+        ),
         "gateway_replay": ArtifactDigest(value=sha256_file(gateway_replay_path)),
         "controller": ArtifactDigest(value=sha256_file(controller_path)),
         "predictive_controller_twin": ArtifactDigest(value=sha256_file(predictive_twin_path)),
+        "predictive_controller_scenario": ArtifactDigest(
+            value=sha256_file(predictive_twin_path.with_suffix(".scenario.json"))
+        ),
+        "predictive_controller_raw": ArtifactDigest(
+            value=sha256_file(predictive_twin_path.with_suffix(".raw.json"))
+        ),
+        "predictive_controller_trace": ArtifactDigest(
+            value=sha256_file(artifact_dir / "controller" / "predictive-twin-trace.json")
+        ),
         "reactive_controller_twin": ArtifactDigest(value=sha256_file(reactive_twin_path)),
+        "reactive_controller_scenario": ArtifactDigest(
+            value=sha256_file(reactive_twin_path.with_suffix(".scenario.json"))
+        ),
+        "reactive_controller_raw": ArtifactDigest(
+            value=sha256_file(reactive_twin_path.with_suffix(".raw.json"))
+        ),
+        "reactive_controller_trace": ArtifactDigest(
+            value=sha256_file(artifact_dir / "controller" / "reactive-twin-trace.json")
+        ),
         "chaos": ArtifactDigest(value=sha256_file(chaos_path)),
         "command_transcript": ArtifactDigest(value=sha256_file(transcript_path)),
         "serving_baselines": ArtifactDigest(value=sha256_file(serving_baselines_path)),
@@ -787,9 +889,42 @@ def run_demo(*, repository_root: Path, artifact_dir: Path, report_dir: Path, res
         "models": (models_path, "application/json"),
         "controller": (controller_path, "application/json"),
         "predictive_controller_twin": (predictive_twin_path, "application/json"),
+        "predictive_controller_scenario": (
+            predictive_twin_path.with_suffix(".scenario.json"),
+            "application/json",
+        ),
+        "predictive_controller_raw": (
+            predictive_twin_path.with_suffix(".raw.json"),
+            "application/json",
+        ),
+        "predictive_controller_trace": (
+            artifact_dir / "controller" / "predictive-twin-trace.json",
+            "application/json",
+        ),
         "reactive_controller_twin": (reactive_twin_path, "application/json"),
+        "reactive_controller_scenario": (
+            reactive_twin_path.with_suffix(".scenario.json"),
+            "application/json",
+        ),
+        "reactive_controller_raw": (
+            reactive_twin_path.with_suffix(".raw.json"),
+            "application/json",
+        ),
+        "reactive_controller_trace": (
+            artifact_dir / "controller" / "reactive-twin-trace.json",
+            "application/json",
+        ),
         "chaos": (chaos_path, "application/json"),
         "replay": (simulator_output, "application/json"),
+        "simulator_scenario": (
+            simulator_output.with_suffix(".scenario.json"),
+            "application/json",
+        ),
+        "simulator_raw": (simulator_output.with_suffix(".raw.json"), "application/json"),
+        "simulator_trace": (
+            artifact_dir / "simulator" / "trace.json",
+            "application/json",
+        ),
         "gateway_replay": (gateway_replay_path, "application/json"),
         "gateway_metrics": (gateway_metrics_path, "text/plain"),
         "gateway_trace": (gateway_trace, "application/json"),

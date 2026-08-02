@@ -52,6 +52,12 @@ def test_compiler_links_plan_and_evidence(
     loaded_evidence = load_evidence_bundle(result.evidence_path)
     assert loaded_evidence.plan_digest.value == canonical_hash(loaded_plan)
     assert loaded_evidence.measurements
+    assert loaded_plan.predicted_metrics["p95_ttft_ms"].point == pytest.approx(
+        optimization.selected.predicted.p95_ttft_ms
+    )
+    assert loaded_plan.predicted_metrics["cost_per_million_tokens"].point == pytest.approx(
+        optimization.selected.predicted.cost_per_million_tokens
+    )
     assert "dominant predicted bottleneck" in explain_plan(loaded_plan)
 
 
@@ -98,6 +104,25 @@ def test_mock_cloud_exporters_preserve_valid_python(target: str, tmp_path: Path)
     )
     assert result.validation
     assert result.deployed is False
+
+
+def test_modal_export_does_not_emit_local_development_region(tmp_path: Path) -> None:
+    output = tmp_path / "modal-local"
+    export_plan(
+        context=ExportContext(
+            plan_id="local-plan",
+            model_id="sloforge/mock-model",
+            model_revision="fixture",
+            engine="mock",
+            dtype="float32",
+            gpu_count=0,
+            regions=["local"],
+        ),
+        target="modal",
+        output=output,
+        repository_root=Path(__file__).resolve().parents[2],
+    )
+    assert "region=None" in (output / "app.py").read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize(

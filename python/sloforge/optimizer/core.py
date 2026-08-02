@@ -374,7 +374,12 @@ def _evaluate(
         if allow_profile_measurement
         else None
     )
-    constraint_metrics = actual or predicted
+    # A Stage-E profile sample observes service time for an isolated request shape; it does not
+    # observe the queue induced by the representative arrival process.  Retain that measurement
+    # for calibration/provenance, but make deployment decisions with the workload-level model.
+    # Otherwise an overloaded one-replica candidate can appear feasible merely because its
+    # individual requests were probed serially.
+    constraint_metrics = predicted
     margins: dict[str, float] = {
         constraint.metric: _margin(
             constraint, constraint_metrics, uncertainty, request.uncertainty_safety
@@ -389,7 +394,18 @@ def _evaluate(
     objective = float(getattr(constraint_metrics, request.objective))
     improvement = -objective if request.direction == "minimize" else objective
     uncertainty_value = float(getattr(uncertainty, request.objective))
-    acquisition = improvement + uncertainty_value * 0.25 - len(reasons) * abs(improvement) * 0.1
+    normalized_violation = sum(
+        max(0.0, -margin) / max(abs(constraint.value), 1.0)
+        for constraint in request.constraints
+        if (margin := margins[constraint.metric]) < 0
+    )
+    # Constrained acquisition is feasibility-first. A small objective value must never outweigh
+    # an arbitrarily large SLO miss (the previous cost-scaled penalty did exactly that).
+    acquisition = (
+        improvement
+        + uncertainty_value * 0.25
+        - normalized_violation * (abs(improvement) + 1.0) * 1_000.0
+    )
     return CandidateEvaluation(
         configuration=configuration,
         predicted=predicted,
@@ -430,8 +446,10 @@ def evaluate_configuration(
 
 
 def _dominates(left: CandidateEvaluation, right: CandidateEvaluation) -> bool:
-    left_metrics = left.measured or left.predicted
-    right_metrics = right.measured or right.predicted
+    # Pareto comparison is over the representative-workload prediction. Direct profile samples
+    # are calibration evidence and cannot represent compiler-added topology or queueing.
+    left_metrics = left.predicted
+    right_metrics = right.predicted
     minimize = (
         "p95_ttft_ms",
         "p99_itl_ms",
@@ -465,8 +483,7 @@ def pareto_frontier(evaluations: Iterable[CandidateEvaluation]) -> list[Candidat
 
 
 def _objective_value(evaluation: CandidateEvaluation, request: OptimizationRequest) -> float:
-    metrics = evaluation.measured or evaluation.predicted
-    return float(getattr(metrics, request.objective))
+    return float(getattr(evaluation.predicted, request.objective))
 
 
 def _best(
@@ -573,10 +590,7 @@ def optimize(
     ]
     promoted = {item.configuration.config_id for item in acquisition_order[: request.trial_budget]}
     selection_pool = [
-        item
-        for item in evaluations
-        if item.feasible
-        and (item.configuration.config_id in promoted or item.fidelity == "measured")
+        item for item in evaluations if item.feasible and item.configuration.config_id in promoted
     ]
     frontier = pareto_frontier(selection_pool)
     selected = _best(frontier, request)

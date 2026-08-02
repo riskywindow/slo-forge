@@ -11,7 +11,7 @@ README.md
 sloforge-export.json
 ```
 
-The app uses `modal.Image.debian_slim(...).uv_pip_install`, `modal.App`, `@app.cls`, `@modal.concurrent`, `@modal.enter` and `@modal.fastapi_endpoint`. Plan fields map to GPU string/count, CPU, memory, minimum/maximum containers, concurrent target/limit, scaledown window, region and optional memory snapshot. Runtime-specific package versions are pinned in the generated image; `requirements.txt` pins `modal==1.5.3` for the generator revision.
+The app uses `modal.Image.debian_slim(...).uv_pip_install`, `modal.App`, `@app.cls`, `@modal.concurrent`, `@modal.enter` and `@modal.fastapi_endpoint`. Plan fields map to GPU string/count, CPU, memory, minimum/maximum containers, concurrent target/limit, scaledown window, region and optional memory snapshot. The generated `Inference` class selects a plan-matching Transformers pipeline, vLLM `LLM`, SGLang `Engine`, TensorRT-LLM `LLM`, or explicit mock path for loading and generation. Runtime-specific package versions are pinned in the generated image; `requirements.txt` pins `modal==1.5.3` for the generator revision.
 
 ## Offline validation
 
@@ -27,8 +27,8 @@ Memory snapshots need care. Without the separate experimental GPU-snapshot optio
 
 ## Limitations
 
-- The generated `Inference` implementation currently loads a Transformers pipeline even when the plan's engine package is vLLM, SGLang or TensorRT-LLM. Generating such a target would silently change runtime semantics, so non-Transformers plans must be rejected until engine-native launch adapters exist.
-- Dtype, quantization, tensor/pipeline parallelism, batching, prefix cache, speculative decode, compilation, routing, canary and rollback semantics are not lowered into the generated application.
+- Engine selection is explicit and never silently replaced, but the non-mock engine paths were not image-built or executed on this CPU-only host.
+- Dtype, quantization, tensor/pipeline parallelism, batching, prefix cache, speculative decode, compilation, routing, canary and rollback semantics are not fully lowered into the generated application.
 - Static compilation proves API-shaped syntax, not SDK runtime compatibility, image build success, model license/download access, GPU availability or regional capacity.
 - Autoscaling maps only min/max/target concurrency and scaledown; plan cooldown, canary and rollback semantics need an external controller.
 - No cloud run was executed on this machine, and no Modal performance claim is made.

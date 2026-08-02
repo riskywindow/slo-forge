@@ -52,9 +52,9 @@ The strongest story is the negative result: a plan that looks feasible from repr
 
 No. The primary strategy is an uncertainty-aware Pareto acquisition ranking over an enumerated space. It is easier to audit and compare than dressing a heuristic as an exotic optimizer. The implementation records exhaustive, random and halving baselines, and the current run does not show primary-strategy superiority.
 
-### Are the promoted trials real measurements?
+### Are the budgeted proposals real measurements?
 
-They are profile-derived measured-fidelity estimates, not fresh launches of all 24 full configurations. The profile itself is real HTTP timing against deterministic mock processes. A GPU paper evaluation must distinguish probe measurements, analytical transformations, simulator trials and fresh engine trials in its trial accounting.
+No. The 24-step acquisition history ranks analytical predictions. Measured fidelity is reserved for the three exact load-test shapes that the profiler actually executed; scaled replica, concurrency, batching, chunking and routing variants remain predicted. The profile itself is real HTTP timing against deterministic mock processes. A GPU paper evaluation must distinguish probe measurements, predictions, simulator trials and fresh engine trials in its trial accounting.
 
 ### Is the simulator validated?
 
@@ -62,7 +62,7 @@ Toy tests establish exact single-server timing, priority order, deadlines/cancel
 
 ### What would you improve first?
 
-Calibrate intervals to target coverage, close controller actions against live replica processes, add fresh configuration trials, implement prefill/decode topology and KV transfer cost, faithfully map vLLM/SGLang in cloud exporters, and run a multi-seed GPU matrix. Those directly attack observed uncertainty rather than adding a dashboard.
+Increase independent calibration data, close controller actions against live replica processes, add fresh configuration trials, implement prefill/decode topology and KV transfer cost, execute every engine-specific cloud export in a no-deploy environment, and run a multi-seed GPU matrix. Those directly attack observed uncertainty rather than adding a dashboard.
 
 ### How is this different from a proxy?
 

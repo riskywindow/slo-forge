@@ -44,9 +44,9 @@ Load probes sample the trace across candidates, vary active concurrency, retain 
 
 ## Calibration
 
-For each candidate, non-warm successful samples are grouped by prompt tokens or active sequences. Median points are made nondecreasing; linear interpolation is used inside the grid and a nonnegative terminal slope outside it. Residuals from those same grouped probe samples set a nominal p95 radius. All representative-load samples are then used to report prefill MAPE and empirical interval coverage; shuffling them does not create a holdout split. Startup median/p95 remain separate.
+For each candidate, non-warm successful samples are grouped by prompt tokens or active sequences. Within every coordinate, a seeded deterministic split holds out roughly one quarter (at least one when possible) for calibration and fits the monotonic median to the rest. Linear interpolation is used inside the grid and a nonnegative terminal slope outside it. Absolute calibration residuals set the nominal 95% radius using rank `ceil((n + 1) * 0.95)`, capped at `n`. Representative-load samples are never used for fitting or radius selection; they report separate prefill and decode MAPE and empirical coverage. Startup median/p95 remain separate.
 
-Accordingly, current `held_out_*` and `conformal_radius_ms` names describe intended semantics, not the statistical procedure actually implemented. A valid uncertainty claim requires disjoint fitting, calibration and test partitions (preferably split by request or run, not individual correlated token samples), finite-sample conformal quantiles and separate coverage checks for TTFT, ITL, E2E and cold start.
+The split is statistically meaningful but small and coordinate-stratified, and load samples within one run may remain correlated. Nominal 95% is therefore a target, not an achieved-coverage claim. TTFT/prefill and ITL/decode coverage are reported separately; E2E and startup still lack their own held-out coverage estimators.
 
 ## Artifact layout
 

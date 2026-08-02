@@ -53,7 +53,7 @@ Candidate weight storage is estimated from parameter count and dtype. A conserva
 
 ### Profiling and calibration
 
-Feasible candidates advance through startup, prefill, decode and representative load probes. Warmups remain in raw data with `warmup=true`. The current model stores separate monotonic prefill and decode curves, startup quantiles, load-sample MAPE and an in-sample residual radius. The implementation does not yet make a train/calibration/test split, so `held_out` and `conformal` field names in the v1 model are compatibility names rather than statistically valid descriptions.
+Feasible candidates advance through startup, prefill, decode and representative load probes. Warmups remain in raw data with `warmup=true`. The model stores separate monotonic prefill and decode curves and startup quantiles. At each service-curve coordinate, a seeded partition leaves a calibration subset out of curve fitting; its absolute residuals use the finite-sample conformal rank for nominal 95% coverage. Representative-load observations are a separate held-out test used to report prefill/decode MAPE and empirical interval coverage. These intervals remain configuration- and workload-scoped rather than cross-hardware guarantees.
 
 ### Candidate expansion
 
@@ -65,19 +65,19 @@ Prediction combines service curves with prompt/output quantiles, arrival rate, r
 
 ### Constrained selection
 
-All candidates get predicted fidelity. Acquisition ranks potential Pareto improvement plus uncertainty and penalizes constraint misses. Up to the configured trial budget are promoted to a profile-derived analytical estimator. The current schema calls these promotions `measured`, but no new configuration is executed; they must not be counted as real trials in an evaluation. A hard constraint is satisfied only when its safety-adjusted value fits the requested bound, although the current radii are not calibrated enough to call that value a confidence bound. No feasible candidate produces an error containing the closest candidate and exact misses.
+All candidates get predicted fidelity. Acquisition ranks potential Pareto improvement plus uncertainty and penalizes constraint misses. The configured trial budget limits the proposal history; it does not manufacture measurements. Only the exact one-replica, concurrency-one, non-chunked, round-robin, 2,048-token shapes executed during profiling can use direct load measurements, so the CPU profile contributes three measured anchors. Replica, batching, concurrency, chunking and routing variants remain `predicted`. A hard constraint is satisfied only when its safety-adjusted value fits the requested bound. No feasible candidate produces an error containing the closest candidate and exact misses.
 
 ### Plan synthesis
 
-The selected configuration becomes replica, routing, admission, batching, autoscaling, cold-start, canary and rollback policies. Predictions are wrapped as `MetricEstimate` objects that cite the selected profile's raw IDs. Rejected candidates and every acquisition step are copied into evidence.
+The selected configuration becomes replica, routing, admission, batching, autoscaling, cold-start, canary and rollback policies. Metric estimates cite only supporting stages: prefill/load for TTFT, decode/load for ITL, startup for cold start, and load for availability, throughput, goodput and derived cost. Hardware has a separate reference, nominal coverage remains in the curve model, and empirical held-out coverage becomes the estimate confidence field. Rejected candidates and every acquisition step are copied into evidence.
 
 ## Backends
 
 - `local` emits gateway JSON and a launcher.
 - `docker` adds a Dockerfile, Compose services, health checks and a model-cache volume.
 - `kubernetes` emits a Helm chart with probes, resources, Prometheus annotations, rolling-update controls and HPA.
-- `modal` emits a pinned Python app using current class/lifecycle/web decorators and offline AST validation.
-- `truss` emits `config.yaml` plus a `Model` implementation and validates against the vendored schema subset.
+- `modal` emits a pinned Python app using current class/lifecycle/web decorators, engine-specific Transformers/vLLM/SGLang/TensorRT-LLM/mock loading and generation paths, and offline import/AST validation.
+- `truss` emits `config.yaml` plus an engine-specific `Model` implementation and requirements, validates against the vendored schema subset, and uses the installed Truss handle when available.
 
 These generators materialize intent; they do not deploy. Cloud execution is outside normal CI and requires explicit credentials and budget authorization.
 

@@ -119,11 +119,25 @@ async def _inject_faults(
     duration_s: float,
     client: httpx.AsyncClient,
 ) -> list[InjectedGatewayFault]:
+    if not backend_urls:
+        raise ValueError("fault injection requires at least one backend URL")
     schedule: list[tuple[float, str, dict[str, object]]] = [
         (duration_s * 0.20, backend_urls[0], {"fault": "slowdown", "multiplier": 3.0}),
-        (duration_s * 0.38, backend_urls[1], {"fault": "crash", "enabled": True}),
-        (duration_s * 0.52, backend_urls[1], {"fault": "crash", "enabled": False}),
-        (duration_s * 0.64, backend_urls[2], {"fault": "cold_start", "next_delay_ms": 350}),
+        (
+            duration_s * 0.38,
+            backend_urls[1 % len(backend_urls)],
+            {"fault": "crash", "enabled": True},
+        ),
+        (
+            duration_s * 0.52,
+            backend_urls[1 % len(backend_urls)],
+            {"fault": "crash", "enabled": False},
+        ),
+        (
+            duration_s * 0.64,
+            backend_urls[2 % len(backend_urls)],
+            {"fault": "cold_start", "next_delay_ms": 350},
+        ),
         (duration_s * 0.80, backend_urls[0], {"fault": "clear"}),
     ]
     injected: list[InjectedGatewayFault] = []

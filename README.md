@@ -36,7 +36,7 @@ make check
 make demo
 ```
 
-The demo starts three real Rust mock-server processes with distinct service curves, profiles them over HTTP/SSE, calibrates the digital twin, searches 540 configurations under a 24-trial budget, emits a plan and Pareto set, starts the real Rust gateway, replays 120 streaming requests, injects slowdown/crash/cold-start faults, evaluates guarded controller actions, and creates all five deployment targets.
+The demo starts three real Rust mock-server processes with distinct service curves, profiles them over HTTP/SSE, calibrates the digital twin, searches 540 configurations under a 24-proposal budget, preserves only the three exactly profiled shapes as measured anchors, emits a plan and Pareto set, starts the real Rust gateway, replays 120 streaming requests, injects slowdown/crash/cold-start faults, evaluates both controller policies in the calibrated Rust twin, and creates all five deployment targets.
 
 The primary outputs are:
 
