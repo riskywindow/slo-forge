@@ -17,7 +17,7 @@ from sloforge.util import sha256_file
 
 from .adapter import ReferenceRuntimeAdapter
 from .core import BaselineStreamingRuntime
-from .models import RuntimeLimits
+from .models import RuntimeLimits, StateAllocatorConfig, StateAllocatorLayout
 
 GENERATED_RUNTIME_SCHEMA_VERSION = "1.0.0"
 
@@ -286,6 +286,30 @@ def generate_baseline_runtime(
     runtime_id = hashlib.sha256(
         f"{package.package_hash}\0{inspection.manifest_hash}\0{seed}".encode()
     ).hexdigest()
+    dtype_bytes = {
+        "bool": 1,
+        "float64": 8,
+        "float32": 4,
+        "bfloat16": 2,
+        "float16": 2,
+        "int64": 8,
+        "int32": 4,
+        "int16": 2,
+        "int8": 1,
+        "uint8": 1,
+    }
+    state_bytes_per_request = 0
+    for field in package.manifest.state_contract.fields:
+        elements = 1
+        for dimension in field.shape:
+            elements *= dimension.maximum
+        try:
+            state_bytes_per_request += elements * dtype_bytes[field.dtype]
+        except KeyError as error:
+            raise ValueError(
+                f"unsupported state dtype for bounded allocation: {field.dtype}"
+            ) from error
+    state_bytes_per_request = max(1, state_bytes_per_request)
     config = {
         "schema_version": GENERATED_RUNTIME_SCHEMA_VERSION,
         "runtime_id": runtime_id,
@@ -303,6 +327,12 @@ def generate_baseline_runtime(
         "generation_seed": seed,
         "policy_bytecode_path": None,
         "policy_bytecode_sha256": None,
+        "state_allocator": {
+            "layout": "contiguous",
+            "page_bytes": 64,
+            "maximum_bytes_per_request": state_bytes_per_request,
+            "maximum_total_bytes": 32 * state_bytes_per_request,
+        },
         "limits": {
             "maximum_queue_depth": 32,
             "maximum_batch_size": 4,
@@ -380,7 +410,7 @@ def _load_config(path: Path) -> dict[str, Any]:
         "generation_seed",
         "limits",
     }
-    optional = {"policy_bytecode_path", "policy_bytecode_sha256"}
+    optional = {"policy_bytecode_path", "policy_bytecode_sha256", "state_allocator"}
     if not required.issubset(config) or not set(config).issubset(required | optional):
         raise ValueError("generated runtime config contains missing or unknown fields")
     if config["schema_version"] != GENERATED_RUNTIME_SCHEMA_VERSION:
@@ -402,6 +432,29 @@ def _load_policy_bytecode(config_path: Path, config: dict[str, Any]) -> Bytecode
     if hashlib.sha256(payload).hexdigest() != digest:
         raise ValueError("runtime policy bytecode digest mismatch")
     return load_bytecode_document(payload)
+
+
+def _load_state_allocator(config: dict[str, Any]) -> StateAllocatorConfig:
+    value = config.get("state_allocator")
+    if value is None:
+        return StateAllocatorConfig()
+    if not isinstance(value, dict) or set(value) != {
+        "layout",
+        "page_bytes",
+        "maximum_bytes_per_request",
+        "maximum_total_bytes",
+    }:
+        raise ValueError("generated runtime state allocator is missing bounded typed fields")
+    try:
+        layout = StateAllocatorLayout(value["layout"])
+    except (TypeError, ValueError) as error:
+        raise ValueError("generated runtime state allocator layout is unsupported") from error
+    return StateAllocatorConfig(
+        layout=layout,
+        page_bytes=value["page_bytes"],
+        maximum_bytes_per_request=value["maximum_bytes_per_request"],
+        maximum_total_bytes=value["maximum_total_bytes"],
+    )
 
 
 def load_generated_runtime(
@@ -444,6 +497,7 @@ def load_generated_runtime(
         limits=limits,
         runtime_seed=seed,
         policy=_load_policy_bytecode(config_path, config),
+        state_allocator=_load_state_allocator(config),
     )
 
 

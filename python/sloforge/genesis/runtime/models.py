@@ -28,6 +28,36 @@ class EventKind(StrEnum):
     ERROR = "error"
 
 
+class StateAllocatorLayout(StrEnum):
+    CONTIGUOUS = "contiguous"
+    PAGED = "paged"
+
+
+@dataclass(frozen=True)
+class StateAllocatorConfig:
+    """Bounded accounting policy for generated runtime request state."""
+
+    layout: StateAllocatorLayout = StateAllocatorLayout.CONTIGUOUS
+    page_bytes: int = 64
+    maximum_bytes_per_request: int = 1
+    maximum_total_bytes: int = 32
+
+    def __post_init__(self) -> None:
+        values = (
+            self.page_bytes,
+            self.maximum_bytes_per_request,
+            self.maximum_total_bytes,
+        )
+        if any(
+            not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in values
+        ):
+            raise ValueError("state allocator bounds must be positive integers")
+        if self.page_bytes & (self.page_bytes - 1):
+            raise ValueError("state allocator page size must be a power of two")
+        if self.maximum_bytes_per_request > self.maximum_total_bytes:
+            raise ValueError("per-request state bound exceeds total state capacity")
+
+
 @dataclass(frozen=True)
 class RuntimeRequest:
     request_id: str
@@ -204,6 +234,8 @@ class RuntimeMetrics:
     deadline_reorders: int = 0
     state_allocations: int = 0
     state_releases: int = 0
+    state_reserved_bytes_peak: int = 0
+    state_pages_peak: int = 0
 
     def snapshot(self) -> dict[str, int]:
         return {
@@ -219,4 +251,6 @@ class RuntimeMetrics:
             "deadline_reorders": self.deadline_reorders,
             "state_allocations": self.state_allocations,
             "state_releases": self.state_releases,
+            "state_reserved_bytes_peak": self.state_reserved_bytes_peak,
+            "state_pages_peak": self.state_pages_peak,
         }

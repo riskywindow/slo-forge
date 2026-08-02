@@ -327,11 +327,39 @@ def _materialize_candidate_runtime(
     _atomic_write(runtime_directory / "policy.bytecode.json", policy)
     _atomic_write(runtime_directory / "policy.slo", policy_source)
     config = json.loads((baseline_runtime / "runtime_config.json").read_text(encoding="utf-8"))
+    layouts = {state.layout.value for state in genome.state.states}
+    if len(layouts) != 1:
+        raise ValueError("generated runtime requires one state allocator layout")
+    layout = next(iter(layouts))
+    maximum_bytes_per_request = max(
+        1, sum(state.maximum_bytes_per_request for state in genome.state.states)
+    )
+    page_bytes = 64
+    layout_record = genome.state.node.extensions.root.get("sloforge.dev/synthesized-state-layout")
+    if layout == "paged":
+        if not isinstance(layout_record, dict) or type(layout_record.get("page_bytes")) is not int:
+            raise ValueError("paged StateGenome is missing its typed allocator page size")
+        page_bytes = int(layout_record["page_bytes"])
+        reserved_per_request = (
+            (maximum_bytes_per_request + page_bytes - 1) // page_bytes
+        ) * page_bytes
+    elif layout == "contiguous":
+        reserved_per_request = maximum_bytes_per_request
+    else:
+        raise ValueError(f"generated runtime does not support state layout {layout!r}")
+    queue_depth = int(config["limits"]["maximum_queue_depth"])
+    state_allocator = {
+        "layout": layout,
+        "page_bytes": page_bytes,
+        "maximum_bytes_per_request": maximum_bytes_per_request,
+        "maximum_total_bytes": reserved_per_request * queue_depth,
+    }
     config.update(
         {
             "genome_hash": canonical_hash(genome),
             "policy_bytecode_path": "policy.bytecode.json",
             "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+            "state_allocator": state_allocator,
         }
     )
     _atomic_write(
@@ -348,6 +376,7 @@ def _materialize_candidate_runtime(
         "candidate_id": design.candidate_id,
         "candidate_genome_hash": canonical_hash(genome),
         "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+        "state_allocator": state_allocator,
         "artifacts": hashes,
     }
     _atomic_write(
@@ -421,6 +450,7 @@ def _run_differential_harness(
         "policy_bytecode_sha256": hashlib.sha256(
             (candidate_directory / "policy.bytecode.json").read_bytes()
         ).hexdigest(),
+        "state_allocator": config["state_allocator"],
         "runtime_artifact_hashes": runtime_hashes,
         "seed": seed,
         "corpus_path": str(samples.resolve()),

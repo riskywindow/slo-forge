@@ -226,12 +226,36 @@ def _resource_evidence(
     generated_tokens = int(limits["maximum_generated_tokens"])
     output_events = int(limits["maximum_output_events_per_request"])
     dtype_bytes = {"int8": 1, "int32": 4, "int64": 8, "float32": 4, "float64": 8}
-    state_bytes = 0
+    reference_state_bytes = 0
     for field in package_manifest["state_contract"]["fields"]:
         elements = 1
         for dimension in field["shape"]:
             elements *= int(dimension["maximum"])
-        state_bytes += elements * dtype_bytes[str(field["dtype"])]
+        reference_state_bytes += elements * dtype_bytes[str(field["dtype"])]
+    state_genome = genome["state"]
+    genome_states = state_genome["states"]
+    genome_state_bytes = sum(int(state["maximum_bytes_per_request"]) for state in genome_states)
+    genome_layouts = {str(state["layout"]) for state in genome_states}
+    allocator = runtime_config["state_allocator"]
+    allocator_layout = str(allocator["layout"])
+    allocator_page_bytes = int(allocator["page_bytes"])
+    allocator_request_bytes = int(allocator["maximum_bytes_per_request"])
+    allocator_total_bytes = int(allocator["maximum_total_bytes"])
+    if allocator_layout == "paged":
+        allocator_reserved_per_request = (
+            (allocator_request_bytes + allocator_page_bytes - 1) // allocator_page_bytes
+        ) * allocator_page_bytes
+    else:
+        allocator_reserved_per_request = allocator_request_bytes
+    allocator_layout_match = genome_layouts == {allocator_layout}
+    allocator_genome_bound_match = (
+        allocator_request_bytes == genome_state_bytes == reference_state_bytes
+    )
+    allocator_capacity_valid = (
+        allocator_page_bytes > 0
+        and allocator_page_bytes & (allocator_page_bytes - 1) == 0
+        and allocator_total_bytes >= queue_depth * allocator_reserved_per_request
+    )
     declared_host_bytes = 0
     declared_queue_entries = 0
 
@@ -249,7 +273,12 @@ def _resource_evidence(
                 visit(child)
 
     visit(genome)
-    request_bytes = (prompt_tokens + generated_tokens) * 8 + output_events * 128 + state_bytes + 512
+    request_bytes = (
+        (prompt_tokens + generated_tokens) * 8
+        + output_events * 128
+        + allocator_reserved_per_request
+        + 512
+    )
     queue_bytes = queue_depth * request_bytes
     interpreter_and_model_reserve = 128 * 1024**2
     single_runtime_peak = max(
@@ -259,7 +288,7 @@ def _resource_evidence(
     coexistence = single_runtime_peak * 2
     usable = int(capacity_bytes * 0.8)
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "method": "runtime-config-genome-state-contract-upper-bound",
         "capacity_bytes": capacity_bytes,
         "usable_capacity_bytes": usable,
@@ -269,7 +298,17 @@ def _resource_evidence(
         "maximum_prompt_tokens": prompt_tokens,
         "maximum_generated_tokens": generated_tokens,
         "maximum_output_events_per_request": output_events,
-        "persistent_state_bytes_per_request": state_bytes,
+        "reference_state_bytes_per_request": reference_state_bytes,
+        "genome_state_bytes_per_request": genome_state_bytes,
+        "genome_state_layouts": sorted(genome_layouts),
+        "persistent_state_bytes_per_request": allocator_reserved_per_request,
+        "state_allocator_layout": allocator_layout,
+        "state_allocator_page_bytes": allocator_page_bytes,
+        "state_allocator_reserved_bytes_per_request": allocator_reserved_per_request,
+        "state_allocator_total_bytes": allocator_total_bytes,
+        "state_allocator_layout_matches_genome": allocator_layout_match,
+        "state_allocator_bound_matches_genome": allocator_genome_bound_match,
+        "state_allocator_capacity_valid": allocator_capacity_valid,
         "bounded_request_bytes": request_bytes,
         "bounded_queue_bytes": queue_bytes,
         "runtime_bundle_bytes": bundle_size_bytes,
@@ -278,7 +317,12 @@ def _resource_evidence(
         "single_runtime_peak_bytes": single_runtime_peak,
         "champion_challenger_coexistence_bytes": coexistence,
         "maximum_processes": 2,
-        "passed": usable >= coexistence,
+        "passed": (
+            usable >= coexistence
+            and allocator_layout_match
+            and allocator_genome_bound_match
+            and allocator_capacity_valid
+        ),
         "unresolved_risk": "Python allocator behavior is covered only by the declared 20 percent margin",
     }
 
@@ -710,6 +754,8 @@ def build_local_capsule(
         != package_root.resolve()
     ):
         raise ValueError("candidate runtime is bound to another reference package")
+    if differential.get("state_allocator") != runtime_config.get("state_allocator"):
+        raise ValueError("differential evidence state allocator identity mismatch")
     replay = _independent_runtime_differential(
         candidate_runtime,
         package_root,
