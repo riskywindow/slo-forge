@@ -155,7 +155,11 @@ def test_package_identity_binds_declared_auxiliary_module_and_runtime(tmp_path: 
     original_hash = inspection.package_hash
     assert dict(inspection.source_hashes)["helper.py"]
     bundle = generate_baseline_runtime(package, inspection, tmp_path / "runtime", seed=73129)
-    runtime = load_generated_runtime(bundle.output_directory / "runtime_config.json", seed=73129)
+    runtime = load_generated_runtime(
+        bundle.output_directory / "runtime_config.json",
+        seed=73129,
+        allow_untrusted_in_process=True,
+    )
     runtime.start()
     runtime.shutdown()
 

@@ -139,7 +139,9 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     bundle_manifest = json.loads((extracted / "bundle_manifest.json").read_text())
     for name, digest in bundle_manifest["entries"].items():
         assert hashlib.sha256((extracted / name).read_bytes()).hexdigest() == digest
-    runtime = load_generated_runtime(extracted / "runtime_config.json", seed=73129)
+    runtime = load_generated_runtime(
+        extracted / "runtime_config.json", seed=73129, allow_untrusted_in_process=True
+    )
     runtime.start()
     try:
         assert runtime.health()["policy"] == "deadline_cancel_batch"
@@ -156,7 +158,9 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     policy_path = extracted / "policy.bytecode.json"
     policy_path.write_bytes(policy_path.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="policy bytecode digest"):
-        load_generated_runtime(extracted / "runtime_config.json", seed=73129)
+        load_generated_runtime(
+            extracted / "runtime_config.json", seed=73129, allow_untrusted_in_process=True
+        )
     hostile_runtime_policy = json.loads(policy_path.read_bytes())
     hostile_runtime_policy["instructions"][-1]["opcode"] = "dynamic_import"
     hostile_runtime_payload = json.dumps(
@@ -168,7 +172,7 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     runtime_config["policy_bytecode_sha256"] = hashlib.sha256(hostile_runtime_payload).hexdigest()
     runtime_config_path.write_text(json.dumps(runtime_config), encoding="utf-8")
     with pytest.raises(ValueError, match="forbidden opcode"):
-        load_generated_runtime(runtime_config_path, seed=73129)
+        load_generated_runtime(runtime_config_path, seed=73129, allow_untrusted_in_process=True)
 
     quality = json.loads((output / by_id["quality-evidence"].path).read_text())
     assert quality["observed"] == 1.0
