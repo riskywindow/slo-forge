@@ -6,6 +6,8 @@ members = [
   "crates/sloforge-loadgen",
   "crates/sloforge-telemetry",
   "crates/sloforge-gateway",
+  "crates/sloforge-fabric-protocol",
+  "crates/sloforge-fabric-sim",
 ]
 
 [workspace.package]
