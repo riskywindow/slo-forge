@@ -43,10 +43,12 @@ assert genesis["evolution_promoted"] is True
 assert genesis["active_stream_preserved"] is True
 assert genesis["hardware_backed"] is False
 assert genesis["kernel_speedup_claim_count"] == 0
-capsule_root = pathlib.Path(genesis["capsule_path"])
+capsule_manifest = pathlib.Path(genesis["capsule_path"])
+assert capsule_manifest.is_file()
+capsule_root = capsule_manifest.parents[1]
 manifest_paths = list((capsule_root / "manifests").glob("*.json"))
-assert len(manifest_paths) == 1
-capsule = json.loads(manifest_paths[0].read_text())
+assert manifest_paths == [capsule_manifest]
+capsule = json.loads(capsule_manifest.read_text())
 assert capsule["benchmarks"] == []
 performance_claims = [
     claim for claim in capsule["claims"] if claim["category"] == "performance"
