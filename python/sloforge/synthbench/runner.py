@@ -103,7 +103,7 @@ class _Executor:
         request: WorkloadRequest,
         *,
         deadline_ns: int,
-    ) -> tuple[tuple[int, ...], int, int, tuple[int, ...]]:
+    ) -> tuple[tuple[int, ...], int, int, tuple[int, ...], tuple[str, str] | None]:
         start = time.perf_counter_ns()
         state = self.allocate_state(
             request_id=request.request_id,
@@ -143,19 +143,19 @@ class _Executor:
         end = time.perf_counter_ns()
         ttft = max(1, token_times[0] - start)
         intervals = tuple(max(1, right - left) for left, right in pairwise(token_times))
-        return tuple(tokens), max(1, end - start), ttft, intervals
+        return tuple(tokens), max(1, end - start), ttft, intervals, None
 
 
 class _GenesisExecutor:
     """Execute generated runtime requests only through the strict local sandbox."""
 
     def __init__(self, config_path: Path, sandbox_root: Path, *, seed: int) -> None:
-        self.config_path = config_path
-        self.runtime_root = config_path.parent
-        config = json.loads(config_path.read_text(encoding="utf-8"))
-        self.package_root = Path(str(config["reference_package_root"]))
+        self.config_path = config_path.resolve(strict=True)
+        self.runtime_root = self.config_path.parent
+        config = json.loads(self.config_path.read_text(encoding="utf-8"))
+        self.package_root = Path(str(config["reference_package_root"])).resolve(strict=True)
         self.repository_python = Path(__file__).resolve().parents[2]
-        self.sandbox_root = sandbox_root
+        self.sandbox_root = sandbox_root.resolve()
         self.seed = seed
         self.call_index = 0
 
@@ -164,7 +164,7 @@ class _GenesisExecutor:
         request: WorkloadRequest,
         *,
         deadline_ns: int,
-    ) -> tuple[tuple[int, ...], int, int, tuple[int, ...]]:
+    ) -> tuple[tuple[int, ...], int, int, tuple[int, ...], tuple[str, str] | None]:
         remaining_seconds = (deadline_ns - time.perf_counter_ns()) / 1e9
         if remaining_seconds <= 0:
             raise TimeoutError("ServingSynthBench CPU request exceeded run timeout")
@@ -172,7 +172,17 @@ class _GenesisExecutor:
         self.call_index += 1
         request_path = self.sandbox_root / "requests" / f"request-{call_id:05d}.json"
         request_path.parent.mkdir(parents=True, exist_ok=True)
-        request_path.write_bytes(canonical_json(request) + b"\n")
+        request_path.write_bytes(
+            canonical_json(
+                {
+                    "request_id": request.request_id,
+                    "prompt_tokens": request.prompt_tokens,
+                    "maximum_new_tokens": request.maximum_new_tokens,
+                    "seed": request.seed,
+                }
+            )
+            + b"\n"
+        )
         output = self.sandbox_root / "outputs" / f"request-{call_id:05d}"
         bounded_timeout = min(30.0, remaining_seconds)
         result = execute_sandboxed(
@@ -196,6 +206,8 @@ class _GenesisExecutor:
                     self.package_root,
                     request_path,
                     self.repository_python,
+                    Path(sys.prefix),
+                    Path(sys.base_prefix),
                 ),
                 artifact_output_directory=output,
                 seed=self.seed,
@@ -216,6 +228,30 @@ class _GenesisExecutor:
                 "sandboxed generated runtime failed: "
                 f"{result.termination.value}: {result.stderr.strip()}"
             )
+        runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
+        execution_record = {
+            "schema_version": "sloforge.synthbench.sandbox-execution/v1",
+            "request_id": request.request_id,
+            "request_seed": request.seed,
+            "run_seed": self.seed,
+            "config_sha256": _sha(self.config_path.read_bytes()),
+            "request_path": str(request_path),
+            "request_sha256": _sha(request_path.read_bytes()),
+            "runner_sha256": _sha(runner_path.read_bytes()),
+            "stdout_sha256": _sha(result.stdout.encode()),
+            "stderr_sha256": _sha(result.stderr.encode()),
+            "termination": result.termination.value,
+            "return_code": result.return_code,
+            "sandbox_backend": result.capabilities.backend.value,
+            "capabilities": result.capabilities.model_dump(mode="json"),
+            "sanitized_environment_names": result.sanitized_environment_names,
+            "process_group_cleaned": result.process_group_cleaned,
+            "output_bytes": result.output_bytes,
+        }
+        evidence_path = output / "sandbox-execution.json"
+        evidence_payload = canonical_json(execution_record) + b"\n"
+        evidence_path.write_bytes(evidence_payload)
+        execution_evidence = (str(evidence_path.resolve()), _sha(evidence_payload))
         document = json.loads(result.stdout)
         tokens = tuple(int(token) for token in document["tokens"])
         intervals = tuple(int(value) for value in document["inter_token_ns"])
@@ -224,6 +260,7 @@ class _GenesisExecutor:
             int(document["latency_ns"]),
             int(document["ttft_ns"]),
             intervals,
+            execution_evidence,
         )
 
 
@@ -417,6 +454,55 @@ def _decode_measurement_order(values: tuple[str, ...]) -> tuple[tuple[int, Basel
     return tuple(decoded)
 
 
+def _validate_sandbox_execution_evidence(
+    path_value: str | None,
+    digest: str | None,
+    *,
+    request_id: str,
+    request_seed: int,
+    run_seed: int,
+    config_sha256: str,
+) -> None:
+    if path_value is None or digest is None:
+        raise ValueError("generated execution is missing sandbox evidence")
+    path = Path(path_value)
+    if not path.is_file() or _sha(path.read_bytes()) != digest:
+        raise ValueError("generated sandbox execution evidence is unavailable or changed")
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(document, dict):
+        raise ValueError("sandbox execution evidence must be an object")
+    if (
+        document.get("schema_version") != "sloforge.synthbench.sandbox-execution/v1"
+        or document.get("request_id") != request_id
+        or document.get("request_seed") != request_seed
+        or document.get("run_seed") != run_seed
+        or document.get("config_sha256") != config_sha256
+        or document.get("termination") != "success"
+        or document.get("return_code") != 0
+        or document.get("sandbox_backend") in {None, "none"}
+        or document.get("process_group_cleaned") is not True
+    ):
+        raise ValueError("sandbox execution evidence does not match the raw sample")
+    request_path_value = document.get("request_path")
+    request_digest = document.get("request_sha256")
+    if not isinstance(request_path_value, str) or not isinstance(request_digest, str):
+        raise ValueError("sandbox evidence omits its oracle-free request identity")
+    request_path = Path(request_path_value)
+    if not request_path.is_file() or _sha(request_path.read_bytes()) != request_digest:
+        raise ValueError("sandbox request artifact is unavailable or changed")
+    request_document = json.loads(request_path.read_text(encoding="utf-8"))
+    if not isinstance(request_document, dict) or set(request_document) != {
+        "request_id",
+        "prompt_tokens",
+        "maximum_new_tokens",
+        "seed",
+    }:
+        raise ValueError("sandbox request contains undeclared or evaluator-only fields")
+    runner_path = Path(__file__).with_name("runtime_runner.py").resolve(strict=True)
+    if document.get("runner_sha256") != _sha(runner_path.read_bytes()):
+        raise ValueError("sandbox execution used an unrecognized trusted runner")
+
+
 def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
     measured = [
         baseline
@@ -507,6 +593,10 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             or manifest.get("package_hash") != task.reference_package_hash
         ):
             raise ValueError("generated runtime is bound to another public package")
+        runtime_config_path = manifest_path.parent / "runtime_config.json"
+        if not runtime_config_path.is_file():
+            raise ValueError("generated runtime configuration is unavailable")
+        runtime_config_sha256 = _sha(runtime_config_path.read_bytes())
         all_samples: list[RawCpuSample] = []
         for summary in task.baselines:
             if summary.status is not BaselineStatus.MEASURED:
@@ -521,11 +611,22 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
             )
             if reconstructed != summary:
                 raise ValueError("baseline summary is not derived from its raw samples")
-            all_samples.extend(
+            loaded_samples = tuple(
                 RawCpuSample.model_validate_json(line, strict=True)
                 for line in path.read_bytes().splitlines()
                 if line
             )
+            for sample in loaded_samples:
+                if sample.execution_surface == "genesis_generated_runtime":
+                    _validate_sandbox_execution_evidence(
+                        sample.execution_evidence_path,
+                        sample.execution_evidence_sha256,
+                        request_id=sample.request_id,
+                        request_seed=sample.request_seed,
+                        run_seed=sample.run_seed,
+                        config_sha256=runtime_config_sha256,
+                    )
+            all_samples.extend(loaded_samples)
         for hidden in task.hidden_evaluations:
             if hidden.status is not BaselineStatus.MEASURED:
                 continue
@@ -536,6 +637,21 @@ def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
                 raise ValueError("SynthBench hidden evidence is unavailable or changed")
             if _hidden_summary_from_artifact(hidden.baseline, path) != hidden:
                 raise ValueError("hidden summary is not derived from its evidence")
+            hidden_results = tuple(
+                HiddenCaseResult.model_validate_json(line, strict=True)
+                for line in path.read_bytes().splitlines()
+                if line
+            )
+            for result in hidden_results:
+                if result.execution_surface == "genesis_generated_runtime":
+                    _validate_sandbox_execution_evidence(
+                        result.execution_evidence_path,
+                        result.execution_evidence_sha256,
+                        request_id=result.request_id,
+                        request_seed=result.request_seed,
+                        run_seed=task.run_seed,
+                        config_sha256=runtime_config_sha256,
+                    )
         rebuilt_integrity = audit_raw_samples(
             tuple(all_samples),
             measured_baselines=_MEASURED_BASELINES,
@@ -619,7 +735,9 @@ def _run_task(
         executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for request in selected:
-            observed, latency, ttft, intervals = executor.execute(request, deadline_ns=deadline_ns)
+            observed, latency, ttft, intervals, execution_evidence = executor.execute(
+                request, deadline_ns=deadline_ns
+            )
             baseline_samples = samples_by_baseline[baseline]
             baseline_samples.append(
                 RawCpuSample(
@@ -633,6 +751,7 @@ def _run_task(
                     measurement_order_ordinal=measurement_order_ordinal,
                     execution_ordinal=len(baseline_samples),
                     request_id=request.request_id,
+                    request_seed=request.seed,
                     latency_ns=latency,
                     ttft_ns=ttft,
                     inter_token_ns=intervals,
@@ -645,6 +764,12 @@ def _run_task(
                         else "genesis_generated_runtime"
                         if baseline is BaselineKind.GENESIS_FULL
                         else "reference_order_surrogate"
+                    ),
+                    execution_evidence_path=(
+                        execution_evidence[0] if execution_evidence is not None else None
+                    ),
+                    execution_evidence_sha256=(
+                        execution_evidence[1] if execution_evidence is not None else None
                     ),
                 )
             )
@@ -688,14 +813,31 @@ def _run_task(
             )
         )
         for request in selected_hidden:
-            observed, _, _, _ = hidden_executor.execute(request, deadline_ns=deadline_ns)
+            observed, _, _, _, execution_evidence = hidden_executor.execute(
+                request, deadline_ns=deadline_ns
+            )
             hidden_results.append(
                 HiddenCaseResult(
                     case_id=case_by_request[request.request_id].case_id,
                     baseline=baseline,
+                    request_id=request.request_id,
+                    request_seed=request.seed,
                     observed_tokens=observed,
                     expected_tokens=request.expected_tokens,
                     exact_match=observed == request.expected_tokens,
+                    execution_surface=(
+                        "python_eager_reference"
+                        if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+                        else "genesis_generated_runtime"
+                        if baseline is BaselineKind.GENESIS_FULL
+                        else "reference_order_surrogate"
+                    ),
+                    execution_evidence_path=(
+                        execution_evidence[0] if execution_evidence is not None else None
+                    ),
+                    execution_evidence_sha256=(
+                        execution_evidence[1] if execution_evidence is not None else None
+                    ),
                 )
             )
         hidden_path = (

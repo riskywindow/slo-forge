@@ -59,19 +59,24 @@ def _sandbox_request(
     mode: str,
     wall_time_seconds: float,
 ) -> tuple[SandboxRequest, Path]:
-    result_path = output_root / "runner-output.json"
+    canonical_source = source_root.resolve(strict=True)
+    canonical_candidate = candidate_path.resolve(strict=True)
+    canonical_config = config_path.resolve(strict=True)
+    canonical_output = output_root.resolve()
+    runner = (canonical_source / "sandbox_runner.py").resolve(strict=True)
+    result_path = canonical_output / "runner-output.json"
     request = SandboxRequest(
         argv=(
             sys.executable,
-            str(source_root / "sandbox_runner.py"),
-            str(candidate_path),
-            str(config_path),
+            str(runner),
+            str(canonical_candidate),
+            str(canonical_config),
             str(result_path),
             mode,
         ),
-        working_directory=source_root,
-        read_only_paths=(source_root, Path(sys.prefix)),
-        artifact_output_directory=output_root,
+        working_directory=canonical_source,
+        read_only_paths=(canonical_source, Path(sys.prefix), Path(sys.base_prefix)),
+        artifact_output_directory=canonical_output,
         seed=seed,
         limits=SandboxLimits(
             wall_time_seconds=wall_time_seconds,

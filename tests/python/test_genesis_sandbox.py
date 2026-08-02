@@ -94,6 +94,31 @@ def test_sandbox_sanitizes_environment_and_is_deterministic(
     assert "AWS_SECRET_ACCESS_KEY" not in result.sanitized_environment_names
 
 
+def test_relative_sandbox_request_gets_canonical_home_and_tmp(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = Path("source")
+    source.mkdir()
+    script = source / "paths.py"
+    script.write_text(
+        "import os\n"
+        "from pathlib import Path\n"
+        "print(Path(os.environ['HOME']))\n"
+        "print(Path(os.environ['TMPDIR']))\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, Path("output"), script.resolve()))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SUCCESS, result.stderr
+    assert result.stdout.splitlines() == [
+        str((tmp_path / "output/home").resolve()),
+        str((tmp_path / "output/tmp").resolve()),
+    ]
+
+
 def test_sandbox_denies_network_and_undeclared_reads(tmp_path: Path) -> None:
     capabilities = detect_capabilities()
     source = tmp_path / "source"

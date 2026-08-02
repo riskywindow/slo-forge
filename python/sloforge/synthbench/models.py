@@ -186,6 +186,7 @@ class RawCpuSample(SynthBenchModel):
     measurement_order_ordinal: NonNegativeInt
     execution_ordinal: NonNegativeInt
     request_id: Identifier
+    request_seed: NonNegativeInt
     latency_ns: PositiveInt
     ttft_ns: PositiveInt
     inter_token_ns: tuple[PositiveInt, ...]
@@ -197,8 +198,19 @@ class RawCpuSample(SynthBenchModel):
         "reference_order_surrogate",
         "genesis_generated_runtime",
     ]
+    execution_evidence_path: NonEmpty | None = None
+    execution_evidence_sha256: Sha256 | None = None
     source: Literal["measured_cpu_monotonic_clock"] = "measured_cpu_monotonic_clock"
     precision: Literal["python_float64_reference"] = "python_float64_reference"
+
+    @model_validator(mode="after")
+    def generated_execution_has_bound_evidence(self) -> Self:
+        generated = self.execution_surface == "genesis_generated_runtime"
+        if generated != (self.execution_evidence_path is not None):
+            raise ValueError("generated runtime sample must bind execution evidence")
+        if generated != (self.execution_evidence_sha256 is not None):
+            raise ValueError("generated runtime sample must bind an evidence digest")
+        return self
 
 
 class BaselineSummary(SynthBenchModel):
@@ -261,10 +273,28 @@ class CpuRunConfiguration(SynthBenchModel):
 class HiddenCaseResult(SynthBenchModel):
     case_id: Identifier
     baseline: BaselineKind
+    request_id: Identifier
+    request_seed: NonNegativeInt
     observed_tokens: tuple[NonNegativeInt, ...]
     expected_tokens: tuple[NonNegativeInt, ...]
     exact_match: bool
+    execution_surface: Literal[
+        "python_eager_reference",
+        "reference_order_surrogate",
+        "genesis_generated_runtime",
+    ]
+    execution_evidence_path: NonEmpty | None = None
+    execution_evidence_sha256: Sha256 | None = None
     source: Literal["evaluator_only_cpu_execution"] = "evaluator_only_cpu_execution"
+
+    @model_validator(mode="after")
+    def generated_execution_has_bound_evidence(self) -> Self:
+        generated = self.execution_surface == "genesis_generated_runtime"
+        if generated != (self.execution_evidence_path is not None):
+            raise ValueError("generated hidden result must bind execution evidence")
+        if generated != (self.execution_evidence_sha256 is not None):
+            raise ValueError("generated hidden result must bind an evidence digest")
+        return self
 
 
 class HiddenEvaluationSummary(SynthBenchModel):

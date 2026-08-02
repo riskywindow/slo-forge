@@ -11,10 +11,14 @@ from sloforge.genesis.demo import run_genesis_demo
 from sloforge.genesis.evaluation import run_genesis_evaluation
 
 
-def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> None:
+def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
     result = run_genesis_demo(
-        tmp_path / "demo",
-        seed=73129,
+        Path("demo"),
+        seed=73131,
+        runtime_seed=73129,
         observed_at=datetime(2026, 8, 2, 12, 0, tzinfo=UTC),
     )
 
@@ -54,6 +58,16 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(tmp_path: Path) -> 
         assert artifact["champion_sandbox"]["termination"] == "success"
         assert artifact["challenger_sandbox"]["termination"] == "success"
         assert artifact["trace_request_count"] == observation["sample_count"]
+
+    champion_manifest = json.loads((tmp_path / "demo/run/run_manifest.json").read_text())
+    challenger_manifest = json.loads(
+        (tmp_path / "demo/evolution/challenger-run/run_manifest.json").read_text()
+    )
+    assert (champion_manifest["seed"], champion_manifest["runtime_seed"]) == (73131, 73129)
+    assert (challenger_manifest["seed"], challenger_manifest["runtime_seed"]) == (
+        73132,
+        73129,
+    )
 
 
 def test_demo_reset_rejects_symlink_output(tmp_path: Path) -> None:

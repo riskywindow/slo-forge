@@ -175,16 +175,19 @@ def _execute_runtime(
 ) -> tuple[_RuntimeObservation, dict[str, object]]:
     runner = Path(__file__).with_name("runtime_evidence_runner.py").resolve(strict=True)
     repository_python = Path(__file__).resolve().parents[3]
-    result_path = output / "runtime-observation.json"
+    canonical_bundle = bundle.resolve(strict=True)
+    canonical_trace = trace_path.resolve(strict=True)
+    canonical_output = output.resolve()
+    result_path = canonical_output / "runtime-observation.json"
     result = execute_sandboxed(
         SandboxRequest(
             argv=(
                 sys.executable,
                 str(runner),
                 "--bundle",
-                str(bundle),
+                str(canonical_bundle),
                 "--trace",
-                str(trace_path),
+                str(canonical_trace),
                 "--output",
                 str(result_path),
                 "--seed",
@@ -192,9 +195,14 @@ def _execute_runtime(
                 "--timeout-seconds",
                 "3",
             ),
-            working_directory=bundle,
-            read_only_paths=(bundle, trace_path, repository_python, Path(sys.prefix)),
-            artifact_output_directory=output,
+            working_directory=canonical_bundle,
+            read_only_paths=(
+                canonical_bundle,
+                canonical_trace,
+                repository_python,
+                Path(sys.prefix),
+            ),
+            artifact_output_directory=canonical_output,
             seed=seed,
             limits=SandboxLimits(
                 wall_time_seconds=20.0,
