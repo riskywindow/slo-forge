@@ -7,6 +7,7 @@ from .fixture import (
     cancellation_fixture_candidates,
     run_cancellation_cegis,
 )
+from .local import LocalSynthesisResult, synthesize_local_run
 from .models import (
     CegisConfiguration,
     CegisEvent,
@@ -29,6 +30,7 @@ __all__ = [
     "ConstraintDocument",
     "ConstraintStore",
     "GeneralizedConstraint",
+    "LocalSynthesisResult",
     "MinimizationResult",
     "ProtocolWitness",
     "VerificationFailure",
@@ -36,4 +38,5 @@ __all__ = [
     "cancellation_fixture_candidates",
     "minimize_protocol_failure",
     "run_cancellation_cegis",
+    "synthesize_local_run",
 ]
