@@ -36,7 +36,7 @@ from .store import EvolutionStore
 from .transition import TransitionCompatibility, validate_transition_compatibility
 
 CapsuleValidator = Callable[[Path], CapsuleValidationReport]
-GateEvidenceValidator = Callable[[GateObservation, ChallengerSpec], bool]
+GateEvidenceValidator = Callable[[GateObservation, ChallengerSpec, CapsuleReference], bool]
 TransitionCompatibilityValidator = Callable[
     [CapsuleReference, CapsuleReference, TransitionCategory], TransitionCompatibility
 ]
@@ -466,7 +466,7 @@ class EvolutionController:
         ):
             raise EvolutionError("external gate observations require Level-5 evidence")
         if self.gate_evidence_validator is None or not self.gate_evidence_validator(
-            observation, record.spec
+            observation, record.spec, self.snapshot.champion
         ):
             raise EvolutionError(
                 f"{self.config.execution_target.value} gate evidence failed trusted validation"
@@ -482,7 +482,7 @@ class EvolutionController:
             raise EvolutionError("promotion requires persisted shadow and canary observations")
         for observation in observations:
             assert observation is not None
-            if not self.gate_evidence_validator(observation, record.spec):
+            if not self.gate_evidence_validator(observation, record.spec, self.snapshot.champion):
                 raise EvolutionError(
                     f"persisted {observation.stage.value} evidence failed trusted revalidation"
                 )

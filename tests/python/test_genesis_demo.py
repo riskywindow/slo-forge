@@ -9,6 +9,8 @@ import pytest
 
 from sloforge.genesis.demo import run_genesis_demo
 from sloforge.genesis.evaluation import run_genesis_evaluation
+from sloforge.genesis.evolution import EvolutionSnapshot, local_gate_evidence_validator
+from sloforge.genesis.ir import canonical_json
 
 
 def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
@@ -68,6 +70,83 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
         73132,
         73129,
     )
+
+    snapshot = EvolutionSnapshot.model_validate_json(
+        (tmp_path / "demo/evolution/promoted-snapshot.json").read_bytes(), strict=True
+    )
+    assert snapshot.previous_champion is not None
+    challenger_record = snapshot.challengers[0]
+    observation = challenger_record.shadow_observation
+    assert observation is not None
+    evidence_root = tmp_path / "demo/evolution/runtime-gates"
+    validator = local_gate_evidence_validator(evidence_root)
+    assert validator(observation, challenger_record.spec, snapshot.previous_champion)
+
+    stage_root = evidence_root / "shadow"
+    artifact_path = stage_root / "gate-evidence.json"
+    artifact_payload = artifact_path.read_bytes()
+    artifact = json.loads(artifact_payload)
+
+    forged_champion = snapshot.previous_champion.model_copy(update={"capsule_digest": "0" * 64})
+    assert not validator(observation, challenger_record.spec, forged_champion)
+
+    forged_artifact = dict(artifact)
+    forged_artifact["challenger_runtime_bundle_digest"] = "0" * 64
+    forged_artifact_payload = canonical_json(forged_artifact) + b"\n"
+    artifact_path.write_bytes(forged_artifact_payload)
+    forged_observation = observation.model_copy(
+        update={"evidence_digest": hashlib.sha256(forged_artifact_payload).hexdigest()}
+    )
+    assert not validator(forged_observation, challenger_record.spec, snapshot.previous_champion)
+    artifact_path.write_bytes(artifact_payload)
+
+    trace_path = stage_root / "trace.json"
+    trace_payload = trace_path.read_bytes()
+    forged_trace = json.loads(trace_payload)
+    forged_trace["requests"][0]["text"] += "-forged"
+    forged_trace_payload = canonical_json(forged_trace) + b"\n"
+    trace_path.write_bytes(forged_trace_payload)
+    forged_artifact = dict(artifact)
+    forged_artifact["trace_sha256"] = hashlib.sha256(forged_trace_payload).hexdigest()
+    forged_artifact_payload = canonical_json(forged_artifact) + b"\n"
+    artifact_path.write_bytes(forged_artifact_payload)
+    forged_observation = observation.model_copy(
+        update={"evidence_digest": hashlib.sha256(forged_artifact_payload).hexdigest()}
+    )
+    assert not validator(forged_observation, challenger_record.spec, snapshot.previous_champion)
+    trace_path.write_bytes(trace_payload)
+    artifact_path.write_bytes(artifact_payload)
+
+    raw_paths = (
+        stage_root / "champion/runtime-observation.json",
+        stage_root / "challenger/runtime-observation.json",
+    )
+    raw_payloads = tuple(path.read_bytes() for path in raw_paths)
+    forged_raw_documents = []
+    forged_raw_payloads = []
+    for raw_payload in raw_payloads:
+        document = json.loads(raw_payload)
+        document["cases"][0]["token_ids"] = [999_999]
+        document["cases"][0]["token_count"] = 1
+        forged_raw_documents.append(document)
+        forged_raw_payloads.append(canonical_json(document) + b"\n")
+    for path, payload in zip(raw_paths, forged_raw_payloads, strict=True):
+        path.write_bytes(payload)
+    forged_artifact = dict(artifact)
+    forged_artifact["champion_observation"] = forged_raw_documents[0]
+    forged_artifact["challenger_observation"] = forged_raw_documents[1]
+    forged_artifact["champion_observation_sha256"] = hashlib.sha256(
+        forged_raw_payloads[0]
+    ).hexdigest()
+    forged_artifact["challenger_observation_sha256"] = hashlib.sha256(
+        forged_raw_payloads[1]
+    ).hexdigest()
+    forged_artifact_payload = canonical_json(forged_artifact) + b"\n"
+    artifact_path.write_bytes(forged_artifact_payload)
+    forged_observation = observation.model_copy(
+        update={"evidence_digest": hashlib.sha256(forged_artifact_payload).hexdigest()}
+    )
+    assert not validator(forged_observation, challenger_record.spec, snapshot.previous_champion)
 
 
 def test_demo_reset_rejects_symlink_output(tmp_path: Path) -> None:
