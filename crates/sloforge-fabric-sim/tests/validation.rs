@@ -189,4 +189,21 @@ fn rejects_unknown_fault_targets_and_invalid_transformed_demands() {
         },
     );
     assert!(simulate(&replaced).is_err());
+
+    let mut wrong_kind = request(
+        vec![
+            resource("gpu", ResourceKind::GpuCompute, SchedulingMode::Exclusive),
+            resource("rail", ResourceKind::NetworkRail, SchedulingMode::FairShare),
+        ],
+        vec![compute("compute", "gpu", 10.0)],
+    );
+    wrong_kind.counterfactuals.push(
+        sloforge_fabric_sim::CounterfactualModifier::ReplaceResource {
+            from_resource_id: "gpu".into(),
+            to_resource_id: "rail".into(),
+        },
+    );
+    assert!(
+        matches!(simulate(&wrong_kind), Err(SimError::InvalidInput(message)) if message.contains("cannot execute"))
+    );
 }
