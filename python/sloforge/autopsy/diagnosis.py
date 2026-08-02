@@ -149,7 +149,60 @@ def _stage_signal(comparison: DifferentialComparison, event_types: set[EventType
 
 
 def _counter_map(comparison: DifferentialComparison) -> dict[str, float]:
-    return {item.name: item.relative_delta for item in comparison.counter_deltas}
+    counters: dict[str, tuple[str, float]] = {}
+    for item in comparison.counter_deltas:
+        previous = counters.get(item.name)
+        if previous is not None and previous[0] != item.unit:
+            raise ValueError(f"counter {item.name!r} has conflicting units in comparison")
+        counters[item.name] = (item.unit, item.relative_delta)
+    return {name: value for name, (_, value) in counters.items()}
+
+
+_SIGNAL_EVENT_TYPES: dict[str, frozenset[EventType]] = {
+    "gateway_queue_delta": frozenset({EventType.GATEWAY_QUEUE}),
+    "backend_queue_delta": frozenset({EventType.BACKEND_QUEUE}),
+    "startup_delta": frozenset({EventType.STARTUP, EventType.READINESS}),
+    "cpu_launch_delta": frozenset({EventType.CPU_LAUNCH}),
+    "gpu_compute_delta": frozenset({EventType.GPU_COMPUTE}),
+    "gpu_memory_delta": frozenset({EventType.GPU_MEMORY}),
+    "pcie_delta": frozenset({EventType.PCIE_TRANSFER}),
+    "nvlink_delta": frozenset({EventType.NVLINK_TRANSFER}),
+    "network_latency_delta": frozenset({EventType.NETWORK_TRANSFER}),
+    "collective_wait_delta": frozenset({EventType.COLLECTIVE_WAIT}),
+    "collective_delta": frozenset({EventType.COLLECTIVE}),
+    "expert_imbalance": frozenset({EventType.EXPERT_DISPATCH, EventType.EXPERT_COMBINE}),
+    "prefill_delta": frozenset({EventType.PREFILL}),
+    "decode_delta": frozenset({EventType.DECODE}),
+    "kv_transfer_delta": frozenset({EventType.KV_TRANSFER}),
+}
+
+_SIGNAL_COUNTERS: dict[str, frozenset[str]] = {
+    "arrival_capacity_ratio": frozenset({"arrival_capacity_ratio"}),
+    "warm_fraction_drop": frozenset({"warm_fraction"}),
+    "model_load_delta": frozenset({"model_load_time_ms"}),
+    "kernel_count_delta": frozenset({"kernel_count"}),
+    "gpu_clock_drop": frozenset({"gpu_clock_mhz"}),
+    "numa_remote_delta": frozenset({"numa_remote_fraction"}),
+    "network_bandwidth_drop": frozenset({"network_bandwidth_gbps"}),
+    "network_latency_delta": frozenset({"network_latency_us"}),
+    "expert_imbalance": frozenset({"expert_token_cv"}),
+    "unhealthy_worker": frozenset({"worker_unhealthy"}),
+    "worker_crash": frozenset({"worker_crash"}),
+    "topology_mismatch": frozenset({"topology_mismatch"}),
+    "invalid_plan_assumption": frozenset({"plan_assumption_error"}),
+}
+
+
+def _signal_sample_count(comparison: DifferentialComparison, signal: str) -> int:
+    if signal == "rank_skew":
+        return sum(item.matched_count for item in comparison.stage_deltas if item.rank is not None)
+    event_types = _SIGNAL_EVENT_TYPES.get(signal, frozenset())
+    stage_count = sum(
+        item.matched_count for item in comparison.stage_deltas if item.event_type in event_types
+    )
+    counter_names = _SIGNAL_COUNTERS.get(signal, frozenset())
+    counter_count = sum(item.name in counter_names for item in comparison.counter_deltas)
+    return stage_count + counter_count
 
 
 def extract_signals(comparison: DifferentialComparison) -> dict[str, float]:
@@ -240,7 +293,7 @@ def diagnose(
         confidence = _confidence(
             observed,
             rule.threshold,
-            comparison.matched_event_count,
+            _signal_sample_count(comparison, rule.signal),
             rule.causal_specificity,
         )
         hypotheses.append(
@@ -254,16 +307,34 @@ def diagnose(
                 rejected_reason=None if supports else "primary signal did not cross its threshold",
             )
         )
-    hypotheses.sort(key=lambda item: (-item.confidence, item.kind.value))
+    hypotheses.sort(
+        key=lambda item: (item.rejected_reason is not None, -item.confidence, item.kind.value)
+    )
     ranked = tuple(item.kind for item in hypotheses[:3])
     top = hypotheses[0]
-    alignments = degraded.alignments + (() if baseline is None else baseline.alignments)
-    sufficient_alignment = all(
-        estimate.quality is not AlignmentQuality.INSUFFICIENT for estimate in alignments
+    runs = (degraded,) if baseline is None else (degraded, baseline)
+    alignments = tuple(estimate for run in runs for estimate in run.alignments)
+    event_hosts = {event.host for event in degraded.events}
+    if baseline is not None:
+        event_hosts.update(event.host for event in baseline.events)
+    complete_alignment = all(
+        {event.host for event in run.events}.issubset(
+            {estimate.host for estimate in run.alignments}
+        )
+        for run in runs
+    )
+    sufficient_alignment = len(event_hosts) <= 1 or (
+        complete_alignment
+        and all(estimate.quality is not AlignmentQuality.INSUFFICIENT for estimate in alignments)
     )
     warnings = list(comparison.warnings)
     if not sufficient_alignment:
         warnings.append("diagnosis confidence excludes fine-grained cross-host ordering")
+    if not any(hypothesis.supporting_evidence for hypothesis in hypotheses):
+        warnings.append("no causal hypothesis crossed its evidence threshold")
+    warnings.append(
+        "diagnosis confidence is a deterministic evidence score, not a calibrated probability"
+    )
     identifier = hashlib.sha256(
         f"{degraded.run_id}\0{comparison.comparison_id}\0{top.kind.value}".encode()
     ).hexdigest()[:16]

@@ -122,6 +122,25 @@ class ScenarioEvaluation(StrictModel):
                 raise ValueError("failed simulations require a rejection reason")
         elif self.observation is None or any(item is None for item in values):
             raise ValueError("completed simulations require all numeric outcomes")
+        else:
+            assert self.expected_improvement_ms is not None
+            assert self.lower_improvement_ms is not None
+            assert self.upper_improvement_ms is not None
+            if not (
+                self.lower_improvement_ms
+                <= self.expected_improvement_ms
+                <= self.upper_improvement_ms
+            ):
+                raise ValueError("counterfactual improvement interval is not ordered")
+            expected_status = (
+                "supported"
+                if self.lower_improvement_ms > 0.0
+                else "contradicted"
+                if self.upper_improvement_ms <= 0.0
+                else "inconclusive"
+            )
+            if self.status != expected_status:
+                raise ValueError("counterfactual status disagrees with its improvement interval")
         return self
 
 
@@ -260,6 +279,8 @@ def replay_counterfactuals(
     if len(scenario_ids) != len(set(scenario_ids)):
         raise ValueError("counterfactual scenario identifiers must be unique")
     degraded = runner(simulation_request)
+    if degraded.makespan_us <= healthy_reference_us:
+        raise ValueError("degraded simulation must be slower than the healthy reference")
     evaluations: list[ScenarioEvaluation] = []
     for scenario in scenarios:
         hypothesis_confidence = _hypothesis_confidence(diagnosis, scenario)
@@ -352,13 +373,26 @@ def attach_counterfactuals(
             continue
         identifier = evaluation.scenario.hypothesis_id
         previous = best.get(identifier)
-        if previous is None or (
+        status_rank = {"supported": 2, "inconclusive": 1, "contradicted": 0}
+        candidate_key = (
+            status_rank.get(evaluation.status, -1),
+            evaluation.confidence,
+            -abs(evaluation.healthy_reference_residual_ms or 0.0),
             evaluation.expected_improvement_ms,
             evaluation.scenario.scenario_id,
-        ) > (
-            previous.expected_improvement_ms or -math.inf,
-            previous.scenario.scenario_id,
-        ):
+        )
+        previous_key = (
+            (
+                status_rank.get(previous.status, -1),
+                previous.confidence,
+                -abs(previous.healthy_reference_residual_ms or 0.0),
+                previous.expected_improvement_ms or -math.inf,
+                previous.scenario.scenario_id,
+            )
+            if previous is not None
+            else None
+        )
+        if previous_key is None or candidate_key > previous_key:
             best[identifier] = evaluation
     updated: list[CausalHypothesis] = []
     for hypothesis in diagnosis.hypotheses:
@@ -388,8 +422,25 @@ def attach_counterfactuals(
                 }
             )
         )
+    ordered = tuple(
+        sorted(
+            updated,
+            key=lambda item: (
+                item.rejected_reason is not None,
+                -item.confidence,
+                item.kind.value,
+            ),
+        )
+    )
+    top_three = tuple(item.kind for item in ordered[:3])
     return DiagnosisRecord.model_validate(
-        {**diagnosis.model_dump(mode="python"), "hypotheses": tuple(updated)}
+        {
+            **diagnosis.model_dump(mode="python"),
+            "top_hypothesis": ordered[0].kind,
+            "top_three": top_three,
+            "hypotheses": ordered,
+            "confidence": ordered[0].confidence,
+        }
     )
 
 

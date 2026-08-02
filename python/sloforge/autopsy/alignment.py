@@ -45,19 +45,26 @@ def estimate_alignment(samples: Iterable[ClockSample], *, reference_host: str) -
         float(sample.reference_monotonic_ns - sample.round_trip_ns // 2 - sample.local_monotonic_ns)
         for sample in records
     ]
-    if len(records) >= 2 and sum(value * value for value in xs) > 0.0:
-        mean_x = statistics.fmean(xs)
-        mean_y = statistics.fmean(ys)
-        denominator = sum((value - mean_x) ** 2 for value in xs)
-        slope = (
-            sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys, strict=True)) / denominator
-            if denominator > 0.0
-            else 0.0
-        )
-        intercept = mean_y - slope * mean_x
-    else:
-        slope = 0.0
-        intercept = ys[0]
+    # Use a bounded Theil-Sen fit over the lowest-RTT observations. Ordinary
+    # least squares lets one delayed clock exchange arbitrarily move both the
+    # drift and offset. Lowest-RTT selection follows the NTP minimum-delay
+    # principle; the cap prevents quadratic work on untrusted trace input.
+    selected_indices = sorted(
+        range(len(records)),
+        key=lambda index: (records[index].round_trip_ns, records[index].local_monotonic_ns),
+    )[:256]
+    selected_xs = [xs[index] for index in selected_indices]
+    selected_ys = [ys[index] for index in selected_indices]
+    slopes = [
+        (selected_ys[right] - selected_ys[left]) / (selected_xs[right] - selected_xs[left])
+        for left in range(len(selected_xs))
+        for right in range(left + 1, len(selected_xs))
+        if selected_xs[right] != selected_xs[left]
+    ]
+    slope = statistics.median(slopes) if slopes else 0.0
+    intercept = statistics.median(
+        y - slope * x for x, y in zip(selected_xs, selected_ys, strict=True)
+    )
     residuals = [abs(y - (intercept + slope * x)) for x, y in zip(xs, ys, strict=True)]
     residual_p95 = math.ceil(_percentile(residuals, 0.95))
     half_rtt_p95 = math.ceil(_percentile([sample.round_trip_ns / 2.0 for sample in records], 0.95))
@@ -112,6 +119,15 @@ def align_run(
     missing = {event.host for event in run.events} - estimates.keys()
     if missing:
         raise ValueError(f"missing alignment estimates for hosts: {sorted(missing)}")
+    wrong_reference = {
+        host
+        for host, estimate in estimates.items()
+        if estimate.reference_host != run.reference_host
+    }
+    if wrong_reference:
+        raise ValueError(
+            f"alignment estimates use a different reference host for {sorted(wrong_reference)}"
+        )
     if require_usable:
         unusable = {
             host
@@ -121,6 +137,10 @@ def align_run(
         if unusable:
             raise ValueError(f"alignment quality is insufficient for hosts: {sorted(unusable)}")
     aligned = tuple(align_event(event, estimates[event.host]) for event in run.events)
-    return run.model_copy(
-        update={"events": aligned, "alignments": tuple(estimates[key] for key in sorted(estimates))}
+    return AutopsyRun.model_validate(
+        {
+            **run.model_dump(mode="python"),
+            "events": aligned,
+            "alignments": tuple(estimates[key] for key in sorted(estimates)),
+        }
     )
