@@ -45,8 +45,10 @@ from sloforge.genesis.capsule import (
     seal_capsule,
     validate_capsule,
 )
-from sloforge.genesis.capsule.validator import _validate_runtime_bundle
-from sloforge.genesis.capsule.validator import _performance_acceptance_failures
+from sloforge.genesis.capsule.validator import (
+    _performance_acceptance_failures,
+    _validate_runtime_bundle,
+)
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
 OBSERVED = datetime(2025, 12, 1, tzinfo=UTC)
