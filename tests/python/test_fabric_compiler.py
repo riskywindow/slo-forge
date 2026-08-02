@@ -156,3 +156,66 @@ def test_stale_fabric_profile_is_rejected() -> None:
         assert "does not match topology" in str(error)
     else:
         raise AssertionError("a stale fabric profile was accepted")
+
+
+def test_disaggregation_assigns_complete_data_replicas_to_worker_pools() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+    constrained = request.model_copy(
+        update={
+            "constraints": request.constraints.model_copy(
+                update={
+                    "tensor_parallel_degree": 1,
+                    "pipeline_parallel_degree": 1,
+                    "data_parallel_degree": 2,
+                    "expert_parallel_degree": 1,
+                    "require_disaggregation": True,
+                }
+            )
+        }
+    )
+    result = compile_physical_plan(constrained)
+    bindings_by_replica: dict[str, set[str]] = {}
+    for binding in result.selected.rank_placement.bindings:
+        bindings_by_replica.setdefault(binding.replica_id, set()).add(binding.worker_role.value)
+    assert bindings_by_replica == {"replica-0": {"prefill"}, "replica-1": {"decode"}}
+    groups = {group.kind.value: set(group.rank_ids) for group in result.selected.parallelism.groups}
+    assert groups["prefill"] == {0}
+    assert groups["decode"] == {1}
+    search = compile_physical_plan(
+        request.model_copy(
+            update={
+                "constraints": request.constraints.model_copy(
+                    update={"require_disaggregation": True}
+                )
+            }
+        )
+    )
+    assert any(
+        "disaggregation_requires_two_data_replicas" in candidate.rejection_codes
+        for candidate in search.all_candidates
+    )
+
+
+def test_data_parallelism_duplicates_kv_while_pipeline_parallelism_shards_it() -> None:
+    request = _request(OptimizationStrategy.HIERARCHICAL)
+
+    def compile_fixed(*, pp: int, dp: int) -> int:
+        result = compile_physical_plan(
+            request.model_copy(
+                update={
+                    "constraints": request.constraints.model_copy(
+                        update={
+                            "tensor_parallel_degree": 1,
+                            "pipeline_parallel_degree": pp,
+                            "data_parallel_degree": dp,
+                            "expert_parallel_degree": 1,
+                        }
+                    )
+                }
+            )
+        )
+        return result.selected.memory.allocations[0].kv_cache_bytes
+
+    single_replica_kv = compile_fixed(pp=1, dp=1)
+    assert compile_fixed(pp=1, dp=2) == single_replica_kv
+    assert compile_fixed(pp=2, dp=1) == (single_replica_kv + 1) // 2
