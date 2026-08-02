@@ -226,10 +226,12 @@ def _edge_bandwidth(edge: TopologyEdge) -> float:
 
 def _edge_latency_us(edge: TopologyEdge, message_bytes: int) -> float:
     points = sorted(edge.latency_curve_us, key=lambda point: point.message_bytes)
-    if points:
-        return min(points, key=lambda point: abs(point.message_bytes - message_bytes)).median
-    bandwidth_gbps = _edge_bandwidth(edge)
-    return 2.0 + message_bytes * 8.0 / (bandwidth_gbps * 1_000.0)
+    base_latency = (
+        min(points, key=lambda point: abs(point.message_bytes - message_bytes)).median
+        if points
+        else 2.0
+    )
+    return base_latency + message_bytes * 8.0 / (_edge_bandwidth(edge) * 1_000.0)
 
 
 def _adjacency(topology: TopologyGraph) -> dict[str, list[tuple[str, TopologyEdge]]]:

@@ -108,6 +108,9 @@ def test_synthetic_profile_converts_to_canonical_fabric_ir() -> None:
     assert len(canonical.raw_artifacts) == len(raw.results)
     assert canonical.extensions.root["sloforge.io/measurement-modes"] == ["synthetic_calibrated"]
     assert canonical.topology_fingerprint.value == canonical_hash(topology)
+    transports = {measurement.transport for measurement in canonical.measurements}
+    assert "sloforge-synthetic-calibrated-v1" not in transports
+    assert "infiniband" in transports
 
 
 def test_canonical_topology_input_is_compile_compatible() -> None:
