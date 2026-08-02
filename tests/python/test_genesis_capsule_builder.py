@@ -129,7 +129,9 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     assert {
         "runtime.py",
         "runtime_config.json",
+        "tested_runtime_config.json",
         "correctness_harness.py",
+        "deployment_manifest.json",
         "policy.slo",
         "policy.bytecode.json",
         "bundle_manifest.json",
@@ -137,6 +139,11 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
         "reference_package/reference_package.json",
     }.issubset(names)
     bundle_manifest = json.loads((extracted / "bundle_manifest.json").read_text())
+    assert bundle_manifest["direct_launch_supported"] is False
+    assert bundle_manifest["trusted_launcher"] == "sloforge.genesis.sandbox.execute_sandboxed"
+    assert bundle_manifest["tested_runtime_config_sha256"] == hashlib.sha256(
+        (extracted / "tested_runtime_config.json").read_bytes()
+    ).hexdigest()
     for name, digest in bundle_manifest["entries"].items():
         assert hashlib.sha256((extracted / name).read_bytes()).hexdigest() == digest
     runtime = load_generated_runtime(
