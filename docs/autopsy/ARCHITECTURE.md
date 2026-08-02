@@ -58,11 +58,11 @@ reduction.
 
 ## Evidence from the flagship demo
 
-The synthetic degraded run contains 480 canonical events in
+The synthetic degraded run contains 2,016 canonical events in
 `artifacts/fabric-demo/autopsy/degraded-run.json`. The diagnosis in
 `artifacts/fabric-demo/autopsy/diagnosis.json` ranked
-`network_bandwidth_degradation` first at deterministic evidence confidence 0.95
-and recorded the first divergence at 176,000 ns.
+`network_bandwidth_degradation` first at deterministic evidence confidence
+0.834 and recorded its first divergence from the matched event stream.
 Seven repairs were evaluated; `remove-both-faults` restored the healthy simulated
 reference. These are deterministic synthetic results, not measured multi-node
 diagnosis accuracy.
