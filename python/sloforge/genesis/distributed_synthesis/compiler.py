@@ -6,13 +6,16 @@ import hashlib
 import json
 from typing import Any, cast
 
-from sloforge.fabric.ir import PhysicalExecutionPlan
+from sloforge.fabric.ir import PhysicalExecutionPlan, canonical_hash
 
 from .models import (
+    INVALIDATED_FABRIC_FIELDS,
+    REQUIRED_REVALIDATION_STAGES,
     CollectiveMutation,
     DistributedMutation,
     DistributedSynthesisResult,
     ExpertPlacementMutation,
+    InvalidatedEvidenceReference,
     KVTransferMutation,
     OverlapMutation,
     RankPlacementMutation,
@@ -21,6 +24,27 @@ from .models import (
 
 class DistributedSynthesisError(ValueError):
     """A mutation cannot be applied to the declared physical plan."""
+
+
+def _canonical_payload_hash(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+
+
+def _reject_pending_candidate(source: PhysicalExecutionPlan) -> None:
+    extension = source.extensions.root.get("sloforge.dev/genesis-candidate")
+    if isinstance(extension, dict) and extension.get("evidence_state") == (
+        "invalidated-pending-revalidation"
+    ):
+        raise DistributedSynthesisError(
+            "distributed candidate requires Fabric revalidation before another mutation"
+        )
 
 
 def _single_index(items: list[dict[str, Any]], field: str, value: str) -> int:
@@ -112,6 +136,7 @@ def compile_distributed_mutation(
 
     if seed < 0:
         raise DistributedSynthesisError("seed must be non-negative")
+    _reject_pending_candidate(source)
     payload = source.model_dump(mode="json")
     if isinstance(mutation, CollectiveMutation):
         _mutate_collective(payload, mutation)
@@ -139,11 +164,31 @@ def compile_distributed_mutation(
         ).encode()
     ).hexdigest()
     payload["plan_id"] = f"genesis-{identity[:24]}"
-    history = cast(list[dict[str, Any]], payload["optimizer_history"])
-    next_sequence = max((int(item["sequence"]) for item in history), default=-1) + 1
-    history.append(
+    source_metrics_hash = _canonical_payload_hash(payload["predicted_metrics"])
+    invalidated_evidence = tuple(
+        InvalidatedEvidenceReference(
+            kind=item.kind,
+            uri=item.uri,
+            digest_sha256=item.digest.value,
+        )
+        for item in sorted(source.evidence, key=lambda reference: reference.uri)
+    )
+
+    # PhysicalExecutionPlan v1 requires predicted_metrics. Retain its values only as a
+    # schema-compatibility snapshot, set every confidence to zero, and make the plan
+    # ineligible for comparison until Fabric produces fresh evidence. Source evidence
+    # and simulator history are removed entirely.
+    metric_payload = cast(dict[str, dict[str, Any]], payload["predicted_metrics"])
+    for interval in metric_payload.values():
+        interval["confidence"] = 0.0
+    payload["bottleneck_prediction"] = "invalidated-pending-distributed-revalidation"
+    payload["failure_exposure"] = []
+    payload["rejected_alternatives"] = []
+    payload["recovery_variants"] = []
+    payload["evidence"] = []
+    payload["optimizer_history"] = [
         {
-            "sequence": next_sequence,
+            "sequence": 0,
             "candidate_id": payload["plan_id"],
             "phase": "feasibility",
             "decision": "evaluate",
@@ -151,11 +196,22 @@ def compile_distributed_mutation(
             "simulator_calls": 0,
             "solver_time_ms": 0.0,
         }
-    )
+    ]
     extensions = cast(dict[str, Any], payload["extensions"])
     extensions["sloforge.dev/genesis-candidate"] = {
+        "evidence_state": "invalidated-pending-revalidation",
         "performance_evidence_valid": False,
+        "eligible_for_performance_comparison": False,
         "requires_bounded_model_check": True,
+        "predicted_metrics_representation": (
+            "source-values-zero-confidence-schema-compatibility-only"
+        ),
+        "required_revalidation_stages": list(REQUIRED_REVALIDATION_STAGES),
+        "invalidated_fields": list(INVALIDATED_FABRIC_FIELDS),
+        "invalidated_evidence": [
+            reference.model_dump(mode="json") for reference in invalidated_evidence
+        ],
+        "source_predicted_metrics_hash": source_metrics_hash,
         "seed": seed,
         "source_plan_id": source.plan_id,
         "transformation_id": mutation.transformation_id,
@@ -168,15 +224,16 @@ def compile_distributed_mutation(
         candidate_plan=candidate,
         transformation_id=mutation.transformation_id,
         affected_surface=mutation.kind,
+        candidate_plan_hash=canonical_hash(candidate),
+        source_predicted_metrics_hash=source_metrics_hash,
         fabric_schema_validated=True,
+        evidence_state="invalidated-pending-revalidation",
         performance_evidence_valid=False,
-        required_verifier_stages=(
-            "fabric-static-validation",
-            "digital-twin",
-            "bounded-protocol-model-check",
-            "end-to-end-benchmark",
-        ),
-        invalidated_evidence_uris=tuple(sorted(item.uri for item in source.evidence)),
+        eligible_for_performance_comparison=False,
+        required_verifier_stages=REQUIRED_REVALIDATION_STAGES,
+        invalidated_fields=INVALIDATED_FABRIC_FIELDS,
+        invalidated_evidence=invalidated_evidence,
+        invalidated_evidence_uris=tuple(item.uri for item in invalidated_evidence),
         bounded_model_check_required=True,
     )
 

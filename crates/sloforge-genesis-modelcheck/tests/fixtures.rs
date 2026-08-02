@@ -39,6 +39,25 @@ fn safe_streaming_fixture_passes() {
 }
 
 #[test]
+fn concurrent_streaming_fixture_checks_two_request_contention_completely() {
+    let request = load_fixture(include_str!(
+        "../../../modelcheck/streaming/concurrent_safe_protocol.json"
+    ));
+    let result = check(&request).unwrap_or_else(|errors| panic!("invalid fixture: {errors:?}"));
+    assert_eq!(result.status, CheckStatus::Passed);
+    assert!(result.scope.complete_within_bounds);
+    assert!(result.scope.truncated_by.is_empty());
+    assert!(result.state_count > 1);
+    assert!(result.transition_count > result.state_count);
+    assert!(
+        result
+            .invariants
+            .iter()
+            .all(|outcome| outcome.counterexample.is_none())
+    );
+}
+
+#[test]
 fn duplicate_token_fixture_is_rejected() {
     assert_rejects(
         include_str!("../../../modelcheck/streaming/duplicate_token.json"),
