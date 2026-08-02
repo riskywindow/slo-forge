@@ -1,6 +1,7 @@
 """Causal performance evidence, alignment, diagnosis, and counterfactual replay."""
 
 from .alignment import align_run, estimate_alignment
+from .capture import capture_simulation_run
 from .comparison import compare_runs
 from .counterfactual import (
     CounterfactualReplay,
@@ -58,6 +59,7 @@ __all__ = [
     "ScenarioEvaluation",
     "SourceClock",
     "align_run",
+    "capture_simulation_run",
     "compare_runs",
     "diagnose",
     "estimate_alignment",
