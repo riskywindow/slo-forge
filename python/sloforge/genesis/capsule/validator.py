@@ -906,16 +906,13 @@ def validate_capsule(
     local_evolution_eligible = not issues
     production_categories = {ClaimCategory.PERFORMANCE, ClaimCategory.OPERATIONAL}
     production_claims = tuple(
-        claim
-        for claim in promotion_claims
-        if claim.category in production_categories
+        claim for claim in promotion_claims if claim.category in production_categories
     )
     external_production_eligible = bool(
         local_evolution_eligible
         and {claim.category for claim in production_claims} == production_categories
         and all(
-            claim.level is VerificationLevel.HARDWARE_OPERATIONAL
-            for claim in production_claims
+            claim.level is VerificationLevel.HARDWARE_OPERATIONAL for claim in production_claims
         )
     )
     return CapsuleValidationReport(

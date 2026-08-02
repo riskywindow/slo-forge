@@ -104,12 +104,8 @@ def verify_state_trace(
                 violations.append(
                     _violation(event, "cancelled_request", "cancelled request reacquired state")
                 )
-            elif (
-                region.ownership is Ownership.EXCLUSIVE
-                and event.actor != allocation.owner
-            ) or (
-                region.ownership is not Ownership.EXCLUSIVE
-                and event.actor not in region.owners
+            elif (region.ownership is Ownership.EXCLUSIVE and event.actor != allocation.owner) or (
+                region.ownership is not Ownership.EXCLUSIVE and event.actor not in region.owners
             ):
                 violations.append(
                     _violation(event, "lease_owner", "actor is not an authorized state owner")

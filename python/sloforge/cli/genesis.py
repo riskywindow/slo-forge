@@ -955,8 +955,7 @@ def compare_command(
         challenger, context=challenger_context, expected_digest=challenger_digest
     )
     if not (
-        champion_report.local_evolution_eligible
-        and challenger_report.local_evolution_eligible
+        champion_report.local_evolution_eligible and challenger_report.local_evolution_eligible
     ):
         raise typer.BadParameter("both capsules must pass independent validation")
     champion_evidence = {item.evidence_id for item in champion_document.evidence}

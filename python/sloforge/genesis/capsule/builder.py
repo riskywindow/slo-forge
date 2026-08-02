@@ -397,7 +397,9 @@ def build_local_capsule(
     repository = Path(__file__).resolve().parents[4]
     candidate = load_candidate(candidate_directory / "candidate.json")
     if candidate.state is not CandidateSuccessState.SIMULATED:
-        raise ValueError("only a model-checked and simulated candidate can enter capsule construction")
+        raise ValueError(
+            "only a model-checked and simulated candidate can enter capsule construction"
+        )
     design = CandidateDesign.model_validate_json(
         (candidate_directory / "candidate_design.json").read_bytes(), strict=True
     )

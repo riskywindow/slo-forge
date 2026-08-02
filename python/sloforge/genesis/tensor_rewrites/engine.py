@@ -295,8 +295,7 @@ def _apply_at(
         if (
             node.output.dtype not in _FLOAT_DTYPES
             or node.output.numerical.maximum_absolute_error <= 0
-            or rule.maximum_quality_cost
-            > node.output.numerical.maximum_absolute_error
+            or rule.maximum_quality_cost > node.output.numerical.maximum_absolute_error
             or node.output.numerical.preserve_nan
             or node.output.numerical.preserve_infinity
             or node.output.numerical.preserve_signed_zero
