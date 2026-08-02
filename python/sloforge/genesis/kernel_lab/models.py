@@ -468,6 +468,200 @@ class KernelBenchmarkConfig(KernelModel):
 KernelBenchmarkReport.model_rebuild()
 
 
+class RuntimeImpactConfig(KernelModel):
+    """Bounded design for one generated-runtime serving experiment."""
+
+    synthesis_seed: int = Field(ge=0, lt=1 << 64)
+    runtime_generation_seed: int = Field(ge=0, lt=1 << 64)
+    trace_seed: int = Field(ge=0, lt=1 << 64)
+    trial_order_seed: int = Field(ge=0, lt=1 << 64)
+    bootstrap_seed: int = Field(ge=0, lt=1 << 64)
+    sandbox_seed: int = Field(ge=0, lt=1 << 64)
+    warmup_count: int = Field(default=1, ge=1, le=100)
+    repetitions: int = Field(default=7, ge=7, le=1_000)
+    bootstrap_rounds: int = Field(default=500, ge=100, le=100_000)
+    confidence: float = Field(default=0.95, gt=0.5, lt=1.0)
+    practical_significance_percent: float = Field(default=2.0, ge=0.0)
+    noise_floor_percent: float = Field(default=1.0, ge=0.0)
+    request_count: int = Field(default=6, ge=2, le=32)
+    request_timeout_seconds: float = Field(default=3.0, gt=0.0, le=30.0)
+    sandbox_wall_time_seconds: float = Field(default=30.0, gt=0.0, le=120.0)
+
+    @model_validator(mode="after")
+    def separate_randomness(self) -> Self:
+        seeds = (
+            self.synthesis_seed,
+            self.runtime_generation_seed,
+            self.trace_seed,
+            self.trial_order_seed,
+            self.bootstrap_seed,
+            self.sandbox_seed,
+        )
+        if len(set(seeds)) != len(seeds):
+            raise ValueError("runtime-impact seed domains must be distinct")
+        return self
+
+
+class RuntimeBundleIdentity(KernelModel):
+    alternative: Literal["reference", "candidate"]
+    bundle_root: NonEmpty
+    runtime_id: Identifier
+    package_root: NonEmpty
+    package_hash: str
+    inspection_path: NonEmpty
+    inspection_sha256: str
+    artifact_manifest_path: NonEmpty
+    artifact_manifest_sha256: str
+
+    @field_validator(
+        "package_hash",
+        "inspection_sha256",
+        "artifact_manifest_sha256",
+    )
+    @classmethod
+    def validate_identity_digest(cls, value: str) -> str:
+        if _SHA256.fullmatch(value) is None:
+            raise ValueError("runtime identity digest must be lowercase sha256")
+        return value
+
+
+class RuntimeImpactSample(KernelModel):
+    alternative: Literal["reference", "candidate"]
+    trial_index: int = Field(ge=0)
+    order_index: int = Field(ge=0)
+    duration_ns: int = Field(gt=0)
+    request_count: int = Field(gt=0, le=32)
+    emitted_token_count: int = Field(gt=0)
+    output_sha256: str
+
+    @field_validator("output_sha256")
+    @classmethod
+    def validate_output_digest(cls, value: str) -> str:
+        if _SHA256.fullmatch(value) is None:
+            raise ValueError("runtime output digest must be lowercase sha256")
+        return value
+
+
+class HybridStateSnapshot(KernelModel):
+    kv_window: tuple[int, ...] = Field(max_length=6)
+    recurrent_state: float
+    quantized_state: int = Field(ge=-127, le=127)
+    expert_loads: tuple[int, int, int]
+    speculative_state: int
+    prompt_length: int = Field(ge=1, le=64)
+
+
+class RuntimeRequestSemantics(KernelModel):
+    request_id: Identifier
+    token_ids: tuple[int, ...] = Field(min_length=1, max_length=16)
+    final_state: HybridStateSnapshot
+
+
+class RuntimeImpactStatistics(KernelModel):
+    status: LabStatus
+    reference_median_ns: float = Field(gt=0.0)
+    candidate_median_ns: float = Field(gt=0.0)
+    improvement_percent: float
+    confidence_interval_low_percent: float
+    confidence_interval_high_percent: float
+    effect_size: float
+    practical_significance_percent: float = Field(ge=0.0)
+    noise_floor_percent: float = Field(ge=0.0)
+    rationale: NonEmpty
+
+
+class RuntimeImpactValidation(KernelModel):
+    status: Literal["passed"] = "passed"
+    artifact_hashes_verified: Literal[True] = True
+    statistics_reconstructed: Literal[True] = True
+    runtime_outputs_replayed: Literal[True] = True
+    state_semantics_replayed: Literal[True] = True
+    replay_output_path: NonEmpty
+    replay_output_sha256: str
+    sandbox_termination: Literal["success"] = "success"
+    sandbox_backend: NonEmpty
+
+    @field_validator("replay_output_sha256")
+    @classmethod
+    def validate_replay_digest(cls, value: str) -> str:
+        if _SHA256.fullmatch(value) is None:
+            raise ValueError("runtime replay digest must be lowercase sha256")
+        return value
+
+
+class RuntimeImpactReport(KernelModel):
+    schema_version: Literal["sloforge.genesis.kernel-runtime-impact/v1"] = (
+        "sloforge.genesis.kernel-runtime-impact/v1"
+    )
+    candidate: KernelCandidate
+    config: RuntimeImpactConfig
+    measurement_scope: Literal["cpu_generated_runtime_end_to_end_serving"] = (
+        "cpu_generated_runtime_end_to_end_serving"
+    )
+    hardware_backed_gpu: Literal[False] = False
+    timing_boundary: Literal[
+        "after_runtime_start_from_interleaved_submission_through_terminal_events"
+    ] = "after_runtime_start_from_interleaved_submission_through_terminal_events"
+    source_package_hash: str
+    patched_package_hash: str
+    candidate_source_path: NonEmpty
+    candidate_source_sha256: str
+    trace_path: NonEmpty
+    trace_sha256: str
+    workload_fingerprint: str
+    hardware_fingerprint: NonEmpty
+    software_manifest: tuple[NonEmpty, ...]
+    runtime_bundles: tuple[RuntimeBundleIdentity, RuntimeBundleIdentity]
+    samples: tuple[RuntimeImpactSample, ...]
+    raw_samples_path: NonEmpty
+    raw_samples_sha256: str
+    runner_output_path: NonEmpty
+    runner_output_sha256: str
+    runner_path: NonEmpty
+    runner_sha256: str
+    reference_semantics: tuple[RuntimeRequestSemantics, ...]
+    candidate_semantics: tuple[RuntimeRequestSemantics, ...]
+    output_exact_match: bool
+    state_exact_match: bool
+    statistics: RuntimeImpactStatistics
+    sandbox_termination: NonEmpty
+    sandbox_backend: NonEmpty
+    validation: RuntimeImpactValidation | None = None
+
+    @field_validator(
+        "source_package_hash",
+        "patched_package_hash",
+        "candidate_source_sha256",
+        "trace_sha256",
+        "workload_fingerprint",
+        "raw_samples_sha256",
+        "runner_output_sha256",
+        "runner_sha256",
+    )
+    @classmethod
+    def validate_report_digest(cls, value: str) -> str:
+        if _SHA256.fullmatch(value) is None:
+            raise ValueError("runtime-impact digest must be lowercase sha256")
+        return value
+
+    @model_validator(mode="after")
+    def validate_runtime_impact(self) -> Self:
+        if self.candidate.deterministic_seed != self.config.synthesis_seed:
+            raise ValueError("candidate and runtime-impact synthesis seeds differ")
+        if len(self.samples) != self.config.repetitions * 2:
+            raise ValueError("runtime-impact samples do not cover every paired trial")
+        if {item.alternative for item in self.runtime_bundles} != {
+            "reference",
+            "candidate",
+        }:
+            raise ValueError("runtime-impact bundle identities are incomplete")
+        if (
+            not self.output_exact_match or not self.state_exact_match
+        ) and self.statistics.status is LabStatus.PASSED:
+            raise ValueError("semantically invalid runtime cannot pass the performance gate")
+        return self
+
+
 class CandidateDecision(KernelModel):
     candidate_id: Identifier
     status: AcceptanceStatus
@@ -505,5 +699,6 @@ class KernelLabReport(KernelModel):
     candidates: tuple[KernelCandidate, ...]
     correctness: tuple[CorrectnessEvidence, ...]
     benchmarks: tuple[KernelBenchmarkReport, ...]
+    runtime_impacts: tuple[RuntimeImpactReport, ...] = ()
     decisions: tuple[CandidateDecision, ...]
     triton_adapter: TritonAdapterReport

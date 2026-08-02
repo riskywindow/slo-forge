@@ -14,7 +14,11 @@ The correctness harness does not import generated code into the controller proce
 
 ## Performance evidence
 
-Benchmarking uses equal warmups, randomized reference/candidate order, repeated raw nanosecond samples, deterministic bootstrap confidence intervals, effect size, practical significance, and an explicit noise floor. It records scalar, non-contiguous batch, and repeated operator-loop regimes. The latter repeats only the focused operation; it is not end-to-end model or serving execution. The trusted validator reconstructs the order, trial sets, fingerprints, intervals, regime summaries, and aggregate status from raw samples. Because no full-stack serving benchmark is present, CPU candidates remain non-promotable and carry `no speedup claim` even when an isolated interval is favorable.
+Benchmarking uses equal warmups, randomized reference/candidate order, repeated raw nanosecond samples, deterministic bootstrap confidence intervals, effect size, practical significance, and an explicit noise floor. It first records scalar, non-contiguous batch, and repeated operator-loop regimes. Those isolated regimes cannot promote a candidate.
+
+The full-stack gate then materializes a content-addressed copy of HybridDecoder with the generated vector kernel and a generated scalar adapter, statically re-inspects that package, and generates a separate conservative bounded streaming runtime for the reference and candidate packages. Both runtimes execute the same six-request interleaved trace in the fail-closed sandbox for at least seven randomized paired trials. Model-generation, trace, trial-order, bootstrap, and sandbox seeds are disjoint and recorded. The timed boundary begins after runtime start, includes bounded admission, batching, prefill, decode, streaming terminal events, and state release, and excludes package import and process startup.
+
+Token streams are checked on every measured trial. The independent validation run separately replays both generated runtimes and reconstructs each request's complete typed persistent state with the runtime's exact phase/position seed schedule. It reopens package, inspection, runtime bundle, candidate source, trace, runner, raw sample, and replay hashes and reconstructs all statistics. A candidate may claim only a local CPU generated-runtime speedup when exact token/state semantics and every correctness, isolated-regime, and end-to-end confidence gate pass. A failed or inconclusive end-to-end interval is retained as a negative result and produces no speedup claim.
 
 The CPU fingerprint and Python software manifest scope every result. These are real local microprobe measurements over synthetic inputs, not Autopsy or GPU evidence. The optional fused-logits Triton harness requires explicit GPU opt-in, randomized correctness, balanced randomized interleaving, paired raw CUDA-event trials, a paired bootstrap interval, workload/hardware/software provenance, and independent recomputation. A scoped isolated-kernel speedup is recorded only when the lower paired interval clears the practical threshold; it never becomes an end-to-end serving claim or automatic runtime enablement.
 
@@ -23,7 +27,7 @@ The CPU fingerprint and Python software manifest scope every result. These are r
 | Evidence source | Status | Permitted claim |
 | --- | --- | --- |
 | Deterministic operator fixtures and simulator-derived serving inputs | Exercised in CPU tests | Correctness/search evidence only within declared fixtures and seeds; not measured performance |
-| Local macOS CPU execution and timing | Exercised by the CPU kernel-lab tests/demo | Host-CPU correctness and timing for the recorded software/hardware fingerprint |
+| Local macOS CPU generated-runtime execution and timing | Exercised by the CPU kernel-lab tests/demo | Host-CPU exact token/state evidence and end-to-end trace timing for the recorded software/hardware fingerprint |
 | Triton capability adapter | Implemented, fail-closed, unexercised for compilation/execution | Availability and opt-in status only |
 | CUDA/GPU kernel execution | Not exercised | No GPU correctness, latency, throughput, or speedup claim |
 | Multi-GPU end-to-end serving impact | Not exercised | No communication or deployment performance claim |
@@ -40,4 +44,4 @@ do not by themselves establish a speedup.
 
 ## Artifacts
 
-`run_kernel_lab_demo` writes candidate source, correctness records, benchmark summaries, complete raw JSONL samples, decisions, and the aggregate report beneath its caller-supplied output directory. The repository does not check in generated measurement outputs. Every negative or inconclusive decision can therefore be reconstructed from its raw artifacts; isolated CPU evidence cannot create an accepted speedup decision.
+`run_kernel_lab_demo` writes candidate source, correctness records, isolated benchmark summaries, both generated runtime bundles, source and patched package inspections, the interleaved trace, complete raw JSONL runtime samples, independent sandbox replay, decisions, and the aggregate report beneath its caller-supplied output directory. The repository does not check in generated measurement outputs. Every negative or inconclusive decision can therefore be reconstructed from its raw artifacts. The end-to-end experiment is real local CPU serving execution, not GPU or production-hardware evidence.
