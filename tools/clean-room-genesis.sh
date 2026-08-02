@@ -18,6 +18,10 @@ printf '%s\n' "$revision" > "$clean_root/.sloforge-source-commit"
   make -C "$clean_root" genesis-demo
   make -C "$clean_root" synthbench-smoke
   make -C "$clean_root" package
+  wheel_path="$(find "$clean_root/dist" -maxdepth 1 -type f -name '*.whl' -print -quit)"
+  test -n "$wheel_path"
+  uv pip install --python "$clean_root/.venv/bin/python" --no-deps --force-reinstall "$wheel_path"
+  "$clean_root/.venv/bin/sloforge" --help >/dev/null
 } 2>&1 | tee "$clean_root/genesis-clean-room.log"
 
 python3 - "$clean_root" "$revision" <<'PY'
@@ -48,6 +52,7 @@ assert synthbench["exact_request_rate"] == 1.0
             "genesis_demo": "passed",
             "synthbench_smoke": "passed",
             "package_build": "passed",
+            "wheel_install_smoke": "passed",
             "hardware_backed": False,
         },
         indent=2,
