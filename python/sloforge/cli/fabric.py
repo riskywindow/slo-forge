@@ -570,6 +570,13 @@ def validate_command(
     seed: Annotated[int, typer.Option("--seed", min=0)] = 41,
     timeout_seconds: Annotated[float, typer.Option("--timeout-seconds", min=0.1)] = 30.0,
     max_relative_error: Annotated[float, typer.Option("--max-relative-error", min=0.0)] = 0.25,
+    slo: Annotated[
+        str | None,
+        typer.Option(
+            "--slo",
+            help="Optional hard p95 TTFT and p99 TPOT/ITL constraints.",
+        ),
+    ] = None,
     require_prediction_interval: Annotated[
         bool,
         typer.Option("--require-prediction-interval/--ignore-prediction-interval"),
@@ -587,31 +594,88 @@ def validate_command(
     )
     latencies = request_latencies(result)
     observed_ttft = percentile([item.ttft_us / 1_000.0 for item in latencies], 0.95)
-    predicted_interval = physical.predicted_metrics.p95_ttft_ms
-    predicted_ttft = predicted_interval.estimate
-    relative_error = abs(observed_ttft - predicted_ttft) / max(predicted_ttft, 1e-9)
-    interval_covered = predicted_interval.lower <= observed_ttft <= predicted_interval.upper
+    trace_records = load_trace(trace)
+    output_tokens = {
+        f"request-{index:06d}": record.output_tokens for index, record in enumerate(trace_records)
+    }
+    token_steps_ms = [
+        operation.duration_us / output_tokens[operation.operation_id.partition(":")[0]] / 1_000.0
+        for operation in result.operations
+        if operation.operation_id.endswith(":decode")
+    ]
+    if not token_steps_ms:
+        raise typer.BadParameter("simulation produced no decode operations for TPOT validation")
+    observed_tpot = percentile(token_steps_ms, 0.99)
+    predicted_ttft_interval = physical.predicted_metrics.p95_ttft_ms
+    predicted_tpot_interval = physical.predicted_metrics.p99_tpot_ms
+    predicted_ttft = predicted_ttft_interval.estimate
+    predicted_tpot = predicted_tpot_interval.estimate
+    ttft_relative_error = abs(observed_ttft - predicted_ttft) / max(predicted_ttft, 1e-9)
+    tpot_relative_error = abs(observed_tpot - predicted_tpot) / max(predicted_tpot, 1e-9)
+    ttft_interval_covered = (
+        predicted_ttft_interval.lower <= observed_ttft <= predicted_ttft_interval.upper
+    )
+    tpot_interval_covered = (
+        predicted_tpot_interval.lower <= observed_tpot <= predicted_tpot_interval.upper
+    )
     failure_reasons: list[str] = []
-    if relative_error > max_relative_error:
+    if ttft_relative_error > max_relative_error:
         failure_reasons.append(
-            f"relative_error={relative_error:.6f} exceeds {max_relative_error:.6f}"
+            f"p95 TTFT relative_error={ttft_relative_error:.6f} exceeds {max_relative_error:.6f}"
         )
-    if require_prediction_interval and not interval_covered:
+    if tpot_relative_error > max_relative_error:
+        failure_reasons.append(
+            f"p99 TPOT relative_error={tpot_relative_error:.6f} exceeds {max_relative_error:.6f}"
+        )
+    if require_prediction_interval and not ttft_interval_covered:
         failure_reasons.append("observed p95 TTFT is outside the plan prediction interval")
+    if require_prediction_interval and not tpot_interval_covered:
+        failure_reasons.append("observed p99 TPOT is outside the plan prediction interval")
+    slo_attained: bool | None = None
+    slo_p95_ttft_ms: float | None = None
+    slo_p99_tpot_ms: float | None = None
+    if slo is not None:
+        slo_p95_ttft_ms, slo_p99_tpot_ms = _parse_slo(slo)
+        slo_attained = observed_ttft <= slo_p95_ttft_ms and observed_tpot <= slo_p99_tpot_ms
+        if observed_ttft > slo_p95_ttft_ms:
+            failure_reasons.append(
+                f"observed p95 TTFT {observed_ttft:.6f} ms exceeds hard SLO "
+                f"{slo_p95_ttft_ms:.6f} ms"
+            )
+        if observed_tpot > slo_p99_tpot_ms:
+            failure_reasons.append(
+                f"observed p99 TPOT {observed_tpot:.6f} ms exceeds hard SLO "
+                f"{slo_p99_tpot_ms:.6f} ms"
+            )
     validation = {
         "schema_version": "sloforge.fabric.validation/v1",
         "plan_id": physical.plan_id,
         "seed": seed,
         "request_count": len(latencies),
         "predicted_p95_ttft_ms": predicted_ttft,
-        "predicted_p95_ttft_lower_ms": predicted_interval.lower,
-        "predicted_p95_ttft_upper_ms": predicted_interval.upper,
+        "predicted_p95_ttft_lower_ms": predicted_ttft_interval.lower,
+        "predicted_p95_ttft_upper_ms": predicted_ttft_interval.upper,
         "observed_p95_ttft_ms": observed_ttft,
+        # Retain the v1 TTFT-only aliases for existing artifact consumers.
         "absolute_error_ms": abs(observed_ttft - predicted_ttft),
-        "relative_error": relative_error,
+        "relative_error": ttft_relative_error,
+        "prediction_interval_covered": ttft_interval_covered,
+        "p95_ttft_absolute_error_ms": abs(observed_ttft - predicted_ttft),
+        "p95_ttft_relative_error": ttft_relative_error,
+        "p95_ttft_prediction_interval_covered": ttft_interval_covered,
+        "predicted_p99_tpot_ms": predicted_tpot,
+        "predicted_p99_tpot_lower_ms": predicted_tpot_interval.lower,
+        "predicted_p99_tpot_upper_ms": predicted_tpot_interval.upper,
+        "observed_p99_tpot_ms": observed_tpot,
+        "p99_tpot_absolute_error_ms": abs(observed_tpot - predicted_tpot),
+        "p99_tpot_relative_error": tpot_relative_error,
+        "p99_tpot_prediction_interval_covered": tpot_interval_covered,
         "maximum_relative_error": max_relative_error,
-        "prediction_interval_covered": interval_covered,
         "prediction_interval_required": require_prediction_interval,
+        "hard_slo_evaluated": slo is not None,
+        "slo_p95_ttft_ms": slo_p95_ttft_ms,
+        "slo_p99_tpot_ms": slo_p99_tpot_ms,
+        "slo_attained": slo_attained,
         "valid": not failure_reasons,
         "failure_reasons": failure_reasons,
         "simulation_result_sha256": sha256_file(output / "result.json"),
