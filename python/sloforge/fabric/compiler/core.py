@@ -102,11 +102,30 @@ class CompilerConstraints(CompilerModel):
     minimum_availability: Annotated[float, Field(ge=0.0, le=1.0, allow_inf_nan=False)] = 0.0
     maximum_cost_per_million_tokens: PositiveFinite | None = None
     maximum_ranks: PositiveInt
+    tensor_parallel_degree: PositiveInt | None = None
+    pipeline_parallel_degree: PositiveInt | None = None
+    data_parallel_degree: PositiveInt | None = None
+    expert_parallel_degree: PositiveInt | None = None
     memory_safety_fraction: Annotated[float, Field(gt=0.0, lt=0.5, allow_inf_nan=False)] = 0.10
     require_disaggregation: bool = False
     permitted_transports: tuple[
         Literal["shared_memory", "nvlink", "pcie", "infiniband", "roce", "tcp"], ...
     ] = ("shared_memory", "nvlink", "pcie", "infiniband", "roce", "tcp")
+
+    @model_validator(mode="after")
+    def validate_fixed_parallelism(self) -> Self:
+        fixed_rank_count = math.prod(
+            degree
+            for degree in (
+                self.tensor_parallel_degree,
+                self.pipeline_parallel_degree,
+                self.data_parallel_degree,
+            )
+            if degree is not None
+        )
+        if fixed_rank_count > self.maximum_ranks:
+            raise ValueError("fixed TP x PP x DP exceeds maximum_ranks")
+        return self
 
 
 class CompilerRequest(CompilerModel):
@@ -1042,6 +1061,13 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
     combinations = itertools.product(degrees, degrees, degrees, degrees, disaggregation_options)
     placement_cache: dict[int, tuple[GpuNode, ...]] = {}
     for tp, pp, dp, ep, disaggregated in combinations:
+        if (
+            (request.constraints.tensor_parallel_degree not in (None, tp))
+            or (request.constraints.pipeline_parallel_degree not in (None, pp))
+            or (request.constraints.data_parallel_degree not in (None, dp))
+            or (request.constraints.expert_parallel_degree not in (None, ep))
+        ):
+            continue
         rank_count = tp * pp * dp
         if rank_count > maximum:
             continue
