@@ -5,6 +5,7 @@ from .constraints import ConstraintStore
 from .fixture import (
     CancellationPolicyVerifier,
     cancellation_fixture_candidates,
+    compiled_candidate_policy,
     run_cancellation_cegis,
 )
 from .local import LocalSynthesisResult, synthesize_local_run
@@ -36,6 +37,7 @@ __all__ = [
     "VerificationFailure",
     "VerificationOutcome",
     "cancellation_fixture_candidates",
+    "compiled_candidate_policy",
     "minimize_protocol_failure",
     "run_cancellation_cegis",
     "synthesize_local_run",

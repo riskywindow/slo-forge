@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
 from pathlib import Path
@@ -13,7 +14,17 @@ from sloforge.genesis.ir import (
     CounterexampleScope,
     LearnedConstraint,
     RequestEventCase,
+    RequestTraceCounterexamplePayload,
     TransformationFamily,
+    load_counterexample,
+)
+from sloforge.genesis.policy_dsl import (
+    BytecodeProgram,
+    check_policy,
+    compile_policy,
+    execute_bytecode,
+    format_policy,
+    parse_policy,
 )
 from sloforge.genesis.search import CandidateDesign, MutationChoice, ParameterValue
 
@@ -30,6 +41,44 @@ from .models import (
 
 def _digest(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
+
+
+_UNSAFE_POLICY = """\
+policy deadline_batch
+input queue_length int 0 32
+input slo_slack_ms int 0 1000
+output int 0 4
+limit 64
+return (clamp (if (lt slo_slack_ms 20) 1 (min queue_length 4)) 0 4)
+"""
+
+_CORRECTED_POLICY = """\
+policy deadline_cancel_batch
+input queue_length int 0 32
+input slo_slack_ms int 0 1000
+input cancellation_pending bool false true
+output int 0 4
+limit 64
+return (clamp (if cancellation_pending 0 (if (lt slo_slack_ms 20) 1 (min queue_length 4))) 0 4)
+"""
+
+
+def compiled_candidate_policy(candidate: CandidateDesign) -> tuple[str, BytecodeProgram, bytes]:
+    """Compile the exact restricted policy represented by a candidate design."""
+
+    safe = any(
+        mutation.parameter("cancel_check_before_emit") == "true" for mutation in candidate.mutations
+    )
+    program = parse_policy(_CORRECTED_POLICY if safe else _UNSAFE_POLICY)
+    check_policy(program)
+    bytecode = compile_policy(program)
+    payload = json.dumps(
+        dataclasses.asdict(bytecode),
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode()
+    return format_policy(program), bytecode, payload
 
 
 def _design(identifier: str, *, safe: bool, upside: float, seed: int) -> CandidateDesign:
@@ -94,11 +143,7 @@ class CancellationPolicyVerifier:
         seed: int,
     ) -> VerificationOutcome:
         trace = witness or _initial_witness()
-        check_before_emit = any(
-            mutation.parameter("cancel_check_before_emit") == "true"
-            for mutation in candidate.mutations
-            if mutation.family is TransformationFamily.BATCHING
-        )
+        _source, bytecode, policy_payload = compiled_candidate_policy(candidate)
         admitted: set[str] = set()
         cancelled: set[str] = set()
         violation = False
@@ -112,7 +157,16 @@ class CancellationPolicyVerifier:
                 and event.request_id in admitted
                 and event.request_id in cancelled
             ):
-                if check_before_emit:
+                available: dict[str, int | bool] = {
+                    "queue_length": 1,
+                    "slo_slack_ms": 100,
+                    "cancellation_pending": event.request_id in cancelled,
+                }
+                names = {item.name for item in bytecode.inputs}
+                scheduling_decision = execute_bytecode(
+                    bytecode, {name: available[name] for name in names}
+                )
+                if type(scheduling_decision) is int and scheduling_decision == 0:
                     continue
                 violation = True
                 break
@@ -120,7 +174,7 @@ class CancellationPolicyVerifier:
             json.dumps(
                 {
                     "candidate": candidate.candidate_id,
-                    "check_before_emit": check_before_emit,
+                    "policy_bytecode_sha256": hashlib.sha256(policy_payload).hexdigest(),
                     "seed": seed,
                     "trace": [event.model_dump(mode="json") for event in trace.events],
                     "violation": violation,
@@ -192,6 +246,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--counterexample", type=Path)
     arguments = parser.parse_args()
     candidate = next(
         (
@@ -203,7 +258,15 @@ def main() -> int:
     )
     if candidate is None:
         raise SystemExit(f"unknown fixture candidate: {arguments.candidate}")
-    outcome = CancellationPolicyVerifier().verify(candidate, None, seed=arguments.seed)
+    witness: ProtocolWitness | None = None
+    if arguments.counterexample is not None:
+        counterexample = load_counterexample(arguments.counterexample)
+        if counterexample.candidate_id != candidate.candidate_id:
+            raise SystemExit("counterexample candidate identity does not match")
+        if not isinstance(counterexample.payload, RequestTraceCounterexamplePayload):
+            raise SystemExit("counterexample is not a request-trace witness")
+        witness = ProtocolWitness(events=counterexample.payload.events)
+    outcome = CancellationPolicyVerifier().verify(candidate, witness, seed=arguments.seed)
     print(outcome.model_dump_json())
     return 0 if outcome.passed else 1
 

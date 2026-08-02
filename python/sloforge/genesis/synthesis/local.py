@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import dataclasses
 import hashlib
 import json
 import os
 import sys
 import tempfile
+from collections import deque
 from pathlib import Path
 from typing import Literal
 
@@ -29,12 +29,17 @@ from sloforge.genesis.ir import (
     load_inference_genome,
     write_canonical,
 )
-from sloforge.genesis.policy_dsl import check_policy, compile_policy, format_policy, parse_policy
+from sloforge.genesis.policy_dsl import execute_bytecode
 from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
 from sloforge.genesis.search import CandidateDesign
 
-from .fixture import cancellation_fixture_candidates, run_cancellation_cegis
-from .models import CegisRunResult
+from .fixture import (
+    cancellation_fixture_candidates,
+    compiled_candidate_policy,
+    run_cancellation_cegis,
+)
+from .lowering import lower_candidate
+from .models import CegisRunResult, ConstraintDocument
 
 
 class LocalSynthesisResult(BaseModel):
@@ -56,26 +61,6 @@ class LocalSynthesisResult(BaseModel):
     cegis_result_path: str
 
 
-_UNSAFE_POLICY = """\
-policy deadline_batch
-input queue_length int 0 32
-input slo_slack_ms int 0 1000
-output int 0 4
-limit 64
-return (clamp (if (lt slo_slack_ms 20) 1 (min queue_length 4)) 0 4)
-"""
-
-_CORRECTED_POLICY = """\
-policy deadline_cancel_batch
-input queue_length int 0 32
-input slo_slack_ms int 0 1000
-input cancellation_pending bool false true
-output int 0 4
-limit 64
-return (clamp (if cancellation_pending 0 (if (lt slo_slack_ms 20) 1 (min queue_length 4))) 0 4)
-"""
-
-
 def _atomic_write(path: Path, payload: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
@@ -95,45 +80,8 @@ def _atomic_write(path: Path, payload: bytes) -> None:
 
 
 def _policy(design: CandidateDesign) -> tuple[str, bytes]:
-    safe = any(
-        mutation.parameter("cancel_check_before_emit") == "true" for mutation in design.mutations
-    )
-    source = _CORRECTED_POLICY if safe else _UNSAFE_POLICY
-    program = parse_policy(source)
-    check_policy(program)
-    bytecode = compile_policy(program)
-    payload = json.dumps(
-        dataclasses.asdict(bytecode),
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ).encode()
-    return format_policy(program), payload
-
-
-def _mutate_genome(baseline: InferenceGenome, design: CandidateDesign) -> InferenceGenome:
-    payload = baseline.model_dump(mode="json")
-    safe = any(
-        mutation.parameter("cancel_check_before_emit") == "true" for mutation in design.mutations
-    )
-    payload["genome_id"] = f"{baseline.genome_id}-{design.candidate_id[-12:]}"
-    payload["request"]["queue_discipline"] = "earliest_deadline"
-    payload["request"]["cancellation_behavior"] = "immediate" if safe else "safe_point"
-    payload["serving"]["decode_scheduling"] = "slo_slack"
-    for region in ("request", "serving"):
-        payload[region]["node"]["extensions"]["sloforge.dev/synthesized-policy"] = {
-            "cancel_check_before_emit": safe,
-            "candidate_id": design.candidate_id,
-            "policy": "deadline_cancel_batch" if safe else "deadline_batch",
-        }
-    payload["extensions"]["sloforge.dev/synthesis-candidate"] = {
-        "candidate_id": design.candidate_id,
-        "parent_genome_hash": canonical_hash(baseline),
-        "transformation_ids": [item.transformation_id for item in design.mutations],
-    }
-    return InferenceGenome.model_validate_json(
-        json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False), strict=True
-    )
+    source, _bytecode, payload = compiled_candidate_policy(design)
+    return source, payload
 
 
 def _evidence_reference(path: Path, *, evidence_id: str, claim_id: str) -> EvidenceReference:
@@ -153,6 +101,11 @@ def _candidate_ir(
     *,
     budget_usd: float,
     runtime_differential_passed: bool,
+    runtime_evidence_path: Path | None,
+    modelcheck_passed: bool,
+    modelcheck_evidence_path: Path | None,
+    simulation_passed: bool,
+    simulation_evidence_path: Path | None,
     counterexample_directory: Path,
 ) -> Candidate:
     events = [
@@ -164,13 +117,18 @@ def _candidate_ir(
         )
     ]
 
-    def transition(state: CandidateSuccessState | CandidateFailureState, reason: str) -> None:
+    def transition(
+        state: CandidateSuccessState | CandidateFailureState,
+        reason: str,
+        evidence: tuple[EvidenceReference, ...] = (),
+    ) -> None:
         events.append(
             LifecycleEvent(
                 sequence=len(events),
                 from_state=events[-1].to_state,
                 to_state=state,
                 reason=reason,
+                evidence=evidence,
             )
         )
 
@@ -188,14 +146,72 @@ def _candidate_ir(
                 "independent cancellation verifier produced a minimized counterexample",
             )
         elif runtime_differential_passed:
+            runtime_evidence = (
+                (
+                    _evidence_reference(
+                        runtime_evidence_path,
+                        evidence_id=f"candidate-runtime:{design.candidate_id}",
+                        claim_id="candidate-runtime-differential",
+                    ),
+                )
+                if runtime_evidence_path is not None
+                else ()
+            )
             transition(
                 CandidateSuccessState.REFERENCE_TESTED,
-                "generated runtime differential harness passed in the sandbox",
+                "candidate-specific generated runtime differential harness passed in the sandbox",
+                runtime_evidence,
             )
             transition(
                 CandidateSuccessState.PROPERTY_TESTED,
                 "bounded cancellation protocol verifier accepted the corrected policy",
             )
+            modelcheck_evidence = (
+                (
+                    _evidence_reference(
+                        modelcheck_evidence_path,
+                        evidence_id=f"candidate-modelcheck:{design.candidate_id}",
+                        claim_id="bounded-cancellation-modelcheck",
+                    ),
+                )
+                if modelcheck_evidence_path is not None
+                else ()
+            )
+            if not modelcheck_passed:
+                transition(
+                    CandidateFailureState.MODEL_CHECK_REJECTED,
+                    "bounded explicit-state model checker rejected the candidate",
+                    modelcheck_evidence,
+                )
+            else:
+                transition(
+                    CandidateSuccessState.MODEL_CHECKED,
+                    "bounded explicit-state cancellation model completed without a counterexample",
+                    modelcheck_evidence,
+                )
+                simulation_evidence = (
+                    (
+                        _evidence_reference(
+                            simulation_evidence_path,
+                            evidence_id=f"candidate-simulation:{design.candidate_id}",
+                            claim_id="deterministic-candidate-simulation",
+                        ),
+                    )
+                    if simulation_evidence_path is not None
+                    else ()
+                )
+                if simulation_passed:
+                    transition(
+                        CandidateSuccessState.SIMULATED,
+                        "candidate genome completed deterministic digital-twin smoke simulation",
+                        simulation_evidence,
+                    )
+                else:
+                    transition(
+                        CandidateFailureState.PERFORMANCE_REJECTED,
+                        "candidate digital-twin simulation did not complete",
+                        simulation_evidence,
+                    )
         else:
             transition(
                 CandidateFailureState.SANDBOX_VIOLATION,
@@ -245,13 +261,68 @@ def _candidate_ir(
     )
 
 
-def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, str]:
-    runtime_directory = run_directory / "generated_runtime"
+def _materialize_candidate_runtime(
+    run_directory: Path,
+    candidate_directory: Path,
+    design: CandidateDesign,
+    genome: InferenceGenome,
+) -> tuple[Path, dict[str, str]]:
+    baseline_runtime = run_directory / "generated_runtime"
+    runtime_directory = candidate_directory / "generated_runtime"
+    policy = (candidate_directory / "policy.bytecode.json").read_bytes()
+    policy_source = (candidate_directory / "policy.slo").read_bytes()
+    for name in ("runtime.py", "correctness_harness.py", "deployment_manifest.json"):
+        _atomic_write(runtime_directory / name, (baseline_runtime / name).read_bytes())
+    _atomic_write(runtime_directory / "policy.bytecode.json", policy)
+    _atomic_write(runtime_directory / "policy.slo", policy_source)
+    config = json.loads((baseline_runtime / "runtime_config.json").read_text(encoding="utf-8"))
+    config.update(
+        {
+            "genome_hash": canonical_hash(genome),
+            "policy_bytecode_path": "policy.bytecode.json",
+            "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+        }
+    )
+    _atomic_write(
+        runtime_directory / "runtime_config.json",
+        json.dumps(config, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+        + b"\n",
+    )
+    hashes = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(runtime_directory.iterdir())
+        if path.is_file()
+    }
+    manifest = {
+        "schema_version": "1.0.0",
+        "candidate_id": design.candidate_id,
+        "candidate_genome_hash": canonical_hash(genome),
+        "policy_bytecode_sha256": hashlib.sha256(policy).hexdigest(),
+        "artifacts": hashes,
+    }
+    _atomic_write(
+        runtime_directory / "candidate_runtime_manifest.json",
+        json.dumps(manifest, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
+    )
+    return runtime_directory, hashes
+
+
+def _run_differential_harness(
+    run_directory: Path,
+    candidate_directory: Path,
+    design: CandidateDesign,
+    genome: InferenceGenome,
+    *,
+    seed: int,
+) -> tuple[bool, str, Path]:
+    runtime_directory, runtime_hashes = _materialize_candidate_runtime(
+        run_directory, candidate_directory, design, genome
+    )
     config = json.loads((runtime_directory / "runtime_config.json").read_text(encoding="utf-8"))
     runtime_seed = int(config["generation_seed"])
     package = load_reference_package(Path(config["reference_package_root"]))
     samples = package.resolve(package.manifest.quality_contract.final_evaluation_corpus)
-    sandbox_output = run_directory / "synthesis/runtime-differential-sandbox"
+    sandbox_output = candidate_directory / "evidence/runtime-differential-sandbox"
     repository_python = Path(__file__).resolve().parents[3]
     result = execute_sandboxed(
         SandboxRequest(
@@ -295,6 +366,12 @@ def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, 
     )
     evidence = {
         "schema_version": "1.0.0",
+        "candidate_id": design.candidate_id,
+        "candidate_genome_hash": canonical_hash(genome),
+        "policy_bytecode_sha256": hashlib.sha256(
+            (candidate_directory / "policy.bytecode.json").read_bytes()
+        ).hexdigest(),
+        "runtime_artifact_hashes": runtime_hashes,
         "seed": seed,
         "corpus_path": str(samples.resolve()),
         "corpus_sha256": hashlib.sha256(samples.read_bytes()).hexdigest(),
@@ -303,11 +380,153 @@ def _run_differential_harness(run_directory: Path, *, seed: int) -> tuple[bool, 
         "cases": cases if isinstance(cases, list) else [],
         "failures": harness.get("failures", []) if isinstance(harness, dict) else [],
     }
+    evidence_path = candidate_directory / "evidence/runtime-differential-result.json"
     _atomic_write(
-        run_directory / "synthesis/runtime-differential-result.json",
+        evidence_path,
         json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
     )
-    return passed, result.termination.value
+    return passed, result.termination.value, evidence_path
+
+
+def _bounded_candidate_modelcheck(
+    candidate_directory: Path, design: CandidateDesign, *, seed: int
+) -> tuple[bool, Path]:
+    """Exhaustively explore the declared one-request cancellation abstraction."""
+
+    _source, policy, policy_payload = compiled_candidate_policy(design)
+    maximum_depth = 4
+    maximum_tokens = 2
+    initial = (False, False, 0)
+    queue: deque[tuple[tuple[bool, bool, int], int, tuple[str, ...]]] = deque(
+        [(initial, 0, ())]
+    )
+    visited = {(initial, 0)}
+    transition_count = 0
+    counterexample: tuple[str, ...] | None = None
+    actions = ("admit", "cancel", "emit", "schedule")
+    while queue:
+        (admitted, cancelled, committed), depth, trace = queue.popleft()
+        if depth == maximum_depth:
+            continue
+        for action in actions:
+            next_state = (admitted, cancelled, committed)
+            if action == "admit" and not admitted:
+                next_state = (True, False, 0)
+            elif action == "cancel" and admitted and not cancelled:
+                next_state = (admitted, True, committed)
+            elif action == "emit" and admitted and committed < maximum_tokens:
+                names = {item.name for item in policy.inputs}
+                values: dict[str, int | bool] = {
+                    "queue_length": 1,
+                    "slo_slack_ms": 100,
+                    "cancellation_pending": cancelled,
+                }
+                decision = execute_bytecode(policy, {name: values[name] for name in names})
+                if cancelled and type(decision) is int and decision > 0:
+                    counterexample = (*trace, action)
+                    queue.clear()
+                    break
+                if not cancelled:
+                    next_state = (admitted, cancelled, committed + 1)
+            transition_count += 1
+            item = (next_state, depth + 1)
+            if item not in visited:
+                visited.add(item)
+                queue.append((next_state, depth + 1, (*trace, action)))
+        if counterexample is not None:
+            break
+    passed = counterexample is None
+    evidence = {
+        "schema_version": "genesis.candidate-modelcheck.v1",
+        "candidate_id": design.candidate_id,
+        "policy_bytecode_sha256": hashlib.sha256(policy_payload).hexdigest(),
+        "model_version": "deadline-cancellation-abstraction.v1",
+        "seed": seed,
+        "bounds": {
+            "max_requests": 1,
+            "max_committed_tokens": maximum_tokens,
+            "max_depth": maximum_depth,
+            "action_count": len(actions),
+        },
+        "state_count": len(visited),
+        "transition_count": transition_count,
+        "assumptions": [
+            "single-request abstraction",
+            "reliable local token delivery",
+            "bounded restricted-policy execution",
+        ],
+        "invariants": ["no token is scheduled for commitment after cancellation"],
+        "result": "pass" if passed else "fail",
+        "counterexample_trace": None if counterexample is None else list(counterexample),
+        "universal_proof": False,
+    }
+    path = candidate_directory / "evidence/modelcheck-result.json"
+    _atomic_write(
+        path,
+        json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
+    )
+    return passed, path
+
+
+def _run_candidate_simulation(
+    run_directory: Path,
+    candidate_directory: Path,
+    design: CandidateDesign,
+    *,
+    seed: int,
+) -> tuple[bool, Path]:
+    manifest_path = run_directory / "run_manifest.json"
+    if manifest_path.is_file():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        workload_path = Path(manifest["workload_contract"]["path"])
+    else:
+        runtime_config = json.loads(
+            (run_directory / "generated_runtime/runtime_config.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        package = load_reference_package(Path(runtime_config["reference_package_root"]))
+        workload_path = package.resolve(package.manifest.sample_corpus)
+    requests = [
+        json.loads(line)
+        for line in workload_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    raw = [
+        {
+            "ordinal": index,
+            "modeled_service_units": len(str(item["text"]))
+            + int(item["maximum_new_tokens"]),
+            "deadline_rank": int(item["maximum_new_tokens"]),
+        }
+        for index, item in enumerate(requests)
+    ]
+    ordered = sorted(raw, key=lambda item: (item["deadline_rank"], item["ordinal"]))
+    clock = 0
+    events: list[dict[str, int]] = []
+    for item in ordered:
+        clock += item["modeled_service_units"]
+        events.append({**item, "completion_units": clock})
+    passed = bool(events)
+    evidence = {
+        "schema_version": "genesis.candidate-simulation.v1",
+        "candidate_id": design.candidate_id,
+        "seed": seed,
+        "workload_path": str(workload_path.resolve()),
+        "workload_sha256": hashlib.sha256(workload_path.read_bytes()).hexdigest(),
+        "queue_policy": "earliest_deadline",
+        "raw_requests": raw,
+        "events": events,
+        "result": "pass" if passed else "inconclusive",
+        "comparison_permitted": False,
+        "hardware_backed": False,
+    }
+    path = candidate_directory / "evidence/simulation-result.json"
+    _atomic_write(
+        path,
+        json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
+    )
+    return passed, path
 
 
 def synthesize_local_run(
@@ -323,31 +542,84 @@ def synthesize_local_run(
     cegis = run_cancellation_cegis(cegis_directory, seed=seed)
     write_canonical(cegis, synthesis_directory / "cegis_result.json")
     designs = cancellation_fixture_candidates(seed)
-    runtime_passed, sandbox_termination = _run_differential_harness(run_directory, seed=seed)
+    constraint_document = ConstraintDocument.model_validate_json(
+        (cegis_directory / "constraints.json").read_bytes(), strict=True
+    )
+    learned = tuple(item.learned for item in constraint_document.constraints)
+    runtime_passed = False
+    sandbox_termination = "not_run"
     accepted_hash: str | None = None
     accepted_id: str | None = None
     for design in designs:
         candidate_directory = run_directory / "candidates" / design.candidate_id
-        genome = _mutate_genome(baseline, design)
+        lowered = lower_candidate(
+            baseline,
+            design,
+            learned_constraints=learned,
+            counterexample_references=cegis.counterexample_ids,
+        )
+        design = lowered.design
+        genome = lowered.genome
         source, bytecode = _policy(design)
         _atomic_write(candidate_directory / "policy.slo", source.encode())
         _atomic_write(candidate_directory / "policy.bytecode.json", bytecode)
         write_canonical(design, candidate_directory / "candidate_design.json")
         write_canonical(genome, candidate_directory / "inference_genome.json")
+        for transformation in lowered.transformations:
+            write_canonical(
+                transformation,
+                candidate_directory
+                / "transformations"
+                / f"{transformation.transformation_id}.json",
+            )
+        candidate_runtime_passed = False
+        candidate_sandbox_termination = "not_run"
+        runtime_evidence_path: Path | None = None
+        modelcheck_passed = False
+        modelcheck_evidence_path: Path | None = None
+        simulation_passed = False
+        simulation_evidence_path: Path | None = None
+        if design.candidate_id not in cegis.suppressed_candidate_ids:
+            (
+                candidate_runtime_passed,
+                candidate_sandbox_termination,
+                runtime_evidence_path,
+            ) = _run_differential_harness(
+                run_directory,
+                candidate_directory,
+                design,
+                genome,
+                seed=seed,
+            )
+        if candidate_runtime_passed and design.candidate_id == cegis.accepted_candidate_id:
+            modelcheck_passed, modelcheck_evidence_path = _bounded_candidate_modelcheck(
+                candidate_directory, design, seed=seed
+            )
+            if modelcheck_passed:
+                simulation_passed, simulation_evidence_path = _run_candidate_simulation(
+                    run_directory, candidate_directory, design, seed=seed
+                )
         candidate = _candidate_ir(
             design,
             genome,
             cegis,
             budget_usd=budget_usd,
             runtime_differential_passed=(
-                runtime_passed and design.candidate_id == cegis.accepted_candidate_id
+                candidate_runtime_passed and design.candidate_id == cegis.accepted_candidate_id
             ),
+            runtime_evidence_path=runtime_evidence_path,
+            modelcheck_passed=modelcheck_passed,
+            modelcheck_evidence_path=modelcheck_evidence_path,
+            simulation_passed=simulation_passed,
+            simulation_evidence_path=simulation_evidence_path,
             counterexample_directory=cegis_directory / "counterexamples",
         )
         write_canonical(candidate, candidate_directory / "candidate.json")
-        if candidate.state is CandidateSuccessState.PROPERTY_TESTED:
+        if candidate.state is CandidateSuccessState.SIMULATED:
             accepted_id = candidate.candidate_id
             accepted_hash = candidate.genome_hash.value
+            runtime_passed = candidate_runtime_passed
+            sandbox_termination = candidate_sandbox_termination
     result = LocalSynthesisResult(
         seed=seed,
         baseline_genome_hash=canonical_hash(baseline),

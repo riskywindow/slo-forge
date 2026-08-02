@@ -19,7 +19,13 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
-from sloforge.genesis.ir import CandidateSuccessState, canonical_hash, load_candidate
+from sloforge.genesis.ir import (
+    CandidateSuccessState,
+    canonical_hash,
+    load_candidate,
+    load_transformation,
+)
+from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytecode_document
 from sloforge.genesis.search import CandidateDesign
 from sloforge.genesis.synthesis import CancellationPolicyVerifier
 
@@ -67,6 +73,8 @@ class CapsuleBuildResult(BaseModel):
     evidence_count: int
     claim_count: int
     promotion_eligible: bool
+    local_evolution_eligible: bool
+    external_production_eligible: bool
     performance_scope: str
     hardware_backed: bool
 
@@ -150,8 +158,11 @@ def _runtime_bundle_bytes(
     candidate_id: str,
     candidate_genome_hash: str,
 ) -> bytes:
-    runtime_root = run_directory / "generated_runtime"
+    runtime_root = candidate_directory / "generated_runtime"
     policy = (candidate_directory / "policy.bytecode.json").read_bytes()
+    policy_source = (candidate_directory / "policy.slo").read_bytes()
+    admitted_policy = load_bytecode_document(policy)
+    authenticate_bytecode_source(admitted_policy, policy_source)
     config = _read_object(runtime_root / "runtime_config.json")
     config.update(
         {
@@ -165,7 +176,7 @@ def _runtime_bundle_bytes(
         "runtime.py": (runtime_root / "runtime.py").read_bytes(),
         "correctness_harness.py": (runtime_root / "correctness_harness.py").read_bytes(),
         "runtime_config.json": canonical_json(config) + b"\n",
-        "policy.slo": (candidate_directory / "policy.slo").read_bytes(),
+        "policy.slo": policy_source,
         "policy.bytecode.json": policy,
     }
     for path in sorted(package_root.rglob("*")):
@@ -375,11 +386,7 @@ def build_local_capsule(
     )
     if context_path.exists() and context_path.is_symlink():
         raise ValueError("capsule trust output must not be a symlink")
-    try:
-        context_path.resolve().relative_to(output_directory.resolve())
-    except ValueError:
-        pass
-    else:
+    if context_path.resolve().is_relative_to(output_directory.resolve()):
         raise ValueError("capsule trust output must be outside the untrusted capsule directory")
     if context_path.exists():
         raise FileExistsError(f"refusing to overwrite capsule trust output: {context_path}")
@@ -389,8 +396,8 @@ def build_local_capsule(
     run_directory = candidate_directory.parent.parent
     repository = Path(__file__).resolve().parents[4]
     candidate = load_candidate(candidate_directory / "candidate.json")
-    if candidate.state is not CandidateSuccessState.PROPERTY_TESTED:
-        raise ValueError("only a property-tested candidate can enter capsule construction")
+    if candidate.state is not CandidateSuccessState.SIMULATED:
+        raise ValueError("only a model-checked and simulated candidate can enter capsule construction")
     design = CandidateDesign.model_validate_json(
         (candidate_directory / "candidate_design.json").read_bytes(), strict=True
     )
@@ -438,6 +445,22 @@ def build_local_capsule(
     if candidate.genome_hash.value != canonical_hash(genome_document):
         raise ValueError("candidate genome changed after acceptance")
 
+    transformation_paths = sorted((candidate_directory / "transformations").glob("*.json"))
+    if len(transformation_paths) != len(candidate.transformation_ids):
+        raise ValueError("candidate transformation artifact set is incomplete")
+    transformations = [load_transformation(path) for path in transformation_paths]
+    if tuple(item.transformation_id for item in transformations) != candidate.transformation_ids:
+        raise ValueError("candidate transformation artifacts do not match lifecycle identifiers")
+    source_constraint = f"source_genome_sha256 == {synthesis['baseline_genome_hash']}"
+    target_constraint = f"target_genome_sha256 == {candidate.genome_hash.value}"
+    for transformation in transformations:
+        if source_constraint not in transformation.source_pattern.structural_constraints:
+            raise ValueError("transformation source hash does not match synthesis baseline")
+        if target_constraint not in transformation.target_pattern.structural_constraints:
+            raise ValueError("transformation target hash does not match accepted candidate")
+        if not transformation.verification_obligations:
+            raise ValueError("transformation is missing verification obligations")
+
     artifacts: list[ArtifactRef] = []
     runtime_bundle = _runtime_bundle_bytes(
         run_directory,
@@ -457,6 +480,18 @@ def build_local_capsule(
             media_type="application/zip",
         )
     )
+    for index, transformation_path in enumerate(transformation_paths):
+        artifacts.append(
+            _copy_artifact(
+                output_directory,
+                f"transformation-{index:03d}",
+                ArtifactRole.SEMANTIC_EVIDENCE,
+                transformation_path,
+                origin=ArtifactOrigin.VERIFIED_EVIDENCE,
+                suffix=".json",
+                media_type="application/json",
+            )
+        )
     artifacts.append(
         _copy_artifact(
             output_directory,
@@ -544,8 +579,27 @@ def build_local_capsule(
         origin=ArtifactOrigin.VERIFIED_EVIDENCE,
     )
     artifacts.append(semantic)
-    differential_path = run_directory / "synthesis/runtime-differential-result.json"
+    differential_path = candidate_directory / "evidence/runtime-differential-result.json"
     differential = _read_object(differential_path)
+    policy_digest = hashlib.sha256(
+        (candidate_directory / "policy.bytecode.json").read_bytes()
+    ).hexdigest()
+    if differential.get("candidate_id") != candidate.candidate_id:
+        raise ValueError("differential evidence candidate identity mismatch")
+    if differential.get("candidate_genome_hash") != candidate.genome_hash.value:
+        raise ValueError("differential evidence genome identity mismatch")
+    if differential.get("policy_bytecode_sha256") != policy_digest:
+        raise ValueError("differential evidence policy identity mismatch")
+    runtime_hashes = differential.get("runtime_artifact_hashes")
+    candidate_runtime = candidate_directory / "generated_runtime"
+    if not isinstance(runtime_hashes, dict) or any(
+        not isinstance(name, str)
+        or not isinstance(digest, str)
+        or not (candidate_runtime / name).is_file()
+        or hashlib.sha256((candidate_runtime / name).read_bytes()).hexdigest() != digest
+        for name, digest in runtime_hashes.items()
+    ):
+        raise ValueError("differential evidence runtime artifact identities do not match")
     final_corpus = package_root / str(
         package_manifest["quality_contract"]["final_evaluation_corpus"]
     )
@@ -577,7 +631,7 @@ def build_local_capsule(
     )
     artifacts.append(quality)
     memory_capacity = int(hardware_document.get("memory_bytes", 8 * 1024**3))
-    runtime_config = _read_object(run_directory / "generated_runtime/runtime_config.json")
+    runtime_config = _read_object(candidate_runtime / "runtime_config.json")
     resource_document = _resource_evidence(
         runtime_config,
         genome_document,
@@ -596,26 +650,47 @@ def build_local_capsule(
         origin=ArtifactOrigin.VERIFIED_EVIDENCE,
     )
     artifacts.append(resource)
-    operational_payload = canonical_json(
-        {
-            "schema_version": "1.0.0",
-            "method": "independent-bounded-cancellation-simulator",
-            "evidence_id": protocol.evidence_id,
-            "claim": "cancelled request emits no subsequent committed token",
-            "passed": True,
-            "seed": design.seed,
-            "scope": "six-event fixture plus minimized admit-cancel-emit schedule",
-            "universal_proof": False,
-        }
-    )
-    operational = _artifact(
+    modelcheck_path = candidate_directory / "evidence/modelcheck-result.json"
+    modelcheck_document = _read_object(modelcheck_path)
+    if (
+        modelcheck_document.get("candidate_id") != candidate.candidate_id
+        or modelcheck_document.get("policy_bytecode_sha256") != policy_digest
+        or modelcheck_document.get("result") != "pass"
+        or modelcheck_document.get("universal_proof") is not False
+        or not isinstance(modelcheck_document.get("state_count"), int)
+        or int(modelcheck_document["state_count"]) <= 0
+    ):
+        raise ValueError("candidate bounded model-check evidence is invalid or misbound")
+    operational = _copy_artifact(
         output_directory,
         "operational-evidence",
-        ArtifactRole.OPERATIONAL_EVIDENCE,
-        operational_payload,
+        ArtifactRole.MODEL_CHECK_RESULT,
+        modelcheck_path,
         origin=ArtifactOrigin.FORMAL_OR_BOUNDED_EVIDENCE,
+        suffix=".json",
+        media_type="application/json",
     )
     artifacts.append(operational)
+    simulation_path = candidate_directory / "evidence/simulation-result.json"
+    simulation_document = _read_object(simulation_path)
+    if (
+        simulation_document.get("candidate_id") != candidate.candidate_id
+        or simulation_document.get("result") != "pass"
+        or simulation_document.get("comparison_permitted") is not False
+        or simulation_document.get("workload_sha256") != workload_digest.value
+    ):
+        raise ValueError("candidate simulation evidence is invalid or misbound")
+    artifacts.append(
+        _copy_artifact(
+            output_directory,
+            "candidate-simulation",
+            ArtifactRole.PERFORMANCE_SAMPLES,
+            simulation_path,
+            origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
+            suffix=".json",
+            media_type="application/json",
+        )
+    )
 
     counterexample_refs: list[str] = []
     counterexample_directory = run_directory / "synthesis/cegis/counterexamples"
@@ -931,7 +1006,7 @@ def build_local_capsule(
         require_promotion_evidence=True,
     )
     report = validate_capsule(capsule, output_directory, context)
-    if not report.promotion_eligible:
+    if not report.local_evolution_eligible:
         issues = "; ".join(f"{item.code.value}:{item.path}" for item in report.issues)
         raise ValueError(f"newly built capsule failed independent validation: {issues}")
     manifest_path = publish_capsule(capsule, output_directory / "manifests")
@@ -944,7 +1019,9 @@ def build_local_capsule(
         artifact_count=len(capsule.artifacts),
         evidence_count=len(capsule.evidence),
         claim_count=len(capsule.claims),
-        promotion_eligible=True,
+        promotion_eligible=False,
+        local_evolution_eligible=True,
+        external_production_eligible=False,
         performance_scope="deterministic local service-model simulation",
         hardware_backed=False,
     )
