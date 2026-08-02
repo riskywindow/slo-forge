@@ -1,7 +1,9 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := check
 
-.PHONY: bootstrap check demo benchmark-cpu benchmark-gpu docker-smoke package
+.PHONY: bootstrap check demo benchmark-cpu benchmark-gpu docker-smoke package \
+	fabric-check fabric-demo autopsy-demo forgeci-demo warmpath-demo \
+	extension-evaluation clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -29,6 +31,33 @@ check:
 
 demo:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/demo --report-dir reports/demo --reset
+
+fabric-check:
+	uv run --locked ruff format --check python tests
+	uv run --locked ruff check python tests
+	uv run --locked mypy python/sloforge
+	uv run --locked pytest -q tests/python/test_fabric*.py tests/python/test_autopsy*.py tests/python/test_forgeci.py tests/python/test_warmpath.py
+	cargo fmt --all --check
+	cargo clippy -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-targets --all-features --locked -- -D warnings
+	cargo test -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-features --locked
+
+fabric-demo:
+	uv run --locked python -m sloforge.fabric.demo --artifact-dir artifacts/fabric-demo --report-dir reports/fabric-demo --reset
+
+autopsy-demo:
+	uv run --locked python -m sloforge.fabric.demo --artifact-dir artifacts/autopsy-demo --report-dir reports/autopsy-demo --reset
+
+forgeci-demo:
+	uv run --locked python -m sloforge.forgeci.demo --output artifacts/forgeci/demo --report reports/forgeci-evaluation.md --reset
+
+warmpath-demo:
+	uv run --locked python -m sloforge.warmpath.demo --artifact-dir artifacts/warmpath --report reports/warmpath-evaluation.md --reset
+
+extension-evaluation:
+	uv run --locked python -m sloforge.fabric.evaluation --output artifacts/fabric/evaluation --report-directory reports --reset
+
+clean-room-test:
+	./tools/clean-room-fabric.sh
 
 benchmark-cpu:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/cpu-demo --report-dir reports/cpu-demo --reset
