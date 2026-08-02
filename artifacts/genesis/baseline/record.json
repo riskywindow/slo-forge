@@ -1,0 +1,42 @@
+{
+  "schema_version": "sloforge.genesis.baseline/v1",
+  "recorded_date": "2026-08-02",
+  "timezone": "America/Los_Angeles",
+  "commit": "435a04799a831c3d19fce18eb816b206d23778d7",
+  "tag": "sloforge-genesis-baseline-435a047",
+  "source_worktree_clean_before_validation": true,
+  "checks": [
+    {"command": "make check", "status": "passed", "python_passed": 362, "python_skipped": 3, "ui_passed": 28},
+    {"command": "make fabric-check", "status": "passed", "python_passed": 292, "fabric_rust_passed": 31},
+    {"command": "make demo", "status": "passed", "live_requests": 120, "simulated_requests": 120},
+    {"command": "make fabric-demo", "status": "passed"},
+    {"command": "make autopsy-demo", "status": "passed"},
+    {"command": "make forgeci-demo", "status": "passed", "bisection_correct": true},
+    {"command": "make warmpath-demo", "status": "passed", "checksum_verified": true}
+  ],
+  "environment": {
+    "os": "macOS 15.6.1",
+    "process_architecture": "x86_64",
+    "logical_cpu_count": 12,
+    "memory_bytes": 25769803776,
+    "rust": "1.93.1",
+    "python": "3.12.7",
+    "uv": "0.10.2",
+    "node": "22.16.0",
+    "npm": "11.4.2",
+    "docker": "29.4.0",
+    "z3_available": true,
+    "nvidia_gpu_available": false,
+    "cuda_compiler_available": false
+  },
+  "safety": {
+    "gpu_budget_present": false,
+    "synthesis_budget_present": false,
+    "external_synthesis_allowed": false,
+    "gpu_allowed": false,
+    "multi_node_allowed": false,
+    "privileged_probes_allowed": false,
+    "external_deployment_allowed": false,
+    "live_promotion_allowed": false
+  }
+}
