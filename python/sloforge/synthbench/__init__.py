@@ -6,6 +6,7 @@ from .grammar import (
     load_hidden_cases,
     load_task,
     load_workload,
+    verify_public_package,
 )
 from .integrity import audit_raw_samples
 from .models import (
@@ -30,7 +31,7 @@ from .models import (
     TaskRunReport,
     WorkloadRequest,
 )
-from .runner import run_cpu_benchmark
+from .runner import run_cpu_benchmark, validate_cpu_benchmark_report
 from .special_case import audit_special_casing
 
 __all__ = [
@@ -64,6 +65,8 @@ __all__ = [
     "load_workload",
     "run_cpu_benchmark",
     "run_synthbench_demo",
+    "validate_cpu_benchmark_report",
+    "verify_public_package",
 ]
 
 

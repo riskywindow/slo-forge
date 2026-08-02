@@ -16,9 +16,12 @@ from pathlib import Path
 from types import ModuleType
 from typing import cast
 
+from sloforge.genesis.compiler import initialize_genesis_run
+from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.genesis.ir import canonical_json
+from sloforge.genesis.runtime import RuntimeRequest, load_generated_runtime
 
-from .grammar import load_hidden_cases, load_task, load_workload
+from .grammar import load_hidden_cases, load_task, load_workload, verify_public_package
 from .integrity import audit_raw_samples
 from .models import (
     AggregateMetrics,
@@ -34,6 +37,7 @@ from .models import (
     TaskRunReport,
     WorkloadRequest,
 )
+from .special_case import audit_special_casing
 
 
 def _sha(value: bytes) -> str:
@@ -141,6 +145,58 @@ class _Executor:
         return tuple(tokens), max(1, end - start), ttft, intervals
 
 
+class _GenesisExecutor:
+    """Execute requests through the generated bounded Genesis runtime."""
+
+    def __init__(self, config_path: Path, *, seed: int) -> None:
+        self.config_path = config_path
+        self.seed = seed
+
+    def execute(
+        self,
+        request: WorkloadRequest,
+        *,
+        deadline_ns: int,
+    ) -> tuple[tuple[int, ...], int, int, tuple[int, ...]]:
+        remaining_seconds = (deadline_ns - time.perf_counter_ns()) / 1e9
+        if remaining_seconds <= 0:
+            raise TimeoutError("ServingSynthBench CPU request exceeded run timeout")
+        runtime = load_generated_runtime(self.config_path, seed=self.seed)
+        runtime.start()
+        try:
+            started = time.perf_counter_ns()
+            handle = runtime.submit(
+                RuntimeRequest(
+                    request_id=request.request_id,
+                    prompt_tokens=request.prompt_tokens,
+                    maximum_new_tokens=request.maximum_new_tokens,
+                    seed=request.seed,
+                    timeout_seconds=remaining_seconds,
+                )
+            )
+            tokens: list[int] = []
+            token_times: list[int] = []
+            for event in handle.events(remaining_seconds):
+                if event.token_id is not None:
+                    tokens.append(event.token_id)
+                    token_times.append(time.perf_counter_ns())
+                elif event.kind.value in {"error", "cancelled", "timed_out"}:
+                    raise RuntimeError(
+                        f"generated Genesis runtime terminated request as {event.kind.value}"
+                    )
+            ended = time.perf_counter_ns()
+        finally:
+            runtime.shutdown()
+        if not token_times:
+            raise RuntimeError("generated Genesis runtime emitted no tokens")
+        return (
+            tuple(tokens),
+            max(1, ended - started),
+            max(1, token_times[0] - started),
+            tuple(max(1, right - left) for left, right in pairwise(token_times)),
+        )
+
+
 _MEASURED_BASELINES = (
     BaselineKind.PYTHON_EAGER_REFERENCE,
     BaselineKind.GENERIC_RUNTIME,
@@ -240,6 +296,7 @@ def _summary_from_artifact(
     latencies = [sample.latency_ns for sample in samples]
     ttfts = [sample.ttft_ns for sample in samples]
     intervals = [value for sample in samples for value in sample.inter_token_ns]
+    surface = samples[0].execution_surface
     return BaselineSummary(
         baseline=baseline,
         status=BaselineStatus.MEASURED,
@@ -247,11 +304,16 @@ def _summary_from_artifact(
             "direct dependency-free eager reference execution; summary derived from complete "
             "raw CPU samples"
             if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+            else "actual generated bounded Genesis runtime execution; CPU smoke validates the "
+            "zero-day runtime path but does not represent optimized search or a speedup claim"
+            if baseline is BaselineKind.GENESIS_FULL
             else f"CPU smoke request-order surrogate for {baseline.value}; uses the same "
             "dependency-free reference executor and does not represent an independent engine, "
             "kernel, or full ablation implementation"
         ),
         raw_samples_path=str(path.resolve()),
+        raw_samples_sha256=_sha(path.read_bytes()),
+        execution_surface=surface,
         sample_count=len(samples),
         valid_request_rate=(sum(sample.exact_match for sample in samples) / len(samples)),
         median_latency_ns=float(statistics.median(latencies)),
@@ -270,6 +332,8 @@ def _unavailable(baseline: BaselineKind, reason: str) -> BaselineSummary:
         status=BaselineStatus.NOT_APPLICABLE,
         reason=reason,
         raw_samples_path=None,
+        raw_samples_sha256=None,
+        execution_surface="not_applicable",
         sample_count=0,
         valid_request_rate=0.0,
         median_latency_ns=0.0,
@@ -293,6 +357,7 @@ def _hidden_summary_from_artifact(baseline: BaselineKind, path: Path) -> HiddenE
         baseline=baseline,
         status=BaselineStatus.MEASURED,
         evidence_path=str(path.resolve()),
+        evidence_sha256=_sha(path.read_bytes()),
         case_count=len(results),
         exact_case_rate=exact / len(results) if results else 0.0,
         escaped_regressions=len(results) - exact,
@@ -304,10 +369,158 @@ def _unavailable_hidden(baseline: BaselineKind) -> HiddenEvaluationSummary:
         baseline=baseline,
         status=BaselineStatus.NOT_APPLICABLE,
         evidence_path=None,
+        evidence_sha256=None,
         case_count=0,
         exact_case_rate=0.0,
         escaped_regressions=0,
     )
+
+
+def _decode_measurement_order(values: tuple[str, ...]) -> tuple[tuple[int, BaselineKind], ...]:
+    decoded: list[tuple[int, BaselineKind]] = []
+    for value in values:
+        try:
+            repetition_text, baseline_text = value.split(":", 1)
+            decoded.append((int(repetition_text), BaselineKind(baseline_text)))
+        except (TypeError, ValueError) as error:
+            raise ValueError("invalid SynthBench measurement run order") from error
+    return tuple(decoded)
+
+
+def _aggregate(reports: tuple[TaskRunReport, ...]) -> AggregateMetrics:
+    measured = [
+        baseline
+        for report in reports
+        for baseline in report.baselines
+        if baseline.status is BaselineStatus.MEASURED
+    ]
+    unavailable = [
+        baseline
+        for report in reports
+        for baseline in report.baselines
+        if baseline.status is BaselineStatus.NOT_APPLICABLE
+    ]
+    genesis = [
+        (report, baseline)
+        for report in reports
+        for baseline in report.baselines
+        if baseline.status is BaselineStatus.MEASURED
+        and baseline.baseline is BaselineKind.GENESIS_FULL
+    ]
+    sample_count = sum(baseline.sample_count for _, baseline in genesis)
+    exact_count = sum(
+        round(baseline.valid_request_rate * baseline.sample_count) for _, baseline in genesis
+    )
+    return AggregateMetrics(
+        measured_baseline_runs=len(measured),
+        unavailable_baseline_runs=len(unavailable),
+        valid_system_rate=(
+            sum(
+                baseline.valid_request_rate == 1.0
+                and next(
+                    hidden.exact_case_rate
+                    for hidden in report.hidden_evaluations
+                    if hidden.baseline is BaselineKind.GENESIS_FULL
+                )
+                == 1.0
+                for report, baseline in genesis
+            )
+            / len(genesis)
+            if genesis
+            else 0.0
+        ),
+        exact_request_rate=exact_count / sample_count if sample_count else 0.0,
+        measured_cpu_seconds=sum(baseline.measured_cpu_seconds for baseline in measured),
+        task_count=len({report.task_id for report in reports}),
+        distinct_task_seeds=len({report.task_generation_seed for report in reports}),
+    )
+
+
+def validate_cpu_benchmark_report(report: SynthBenchReport) -> None:
+    """Reopen raw artifacts and independently reconstruct every report summary."""
+
+    expected_baselines = set(BaselineKind)
+    if {item.run_seed for item in report.tasks} != set(report.run_seeds):
+        raise ValueError("report task seeds do not match declared run seeds")
+    task_seed_pairs = [(item.task_id, item.run_seed) for item in report.tasks]
+    if len(task_seed_pairs) != len(set(task_seed_pairs)):
+        raise ValueError("report repeats a task/run-seed pair")
+    for task_id in {item.task_id for item in report.tasks}:
+        variants = tuple(item for item in report.tasks if item.task_id == task_id)
+        if {item.run_seed for item in variants} != set(report.run_seeds):
+            raise ValueError("report omits a task/run-seed execution")
+        identities = {
+            (
+                item.task_hash,
+                item.public_package_hash,
+                item.reference_package_hash,
+                item.task_generation_seed,
+            )
+            for item in variants
+        }
+        if len(identities) != 1:
+            raise ValueError("task identity changes across run seeds")
+    for task in report.tasks:
+        if {item.baseline for item in task.baselines} != expected_baselines:
+            raise ValueError("report baseline set is incomplete")
+        if {item.baseline for item in task.hidden_evaluations} != expected_baselines:
+            raise ValueError("report hidden-evaluation set is incomplete")
+        manifest_path = Path(task.genesis_runtime_manifest_path)
+        if (
+            not manifest_path.is_file()
+            or _sha(manifest_path.read_bytes()) != task.genesis_runtime_manifest_sha256
+        ):
+            raise ValueError("generated Genesis runtime manifest is unavailable or changed")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(manifest, dict)
+            or manifest.get("package_hash") != task.reference_package_hash
+        ):
+            raise ValueError("generated runtime is bound to another public package")
+        all_samples: list[RawCpuSample] = []
+        for summary in task.baselines:
+            if summary.status is not BaselineStatus.MEASURED:
+                continue
+            if summary.raw_samples_path is None or summary.raw_samples_sha256 is None:
+                raise ValueError("measured baseline is missing raw evidence")
+            path = Path(summary.raw_samples_path)
+            if not path.is_file() or _sha(path.read_bytes()) != summary.raw_samples_sha256:
+                raise ValueError("SynthBench raw samples are unavailable or changed")
+            reconstructed = _summary_from_artifact(
+                summary.baseline, path, candidate_count=summary.candidate_count
+            )
+            if reconstructed != summary:
+                raise ValueError("baseline summary is not derived from its raw samples")
+            all_samples.extend(
+                RawCpuSample.model_validate_json(line, strict=True)
+                for line in path.read_bytes().splitlines()
+                if line
+            )
+        for hidden in task.hidden_evaluations:
+            if hidden.status is not BaselineStatus.MEASURED:
+                continue
+            if hidden.evidence_path is None or hidden.evidence_sha256 is None:
+                raise ValueError("measured hidden evaluation is missing evidence")
+            path = Path(hidden.evidence_path)
+            if not path.is_file() or _sha(path.read_bytes()) != hidden.evidence_sha256:
+                raise ValueError("SynthBench hidden evidence is unavailable or changed")
+            if _hidden_summary_from_artifact(hidden.baseline, path) != hidden:
+                raise ValueError("hidden summary is not derived from its evidence")
+        rebuilt_integrity = audit_raw_samples(
+            tuple(all_samples),
+            measured_baselines=_MEASURED_BASELINES,
+            workload_fingerprint=task.integrity.workload_fingerprint,
+            environment_fingerprint=task.integrity.environment_fingerprint,
+            task_hash=task.task_hash,
+            run_seed=task.run_seed,
+            repetitions=task.repetitions,
+            request_ids=task.integrity.expected_request_ids,
+            measurement_run_order=_decode_measurement_order(task.measurement_run_order),
+        )
+        if rebuilt_integrity != task.integrity or not rebuilt_integrity.passed:
+            raise ValueError("report integrity result is not independently reproducible")
+    if _aggregate(report.tasks) != report.metrics:
+        raise ValueError("aggregate metrics are not derived from task evidence")
 
 
 def _run_task(
@@ -318,17 +531,39 @@ def _run_task(
     configuration: CpuRunConfiguration,
     output_directory: Path,
 ) -> TaskRunReport:
+    verify_public_package(task_directory, descriptor)
     workload_path = task_directory / descriptor.workload_path
     workload = load_workload(task_directory, descriptor)
     hidden_cases = load_hidden_cases(task_directory, descriptor)
     workload_fingerprint = _sha(workload_path.read_bytes())
     environment = _environment_fingerprint()
     task_hash = _sha(canonical_json(descriptor))
-    executors = {
-        baseline: _Executor(
-            task_directory,
-            descriptor,
-            identity_suffix=f"{run_seed}_{baseline.value}",
+    runtime_root = output_directory / "generated-runtimes" / descriptor.task_id / f"seed-{run_seed}"
+    inspection = inspect_reference_package(task_directory / descriptor.public_package_path)
+    initialized = initialize_genesis_run(
+        task_directory / descriptor.public_package_path,
+        inspection,
+        runtime_root,
+        seed=run_seed,
+        workload_contract_hash=workload_fingerprint,
+    )
+    runtime_manifest = initialized.runtime.output_directory / "artifact_manifest.json"
+    special_case_audit = audit_special_casing(
+        initialized.runtime.output_directory / "runtime.py", descriptor, hidden_cases
+    )
+    if not special_case_audit.passed:
+        raise ValueError("generated Genesis runtime contains task-specific special casing")
+    executors: dict[BaselineKind, _Executor | _GenesisExecutor] = {
+        baseline: (
+            _GenesisExecutor(
+                initialized.runtime.output_directory / "runtime_config.json", seed=run_seed
+            )
+            if baseline is BaselineKind.GENESIS_FULL
+            else _Executor(
+                task_directory,
+                descriptor,
+                identity_suffix=f"{run_seed}_{baseline.value}",
+            )
         )
         for baseline in _MEASURED_BASELINES
     }
@@ -348,7 +583,7 @@ def _run_task(
     samples_by_baseline: dict[BaselineKind, list[RawCpuSample]] = {
         baseline: [] for baseline in _MEASURED_BASELINES
     }
-    for repetition, baseline in run_order:
+    for measurement_order_ordinal, (repetition, baseline) in enumerate(run_order):
         executor = executors[baseline]
         selected, _ = _selected_order(baseline, workload)
         for request in selected:
@@ -363,6 +598,7 @@ def _run_task(
                     baseline=baseline,
                     run_seed=run_seed,
                     repetition=repetition,
+                    measurement_order_ordinal=measurement_order_ordinal,
                     execution_ordinal=len(baseline_samples),
                     request_id=request.request_id,
                     latency_ns=latency,
@@ -371,6 +607,13 @@ def _run_task(
                     observed_tokens=observed,
                     expected_tokens=request.expected_tokens,
                     exact_match=observed == request.expected_tokens,
+                    execution_surface=(
+                        "python_eager_reference"
+                        if baseline is BaselineKind.PYTHON_EAGER_REFERENCE
+                        else "genesis_generated_runtime"
+                        if baseline is BaselineKind.GENESIS_FULL
+                        else "reference_order_surrogate"
+                    ),
                 )
             )
     summaries: list[BaselineSummary] = []
@@ -391,16 +634,24 @@ def _run_task(
         )
         _write_samples(path, persisted_samples)
         _, candidate_count = _selected_order(baseline, workload)
+        if baseline is BaselineKind.GENESIS_FULL:
+            candidate_count = 1
         summaries.append(_summary_from_artifact(baseline, path, candidate_count=candidate_count))
         all_samples.extend(persisted_samples)
         hidden_requests = tuple(case.request for case in hidden_cases)
         selected_hidden, _ = _selected_order(baseline, hidden_requests)
         case_by_request = {case.request.request_id: case for case in hidden_cases}
         hidden_results: list[HiddenCaseResult] = []
-        hidden_executor = _Executor(
-            task_directory,
-            descriptor,
-            identity_suffix=f"{run_seed}_{baseline.value}_hidden",
+        hidden_executor: _Executor | _GenesisExecutor = (
+            _GenesisExecutor(
+                initialized.runtime.output_directory / "runtime_config.json", seed=run_seed
+            )
+            if baseline is BaselineKind.GENESIS_FULL
+            else _Executor(
+                task_directory,
+                descriptor,
+                identity_suffix=f"{run_seed}_{baseline.value}_hidden",
+            )
         )
         for request in selected_hidden:
             observed, _, _, _ = hidden_executor.execute(request, deadline_ns=deadline_ns)
@@ -432,12 +683,18 @@ def _run_task(
         measured_baselines=_MEASURED_BASELINES,
         workload_fingerprint=workload_fingerprint,
         environment_fingerprint=environment,
+        task_hash=task_hash,
+        run_seed=run_seed,
         repetitions=configuration.repetitions,
         request_ids=tuple(request.request_id for request in workload),
+        measurement_run_order=tuple(run_order),
     )
     return TaskRunReport(
         task_id=descriptor.task_id,
         task_hash=task_hash,
+        public_package_hash=descriptor.public_package_hash,
+        reference_package_hash=inspection.package_hash,
+        task_generation_seed=descriptor.seed,
         run_seed=run_seed,
         warmup_count=configuration.warmup_count,
         repetitions=configuration.repetitions,
@@ -447,6 +704,8 @@ def _run_task(
         baselines=tuple(summaries),
         hidden_evaluations=tuple(hidden_summaries),
         integrity=integrity,
+        genesis_runtime_manifest_path=str(runtime_manifest.resolve()),
+        genesis_runtime_manifest_sha256=_sha(runtime_manifest.read_bytes()),
     )
 
 
@@ -469,51 +728,7 @@ def run_cpu_benchmark(
         for task_directory in selected
         for run_seed in configuration.seeds
     )
-    measured = [
-        baseline
-        for report in reports
-        for baseline in report.baselines
-        if baseline.status is BaselineStatus.MEASURED
-    ]
-    unavailable = [
-        baseline
-        for report in reports
-        for baseline in report.baselines
-        if baseline.status is BaselineStatus.NOT_APPLICABLE
-    ]
-    system_measured = [
-        baseline for baseline in measured if baseline.baseline is BaselineKind.GENESIS_FULL
-    ]
-    sample_count = sum(baseline.sample_count for baseline in system_measured)
-    exact_count = sum(
-        round(baseline.valid_request_rate * baseline.sample_count) for baseline in system_measured
-    )
-    metrics = AggregateMetrics(
-        measured_baseline_runs=len(measured),
-        unavailable_baseline_runs=len(unavailable),
-        valid_system_rate=(
-            sum(
-                baseline.valid_request_rate == 1.0
-                and next(
-                    hidden.exact_case_rate
-                    for hidden in report.hidden_evaluations
-                    if hidden.baseline is baseline.baseline
-                )
-                == 1.0
-                for report in reports
-                for baseline in report.baselines
-                if baseline.status is BaselineStatus.MEASURED
-                and baseline.baseline is BaselineKind.GENESIS_FULL
-            )
-            / len(system_measured)
-            if system_measured
-            else 0.0
-        ),
-        exact_request_rate=exact_count / sample_count if sample_count else 0.0,
-        measured_cpu_seconds=sum(baseline.measured_cpu_seconds for baseline in measured),
-        task_count=len(selected),
-        distinct_task_seeds=len({load_task(path / "task.json").seed for path in selected}),
-    )
+    metrics = _aggregate(reports)
     result = SynthBenchReport(
         run_seeds=configuration.seeds,
         tasks=reports,
@@ -524,4 +739,6 @@ def run_cpu_benchmark(
     if report_path.exists():
         raise FileExistsError(f"refusing to overwrite synthbench report: {report_path}")
     report_path.write_bytes(canonical_json(result) + b"\n")
-    return SynthBenchReport.model_validate_json(report_path.read_bytes(), strict=True)
+    persisted = SynthBenchReport.model_validate_json(report_path.read_bytes(), strict=True)
+    validate_cpu_benchmark_report(persisted)
+    return persisted

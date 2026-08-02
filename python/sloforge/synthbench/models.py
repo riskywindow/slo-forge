@@ -183,6 +183,7 @@ class RawCpuSample(SynthBenchModel):
     baseline: BaselineKind
     run_seed: NonNegativeInt
     repetition: NonNegativeInt
+    measurement_order_ordinal: NonNegativeInt
     execution_ordinal: NonNegativeInt
     request_id: Identifier
     latency_ns: PositiveInt
@@ -191,6 +192,11 @@ class RawCpuSample(SynthBenchModel):
     observed_tokens: tuple[NonNegativeInt, ...]
     expected_tokens: tuple[NonNegativeInt, ...]
     exact_match: bool
+    execution_surface: Literal[
+        "python_eager_reference",
+        "reference_order_surrogate",
+        "genesis_generated_runtime",
+    ]
     source: Literal["measured_cpu_monotonic_clock"] = "measured_cpu_monotonic_clock"
     precision: Literal["python_float64_reference"] = "python_float64_reference"
 
@@ -200,6 +206,13 @@ class BaselineSummary(SynthBenchModel):
     status: BaselineStatus
     reason: NonEmpty
     raw_samples_path: NonEmpty | None
+    raw_samples_sha256: Sha256 | None
+    execution_surface: Literal[
+        "not_applicable",
+        "python_eager_reference",
+        "reference_order_surrogate",
+        "genesis_generated_runtime",
+    ]
     sample_count: NonNegativeInt
     valid_request_rate: Annotated[float, Field(ge=0.0, le=1.0)]
     median_latency_ns: NonNegativeFloat
@@ -209,6 +222,17 @@ class BaselineSummary(SynthBenchModel):
     measured_cpu_seconds: NonNegativeFloat
     candidate_count: NonNegativeInt
     human_authored_model_specific_lines: NonNegativeInt
+
+    @model_validator(mode="after")
+    def evidence_matches_status(self) -> Self:
+        measured = self.status is BaselineStatus.MEASURED
+        if measured != (self.raw_samples_path is not None):
+            raise ValueError("measured baseline status and raw sample path must agree")
+        if measured != (self.raw_samples_sha256 is not None):
+            raise ValueError("measured baseline status and raw sample digest must agree")
+        if measured == (self.execution_surface == "not_applicable"):
+            raise ValueError("baseline execution surface does not match its status")
+        return self
 
 
 class IntegrityReport(SynthBenchModel):
@@ -247,14 +271,27 @@ class HiddenEvaluationSummary(SynthBenchModel):
     baseline: BaselineKind
     status: BaselineStatus
     evidence_path: NonEmpty | None
+    evidence_sha256: Sha256 | None
     case_count: NonNegativeInt
     exact_case_rate: Annotated[float, Field(ge=0.0, le=1.0)]
     escaped_regressions: NonNegativeInt
+
+    @model_validator(mode="after")
+    def evidence_matches_status(self) -> Self:
+        measured = self.status is BaselineStatus.MEASURED
+        if measured != (self.evidence_path is not None):
+            raise ValueError("measured hidden status and evidence path must agree")
+        if measured != (self.evidence_sha256 is not None):
+            raise ValueError("measured hidden status and evidence digest must agree")
+        return self
 
 
 class TaskRunReport(SynthBenchModel):
     task_id: Identifier
     task_hash: Sha256
+    public_package_hash: Sha256
+    reference_package_hash: Sha256
+    task_generation_seed: NonNegativeInt
     run_seed: NonNegativeInt
     warmup_count: NonNegativeInt
     repetitions: PositiveInt
@@ -262,6 +299,8 @@ class TaskRunReport(SynthBenchModel):
     baselines: tuple[BaselineSummary, ...]
     hidden_evaluations: tuple[HiddenEvaluationSummary, ...]
     integrity: IntegrityReport
+    genesis_runtime_manifest_path: NonEmpty
+    genesis_runtime_manifest_sha256: Sha256
 
 
 class AggregateMetrics(SynthBenchModel):
@@ -290,4 +329,8 @@ class SynthBenchReport(SynthBenchModel):
         )
         if not all(math.isfinite(value) for value in values):
             raise ValueError("aggregate metrics must be finite")
+        if len(self.run_seeds) < 2 or len(self.run_seeds) != len(set(self.run_seeds)):
+            raise ValueError("report requires at least two distinct run seeds")
+        if self.metrics.task_count <= 0 or not self.tasks:
+            raise ValueError("report must contain executed tasks")
         return self

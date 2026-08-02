@@ -99,6 +99,20 @@ def test_hidden_commitment_detects_evaluator_case_tampering(tmp_path: Path) -> N
         load_hidden_cases(task, descriptor)
 
 
+def test_runner_rejects_public_package_tampering(tmp_path: Path) -> None:
+    descriptor = generate_tasks(_configuration(count=1), tmp_path / "tasks")[0]
+    task = tmp_path / "tasks" / descriptor.task_id
+    reference = task / "public/reference.py"
+    reference.write_text(reference.read_text(encoding="utf-8") + "\n# changed\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="public reference package"):
+        run_cpu_benchmark(
+            (task,),
+            CpuRunConfiguration(seeds=(1, 2), repetitions=2, maximum_tasks=1),
+            tmp_path / "run",
+        )
+
+
 def test_special_case_detector_rejects_task_seed_commitment_and_hidden_shapes(
     tmp_path: Path,
 ) -> None:
@@ -179,8 +193,12 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
         assert all(
             "request-order surrogate" in item.reason
             for item in measured
-            if item.baseline is not BaselineKind.PYTHON_EAGER_REFERENCE
+            if item.baseline not in {BaselineKind.PYTHON_EAGER_REFERENCE, BaselineKind.GENESIS_FULL}
         )
+        genesis = next(item for item in measured if item.baseline is BaselineKind.GENESIS_FULL)
+        assert genesis.execution_surface == "genesis_generated_runtime"
+        assert "actual generated bounded Genesis runtime" in genesis.reason
+        assert Path(task_report.genesis_runtime_manifest_path).is_file()
         assert all(summary.reason for summary in unavailable)
         assert all(summary.valid_request_rate == 1.0 for summary in measured)
         assert all(summary.human_authored_model_specific_lines == 0 for summary in measured)
@@ -234,12 +252,49 @@ def test_integrity_auditor_detects_discarded_sample(tmp_path: Path) -> None:
         measured_baselines=(BaselineKind.GENESIS_FULL,),
         workload_fingerprint=task_report.integrity.workload_fingerprint,
         environment_fingerprint=task_report.integrity.environment_fingerprint,
+        task_hash=task_report.task_hash,
+        run_seed=task_report.run_seed,
         repetitions=task_report.repetitions,
         request_ids=task_report.integrity.expected_request_ids,
+        measurement_run_order=tuple(
+            (int(value.split(":", 1)[0]), BaselineKind(value.split(":", 1)[1]))
+            for value in task_report.measurement_run_order
+        ),
     )
 
     assert not damaged.passed
     assert any("input_distribution_mismatch" in violation for violation in damaged.violations)
+
+    dishonest_first = samples[0].model_copy(
+        update={
+            "observed_tokens": tuple(value + 1 for value in samples[0].expected_tokens),
+            "exact_match": True,
+            "run_seed": samples[0].run_seed + 1,
+            "measurement_order_ordinal": len(task_report.measurement_run_order) + 1,
+            "ttft_ns": samples[0].latency_ns + 1,
+        }
+    )
+    dishonest = audit_raw_samples(
+        (dishonest_first, *samples[1:]),
+        measured_baselines=(BaselineKind.GENESIS_FULL,),
+        workload_fingerprint=task_report.integrity.workload_fingerprint,
+        environment_fingerprint=task_report.integrity.environment_fingerprint,
+        task_hash=task_report.task_hash,
+        run_seed=task_report.run_seed,
+        repetitions=task_report.repetitions,
+        request_ids=task_report.integrity.expected_request_ids,
+        measurement_run_order=tuple(
+            (int(value.split(":", 1)[0]), BaselineKind(value.split(":", 1)[1]))
+            for value in task_report.measurement_run_order
+        ),
+    )
+    assert not dishonest.passed
+    assert {violation.split(":", 1)[1] for violation in dishonest.violations} >= {
+        "false_exact_match",
+        "ordinal_set_mismatch",
+        "run_seed_mismatch",
+        "ttft_exceeds_latency",
+    }
 
 
 def test_cpu_runner_requires_multiple_distinct_seeds() -> None:
@@ -302,6 +357,27 @@ def test_synthbench_cli_generates_runs_and_compares_cpu_artifacts(tmp_path: Path
     comparison = json.loads((tmp_path / "comparison/comparison.json").read_text(encoding="utf-8"))
     assert comparison["source"] == "validated_synthbench_reports"
     assert comparison["hardware_comparison"] == "not_measured_in_cpu_profile"
+
+    report = SynthBenchReport.model_validate_json((run / "report.json").read_bytes(), strict=True)
+    genesis = next(
+        baseline
+        for baseline in report.tasks[0].baselines
+        if baseline.baseline is BaselineKind.GENESIS_FULL
+    )
+    assert genesis.raw_samples_path is not None
+    Path(genesis.raw_samples_path).write_bytes(Path(genesis.raw_samples_path).read_bytes() + b"\n")
+    rejected = runner.invoke(
+        app,
+        [
+            "synthbench",
+            "compare",
+            "--runs",
+            str(tmp_path / "runs"),
+            "--output",
+            str(tmp_path / "comparison-tampered"),
+        ],
+    )
+    assert rejected.exit_code != 0
 
 
 def test_synthbench_demo_produces_artifact_derived_cpu_summary(tmp_path: Path) -> None:
