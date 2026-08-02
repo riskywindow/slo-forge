@@ -24,7 +24,7 @@ class SynthBenchDemoResult(BaseModel):
     task_seeds: tuple[int, ...]
     valid_system_rate: float
     exact_request_rate: float
-    measured_cpu_seconds: float
+    observed_request_wall_seconds: float
     hardware_backed: bool = False
     report_path: str
 
@@ -80,7 +80,7 @@ def run_synthbench_demo(
         task_seeds=tuple(item.seed for item in descriptors),
         valid_system_rate=report.metrics.valid_system_rate,
         exact_request_rate=report.metrics.exact_request_rate,
-        measured_cpu_seconds=report.metrics.measured_cpu_seconds,
+        observed_request_wall_seconds=report.metrics.observed_request_wall_seconds,
         report_path=str((output / "run/report.json").resolve()),
     )
     (output / "summary.json").write_bytes(canonical_json(result) + b"\n")

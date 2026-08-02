@@ -535,3 +535,36 @@ def test_capsule_builder_replays_trusted_transformation_lowering(tmp_path: Path)
             tmp_path / "forged-transformation-capsule",
             observed_at=datetime(2026, 8, 2, 12, 0, tzinfo=UTC),
         )
+
+
+def test_capsule_builder_recomputes_proofs_and_final_corpus_oracle(tmp_path: Path) -> None:
+    candidate = _accepted_candidate(tmp_path)
+    observed_at = datetime(2026, 8, 2, 12, 0, tzinfo=UTC)
+
+    modelcheck_path = candidate / "evidence/modelcheck-result.json"
+    original_modelcheck = modelcheck_path.read_bytes()
+    forged_modelcheck = json.loads(original_modelcheck)
+    forged_modelcheck["bounds"]["max_depth"] = 999_999
+    forged_modelcheck["transition_count"] = 1
+    forged_modelcheck["invariants"] = ["forged invariant"]
+    modelcheck_path.write_text(json.dumps(forged_modelcheck), encoding="utf-8")
+    with pytest.raises(ValueError, match="independently recomputed bounded result"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "forged-modelcheck-capsule",
+            observed_at=observed_at,
+        )
+    modelcheck_path.write_bytes(original_modelcheck)
+
+    differential_path = candidate / "evidence/runtime-differential-result.json"
+    forged_differential = json.loads(differential_path.read_bytes())
+    forged_differential["cases"][0]["expected"] = [999]
+    forged_differential["cases"][0]["observed"] = [999]
+    forged_differential["cases"][0]["exact_match"] = True
+    differential_path.write_text(json.dumps(forged_differential), encoding="utf-8")
+    with pytest.raises(ValueError, match="independent sandbox replay"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "forged-differential-capsule",
+            observed_at=observed_at,
+        )

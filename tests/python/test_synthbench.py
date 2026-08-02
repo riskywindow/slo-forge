@@ -7,8 +7,10 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
+import sloforge.synthbench.runner as synthbench_runner
 from sloforge.cli.main import app
 from sloforge.genesis.frontend import inspect_reference_package
+from sloforge.genesis.ir import canonical_json
 from sloforge.synthbench import (
     BaselineKind,
     BaselineStatus,
@@ -173,7 +175,7 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
     assert report.metrics.distinct_task_seeds == 2
     assert report.metrics.valid_system_rate == 1.0
     assert report.metrics.exact_request_rate == 1.0
-    assert report.metrics.measured_cpu_seconds > 0
+    assert report.metrics.observed_request_wall_seconds > 0
     for task_report in report.tasks:
         assert task_report.integrity.passed
         assert {summary.baseline for summary in task_report.baselines} == set(BaselineKind)
@@ -183,18 +185,23 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
             for summary in task_report.baselines
             if summary.status is BaselineStatus.MEASURED
         ]
+        surrogates = [
+            summary
+            for summary in task_report.baselines
+            if summary.status is BaselineStatus.SURROGATE
+        ]
         unavailable = [
             summary
             for summary in task_report.baselines
             if summary.status is BaselineStatus.NOT_APPLICABLE
         ]
-        assert measured and unavailable
+        assert measured and surrogates and unavailable
         assert next(
             item for item in measured if item.baseline is BaselineKind.PYTHON_EAGER_REFERENCE
         ).reason.startswith("direct dependency-free eager reference")
         assert all(
             "request-order surrogate" in item.reason
-            for item in measured
+            for item in surrogates
             if item.baseline not in {BaselineKind.PYTHON_EAGER_REFERENCE, BaselineKind.GENESIS_FULL}
         )
         genesis = next(item for item in measured if item.baseline is BaselineKind.GENESIS_FULL)
@@ -202,12 +209,14 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
         assert "actual generated bounded Genesis runtime" in genesis.reason
         assert Path(task_report.genesis_runtime_manifest_path).is_file()
         assert all(summary.reason for summary in unavailable)
-        assert all(summary.valid_request_rate == 1.0 for summary in measured)
-        assert all(summary.human_authored_model_specific_lines == 0 for summary in measured)
+        assert all(summary.valid_request_rate == 1.0 for summary in (*measured, *surrogates))
+        assert all(
+            summary.human_authored_model_specific_lines == 0 for summary in (*measured, *surrogates)
+        )
         assert all(
             hidden.exact_case_rate == 1.0
             for hidden in task_report.hidden_evaluations
-            if hidden.status is BaselineStatus.MEASURED
+            if hidden.status in {BaselineStatus.MEASURED, BaselineStatus.SURROGATE}
         )
         sample_summary = measured[0]
         assert sample_summary.raw_samples_path is not None
@@ -242,6 +251,38 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
         Path(genesis_summary.raw_samples_path).read_bytes().splitlines()[0], strict=True
     )
     assert generated_sample.execution_evidence_path is not None
+    raw_path = Path(genesis_summary.raw_samples_path)
+    original_raw = raw_path.read_bytes()
+    raw_samples = [
+        RawCpuSample.model_validate_json(line, strict=True)
+        for line in original_raw.splitlines()
+        if line
+    ]
+    raw_samples[0] = raw_samples[0].model_copy(
+        update={
+            "observed_tokens": tuple(value + 1 for value in raw_samples[0].observed_tokens),
+            "expected_tokens": tuple(value + 1 for value in raw_samples[0].expected_tokens),
+        }
+    )
+    raw_path.write_bytes(b"".join(canonical_json(sample) + b"\n" for sample in raw_samples))
+    forged_summary = synthbench_runner._summary_from_artifact(
+        genesis_summary.baseline,
+        raw_path,
+        candidate_count=genesis_summary.candidate_count,
+    )
+    first_task = report.tasks[0]
+    forged_task = first_task.model_copy(
+        update={
+            "baselines": tuple(
+                forged_summary if item.baseline is BaselineKind.GENESIS_FULL else item
+                for item in first_task.baselines
+            )
+        }
+    )
+    forged_report = report.model_copy(update={"tasks": (forged_task, *report.tasks[1:])})
+    with pytest.raises(ValueError, match=r"workload oracle|sandbox runner response"):
+        validate_cpu_benchmark_report(forged_report)
+    raw_path.write_bytes(original_raw)
     execution_evidence = Path(generated_sample.execution_evidence_path)
     execution_evidence.write_bytes(execution_evidence.read_bytes() + b" ")
     with pytest.raises(ValueError, match="execution evidence"):
@@ -409,6 +450,6 @@ def test_synthbench_demo_produces_artifact_derived_cpu_summary(tmp_path: Path) -
     assert result.task_count == 2
     assert result.valid_system_rate == 1.0
     assert result.exact_request_rate == 1.0
-    assert result.measured_cpu_seconds > 0
+    assert result.observed_request_wall_seconds > 0
     assert result.hardware_backed is False
     assert Path(result.report_path).is_file()

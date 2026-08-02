@@ -4,7 +4,7 @@ from .benchmark import benchmark_candidate, decide_candidate, validate_benchmark
 from .cases import generate_correctness_cases, reference_quantized_state_update
 from .demo import run_kernel_lab_demo
 from .evidence import BottleneckEvidenceError, validate_bottleneck_evidence
-from .executor import execute_correctness
+from .executor import execute_correctness, validate_correctness_evidence
 from .generator import (
     generate_candidates,
     hybrid_quantized_state_schema,
@@ -83,5 +83,6 @@ __all__ = [
     "triton_adapter_status",
     "validate_benchmark_report",
     "validate_bottleneck_evidence",
+    "validate_correctness_evidence",
     "validate_generated_source",
 ]

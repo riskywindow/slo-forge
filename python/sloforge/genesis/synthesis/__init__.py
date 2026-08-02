@@ -8,7 +8,12 @@ from .fixture import (
     compiled_candidate_policy,
     run_cancellation_cegis,
 )
-from .local import LocalSynthesisResult, synthesize_local_run
+from .local import (
+    LocalSynthesisResult,
+    bounded_candidate_modelcheck_document,
+    bounded_candidate_policy_property_document,
+    synthesize_local_run,
+)
 from .models import (
     CegisConfiguration,
     CegisEvent,
@@ -36,6 +41,8 @@ __all__ = [
     "ProtocolWitness",
     "VerificationFailure",
     "VerificationOutcome",
+    "bounded_candidate_modelcheck_document",
+    "bounded_candidate_policy_property_document",
     "cancellation_fixture_candidates",
     "compiled_candidate_policy",
     "minimize_protocol_failure",

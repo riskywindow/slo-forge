@@ -89,6 +89,16 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     assert modelcheck_evidence["state_count"] > 0
     assert modelcheck_evidence["transition_count"] > 0
     assert modelcheck_evidence["universal_proof"] is False
+    property_evidence = json.loads(
+        (accepted_directory / "evidence/property-result.json").read_text(encoding="utf-8")
+    )
+    assert property_evidence["result"] == "pass"
+    assert property_evidence["states_checked"] == 66_066
+    assert property_evidence["counterexample"] is None
+    property_event = next(
+        event for event in accepted.lifecycle if event.to_state.value == "PROPERTY_TESTED"
+    )
+    assert property_event.evidence
     simulation_evidence = json.loads(
         (accepted_directory / "evidence/simulation-result.json").read_text(encoding="utf-8")
     )

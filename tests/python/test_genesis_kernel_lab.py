@@ -25,10 +25,28 @@ from sloforge.genesis.kernel_lab import (
     triton_adapter_status,
     validate_benchmark_report,
     validate_bottleneck_evidence,
+    validate_correctness_evidence,
     validate_generated_source,
 )
 
 SEED = 73129
+
+
+def test_correctness_validator_reopens_retained_runner_output(tmp_path: Path) -> None:
+    candidate, source = generate_candidates(seed=SEED)[0]
+    evidence = execute_correctness(
+        candidate,
+        source,
+        generate_correctness_cases(seed=SEED, randomized_cases=1),
+        output_root=tmp_path / "correctness",
+        seed=SEED,
+    )
+    validate_correctness_evidence(evidence)
+    assert evidence.runner_output_path is not None
+    output = Path(evidence.runner_output_path)
+    output.write_bytes(output.read_bytes() + b" ")
+    with pytest.raises(ValueError, match="changed after execution"):
+        validate_correctness_evidence(evidence)
 
 
 def _evidence(tmp_path: Path, *, observed_fraction: float = 0.18) -> BottleneckEvidence:

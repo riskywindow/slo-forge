@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 from collections import deque
+from itertools import product
 from pathlib import Path
 from typing import Any, Literal
 
@@ -102,6 +103,8 @@ def _candidate_ir(
     budget_usd: float,
     runtime_differential_passed: bool,
     runtime_evidence_path: Path | None,
+    property_passed: bool,
+    property_evidence_path: Path | None,
     modelcheck_passed: bool,
     modelcheck_evidence_path: Path | None,
     simulation_passed: bool,
@@ -162,9 +165,57 @@ def _candidate_ir(
                 "candidate-specific generated runtime differential harness passed in the sandbox",
                 runtime_evidence,
             )
+            property_evidence = (
+                (
+                    _evidence_reference(
+                        property_evidence_path,
+                        evidence_id=f"candidate-property:{design.candidate_id}",
+                        claim_id="bounded-policy-properties",
+                    ),
+                )
+                if property_evidence_path is not None
+                else ()
+            )
+            if not property_passed:
+                transition(
+                    CandidateFailureState.SEMANTIC_REJECTED,
+                    "bounded policy property enumeration found a counterexample",
+                    property_evidence,
+                )
+                state = events[-1].to_state
+                return Candidate(
+                    candidate_id=design.candidate_id,
+                    seed=design.seed,
+                    genome_hash=ArtifactDigest(value=canonical_hash(genome)),
+                    parent_candidate_ids=design.parent_candidate_ids,
+                    transformation_ids=tuple(item.transformation_id for item in design.mutations),
+                    state=state,
+                    lifecycle=tuple(events),
+                    budget=SearchBudget(
+                        wall_time_seconds=300.0,
+                        cpu_time_seconds=300.0,
+                        gpu_time_seconds=0.0,
+                        cloud_cost_usd=budget_usd,
+                        external_synthesis_cost_usd=0.0,
+                        candidate_count=3,
+                        compilation_count=3,
+                        benchmark_count=0,
+                        verifier_time_seconds=120.0,
+                    ),
+                    usage=BudgetUsage(candidate_count=1, compilation_count=1),
+                    extensions=Extensions(
+                        root={
+                            "sloforge.dev/local-synthesis": {
+                                "cross_layer": design.cross_layer,
+                                "proposal_engine": design.proposal_engine,
+                            }
+                        }
+                    ),
+                )
             transition(
                 CandidateSuccessState.PROPERTY_TESTED,
-                "bounded cancellation protocol verifier accepted the corrected policy",
+                "all 66,066 declared integer/boolean policy states satisfied cancellation and output-bound properties",
+                property_evidence,
             )
             modelcheck_evidence = (
                 (
@@ -387,10 +438,10 @@ def _run_differential_harness(
     return passed, result.termination.value, evidence_path
 
 
-def _bounded_candidate_modelcheck(
-    candidate_directory: Path, design: CandidateDesign, *, seed: int
-) -> tuple[bool, Path]:
-    """Exhaustively explore the declared one-request cancellation abstraction."""
+def bounded_candidate_modelcheck_document(
+    design: CandidateDesign, *, seed: int
+) -> dict[str, object]:
+    """Independently derive the complete bounded cancellation-check document."""
 
     _source, policy, policy_payload = compiled_candidate_policy(design)
     maximum_depth = 4
@@ -433,7 +484,7 @@ def _bounded_candidate_modelcheck(
         if counterexample is not None:
             break
     passed = counterexample is None
-    evidence = {
+    return {
         "schema_version": "genesis.candidate-modelcheck.v1",
         "candidate_id": design.candidate_id,
         "policy_bytecode_sha256": hashlib.sha256(policy_payload).hexdigest(),
@@ -457,12 +508,105 @@ def _bounded_candidate_modelcheck(
         "counterexample_trace": None if counterexample is None else list(counterexample),
         "universal_proof": False,
     }
+
+
+def bounded_candidate_policy_property_document(
+    design: CandidateDesign, *, seed: int
+) -> dict[str, object]:
+    """Exhaustively check executable policy properties over its declared domain."""
+
+    _source, policy, policy_payload = compiled_candidate_policy(design)
+    domains: list[tuple[int | bool, ...]] = []
+    serialized_domains: dict[str, dict[str, object]] = {}
+    for specification in policy.inputs:
+        if specification.scalar_type.value == "bool":
+            domain: tuple[int | bool, ...] = tuple(
+                value
+                for value in (False, True)
+                if specification.lower <= value <= specification.upper
+            )
+        elif specification.scalar_type.value == "int":
+            domain = tuple(range(int(specification.lower), int(specification.upper) + 1))
+        else:
+            raise ValueError("bounded property enumeration does not support floating inputs")
+        domains.append(domain)
+        serialized_domains[specification.name] = {
+            "type": specification.scalar_type.value,
+            "minimum": specification.lower,
+            "maximum": specification.upper,
+            "cardinality": len(domain),
+        }
+    maximum_states = 100_000
+    state_count = 1
+    for domain in domains:
+        state_count *= len(domain)
+    if state_count > maximum_states:
+        raise ValueError(
+            f"policy property domain contains {state_count} states, limit is {maximum_states}"
+        )
+    checked = 0
+    counterexample: dict[str, object] | None = None
+    for values in product(*domains):
+        assignment = {
+            specification.name: value
+            for specification, value in zip(policy.inputs, values, strict=True)
+        }
+        decision = execute_bytecode(policy, assignment)
+        checked += 1
+        violations: list[str] = []
+        if type(decision) is not int or not 0 <= decision <= 4:
+            violations.append("output is outside the declared integer bound [0,4]")
+        if assignment.get("cancellation_pending") is True and decision != 0:
+            violations.append("cancelled request remains schedulable")
+        if violations:
+            counterexample = {
+                "assignment": assignment,
+                "observed_output": decision,
+                "violations": violations,
+            }
+            break
+    return {
+        "schema_version": "genesis.candidate-policy-property.v1",
+        "candidate_id": design.candidate_id,
+        "policy_bytecode_sha256": hashlib.sha256(policy_payload).hexdigest(),
+        "seed": seed,
+        "domains": serialized_domains,
+        "maximum_states": maximum_states,
+        "states_checked": checked,
+        "properties": [
+            "output is an integer in the declared interval [0,4]",
+            "cancellation_pending implies output equals zero",
+        ],
+        "result": "pass" if counterexample is None else "fail",
+        "counterexample": counterexample,
+        "universal_proof": False,
+    }
+
+
+def _bounded_candidate_policy_properties(
+    candidate_directory: Path, design: CandidateDesign, *, seed: int
+) -> tuple[bool, Path]:
+    evidence = bounded_candidate_policy_property_document(design, seed=seed)
+    path = candidate_directory / "evidence/property-result.json"
+    _atomic_write(
+        path,
+        json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
+    )
+    return evidence["result"] == "pass", path
+
+
+def _bounded_candidate_modelcheck(
+    candidate_directory: Path, design: CandidateDesign, *, seed: int
+) -> tuple[bool, Path]:
+    """Exhaustively explore and persist the declared cancellation abstraction."""
+
+    evidence = bounded_candidate_modelcheck_document(design, seed=seed)
     path = candidate_directory / "evidence/modelcheck-result.json"
     _atomic_write(
         path,
         json.dumps(evidence, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(),
     )
-    return passed, path
+    return evidence["result"] == "pass", path
 
 
 def _run_candidate_simulation(
@@ -612,6 +756,8 @@ def synthesize_local_run(
         candidate_runtime_passed = False
         candidate_sandbox_termination = "not_run"
         runtime_evidence_path: Path | None = None
+        property_passed = False
+        property_evidence_path: Path | None = None
         modelcheck_passed = False
         modelcheck_evidence_path: Path | None = None
         simulation_passed = False
@@ -629,13 +775,19 @@ def synthesize_local_run(
                 seed=seed,
             )
         if candidate_runtime_passed and design.candidate_id == cegis.accepted_candidate_id:
-            modelcheck_passed, modelcheck_evidence_path = _bounded_candidate_modelcheck(
-                candidate_directory, design, seed=seed
+            property_passed, property_evidence_path = _bounded_candidate_policy_properties(
+                candidate_directory,
+                design,
+                seed=seed,
             )
-            if modelcheck_passed:
-                simulation_passed, simulation_evidence_path = _run_candidate_simulation(
-                    run_directory, candidate_directory, design, seed=seed
+            if property_passed:
+                modelcheck_passed, modelcheck_evidence_path = _bounded_candidate_modelcheck(
+                    candidate_directory, design, seed=seed
                 )
+                if modelcheck_passed:
+                    simulation_passed, simulation_evidence_path = _run_candidate_simulation(
+                        run_directory, candidate_directory, design, seed=seed
+                    )
         candidate = _candidate_ir(
             design,
             genome,
@@ -645,6 +797,8 @@ def synthesize_local_run(
                 candidate_runtime_passed and design.candidate_id == cegis.accepted_candidate_id
             ),
             runtime_evidence_path=runtime_evidence_path,
+            property_passed=property_passed,
+            property_evidence_path=property_evidence_path,
             modelcheck_passed=modelcheck_passed,
             modelcheck_evidence_path=modelcheck_evidence_path,
             simulation_passed=simulation_passed,
@@ -679,4 +833,9 @@ def synthesize_local_run(
     return result
 
 
-__all__ = ["LocalSynthesisResult", "synthesize_local_run"]
+__all__ = [
+    "LocalSynthesisResult",
+    "bounded_candidate_modelcheck_document",
+    "bounded_candidate_policy_property_document",
+    "synthesize_local_run",
+]

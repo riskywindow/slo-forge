@@ -18,7 +18,7 @@ from ..verification import (
     evaluate_performance,
 )
 from .cases import generate_correctness_cases
-from .executor import execute_benchmark_payload
+from .executor import execute_benchmark_payload, validate_correctness_evidence
 from .models import (
     AcceptanceStatus,
     BenchmarkRegimeEvidence,
@@ -406,6 +406,7 @@ def decide_candidate(
 ) -> CandidateDecision:
     if correctness.candidate != benchmark.candidate:
         raise ValueError("correctness and benchmark evidence refer to different candidates")
+    validate_correctness_evidence(correctness)
     validate_benchmark_report(benchmark)
     by_name = {item.regime: item for item in benchmark.regimes}
     micro = by_name.get("micro_noncontiguous")

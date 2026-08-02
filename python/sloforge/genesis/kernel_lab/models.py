@@ -326,11 +326,39 @@ class CorrectnessEvidence(KernelModel):
     sandbox_termination: NonEmpty
     sandbox_backend: NonEmpty
     assumptions: tuple[NonEmpty, ...]
+    candidate_source_path: NonEmpty | None = None
+    candidate_source_sha256: str | None = None
+    cases_config_path: NonEmpty | None = None
+    cases_config_sha256: str | None = None
+    runner_path: NonEmpty | None = None
+    runner_sha256: str | None = None
+    runner_output_path: NonEmpty | None = None
+    runner_output_sha256: str | None = None
 
     @model_validator(mode="after")
     def validate_correctness(self) -> Self:
         if self.status is LabStatus.PASSED and (self.mismatches or self.cases_executed == 0):
             raise ValueError("passed correctness evidence requires executed mismatch-free cases")
+        identities = (
+            self.candidate_source_path,
+            self.candidate_source_sha256,
+            self.cases_config_path,
+            self.cases_config_sha256,
+            self.runner_path,
+            self.runner_sha256,
+            self.runner_output_path,
+            self.runner_output_sha256,
+        )
+        if self.status is LabStatus.PASSED and any(value is None for value in identities):
+            raise ValueError("passed correctness evidence requires content-addressed raw artifacts")
+        for digest in (
+            self.candidate_source_sha256,
+            self.cases_config_sha256,
+            self.runner_sha256,
+            self.runner_output_sha256,
+        ):
+            if digest is not None and _SHA256.fullmatch(digest) is None:
+                raise ValueError("correctness artifact digest must be lowercase sha256")
         return self
 
 

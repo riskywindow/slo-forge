@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import shutil
@@ -45,6 +46,7 @@ class HypothesisReport(BaseModel):
     scope: str
     metrics: dict[str, float | int | str | bool]
     evidence_paths: tuple[str, ...]
+    evidence_sha256: tuple[str, ...] = ()
     limitations: tuple[str, ...]
 
 
@@ -137,6 +139,61 @@ def _write(path: Path, value: BaseModel | dict[str, object]) -> None:
     if path.exists():
         raise FileExistsError(f"refusing to overwrite evaluation artifact: {path}")
     path.write_bytes(canonical_json(value) + b"\n")
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_genesis_evaluation(result: EvaluationResult) -> None:
+    """Reopen content-addressed inputs and recompute the top-level local rates."""
+
+    for hypothesis in result.hypotheses:
+        if len(hypothesis.evidence_paths) != len(hypothesis.evidence_sha256):
+            raise ValueError(f"{hypothesis.hypothesis_id} evidence digests are incomplete")
+        for path_value, digest in zip(
+            hypothesis.evidence_paths, hypothesis.evidence_sha256, strict=True
+        ):
+            path = Path(path_value)
+            if not path.is_file() or _sha256(path) != digest:
+                raise ValueError(
+                    f"{hypothesis.hypothesis_id} evidence is unavailable or changed: {path}"
+                )
+    h1 = next(item for item in result.hypotheses if item.hypothesis_id == "H1")
+    run_paths = tuple(
+        Path(path) for path in h1.evidence_paths if Path(path).name == "GENESIS_DEMO_REPORT.json"
+    )
+    runs = tuple(
+        GenesisDemoResult.model_validate_json(path.read_bytes(), strict=True) for path in run_paths
+    )
+    if len(runs) != result.run_count:
+        raise ValueError("evaluation does not bind one Genesis run report per declared run")
+    rates = derive_evaluation_rates(runs)
+    expected = (
+        sum(item.runtime_differential_passed for item in runs) / len(runs),
+        rates.accepted_runtime_success_rate,
+        sum(bool(item.rejected_candidate_ids) for item in runs) / len(runs),
+        rates.local_capsule_acceptance_rate,
+        rates.external_production_eligibility_rate,
+        sum(item.redteam_replayed_count for item in runs)
+        / sum(item.redteam_finding_count for item in runs),
+        rates.local_evolution_promotion_rate,
+        sum(item.kernel_speedup_claim_count for item in runs),
+        sum(item.hardware_backed for item in runs),
+    )
+    observed = (
+        result.accepted_candidate_runtime_differential_rate,
+        result.accepted_runtime_success_rate,
+        result.real_rejection_rate,
+        result.capsule_acceptance_rate,
+        result.external_production_eligibility_rate,
+        result.redteam_replay_rate,
+        result.evolution_promotion_rate,
+        result.kernel_speedup_claims,
+        result.hardware_backed_runs,
+    )
+    if observed != expected:
+        raise ValueError("evaluation top-level metrics are not derived from bound run reports")
 
 
 def _tamper_gate(run: GenesisDemoResult, output: Path) -> dict[str, object]:
@@ -279,10 +336,17 @@ def run_genesis_evaluation(
     rejections = sum(bool(item.rejected_candidate_ids) for item in runs) / count
     replay_count = sum(item.redteam_replayed_count for item in runs)
     finding_count = sum(item.redteam_finding_count for item in runs)
+    finding_families = {
+        str(document["violated_contract"])
+        for run in runs
+        for path in (Path(run.output_directory) / "redteam/counterexamples").glob("*.json")
+        if isinstance((document := json.loads(path.read_text(encoding="utf-8"))), dict)
+        and isinstance(document.get("violated_contract"), str)
+    }
     promotion_rate = rates.local_evolution_promotion_rate
     hypothesis_directory = output / "hypotheses"
 
-    reports = (
+    reports: tuple[HypothesisReport, ...] = (
         HypothesisReport(
             hypothesis_id="H1",
             statement="Genesis synthesizes correct baseline servers for unseen generated tasks.",
@@ -394,7 +458,8 @@ def run_genesis_evaluation(
             status=HypothesisStatus.PARTIALLY_EVALUATED,
             scope="unsafe local fixture over five adversarial surfaces",
             metrics={
-                "unique_findings": finding_count,
+                "total_findings_across_runs": finding_count,
+                "unique_violation_families": len(finding_families),
                 "regression_replay_rate": replay_count / finding_count if finding_count else 0.0,
             },
             evidence_paths=run_paths,
@@ -418,6 +483,12 @@ def run_genesis_evaluation(
             ),
         ),
     )
+    reports = tuple(
+        report.model_copy(
+            update={"evidence_sha256": tuple(_sha256(Path(path)) for path in report.evidence_paths)}
+        )
+        for report in reports
+    )
     for report in reports:
         _write(hypothesis_directory / f"{report.hypothesis_id}.json", report)
     report_path = output / "evaluation.json"
@@ -437,8 +508,11 @@ def run_genesis_evaluation(
         hypotheses=reports,
         report_path=str(report_path.resolve()),
     )
+    validate_genesis_evaluation(result)
     _write(report_path, result)
-    return result
+    persisted = EvaluationResult.model_validate_json(report_path.read_bytes(), strict=True)
+    validate_genesis_evaluation(persisted)
+    return persisted
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -470,4 +544,5 @@ __all__ = [
     "derive_evaluation_rates",
     "main",
     "run_genesis_evaluation",
+    "validate_genesis_evaluation",
 ]
