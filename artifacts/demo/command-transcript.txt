@@ -1,0 +1,14 @@
+target/debug/sloforge-gateway mock-backend --config artifacts/demo/runtime/mock-balanced.json
+target/debug/sloforge-gateway mock-backend --config artifacts/demo/runtime/mock-fast.json
+target/debug/sloforge-gateway mock-backend --config artifacts/demo/runtime/mock-economy.json
+target/debug/sloforge-gateway mock-backend --config artifacts/demo/runtime/mock-fast-replica-1.json
+target/debug/sloforge-gateway mock-backend --config artifacts/demo/runtime/mock-fast-replica-2.json
+target/debug/sloforge-gateway serve --config artifacts/demo/runtime/gateway.json
+cargo run -q -p sloforge-sim -- simulate --config artifacts/demo/simulator/replay.scenario.json --output artifacts/demo/simulator/replay.raw.json --chrome-trace artifacts/demo/simulator/trace.json
+cargo run -q -p sloforge-sim -- simulate --config artifacts/demo/controller/predictive-twin.scenario.json --output artifacts/demo/controller/predictive-twin.raw.json --chrome-trace artifacts/demo/controller/predictive-twin-trace.json
+cargo run -q -p sloforge-sim -- simulate --config artifacts/demo/controller/reactive-twin.scenario.json --output artifacts/demo/controller/reactive-twin.raw.json --chrome-trace artifacts/demo/controller/reactive-twin-trace.json
+sloforge export --target local # 2 files
+sloforge export --target docker # 5 files
+sloforge export --target kubernetes # 4 files
+sloforge export --target modal # 3 files
+sloforge export --target truss # 3 files

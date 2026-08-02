@@ -6,9 +6,9 @@ Scope: compiler/optimizer semantics, calibrated uncertainty, regenerated CPU art
 
 ## Outcome
 
-No unresolved high-severity defect remains in the exercised CPU compiler, gateway, simulator, evidence, or report path after the patches below. The initially regenerated run exposed three high-severity semantic errors and one reproducibility error; all were fixed in source and covered by targeted tests. A final clean demo regeneration is required after this review so checked artifacts contain the load-calibrated intervals and the immutable post-review Git revision.
+No unresolved high-severity defect remains in the exercised CPU compiler, gateway, simulator, evidence, or report path after the patches below. The initially regenerated run exposed three high-severity semantic errors and one reproducibility error; all were fixed in source and covered by targeted tests.
 
-The preliminary corrected run provided useful independent validation before the last calibration patch: the optimizer selected three `mock-fast` replicas at concurrency six, the live gateway config contained exactly those three distinct processes and the compiled SLO-slack policy, all 120 streamed requests completed through five live injected fault operations, and actual p95 TTFT was below the requested 250 ms. Its 18 indexed artifacts all matched their SHA-256 digests. Those preliminary numbers must not be copied into release claims because the final calibration split changes the model/evidence and the final run has not yet been generated.
+The required final regeneration has since completed from immutable source revision `2c889e6956ac73a1a530f1abb1d7407f70219ffe`. The optimizer selected three `mock-fast` replicas at concurrency six, the live gateway config contained exactly those three distinct processes and the compiled SLO-slack policy, all 120 streamed requests completed through five live injected fault operations, and actual p95 TTFT was below the requested 250 ms. The final index contains 27 artifacts with zero digest mismatches and reconciles all 24 `EvidenceBundle` hashes.
 
 ## Resolved high-severity findings
 
@@ -32,7 +32,7 @@ Fixed at `python/sloforge/demo.py:515-617`: the demo starts distinct processes f
 
 ### H-04: “calibrated” workload interval used a service-only radius
 
-The preliminary corrected artifact reported only 4.17% prefill interval coverage. Stage-D service-only residuals calibrated the radius, while Stage-E load TTFT—including runtime/queue overhead—was the evaluation target. Using that radius for SLO selection contradicted the uncertainty-aware claim.
+The preliminary corrected artifact reported extremely poor prefill interval coverage. Stage-D service-only residuals calibrated the radius, while Stage-E load TTFT—including runtime/queue overhead—was the evaluation target. Using that radius for SLO selection contradicted the uncertainty-aware claim.
 
 Fixed at `python/sloforge/models/service_curve.py:80-85,137-225`: Stage-E load records are deterministically shuffled and split into disjoint calibration and test halves; TTFT and ITL radii are expanded with finite-sample load-calibration residuals; MAPE and empirical coverage use only the untouched test half. Against the same preliminary raw profile, mock-fast test coverage became 91.67% for both TTFT and ITL (12 test samples), with no test sample reused for calibration. The selected configuration remained feasible with a 34.3 ms uncertainty-adjusted TTFT margin.
 
@@ -74,7 +74,7 @@ No NVIDIA GPU, paid cloud resource, Kubernetes cluster, or credentials were avai
 
 - The gateway keeps bounded admission and stream queues, propagates cancellation, refuses backend redirects/credential-bearing URLs, caps error/non-streaming bodies, gates half-open circuit-breaker probes, and terminates process groups. Contract tests cover malformed/partial SSE, disconnects, queue saturation, slow consumers, cancellation, retry-before-output, and breaker recovery.
 - Generated local/Docker endpoints bind to loopback; containers drop capabilities, disallow privilege escalation, and use read-only filesystems. Kubernetes disables service-account token mounting, applies non-root/seccomp controls, and restricts backend ingress. Authentication/TLS remain trusted-ingress responsibilities.
-- The inspected preliminary artifact index contained 18 entries with zero digest mismatches. Evidence included five measurement-stage references, calibration/error records, 24 optimizer decisions, 499 rejected candidates, four benchmark records, environment versions, raw result digests, and a Git commit. Final evidence must point at the post-review source commit and must be regenerated rather than hand-edited.
+- The final artifact index contains 27 entries with zero digest mismatches. Evidence includes five measurement-stage references, held-out calibration/error records, 24 optimizer decisions, 513 rejected candidates, four benchmark records, environment versions, raw result digests, and the immutable post-review source commit.
 - Modal generation now drops the IR-only `local` region rather than creating an unschedulable Modal app. Offline generation never calls `deploy`, `remote`, or a paid resource API.
 - Core-source scan found no `NotImplementedError`, TODO/FIXME core stubs, silent device/engine substitution, or empty exception handlers after the review patches.
 
@@ -84,6 +84,7 @@ No NVIDIA GPU, paid cloud resource, Kubernetes cluster, or credentials were avai
 - `uv run mypy python/sloforge` — passed for 43 source files.
 - `uv run pytest -q tests/python/test_profiler_optimizer.py tests/python/test_compiler_exporters.py tests/python/test_evidence_reports.py tests/python/test_controller_faults.py` — 23 passed.
 - Refit/calibration probe on the regenerated raw profile — TTFT coverage 91.67%, ITL coverage 91.67%, disjoint held-out count 12; selected plan remained feasible under the widened intervals.
-- Preliminary live demo artifact audit — selected plan/topology matched gateway runtime; 120/120 streaming requests completed; five required live fault operations were recorded; 18/18 indexed SHA-256 values matched.
+- Final live demo artifact audit — selected plan/topology matched gateway runtime; 120/120 streaming requests completed; five required live fault operations were recorded; 27/27 indexed SHA-256 values and 24/24 evidence hashes matched.
+- Final release gates — `make check`, `make demo`, `make benchmark-cpu`, `make benchmark-gpu`, `make docker-smoke`, the report round trip, clean-archive `make bootstrap`, stale-claim scan, path/secret scan, and `git diff --check` passed. Python recorded 67 passes with three expected GPU/Torch skips, Rust recorded 62 passes, and the UI recorded 11 passes plus a production build.
 
-The integration owner must now freeze the source, create the immutable revision, run the full `make check`, clean `make demo`, CPU/GPU benchmark targets, Docker smoke, scans, and regenerate reports/evidence once. Any final metric or resume claim must be taken only from that post-review artifact set.
+All final metric and resume claims were regenerated from that post-review artifact set. The remaining medium-severity boundaries above are retained in `FINAL_REPORT.md` and `docs/LIMITATIONS.md`.

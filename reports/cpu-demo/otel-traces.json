@@ -1,0 +1,722 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "sloforge-demo"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "sloforge",
+            "version": "0.1.0"
+          },
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "3"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "2000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000001",
+              "startTimeUnixNano": "0",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "3"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "1002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000002",
+              "startTimeUnixNano": "1000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "3"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "2002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000003",
+              "startTimeUnixNano": "2000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "3"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "3002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000004",
+              "startTimeUnixNano": "3000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "3"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "4002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000005",
+              "startTimeUnixNano": "4000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "scale"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "5002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000006",
+              "startTimeUnixNano": "5000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "6002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000007",
+              "startTimeUnixNano": "6000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "7002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000008",
+              "startTimeUnixNano": "7000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "8002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000009",
+              "startTimeUnixNano": "8000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "9002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000a",
+              "startTimeUnixNano": "9000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "10002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000b",
+              "startTimeUnixNano": "10000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "11002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000c",
+              "startTimeUnixNano": "11000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "12002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000d",
+              "startTimeUnixNano": "12000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "13002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000e",
+              "startTimeUnixNano": "13000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "14002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "000000000000000f",
+              "startTimeUnixNano": "14000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.action",
+                  "value": {
+                    "stringValue": "hold"
+                  }
+                },
+                {
+                  "key": "sloforge.replicas",
+                  "value": {
+                    "intValue": "4"
+                  }
+                },
+                {
+                  "key": "sloforge.rollback",
+                  "value": {
+                    "boolValue": false
+                  }
+                }
+              ],
+              "endTimeUnixNano": "15002000000",
+              "kind": 1,
+              "name": "sloforge.controller.decision",
+              "spanId": "0000000000000010",
+              "startTimeUnixNano": "15000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "backend_slowdown"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "decode_dominance"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "2400000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000011",
+              "startTimeUnixNano": "1500000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "backend_crash"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "unhealthy_backend"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "3800000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000012",
+              "startTimeUnixNano": "3000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "startup_slowdown"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "cold_start_dominance"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "5000000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000013",
+              "startTimeUnixNano": "4300000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "request_errors"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "unhealthy_backend"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "5600000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000014",
+              "startTimeUnixNano": "5200000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "queue_saturation"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "gateway_queueing"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "6500000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000015",
+              "startTimeUnixNano": "6000000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "capacity_loss"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "insufficient_warm_capacity"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "7500000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000016",
+              "startTimeUnixNano": "6900000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "network_jitter"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "gateway_queueing"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "8200000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000017",
+              "startTimeUnixNano": "7700000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "sloforge.fault_type",
+                  "value": {
+                    "stringValue": "simulated_oom"
+                  }
+                },
+                {
+                  "key": "sloforge.diagnosis",
+                  "value": {
+                    "stringValue": "configuration_infeasibility"
+                  }
+                }
+              ],
+              "endTimeUnixNano": "8900000000.0",
+              "kind": 1,
+              "name": "sloforge.chaos.fault",
+              "spanId": "0000000000000018",
+              "startTimeUnixNano": "8500000000",
+              "status": {
+                "code": 1
+              },
+              "traceId": "00000000000000005a10f0a6e0000001"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

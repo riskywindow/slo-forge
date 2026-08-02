@@ -1,0 +1,168 @@
+{
+  "artifacts": [
+    {
+      "media_type": "application/json",
+      "name": "chaos",
+      "path": "artifacts/cpu-demo/chaos/result.json",
+      "sha256": "7b6087a25e4d1ff0cf594c3ebb36e84c0740745d04d5cb5eaf71603deee9b2c1"
+    },
+    {
+      "media_type": "text/plain",
+      "name": "command_transcript",
+      "path": "artifacts/cpu-demo/command-transcript.txt",
+      "sha256": "d9363123b0af2776e3a74ae2e7074235064abd1a0dbffbd1084a8a56ef6faf3b"
+    },
+    {
+      "media_type": "application/json",
+      "name": "controller",
+      "path": "artifacts/cpu-demo/controller/evaluation.json",
+      "sha256": "1ee5e9d7eca8e22831e3f7a3fd1849cb918407d3617721e4253d6538f3303ec6"
+    },
+    {
+      "media_type": "application/json",
+      "name": "evidence",
+      "path": "artifacts/cpu-demo/evidence/evidence.json",
+      "sha256": "6f0056ca70a8174d3120da5dbb3935cf85780e92583b23d7261812397536f4d2"
+    },
+    {
+      "media_type": "text/plain",
+      "name": "gateway_metrics",
+      "path": "artifacts/cpu-demo/gateway/metrics.prom",
+      "sha256": "911d1ad879109e29d563b95da4f2f65fa30ba0b1911a64e09e8362fb87c17665"
+    },
+    {
+      "media_type": "application/json",
+      "name": "gateway_replay",
+      "path": "artifacts/cpu-demo/gateway/replay.json",
+      "sha256": "187ab151a1c4983707c612dad47b2e893213aac4b60a1c6e1c3877ab0ab8d512"
+    },
+    {
+      "media_type": "application/json",
+      "name": "gateway_trace",
+      "path": "artifacts/cpu-demo/runtime/gateway-trace.json",
+      "sha256": "b945cbc3679983f759a91015b9746fedb0b0eb1e70e14e2e23d9c60c78f5c4f6"
+    },
+    {
+      "media_type": "application/json",
+      "name": "hardware",
+      "path": "artifacts/cpu-demo/hardware/local-cpu.json",
+      "sha256": "7f43bf11954e1293c89478c4809d8d265ac6f329dc7ed36371369ee4a56b729b"
+    },
+    {
+      "media_type": "application/json",
+      "name": "models",
+      "path": "artifacts/cpu-demo/models/service-curves.json",
+      "sha256": "9f2231c0a6b1cd220576d4c515cea006fe0ce91d1cd2f05cd5d752c0d0bc2e3a"
+    },
+    {
+      "media_type": "application/json",
+      "name": "optimization",
+      "path": "artifacts/cpu-demo/optimization/result.json",
+      "sha256": "2b71d05c0ca03253e442be00af27e6e74a2d3eb256d7520784ff924d140c2c79"
+    },
+    {
+      "media_type": "application/json",
+      "name": "plan",
+      "path": "artifacts/cpu-demo/plans/qwen3-coding-agent.json",
+      "sha256": "45582cc392e821ab63642b95aa460df666ba1eff7c8141445a879164aaa0a0a8"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_raw",
+      "path": "artifacts/cpu-demo/controller/predictive-twin.raw.json",
+      "sha256": "f92731c98ffde623094dd71d0e72c311f566c796338901c4740c5e2f114145d4"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_scenario",
+      "path": "artifacts/cpu-demo/controller/predictive-twin.scenario.json",
+      "sha256": "8963aab24b5afea3cfaf8a6ba100b6016c627aed4358471a8f7932613e4801f5"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_trace",
+      "path": "artifacts/cpu-demo/controller/predictive-twin-trace.json",
+      "sha256": "0f602c0d0259bee57bc5e1f329618832ac44bb010534e49534e7930e261d27c6"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_twin",
+      "path": "artifacts/cpu-demo/controller/predictive-twin.json",
+      "sha256": "bd2392fbc2f7c4fa8083d380f85acddf95d84d10d1056cddb8a502d39a2a9517"
+    },
+    {
+      "media_type": "application/json",
+      "name": "profile",
+      "path": "artifacts/cpu-demo/profiles/qwen3-cpu-mocks/profile.json",
+      "sha256": "5f8775adfe0a9243ac9fea4677a308d8ba4307c9c19823261f13e155edea646f"
+    },
+    {
+      "media_type": "application/x-ndjson",
+      "name": "raw_measurements",
+      "path": "artifacts/cpu-demo/profiles/qwen3-cpu-mocks/measurements.jsonl",
+      "sha256": "6d64b80a89a2ee80b9d15463c163fab8e85f1f23eac0ea10d5bd8e694a314e80"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_raw",
+      "path": "artifacts/cpu-demo/controller/reactive-twin.raw.json",
+      "sha256": "b24b85dfd6598bb3f36f526ed462e13df0352a5d44b9bd9819707314296d1e5d"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_scenario",
+      "path": "artifacts/cpu-demo/controller/reactive-twin.scenario.json",
+      "sha256": "3c2358c83e3449d4da21efcfe521b573d8feac693f6816217d26bd129e8976a5"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_trace",
+      "path": "artifacts/cpu-demo/controller/reactive-twin-trace.json",
+      "sha256": "dba4180740008baaff15ad1cbc3cbdad47e5b87df7857b62d53ec0a69a94e4fe"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_twin",
+      "path": "artifacts/cpu-demo/controller/reactive-twin.json",
+      "sha256": "042033f69fe15a7f1de5ac13489f2fadfa4cb2126a6bf586790d69491cb7a7c4"
+    },
+    {
+      "media_type": "application/json",
+      "name": "replay",
+      "path": "artifacts/cpu-demo/simulator/replay.json",
+      "sha256": "23507015f9cb295fcb489503e037651041474c20295e9955e936348d357b58b3"
+    },
+    {
+      "media_type": "application/json",
+      "name": "serving_baselines",
+      "path": "artifacts/cpu-demo/benchmarks/serving-baselines.json",
+      "sha256": "dcc992040624bb68776d7aa472e61081a2982fac138dd6cc5c8cd6dbd0d34459"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_raw",
+      "path": "artifacts/cpu-demo/simulator/replay.raw.json",
+      "sha256": "2714087f5418b2fe283bd443533f8f503a9592cb00d7e92aff6ae4c6babf6eca"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_scenario",
+      "path": "artifacts/cpu-demo/simulator/replay.scenario.json",
+      "sha256": "50cd0d867a8d95155fca57b87eb02b49c76807de7f10d57af01f23eb1f91d7f0"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_trace",
+      "path": "artifacts/cpu-demo/simulator/trace.json",
+      "sha256": "a3cd64df183578c6483eb5c4beeba4418ee066520f4c03bd2d6f2dca37983443"
+    },
+    {
+      "media_type": "application/x-ndjson",
+      "name": "workload",
+      "path": "artifacts/cpu-demo/workloads/coding-agent.jsonl",
+      "sha256": "cefef52050e51049d4562e38aed554cd2ddbc9c32c1bb64c6266c086cbb34e52"
+    }
+  ],
+  "generated_at": "2026-08-02T02:58:31.021421+00:00",
+  "schema_version": "sloforge.artifact-index/v1"
+}

@@ -26,7 +26,7 @@ Attempt-level gateway errors, final request availability and simulator availabil
 - simulator availability is completed requests divided by input requests under simulated deadlines/failures;
 - report replay SLO attainment is `(requests - deadline_misses) / requests`.
 
-Comparing these without naming the denominator is an analysis bug. The CPU demo, for example, had 100% gateway final success but 59.17% faulted-simulator attainment.
+Comparing these without naming the denominator is an analysis bug. The CPU demo, for example, had 100% gateway final success, 2 recoverable backend-status attempt errors, and 97.5% faulted-simulator completion/deadline attainment.
 
 ## Trace correlation
 

@@ -1,0 +1,29 @@
+planId: opt-2b8d4d50935ad9d4
+image:
+  repository: ghcr.io/sloforge/runtime
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+replicaCount: 1
+maxReplicas: 4
+gatewayResources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: '1'
+    memory: 1Gi
+backendResources:
+  requests:
+    cpu: '6.0'
+    memory: 24Gi
+  limits:
+    cpu: '6.0'
+    memory: 24Gi
+backendCommand:
+- mock-backend
+- --config
+- /etc/sloforge/mock-backend.json
+estimatedServiceMs: 1021.7448681100495
+hourlyPriceUsd: 2.2
+gpuCount: 0
+concurrency: 6

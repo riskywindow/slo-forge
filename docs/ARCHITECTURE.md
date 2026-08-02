@@ -72,7 +72,7 @@ The version-1 schema is at [`schemas/deployment-plan-v1.schema.json`](../schemas
 
 ## Evidence and reproducibility
 
-The `EvidenceBundle` stores the environment manifest, assumptions, measurement references, calibration metrics, optimizer history, rejections, benchmark records, artifact hashes, Git state and generation time. A separate artifact index binds friendly names to paths, media types and hashes. The demo report verified 15 indexed inputs before rendering. Deterministic algorithms take an explicit seed; environment timestamps remain nondeterministic envelope data.
+The `EvidenceBundle` stores the environment manifest, assumptions, measurement references, calibration metrics, optimizer history, rejections, benchmark records, artifact hashes, Git state and generation time. A separate artifact index binds friendly names to paths, media types and hashes. The final demo report verified all 27 indexed inputs before rendering; the bundle itself carries 24 artifact hashes plus five typed measurement references. Deterministic algorithms take an explicit seed; environment timestamps remain nondeterministic envelope data.
 
 ## Current evidence boundary
 

@@ -76,9 +76,9 @@ Open `reports/demo/evaluation.html`, `reports/demo/pareto.svg` and `reports/demo
 
 <!-- Metrics source: ../reports/demo/evaluation.json and ../artifacts/demo/gateway/replay.json -->
 
-The seed-41 artifact selects 2 balanced replicas and reports 222.812 ms profile-derived p95 TTFT and 5.609 ms p99 ITL. Live gateway replay completed 120/120 requests but had 1,605.45 ms p95 TTFT during injected faults/queues. Faulted simulation attained only 59.17% of deadlines. Predictive control had 0 violation windows versus 1 reactive violation at slightly higher modeled cost. Diagnosis matched 8/8 known injections.
+The seed-41 artifact selects 3 fast-mock replicas at concurrency 6, a 2,048-token batch limit, chunked prefill, SLO-slack routing and 2 warm replicas. Its calibrated prediction is 192.349 ms p95 TTFT, 3.471 ms p99 ITL and $2.47718/million tokens. Live compiled-topology replay completed 120/120 requests during scheduled faults at 170.429 ms p95 TTFT and 9.429 ms p99 ITL. The harsher faulted simulator completed 117/120 and missed 3 deadlines (97.5% attainment). In matched Rust-twin scenarios, predictive control had 0 misses versus 2 for reactive control at 0.001458 USD greater cost. Diagnosis matched 8/8 known injections and produced 0 false positives across 8 no-fault windows; mean classifier execution was 0.005666 ms.
 
-The honest conclusion is not “the plan solved every SLO.” The compiler found a feasible steady-profile point; runtime replay found a serious robustness gap and preserved it. That is the value of compile plus validation.
+The honest conclusion is not “the plan solved every SLO.” The live compiled-topology replay met the requested TTFT/ITL bounds, while the intentionally harsher simulator's crash/slowdown/startup scenario still missed three request deadlines and had 717.771 ms p95 TTFT. Compile plus validation preserves both results and their different fault models.
 
 ## Artifact validation
 

@@ -6,7 +6,7 @@ Generative-model serving exposes a large configuration space spanning inference 
 
 We present SLOForge, an open-source inference deployment compiler and adaptive runtime. SLOForge defines a typed, versioned `DeploymentPlan` intermediate representation; performs staged budgeted profiling; calibrates separate monotonic prefill, decode and startup models with uncertainty; searches configurations under hard constraints; and emits a Pareto frontier, selected plan, rejected alternatives and content-addressed evidence. A deterministic Rust discrete-event simulator models priority queues, replicas, cold starts, chunked prefill, approximate continuous batching, decode, deadlines, failures and cost. A separate asynchronous Rust gateway implements OpenAI-compatible streaming with bounded admission, cancellation propagation, health checks, circuit breakers and SLO-aware routing. Python components implement controller baselines, fault diagnosis, deployment backends and hash-verified reports.
 
-On a 120-request CPU/mock workload, SLOForge evaluated 540 configurations, promoted 24 profile-derived trials and selected a 17-point feasible frontier. The live gateway completed 120/120 localhost requests during injected faults. The faulted simulator nevertheless attained only 59.17% of deadlines, while the selected steady-profile estimate had satisfied its requested TTFT/ITL bounds. This negative result illustrates the central design claim: deployment selection without evidence-scoped runtime validation is insufficient. No compatible NVIDIA hardware was available, so we make no claim about model or GPU performance.
+On a 120-request CPU/mock workload, SLOForge evaluated 540 configurations, distinguished three direct profile anchors from 537 predictions, recorded a 24-proposal acquisition history and selected from a four-point feasible frontier. The compiled three-replica topology completed 120/120 live localhost requests during scheduled faults at 170.429 ms p95 TTFT. An explicitly harsher faulted simulation completed 117/120 and reached 717.771 ms p95 TTFT. This scope-sensitive result illustrates the central design claim: deployment selection without explicit runtime and fault-model validation is insufficient. No compatible NVIDIA hardware was available, so we make no claim about model or GPU performance.
 
 ## 1. Motivation
 
@@ -99,7 +99,7 @@ Profiling advances through five fidelities. Static feasibility estimates weight 
 
 Every sample records candidate, stage, shape, latency, warmup/failure flags and seed. A mutable budget meter reserves projected seconds and dollar cost before each probe. Exceeding either bound aborts rather than silently truncating a candidate.
 
-For each dimension, non-warm successful samples are grouped by coordinate. A seeded split holds out calibration observations at every coordinate, fits a monotonic median to the remaining observations, interpolates within the grid and extrapolates with nonnegative terminal slope. The radius is the finite-sample conformal rank over absolute calibration residuals at nominal 95% coverage. Representative-load observations are a separate held-out test for prefill/decode MAPE and empirical coverage. The small coordinate-stratified split does not imply independent requests or cross-hardware generalization, so nominal and achieved coverage remain separate.
+For each dimension, non-warm successful service samples are grouped by coordinate. A seeded split fits a monotonic median to the training observations, interpolates within the grid and extrapolates with nonnegative terminal slope. Stage-E representative-load observations are then deterministically split into disjoint calibration and test halves. The radius is expanded using the finite-sample conformal rank over the load-calibration residuals at nominal 95% coverage; only the untouched load-test half supplies final prefill/decode MAPE and empirical coverage. The small split does not imply independent requests or cross-hardware generalization, so nominal and achieved coverage remain separate.
 
 Real adapters exist for Transformers, vLLM and SGLang on explicitly requested CUDA hardware. They parse incremental OpenAI SSE, bound server readiness and requests, collect Torch/Perfetto traces and can generate Nsight commands. These adapters were not exercised in the present CPU study.
 
@@ -145,33 +145,35 @@ The report generator accepts an evidence bundle and SHA-256 artifact index. It r
 
 ### 11.1 Method
 
-<!-- All evaluation values in this section come from ../reports/demo/evaluation.json, ../artifacts/demo/optimization/result.json, ../artifacts/demo/gateway/replay.json, ../artifacts/demo/simulator/replay.raw.json, ../artifacts/demo/controller/evaluation.json, ../artifacts/demo/chaos/result.json and ../artifacts/demo/hardware/local-cpu.json. -->
+<!-- All evaluation values in this section come from ../reports/demo/evaluation.json, ../artifacts/demo/optimization/result.json, ../artifacts/demo/benchmarks/serving-baselines.json, ../artifacts/demo/models/service-curves.json, ../artifacts/demo/gateway/replay.json, ../artifacts/demo/gateway/metrics.prom, ../artifacts/demo/simulator/replay.raw.json, ../artifacts/demo/controller/evaluation.json, ../artifacts/demo/chaos/result.json and ../artifacts/demo/hardware/local-cpu.json. -->
 
-The evaluated host was an Apple M4 Pro with 12 logical CPUs and 24 GiB RAM on macOS 15.6.1 arm64. The CPU probe measured 74.72 GB/s median host copy and 1,637.29 GFLOP/s median FP32 384 GEMM. Three Rust HTTP mock backends represented balanced, latency-oriented and economy service curves. A seeded bursty workload contained 120 short-interactive and long-context requests with multiple priorities and output lengths.
+The evaluated host was an Apple M4 Pro with 12 logical CPUs and 24 GiB RAM on macOS 15.6.1 arm64. The CPU probe measured 74.058 GB/s median host copy and 1,541.625 GFLOP/s median FP32 384 GEMM. Three Rust HTTP mock backends represented balanced, latency-oriented and economy service curves. A seeded bursty workload contained 120 short-interactive and long-context requests with multiple priorities and output lengths.
 
 This setup tests orchestration, protocols, queueing, faults and provenance. It does not execute a language model and cannot answer GPU efficiency hypotheses.
 
 ### 11.2 Profiling and prediction
 
-The profiler spent 41.460405 modeled seconds and 0.013295 USD within a 180-second/0.20-USD budget. Candidate p95 TTFT ranged from 199.78 ms (fast) to 515.92 ms (economy). The selected balanced model had 7.57% held-out prefill MAPE and 54.17% interval coverage. Coverage is substantially below a typical 95% target and is a negative calibration result.
+The profiler spent 40.971631 measured seconds and 0.013177 USD of modeled spend within a 180-second/0.20-USD budget. Direct candidate p95 TTFT ranged from 193.465 ms (fast) to 504.582 ms (economy). The selected fast curve had 8.401% prefill MAPE and 91.667% interval coverage on 12 held-out representative-load observations. Decode MAPE was 1.009% with 100% coverage on the corresponding 12 observations. Prefill remains below the nominal 95% target, and decode's perfect coverage has a small denominator; neither supports an unmeasured-hardware claim.
 
 ### 11.3 Search
 
-Search evaluated 540 configurations and promoted 24, yielding 17 feasible non-dominated points. The selected configuration used balanced mock service, 2 replicas, concurrency 4, 512 batched tokens, chunked prefill, SLO-slack routing and 1 warm replica. Its profile-derived metrics were 222.812 ms p95 TTFT, 5.609 ms p99 ITL, 450.173 tokens/s throughput, 97.452 deadline-aware goodput tokens/s and 1.35750 USD/million tokens.
+Search evaluated 540 configurations: 3 exact load-test shapes carried measured fidelity and 537 topology/policy variants remained predictions. Twenty-seven evaluations were feasible in the full table; all 24 budgeted acquisition proposals were feasible and formed the selection pool, which had a 4-point frontier. The chosen predicted configuration, `cfg-aad9cd4cfa41`, used fast mock service, 3 replicas, concurrency 6, 2,048 batched tokens, chunked prefill, SLO-slack routing and 2 warm replicas. It predicted 192.349 ms p95 TTFT, 3.471 ms p99 ITL, 740.088 tokens/s throughput and deadline-aware goodput, and $2.47718/million tokens. The 68.518 ms TTFT radius produced a 23.392 ms constraint margin with the configured half-radius safety multiplier.
 
-Exhaustive, seeded random and uncertainty-aware search reached the same objective in this small space. Successive halving found no feasible incumbent in 24 trials. H1 is therefore not supported by this run.
+Exhaustive, successive halving and uncertainty-aware search reached the same $2.47718 objective in this small space; seeded random reached $3.30291. These strategies expose entries from one shared predicted table instead of purchasing independent trials, so H1 is not established by this run.
+
+The H2 artifact adds 15 calibrated-prediction rows: documented default, manual static and the compiled plan across steady, bursty, short-prompt, long-prompt and mixed regimes. The compiled plan is prediction-feasible in 3/5 regimes, versus 1/5 for manual static and 0/5 for the documented default. The compiled plan is not uniformly cheaper, and no row is a fresh configuration measurement; therefore this is useful failure/sensitivity analysis, not an H2 win.
 
 ### 11.4 Live gateway and simulation
 
-Live gateway replay completed all 120 requests while injecting slowdown, crash, recovery and cold-start commands. Final p95 TTFT was 1,605.45 ms and p99 ITL 12.35 ms. Attempt metrics recorded queue errors and retries, demonstrating why final success and backend-attempt health require separate denominators.
+Live gateway replay materialized the compiled three-replica fast topology and replayed the profiled arrival process while injecting slowdown, crash, recovery and cold-start commands. It completed all 120 requests at 170.429 ms p95 TTFT, 9.429 ms p99 ITL and 290.455 ms p95 E2E. Attempt metrics recorded 2 backend-status errors and 2 legal pre-output retries despite 100% final availability, demonstrating why final success and backend-attempt health require separate denominators.
 
-The calibrated faulted simulator processed 3,445 events across 22.25 simulated seconds, completed 71 requests, recorded 4 backend failures and 49 deadline misses. It reported 5,035.21 ms p95 TTFT, 16.02 ms p99 ITL, 332.04 tokens/s throughput, 59.17% availability/attainment and 0.01360 USD cost. The gap from the selected steady-profile point is the main result: selection evidence did not cover the injected fault/load regime.
+The calibrated faulted simulator processed 4,970 events across 16.378 simulated seconds, completed 117 requests and recorded 3 failed/deadline-missed requests. It reported 717.771 ms p95 TTFT, 12.697 ms p99 ITL, 688.313 tokens/s throughput, 97.5% availability/attainment and 0.030026 USD cost. The live topology passed the requested p95 TTFT/ITL bounds, but the harsher simulator did not; the difference is evidence about distinct fault schedules, not a reason to collapse their denominators.
 
 ### 11.5 Controller and diagnosis
 
-Across 16 windows, predictive control made 2 scale actions with 0 SLO-violation windows, 1 cold exposure and 0.015889 USD modeled cost. Reactive control made 2 actions with 1 violation, 2 cold exposures and 0.014056 USD cost. The one-seed result suggests a cost/reliability trade, not general superiority. No canary or rollback occurred.
+Across 16 windows, predictive control made 1 scale action; its matched Rust-twin scenario had 0 deadline misses, 1 cold exposure, 0 oscillations and 0.036939 USD simulated cost. Reactive control made 2 scale actions and had 2 deadline misses, 1 cold exposure, 1 oscillation and 0.035481 USD cost. The one-seed result trades 0.001458 USD greater predictive cost for two fewer misses; it does not establish general superiority. No canary or rollback occurred.
 
-The closed-set diagnosis evaluator applied all 8 fault types and matched all expected labels, with 0 false positives and 17.54 ms mean modeled diagnosis latency. Because the injector and classifier share known counter semantics, this establishes deterministic plumbing, not production incident accuracy.
+The closed-set diagnosis evaluator applied all 8 fault types and matched all expected labels. Eight paired no-fault windows produced 0 false positives, and direct classifier execution averaged 0.005666 ms. Because the injector and classifier share known counter semantics, this establishes deterministic plumbing and a normal-state control, not production incident accuracy or end-to-end detection latency.
 
 ### 11.6 Hypotheses
 
@@ -192,7 +194,7 @@ The full comparison and primary links are in [`docs/RELATED_WORK.md`](../docs/RE
 
 ## 13. Limitations
 
-The present evidence is CPU/mock and single-seed. Real GPU engines and cloud targets are implemented paths but unexercised. Nominal and empirical coverage differ, especially for decode. Only three exact load-test shapes are measured; the rest of the configuration space is predicted. The simulator omits KV transfer, cache eviction, collective contention and cycle-level GPU overlap. Controller actions are compared in the Rust twin rather than applied to live provider capacity. Diagnosis is closed set despite negative controls. The gateway needs trusted ingress for TLS/auth/quotas. Modal and Truss have engine-specific code generation but have not executed their non-mock paths here.
+The present evidence is CPU/mock and single-seed. Real GPU engines and cloud targets are implemented paths but unexercised. Prefill empirical coverage is below nominal; decode's 100% coverage has only 12 held-out observations, while E2E/startup coverage is unevaluated. Only three exact load-test shapes are measured; the rest of the configuration space is predicted. H2's 15 default/manual/compiled rows are calibrated predictions across five regimes, not measured engine comparisons. The simulator omits KV transfer, cache eviction, collective contention and cycle-level GPU overlap. Controller actions are compared in the Rust twin rather than applied to live provider capacity. Diagnosis is closed set despite negative controls. The gateway needs trusted ingress for TLS/auth/quotas. Modal and Truss have engine-specific code generation but have not executed their non-mock paths here.
 
 These limitations are not incidental footnotes: they bound every reported number and motivate the validation-first architecture.
 
@@ -204,7 +206,7 @@ A focused Triton fused-logits experiment is present behind an explicit opt-in fl
 
 ## 15. Conclusion
 
-SLOForge demonstrates that inference deployment can be treated as an evidence-bearing compilation problem. Its strongest current finding is a failure: a configuration selected under representative steady measurements did not maintain deadlines under faulted replay. By making plan assumptions, uncertainty, raw measurements, runtime traces and rejected alternatives part of one reproducible artifact chain, SLOForge creates a foundation for improving that outcome without hiding it.
+SLOForge demonstrates that inference deployment can be treated as an evidence-bearing compilation problem. The compiled topology met the requested live localhost TTFT/ITL bounds, yet a harsher calibrated fault scenario still missed three request deadlines and moved p95 TTFT from a 192.349 ms prediction to 717.771 ms. By making plan assumptions, uncertainty, raw measurements, runtime traces, fault schedules and rejected alternatives part of one reproducible artifact chain, SLOForge creates a foundation for improving that outcome without hiding it.
 
 ## References
 

@@ -11,11 +11,11 @@ This document is deliberately conservative. The checked-in system is a complete 
 
 ## Prediction quality
 
-The selected service curve has 7.57% held-out prefill MAPE but only 54.17% interval coverage. The uncertainty interval is therefore under-calibrated on this run. Cross-hardware generalization is neither implemented nor claimed.
+The selected service curve has 8.401% held-out prefill MAPE and 91.667% coverage on 12 representative-load observations; decode has 1.009% MAPE and 100% coverage on the corresponding 12 observations. Prefill is below the nominal 95% target and decode's perfect result has a very small denominator. E2E and startup lack distinct held-out coverage estimates. Cross-hardware generalization is neither implemented nor claimed.
 
 Only the three exact profiled CPU/mock shapes are labeled measured. The other replica/concurrency/batching/routing configurations are analytical predictions and are not fresh launches. Cost is derived from declared hourly price and observed or predicted output rate. Availability comes from mock observations or modeled failure rates and should not be mapped to provider availability.
 
-The selected steady-profile estimate met p95 TTFT and p99 ITL constraints, yet the faulted simulator replay attained only 59.17% of request deadlines. This exposes workload/fault mismatch and means the plan should not be promoted unchanged to production.
+The selected prediction met p95 TTFT and p99 ITL constraints, and live compiled-topology replay met both at 170.429 ms and 9.429 ms. The harsher faulted simulator nevertheless reached 717.771 ms p95 TTFT and missed 3/120 deadlines. This fault-model sensitivity means the plan should not be promoted unchanged to production solely from the successful localhost run.
 
 ## Simulator fidelity
 

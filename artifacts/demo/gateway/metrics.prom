@@ -1,0 +1,112 @@
+# TYPE sloforge_gateway_backend_errors_total counter
+sloforge_gateway_backend_errors_total{backend="mock-fast-replica-1",kind="backend_status"} 2
+# TYPE sloforge_gateway_backend_healthy gauge
+sloforge_gateway_backend_healthy{backend="mock-fast-replica-0"} 1
+sloforge_gateway_backend_healthy{backend="mock-fast-replica-1"} 1
+sloforge_gateway_backend_healthy{backend="mock-fast-replica-2"} 1
+# TYPE sloforge_gateway_backend_outstanding gauge
+sloforge_gateway_backend_outstanding{backend="mock-fast-replica-0"} 0
+sloforge_gateway_backend_outstanding{backend="mock-fast-replica-1"} 0
+sloforge_gateway_backend_outstanding{backend="mock-fast-replica-2"} 0
+# TYPE sloforge_gateway_circuit_open gauge
+sloforge_gateway_circuit_open{backend="mock-fast-replica-0"} 0
+sloforge_gateway_circuit_open{backend="mock-fast-replica-1"} 0
+sloforge_gateway_circuit_open{backend="mock-fast-replica-2"} 0
+# TYPE sloforge_gateway_request_duration_seconds histogram
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.01"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.025"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.05"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.1"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.25"} 8
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="0.5"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="1"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="2.5"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="5"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="10"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="30"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="120"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-0",le="+Inf"} 10
+sloforge_gateway_request_duration_seconds_sum{backend="mock-fast-replica-0"} 1.972996666
+sloforge_gateway_request_duration_seconds_count{backend="mock-fast-replica-0"} 10
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.01"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.025"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.05"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.1"} 2
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.25"} 81
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="0.5"} 87
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="1"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="2.5"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="5"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="10"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="30"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="120"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-1",le="+Inf"} 88
+sloforge_gateway_request_duration_seconds_sum{backend="mock-fast-replica-1"} 14.430955211000002
+sloforge_gateway_request_duration_seconds_count{backend="mock-fast-replica-1"} 88
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.01"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.025"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.05"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.1"} 0
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.25"} 15
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="0.5"} 21
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="1"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="2.5"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="5"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="10"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="30"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="120"} 22
+sloforge_gateway_request_duration_seconds_bucket{backend="mock-fast-replica-2",le="+Inf"} 22
+sloforge_gateway_request_duration_seconds_sum{backend="mock-fast-replica-2"} 4.561189163
+sloforge_gateway_request_duration_seconds_count{backend="mock-fast-replica-2"} 22
+# TYPE sloforge_gateway_requests_total counter
+sloforge_gateway_requests_total 120
+# TYPE sloforge_gateway_retries_total counter
+sloforge_gateway_retries_total{phase="before_output"} 2
+# TYPE sloforge_gateway_route_decisions_total counter
+sloforge_gateway_route_decisions_total{backend="mock-fast-replica-0",policy="slo_slack_aware"} 10
+sloforge_gateway_route_decisions_total{backend="mock-fast-replica-1",policy="slo_slack_aware"} 90
+sloforge_gateway_route_decisions_total{backend="mock-fast-replica-2",policy="slo_slack_aware"} 22
+# TYPE sloforge_gateway_stream_events_total counter
+sloforge_gateway_stream_events_total{backend="mock-fast-replica-0"} 320
+sloforge_gateway_stream_events_total{backend="mock-fast-replica-1"} 2782
+sloforge_gateway_stream_events_total{backend="mock-fast-replica-2"} 685
+# TYPE sloforge_gateway_ttft_seconds histogram
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.01"} 0
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.025"} 4
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.05"} 5
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.1"} 9
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.25"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="0.5"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="1"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="2.5"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="5"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="10"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-0",le="+Inf"} 10
+sloforge_gateway_ttft_seconds_sum{backend="mock-fast-replica-0"} 0.516270499
+sloforge_gateway_ttft_seconds_count{backend="mock-fast-replica-0"} 10
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.01"} 0
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.025"} 51
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.05"} 62
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.1"} 73
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.25"} 87
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="0.5"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="1"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="2.5"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="5"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="10"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-1",le="+Inf"} 88
+sloforge_gateway_ttft_seconds_sum{backend="mock-fast-replica-1"} 4.385736666999999
+sloforge_gateway_ttft_seconds_count{backend="mock-fast-replica-1"} 88
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.01"} 0
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.025"} 11
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.05"} 13
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.1"} 14
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.25"} 20
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="0.5"} 21
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="1"} 22
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="2.5"} 22
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="5"} 22
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="10"} 22
+sloforge_gateway_ttft_seconds_bucket{backend="mock-fast-replica-2",le="+Inf"} 22
+sloforge_gateway_ttft_seconds_sum{backend="mock-fast-replica-2"} 2.0814414579999996
+sloforge_gateway_ttft_seconds_count{backend="mock-fast-replica-2"} 22

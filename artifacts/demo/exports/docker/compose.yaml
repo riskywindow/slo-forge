@@ -1,0 +1,60 @@
+services:
+  gateway:
+    image: ghcr.io/sloforge/runtime:0.1.0
+    command:
+    - serve
+    - --config
+    - /etc/sloforge/gateway.json
+    volumes:
+    - ./gateway.json:/etc/sloforge/gateway.json:ro
+    ports:
+    - 127.0.0.1:8080:8080
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8080/health
+      interval: 5s
+      timeout: 2s
+      retries: 12
+    depends_on:
+      backend:
+        condition: service_healthy
+    read_only: true
+    cap_drop:
+    - ALL
+    security_opt:
+    - no-new-privileges:true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  backend:
+    image: ghcr.io/sloforge/runtime:0.1.0
+    command:
+    - mock-backend
+    - --config
+    - /etc/sloforge/mock-backend.json
+    environment:
+      HF_HOME: /models/huggingface
+      XDG_CACHE_HOME: /models/cache
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8000/health
+      interval: 3s
+      timeout: 2s
+      retries: 20
+    volumes:
+    - model-cache:/models
+    - ./mock-backend.json:/etc/sloforge/mock-backend.json:ro
+    read_only: true
+    cap_drop:
+    - ALL
+    security_opt:
+    - no-new-privileges:true
+    tmpfs:
+    - /tmp:rw,noexec,nosuid,size=256m
+volumes:
+  model-cache: {}

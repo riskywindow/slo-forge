@@ -44,9 +44,9 @@ The output contains expected and predicted labels, confidence, evidence string, 
 
 <!-- Metrics source: ../artifacts/demo/chaos/result.json -->
 
-All 8 required events are paired with 8 no-fault negative-control windows. The generated result reports closed-set label agreement, a confusion matrix, false-positive count/rate with a real negative denominator, and mean classifier execution time. This remains a self-consistency test because the injector and classifier share known counter mappings; negative windows verify the normal-state abstention path but do not establish specificity on production telemetry, overlapping faults or unseen perturbations.
+All 8 required events were applied in the seed-41 CPU scenario and all 8 expected labels matched. The paired 8 no-fault windows produced 0 false positives. Mean classifier execution was 0.005666 ms. Rule scores ranged from 0.50 to 0.99. This remains a self-consistency test because the injector and classifier share known counter mappings; negative windows verify the normal-state abstention path but do not establish specificity on production telemetry, overlapping faults or unseen perturbations, and execution time is not end-to-end diagnosis latency.
 
-The live gateway run separately applied slowdown, crash, recovery and cold-start commands while 120 requests completed. The simulator replay produced 4 failed requests and 49 deadline misses under its timed actions. Keeping the live, simulator and classifier artifacts separate prevents a synthetic classifier score from being mistaken for transport failure evidence.
+The live gateway run separately applied slowdown, crash, recovery and cold-start commands while 120/120 requests completed. Its metrics retained 2 backend-status errors and 2 pre-output retries. The harsher simulator replay completed 117/120 and recorded 3 failed/deadline-missed requests under timed faults. Keeping the live, simulator and classifier artifacts separate prevents a synthetic classifier score from being mistaken for transport failure evidence.
 
 ## Running
 

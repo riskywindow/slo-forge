@@ -1,0 +1,18 @@
+{
+  "deployed": false,
+  "files": {
+    "Dockerfile": "aaabdebc4e7535c90aec17038cccf6e1f0fd1762ef6955bf8f8b1d5b3354c0b0",
+    "compose.yaml": "6418e7eccf11d3e4a2b5edbd2af3612d80b5e1c468782ee17ad696a3fe269b02",
+    "gateway.json": "a33bed8ad4fa2a8c5784dc7a39582684171112bdf7485b452ff206b4de21cd43",
+    "mock-backend.json": "3d1fd63072c76a041b2ede29c1bdbd2c50877b11af6cff08482eadced4b69bd5",
+    "run.sh": "560ecd19c07ccf4fc2fd186806404aa7f5de4a483609f2cbe48eb3cc919810f4"
+  },
+  "generated_at": "2026-08-02T02:58:30.254503+00:00",
+  "output_dir": "artifacts/cpu-demo/exports/docker",
+  "schema_version": "sloforge.export/v1",
+  "target": "docker",
+  "validation": [
+    "gateway JSON and current serve subcommand validated",
+    "Docker Compose services are bounded, hardened, and run the selected engine without silent substitution"
+  ]
+}

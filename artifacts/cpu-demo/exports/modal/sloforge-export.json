@@ -1,0 +1,16 @@
+{
+  "deployed": false,
+  "files": {
+    "README.md": "e58099c9b419e32f1b87657eddd6f65c8e6dfa7115ca4ce123e9e7d466abaafe",
+    "app.py": "e68da8595a9817e3c0c9a601d6925993161314a022c8e0b3b5ec8cc9293f44eb",
+    "requirements.txt": "010c030d909f84a4f1a66eab1cee2dc9f31465a97344c923291982f139067fbc"
+  },
+  "generated_at": "2026-08-02T02:58:30.415851+00:00",
+  "output_dir": "artifacts/cpu-demo/exports/modal",
+  "schema_version": "sloforge.export/v1",
+  "target": "modal",
+  "validation": [
+    "Modal app AST and bytecode compilation passed without resource invocation",
+    "Modal 1.5.3 offline import passed without credentials"
+  ]
+}

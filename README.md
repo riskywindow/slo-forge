@@ -48,7 +48,7 @@ The primary outputs are:
 - `artifacts/demo/benchmarks/serving-baselines.json`
 - `reports/demo/evaluation.md`, `evaluation.html`, and `report-data.json`
 
-The report generator first verifies every indexed SHA-256 digest and the plan's canonical digest. It refuses tampered input, so report values cannot drift away from the raw run silently.
+The report generator verifies every indexed SHA-256 digest, reconciles the `EvidenceBundle` hash chain, and verifies the plan's canonical digest before reading metrics. It refuses tampered or internally stale input, so report values cannot drift away from the raw run silently.
 
 ## Cohesive CLI workflow
 
@@ -136,7 +136,7 @@ make benchmark-gpu  # real path when available; explicit unavailable artifact ot
 make docker-smoke   # Linux container build plus real streaming request
 ```
 
-The checked CPU report is an integration and methodology study over explicit mock inference, not a claim about Qwen GPU performance. It preserves negative results: faulted simulator replay can miss the requested SLO, empirical interval coverage may be below nominal, and the predictive controller can cost more than the reactive baseline. H1 and production H2 remain unestablished until real multi-engine GPU trials are executed. The report's default/manual/compiled serving comparisons are visibly labeled calibrated predictions.
+The checked seed-41 CPU report is an integration and methodology study over explicit mock inference, not a claim about Qwen GPU performance. The selected three-replica plan predicts 192.349 ms p95 TTFT, 3.471 ms p99 ITL and $2.47718/million tokens; its compiled-topology live replay completed 120/120 requests during scheduled faults at 170.429 ms p95 TTFT and 9.429 ms p99 ITL. The harsher faulted Rust simulation still missed 3/120 deadlines. In a separate matched controller-twin comparison, predictive control had 0 misses versus 2 for reactive control at $0.001458 greater simulated cost. Held-out prefill/decode MAPE was 8.401%/1.009%, with 91.667%/100% interval coverage. H1 and production H2 remain unestablished until independently budgeted real-engine GPU trials are executed; the report's default/manual/compiled comparisons are visibly labeled calibrated predictions.
 
 See [Reproducibility](docs/REPRODUCIBILITY.md), [Limitations](docs/LIMITATIONS.md), [Related work](docs/RELATED_WORK.md), and the [paper-style report](paper/SLOFORGE.md). The local artifact explorer is documented in [ui/README.md](ui/README.md).
 

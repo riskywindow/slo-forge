@@ -1,0 +1,30 @@
+{
+  "admission_capacity": 256,
+  "backends": [
+    {
+      "base_url": "http://backend:8000",
+      "capacity": 6,
+      "estimated_service_ms": 1021.7448681100495,
+      "health_path": "/health",
+      "name": "inference-0",
+      "price_per_hour_usd": 2.2,
+      "weight": 1
+    }
+  ],
+  "bind": "127.0.0.1:8080",
+  "breaker_cooldown_ms": 10000,
+  "breaker_failures": 3,
+  "connect_timeout_ms": 2000,
+  "health_interval_ms": 5000,
+  "health_timeout_ms": 1000,
+  "max_request_bytes": 1048576,
+  "max_trace_events": 100000,
+  "provenance": {
+    "plan_id": "opt-2b8d4d50935ad9d4"
+  },
+  "queue_timeout_ms": 1000,
+  "request_timeout_ms": 30000,
+  "retry_attempts": 1,
+  "routing_policy": "slo_slack_aware",
+  "stream_buffer_bytes": 1048576
+}

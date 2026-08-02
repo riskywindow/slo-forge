@@ -55,7 +55,7 @@ The reactive policy increments or decrements one replica when observed utilizati
 
 <!-- Metrics source: ../artifacts/demo/controller/evaluation.json -->
 
-Across 16 one-second windows, the predictive controller made 2 scale actions, incurred 0 SLO-violation windows, exposed 1 cold-start window, changed replica direction once and accumulated 0.015889 USD of modeled cost. The reactive baseline made 2 scale actions, incurred 1 violation window and 2 cold exposures at 0.014056 USD. The predictive policy therefore traded 0.001833 USD more modeled cost for one fewer violation in this single seeded CPU/mock trace.
+Across 16 one-second windows, the predictive controller made 1 scale action and its calibrated Rust-twin replay incurred 0 request deadline misses, 1 cold-start exposure, 0 oscillations and 0.036939 USD simulated cost. Reactive control made 2 scale actions and its matched replay incurred 2 deadline misses, 1 cold exposure, 1 oscillation and 0.035481 USD cost. The predictive policy therefore traded 0.001458 USD greater simulated cost for two fewer misses in this single seeded CPU/mock trace.
 
 No canary or rollback was triggered in this run. Zero rollback count is not evidence of successful rollback under load; contract tests cover the state path, and a dedicated canary-triggering evaluation remains necessary before production use.
 

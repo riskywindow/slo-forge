@@ -1,0 +1,5443 @@
+{
+  "predictive": {
+    "action_count": 1,
+    "cold_start_exposure": 1,
+    "controller": "predictive",
+    "estimated_cost_usd": 0.036938528198543215,
+    "recovery_windows": 2,
+    "replica_oscillations": 0,
+    "rollback_count": 0,
+    "slo_violations": 0
+  },
+  "predictive_decisions": [
+    {
+      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 14509.206500882028,
+          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 7025.284586498392,
+          "predicted_slo_attainment": 0.035585747014500284,
+          "predicted_utilization": 1.0363225834851908,
+          "rejection_reason": "upper forecast predicts 7025.3ms TTFT at 1.04 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 1176.523359127696,
+          "predicted_slo_attainment": 0.2124904686850895,
+          "predicted_utilization": 0.8461538461538461,
+          "rejection_reason": "upper forecast predicts 1176.5ms TTFT at 0.85 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 677.9849300759118,
+          "predicted_slo_attainment": 0.3687397594102988,
+          "predicted_utilization": 0.7327907262791404,
+          "rejection_reason": "upper forecast predicts 678.0ms TTFT at 0.73 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 7025.284586498392,
+          "predicted_slo_attainment": 0.035585747014500284,
+          "predicted_utilization": 1.0363225834851908,
+          "rejection_reason": "upper forecast predicts 7025.3ms TTFT at 1.04 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 297.2902030559447,
+          "predicted_slo_attainment": 0.8409291575375408,
+          "predicted_utilization": 0.5181612917425954,
+          "rejection_reason": "upper forecast predicts 297.3ms TTFT at 0.52 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 272.654619734355,
+          "predicted_slo_attainment": 0.9169109265178519,
+          "predicted_utilization": 0.4230769230769231,
+          "rejection_reason": "upper forecast predicts 272.7ms TTFT at 0.42 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 273.00476744084517,
+          "predicted_slo_attainment": 0.9157349241315726,
+          "predicted_utilization": 0.3663953631395702,
+          "rejection_reason": "upper forecast predicts 273.0ms TTFT at 0.37 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 485.700641785065,
+          "predicted_slo_attainment": 0.5147203410750926,
+          "predicted_utilization": 0.6908817223234605,
+          "rejection_reason": "upper forecast predicts 485.7ms TTFT at 0.69 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 225.7145665010812,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.34544086116173023,
+          "rejection_reason": "upper forecast predicts 225.7ms TTFT at 0.35 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 231.15044292547705,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.28205128205128205,
+          "rejection_reason": "upper forecast predicts 231.2ms TTFT at 0.28 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 243.05973789919776,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.24426357542638016,
+          "rejection_reason": "upper forecast predicts 243.1ms TTFT at 0.24 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 297.2902030559447,
+          "predicted_slo_attainment": 0.8409291575375408,
+          "predicted_utilization": 0.5181612917425954,
+          "rejection_reason": "upper forecast predicts 297.3ms TTFT at 0.52 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 208.20595058531705,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2590806458712977,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 219.90269853282723,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.21153846153846154,
+          "rejection_reason": "upper forecast predicts 219.9ms TTFT at 0.21 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 234.53077168067185,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.1831976815697851,
+          "rejection_reason": "upper forecast predicts 234.5ms TTFT at 0.18 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00000",
+      "forecast": {
+        "arrival_rate_rps": 5.0,
+        "drift_score": 0.0,
+        "horizon_windows": 2,
+        "lower_rps": 4.5,
+        "upper_rps": 5.5
+      },
+      "generated_at": "2026-08-02T02:56:39.645956+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.6,
+        "long_context_fraction": 0.4,
+        "observed_p95_ttft_ms": 207.79041838365882,
+        "output_p95": 193.0,
+        "prompt_p95": 1265.2,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 1000.0,
+        "window_index": 0,
+        "window_start_ms": 0.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 201.01671537615712,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 14509.206500882028,
+          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 2658.2422089989973,
+          "predicted_slo_attainment": 0.09404711096440735,
+          "predicted_utilization": 0.9326903251366717,
+          "rejection_reason": "upper forecast predicts 2658.2ms TTFT at 0.93 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 714.1757551062177,
+          "predicted_slo_attainment": 0.3500538882936709,
+          "predicted_utilization": 0.7615384615384616,
+          "rejection_reason": "upper forecast predicts 714.2ms TTFT at 0.76 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 513.0506550774437,
+          "predicted_slo_attainment": 0.4872813191560259,
+          "predicted_utilization": 0.6595116536512263,
+          "rejection_reason": "upper forecast predicts 513.1ms TTFT at 0.66 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 2658.2422089989973,
+          "predicted_slo_attainment": 0.09404711096440735,
+          "predicted_utilization": 0.9326903251366717,
+          "rejection_reason": "upper forecast predicts 2658.2ms TTFT at 0.93 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 268.71150296112637,
+          "predicted_slo_attainment": 0.9303658282026233,
+          "predicted_utilization": 0.46634516256833586,
+          "rejection_reason": "upper forecast predicts 268.7ms TTFT at 0.47 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 256.8148614353146,
+          "predicted_slo_attainment": 0.9734639132750069,
+          "predicted_utilization": 0.3807692307692308,
+          "rejection_reason": "upper forecast predicts 256.8ms TTFT at 0.38 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 261.82255313638916,
+          "predicted_slo_attainment": 0.9548451690094454,
+          "predicted_utilization": 0.32975582682561316,
+          "rejection_reason": "upper forecast predicts 261.8ms TTFT at 0.33 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 386.07184970130595,
+          "predicted_slo_attainment": 0.6475478597919498,
+          "predicted_utilization": 0.6217935500911145,
+          "rejection_reason": "upper forecast predicts 386.1ms TTFT at 0.62 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 217.68861703974173,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.31089677504555724,
+          "rejection_reason": "upper forecast predicts 217.7ms TTFT at 0.31 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 226.06344760067756,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.25384615384615383,
+          "rejection_reason": "upper forecast predicts 226.1ms TTFT at 0.25 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 239.22950419260098,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.21983721788374214,
+          "rejection_reason": "upper forecast predicts 239.2ms TTFT at 0.22 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 268.71150296112637,
+          "predicted_slo_attainment": 0.9303658282026233,
+          "predicted_utilization": 0.46634516256833586,
+          "rejection_reason": "upper forecast predicts 268.7ms TTFT at 0.47 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 204.44651996113615,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.23317258128416793,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 217.40882513536425,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.1903846153846154,
+          "rejection_reason": "upper forecast predicts 217.4ms TTFT at 0.19 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 232.6076129545708,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.16487791341280658,
+          "rejection_reason": "upper forecast predicts 232.6ms TTFT at 0.16 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00001",
+      "forecast": {
+        "arrival_rate_rps": 4.45,
+        "drift_score": 0.2,
+        "horizon_windows": 2,
+        "lower_rps": 3.95,
+        "upper_rps": 4.95
+      },
+      "generated_at": "2026-08-02T02:56:39.646090+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 201.01671537615712,
+        "output_p95": 68.0,
+        "prompt_p95": 165.09999999999997,
+        "replicas": 3,
+        "sample_count": 4,
+        "window_end_ms": 2000.0,
+        "window_index": 1,
+        "window_start_ms": 1000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 14509.206500882028,
+          "predicted_slo_attainment": 0.017230439168730714,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 14509.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 8169.907248365379,
+          "predicted_slo_attainment": 0.030600102596026357,
+          "predicted_utilization": 1.1197465514557488,
+          "rejection_reason": "upper forecast predicts 8169.9ms TTFT at 1.12 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 2237.02719840319,
+          "predicted_slo_attainment": 0.11175545839516489,
+          "predicted_utilization": 0.9142692307692308,
+          "rejection_reason": "upper forecast predicts 2237.0ms TTFT at 0.91 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 903.5402891280306,
+          "predicted_slo_attainment": 0.2766893773395148,
+          "predicted_utilization": 0.7917803797446112,
+          "rejection_reason": "upper forecast predicts 903.5ms TTFT at 0.79 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 8169.907248365379,
+          "predicted_slo_attainment": 0.030600102596026357,
+          "predicted_utilization": 1.1197465514557488,
+          "rejection_reason": "upper forecast predicts 8169.9ms TTFT at 1.12 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 326.8770766776863,
+          "predicted_slo_attainment": 0.7648134966849017,
+          "predicted_utilization": 0.5598732757278744,
+          "rejection_reason": "upper forecast predicts 326.9ms TTFT at 0.56 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 288.1962775297555,
+          "predicted_slo_attainment": 0.8674643619371113,
+          "predicted_utilization": 0.4571346153846154,
+          "rejection_reason": "upper forecast predicts 288.2ms TTFT at 0.46 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 283.7192939885172,
+          "predicted_slo_attainment": 0.881152622669779,
+          "predicted_utilization": 0.3958901898723056,
+          "rejection_reason": "upper forecast predicts 283.7ms TTFT at 0.40 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 610.5778978209082,
+          "predicted_slo_attainment": 0.4094481652418555,
+          "predicted_utilization": 0.7464977009704991,
+          "rejection_reason": "upper forecast predicts 610.6ms TTFT at 0.75 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 233.3463624313218,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.37324885048524953,
+          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.37 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 235.89131724217359,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.30475641025641026,
+          "rejection_reason": "upper forecast predicts 235.9ms TTFT at 0.30 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 246.5930899973734,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2639267932482038,
+          "rejection_reason": "upper forecast predicts 246.6ms TTFT at 0.26 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 326.8770766776863,
+          "predicted_slo_attainment": 0.7648134966849017,
+          "predicted_utilization": 0.5598732757278744,
+          "rejection_reason": "upper forecast predicts 326.9ms TTFT at 0.56 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 211.68742050715883,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2799366378639372,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 222.18502505156616,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2285673076923077,
+          "rejection_reason": "upper forecast predicts 222.2ms TTFT at 0.23 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 236.27971000307758,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.1979450949361528,
+          "rejection_reason": "upper forecast predicts 236.3ms TTFT at 0.20 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00002",
+      "forecast": {
+        "arrival_rate_rps": 5.4025,
+        "drift_score": 0.1111111111111111,
+        "horizon_windows": 2,
+        "lower_rps": 4.8622499999999995,
+        "upper_rps": 5.94275
+      },
+      "generated_at": "2026-08-02T02:56:39.646160+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.4,
+        "long_context_fraction": 0.6,
+        "observed_p95_ttft_ms": 207.79041838365882,
+        "output_p95": 213.2,
+        "prompt_p95": 978.0,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 3000.0,
+        "window_index": 2,
+        "window_start_ms": 2000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 191.43981659897415,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 1292.9278388227794,
+          "predicted_slo_attainment": 0.1933595924638972,
+          "predicted_utilization": 0.8834414496351368,
+          "rejection_reason": "upper forecast predicts 1292.9ms TTFT at 0.88 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 525.0288674430849,
+          "predicted_slo_attainment": 0.47616429400827365,
+          "predicted_utilization": 0.721326923076923,
+          "rejection_reason": "upper forecast predicts 525.0ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 404.36493219540785,
+          "predicted_slo_attainment": 0.6182534144162344,
+          "predicted_utilization": 0.624687439818279,
+          "rejection_reason": "upper forecast predicts 404.4ms TTFT at 0.62 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 1292.9278388227794,
+          "predicted_slo_attainment": 0.1933595924638972,
+          "predicted_utilization": 0.8834414496351368,
+          "rejection_reason": "upper forecast predicts 1292.9ms TTFT at 0.88 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 226.71738252488115,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.4417207248175684,
+          "rejection_reason": "upper forecast predicts 226.7ms TTFT at 0.44 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 220.37898439985975,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3606634615384615,
+          "rejection_reason": "upper forecast predicts 220.4ms TTFT at 0.36 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 226.36634367877193,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3123437199091395,
+          "rejection_reason": "upper forecast predicts 226.4ms TTFT at 0.31 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 309.77733259009045,
+          "predicted_slo_attainment": 0.8070312889252289,
+          "predicted_utilization": 0.5889609664234245,
+          "rejection_reason": "upper forecast predicts 309.8ms TTFT at 0.59 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 188.651180936221,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2944804832117123,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "change_routing",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 197.05945209164926,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2404423076923077,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 209.09779038218258,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.208229146606093,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 226.71738252488115,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.4417207248175684,
+          "rejection_reason": "upper forecast predicts 226.7ms TTFT at 0.44 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 178.51933448634554,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2208603624087842,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 190.38662282445375,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.18033173076923076,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 203.97146968428655,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.15617185995456975,
+          "rejection_reason": null,
+          "safe": true
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00003",
+      "forecast": {
+        "arrival_rate_rps": 2.688625,
+        "drift_score": 0.7857142857142857,
+        "horizon_windows": 2,
+        "lower_rps": 0.688625,
+        "upper_rps": 4.688625
+      },
+      "generated_at": "2026-08-02T02:56:39.646223+00:00",
+      "observed": {
+        "arrival_rate_rps": 1.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 191.43981659897415,
+        "output_p95": 51.0,
+        "prompt_p95": 157.0,
+        "replicas": 3,
+        "sample_count": 1,
+        "window_end_ms": 4000.0,
+        "window_index": 3,
+        "window_start_ms": 3000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 321.90901563587374,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 22477.669657186972,
+          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 22477.669657186972,
+          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 18958.334186013788,
+          "predicted_slo_attainment": 0.01318681259371583,
+          "predicted_utilization": 1.3169048076923078,
+          "rejection_reason": "upper forecast predicts 18958.3ms TTFT at 1.32 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 15480.024770998984,
+          "predicted_slo_attainment": 0.016149844958152904,
+          "predicted_utilization": 1.1404730178273994,
+          "rejection_reason": "upper forecast predicts 15480.0ms TTFT at 1.14 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 22477.669657186972,
+          "predicted_slo_attainment": 0.011122149395947965,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 22477.7ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 1289.4549381887357,
+          "predicted_slo_attainment": 0.1938803696011034,
+          "predicted_utilization": 0.8064362046660404,
+          "rejection_reason": "upper forecast predicts 1289.5ms TTFT at 0.81 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 731.6017034034487,
+          "predicted_slo_attainment": 0.34171598950219384,
+          "predicted_utilization": 0.6584524038461539,
+          "rejection_reason": "upper forecast predicts 731.6ms TTFT at 0.66 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 613.0539380096287,
+          "predicted_slo_attainment": 0.407794460650008,
+          "predicted_utilization": 0.5702365089136997,
+          "rejection_reason": "upper forecast predicts 613.1ms TTFT at 0.57 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 11693.897699180865,
+          "predicted_slo_attainment": 0.021378671716746078,
+          "predicted_utilization": 1.0752482728880537,
+          "rejection_reason": "upper forecast predicts 11693.9ms TTFT at 1.08 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 480.6431194730273,
+          "predicted_slo_attainment": 0.5201364377671686,
+          "predicted_utilization": 0.5376241364440268,
+          "rejection_reason": "upper forecast predicts 480.6ms TTFT at 0.54 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 433.10142438516243,
+          "predicted_slo_attainment": 0.5772319967658937,
+          "predicted_utilization": 0.43896826923076926,
+          "rejection_reason": "upper forecast predicts 433.1ms TTFT at 0.44 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 430.3657109357658,
+          "predicted_slo_attainment": 0.5809012977739617,
+          "predicted_utilization": 0.38015767260913313,
+          "rejection_reason": "upper forecast predicts 430.4ms TTFT at 0.38 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 1289.4549381887357,
+          "predicted_slo_attainment": 0.1938803696011034,
+          "predicted_utilization": 0.8064362046660404,
+          "rejection_reason": "upper forecast predicts 1289.5ms TTFT at 0.81 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 376.33414143091494,
+          "predicted_slo_attainment": 0.6643032679667025,
+          "predicted_utilization": 0.4032181023330202,
+          "rejection_reason": "upper forecast predicts 376.3ms TTFT at 0.40 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 374.46980622766694,
+          "predicted_slo_attainment": 0.6676105679078627,
+          "predicted_utilization": 0.32922620192307694,
+          "rejection_reason": "upper forecast predicts 374.5ms TTFT at 0.33 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 388.6812338162418,
+          "predicted_slo_attainment": 0.6432005927978334,
+          "predicted_utilization": 0.28511825445684985,
+          "rejection_reason": "upper forecast predicts 388.7ms TTFT at 0.29 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00004",
+      "forecast": {
+        "arrival_rate_rps": 6.55988125,
+        "drift_score": 0.3333333333333333,
+        "horizon_windows": 2,
+        "lower_rps": 4.55988125,
+        "upper_rps": 8.55988125
+      },
+      "generated_at": "2026-08-02T02:56:39.646291+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.4,
+        "long_context_fraction": 0.6,
+        "observed_p95_ttft_ms": 321.90901563587374,
+        "output_p95": 191.99999999999997,
+        "prompt_p95": 3271.7999999999997,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 5000.0,
+        "window_index": 4,
+        "window_start_ms": 4000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 1214.1209851222004,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 13917.230875646042,
+          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 15066.360030515898,
+          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 13917.230875646042,
+          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 15066.360030515898,
+          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_routing",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 13917.230875646042,
+          "predicted_slo_attainment": 0.01796334358708373,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13917.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 11953.508637616302,
+          "predicted_slo_attainment": 0.020914361429687604,
+          "predicted_utilization": 1.3337655717036794,
+          "rejection_reason": "upper forecast predicts 11953.5ms TTFT at 1.33 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 11375.353406694685,
+          "predicted_slo_attainment": 0.021977339170215902,
+          "predicted_utilization": 1.414672020397236,
+          "rejection_reason": "upper forecast predicts 11375.4ms TTFT at 1.41 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 8327.13062849483,
+          "predicted_slo_attainment": 0.030022346370371367,
+          "predicted_utilization": 1.1550748677884615,
+          "rejection_reason": "upper forecast predicts 8327.1ms TTFT at 1.16 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 6810.57929962431,
+          "predicted_slo_attainment": 0.03670759696077405,
+          "predicted_utilization": 1.0003241787777595,
+          "rejection_reason": "upper forecast predicts 6810.6ms TTFT at 1.00 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "scale",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00005",
+      "forecast": {
+        "arrival_rate_rps": 22.5319465625,
+        "drift_score": 4.0,
+        "horizon_windows": 2,
+        "lower_rps": 15.0319465625,
+        "upper_rps": 30.0319465625
+      },
+      "generated_at": "2026-08-02T02:56:39.646365+00:00",
+      "observed": {
+        "arrival_rate_rps": 20.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.7,
+        "long_context_fraction": 0.3,
+        "observed_p95_ttft_ms": 6885.124483559548,
+        "output_p95": 227.20000000000005,
+        "prompt_p95": 1603.7500000000002,
+        "replicas": 3,
+        "sample_count": 20,
+        "window_end_ms": 6000.0,
+        "window_index": 5,
+        "window_start_ms": 5000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum samples satisfied",
+        "cooldown satisfied",
+        "change budget satisfied"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 225.89649321151765,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 15066.360030515898,
+          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 7896.254904773242,
+          "predicted_slo_attainment": 0.031660578719270624,
+          "predicted_utilization": 1.0793258587977281,
+          "rejection_reason": "upper forecast predicts 7896.3ms TTFT at 1.08 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 5966.881432912884,
+          "predicted_slo_attainment": 0.04189793325220411,
+          "predicted_utilization": 1.0175981784878234,
+          "rejection_reason": "upper forecast predicts 5966.9ms TTFT at 1.02 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 564.2262012428704,
+          "predicted_slo_attainment": 0.4430847051223483,
+          "predicted_utilization": 0.7195505725318188,
+          "rejection_reason": "upper forecast predicts 564.2ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 581.242626654866,
+          "predicted_slo_attainment": 0.43011298300468015,
+          "predicted_utilization": 0.7631986338658676,
+          "rejection_reason": "upper forecast predicts 581.2ms TTFT at 0.76 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 323.6607637419483,
+          "predicted_slo_attainment": 0.7724136750765461,
+          "predicted_utilization": 0.5396629293988641,
+          "rejection_reason": "upper forecast predicts 323.7ms TTFT at 0.54 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00006",
+      "forecast": {
+        "arrival_rate_rps": 10.701875953125,
+        "drift_score": 0.3499999999999999,
+        "horizon_windows": 2,
+        "lower_rps": 5.2018759531250005,
+        "upper_rps": 16.201875953125
+      },
+      "generated_at": "2026-08-02T02:56:39.646478+00:00",
+      "observed": {
+        "arrival_rate_rps": 9.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.7777777777777778,
+        "long_context_fraction": 0.2222222222222222,
+        "observed_p95_ttft_ms": 225.89649321151765,
+        "output_p95": 240.39999999999995,
+        "prompt_p95": 1504.7999999999995,
+        "replicas": 4,
+        "sample_count": 9,
+        "window_end_ms": 7000.0,
+        "window_index": 6,
+        "window_start_ms": 6000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "cooldown guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 217.175529740466,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 13213.999112241123,
+          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 13213.999112241123,
+          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 11547.319333768422,
+          "predicted_slo_attainment": 0.0216500464544106,
+          "predicted_utilization": 1.2878256319930388,
+          "rejection_reason": "upper forecast predicts 11547.3ms TTFT at 1.29 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 13213.999112241123,
+          "predicted_slo_attainment": 0.018919329256531142,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13214.0ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 1787.1649791071181,
+          "predicted_slo_attainment": 0.13988635795946605,
+          "predicted_utilization": 0.910630237368129,
+          "rejection_reason": "upper forecast predicts 1787.2ms TTFT at 0.91 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 444.0561052866404,
+          "predicted_slo_attainment": 0.5629919215695138,
+          "predicted_utilization": 0.6439128159965194,
+          "rejection_reason": "upper forecast predicts 444.1ms TTFT at 0.64 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 8717.864349642738,
+          "predicted_slo_attainment": 0.028676748108640293,
+          "predicted_utilization": 1.214173649824172,
+          "rejection_reason": "upper forecast predicts 8717.9ms TTFT at 1.21 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 336.9577981091837,
+          "predicted_slo_attainment": 0.7419326734767926,
+          "predicted_utilization": 0.607086824912086,
+          "rejection_reason": "upper forecast predicts 337.0ms TTFT at 0.61 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 271.40887915989833,
+          "predicted_slo_attainment": 0.9211194592226828,
+          "predicted_utilization": 0.4292752106643463,
+          "rejection_reason": "upper forecast predicts 271.4ms TTFT at 0.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 1787.1649791071181,
+          "predicted_slo_attainment": 0.13988635795946605,
+          "predicted_utilization": 0.910630237368129,
+          "rejection_reason": "upper forecast predicts 1787.2ms TTFT at 0.91 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 240.04425546068606,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.4553151186840645,
+          "rejection_reason": "upper forecast predicts 240.0ms TTFT at 0.46 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 236.52928449072928,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3219564079982597,
+          "rejection_reason": "upper forecast predicts 236.5ms TTFT at 0.32 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00007",
+      "forecast": {
+        "arrival_rate_rps": 8.665844178906251,
+        "drift_score": 0.0,
+        "horizon_windows": 2,
+        "lower_rps": 7.6658441789062515,
+        "upper_rps": 9.665844178906251
+      },
+      "generated_at": "2026-08-02T02:56:39.646585+00:00",
+      "observed": {
+        "arrival_rate_rps": 7.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.5714285714285714,
+        "long_context_fraction": 0.42857142857142855,
+        "observed_p95_ttft_ms": 217.175529740466,
+        "output_p95": 215.79999999999995,
+        "prompt_p95": 2083.3999999999996,
+        "replicas": 4,
+        "sample_count": 7,
+        "window_end_ms": 8000.0,
+        "window_index": 7,
+        "window_start_ms": 7000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 11650.619310193544,
+          "predicted_slo_attainment": 0.021458086762929936,
+          "predicted_utilization": 1.4319396493271106,
+          "rejection_reason": "upper forecast predicts 11650.6ms TTFT at 1.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 6972.986182688636,
+          "predicted_slo_attainment": 0.035852645258448695,
+          "predicted_utilization": 1.0125342362890868,
+          "rejection_reason": "upper forecast predicts 6973.0ms TTFT at 1.01 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 11650.619310193544,
+          "predicted_slo_attainment": 0.021458086762929936,
+          "predicted_utilization": 1.4319396493271106,
+          "rejection_reason": "upper forecast predicts 11650.6ms TTFT at 1.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 471.2072731042455,
+          "predicted_slo_attainment": 0.5305520824265638,
+          "predicted_utilization": 0.7159698246635553,
+          "rejection_reason": "upper forecast predicts 471.2ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 301.1526602031825,
+          "predicted_slo_attainment": 0.8301437544377968,
+          "predicted_utilization": 0.5062671181445434,
+          "rejection_reason": "upper forecast predicts 301.2ms TTFT at 0.51 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 3542.2472417325334,
+          "predicted_slo_attainment": 0.07057666586754785,
+          "predicted_utilization": 0.9546264328847403,
+          "rejection_reason": "upper forecast predicts 3542.2ms TTFT at 0.95 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 241.2295019189453,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.4773132164423701,
+          "rejection_reason": "upper forecast predicts 241.2ms TTFT at 0.48 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 232.32893183083107,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.33751141209636226,
+          "rejection_reason": "upper forecast predicts 232.3ms TTFT at 0.34 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 471.2072731042455,
+          "predicted_slo_attainment": 0.5305520824265638,
+          "predicted_utilization": 0.7159698246635553,
+          "rejection_reason": "upper forecast predicts 471.2ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 201.53623365506817,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.35798491233177765,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 215.24950129472788,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2531335590722717,
+          "rejection_reason": "upper forecast predicts 215.2ms TTFT at 0.25 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00008",
+      "forecast": {
+        "arrival_rate_rps": 6.099629880507813,
+        "drift_score": 0.42857142857142855,
+        "horizon_windows": 2,
+        "lower_rps": 4.599629880507813,
+        "upper_rps": 7.599629880507813
+      },
+      "generated_at": "2026-08-02T02:56:39.646642+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.5,
+        "long_context_fraction": 0.5,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 214.39999999999998,
+        "prompt_p95": 1245.2,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 9000.0,
+        "window_index": 8,
+        "window_start_ms": 8000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 6050.268415897614,
+          "predicted_slo_attainment": 0.041320480814223536,
+          "predicted_utilization": 1.024888514379903,
+          "rejection_reason": "upper forecast predicts 6050.3ms TTFT at 1.02 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 576.4408244465386,
+          "predicted_slo_attainment": 0.43369586156572776,
+          "predicted_utilization": 0.7247056184782358,
+          "rejection_reason": "upper forecast predicts 576.4ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 6050.268415897614,
+          "predicted_slo_attainment": 0.041320480814223536,
+          "predicted_utilization": 1.024888514379903,
+          "rejection_reason": "upper forecast predicts 6050.3ms TTFT at 1.02 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 258.48740844805457,
+          "predicted_slo_attainment": 0.9671650990699604,
+          "predicted_utilization": 0.5124442571899515,
+          "rejection_reason": "upper forecast predicts 258.5ms TTFT at 0.51 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 239.0620082552437,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3623528092391179,
+          "rejection_reason": "upper forecast predicts 239.1ms TTFT at 0.36 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 415.6176245241619,
+          "predicted_slo_attainment": 0.6015144335763516,
+          "predicted_utilization": 0.6832590095866019,
+          "rejection_reason": "upper forecast predicts 415.6ms TTFT at 0.68 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 197.78328805938784,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.34162950479330095,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 213.49471583923173,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.24156853949274526,
+          "rejection_reason": "upper forecast predicts 213.5ms TTFT at 0.24 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 258.48740844805457,
+          "predicted_slo_attainment": 0.9671650990699604,
+          "predicted_utilization": 0.5124442571899515,
+          "rejection_reason": "upper forecast predicts 258.5ms TTFT at 0.51 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 182.83002747173774,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.25622212859497573,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 206.1886609805893,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.18117640461955895,
+          "rejection_reason": null,
+          "safe": true
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00009",
+      "forecast": {
+        "arrival_rate_rps": 4.9448334462285155,
+        "drift_score": 0.41818181818181815,
+        "horizon_windows": 2,
+        "lower_rps": 4.450350101605664,
+        "upper_rps": 5.439316790851367
+      },
+      "generated_at": "2026-08-02T02:56:39.646695+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 88.89999999999998,
+        "prompt_p95": 180.95,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 10000.0,
+        "window_index": 9,
+        "window_start_ms": 9000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 1874.4672381488394,
+          "predicted_slo_attainment": 0.13337122938829893,
+          "predicted_utilization": 0.9171817682044401,
+          "rejection_reason": "upper forecast predicts 1874.5ms TTFT at 0.92 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 435.49168088446555,
+          "predicted_slo_attainment": 0.574063778881517,
+          "predicted_utilization": 0.6485454478780278,
+          "rejection_reason": "upper forecast predicts 435.5ms TTFT at 0.65 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 1874.4672381488394,
+          "predicted_slo_attainment": 0.13337122938829893,
+          "predicted_utilization": 0.9171817682044401,
+          "rejection_reason": "upper forecast predicts 1874.5ms TTFT at 0.92 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 233.25997754730497,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.45859088410222004,
+          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.46 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 229.090795863483,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3242727239390139,
+          "rejection_reason": "upper forecast predicts 229.1ms TTFT at 0.32 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 329.6600749223173,
+          "predicted_slo_attainment": 0.7583569228360797,
+          "predicted_utilization": 0.6114545121362933,
+          "rejection_reason": "upper forecast predicts 329.7ms TTFT at 0.61 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 190.61916881073077,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.30572725606814666,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 210.06158640237607,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2161818159593426,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 233.25997754730497,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.45859088410222004,
+          "rejection_reason": "upper forecast predicts 233.3ms TTFT at 0.46 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 179.4621575428512,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.22929544205111002,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 204.46146290089345,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.16213636196950695,
+          "rejection_reason": null,
+          "safe": true
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00010",
+      "forecast": {
+        "arrival_rate_rps": 4.425175050802832,
+        "drift_score": 0.41818181818181815,
+        "horizon_windows": 2,
+        "lower_rps": 3.9826575457225486,
+        "upper_rps": 4.867692555883115
+      },
+      "generated_at": "2026-08-02T02:56:39.646746+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 107.74999999999999,
+        "prompt_p95": 193.54999999999998,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 11000.0,
+        "window_index": 10,
+        "window_start_ms": 10000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 204.1275003666601,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 11625.547986727777,
+          "predicted_slo_attainment": 0.021504362657606392,
+          "predicted_utilization": 1.4303755356321926,
+          "rejection_reason": "upper forecast predicts 11625.5ms TTFT at 1.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 6958.1941018438365,
+          "predicted_slo_attainment": 0.03592886262453544,
+          "predicted_utilization": 1.0114282408888635,
+          "rejection_reason": "upper forecast predicts 6958.2ms TTFT at 1.01 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 11625.547986727777,
+          "predicted_slo_attainment": 0.021504362657606392,
+          "predicted_utilization": 1.4303755356321926,
+          "rejection_reason": "upper forecast predicts 11625.5ms TTFT at 1.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 469.71450293726775,
+          "predicted_slo_attainment": 0.5322381966847392,
+          "predicted_utilization": 0.7151877678160963,
+          "rejection_reason": "upper forecast predicts 469.7ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 300.8130789925776,
+          "predicted_slo_attainment": 0.8310808853034234,
+          "predicted_utilization": 0.5057141204444318,
+          "rejection_reason": "upper forecast predicts 300.8ms TTFT at 0.51 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 3459.2429306880717,
+          "predicted_slo_attainment": 0.07227014841373773,
+          "predicted_utilization": 0.9535836904214616,
+          "rejection_reason": "upper forecast predicts 3459.2ms TTFT at 0.95 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 240.99680268654038,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.4767918452107308,
+          "rejection_reason": "upper forecast predicts 241.0ms TTFT at 0.48 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 232.23558782016198,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.3371427469629545,
+          "rejection_reason": "upper forecast predicts 232.2ms TTFT at 0.34 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 469.71450293726775,
+          "predicted_slo_attainment": 0.5322381966847392,
+          "predicted_utilization": 0.7151877678160963,
+          "rejection_reason": "upper forecast predicts 469.7ms TTFT at 0.72 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 201.4426451489634,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.35759388390804814,
+          "rejection_reason": null,
+          "safe": true
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 215.2060854759911,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2528570602222159,
+          "rejection_reason": "upper forecast predicts 215.2ms TTFT at 0.25 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00011",
+      "forecast": {
+        "arrival_rate_rps": 6.591328772861274,
+        "drift_score": 0.1111111111111111,
+        "horizon_windows": 2,
+        "lower_rps": 5.591328772861274,
+        "upper_rps": 7.591328772861274
+      },
+      "generated_at": "2026-08-02T02:56:39.646798+00:00",
+      "observed": {
+        "arrival_rate_rps": 6.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.6666666666666666,
+        "long_context_fraction": 0.3333333333333333,
+        "observed_p95_ttft_ms": 204.1275003666601,
+        "output_p95": 177.5,
+        "prompt_p95": 871.5,
+        "replicas": 4,
+        "sample_count": 6,
+        "window_end_ms": 12000.0,
+        "window_index": 11,
+        "window_start_ms": 11000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 250.14185296729812,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 15066.360030515898,
+          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 10163.759834307415,
+          "predicted_slo_attainment": 0.024597196714166127,
+          "predicted_utilization": 1.3360174601734325,
+          "rejection_reason": "upper forecast predicts 10163.8ms TTFT at 1.34 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 3398.0126926345306,
+          "predicted_slo_attainment": 0.07357241500065476,
+          "predicted_utilization": 0.9447070058722622,
+          "rejection_reason": "upper forecast predicts 3398.0ms TTFT at 0.94 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 1387.1260704238196,
+          "predicted_slo_attainment": 0.18022875161131932,
+          "predicted_utilization": 0.8906783067822881,
+          "rejection_reason": "upper forecast predicts 1387.1ms TTFT at 0.89 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 410.6518771532372,
+          "predicted_slo_attainment": 0.6087881583132543,
+          "predicted_utilization": 0.6298046705815081,
+          "rejection_reason": "upper forecast predicts 410.7ms TTFT at 0.63 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 10163.759834307415,
+          "predicted_slo_attainment": 0.024597196714166127,
+          "predicted_utilization": 1.3360174601734325,
+          "rejection_reason": "upper forecast predicts 10163.8ms TTFT at 1.34 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 393.8150736498237,
+          "predicted_slo_attainment": 0.6348157212039512,
+          "predicted_utilization": 0.6680087300867162,
+          "rejection_reason": "upper forecast predicts 393.8ms TTFT at 0.67 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 282.0689743763979,
+          "predicted_slo_attainment": 0.8863080406227009,
+          "predicted_utilization": 0.4723535029361311,
+          "rejection_reason": "upper forecast predicts 282.1ms TTFT at 0.47 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "cooldown",
+      "decision_id": "predictive-00012",
+      "forecast": {
+        "arrival_rate_rps": 11.681097947787574,
+        "drift_score": 0.4915254237288136,
+        "horizon_windows": 2,
+        "lower_rps": 9.181097947787574,
+        "upper_rps": 14.181097947787574
+      },
+      "generated_at": "2026-08-02T02:56:39.646852+00:00",
+      "observed": {
+        "arrival_rate_rps": 11.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.5454545454545454,
+        "long_context_fraction": 0.45454545454545453,
+        "observed_p95_ttft_ms": 250.14185296729812,
+        "output_p95": 245.0,
+        "prompt_p95": 1521.5,
+        "replicas": 4,
+        "sample_count": 11,
+        "window_end_ms": 13000.0,
+        "window_index": 12,
+        "window_start_ms": 12000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "cooldown guard forced hold"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 739.668855107771,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 16378.171369946382,
+          "predicted_slo_attainment": 0.015264219329072659,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 16378.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 16378.171369946382,
+          "predicted_slo_attainment": 0.015264219329072659,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 16378.2ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 9173.091340216946,
+          "predicted_slo_attainment": 0.027253625929128427,
+          "predicted_utilization": 1.1166839806593982,
+          "rejection_reason": "upper forecast predicts 9173.1ms TTFT at 1.12 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 13879.806245717273,
+          "predicted_slo_attainment": 0.018011778808305737,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 13879.8ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 8722.703369394576,
+          "predicted_slo_attainment": 0.02866083935367757,
+          "predicted_utilization": 1.1844222227499719,
+          "rejection_reason": "upper forecast predicts 8722.7ms TTFT at 1.18 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 1145.787768915344,
+          "predicted_slo_attainment": 0.2181904945945283,
+          "predicted_utilization": 0.8375129854945487,
+          "rejection_reason": "upper forecast predicts 1145.8ms TTFT at 0.84 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00013",
+      "forecast": {
+        "arrival_rate_rps": 20.64399407650441,
+        "drift_score": 1.4615384615384615,
+        "horizon_windows": 2,
+        "lower_rps": 16.14399407650441,
+        "upper_rps": 25.14399407650441
+      },
+      "generated_at": "2026-08-02T02:56:39.646910+00:00",
+      "observed": {
+        "arrival_rate_rps": 20.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.75,
+        "long_context_fraction": 0.25,
+        "observed_p95_ttft_ms": 739.668855107771,
+        "output_p95": 261.55,
+        "prompt_p95": 2203.9000000000005,
+        "replicas": 4,
+        "sample_count": 20,
+        "window_end_ms": 14000.0,
+        "window_index": 13,
+        "window_start_ms": 13000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum samples satisfied",
+        "cooldown satisfied",
+        "change budget satisfied"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 217.01804595336364,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 15066.360030515898,
+          "predicted_slo_attainment": 0.01659325805925531,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 15066.4ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 8730.58825600934,
+          "predicted_slo_attainment": 0.028634954789893204,
+          "predicted_utilization": 1.1363117547321813,
+          "rejection_reason": "upper forecast predicts 8730.6ms TTFT at 1.14 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 6595.381132525764,
+          "predicted_slo_attainment": 0.037905315094998934,
+          "predicted_utilization": 1.0713249964174805,
+          "rejection_reason": "upper forecast predicts 6595.4ms TTFT at 1.07 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 667.4537019665639,
+          "predicted_slo_attainment": 0.37455781466700705,
+          "predicted_utilization": 0.7575411698214544,
+          "rejection_reason": "upper forecast predicts 667.5ms TTFT at 0.76 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 719.9534139622498,
+          "predicted_slo_attainment": 0.34724468993643604,
+          "predicted_utilization": 0.8034937473131105,
+          "rejection_reason": "upper forecast predicts 720.0ms TTFT at 0.80 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 346.42606704007426,
+          "predicted_slo_attainment": 0.7216547014953127,
+          "predicted_utilization": 0.5681558773660906,
+          "rejection_reason": "upper forecast predicts 346.4ms TTFT at 0.57 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00014",
+      "forecast": {
+        "arrival_rate_rps": 11.057297334426984,
+        "drift_score": 0.015384615384615385,
+        "horizon_windows": 2,
+        "lower_rps": 5.057297334426984,
+        "upper_rps": 17.057297334426984
+      },
+      "generated_at": "2026-08-02T02:56:39.646968+00:00",
+      "observed": {
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.625,
+        "long_context_fraction": 0.375,
+        "observed_p95_ttft_ms": 217.01804595336364,
+        "output_p95": 156.75,
+        "prompt_p95": 1785.1499999999996,
+        "replicas": 4,
+        "sample_count": 8,
+        "window_end_ms": 15000.0,
+        "window_index": 14,
+        "window_start_ms": 14000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum samples satisfied",
+        "cooldown satisfied",
+        "change budget satisfied"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 209.84708954770244,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 1,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 2.2,
+          "predicted_p95_ttft_ms": 11254.291319946893,
+          "predicted_slo_attainment": 0.02221374877304844,
+          "predicted_utilization": 1.2934905042290619,
+          "rejection_reason": "upper forecast predicts 11254.3ms TTFT at 1.29 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 12768.101720776185,
+          "predicted_slo_attainment": 0.019580044509921266,
+          "predicted_utilization": 1.5,
+          "rejection_reason": "upper forecast predicts 12768.1ms TTFT at 1.50 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 1814.3962117369274,
+          "predicted_slo_attainment": 0.13778688380344126,
+          "predicted_utilization": 0.9146359069407763,
+          "rejection_reason": "upper forecast predicts 1814.4ms TTFT at 0.91 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 2,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 4.4,
+          "predicted_p95_ttft_ms": 432.9740876897838,
+          "predicted_slo_attainment": 0.5774017593845463,
+          "predicted_utilization": 0.6467452521145309,
+          "rejection_reason": "upper forecast predicts 433.0ms TTFT at 0.65 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 8496.475719296048,
+          "predicted_slo_attainment": 0.029423964507099547,
+          "predicted_utilization": 1.2195145425877016,
+          "rejection_reason": "upper forecast predicts 8496.5ms TTFT at 1.22 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 328.06468685952194,
+          "predicted_slo_attainment": 0.7620448344903716,
+          "predicted_utilization": 0.6097572712938508,
+          "rejection_reason": "upper forecast predicts 328.1ms TTFT at 0.61 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 263.0290872297287,
+          "predicted_slo_attainment": 0.9504652228126043,
+          "predicted_utilization": 0.43116350140968734,
+          "rejection_reason": "upper forecast predicts 263.0ms TTFT at 0.43 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 1,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 1814.3962117369274,
+          "predicted_slo_attainment": 0.13778688380344126,
+          "predicted_utilization": 0.9146359069407763,
+          "rejection_reason": "upper forecast predicts 1814.4ms TTFT at 0.91 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "change_concurrency",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 4,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 232.7459739300117,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.45731795347038817,
+          "rejection_reason": "upper forecast predicts 232.7ms TTFT at 0.46 utilization",
+          "safe": false
+        },
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "slo_slack",
+            "target_concurrency": 8,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 228.87896421085392,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.32337262605726547,
+          "rejection_reason": "upper forecast predicts 228.9ms TTFT at 0.32 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "slo_slack",
+        "target_concurrency": 8,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "predictive-00015",
+      "forecast": {
+        "arrival_rate_rps": 8.825783800492143,
+        "drift_score": 0.125,
+        "horizon_windows": 2,
+        "lower_rps": 7.943205420442929,
+        "upper_rps": 9.708362180541357
+      },
+      "generated_at": "2026-08-02T02:56:39.647044+00:00",
+      "observed": {
+        "arrival_rate_rps": 7.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 8,
+        "interactive_fraction": 0.7142857142857143,
+        "long_context_fraction": 0.2857142857142857,
+        "observed_p95_ttft_ms": 209.84708954770244,
+        "output_p95": 121.59999999999997,
+        "prompt_p95": 1116.5999999999997,
+        "replicas": 4,
+        "sample_count": 7,
+        "window_end_ms": 16000.0,
+        "window_index": 15,
+        "window_start_ms": 15000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "minimum sample guard forced hold"
+      ]
+    }
+  ],
+  "reactive": {
+    "action_count": 2,
+    "cold_start_exposure": 1,
+    "controller": "reactive",
+    "estimated_cost_usd": 0.03548068037502083,
+    "recovery_windows": 2,
+    "replica_oscillations": 1,
+    "rollback_count": 0,
+    "slo_violations": 2
+  },
+  "reactive_decisions": [
+    {
+      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 226.49155603818812,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2564102564102564,
+          "rejection_reason": "upper forecast predicts 226.5ms TTFT at 0.26 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00000",
+      "forecast": {
+        "arrival_rate_rps": 5.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 5.0,
+        "upper_rps": 5.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647116+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.6,
+        "long_context_fraction": 0.4,
+        "observed_p95_ttft_ms": 207.79041838365882,
+        "output_p95": 193.0,
+        "prompt_p95": 1265.2,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 1000.0,
+        "window_index": 0,
+        "window_start_ms": 0.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 201.01671537615712,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 219.10821976001128,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.20512820512820512,
+          "rejection_reason": "upper forecast predicts 219.1ms TTFT at 0.21 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00001",
+      "forecast": {
+        "arrival_rate_rps": 4.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 4.0,
+        "upper_rps": 4.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647139+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 201.01671537615712,
+        "output_p95": 68.0,
+        "prompt_p95": 165.09999999999997,
+        "replicas": 3,
+        "sample_count": 4,
+        "window_end_ms": 2000.0,
+        "window_index": 1,
+        "window_start_ms": 1000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 207.79041838365882,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 226.49155603818812,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2564102564102564,
+          "rejection_reason": "upper forecast predicts 226.5ms TTFT at 0.26 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00002",
+      "forecast": {
+        "arrival_rate_rps": 5.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 5.0,
+        "upper_rps": 5.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647159+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.4,
+        "long_context_fraction": 0.6,
+        "observed_p95_ttft_ms": 207.79041838365882,
+        "output_p95": 213.2,
+        "prompt_p95": 978.0,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 3000.0,
+        "window_index": 2,
+        "window_start_ms": 2000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 191.43981659897415,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 208.66940009288183,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.05128205128205128,
+          "rejection_reason": null,
+          "safe": true
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00003",
+      "forecast": {
+        "arrival_rate_rps": 1.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 1.0,
+        "upper_rps": 1.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647176+00:00",
+      "observed": {
+        "arrival_rate_rps": 1.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 191.43981659897415,
+        "output_p95": 51.0,
+        "prompt_p95": 157.0,
+        "replicas": 3,
+        "sample_count": 1,
+        "window_end_ms": 4000.0,
+        "window_index": 3,
+        "window_start_ms": 3000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 321.90901563587374,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 350.8808270431024,
+          "predicted_slo_attainment": 0.7124926206620286,
+          "predicted_utilization": 0.2564102564102564,
+          "rejection_reason": "upper forecast predicts 350.9ms TTFT at 0.26 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "stable",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00004",
+      "forecast": {
+        "arrival_rate_rps": 5.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 5.0,
+        "upper_rps": 5.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647193+00:00",
+      "observed": {
+        "arrival_rate_rps": 5.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.4,
+        "long_context_fraction": 0.6,
+        "observed_p95_ttft_ms": 321.90901563587374,
+        "output_p95": 191.99999999999997,
+        "prompt_p95": 3271.7999999999997,
+        "replicas": 3,
+        "sample_count": 5,
+        "window_end_ms": 5000.0,
+        "window_index": 4,
+        "window_start_ms": 4000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 1214.1209851222004,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 741.6632513321986,
+          "predicted_slo_attainment": 0.33708020392131094,
+          "predicted_utilization": 0.7692307692307693,
+          "rejection_reason": "upper forecast predicts 741.7ms TTFT at 0.77 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "scale",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "stable",
+      "decision_id": "reactive-00005",
+      "forecast": {
+        "arrival_rate_rps": 20.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 20.0,
+        "upper_rps": 20.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647215+00:00",
+      "observed": {
+        "arrival_rate_rps": 20.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.7,
+        "long_context_fraction": 0.3,
+        "observed_p95_ttft_ms": 6885.124483559548,
+        "output_p95": 227.20000000000005,
+        "prompt_p95": 1603.7500000000002,
+        "replicas": 3,
+        "sample_count": 20,
+        "window_end_ms": 6000.0,
+        "window_index": 5,
+        "window_start_ms": 5000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 225.89649321151765,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 246.22717760055426,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.34615384615384615,
+          "rejection_reason": "upper forecast predicts 246.2ms TTFT at 0.35 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00006",
+      "forecast": {
+        "arrival_rate_rps": 9.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 9.0,
+        "upper_rps": 9.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647238+00:00",
+      "observed": {
+        "arrival_rate_rps": 9.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.7777777777777778,
+        "long_context_fraction": 0.2222222222222222,
+        "observed_p95_ttft_ms": 225.89649321151765,
+        "output_p95": 240.39999999999995,
+        "prompt_p95": 1504.7999999999995,
+        "replicas": 4,
+        "sample_count": 9,
+        "window_end_ms": 7000.0,
+        "window_index": 6,
+        "window_start_ms": 6000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 217.175529740466,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 236.72132741710797,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.2692307692307692,
+          "rejection_reason": "upper forecast predicts 236.7ms TTFT at 0.27 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00007",
+      "forecast": {
+        "arrival_rate_rps": 7.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 7.0,
+        "upper_rps": 7.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647257+00:00",
+      "observed": {
+        "arrival_rate_rps": 7.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.5714285714285714,
+        "long_context_fraction": 0.42857142857142855,
+        "observed_p95_ttft_ms": 217.175529740466,
+        "output_p95": 215.79999999999995,
+        "prompt_p95": 2083.3999999999996,
+        "replicas": 4,
+        "sample_count": 7,
+        "window_end_ms": 8000.0,
+        "window_index": 7,
+        "window_start_ms": 7000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.15384615384615385,
+          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00008",
+      "forecast": {
+        "arrival_rate_rps": 4.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 4.0,
+        "upper_rps": 4.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647275+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.5,
+        "long_context_fraction": 0.5,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 214.39999999999998,
+        "prompt_p95": 1245.2,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 9000.0,
+        "window_index": 8,
+        "window_start_ms": 8000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.15384615384615385,
+          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00009",
+      "forecast": {
+        "arrival_rate_rps": 4.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 4.0,
+        "upper_rps": 4.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647291+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 88.89999999999998,
+        "prompt_p95": 180.95,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 10000.0,
+        "window_index": 9,
+        "window_start_ms": 9000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 196.25076882863985,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 213.91333802321745,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.15384615384615385,
+          "rejection_reason": "upper forecast predicts 213.9ms TTFT at 0.15 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00010",
+      "forecast": {
+        "arrival_rate_rps": 4.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 4.0,
+        "upper_rps": 4.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647308+00:00",
+      "observed": {
+        "arrival_rate_rps": 4.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 1.0,
+        "long_context_fraction": 0.0,
+        "observed_p95_ttft_ms": 196.25076882863985,
+        "output_p95": 107.74999999999999,
+        "prompt_p95": 193.54999999999998,
+        "replicas": 4,
+        "sample_count": 4,
+        "window_end_ms": 11000.0,
+        "window_index": 10,
+        "window_start_ms": 10000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 204.1275003666601,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 222.4989753996595,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.23076923076923078,
+          "rejection_reason": "upper forecast predicts 222.5ms TTFT at 0.23 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00011",
+      "forecast": {
+        "arrival_rate_rps": 6.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 6.0,
+        "upper_rps": 6.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647324+00:00",
+      "observed": {
+        "arrival_rate_rps": 6.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.6666666666666666,
+        "long_context_fraction": 0.3333333333333333,
+        "observed_p95_ttft_ms": 204.1275003666601,
+        "output_p95": 177.5,
+        "prompt_p95": 871.5,
+        "replicas": 4,
+        "sample_count": 6,
+        "window_end_ms": 12000.0,
+        "window_index": 11,
+        "window_start_ms": 11000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 250.14185296729812,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 272.654619734355,
+          "predicted_slo_attainment": 0.9169109265178519,
+          "predicted_utilization": 0.4230769230769231,
+          "rejection_reason": "upper forecast predicts 272.7ms TTFT at 0.42 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00012",
+      "forecast": {
+        "arrival_rate_rps": 11.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 11.0,
+        "upper_rps": 11.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647343+00:00",
+      "observed": {
+        "arrival_rate_rps": 11.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.5454545454545454,
+        "long_context_fraction": 0.45454545454545453,
+        "observed_p95_ttft_ms": 250.14185296729812,
+        "output_p95": 245.0,
+        "prompt_p95": 1521.5,
+        "replicas": 4,
+        "sample_count": 11,
+        "window_end_ms": 13000.0,
+        "window_index": 12,
+        "window_start_ms": 12000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 739.668855107771,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 4,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 8.8,
+          "predicted_p95_ttft_ms": 806.2390520674705,
+          "predicted_slo_attainment": 0.31008172992726557,
+          "predicted_utilization": 0.7692307692307693,
+          "rejection_reason": "upper forecast predicts 806.2ms TTFT at 0.77 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 4,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00013",
+      "forecast": {
+        "arrival_rate_rps": 20.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 20.0,
+        "upper_rps": 20.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647365+00:00",
+      "observed": {
+        "arrival_rate_rps": 20.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.75,
+        "long_context_fraction": 0.25,
+        "observed_p95_ttft_ms": 739.668855107771,
+        "output_p95": 261.55,
+        "prompt_p95": 2203.9000000000005,
+        "replicas": 4,
+        "sample_count": 20,
+        "window_end_ms": 14000.0,
+        "window_index": 13,
+        "window_start_ms": 13000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 245.39569171385577,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "scale",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 267.4813039681028,
+          "predicted_slo_attainment": 0.9346447631712329,
+          "predicted_utilization": 0.41025641025641024,
+          "rejection_reason": "upper forecast predicts 267.5ms TTFT at 0.41 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "scale",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00014",
+      "forecast": {
+        "arrival_rate_rps": 8.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 8.0,
+        "upper_rps": 8.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647386+00:00",
+      "observed": {
+        "arrival_rate_rps": 8.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.625,
+        "long_context_fraction": 0.375,
+        "observed_p95_ttft_ms": 217.01804595336364,
+        "output_p95": 156.75,
+        "prompt_p95": 1785.1499999999996,
+        "replicas": 4,
+        "sample_count": 8,
+        "window_end_ms": 15000.0,
+        "window_index": 14,
+        "window_start_ms": 14000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    },
+    {
+      "actual_outcome_p95_ttft_ms": 229.28853998020045,
+      "alternatives": [
+        {
+          "action": {
+            "action_type": "hold",
+            "admission_limit_rps": null,
+            "routing_policy": "round_robin",
+            "target_concurrency": 6,
+            "target_replicas": 3,
+            "variant": "balanced"
+          },
+          "predicted_cost_per_hour_usd": 6.6000000000000005,
+          "predicted_p95_ttft_ms": 249.9245085784185,
+          "predicted_slo_attainment": 1.0,
+          "predicted_utilization": 0.358974358974359,
+          "rejection_reason": "upper forecast predicts 249.9ms TTFT at 0.36 utilization",
+          "safe": false
+        }
+      ],
+      "canary": false,
+      "chosen": {
+        "action_type": "hold",
+        "admission_limit_rps": null,
+        "routing_policy": "round_robin",
+        "target_concurrency": 6,
+        "target_replicas": 3,
+        "variant": "balanced"
+      },
+      "controller_state_after": "cooldown",
+      "controller_state_before": "cooldown",
+      "decision_id": "reactive-00015",
+      "forecast": {
+        "arrival_rate_rps": 7.0,
+        "drift_score": 0.0,
+        "horizon_windows": 1,
+        "lower_rps": 7.0,
+        "upper_rps": 7.0
+      },
+      "generated_at": "2026-08-02T02:56:39.647404+00:00",
+      "observed": {
+        "arrival_rate_rps": 7.0,
+        "backend_error_rate": 0.0,
+        "concurrency": 6,
+        "interactive_fraction": 0.7142857142857143,
+        "long_context_fraction": 0.2857142857142857,
+        "observed_p95_ttft_ms": 229.28853998020045,
+        "output_p95": 121.59999999999997,
+        "prompt_p95": 1116.5999999999997,
+        "replicas": 3,
+        "sample_count": 7,
+        "window_end_ms": 16000.0,
+        "window_index": 15,
+        "window_start_ms": 15000.0
+      },
+      "rollback_reason": null,
+      "rolled_back": false,
+      "safety_checks": [
+        "reactive utilization threshold",
+        "cooldown and sample guard"
+      ]
+    }
+  ],
+  "schema_version": "sloforge.controller-evaluation/v1",
+  "windows": [
+    {
+      "arrival_rate_rps": 5.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 0.6,
+      "long_context_fraction": 0.4,
+      "observed_p95_ttft_ms": 207.79041838365882,
+      "output_p95": 193.0,
+      "prompt_p95": 1265.2,
+      "replicas": 3,
+      "sample_count": 5,
+      "window_end_ms": 1000.0,
+      "window_index": 0,
+      "window_start_ms": 0.0
+    },
+    {
+      "arrival_rate_rps": 4.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 1.0,
+      "long_context_fraction": 0.0,
+      "observed_p95_ttft_ms": 201.01671537615712,
+      "output_p95": 68.0,
+      "prompt_p95": 165.09999999999997,
+      "replicas": 3,
+      "sample_count": 4,
+      "window_end_ms": 2000.0,
+      "window_index": 1,
+      "window_start_ms": 1000.0
+    },
+    {
+      "arrival_rate_rps": 5.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 0.4,
+      "long_context_fraction": 0.6,
+      "observed_p95_ttft_ms": 207.79041838365882,
+      "output_p95": 213.2,
+      "prompt_p95": 978.0,
+      "replicas": 3,
+      "sample_count": 5,
+      "window_end_ms": 3000.0,
+      "window_index": 2,
+      "window_start_ms": 2000.0
+    },
+    {
+      "arrival_rate_rps": 1.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 1.0,
+      "long_context_fraction": 0.0,
+      "observed_p95_ttft_ms": 191.43981659897415,
+      "output_p95": 51.0,
+      "prompt_p95": 157.0,
+      "replicas": 3,
+      "sample_count": 1,
+      "window_end_ms": 4000.0,
+      "window_index": 3,
+      "window_start_ms": 3000.0
+    },
+    {
+      "arrival_rate_rps": 5.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 0.4,
+      "long_context_fraction": 0.6,
+      "observed_p95_ttft_ms": 321.90901563587374,
+      "output_p95": 191.99999999999997,
+      "prompt_p95": 3271.7999999999997,
+      "replicas": 3,
+      "sample_count": 5,
+      "window_end_ms": 5000.0,
+      "window_index": 4,
+      "window_start_ms": 4000.0
+    },
+    {
+      "arrival_rate_rps": 20.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 6,
+      "interactive_fraction": 0.7,
+      "long_context_fraction": 0.3,
+      "observed_p95_ttft_ms": 6885.124483559548,
+      "output_p95": 227.20000000000005,
+      "prompt_p95": 1603.7500000000002,
+      "replicas": 3,
+      "sample_count": 20,
+      "window_end_ms": 6000.0,
+      "window_index": 5,
+      "window_start_ms": 5000.0
+    },
+    {
+      "arrival_rate_rps": 9.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.7777777777777778,
+      "long_context_fraction": 0.2222222222222222,
+      "observed_p95_ttft_ms": 225.89649321151765,
+      "output_p95": 240.39999999999995,
+      "prompt_p95": 1504.7999999999995,
+      "replicas": 4,
+      "sample_count": 9,
+      "window_end_ms": 7000.0,
+      "window_index": 6,
+      "window_start_ms": 6000.0
+    },
+    {
+      "arrival_rate_rps": 7.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.5714285714285714,
+      "long_context_fraction": 0.42857142857142855,
+      "observed_p95_ttft_ms": 217.175529740466,
+      "output_p95": 215.79999999999995,
+      "prompt_p95": 2083.3999999999996,
+      "replicas": 4,
+      "sample_count": 7,
+      "window_end_ms": 8000.0,
+      "window_index": 7,
+      "window_start_ms": 7000.0
+    },
+    {
+      "arrival_rate_rps": 4.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.5,
+      "long_context_fraction": 0.5,
+      "observed_p95_ttft_ms": 196.25076882863985,
+      "output_p95": 214.39999999999998,
+      "prompt_p95": 1245.2,
+      "replicas": 4,
+      "sample_count": 4,
+      "window_end_ms": 9000.0,
+      "window_index": 8,
+      "window_start_ms": 8000.0
+    },
+    {
+      "arrival_rate_rps": 4.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 1.0,
+      "long_context_fraction": 0.0,
+      "observed_p95_ttft_ms": 196.25076882863985,
+      "output_p95": 88.89999999999998,
+      "prompt_p95": 180.95,
+      "replicas": 4,
+      "sample_count": 4,
+      "window_end_ms": 10000.0,
+      "window_index": 9,
+      "window_start_ms": 9000.0
+    },
+    {
+      "arrival_rate_rps": 4.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 1.0,
+      "long_context_fraction": 0.0,
+      "observed_p95_ttft_ms": 196.25076882863985,
+      "output_p95": 107.74999999999999,
+      "prompt_p95": 193.54999999999998,
+      "replicas": 4,
+      "sample_count": 4,
+      "window_end_ms": 11000.0,
+      "window_index": 10,
+      "window_start_ms": 10000.0
+    },
+    {
+      "arrival_rate_rps": 6.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.6666666666666666,
+      "long_context_fraction": 0.3333333333333333,
+      "observed_p95_ttft_ms": 204.1275003666601,
+      "output_p95": 177.5,
+      "prompt_p95": 871.5,
+      "replicas": 4,
+      "sample_count": 6,
+      "window_end_ms": 12000.0,
+      "window_index": 11,
+      "window_start_ms": 11000.0
+    },
+    {
+      "arrival_rate_rps": 11.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.5454545454545454,
+      "long_context_fraction": 0.45454545454545453,
+      "observed_p95_ttft_ms": 250.14185296729812,
+      "output_p95": 245.0,
+      "prompt_p95": 1521.5,
+      "replicas": 4,
+      "sample_count": 11,
+      "window_end_ms": 13000.0,
+      "window_index": 12,
+      "window_start_ms": 12000.0
+    },
+    {
+      "arrival_rate_rps": 20.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.75,
+      "long_context_fraction": 0.25,
+      "observed_p95_ttft_ms": 739.668855107771,
+      "output_p95": 261.55,
+      "prompt_p95": 2203.9000000000005,
+      "replicas": 4,
+      "sample_count": 20,
+      "window_end_ms": 14000.0,
+      "window_index": 13,
+      "window_start_ms": 13000.0
+    },
+    {
+      "arrival_rate_rps": 8.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.625,
+      "long_context_fraction": 0.375,
+      "observed_p95_ttft_ms": 217.01804595336364,
+      "output_p95": 156.75,
+      "prompt_p95": 1785.1499999999996,
+      "replicas": 4,
+      "sample_count": 8,
+      "window_end_ms": 15000.0,
+      "window_index": 14,
+      "window_start_ms": 14000.0
+    },
+    {
+      "arrival_rate_rps": 7.0,
+      "backend_error_rate": 0.0,
+      "concurrency": 8,
+      "interactive_fraction": 0.7142857142857143,
+      "long_context_fraction": 0.2857142857142857,
+      "observed_p95_ttft_ms": 209.84708954770244,
+      "output_p95": 121.59999999999997,
+      "prompt_p95": 1116.5999999999997,
+      "replicas": 4,
+      "sample_count": 7,
+      "window_end_ms": 16000.0,
+      "window_index": 15,
+      "window_start_ms": 15000.0
+    }
+  ]
+}

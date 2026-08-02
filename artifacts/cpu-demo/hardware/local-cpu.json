@@ -1,0 +1,53 @@
+{
+  "benchmarks": [
+    {
+      "device": "cpu",
+      "median": 75.0940666738282,
+      "name": "host_memory_copy_bandwidth",
+      "p95": 76.91300949287434,
+      "samples": [
+        53.366889860834995,
+        73.78654645409566,
+        75.0940666738282,
+        76.4916337640311,
+        77.01835342508515
+      ],
+      "unit": "GB/s",
+      "warmup_count": 1
+    },
+    {
+      "device": "cpu",
+      "median": 1551.3179178082191,
+      "name": "fp32_gemm_384",
+      "p95": 1654.833804367186,
+      "samples": [
+        1160.0123738796412,
+        1551.3179178082191,
+        1653.2293138686132,
+        1655.2349269918293,
+        1542.5276234063417
+      ],
+      "unit": "GFLOP/s",
+      "warmup_count": 1
+    }
+  ],
+  "captured_at": "2026-08-02T02:57:36.412384+00:00",
+  "fingerprint": "60c7832bf5c099925eb560adc42e16b35c5859204c8874f2d5151f6c7be71717",
+  "hardware": {
+    "architecture": "arm64",
+    "cgroup_memory_limit_bytes": null,
+    "container": null,
+    "cpu_model": "Apple M4 Pro",
+    "gpu": null,
+    "hostname": "MacBook-Pro-5.local",
+    "logical_cpu_count": 12,
+    "memory_bytes": 25769803776,
+    "numa_nodes": null,
+    "os": "macOS-15.6.1-arm64-i386-64bit"
+  },
+  "requested_device": "cpu",
+  "schema_version": "sloforge.hardware/v1",
+  "warnings": [
+    "GPU microbenchmarks were not requested; CUDA capabilities are unmeasured."
+  ]
+}

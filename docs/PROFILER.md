@@ -40,7 +40,7 @@ Load probes sample the trace across candidates, vary active concurrency, retain 
 
 ## Budgets
 
-`ProfilingBudget.reserve` debits projected seconds and `duration / 3600 * hourly_price` before each probe. A request exceeding either ceiling raises an error. The demo budget was 180 seconds and 0.20 USD; it recorded 41.460405 measured seconds and 0.013295 USD of modeled probe spend.
+`ProfilingBudget.reserve` debits projected seconds and `duration / 3600 * hourly_price` before each probe. A request exceeding either ceiling raises an error. The final demo budget was 180 seconds and 0.20 USD; it recorded 40.971631 measured seconds and 0.013177 USD of modeled probe spend.
 
 ## Calibration
 
@@ -62,6 +62,6 @@ workload.jsonl          copied normalized workload
 
 <!-- Metrics sources: ../artifacts/demo/hardware/local-cpu.json, ../artifacts/demo/profiles/qwen3-cpu-mocks/profile.json, ../reports/demo/evaluation.json -->
 
-On an Apple M4 Pro with 12 logical CPUs and 24 GiB RAM, the probe measured median host-copy bandwidth of 74.72 GB/s and FP32 384 GEMM throughput of 1,637.29 GFLOP/s. Three mock candidates were feasible. Their profiled p95 TTFTs were 353.67 ms (balanced), 199.78 ms (fast) and 515.92 ms (economy). The selected balanced model's held-out prefill MAPE was 7.57%, but its interval coverage was only 54.17%; the latter is a negative calibration result and is reported as such.
+On an Apple M4 Pro with 12 logical CPUs and 24 GiB RAM, the probe measured median host-copy bandwidth of 74.058 GB/s and FP32 384 GEMM throughput of 1,541.625 GFLOP/s. Three mock candidates were feasible. Their directly profiled p95 TTFTs were 358.022 ms (balanced), 193.465 ms (fast) and 504.582 ms (economy). The selected fast service curve's held-out prefill MAPE/coverage was 8.401%/91.667%; decode MAPE/coverage was 1.009%/100%, each on 12 representative-load observations. Prefill falls short of the nominal 95% target, while decode's perfect result has a small denominator.
 
 No NVIDIA GPU was present. None of the GPU adapters or GPU performance numbers has been exercised on this machine.

@@ -36,13 +36,13 @@ Every algorithmic path takes a seed. The Rust simulator uses ChaCha8, validates 
 
 The optimizer predicts phase service, converts it to request capacity, estimates utilization, applies a queue blow-up near saturation, and incorporates routing, batching, replication, warm capacity, failure and price. Hard constraints include uncertainty radii. This makes failure explanations inspectable: a candidate can miss because prefill grows with prompt p95, because utilization drives queueing, because cold capacity expands startup exposure or because availability is too low.
 
-The model is intentionally simple. Its limitation is visible in the current 54.17% interval coverage and the large gap between steady-profile selection and faulted replay. A stronger system would calibrate per-workload quantile models and use the Rust twin directly for every promoted candidate.
+The model is intentionally simple. The selected service curve achieved 91.667% prefill coverage versus 95% nominal, while decode covered 100%; the harsher faulted simulator still reached 717.771 ms p95 TTFT versus the plan's 192.349 ms prediction. A stronger system would use more independent calibration runs, cover E2E/startup explicitly and execute the Rust twin for every acquisition proposal.
 
 ## Demo result, honestly stated
 
 <!-- Metrics source: ../reports/demo/evaluation.json, ../artifacts/demo/optimization/result.json and ../artifacts/demo/simulator/replay.raw.json -->
 
-The CPU/mock run evaluated 540 configurations and promoted 24. It selected a 2-replica balanced plan at 222.812 ms profile-derived p95 TTFT and 1.35750 USD/million modeled tokens. The gateway completed 120 streamed requests under live faults. The faulted simulator achieved only 59.17% deadline attainment. Predictive control avoided the reactive baseline's one violation window at 0.001833 USD additional modeled cost. The diagnosis classifier matched 8 closed-set injections.
+The CPU/mock run evaluated 540 configurations, retained 3 direct measured anchors and recorded 24 acquisition proposals. It selected predicted configuration `cfg-aad9cd4cfa41`: 3 fast-mock replicas at concurrency 6 with chunked prefill and SLO-slack routing, at 192.349 ms p95 TTFT and $2.47718/million modeled tokens. The compiled-topology gateway completed 120 streamed requests under live faults at 170.429 ms p95 TTFT. The harsher simulator completed 117/120 (97.5% deadline attainment). Matched Rust-twin replay recorded 0 predictive misses versus 2 reactive misses at 0.001458 USD greater predictive cost. The classifier matched 8 closed-set injections and rejected all 8 no-fault controls.
 
 The strongest story is the negative result: a plan that looks feasible from representative probes can fail under queue/fault dynamics. SLOForge makes that mismatch a first-class artifact rather than a hidden benchmark footnote.
 
@@ -58,7 +58,7 @@ No. The 24-step acquisition history ranks analytical predictions. Measured fidel
 
 ### Is the simulator validated?
 
-Toy tests establish exact single-server timing, priority order, deadlines/cancellation/rejection, crash rerouting, dynamic actions, routing balance and at-least-10× faster-than-trace execution. Current held-out calibration is weak, so production accuracy remains unproven. Both facts belong in the answer.
+Toy tests establish exact single-server timing, priority order, deadlines/cancellation/rejection, crash rerouting, dynamic actions, routing balance and at-least-10× faster-than-trace execution. The selected run's held-out prefill/decode MAPE was 8.401%/1.009% with 91.667%/100% interval coverage, but production accuracy and unmeasured-hardware generalization remain unproven. Both facts belong in the answer.
 
 ### What would you improve first?
 
