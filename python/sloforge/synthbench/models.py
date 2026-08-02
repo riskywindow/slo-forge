@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import math
 from enum import StrEnum
+from pathlib import PurePosixPath
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
-NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
-Identifier = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_.-]*$")]
+NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4096)]
+Identifier = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_.-]*$", max_length=128)]
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 PositiveInt = Annotated[int, Field(gt=0)]
-NonNegativeInt = Annotated[int, Field(ge=0)]
+NonNegativeInt = Annotated[int, Field(ge=0, le=(1 << 64) - 1)]
 NonNegativeFloat = Annotated[float, Field(ge=0.0)]
 
 
@@ -94,6 +95,8 @@ class WorkloadRequest(SynthBenchModel):
     def aligned_output(self) -> Self:
         if not self.prompt_tokens:
             raise ValueError("workload prompt cannot be empty")
+        if len(self.prompt_tokens) > 512:
+            raise ValueError("workload prompt exceeds the task-grammar bound")
         if len(self.expected_tokens) != self.maximum_new_tokens:
             raise ValueError("expected output count must match maximum_new_tokens")
         return self
@@ -122,6 +125,24 @@ class TaskDescriptor(SynthBenchModel):
     hidden_cases_path: NonEmpty
     hidden_commitment: Sha256
     public_package_hash: Sha256
+
+    @model_validator(mode="after")
+    def paths_are_task_relative(self) -> Self:
+        for value in (
+            self.public_package_path,
+            self.workload_path,
+            self.hidden_cases_path,
+        ):
+            path = PurePosixPath(value)
+            if (
+                "\\" in value
+                or path.is_absolute()
+                or not path.parts
+                or path.as_posix() != value
+                or any(part in {"", ".", ".."} for part in path.parts)
+            ):
+                raise ValueError("task artifact paths must be normalized task-relative paths")
+        return self
 
 
 class GrammarConfiguration(SynthBenchModel):
@@ -201,16 +222,15 @@ class RawCpuSample(SynthBenchModel):
     ]
     execution_evidence_path: NonEmpty | None = None
     execution_evidence_sha256: Sha256 | None = None
-    source: Literal["measured_cpu_monotonic_clock"] = "measured_cpu_monotonic_clock"
+    source: Literal["measured_cpu_monotonic_clock", "replayed_cpu_reference_observation"] = (
+        "measured_cpu_monotonic_clock"
+    )
     precision: Literal["python_float64_reference"] = "python_float64_reference"
 
     @model_validator(mode="after")
     def generated_execution_has_bound_evidence(self) -> Self:
-        generated = self.execution_surface == "genesis_generated_runtime"
-        if generated != (self.execution_evidence_path is not None):
-            raise ValueError("generated runtime sample must bind execution evidence")
-        if generated != (self.execution_evidence_sha256 is not None):
-            raise ValueError("generated runtime sample must bind an evidence digest")
+        if self.execution_evidence_path is None or self.execution_evidence_sha256 is None:
+            raise ValueError("every executed CPU sample must bind sandbox execution evidence")
         return self
 
 
@@ -290,11 +310,8 @@ class HiddenCaseResult(SynthBenchModel):
 
     @model_validator(mode="after")
     def generated_execution_has_bound_evidence(self) -> Self:
-        generated = self.execution_surface == "genesis_generated_runtime"
-        if generated != (self.execution_evidence_path is not None):
-            raise ValueError("generated hidden result must bind execution evidence")
-        if generated != (self.execution_evidence_sha256 is not None):
-            raise ValueError("generated hidden result must bind an evidence digest")
+        if self.execution_evidence_path is None or self.execution_evidence_sha256 is None:
+            raise ValueError("every hidden CPU result must bind sandbox execution evidence")
         return self
 
 

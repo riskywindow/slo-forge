@@ -251,6 +251,33 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
         Path(genesis_summary.raw_samples_path).read_bytes().splitlines()[0], strict=True
     )
     assert generated_sample.execution_evidence_path is not None
+    genesis_hidden = next(
+        item
+        for item in report.tasks[0].hidden_evaluations
+        if item.baseline is BaselineKind.GENESIS_FULL
+    )
+    assert genesis_hidden.evidence_path is not None
+    hidden_path = Path(genesis_hidden.evidence_path)
+    original_hidden = hidden_path.read_bytes()
+    hidden_path.write_bytes(b"\n".join(original_hidden.splitlines()[:-1]) + b"\n")
+    truncated_hidden = synthbench_runner._hidden_summary_from_artifact(
+        BaselineKind.GENESIS_FULL, hidden_path
+    )
+    hidden_task = report.tasks[0].model_copy(
+        update={
+            "hidden_evaluations": tuple(
+                truncated_hidden if item.baseline is BaselineKind.GENESIS_FULL else item
+                for item in report.tasks[0].hidden_evaluations
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="hidden evidence is incomplete"):
+        validate_cpu_benchmark_report(
+            report.model_copy(update={"tasks": (hidden_task, *report.tasks[1:])}),
+            artifact_root=output,
+        )
+    hidden_path.write_bytes(original_hidden)
+
     raw_path = Path(genesis_summary.raw_samples_path)
     original_raw = raw_path.read_bytes()
     raw_samples = [
@@ -281,12 +308,35 @@ def test_cpu_runner_executes_all_local_baselines_and_derives_report_from_raw_art
     )
     forged_report = report.model_copy(update={"tasks": (forged_task, *report.tasks[1:])})
     with pytest.raises(ValueError, match=r"workload oracle|sandbox runner response"):
-        validate_cpu_benchmark_report(forged_report)
+        validate_cpu_benchmark_report(forged_report, artifact_root=output)
     raw_path.write_bytes(original_raw)
+
+    external_raw = tmp_path / "external-raw.jsonl"
+    external_raw.write_bytes(original_raw)
+    escaped_summary = genesis_summary.model_copy(
+        update={
+            "raw_samples_path": str(external_raw.resolve()),
+            "raw_samples_sha256": synthbench_runner._sha(external_raw.read_bytes()),
+        }
+    )
+    escaped_task = first_task.model_copy(
+        update={
+            "baselines": tuple(
+                escaped_summary if item.baseline is BaselineKind.GENESIS_FULL else item
+                for item in first_task.baselines
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="escapes the benchmark artifact root"):
+        validate_cpu_benchmark_report(
+            report.model_copy(update={"tasks": (escaped_task, *report.tasks[1:])}),
+            artifact_root=output,
+        )
+
     execution_evidence = Path(generated_sample.execution_evidence_path)
     execution_evidence.write_bytes(execution_evidence.read_bytes() + b" ")
     with pytest.raises(ValueError, match="execution evidence"):
-        validate_cpu_benchmark_report(report)
+        validate_cpu_benchmark_report(report, artifact_root=output)
 
 
 def test_integrity_auditor_detects_discarded_sample(tmp_path: Path) -> None:
@@ -453,3 +503,17 @@ def test_synthbench_demo_produces_artifact_derived_cpu_summary(tmp_path: Path) -
     assert result.observed_request_wall_seconds > 0
     assert result.hardware_backed is False
     assert Path(result.report_path).is_file()
+
+
+def test_synthbench_demo_reset_does_not_follow_symlink(tmp_path: Path) -> None:
+    preserved = tmp_path / "preserved"
+    preserved.mkdir()
+    marker = preserved / "marker.txt"
+    marker.write_text("keep", encoding="utf-8")
+    output = tmp_path / "output"
+    output.symlink_to(preserved, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="symlinked"):
+        run_synthbench_demo(output, seed=73129, count=1, reset=True)
+
+    assert marker.read_text(encoding="utf-8") == "keep"

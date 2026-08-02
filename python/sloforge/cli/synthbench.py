@@ -121,7 +121,7 @@ def compare_command(
     for path in paths:
         payload = path.read_bytes()
         report = SynthBenchReport.model_validate_json(payload, strict=True)
-        validate_cpu_benchmark_report(report)
+        validate_cpu_benchmark_report(report, artifact_root=path.parent)
         entries.append(
             {
                 "report": str(path.resolve()),

@@ -44,7 +44,12 @@ def audit_raw_samples(
             violations.append(f"{sample.baseline}:workload_fingerprint_mismatch")
         if sample.environment_fingerprint != environment_fingerprint:
             violations.append(f"{sample.baseline}:environment_fingerprint_mismatch")
-        if sample.source != "measured_cpu_monotonic_clock":
+        expected_source = (
+            "measured_cpu_monotonic_clock"
+            if sample.baseline in {BaselineKind.PYTHON_EAGER_REFERENCE, BaselineKind.GENESIS_FULL}
+            else "replayed_cpu_reference_observation"
+        )
+        if sample.source != expected_source:
             violations.append(f"{sample.baseline}:untrusted_timer_source")
         if sample.precision != "python_float64_reference":
             violations.append(f"{sample.baseline}:precision_mismatch")

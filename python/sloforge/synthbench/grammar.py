@@ -21,6 +21,11 @@ from .models import (
     WorkloadRequest,
 )
 
+_MAXIMUM_TASK_DESCRIPTOR_BYTES = 2 * 1024 * 1024
+_MAXIMUM_CASE_ARTIFACT_BYTES = 8 * 1024 * 1024
+_MAXIMUM_PUBLIC_PACKAGE_BYTES = 32 * 1024 * 1024
+_MAXIMUM_PUBLIC_PACKAGE_FILES = 128
+
 
 class _ReferenceState(TypedDict):
     history: list[int]
@@ -478,7 +483,14 @@ def _manifest(architecture: ArchitectureSpec) -> dict[str, object]:
                     "field_id": "expert_loads",
                     "kind": "custom",
                     "dtype": "int32",
-                    "shape": [{"name": "experts", "minimum": 4, "maximum": 4, "multiple_of": 1}],
+                    "shape": [
+                        {
+                            "name": "experts",
+                            "minimum": max(block.expert_count for block in architecture.blocks),
+                            "maximum": max(block.expert_count for block in architecture.blocks),
+                            "multiple_of": 1,
+                        }
+                    ],
                     "mutable": True,
                     "persistent_across_tokens": True,
                     "reset_at_request_boundary": True,
@@ -491,6 +503,17 @@ def _manifest(architecture: ArchitectureSpec) -> dict[str, object]:
                     "dtype": "int32",
                     "shape": [dimension],
                     "mutable": True,
+                    "persistent_across_tokens": True,
+                    "reset_at_request_boundary": True,
+                    "alias_group": None,
+                    "quantization": None,
+                },
+                {
+                    "field_id": "prompt_checksum",
+                    "kind": "custom",
+                    "dtype": "int32",
+                    "shape": [dimension],
+                    "mutable": False,
                     "persistent_across_tokens": True,
                     "reset_at_request_boundary": True,
                     "alias_group": None,
@@ -558,13 +581,27 @@ def _manifest(architecture: ArchitectureSpec) -> dict[str, object]:
 
 
 def _package_hash(directory: Path) -> str:
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError("public reference package must be a regular directory")
+    discovered = tuple(directory.rglob("*"))
+    if any(path.is_symlink() for path in discovered):
+        raise ValueError("public reference package cannot contain symlinks")
+    files = tuple(
+        path
+        for path in sorted(discovered)
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    )
+    if not files or len(files) > _MAXIMUM_PUBLIC_PACKAGE_FILES:
+        raise ValueError("public reference package file count is outside the bounded domain")
+    sizes = tuple(path.stat().st_size for path in files)
+    if (
+        any(size > _MAXIMUM_CASE_ARTIFACT_BYTES for size in sizes)
+        or sum(sizes) > _MAXIMUM_PUBLIC_PACKAGE_BYTES
+    ):
+        raise ValueError("public reference package exceeds its byte bound")
     entries = [
         (path.relative_to(directory).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
-        for path in sorted(directory.rglob("*"))
-        if path.is_file()
-        and not path.is_symlink()
-        and "__pycache__" not in path.parts
-        and path.suffix != ".pyc"
+        for path in files
     ]
     return _hash_bytes(json.dumps(entries, sort_keys=True, separators=(",", ":")).encode())
 
@@ -706,31 +743,91 @@ def generate_tasks(
 
 
 def load_task(path: Path) -> TaskDescriptor:
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("task descriptor must be a regular non-symlinked file")
+    if path.stat().st_size > _MAXIMUM_TASK_DESCRIPTOR_BYTES:
+        raise ValueError("task descriptor exceeds its byte bound")
     return TaskDescriptor.model_validate_json(path.read_bytes(), strict=True)
+
+
+def _task_artifact(task_directory: Path, relative: str) -> Path:
+    root = task_directory.resolve(strict=True)
+    unresolved = task_directory / relative
+    if unresolved.is_symlink():
+        raise ValueError("task artifact cannot be a symlink")
+    path = unresolved.resolve(strict=True)
+    try:
+        path.relative_to(root)
+    except ValueError as error:
+        raise ValueError("task artifact escapes its task directory") from error
+    if not path.is_file():
+        raise ValueError("task artifact must be a regular file")
+    return path
+
+
+def _validate_requests(
+    requests: tuple[WorkloadRequest, ...],
+    descriptor: TaskDescriptor,
+    *,
+    hidden: bool,
+) -> None:
+    lower, upper = (3, 64) if hidden else (2, 64)
+    if not lower <= len(requests) <= upper:
+        raise ValueError("task case count is outside the task-grammar bound")
+    identifiers = tuple(item.request_id for item in requests)
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("task request identifiers must be unique")
+    architecture = descriptor.architecture
+    for request in requests:
+        if len(request.prompt_tokens) > architecture.maximum_sequence_length:
+            raise ValueError("task prompt exceeds the declared architecture domain")
+        if any(token >= architecture.vocabulary_size for token in request.prompt_tokens):
+            raise ValueError("task prompt token exceeds the declared vocabulary")
+        if any(token >= architecture.vocabulary_size for token in request.expected_tokens):
+            raise ValueError("task expected token exceeds the declared vocabulary")
 
 
 def verify_public_package(task_directory: Path, descriptor: TaskDescriptor) -> None:
     """Reject a task whose public reference package changed after generation."""
 
-    public = task_directory / descriptor.public_package_path
+    root = task_directory.resolve(strict=True)
+    unresolved = task_directory / descriptor.public_package_path
+    if unresolved.is_symlink():
+        raise ValueError("public reference package cannot be a symlink")
+    public = unresolved.resolve(strict=True)
+    try:
+        public.relative_to(root)
+    except ValueError as error:
+        raise ValueError("public reference package escapes its task directory") from error
     if _package_hash(public) != descriptor.public_package_hash:
         raise ValueError("public reference package does not match its task descriptor")
 
 
 def load_workload(task_directory: Path, descriptor: TaskDescriptor) -> tuple[WorkloadRequest, ...]:
-    path = task_directory / descriptor.workload_path
-    return tuple(
+    path = _task_artifact(task_directory, descriptor.workload_path)
+    if path.stat().st_size > _MAXIMUM_CASE_ARTIFACT_BYTES:
+        raise ValueError("public workload exceeds its byte bound")
+    requests = tuple(
         WorkloadRequest.model_validate_json(line, strict=True)
         for line in path.read_bytes().splitlines()
         if line
     )
+    _validate_requests(requests, descriptor, hidden=False)
+    return requests
 
 
 def load_hidden_cases(task_directory: Path, descriptor: TaskDescriptor) -> tuple[HiddenCase, ...]:
-    path = task_directory / descriptor.hidden_cases_path
+    path = _task_artifact(task_directory, descriptor.hidden_cases_path)
+    if path.stat().st_size > _MAXIMUM_CASE_ARTIFACT_BYTES:
+        raise ValueError("hidden evaluation cases exceed their byte bound")
     payload = path.read_bytes()
     if _hash_bytes(payload) != descriptor.hidden_commitment:
         raise ValueError("hidden evaluation cases do not match their public commitment")
-    return tuple(
+    cases = tuple(
         HiddenCase.model_validate_json(line, strict=True) for line in payload.splitlines() if line
     )
+    identifiers = tuple(item.case_id for item in cases)
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("hidden case identifiers must be unique")
+    _validate_requests(tuple(item.request for item in cases), descriptor, hidden=True)
+    return cases
