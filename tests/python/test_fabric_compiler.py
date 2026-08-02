@@ -102,6 +102,14 @@ def test_topology_unaware_baseline_is_available() -> None:
     assert result.selected.rank_placement.bindings[0].gpu_id == "gpu-0"
 
 
+def test_random_placement_baseline_is_seeded_and_public() -> None:
+    first = compile_physical_plan(_request(OptimizationStrategy.RANDOM_PLACEMENT))
+    second = compile_physical_plan(_request(OptimizationStrategy.RANDOM_PLACEMENT))
+    assert first == second
+    assert first.strategy is OptimizationStrategy.RANDOM_PLACEMENT
+    assert first.selected.rank_placement.bindings
+
+
 def test_fixed_parallelism_exposes_topology_comparison_space() -> None:
     request = _request(OptimizationStrategy.GREEDY_TOPOLOGY_AWARE)
     constrained = request.model_copy(
