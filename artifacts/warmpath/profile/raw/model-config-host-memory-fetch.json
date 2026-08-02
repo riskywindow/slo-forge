@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "414adff7522344d6e146d0ed4f5dc18209873e25e80c75a771c3d35b2b7a53dc",
+  "artifact_id": "model-config",
+  "confidence_interval_high_ms": 0.000167,
+  "confidence_interval_low_ms": 0.000125,
+  "confidence_level": 0.95,
+  "environment_fingerprint": "caca9fa447fc282c3b32f60ece5240f17785bc89a4ce2bf9f84062bf86f2e0b4",
+  "invocation": "host-memory-copy:config.json",
+  "median_absolute_deviation_ms": 0.0,
+  "median_ms": 0.000125,
+  "p95_ms": 0.000167,
+  "raw_samples_ms": [
+    0.000167,
+    0.000125,
+    0.000167,
+    0.000125,
+    0.000125,
+    0.000125,
+    0.000125
+  ],
+  "source": "measured",
+  "stage": "fetch",
+  "tier_id": "host-memory",
+  "timeout_seconds": 10.0,
+  "warmup_count": 2
+}

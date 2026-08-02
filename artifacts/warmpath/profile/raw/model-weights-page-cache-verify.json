@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "3ef5719635c64d9262f713f0f22ebc3a5224458fe97268f7f11ece142703fb73",
+  "artifact_id": "model-weights",
+  "confidence_interval_high_ms": 0.661166,
+  "confidence_interval_low_ms": 0.614083,
+  "confidence_level": 0.95,
+  "environment_fingerprint": "caca9fa447fc282c3b32f60ece5240f17785bc89a4ce2bf9f84062bf86f2e0b4",
+  "invocation": "local-read:weights.bin:chunk=1048576",
+  "median_absolute_deviation_ms": 0.02212500000000006,
+  "median_ms": 0.635875,
+  "p95_ms": 0.7125292,
+  "raw_samples_ms": [
+    0.627291,
+    0.603917,
+    0.734542,
+    0.614083,
+    0.635875,
+    0.661166,
+    0.658
+  ],
+  "source": "measured",
+  "stage": "verify",
+  "tier_id": "page-cache",
+  "timeout_seconds": 10.0,
+  "warmup_count": 2
+}
