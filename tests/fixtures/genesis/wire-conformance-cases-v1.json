@@ -36,5 +36,61 @@
       ],
       "kind": "request_trace"
     }
+  },
+  {
+    "accepted": false,
+    "case_id": "negative-workflow-latency",
+    "document": "inference-genome-v1.json",
+    "pointer": "/workflow/steps/0/expected_latency_ms",
+    "replacement": -1.0
+  },
+  {
+    "accepted": false,
+    "case_id": "zero-workflow-deadline",
+    "document": "inference-genome-v1.json",
+    "pointer": "/workflow/steps/0/deadline_ms",
+    "replacement": 0.0
+  },
+  {
+    "accepted": false,
+    "case_id": "negative-quality-regression-budget",
+    "document": "inference-genome-v1.json",
+    "pointer": "/workflow/node/quality_implications",
+    "replacement": [
+      {
+        "evaluation_contract_id": "quality.fixture",
+        "expected_delta": 0.0,
+        "maximum_regression": -0.1,
+        "metric": "exact_match"
+      }
+    ]
+  },
+  {
+    "accepted": false,
+    "case_id": "zero-state-replication-factor",
+    "document": "inference-genome-v1.json",
+    "pointer": "/state/states/0/replication_factor",
+    "replacement": 0
+  },
+  {
+    "accepted": false,
+    "case_id": "zero-serving-prefill-chunk",
+    "document": "inference-genome-v1.json",
+    "pointer": "/serving/prefill_chunk_tokens",
+    "replacement": 0
+  },
+  {
+    "accepted": false,
+    "case_id": "negative-kernel-numerical-tolerance",
+    "document": "inference-genome-v1.json",
+    "pointer": "/kernel/kernels/0/numerical_tolerance",
+    "replacement": -0.1
+  },
+  {
+    "accepted": false,
+    "case_id": "unknown-state-offload-tier",
+    "document": "inference-genome-v1.json",
+    "pointer": "/state/states/0/offload_tier",
+    "replacement": "opaque_storage"
   }
 ]

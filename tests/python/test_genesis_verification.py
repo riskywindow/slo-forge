@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -94,6 +96,13 @@ def test_operator_verifier_detects_signed_zero_contract_violation() -> None:
     assert verification.status is EvidenceStatus.FAILED
     assert verification.counterexample is not None
     assert verification.counterexample.violation == "signed_zero_behavior"
+
+
+@pytest.mark.parametrize("tolerance", [float("nan"), float("inf"), -1.0])
+def test_operator_verifier_rejects_invalid_numerical_tolerances(tolerance: float) -> None:
+    contract = replace(_operator_contract(), exact=False, maximum_absolute_error=tolerance)
+    with pytest.raises(VerificationError, match="finite and non-negative"):
+        verify_operator(lambda value: value, lambda value: value, contract, seed=1)
 
 
 def test_quality_contract_detects_distribution_and_token_regression() -> None:

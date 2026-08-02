@@ -660,8 +660,9 @@ def test_shared_python_rust_wire_accept_reject_corpus() -> None:
         target = document
         parts = case["pointer"].lstrip("/").split("/")
         for part in parts[:-1]:
-            target = target[part]
-        target[parts[-1]] = case["replacement"]
+            target = target[int(part)] if isinstance(target, list) else target[part]
+        final = int(parts[-1]) if isinstance(target, list) else parts[-1]
+        target[final] = case["replacement"]
         if case["accepted"]:
             loaders[case["document"]](document)
         else:

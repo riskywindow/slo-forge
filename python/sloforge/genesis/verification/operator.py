@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 from collections.abc import Callable
 
 import numpy as np
@@ -156,8 +157,9 @@ def verify_operator(
         raise VerificationError("maximum_cases must be in [1, 100000]")
     if seed < 0:
         raise VerificationError("operator verification seed must be non-negative")
-    if contract.maximum_absolute_error < 0 or contract.maximum_relative_error < 0:
-        raise VerificationError("numerical tolerances must be non-negative")
+    tolerances = (contract.maximum_absolute_error, contract.maximum_relative_error)
+    if any(not math.isfinite(value) or value < 0 for value in tolerances):
+        raise VerificationError("numerical tolerances must be finite and non-negative")
     generator = np.random.default_rng(seed)
     executed = 0
     for index in range(contract.maximum_cases):

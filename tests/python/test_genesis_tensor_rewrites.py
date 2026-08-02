@@ -166,6 +166,84 @@ def test_invalid_graphs_and_bounds_fail_closed() -> None:
     assert structural_key(_integer_identity_graph()) == structural_key(_integer_identity_graph())
 
 
+@pytest.mark.parametrize("tolerance", [float("nan"), float("inf"), -1.0])
+def test_graph_rejects_invalid_numerical_tolerances(tolerance: float) -> None:
+    spec = TensorSpec(
+        (4,),
+        DType.FLOAT32,
+        numerical=NumericalContract(maximum_absolute_error=tolerance),
+    )
+    with pytest.raises(RewriteError, match="finite and non-negative"):
+        validate_graph(TensorGraph((TensorNode("out", "input", (), spec),), ("out",)))
+
+
+def test_quantization_requires_a_finite_representable_value_domain() -> None:
+    rule = _rule(RewriteKind.QUANTIZE_OUTPUT)
+
+    def graph(contract: NumericalContract) -> TensorGraph:
+        spec = TensorSpec((4,), DType.FLOAT32, numerical=contract)
+        return TensorGraph((TensorNode("out", "input", (), spec),), ("out",))
+
+    missing_domain = NumericalContract(
+        maximum_absolute_error=0.02,
+        preserve_nan=False,
+        preserve_infinity=False,
+        preserve_signed_zero=False,
+    )
+    assert not apply_rule(graph(missing_domain), rule, quality_budget=0.01)
+
+    outside_int8_scale = replace(
+        missing_domain,
+        minimum_finite_value=-3.0,
+        maximum_finite_value=3.0,
+    )
+    assert not apply_rule(graph(outside_int8_scale), rule, quality_budget=0.01)
+
+    malformed_domain = replace(
+        missing_domain,
+        minimum_finite_value=float("nan"),
+        maximum_finite_value=1.0,
+    )
+    with pytest.raises(RewriteError, match="finite and ordered"):
+        validate_graph(graph(malformed_domain))
+
+    bounded = replace(
+        missing_domain,
+        minimum_finite_value=-1.0,
+        maximum_finite_value=1.0,
+    )
+    source = TensorSpec((4,), DType.FLOAT32, numerical=bounded)
+    encoded = replace(source, dtype=DType.INT8)
+    missing_scale = TensorGraph(
+        (
+            TensorNode("source", "input", (), source),
+            TensorNode(
+                "encoded",
+                "quantize",
+                ("source",),
+                encoded,
+                OperatorParameters(target_dtype=DType.INT8),
+            ),
+        ),
+        ("encoded",),
+    )
+    with pytest.raises(RewriteError, match="finite positive symmetric scale"):
+        validate_graph(missing_scale)
+
+    underscaled = replace(
+        missing_scale,
+        nodes=(
+            missing_scale.nodes[0],
+            replace(
+                missing_scale.nodes[1],
+                parameters=OperatorParameters(target_dtype=DType.INT8, scale=0.001),
+            ),
+        ),
+    )
+    with pytest.raises(RewriteError, match="exceeds the int8 scale domain"):
+        validate_graph(underscaled)
+
+
 def test_exact_eliminations_require_the_full_output_contract() -> None:
     source = TensorSpec((2,), DType.INT32, alias_group="source")
     cast_output = replace(source, alias_group="cast-output")
@@ -251,6 +329,8 @@ def test_quantization_inserts_a_consumer_without_destroying_the_original_output(
         alias_group="reference-output",
         numerical=NumericalContract(
             maximum_absolute_error=0.02,
+            minimum_finite_value=-1.0,
+            maximum_finite_value=1.0,
             preserve_nan=False,
             preserve_infinity=False,
             preserve_signed_zero=False,
@@ -280,6 +360,7 @@ def test_quantization_inserts_a_consumer_without_destroying_the_original_output(
     assert quantized.inputs == ("out",)
     assert quantized.output.dtype is DType.INT8
     assert quantized.output.alias_group is None
+    assert quantized.parameters.scale == 0.02
     assert candidate.outputs == ("out.quantized",)
 
 
@@ -289,6 +370,8 @@ def test_search_enforces_cumulative_quality_and_preserves_topological_order() ->
         DType.FLOAT32,
         numerical=NumericalContract(
             maximum_absolute_error=0.02,
+            minimum_finite_value=-1.0,
+            maximum_finite_value=1.0,
             preserve_nan=False,
             preserve_infinity=False,
             preserve_signed_zero=False,

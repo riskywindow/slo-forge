@@ -19,6 +19,35 @@ fn nonempty(path: &str, value: &str) -> Result<(), ValidationError> {
     }
 }
 
+fn nonempty_values<'a>(
+    path: &str,
+    values: impl IntoIterator<Item = &'a String>,
+) -> Result<(), ValidationError> {
+    for (index, value) in values.into_iter().enumerate() {
+        nonempty(&format!("{path}[{index}]"), value)?;
+    }
+    Ok(())
+}
+
+fn finite_nonnegative(path: &str, value: f64) -> Result<(), ValidationError> {
+    if value.is_finite() && value >= 0.0 {
+        Ok(())
+    } else {
+        Err(ValidationError::new(
+            path,
+            "must be finite and non-negative",
+        ))
+    }
+}
+
+fn finite_positive(path: &str, value: f64) -> Result<(), ValidationError> {
+    if value.is_finite() && value > 0.0 {
+        Ok(())
+    } else {
+        Err(ValidationError::new(path, "must be finite and positive"))
+    }
+}
+
 fn extension_key_is_valid(key: &str) -> bool {
     let Some((namespace, name)) = key.split_once('/') else {
         return false;
@@ -91,6 +120,13 @@ string_enum!(HotSwapCategory {
     StateConversionMigration,
     FullDeploymentRebuild,
     OperatorRequired,
+});
+string_enum!(LineageRelation {
+    Parent,
+    DerivedFrom,
+    Reused,
+    ConstrainedBy,
+    InvalidatedBy
 });
 string_enum!(WorkflowStepKind {
     ModelInvocation,
@@ -197,12 +233,24 @@ string_enum!(ConsistencyModel {
     Versioned,
     ReadOnlyReplicated
 });
+string_enum!(OffloadTier {
+    None,
+    Host,
+    Peer,
+    Remote
+});
 string_enum!(CollectiveKind {
     AllReduce,
     AllGather,
     ReduceScatter,
     AllToAll,
     SendRecv
+});
+string_enum!(PrefillDecodeTransfer {
+    None,
+    Host,
+    Peer,
+    Rdma
 });
 string_enum!(KernelBackend {
     Pytorch,
@@ -216,6 +264,18 @@ string_enum!(TransitionPoint {
     TokenBoundary,
     RequestBoundary,
     Drained
+});
+string_enum!(StateTransfer {
+    None,
+    Copy,
+    Move,
+    Recompute
+});
+string_enum!(ActiveStreamBehavior {
+    Preserve,
+    Drain,
+    Restart,
+    Reject
 });
 string_enum!(TransformationFamily {
     AlgebraicRewrite,
@@ -360,6 +420,15 @@ impl ArtifactDigest {
     }
 }
 
+impl EvidenceReference {
+    fn validate_at(&self, path: &str) -> Result<(), ValidationError> {
+        nonempty(&format!("{path}.evidence_id"), &self.evidence_id)?;
+        nonempty(&format!("{path}.artifact_uri"), &self.artifact_uri)?;
+        self.digest.validate_at(&format!("{path}.digest"))?;
+        nonempty_values(&format!("{path}.claim_ids"), &self.claim_ids)
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, JsonSchema, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct EvidenceReference {
@@ -373,7 +442,7 @@ pub struct EvidenceReference {
 #[serde(deny_unknown_fields)]
 pub struct LineageReference {
     pub lineage_id: String,
-    pub relation: String,
+    pub relation: LineageRelation,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, JsonSchema, PartialEq, Serialize)]
@@ -479,11 +548,31 @@ pub struct GenomeNodeMetadata {
 }
 
 impl GenomeNodeMetadata {
+    // This is the single admission gate for every mutable-node obligation and
+    // precondition. Keeping the checks together prevents a newly added field
+    // from being validated on only one side of the Rust/Python boundary.
+    #[allow(clippy::too_many_lines)]
     fn validate_at(&self, path: &str) -> Result<(), ValidationError> {
         nonempty(&format!("{path}.stable_id"), &self.stable_id)?;
         nonempty(
             &format!("{path}.semantic_contract.contract_id"),
             &self.semantic_contract.contract_id,
+        )?;
+        nonempty_values(
+            &format!("{path}.semantic_contract.input_domain"),
+            &self.semantic_contract.input_domain,
+        )?;
+        nonempty_values(
+            &format!("{path}.semantic_contract.output_guarantees"),
+            &self.semantic_contract.output_guarantees,
+        )?;
+        nonempty_values(
+            &format!("{path}.semantic_contract.state_invariants"),
+            &self.semantic_contract.state_invariants,
+        )?;
+        nonempty(
+            &format!("{path}.semantic_contract.numerical_contract"),
+            &self.semantic_contract.numerical_contract,
         )?;
         if self.legal_rewrite_rules.is_empty() && !self.frozen {
             return Err(ValidationError::new(
@@ -491,12 +580,86 @@ impl GenomeNodeMetadata {
                 "mutable nodes must declare legal rewrite rules",
             ));
         }
+        nonempty_values(
+            &format!("{path}.legal_rewrite_rules"),
+            &self.legal_rewrite_rules,
+        )?;
         if self.proof_obligations.is_empty() {
             return Err(ValidationError::new(
                 format!("{path}.proof_obligations"),
                 "must not be empty",
             ));
         }
+        for (index, obligation) in self.proof_obligations.iter().enumerate() {
+            let prefix = format!("{path}.proof_obligations[{index}]");
+            nonempty(
+                &format!("{prefix}.obligation_id"),
+                &obligation.obligation_id,
+            )?;
+            nonempty(&format!("{prefix}.property"), &obligation.property)?;
+            nonempty(&format!("{prefix}.scope"), &obligation.scope)?;
+            nonempty_values(&format!("{prefix}.assumptions"), &obligation.assumptions)?;
+        }
+        for (index, precondition) in self.hardware_preconditions.iter().enumerate() {
+            let prefix = format!("{path}.hardware_preconditions[{index}]");
+            if let Some(architecture) = &precondition.architecture {
+                nonempty(&format!("{prefix}.architecture"), architecture)?;
+            }
+            nonempty_values(
+                &format!("{prefix}.required_features"),
+                &precondition.required_features,
+            )?;
+            nonempty_values(
+                &format!("{prefix}.forbidden_features"),
+                &precondition.forbidden_features,
+            )?;
+        }
+        for (index, precondition) in self.software_preconditions.iter().enumerate() {
+            for (requirement_index, requirement) in precondition.requirements.iter().enumerate() {
+                let prefix = format!(
+                    "{path}.software_preconditions[{index}].requirements[{requirement_index}]"
+                );
+                nonempty(&format!("{prefix}.package"), &requirement.package)?;
+                nonempty(
+                    &format!("{prefix}.version_range"),
+                    &requirement.version_range,
+                )?;
+            }
+        }
+        for (index, implication) in self.quality_implications.iter().enumerate() {
+            let prefix = format!("{path}.quality_implications[{index}]");
+            nonempty(&format!("{prefix}.metric"), &implication.metric)?;
+            if !implication.expected_delta.is_finite() {
+                return Err(ValidationError::new(
+                    format!("{prefix}.expected_delta"),
+                    "must be finite",
+                ));
+            }
+            finite_nonnegative(
+                &format!("{prefix}.maximum_regression"),
+                implication.maximum_regression,
+            )?;
+            nonempty(
+                &format!("{prefix}.evaluation_contract_id"),
+                &implication.evaluation_contract_id,
+            )?;
+        }
+        for (index, estimate) in self.expected_performance.iter().enumerate() {
+            let prefix = format!("{path}.expected_performance[{index}]");
+            nonempty(&format!("{prefix}.metric"), &estimate.metric)?;
+            if !estimate.expected_delta.is_finite() {
+                return Err(ValidationError::new(
+                    format!("{prefix}.expected_delta"),
+                    "must be finite",
+                ));
+            }
+            nonempty(&format!("{prefix}.unit"), &estimate.unit)?;
+            nonempty(&format!("{prefix}.model_id"), &estimate.model_id)?;
+        }
+        nonempty(
+            &format!("{path}.uncertainty.method"),
+            &self.uncertainty.method,
+        )?;
         if !self.uncertainty.confidence.is_finite()
             || !(0.0..=1.0).contains(&self.uncertainty.confidence)
             || !self.uncertainty.lower.is_finite()
@@ -507,6 +670,15 @@ impl GenomeNodeMetadata {
                 format!("{path}.uncertainty"),
                 "invalid finite confidence interval",
             ));
+        }
+        for (index, reference) in self.lineage_references.iter().enumerate() {
+            nonempty(
+                &format!("{path}.lineage_references[{index}].lineage_id"),
+                &reference.lineage_id,
+            )?;
+        }
+        for (index, reference) in self.evidence_references.iter().enumerate() {
+            reference.validate_at(&format!("{path}.evidence_references[{index}]"))?;
         }
         Ok(())
     }
@@ -606,7 +778,7 @@ pub struct StateSpec {
     pub retention: RetentionPolicy,
     pub replication_factor: u64,
     pub migratable: bool,
-    pub offload_tier: String,
+    pub offload_tier: OffloadTier,
     pub checkpoint_interval_tokens: u64,
     pub eviction_policy: String,
     pub recomputable: bool,
@@ -677,7 +849,7 @@ pub struct DistributedGenome {
     pub rank_placement: Vec<Placement>,
     pub expert_placement: Vec<ExpertPlacement>,
     pub collective_dag: Vec<CollectiveStep>,
-    pub prefill_decode_transfer: String,
+    pub prefill_decode_transfer: PrefillDecodeTransfer,
     pub failure_domains: Vec<String>,
     pub recovery_variant_ids: Vec<String>,
 }
@@ -795,8 +967,8 @@ pub struct RecoveryTransition {
     pub source_state_contract: String,
     pub target_state_contract: String,
     pub state_conversion_artifact: Option<EvidenceReference>,
-    pub state_transfer: String,
-    pub active_stream_behavior: String,
+    pub state_transfer: StateTransfer,
+    pub active_stream_behavior: ActiveStreamBehavior,
     pub rollback_transition_id: String,
     pub failure_invariants: Vec<String>,
     pub operator_action_required: bool,
@@ -930,11 +1102,46 @@ impl Validate for InferenceGenome {
                 "must be positive",
             ));
         }
+        if let Some(deadline) = self.request.default_deadline_ms {
+            finite_positive("request.default_deadline_ms", deadline)?;
+        }
+        nonempty_values("request.request_classes", &self.request.request_classes)?;
+        nonempty_values("request.quality_tiers", &self.request.quality_tiers)?;
+        if self.serving.prefill_chunk_tokens == 0
+            || self.serving.maximum_batch_tokens == 0
+            || self.serving.decode_chunk_tokens == 0
+        {
+            return Err(ValidationError::new(
+                "serving",
+                "token chunk and batch bounds must be positive",
+            ));
+        }
+        nonempty(
+            "serving.verification_policy",
+            &self.serving.verification_policy,
+        )?;
+        nonempty_values("serving.model_cascade", &self.serving.model_cascade)?;
+        nonempty_values("serving.worker_roles", &self.serving.worker_roles)?;
         if self.serving.speculative_decoding && self.serving.draft_model_id.is_none() {
             return Err(ValidationError::new(
                 "serving.draft_model_id",
                 "required when speculative decoding is enabled",
             ));
+        }
+        if let Some(draft_model_id) = &self.serving.draft_model_id {
+            nonempty("serving.draft_model_id", draft_model_id)?;
+        }
+        if self.state.migration_chunk_bytes == 0 {
+            return Err(ValidationError::new(
+                "state.migration_chunk_bytes",
+                "must be positive",
+            ));
+        }
+        if let Some(reference) = &self.state.conversion_artifact {
+            reference.validate_at("state.conversion_artifact")?;
+        }
+        if let Some(deadline) = self.workflow.workflow_deadline_ms {
+            finite_positive("workflow.workflow_deadline_ms", deadline)?;
         }
         let step_ids: BTreeSet<_> = self
             .workflow
@@ -963,6 +1170,16 @@ impl Validate for InferenceGenome {
                 return Err(ValidationError::new(
                     format!("workflow.edges[{index}]"),
                     "must reference declared steps",
+                ));
+            }
+            nonempty(
+                &format!("workflow.edges[{index}].condition"),
+                &edge.condition,
+            )?;
+            if !edge.probability.is_finite() || !(0.0..=1.0).contains(&edge.probability) {
+                return Err(ValidationError::new(
+                    format!("workflow.edges[{index}].probability"),
+                    "must be a finite probability",
                 ));
             }
         }
@@ -1001,11 +1218,52 @@ impl Validate for InferenceGenome {
                     "must be a finite probability",
                 ));
             }
+            nonempty(&format!("workflow.steps[{index}].target"), &step.target)?;
+            finite_nonnegative(
+                &format!("workflow.steps[{index}].expected_latency_ms"),
+                step.expected_latency_ms,
+            )?;
+            if let Some(deadline) = step.deadline_ms {
+                finite_positive(&format!("workflow.steps[{index}].deadline_ms"), deadline)?;
+            }
+            finite_nonnegative(
+                &format!("workflow.steps[{index}].expected_future_requests"),
+                step.expected_future_requests,
+            )?;
+            nonempty_values(
+                &format!("workflow.steps[{index}].model_cascade_targets"),
+                &step.model_cascade_targets,
+            )?;
+            if let Some(group) = &step.shared_prefix_group {
+                nonempty(
+                    &format!("workflow.steps[{index}].shared_prefix_group"),
+                    group,
+                )?;
+            }
         }
         for (index, state) in self.state.states.iter().enumerate() {
             state
                 .node
                 .validate_at(&format!("state.states[{index}].node"))?;
+            nonempty(&format!("state.states[{index}].state_id"), &state.state_id)?;
+            nonempty_values(
+                &format!("state.states[{index}].cache_key_fields"),
+                &state.cache_key_fields,
+            )?;
+            if state.replication_factor == 0 {
+                return Err(ValidationError::new(
+                    format!("state.states[{index}].replication_factor"),
+                    "must be positive",
+                ));
+            }
+            nonempty(
+                &format!("state.states[{index}].eviction_policy"),
+                &state.eviction_policy,
+            )?;
+            nonempty(
+                &format!("state.states[{index}].recovery_behavior"),
+                &state.recovery_behavior,
+            )?;
         }
         let state_ids: BTreeSet<_> = self
             .state
@@ -1041,6 +1299,26 @@ impl Validate for InferenceGenome {
             placement
                 .node
                 .validate_at(&format!("distributed.rank_placement[{index}].node"))?;
+            nonempty(
+                &format!("distributed.rank_placement[{index}].host_id"),
+                &placement.host_id,
+            )?;
+            nonempty(
+                &format!("distributed.rank_placement[{index}].device_id"),
+                &placement.device_id,
+            )?;
+            if let Some(domain) = &placement.numa_domain {
+                nonempty(
+                    &format!("distributed.rank_placement[{index}].numa_domain"),
+                    domain,
+                )?;
+            }
+            if let Some(rail) = &placement.network_rail {
+                nonempty(
+                    &format!("distributed.rank_placement[{index}].network_rail"),
+                    rail,
+                )?;
+            }
         }
         let rank_ids: BTreeSet<_> = self
             .distributed
@@ -1080,6 +1358,10 @@ impl Validate for InferenceGenome {
             collective
                 .node
                 .validate_at(&format!("distributed.collective_dag[{index}].node"))?;
+            nonempty(
+                &format!("distributed.collective_dag[{index}].step_id"),
+                &collective.step_id,
+            )?;
             if collective_dependencies
                 .insert(collective.step_id.clone(), collective.dependencies.clone())
                 .is_some()
@@ -1103,7 +1385,31 @@ impl Validate for InferenceGenome {
                     "must uniquely reference declared logical ranks",
                 ));
             }
+            if collective.chunk_bytes == 0 {
+                return Err(ValidationError::new(
+                    format!("distributed.collective_dag[{index}].chunk_bytes"),
+                    "must be positive",
+                ));
+            }
+            nonempty(
+                &format!("distributed.collective_dag[{index}].algorithm"),
+                &collective.algorithm,
+            )?;
+            nonempty(
+                &format!("distributed.collective_dag[{index}].transport"),
+                &collective.transport,
+            )?;
+            if let Some(group) = &collective.overlap_group {
+                nonempty(
+                    &format!("distributed.collective_dag[{index}].overlap_group"),
+                    group,
+                )?;
+            }
         }
+        nonempty_values(
+            "distributed.failure_domains",
+            &self.distributed.failure_domains,
+        )?;
         validate_acyclic("distributed.collective_dag", &collective_dependencies)?;
         let value_ids: BTreeSet<_> = self
             .tensor
@@ -1124,11 +1430,22 @@ impl Validate for InferenceGenome {
                     "invalid positive symbolic dimension range",
                 ));
             }
+            nonempty(
+                &format!("tensor.symbolic_dimensions[{index}].name"),
+                &dimension.name,
+            )?;
         }
         for (index, value) in self.tensor.values.iter().enumerate() {
             value
                 .node
                 .validate_at(&format!("tensor.values[{index}].node"))?;
+            nonempty(&format!("tensor.values[{index}].value_id"), &value.value_id)?;
+            nonempty_values(&format!("tensor.values[{index}].shape"), &value.shape)?;
+            nonempty_values(&format!("tensor.values[{index}].strides"), &value.strides)?;
+            nonempty(&format!("tensor.values[{index}].layout"), &value.layout)?;
+            if let Some(group) = &value.alias_group {
+                nonempty(&format!("tensor.values[{index}].alias_group"), group)?;
+            }
         }
         if value_ids.len() != self.tensor.values.len() {
             return Err(ValidationError::new(
@@ -1152,6 +1469,10 @@ impl Validate for InferenceGenome {
             operator
                 .node
                 .validate_at(&format!("tensor.operators[{index}].node"))?;
+            nonempty(
+                &format!("tensor.operators[{index}].operator_id"),
+                &operator.operator_id,
+            )?;
             if operator
                 .inputs
                 .iter()
@@ -1163,6 +1484,26 @@ impl Validate for InferenceGenome {
                     "operator must reference declared values",
                 ));
             }
+            nonempty(
+                &format!("tensor.operators[{index}].operator"),
+                &operator.operator,
+            )?;
+            nonempty_values(
+                &format!("tensor.operators[{index}].fused_operators"),
+                &operator.fused_operators,
+            )?;
+            nonempty_values(
+                &format!("tensor.operators[{index}].decomposition"),
+                &operator.decomposition,
+            )?;
+            nonempty(
+                &format!("tensor.operators[{index}].quantization"),
+                &operator.quantization,
+            )?;
+            nonempty(
+                &format!("tensor.operators[{index}].numerical_contract"),
+                &operator.numerical_contract,
+            )?;
         }
         let operator_ids: BTreeSet<_> = self
             .tensor
@@ -1233,10 +1574,51 @@ impl Validate for InferenceGenome {
             kernel
                 .node
                 .validate_at(&format!("kernel.kernels[{index}].node"))?;
+            nonempty(
+                &format!("kernel.kernels[{index}].kernel_id"),
+                &kernel.kernel_id,
+            )?;
             kernel
                 .source_artifact
-                .digest
-                .validate_at(&format!("kernel.kernels[{index}].source_artifact.digest"))?;
+                .validate_at(&format!("kernel.kernels[{index}].source_artifact"))?;
+            nonempty(
+                &format!("kernel.kernels[{index}].target_architecture"),
+                &kernel.target_architecture,
+            )?;
+            if kernel.launch.block_x == 0
+                || kernel.launch.block_y == 0
+                || kernel.launch.block_z == 0
+                || kernel.launch.warps == 0
+                || kernel.launch.pipeline_stages == 0
+                || kernel.tile_shape.contains(&0)
+                || kernel.vector_width == 0
+            {
+                return Err(ValidationError::new(
+                    format!("kernel.kernels[{index}]"),
+                    "launch, tile and vector dimensions must be positive",
+                ));
+            }
+            nonempty(
+                &format!("kernel.kernels[{index}].warp_strategy"),
+                &kernel.warp_strategy,
+            )?;
+            nonempty_values(
+                &format!("kernel.kernels[{index}].layout_assumptions"),
+                &kernel.layout_assumptions,
+            )?;
+            nonempty_values(
+                &format!("kernel.kernels[{index}].supported_shapes.constraints"),
+                &kernel.supported_shapes.constraints,
+            )?;
+            finite_nonnegative(
+                &format!("kernel.kernels[{index}].numerical_tolerance"),
+                kernel.numerical_tolerance,
+            )?;
+            for (evidence_index, reference) in kernel.benchmark_evidence.iter().enumerate() {
+                reference.validate_at(&format!(
+                    "kernel.kernels[{index}].benchmark_evidence[{evidence_index}]"
+                ))?;
+            }
             if !kernel_ids.contains(kernel.fallback_kernel_id.as_str()) {
                 return Err(ValidationError::new(
                     format!("kernel.kernels[{index}].fallback_kernel_id"),
@@ -1260,6 +1642,27 @@ impl Validate for InferenceGenome {
             transition
                 .node
                 .validate_at(&format!("recovery.transitions[{index}].node"))?;
+            nonempty(
+                &format!("recovery.transitions[{index}].transition_id"),
+                &transition.transition_id,
+            )?;
+            nonempty(
+                &format!("recovery.transitions[{index}].source_state_contract"),
+                &transition.source_state_contract,
+            )?;
+            nonempty(
+                &format!("recovery.transitions[{index}].target_state_contract"),
+                &transition.target_state_contract,
+            )?;
+            if let Some(reference) = &transition.state_conversion_artifact {
+                reference.validate_at(&format!(
+                    "recovery.transitions[{index}].state_conversion_artifact"
+                ))?;
+            }
+            nonempty_values(
+                &format!("recovery.transitions[{index}].failure_invariants"),
+                &transition.failure_invariants,
+            )?;
             if !transition_ids.contains(transition.rollback_transition_id.as_str()) {
                 return Err(ValidationError::new(
                     format!("recovery.transitions[{index}].rollback_transition_id"),
@@ -1278,6 +1681,10 @@ impl Validate for InferenceGenome {
                 "must reference declared recovery transitions",
             ));
         }
+        nonempty_values(
+            "recovery.degraded_mode_ids",
+            &self.recovery.degraded_mode_ids,
+        )?;
         Ok(())
     }
 }
