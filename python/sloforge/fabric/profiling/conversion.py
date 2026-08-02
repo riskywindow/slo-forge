@@ -64,6 +64,8 @@ def _digest(value: object) -> ArtifactDigest:
 
 
 def _transport(result: BenchmarkResult, topology: TopologyGraph) -> str:
+    if result.case.invocation.adapter == "nccl-tests":
+        return "nccl-local"
     edges = {edge.edge_id: edge for edge in topology.edges}
     path = tuple(edges[edge_id] for edge_id in result.case.topology_path if edge_id in edges)
     connections = {edge.connection.value for edge in path}

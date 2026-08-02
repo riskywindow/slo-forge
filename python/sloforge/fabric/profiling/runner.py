@@ -33,7 +33,7 @@ from sloforge.fabric.profiling.models import (
     finalize_profile,
     finalize_result,
 )
-from sloforge.util import utc_now, write_json
+from sloforge.util import sha256_file, utc_now, write_json
 
 NcclOperation = Literal[
     "all_reduce", "all_gather", "reduce_scatter", "broadcast", "send_receive", "all_to_all"
@@ -320,7 +320,7 @@ def run_nccl_tests_profile(
 ) -> FabricProfile:
     """Run independent nccl-tests processes and retain each table row as evidence."""
 
-    if command.adapter != "nccl-tests" or command.expected_transport != "nccl":
+    if command.adapter != "nccl-tests" or command.expected_transport != "nccl-local":
         raise ValueError("measured NCCL execution requires the explicit nccl-tests adapter")
     if not command.requires_gpu or command.requires_multi_process:
         raise ValueError("this runner supports one explicit local NCCL GPU process only")
@@ -336,6 +336,11 @@ def run_nccl_tests_profile(
         EnvironmentFact(name="platform", value=platform.platform(), source="python-platform"),
         EnvironmentFact(name="machine", value=platform.machine(), source="python-platform"),
         EnvironmentFact(name="adapter", value="nccl-tests", source="explicit-cli-selection"),
+        EnvironmentFact(
+            name="adapter_executable_sha256",
+            value=sha256_file(Path(command.executable)),
+            source="resolved-executable",
+        ),
         EnvironmentFact(
             name="expected_transport", value=command.expected_transport, source="typed-command"
         ),
@@ -387,6 +392,17 @@ def run_nccl_tests_profile(
             rows = parse_nccl_tests_output(capture.stdout)
         except AdapterExecutionError as error:
             failure_reason = f"nccl-tests repetition {repetition} parse failed: {error}"
+            break
+        incorrect = tuple(
+            row.message_bytes
+            for row in rows
+            if row.out_of_place_wrong not in {"0", "0.0"} or row.in_place_wrong not in {"0", "0.0"}
+        )
+        if incorrect:
+            failure_reason = (
+                f"nccl-tests repetition {repetition} reported incorrect output for "
+                f"message sizes {list(incorrect)}"
+            )
             break
         by_size = {row.message_bytes: row for row in rows}
         if set(by_size) != set(expected_sizes):

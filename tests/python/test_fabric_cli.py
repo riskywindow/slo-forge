@@ -20,6 +20,7 @@ from sloforge.fabric.ir import (
     load_physical_execution_plan,
     load_topology_graph,
 )
+from sloforge.fabric.profiling import BenchmarkStatus, MeasurementMode, load_profile
 from sloforge.warmpath import (
     ArtifactGraph,
     ArtifactKind,
@@ -165,6 +166,135 @@ def test_fabric_benchmark_never_hides_synthetic_fallback(tmp_path: Path) -> None
     )
     assert result.exit_code == 2
     assert "--synthetic for fixtures" in result.output
+
+
+def _fake_nccl_executable(tmp_path: Path, *, exit_code: int = 0) -> Path:
+    executable = tmp_path / "all_reduce_perf"
+    if exit_code:
+        body = f"#!/bin/sh\necho intentional-adapter-failure >&2\nexit {exit_code}\n"
+    else:
+        rows = []
+        message_bytes = 1_024
+        while message_bytes <= 1 << 20:
+            count = message_bytes // 4
+            duration = 5.0 + message_bytes / (1 << 20)
+            algorithm_gbps = message_bytes / (duration / 1_000_000.0) / 1_000_000_000.0
+            rows.append(
+                f"{message_bytes} {count} float sum -1 {duration:.6f} "
+                f"{algorithm_gbps:.9f} {algorithm_gbps:.9f} 0 {duration:.6f} "
+                f"{algorithm_gbps:.9f} {algorithm_gbps:.9f} 0"
+            )
+            message_bytes *= 2
+        body = (
+            "#!/bin/sh\ncat <<'EOF'\n"
+            "# size count type redop root time algbw busbw #wrong time algbw busbw #wrong\n"
+            + "\n".join(rows)
+            + "\nEOF\n"
+        )
+    executable.write_text(body, encoding="utf-8")
+    executable.chmod(executable.stat().st_mode | 0o700)
+    return executable
+
+
+def test_fabric_measured_nccl_cli_executes_only_explicit_adapter(tmp_path: Path) -> None:
+    topology = tmp_path / "topology.json"
+    profile_dir = tmp_path / "profile"
+    _invoke(
+        [
+            "fabric",
+            "discover",
+            "--fixture",
+            "two_node_infiniband",
+            "--output",
+            str(topology),
+        ]
+    )
+    executable = _fake_nccl_executable(tmp_path)
+    _invoke(
+        [
+            "fabric",
+            "benchmark",
+            "--topology",
+            str(topology),
+            "--suite",
+            "quick",
+            "--measured",
+            "--adapter",
+            "nccl-tests",
+            "--transport",
+            "nccl-local",
+            "--adapter-executable",
+            str(executable),
+            "--visible-device",
+            "GPU-00-00",
+            "--samples",
+            "3",
+            "--warmups",
+            "0",
+            "--inner-iterations",
+            "1",
+            "--timeout-seconds",
+            "2",
+            "--output",
+            str(profile_dir),
+        ]
+    )
+    canonical = load_fabric_profile(profile_dir / "fabric-profile.json")
+    raw = load_profile(profile_dir / "raw")
+    assert len(canonical.measurements) == 11
+    assert all(measurement.transport == "nccl-local" for measurement in canonical.measurements)
+    assert all(result.mode is MeasurementMode.MEASURED for result in raw.results)
+    assert all(result.status is BenchmarkStatus.SUCCESS for result in raw.results)
+
+
+def test_fabric_measured_nccl_cli_preserves_failure_artifact(tmp_path: Path) -> None:
+    topology = tmp_path / "topology.json"
+    profile_dir = tmp_path / "profile"
+    _invoke(
+        [
+            "fabric",
+            "discover",
+            "--fixture",
+            "two_node_infiniband",
+            "--output",
+            str(topology),
+        ]
+    )
+    executable = _fake_nccl_executable(tmp_path, exit_code=9)
+    result = runner.invoke(
+        app,
+        [
+            "fabric",
+            "benchmark",
+            "--topology",
+            str(topology),
+            "--suite",
+            "quick",
+            "--measured",
+            "--adapter",
+            "nccl-tests",
+            "--transport",
+            "nccl-local",
+            "--adapter-executable",
+            str(executable),
+            "--visible-device",
+            "GPU-00-00",
+            "--samples",
+            "3",
+            "--warmups",
+            "0",
+            "--timeout-seconds",
+            "2",
+            "--output",
+            str(profile_dir),
+        ],
+    )
+    assert result.exit_code == 2
+    assert "failed closed" in result.output
+    raw = load_profile(profile_dir / "raw")
+    assert raw.results
+    assert all(item.status is BenchmarkStatus.FAILED for item in raw.results)
+    assert not (profile_dir / "fabric-profile.json").exists()
 
 
 def _autopsy_run(run_id: str, *, degraded: bool, directory: Path) -> AutopsyRun:
