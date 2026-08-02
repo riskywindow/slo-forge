@@ -1,0 +1,373 @@
+{
+  "$defs": {
+    "BottleneckKind": {
+      "enum": [
+        "arrival_overload",
+        "gateway_queueing",
+        "backend_queueing",
+        "insufficient_warm_capacity",
+        "cold_start_regression",
+        "model_loading_regression",
+        "cpu_launch_bottleneck",
+        "excessive_kernel_launches",
+        "gpu_compute_regression",
+        "gpu_memory_bandwidth_regression",
+        "gpu_clock_throttling",
+        "numa_misplacement",
+        "pcie_bottleneck",
+        "nvlink_degradation",
+        "network_bandwidth_degradation",
+        "network_latency_degradation",
+        "rank_straggler",
+        "collective_imbalance",
+        "collective_algorithm_regression",
+        "expert_load_imbalance",
+        "prefill_pool_saturation",
+        "decode_pool_saturation",
+        "kv_transfer_bottleneck",
+        "unhealthy_worker",
+        "worker_crash",
+        "topology_mismatch",
+        "invalid_physical_plan_assumption"
+      ],
+      "title": "BottleneckKind",
+      "type": "string"
+    },
+    "CausalHypothesis": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "contradicting_evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceStatement"
+          },
+          "title": "Contradicting Evidence",
+          "type": "array"
+        },
+        "counterfactual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CounterfactualEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "hypothesis_id": {
+          "minLength": 1,
+          "title": "Hypothesis Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/BottleneckKind"
+        },
+        "rejected_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejected Reason"
+        },
+        "supporting_evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceStatement"
+          },
+          "title": "Supporting Evidence",
+          "type": "array"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hypothesis_id",
+        "kind",
+        "target",
+        "supporting_evidence",
+        "contradicting_evidence",
+        "confidence"
+      ],
+      "title": "CausalHypothesis",
+      "type": "object"
+    },
+    "CounterfactualEstimate": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_improvement_ms": {
+          "title": "Expected Improvement Ms",
+          "type": "number"
+        },
+        "healthy_gap_remaining_ms": {
+          "title": "Healthy Gap Remaining Ms",
+          "type": "number"
+        },
+        "lower_improvement_ms": {
+          "title": "Lower Improvement Ms",
+          "type": "number"
+        },
+        "scenario_id": {
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "simulation_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "upper_improvement_ms": {
+          "title": "Upper Improvement Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "expected_improvement_ms",
+        "lower_improvement_ms",
+        "upper_improvement_ms",
+        "healthy_gap_remaining_ms"
+      ],
+      "title": "CounterfactualEstimate",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "record_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Record Index"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "artifact_uri",
+        "sha256"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "EvidenceStatement": {
+      "additionalProperties": false,
+      "properties": {
+        "event_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "metric": {
+          "minLength": 1,
+          "title": "Metric",
+          "type": "string"
+        },
+        "observed": {
+          "title": "Observed",
+          "type": "number"
+        },
+        "relation": {
+          "enum": [
+            "greater_than",
+            "less_than",
+            "present",
+            "absent"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "supports_hypothesis": {
+          "title": "Supports Hypothesis",
+          "type": "boolean"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric",
+        "observed",
+        "threshold",
+        "relation",
+        "supports_hypothesis",
+        "explanation"
+      ],
+      "title": "EvidenceStatement",
+      "type": "object"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/autopsy/diagnosis-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baseline_run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Baseline Run Id"
+    },
+    "comparison_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Comparison Id"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "degraded_run_id": {
+      "minLength": 1,
+      "title": "Degraded Run Id",
+      "type": "string"
+    },
+    "diagnosis_id": {
+      "minLength": 1,
+      "title": "Diagnosis Id",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "first_divergence_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "First Divergence Event Id"
+    },
+    "first_divergence_ns": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "First Divergence Ns"
+    },
+    "hypotheses": {
+      "items": {
+        "$ref": "#/$defs/CausalHypothesis"
+      },
+      "title": "Hypotheses",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "sloforge.autopsy.diagnosis/v1",
+      "default": "sloforge.autopsy.diagnosis/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sufficient_alignment": {
+      "title": "Sufficient Alignment",
+      "type": "boolean"
+    },
+    "top_hypothesis": {
+      "$ref": "#/$defs/BottleneckKind"
+    },
+    "top_three": {
+      "items": {
+        "$ref": "#/$defs/BottleneckKind"
+      },
+      "title": "Top Three",
+      "type": "array"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "diagnosis_id",
+    "degraded_run_id",
+    "baseline_run_id",
+    "comparison_id",
+    "top_hypothesis",
+    "top_three",
+    "hypotheses",
+    "first_divergence_event_id",
+    "confidence",
+    "sufficient_alignment",
+    "evidence"
+  ],
+  "title": "DiagnosisRecord",
+  "type": "object"
+}

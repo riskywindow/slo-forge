@@ -1,0 +1,240 @@
+{
+  "$defs": {
+    "ArtifactKind": {
+      "enum": [
+        "container_layer",
+        "python_environment",
+        "tokenizer",
+        "model_config",
+        "model_weights",
+        "quantized_weights",
+        "adapter_weights",
+        "compiled_kernel",
+        "runtime_cache",
+        "graph_capture",
+        "engine_metadata",
+        "communication_metadata",
+        "process_checkpoint",
+        "cpu_memory_image",
+        "pinned_host_buffer",
+        "gpu_memory_image",
+        "readiness_metadata"
+      ],
+      "title": "ArtifactKind",
+      "type": "string"
+    },
+    "ArtifactNode": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "compatibility": {
+          "$ref": "#/$defs/CompatibilityConstraint"
+        },
+        "dependencies": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "kind": {
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "lazy_restore_allowed": {
+          "default": false,
+          "title": "Lazy Restore Allowed",
+          "type": "boolean"
+        },
+        "rebuild_time_ms": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Rebuild Time Ms",
+          "type": "number"
+        },
+        "required_for_readiness": {
+          "default": true,
+          "title": "Required For Readiness",
+          "type": "boolean"
+        },
+        "security_class": {
+          "$ref": "#/$defs/SecurityClass",
+          "default": "internal"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "source_relative_path": {
+          "minLength": 1,
+          "title": "Source Relative Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "kind",
+        "size_bytes",
+        "sha256",
+        "source_relative_path"
+      ],
+      "title": "ArtifactNode",
+      "type": "object"
+    },
+    "CompatibilityConstraint": {
+      "additionalProperties": false,
+      "description": "Host constraints for artifacts whose captured state is not portable.",
+      "properties": {
+        "architectures": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Architectures",
+          "type": "array"
+        },
+        "captured_host_fingerprint": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Captured Host Fingerprint"
+        },
+        "driver_major_versions": {
+          "default": [],
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Driver Major Versions",
+          "type": "array"
+        },
+        "gpu_architectures": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Gpu Architectures",
+          "type": "array"
+        },
+        "maximum_gpu_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Gpu Count"
+        },
+        "operating_systems": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Operating Systems",
+          "type": "array"
+        },
+        "portable": {
+          "default": true,
+          "title": "Portable",
+          "type": "boolean"
+        },
+        "runtime_versions": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Runtime Versions",
+          "type": "array"
+        },
+        "runtimes": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Runtimes",
+          "type": "array"
+        },
+        "topology_fingerprint": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topology Fingerprint"
+        }
+      },
+      "title": "CompatibilityConstraint",
+      "type": "object"
+    },
+    "SecurityClass": {
+      "enum": [
+        "public",
+        "internal",
+        "restricted"
+      ],
+      "title": "SecurityClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/warmpath/artifact-graph-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/ArtifactNode"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "graph_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Graph Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "graph_id",
+    "artifacts"
+  ],
+  "title": "ArtifactGraph",
+  "type": "object"
+}

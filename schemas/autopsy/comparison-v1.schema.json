@@ -1,0 +1,290 @@
+{
+  "$defs": {
+    "CounterDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute_delta": {
+          "title": "Absolute Delta",
+          "type": "number"
+        },
+        "degraded_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Degraded Count",
+          "type": "integer"
+        },
+        "degraded_median": {
+          "title": "Degraded Median",
+          "type": "number"
+        },
+        "healthy_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Healthy Count",
+          "type": "integer"
+        },
+        "healthy_median": {
+          "title": "Healthy Median",
+          "type": "number"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "relative_delta": {
+          "title": "Relative Delta",
+          "type": "number"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "unit",
+        "healthy_median",
+        "degraded_median",
+        "absolute_delta",
+        "relative_delta"
+      ],
+      "title": "CounterDelta",
+      "type": "object"
+    },
+    "EventType": {
+      "enum": [
+        "request",
+        "gateway_queue",
+        "backend_queue",
+        "scheduler",
+        "prefill",
+        "decode",
+        "token_stream",
+        "cpu_launch",
+        "gpu_compute",
+        "gpu_memory",
+        "kernel",
+        "collective",
+        "collective_wait",
+        "expert_dispatch",
+        "expert_combine",
+        "kv_transfer",
+        "network_transfer",
+        "pcie_transfer",
+        "nvlink_transfer",
+        "storage_read",
+        "startup",
+        "readiness",
+        "controller",
+        "recovery",
+        "fault",
+        "health"
+      ],
+      "title": "EventType",
+      "type": "string"
+    },
+    "StageDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute_delta_ms": {
+          "title": "Absolute Delta Ms",
+          "type": "number"
+        },
+        "degraded_count": {
+          "minimum": 0,
+          "title": "Degraded Count",
+          "type": "integer"
+        },
+        "degraded_median_ms": {
+          "minimum": 0.0,
+          "title": "Degraded Median Ms",
+          "type": "number"
+        },
+        "degraded_p95_ms": {
+          "minimum": 0.0,
+          "title": "Degraded P95 Ms",
+          "type": "number"
+        },
+        "event_type": {
+          "$ref": "#/$defs/EventType"
+        },
+        "healthy_count": {
+          "minimum": 0,
+          "title": "Healthy Count",
+          "type": "integer"
+        },
+        "healthy_median_ms": {
+          "minimum": 0.0,
+          "title": "Healthy Median Ms",
+          "type": "number"
+        },
+        "healthy_p95_ms": {
+          "minimum": 0.0,
+          "title": "Healthy P95 Ms",
+          "type": "number"
+        },
+        "matched_count": {
+          "minimum": 0,
+          "title": "Matched Count",
+          "type": "integer"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operation"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rank"
+        },
+        "relative_delta": {
+          "title": "Relative Delta",
+          "type": "number"
+        },
+        "signature": {
+          "minLength": 1,
+          "title": "Signature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "signature",
+        "event_type",
+        "operation",
+        "rank",
+        "healthy_count",
+        "degraded_count",
+        "matched_count",
+        "healthy_median_ms",
+        "degraded_median_ms",
+        "healthy_p95_ms",
+        "degraded_p95_ms",
+        "absolute_delta_ms",
+        "relative_delta"
+      ],
+      "title": "StageDelta",
+      "type": "object"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/autopsy/comparison-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "comparison_id": {
+      "minLength": 1,
+      "title": "Comparison Id",
+      "type": "string"
+    },
+    "counter_deltas": {
+      "items": {
+        "$ref": "#/$defs/CounterDelta"
+      },
+      "title": "Counter Deltas",
+      "type": "array"
+    },
+    "degraded_run_id": {
+      "minLength": 1,
+      "title": "Degraded Run Id",
+      "type": "string"
+    },
+    "first_divergence_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "First Divergence Event Id"
+    },
+    "first_divergence_ns": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "First Divergence Ns"
+    },
+    "healthy_run_id": {
+      "minLength": 1,
+      "title": "Healthy Run Id",
+      "type": "string"
+    },
+    "matched_event_count": {
+      "minimum": 0,
+      "title": "Matched Event Count",
+      "type": "integer"
+    },
+    "maximum_rank_skew": {
+      "minimum": 1.0,
+      "title": "Maximum Rank Skew",
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "sloforge.autopsy.comparison/v1",
+      "default": "sloforge.autopsy.comparison/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "stage_deltas": {
+      "items": {
+        "$ref": "#/$defs/StageDelta"
+      },
+      "title": "Stage Deltas",
+      "type": "array"
+    },
+    "unmatched_degraded_count": {
+      "minimum": 0,
+      "title": "Unmatched Degraded Count",
+      "type": "integer"
+    },
+    "unmatched_healthy_count": {
+      "minimum": 0,
+      "title": "Unmatched Healthy Count",
+      "type": "integer"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "comparison_id",
+    "healthy_run_id",
+    "degraded_run_id",
+    "matched_event_count",
+    "unmatched_healthy_count",
+    "unmatched_degraded_count",
+    "stage_deltas",
+    "counter_deltas",
+    "first_divergence_event_id",
+    "maximum_rank_skew"
+  ],
+  "title": "DifferentialComparison",
+  "type": "object"
+}

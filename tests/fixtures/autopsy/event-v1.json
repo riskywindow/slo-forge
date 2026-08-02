@@ -1,0 +1,44 @@
+{
+  "alignment_confidence": 0,
+  "alignment_uncertainty_ns": null,
+  "counters": [
+    {
+      "name": "network_bandwidth_gbps",
+      "unit": "Gb/s",
+      "value": 50
+    }
+  ],
+  "dependency_event_ids": [],
+  "end_ns": 4000000,
+  "event_id": "degraded-golden-event",
+  "event_type": "network_transfer",
+  "evidence": {
+    "artifact_uri": "fixture://fabric-simulation",
+    "record_index": null,
+    "sha256": "f21cde90d574ca0b10061e5212104103399f1f5c3fda010cd7d220ccb40f5a67",
+    "source": "synthetic-fixture"
+  },
+  "gpu": "gpu-0",
+  "host": "host-0",
+  "model_id": "model-0",
+  "nic": "nic-0",
+  "normalized_end_ns": null,
+  "normalized_start_ns": null,
+  "numa_domain": "numa-0",
+  "operation": "expert-dispatch",
+  "parent_event_id": null,
+  "process_id": null,
+  "rank": 0,
+  "replica": "replica-0",
+  "request_id": "request-0",
+  "resource": {
+    "contention_domain": "rail-0",
+    "resource_id": "rail-0",
+    "resource_type": "network_rail",
+    "topology_node_id": "rail-0"
+  },
+  "schema_version": "sloforge.autopsy.event/v1",
+  "source_clock": "synthetic",
+  "start_ns": 1000000,
+  "thread_id": null
+}

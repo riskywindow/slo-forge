@@ -1,0 +1,191 @@
+{
+  "$defs": {
+    "ExecutorArtifactRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "bytes_materialized": {
+          "minimum": 0,
+          "title": "Bytes Materialized",
+          "type": "integer"
+        },
+        "checksum_verified": {
+          "title": "Checksum Verified",
+          "type": "boolean"
+        },
+        "destination_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Path"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "finished_ns": {
+          "minimum": 0,
+          "title": "Finished Ns",
+          "type": "integer"
+        },
+        "mode": {
+          "$ref": "#/$defs/MaterializationMode"
+        },
+        "source_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Path"
+        },
+        "started_ns": {
+          "minimum": 0,
+          "title": "Started Ns",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "restored",
+            "rebuilt",
+            "kept_warm",
+            "deferred",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "tier_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Tier Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "tier_id",
+        "mode",
+        "status",
+        "started_ns",
+        "finished_ns",
+        "bytes_materialized",
+        "checksum_verified"
+      ],
+      "title": "ExecutorArtifactRecord",
+      "type": "object"
+    },
+    "MaterializationMode": {
+      "enum": [
+        "eager_restore",
+        "lazy_restore",
+        "rebuild",
+        "keep_warm"
+      ],
+      "title": "MaterializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "https://sloforge.dev/schemas/warmpath/execution-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Artifact Hash",
+      "type": "string"
+    },
+    "cache_evictions": {
+      "default": [],
+      "items": {
+        "pattern": "^[a-z][a-z0-9_.-]*$",
+        "type": "string"
+      },
+      "title": "Cache Evictions",
+      "type": "array"
+    },
+    "execution_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Reason"
+    },
+    "output_directory": {
+      "minLength": 1,
+      "title": "Output Directory",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "ready_time_ms": {
+      "minimum": 0.0,
+      "title": "Ready Time Ms",
+      "type": "number"
+    },
+    "records": {
+      "items": {
+        "$ref": "#/$defs/ExecutorArtifactRecord"
+      },
+      "title": "Records",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "success": {
+      "title": "Success",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "execution_id",
+    "plan_id",
+    "success",
+    "records",
+    "ready_time_ms",
+    "output_directory",
+    "artifact_hash"
+  ],
+  "title": "ExecutionRecord",
+  "type": "object"
+}
