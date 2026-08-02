@@ -40,6 +40,7 @@ from .forgeci import forgeci_app
 from .genesis import genesis_app
 from .lineage import lineage_app
 from .recovery import recovery_app
+from .redteam import redteam_app
 from .synthbench import synthbench_app
 from .warmpath import warmpath_app
 
@@ -60,6 +61,7 @@ app.add_typer(warmpath_app, name="warmpath")
 app.add_typer(genesis_app, name="genesis")
 app.add_typer(lineage_app, name="lineage")
 app.add_typer(synthbench_app, name="synthbench")
+app.add_typer(redteam_app, name="redteam")
 console = Console()
 
 
