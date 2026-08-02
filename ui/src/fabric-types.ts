@@ -400,4 +400,5 @@ export type FabricArtifactBundle = {
 
 export type ArtifactDocument =
   | { kind: "fabric"; value: FabricArtifactBundle }
+  | { kind: "genesis"; value: import("./genesis-types").GenesisArtifactBundle }
   | { kind: "logical"; value: import("./types").ReportArtifact };
