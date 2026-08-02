@@ -1,0 +1,37 @@
+schema_version: sloforge.fabric.evaluation-matrix/v1
+mode: synthetic_cpu
+command: >-
+  PYTHONPATH=python python -m sloforge.fabric.evaluation
+  --artifact-dir artifacts/fabric/evaluation --report-dir reports --reset
+seeds: [13, 29, 47]
+topologies:
+  - two_node_infiniband
+  - degraded_topology
+methods:
+  - random_placement
+  - sequential_placement
+  - topology_unaware_optimizer
+  - topology_aware_greedy
+  - hierarchical_compiler
+parallelism_control:
+  tensor_parallel_degree: 8
+  pipeline_parallel_degree: 1
+  data_parallel_degree: 2
+  expert_parallel_degree: 4
+hypotheses:
+  H1: topology-aware physical placement
+  H2: calibrated digital-twin ranking
+  H3: causal diagnosis of network degradation and rank skew
+  H4: diagnosis-driven recovery against generic baselines
+statistics:
+  confidence_level: 0.95
+  bootstrap_repetitions: 1000
+  aggregation: median
+safety:
+  requires_gpu: false
+  requires_network_privilege: false
+  creates_cloud_resources: false
+  simulator_timeout_seconds: 60
+provenance:
+  fixture_curves_are_measurements: false
+  hardware_backed_results_expected: false
