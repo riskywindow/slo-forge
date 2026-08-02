@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
+import pytest
+
+import sloforge.fabric.simulation as simulation_module
 from sloforge.autopsy import BottleneckKind, compare_runs, diagnose
 from sloforge.autopsy.capture import _counters as captured_counters
 from sloforge.autopsy.capture import capture_simulation_run
@@ -47,6 +51,62 @@ def _inputs() -> tuple[PhysicalExecutionPlan, TopologyGraph, FabricProfile]:
         load_topology_graph(FIXTURES / "topology-graph-v1.json"),
         load_fabric_profile(FIXTURES / "fabric-profile-v1.json"),
     )
+
+
+def _small_request() -> FabricSimulationRequest:
+    plan, topology, profile = _inputs()
+    return build_simulation_request(
+        plan,
+        topology,
+        profile,
+        SimulationWorkload(
+            request_count=1,
+            arrival_interval_us=0.0,
+            prompt_tokens=16,
+            output_tokens=1,
+        ),
+        seed=3,
+    )
+
+
+def test_simulator_boundary_times_out_and_caps_responses(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = _small_request()
+
+    def timeout(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        del args, kwargs
+        raise subprocess.TimeoutExpired(cmd=("sim",), timeout=0.1)
+
+    monkeypatch.setattr(simulation_module.subprocess, "run", timeout)
+    with pytest.raises(RuntimeError, match=r"timed out after 0\.1s"):
+        run_simulation(request, repository_root=ROOT, timeout_seconds=0.1)
+
+    monkeypatch.setattr(simulation_module, "_MAX_SIMULATOR_OUTPUT_BYTES", 4)
+    monkeypatch.setattr(
+        simulation_module.subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=("sim",), returncode=0, stdout=b"12345", stderr=b""
+        ),
+    )
+    with pytest.raises(RuntimeError, match="response exceeds"):
+        run_simulation(request, repository_root=ROOT)
+
+
+def test_simulator_boundary_truncates_failure_detail(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(simulation_module, "_MAX_SIMULATOR_ERROR_BYTES", 8)
+    monkeypatch.setattr(
+        simulation_module.subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=("sim",), returncode=9, stdout=b"", stderr=b"0123456789abcdef"
+        ),
+    )
+    with pytest.raises(RuntimeError, match=r"01234567\n\[stderr truncated\]"):
+        run_simulation(_small_request(), repository_root=ROOT)
 
 
 def test_physical_plan_lowers_to_strict_rust_protocol() -> None:

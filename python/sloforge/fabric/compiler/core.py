@@ -11,9 +11,11 @@ import hashlib
 import itertools
 import math
 import statistics
+import time
 from collections import defaultdict
 from enum import StrEnum
 from functools import cache
+from pathlib import Path
 from typing import Annotated, Final, Literal, Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
@@ -180,8 +182,12 @@ class PhysicalCompileResult(CompilerModel):
     pareto_frontier: tuple[CandidateSummary, ...]
     all_candidates: tuple[CandidateSummary, ...]
     strategy: OptimizationStrategy
+    # This outer diagnostic is intentionally excluded from PhysicalExecutionPlan
+    # canonical serialization. It is the actual local elapsed wall time.
     solver_time_ms: NonNegativeFinite
     simulator_calls: Annotated[int, Field(ge=0)]
+    simulator_validated_candidate_ids: tuple[str, ...]
+    deterministic_solver_work_units: Annotated[int, Field(ge=0)]
 
 
 class _Candidate(CompilerModel):
@@ -1358,9 +1364,313 @@ def _recovery_variants(
     return tuple(result)
 
 
+def _failure_exposure(
+    request: CompilerRequest, candidate: _Candidate
+) -> tuple[FailureExposure, ...]:
+    return tuple(
+        FailureExposure(
+            fault_domain=host_id,
+            affected_rank_ids=tuple(
+                binding.rank_id
+                for binding in candidate.placement.bindings
+                if binding.host_id == host_id
+            ),
+            probability=max(0.0, 1.0 - request.assumptions.base_availability),
+            expected_slo_impact_ms=candidate.summary.p95_ttft_ms,
+        )
+        for host_id in sorted({binding.host_id for binding in candidate.placement.bindings})
+    )
+
+
+def _candidate_plan(
+    request: CompilerRequest,
+    candidate: _Candidate,
+    *,
+    optimizer_history: tuple[OptimizerTraceEntry, ...] = (),
+    rejected_alternatives: tuple[RejectedPhysicalCandidate, ...] = (),
+    recovery_variants: tuple[RecoveryVariant, ...] = (),
+) -> PhysicalExecutionPlan:
+    """Build the canonical plan shape used by both refinement and final emission."""
+
+    topology_hash = ArtifactDigest(value=canonical_hash(request.topology))
+    profile_hash = ArtifactDigest(value=canonical_hash(request.fabric_profile))
+    model_hash = ArtifactDigest(value=canonical_hash(request.model))
+    plan_seed = (
+        f"{request.logical_deployment_plan.digest.value}:{model_hash.value}:"
+        f"{topology_hash.value}:{profile_hash.value}:{candidate.candidate_id}:{request.seed}"
+    )
+    physical_metrics = _physical_metrics(
+        candidate.summary,
+        request.assumptions.measurement_relative_uncertainty,
+        request.constraints.output_tokens_p95,
+    )
+    return PhysicalExecutionPlan(
+        plan_id=f"physical-plan-{hashlib.sha256(plan_seed.encode()).hexdigest()[:16]}",
+        logical_deployment_plan=request.logical_deployment_plan,
+        model_graph_hash=model_hash,
+        topology_fingerprint=topology_hash,
+        fabric_profile_hash=profile_hash,
+        parallelism=_parallelism(
+            candidate.tp,
+            candidate.pp,
+            candidate.dp,
+            candidate.ep,
+            candidate.disaggregated,
+        ),
+        rank_placement=candidate.placement,
+        expert_placement=_expert_placement(request.model, candidate),
+        collectives=candidate.collectives,
+        kv_transfer=candidate.kv_transfer,
+        memory=candidate.memory,
+        communication_overlap=candidate.overlap,
+        predicted_metrics=physical_metrics,
+        bottleneck_prediction=(
+            "communication"
+            if candidate.summary.communication_us / 1_000.0 > candidate.summary.p95_ttft_ms * 0.30
+            else (
+                "prefill_compute"
+                if candidate.summary.p95_ttft_ms > request.constraints.p95_ttft_ms * 0.75
+                else "decode_compute"
+            )
+        ),
+        failure_exposure=_failure_exposure(request, candidate),
+        optimizer_history=optimizer_history,
+        rejected_alternatives=rejected_alternatives,
+        recovery_variants=recovery_variants,
+        evidence=(
+            request.fabric_profile.hardware_manifest,
+            request.fabric_profile.software_manifest,
+        ),
+        compiler_version=_COMPILER_VERSION,
+        git_commit=request.git_commit,
+        reproducibility=ReproducibilityMetadata(
+            seed=request.seed,
+            generated_at=request.generated_at,
+            environment_digest=request.environment_digest,
+            command=("sloforge", "fabric", "compile"),
+        ),
+    )
+
+
+def _compiler_repository_root() -> Path:
+    root = Path(__file__).resolve().parents[4]
+    if not (root / "Cargo.toml").is_file():
+        raise RuntimeError("unable to locate the SLOForge Rust workspace")
+    return root
+
+
+def _percentile(values: tuple[float, ...], quantile: float) -> float:
+    if not values:
+        raise ValueError("cannot compute a percentile without samples")
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * quantile
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    fraction = position - lower
+    return ordered[lower] * (1.0 - fraction) + ordered[upper] * fraction
+
+
+def _objective_score(request: CompilerRequest, summary: CandidateSummary) -> float:
+    uncertainty = request.assumptions.measurement_relative_uncertainty
+    robust_ttft_ms = summary.p95_ttft_ms * (1.0 + uncertainty)
+    robust_tpot_ms = summary.p99_tpot_ms * (1.0 + uncertainty)
+    violation = max(0.0, robust_ttft_ms / request.constraints.p95_ttft_ms - 1.0) + max(
+        0.0, robust_tpot_ms / request.constraints.p99_tpot_ms - 1.0
+    )
+    terms = {
+        CompilerObjective.MINIMIZE_COST: summary.cost_per_million_tokens + violation * 1e6,
+        CompilerObjective.MINIMIZE_LATENCY: summary.p95_ttft_ms
+        + summary.p99_tpot_ms * 10.0
+        + violation * 1e6,
+        CompilerObjective.MAXIMIZE_GOODPUT: -summary.goodput_tokens_per_second + violation * 1e6,
+        CompilerObjective.ROBUST_BALANCED: (
+            summary.cost_per_million_tokens
+            + summary.p95_ttft_ms
+            + summary.p99_tpot_ms * 10.0
+            + summary.communication_us / 1_000.0
+            + summary.failure_exposure_score * 1_000.0
+            + violation * 1e6
+        ),
+    }
+    return terms[request.objective]
+
+
+def _simulated_rejection_codes(
+    request: CompilerRequest, summary: CandidateSummary
+) -> tuple[str, ...]:
+    uncertainty = request.assumptions.measurement_relative_uncertainty
+    codes: list[str] = []
+    if summary.p95_ttft_ms * (1.0 + uncertainty) > request.constraints.p95_ttft_ms:
+        codes.append("simulated_p95_ttft_slo")
+    if summary.p99_tpot_ms * (1.0 + uncertainty) > request.constraints.p99_tpot_ms:
+        codes.append("simulated_p99_tpot_slo")
+    if (
+        summary.goodput_tokens_per_second * (1.0 - uncertainty)
+        < request.constraints.minimum_goodput_tokens_per_second
+    ):
+        codes.append("simulated_minimum_goodput")
+    if (
+        request.constraints.maximum_cost_per_million_tokens is not None
+        and summary.cost_per_million_tokens * (1.0 + uncertainty)
+        > request.constraints.maximum_cost_per_million_tokens
+    ):
+        codes.append("simulated_maximum_cost")
+    return tuple(codes)
+
+
+def _simulate_candidate(request: CompilerRequest, candidate: _Candidate) -> tuple[_Candidate, int]:
+    """Refine one analytical candidate through the deterministic Rust twin."""
+
+    from sloforge.fabric.simulation import (
+        SimulationWorkload,
+        build_simulation_request,
+        request_latencies,
+        run_simulation,
+    )
+
+    # Candidate refinement isolates one representative request. The physical
+    # simulator models exclusive GPU operation resources rather than an
+    # engine's continuous-batching scheduler; treating configured concurrency
+    # as simultaneous independent GPU kernels would manufacture queue delay.
+    # Full workload queueing remains the subsequent `fabric validate` pass.
+    request_count = 1
+    workload = SimulationWorkload(
+        request_count=request_count,
+        arrival_interval_us=0.0,
+        prompt_tokens=request.constraints.prompt_tokens_p95,
+        output_tokens=request.constraints.output_tokens_p95,
+    )
+    simulation_request = build_simulation_request(
+        _candidate_plan(request, candidate),
+        request.topology,
+        request.fabric_profile,
+        workload,
+        seed=request.seed,
+    )
+    output = run_simulation(
+        simulation_request,
+        repository_root=_compiler_repository_root(),
+        timeout_seconds=30.0,
+    )
+    latencies = request_latencies(output)
+    if len(latencies) != request_count:
+        raise RuntimeError(
+            f"fabric simulator returned {len(latencies)} request latencies; "
+            f"expected {request_count}"
+        )
+    ttft_ms = _percentile(tuple(item.ttft_us / 1_000.0 for item in latencies), 0.95)
+    tpot_samples = tuple(
+        max(0.0, item.end_to_end_us - item.ttft_us)
+        / request.constraints.output_tokens_p95
+        / 1_000.0
+        for item in latencies
+    )
+    tpot_ms = _percentile(tpot_samples, 0.99)
+    decode_replicas = (
+        candidate.dp - max(1, candidate.dp // 2) if candidate.disaggregated else candidate.dp
+    )
+    simulated_decode_capacity = 1_000.0 / max(tpot_ms, 1e-9) * decode_replicas
+    communication_operations = tuple(
+        operation
+        for operation in output.operations
+        if ":collective-" in operation.operation_id or ":kv-" in operation.operation_id
+    )
+    communication_us = sum(item.duration_us for item in communication_operations) / request_count
+    provisional = candidate.summary.model_copy(
+        update={
+            "communication_us": communication_us,
+            "p95_ttft_ms": ttft_ms,
+            "p99_tpot_ms": tpot_ms,
+            "goodput_tokens_per_second": min(
+                candidate.summary.goodput_tokens_per_second,
+                simulated_decode_capacity,
+            ),
+        }
+    )
+    cost_per_million = (
+        candidate.tp
+        * candidate.pp
+        * candidate.dp
+        * request.assumptions.gpu_hourly_price_usd
+        / max(provisional.goodput_tokens_per_second, 1e-9)
+        / 3_600.0
+        * 1e6
+    )
+    provisional = provisional.model_copy(update={"cost_per_million_tokens": cost_per_million})
+    rejection_codes = _simulated_rejection_codes(request, provisional)
+    summary = provisional.model_copy(
+        update={
+            "objective_score": _objective_score(request, provisional),
+            "feasible": not rejection_codes,
+            "rejection_codes": rejection_codes,
+        }
+    )
+    # The work unit is a deterministic count of processed simulator events. It
+    # is suitable for canonical optimizer traces; actual wall time stays in the
+    # outer PhysicalCompileResult diagnostic.
+    return (
+        candidate.model_copy(update={"summary": summary}),
+        output.metrics.processed_events,
+    )
+
+
+def _refine_candidates(
+    request: CompilerRequest, candidates: tuple[_Candidate, ...]
+) -> tuple[tuple[_Candidate, ...], frozenset[str], dict[str, int], int]:
+    """Iteratively simulate every candidate that can reach the final frontier."""
+
+    by_id = {candidate.candidate_id: candidate for candidate in candidates}
+    validated: set[str] = set()
+    work_by_id: dict[str, int] = {}
+    simulator_calls = 0
+    while True:
+        feasible = tuple(item for item in by_id.values() if item.summary.feasible)
+        if not feasible:
+            break
+        frontier_ids = {
+            item.candidate_id for item in _pareto(tuple(item.summary for item in feasible))
+        }
+        ordered = sorted(
+            feasible, key=lambda item: (item.summary.objective_score, item.candidate_id)
+        )
+        # The leading alternatives are the source for recovery variants, so
+        # validate them with the same twin rather than publishing static-only
+        # recovery promises.
+        promoted = frontier_ids | {item.candidate_id for item in ordered[:4]}
+        pending = tuple(sorted(promoted - validated))
+        if not pending:
+            break
+        for candidate_id in pending:
+            try:
+                refined, work_units = _simulate_candidate(request, by_id[candidate_id])
+            except ValueError:
+                summary = by_id[candidate_id].summary.model_copy(
+                    update={
+                        "feasible": False,
+                        "objective_score": 1.0e30,
+                        "rejection_codes": ("simulator_invalid_physical_plan",),
+                    }
+                )
+                refined = by_id[candidate_id].model_copy(update={"summary": summary})
+                work_units = 0
+            by_id[candidate_id] = refined
+            validated.add(candidate_id)
+            work_by_id[candidate_id] = work_units
+            simulator_calls += 1
+    return (
+        tuple(sorted(by_id.values(), key=lambda item: item.candidate_id)),
+        frozenset(validated),
+        work_by_id,
+        simulator_calls,
+    )
+
+
 def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
     """Compile and explain a deterministic physical execution plan."""
 
+    started_ns = time.perf_counter_ns()
     gpus = _healthy_gpus(request.topology)
     if not gpus:
         raise ValueError("topology contains no non-failed GPUs")
@@ -1421,6 +1731,18 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         else:
             candidates.append(outcome)
             summaries.append(outcome.summary)
+    candidate_ids = {candidate.candidate_id for candidate in candidates}
+    static_rejections = tuple(
+        summary for summary in summaries if summary.candidate_id not in candidate_ids
+    )
+    refined_candidates, validated_ids, work_by_id, simulator_calls = _refine_candidates(
+        request, tuple(candidates)
+    )
+    summaries = [
+        *static_rejections,
+        *(candidate.summary for candidate in refined_candidates),
+    ]
+    candidates = list(refined_candidates)
     feasible = tuple(candidate for candidate in candidates if candidate.summary.feasible)
     if not feasible:
         reasons = sorted({code for item in summaries for code in item.rejection_codes})
@@ -1434,17 +1756,21 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             OptimizerTraceEntry(
                 sequence=sequence,
                 candidate_id=item.candidate_id,
-                phase="lower_bound" if item.feasible else "feasibility",
+                phase=(
+                    "simulation"
+                    if item.candidate_id in validated_ids
+                    else ("lower_bound" if item.feasible else "feasibility")
+                ),
                 decision=(
                     "select"
                     if item.candidate_id == selected.candidate_id
                     else ("promote" if item.candidate_id in frontier_ids else "reject")
                 ),
                 reason_code=(
-                    "minimum_robust_objective"
+                    "simulator_validated_minimum_robust_objective"
                     if item.candidate_id == selected.candidate_id
                     else (
-                        "pareto_candidate"
+                        "simulator_validated_pareto_candidate"
                         if item.candidate_id in frontier_ids
                         else (
                             "dominated_objective"
@@ -1453,18 +1779,21 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
                         )
                     )
                 ),
-                # Compilation ranks the finite candidate space with measured
-                # service/link curves. Runtime validation is an explicit
-                # subsequent compiler pass (``fabric simulate``/``validate``),
-                # so do not claim simulator executions that did not occur.
-                simulator_calls=0,
-                solver_time_ms=0.0,
+                simulator_calls=1 if item.candidate_id in validated_ids else 0,
+                # Canonical plans cannot include noisy wall time. This is the
+                # deterministic equivalent work estimate in reference-event ms;
+                # PhysicalCompileResult.solver_time_ms is actual elapsed time.
+                solver_time_ms=work_by_id.get(item.candidate_id, 0) / 1_000.0,
             )
         )
     rejected = tuple(
         RejectedPhysicalCandidate(
             candidate_id=item.candidate_id,
-            stage="constraint_check" if not item.feasible else "objective_ranking",
+            stage=(
+                "simulation_validation"
+                if any(code.startswith("simulator_") for code in item.rejection_codes)
+                else ("constraint_check" if not item.feasible else "objective_ranking")
+            ),
             reason_code=(
                 "+".join(item.rejection_codes) if item.rejection_codes else "dominated_objective"
             ),
@@ -1478,82 +1807,24 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         for item in summaries
         if item.candidate_id != selected.candidate_id
     )
-    physical_metrics = _physical_metrics(
-        selected.summary,
-        request.assumptions.measurement_relative_uncertainty,
-        request.constraints.output_tokens_p95,
+    validated_candidates = tuple(
+        candidate for candidate in candidates if candidate.candidate_id in validated_ids
     )
-    failure_exposure = tuple(
-        FailureExposure(
-            fault_domain=host_id,
-            affected_rank_ids=tuple(
-                binding.rank_id
-                for binding in selected.placement.bindings
-                if binding.host_id == host_id
-            ),
-            probability=max(0.0, 1.0 - request.assumptions.base_availability),
-            expected_slo_impact_ms=selected.summary.p95_ttft_ms,
-        )
-        for host_id in sorted({binding.host_id for binding in selected.placement.bindings})
-    )
-    topology_hash = ArtifactDigest(value=canonical_hash(request.topology))
-    profile_hash = ArtifactDigest(value=canonical_hash(request.fabric_profile))
-    model_hash = ArtifactDigest(value=canonical_hash(request.model))
-    plan_seed = (
-        f"{request.logical_deployment_plan.digest.value}:{model_hash.value}:"
-        f"{topology_hash.value}:{profile_hash.value}:{selected.candidate_id}:{request.seed}"
-    )
-    plan = PhysicalExecutionPlan(
-        plan_id=f"physical-plan-{hashlib.sha256(plan_seed.encode()).hexdigest()[:16]}",
-        logical_deployment_plan=request.logical_deployment_plan,
-        model_graph_hash=model_hash,
-        topology_fingerprint=topology_hash,
-        fabric_profile_hash=profile_hash,
-        parallelism=_parallelism(
-            selected.tp,
-            selected.pp,
-            selected.dp,
-            selected.ep,
-            selected.disaggregated,
-        ),
-        rank_placement=selected.placement,
-        expert_placement=_expert_placement(request.model, selected),
-        collectives=selected.collectives,
-        kv_transfer=selected.kv_transfer,
-        memory=selected.memory,
-        communication_overlap=selected.overlap,
-        predicted_metrics=physical_metrics,
-        bottleneck_prediction=(
-            "communication"
-            if selected.summary.communication_us / 1_000.0 > selected.summary.p95_ttft_ms * 0.30
-            else (
-                "prefill_compute"
-                if selected.summary.p95_ttft_ms > request.constraints.p95_ttft_ms * 0.75
-                else "decode_compute"
-            )
-        ),
-        failure_exposure=failure_exposure,
+    plan = _candidate_plan(
+        request,
+        selected,
         optimizer_history=tuple(history),
         rejected_alternatives=rejected,
-        recovery_variants=_recovery_variants(request, selected, tuple(candidates)),
-        evidence=(
-            request.fabric_profile.hardware_manifest,
-            request.fabric_profile.software_manifest,
-        ),
-        compiler_version=_COMPILER_VERSION,
-        git_commit=request.git_commit,
-        reproducibility=ReproducibilityMetadata(
-            seed=request.seed,
-            generated_at=request.generated_at,
-            environment_digest=request.environment_digest,
-            command=("sloforge", "fabric", "compile"),
-        ),
+        recovery_variants=_recovery_variants(request, selected, validated_candidates),
     )
+    elapsed_ms = (time.perf_counter_ns() - started_ns) / 1_000_000.0
     return PhysicalCompileResult(
         selected=plan,
         pareto_frontier=frontier,
         all_candidates=tuple(sorted(summaries, key=lambda item: item.candidate_id)),
         strategy=request.strategy,
-        solver_time_ms=0.0,
-        simulator_calls=0,
+        solver_time_ms=elapsed_ms,
+        simulator_calls=simulator_calls,
+        simulator_validated_candidate_ids=tuple(sorted(validated_ids)),
+        deterministic_solver_work_units=sum(work_by_id.values()),
     )

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+import sloforge.fabric.compiler.core as compiler_core
 from sloforge.fabric.compiler import (
     CompilerAssumptions,
     CompilerConstraints,
@@ -91,8 +92,16 @@ def test_hierarchical_compiler_produces_valid_explainable_plan() -> None:
     assert result.selected.optimizer_history
     assert result.selected.rejected_alternatives
     assert result.pareto_frontier
-    assert result.simulator_calls == 0
-    assert all(entry.simulator_calls == 0 for entry in result.selected.optimizer_history)
+    assert result.simulator_calls >= 1
+    assert result.solver_time_ms > 0.0
+    assert result.deterministic_solver_work_units > 0
+    validated = set(result.simulator_validated_candidate_ids)
+    assert all(item.candidate_id in validated for item in result.pareto_frontier)
+    selected_history = next(
+        item for item in result.selected.optimizer_history if item.decision == "select"
+    )
+    assert selected_history.phase == "simulation"
+    assert selected_history.simulator_calls == 1
     assert len(result.selected.rank_placement.bindings) == (
         result.selected.parallelism.expected_rank_count
     )
@@ -128,8 +137,51 @@ def test_compiler_is_deterministic() -> None:
     request = _request(OptimizationStrategy.EXHAUSTIVE)
     first = compile_physical_plan(request)
     second = compile_physical_plan(request)
-    assert first == second
+    # Actual outer solver wall time is diagnostic and intentionally noisy; the
+    # canonical plan and deterministic simulator work accounting are stable.
+    assert first.selected == second.selected
+    assert first.pareto_frontier == second.pareto_frontier
+    assert first.simulator_calls == second.simulator_calls
+    assert first.deterministic_solver_work_units == second.deterministic_solver_work_units
     assert canonical_hash(first.selected) == canonical_hash(second.selected)
+
+
+def test_invalid_simulator_candidate_is_rejected_and_refinement_continues(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = compiler_core._simulate_candidate
+    rejected_id: list[str] = []
+
+    def reject_first(
+        request: CompilerRequest, candidate: compiler_core._Candidate
+    ) -> tuple[compiler_core._Candidate, int]:
+        if not rejected_id:
+            rejected_id.append(candidate.candidate_id)
+            raise ValueError("invalid operation DAG")
+        return original(request, candidate)
+
+    monkeypatch.setattr(compiler_core, "_simulate_candidate", reject_first)
+    result = compile_physical_plan(_request(OptimizationStrategy.HIERARCHICAL))
+    rejected = {
+        candidate.candidate_id: candidate for candidate in result.selected.rejected_alternatives
+    }
+    assert rejected[rejected_id[0]].stage == "simulation_validation"
+    assert rejected[rejected_id[0]].reason_code == "simulator_invalid_physical_plan"
+    assert result.selected.optimizer_history
+
+
+def test_simulator_subprocess_failure_aborts_compile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail(
+        request: CompilerRequest, candidate: compiler_core._Candidate
+    ) -> tuple[compiler_core._Candidate, int]:
+        del request, candidate
+        raise RuntimeError("fabric simulator timed out after 30s")
+
+    monkeypatch.setattr(compiler_core, "_simulate_candidate", fail)
+    with pytest.raises(RuntimeError, match="timed out"):
+        compile_physical_plan(_request(OptimizationStrategy.HIERARCHICAL))
 
 
 def test_topology_unaware_baseline_is_available() -> None:
@@ -141,7 +193,9 @@ def test_topology_unaware_baseline_is_available() -> None:
 def test_random_placement_baseline_is_seeded_and_public() -> None:
     first = compile_physical_plan(_request(OptimizationStrategy.RANDOM_PLACEMENT))
     second = compile_physical_plan(_request(OptimizationStrategy.RANDOM_PLACEMENT))
-    assert first == second
+    assert first.selected == second.selected
+    assert first.pareto_frontier == second.pareto_frontier
+    assert first.deterministic_solver_work_units == second.deterministic_solver_work_units
     assert first.strategy is OptimizationStrategy.RANDOM_PLACEMENT
     assert first.selected.rank_placement.bindings
 

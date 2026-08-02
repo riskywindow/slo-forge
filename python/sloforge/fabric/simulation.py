@@ -25,6 +25,10 @@ from sloforge.fabric.ir import (
     WorkerRole,
 )
 
+_MAX_SIMULATOR_INPUT_BYTES = 64 * 1024 * 1024
+_MAX_SIMULATOR_OUTPUT_BYTES = 128 * 1024 * 1024
+_MAX_SIMULATOR_ERROR_BYTES = 16 * 1024
+
 PositiveFloat = Annotated[float, Field(gt=0.0, allow_inf_nan=False)]
 NonNegativeFloat = Annotated[float, Field(ge=0.0, allow_inf_nan=False)]
 
@@ -852,19 +856,28 @@ def run_simulation(
     """Execute the bounded Rust subprocess without transport fallback."""
 
     command = _simulator_command(repository_root)
+    payload = request.model_dump_json().encode()
+    if len(payload) > _MAX_SIMULATOR_INPUT_BYTES:
+        raise RuntimeError("fabric simulator request exceeds the 64 MiB subprocess boundary")
     try:
         completed = subprocess.run(
             command,
             cwd=repository_root,
-            input=request.model_dump_json().encode(),
+            input=payload,
             capture_output=True,
             check=False,
             timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as error:
         raise RuntimeError(f"fabric simulator timed out after {timeout_seconds:g}s") from error
+    if len(completed.stdout) > _MAX_SIMULATOR_OUTPUT_BYTES:
+        raise RuntimeError("fabric simulator response exceeds the 128 MiB boundary")
     if completed.returncode != 0:
-        stderr = completed.stderr.decode(errors="replace").strip()
+        clipped = completed.stderr[:_MAX_SIMULATOR_ERROR_BYTES]
+        suffix = (
+            "\n[stderr truncated]" if len(completed.stderr) > _MAX_SIMULATOR_ERROR_BYTES else ""
+        )
+        stderr = clipped.decode(errors="replace").strip() + suffix
         raise RuntimeError(f"fabric simulator failed ({completed.returncode}): {stderr}")
     try:
         return FabricSimulationOutput.model_validate_json(completed.stdout)
