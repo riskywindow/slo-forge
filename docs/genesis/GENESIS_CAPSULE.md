@@ -58,7 +58,8 @@ The validator never imports or executes generated code. It accumulates determini
 - missing, symlinked, escaping, size-mismatched, or digest-mismatched artifacts;
 - absent, failed, future-dated, expired, incorrectly issued, role-incompatible, or insufficient-
   level evidence;
-- claims outside their hardware scope or unsupported by the matching evidence class;
+- promotion claims whose complete statement and scope are not externally anchored, claims outside
+  their hardware scope, or claims unsupported by the matching evidence class;
 - source model, tokenizer, workload contract, hardware contract, hardware fingerprint,
   architecture, device count, verifier, dependency lock, or dependency mismatch;
 - benchmark provenance or recomputed-statistic mismatch; and
@@ -88,7 +89,7 @@ then evaluates these ten attacks:
 | Altered benchmark summary | Re-seals a median not derivable from the raw samples | Independent benchmark recomputation |
 | Altered quality evidence | Changes replayable expected/observed cases without their anchored digest | Artifact integrity and evidence completeness |
 | Missing counterexample corpus | Removes the required corpus from a re-sealed manifest | Counterexample-corpus completeness |
-| Invalid model-check scope | Moves the operational claim outside the validating hardware fingerprint | Claim-scope compatibility |
+| Invalid model-check scope | Moves the operational claim outside the validating hardware fingerprint | Claim-scope compatibility and external whole-claim anchor |
 | Incompatible state migration | Replaces the anchored state-conversion bytes with an incompatible source genome | State-conversion artifact integrity |
 
 The default matrix is three seeds by ten attack classes. Every mutation record preserves its seed,
@@ -103,6 +104,12 @@ Some re-sealed attacks deliberately substitute the re-sealed digest into the sup
 That exercises evidence anchors and semantic completeness after manifest hashing has passed; it
 does not weaken the operational requirement that the deployment controller independently pin the
 expected capsule digest.
+
+Promotion-required evidence anchors bind issuer records and artifact digests. Separate trusted
+claim anchors bind the canonical digest of the complete claim, including its statement, evidence
+references, verification level, assumptions, exclusions, and input/shape/dtype/hardware scope.
+Consequently, re-sealing a narrower or broader claim scope cannot authorize a claim that the
+external validation authority did not approve.
 
 The campaign has an exact, narrow proof scope. Its promotion-complete capsule is a validator
 conformance fixture. Its benchmark numbers are deterministic statistical test vectors, not

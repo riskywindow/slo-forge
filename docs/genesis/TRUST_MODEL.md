@@ -100,6 +100,12 @@ immutable evidence IDs. The validator checks that evidence:
 - passed, is not future-dated, and has not expired;
 - matches the claim category and current hardware scope.
 
+For every promotion-required claim, the external validation context also pins a canonical digest
+of the complete claim. This prevents a re-sealed capsule from broadening an evidence-backed scope,
+changing assumptions or exclusions, or redirecting evidence references while retaining valid
+artifact and evidence-record anchors. The context is control-plane authority and must be constructed
+outside the untrusted capsule directory.
+
 Promotion additionally requires generated runtime, deployment, rollback, semantic, quality,
 resource, performance, and operational evidence; a counterexample corpus; and at least one
 provenance-complete benchmark. The current model, tokenizer, workload contract, hardware contract,
@@ -144,6 +150,11 @@ those artifacts and calls the production validator again. It then builds the bas
 fresh temporary tree, reapplies the mutation, and compares the independently rebuilt mutation,
 capsule, context, issue set, and report. This prevents the summary from becoming authority for its
 own result.
+
+The model-check-scope attack is rejected both when the current hardware lies outside the mutated
+scope and because the mutated complete claim no longer matches its externally trusted claim anchor.
+The anchor closes scope-broadening attacks too; checking only that the current hardware appears in a
+manifest-provided scope would let an untrusted publisher enlarge that scope.
 
 Several re-sealed attacks also substitute the attacker-selected manifest digest into the test
 context. This is intentional adversarial depth: the inner evidence-anchor, completeness, scope, and

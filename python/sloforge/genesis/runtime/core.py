@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 from collections.abc import Iterator
 from queue import Empty, Full, Queue
 from threading import Lock, Thread
@@ -22,6 +23,17 @@ from .models import (
     StateAllocatorLayout,
     StreamEvent,
 )
+
+
+def _bounded_timeout(value: float, *, operation: str) -> float:
+    if (
+        not isinstance(value, (int, float))
+        or isinstance(value, bool)
+        or not math.isfinite(value)
+        or value <= 0
+    ):
+        raise ValueError(f"{operation} timeout must be finite and positive")
+    return float(value)
 
 
 class QueueSaturatedError(RuntimeError):
@@ -46,8 +58,7 @@ class StreamHandle:
         return self._control.cancel()
 
     def next_event(self, timeout_seconds: float) -> StreamEvent:
-        if timeout_seconds <= 0:
-            raise ValueError("stream timeout must be positive")
+        timeout_seconds = _bounded_timeout(timeout_seconds, operation="stream")
         try:
             event = self._events.get(timeout=timeout_seconds)
         except Empty as error:
@@ -69,8 +80,7 @@ class StreamHandle:
                 return
 
     def wait(self, timeout_seconds: float) -> bool:
-        if timeout_seconds <= 0:
-            raise ValueError("wait timeout must be positive")
+        timeout_seconds = _bounded_timeout(timeout_seconds, operation="wait")
         return self._control.finished.wait(timeout_seconds)
 
 
@@ -248,9 +258,10 @@ class BaselineStreamingRuntime:
             return self._metrics.snapshot()
 
     def shutdown(self, timeout_seconds: float | None = None) -> None:
-        timeout = timeout_seconds or self._limits.shutdown_timeout_seconds
-        if timeout <= 0:
-            raise ValueError("shutdown timeout must be positive")
+        timeout = _bounded_timeout(
+            self._limits.shutdown_timeout_seconds if timeout_seconds is None else timeout_seconds,
+            operation="shutdown",
+        )
         with self._lifecycle_lock:
             if not self._started:
                 return

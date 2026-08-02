@@ -6,7 +6,7 @@
 mod checker;
 mod model;
 
-pub use checker::{check, replay_counterexample};
+pub use checker::{check, replay_counterexample, validate_result};
 pub use model::*;
 
 use schemars::Schema;

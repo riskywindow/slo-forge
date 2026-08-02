@@ -49,6 +49,7 @@ def test_h3_campaign_runs_real_ablation_and_replays(
     assert report.scope.hardware_backed is False
     assert report.scope.hardware_performance_claims is False
     assert report.scope.universal_proof is False
+    assert report.scope.oracle == "bounded_policy_domain_enumeration"
     assert report.run_seeds == tuple(dict.fromkeys(report.run_seeds))
     assert len(report.run_seeds) == 3
 

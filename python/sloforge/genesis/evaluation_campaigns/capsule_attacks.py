@@ -45,6 +45,7 @@ from sloforge.genesis.capsule import (
     RawBenchmarkSamples,
     ScopedClaim,
     TrustedArtifactAnchor,
+    TrustedClaimAnchor,
     TrustedEvidenceAnchor,
     ValidationContext,
     ValidationIssueCode,
@@ -712,6 +713,13 @@ def _build_fixture(root: Path, seed: int) -> _Fixture:
                 ),
             )
             for record in evidence
+        ),
+        trusted_claim_anchors=tuple(
+            TrustedClaimAnchor(
+                claim_id=claim.claim_id,
+                claim_digest=_digest(canonical_json(claim)),
+            )
+            for claim in claims
         ),
         trusted_artifact_anchors=(
             TrustedArtifactAnchor(artifact_id=rollback.artifact_id, digest=rollback.digest),

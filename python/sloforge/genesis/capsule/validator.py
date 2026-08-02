@@ -750,6 +750,9 @@ def validate_capsule(
 
     evidence = {record.evidence_id: record for record in capsule.evidence}
     trust_anchors = {item.evidence_id: item for item in context.trusted_evidence_anchors}
+    claim_trust_anchors = {
+        item.claim_id: item.claim_digest for item in context.trusted_claim_anchors
+    }
     for record in capsule.evidence:
         prefix = f"evidence.{record.evidence_id}"
         if any(artifact_id not in artifacts for artifact_id in record.artifact_ids):
@@ -883,6 +886,14 @@ def validate_capsule(
                 "claim category is not supported by matching evidence",
             )
         if claim.promotion_required:
+            claim_digest = Digest(value=hashlib.sha256(canonical_json(claim)).hexdigest())
+            if claim_trust_anchors.get(claim.claim_id) != claim_digest:
+                _append(
+                    issues,
+                    ValidationIssueCode.EVIDENCE_UNTRUSTED,
+                    prefix,
+                    "promotion claim and scope are not bound by the external validation context",
+                )
             for record in matching_records:
                 anchor = trust_anchors.get(record.evidence_id)
                 anchored_artifacts = (

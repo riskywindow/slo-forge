@@ -7,13 +7,14 @@ from pathlib import Path
 
 from sloforge.genesis.ir import load_counterexample, write_canonical
 from sloforge.genesis.synthesis import ConstraintStore
-from sloforge.genesis.synthesis.cegis import _counterexample
+from sloforge.genesis.synthesis.cegis import _counterexample, minimize_protocol_failure
 from sloforge.genesis.synthesis.fixture import (
     CancellationPolicyVerifier,
     cancellation_fixture_candidates,
     run_cancellation_cegis,
 )
-from sloforge.genesis.synthesis.models import ProtocolWitness
+from sloforge.genesis.synthesis.local import bounded_candidate_policy_property_document
+from sloforge.genesis.synthesis.models import ProtocolWitness, VerificationOutcome
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -59,6 +60,21 @@ def test_cegis_rejects_minimizes_learns_suppresses_and_corrects(tmp_path: Path) 
     assert "candidate_suppressed" in {event["event_type"] for event in events}
 
 
+def test_policy_property_oracle_rejects_missing_cancellation_input() -> None:
+    unsafe, _repeated, corrected = cancellation_fixture_candidates(73129)
+
+    unsafe_result = bounded_candidate_policy_property_document(unsafe, seed=73129)
+    corrected_result = bounded_candidate_policy_property_document(corrected, seed=73129)
+
+    assert unsafe_result["result"] == "fail"
+    assert unsafe_result["counterexample"] == {
+        "assignment": {},
+        "observed_output": None,
+        "violations": ["required boolean cancellation_pending input is absent"],
+    }
+    assert corrected_result["result"] == "pass"
+
+
 def test_minimized_trace_is_one_event_minimal_for_same_contract(tmp_path: Path) -> None:
     result = run_cancellation_cegis(tmp_path, seed=17)
     candidate = cancellation_fixture_candidates(17)[0]
@@ -75,6 +91,39 @@ def test_minimized_trace_is_one_event_minimal_for_same_contract(tmp_path: Path) 
             )
         )
         assert verifier.verify(candidate, witness, seed=3).passed
+
+
+def test_minimization_preserves_the_original_verification_seed() -> None:
+    expected_seed = 101
+    candidate = cancellation_fixture_candidates(17)[0]
+    underlying = CancellationPolicyVerifier()
+
+    class SeedPinnedVerifier:
+        def verify(
+            self,
+            candidate: object,
+            witness: ProtocolWitness | None,
+            *,
+            seed: int,
+        ) -> VerificationOutcome:
+            if seed != expected_seed:
+                return VerificationOutcome(passed=True, evidence_id="wrong-seed")
+            return underlying.verify(candidate, witness, seed=seed)  # type: ignore[arg-type]
+
+    initial = underlying.verify(candidate, None, seed=expected_seed)
+    assert initial.failure is not None
+    minimized = minimize_protocol_failure(
+        candidate,
+        initial.failure,
+        SeedPinnedVerifier(),  # type: ignore[arg-type]
+        seed=expected_seed,
+        maximum_evaluations=64,
+    )
+
+    reproduced = underlying.verify(candidate, minimized.witness, seed=expected_seed)
+    assert not reproduced.passed
+    assert reproduced.failure is not None
+    assert reproduced.failure.violated_contract == initial.failure.violated_contract
 
 
 def test_counterexample_reproduction_command_executes_real_verifier(tmp_path: Path) -> None:

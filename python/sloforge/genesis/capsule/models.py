@@ -434,6 +434,13 @@ class TrustedEvidenceAnchor(CapsuleModel):
         return self
 
 
+class TrustedClaimAnchor(CapsuleModel):
+    """External authority binding for a complete promotion claim and its scope."""
+
+    claim_id: NonEmptyString
+    claim_digest: Digest
+
+
 class ValidationContext(CapsuleModel):
     expected_capsule_digest: Digest
     source_model_hash: Digest
@@ -446,6 +453,7 @@ class ValidationContext(CapsuleModel):
     dependency_lock_hash: Digest
     dependencies: tuple[CurrentDependency, ...]
     trusted_evidence_anchors: tuple[TrustedEvidenceAnchor, ...]
+    trusted_claim_anchors: tuple[TrustedClaimAnchor, ...] = ()
     trusted_artifact_anchors: tuple[TrustedArtifactAnchor, ...] = ()
     trusted_verifier_version: NonEmptyString
     now: AwareDatetime
@@ -456,6 +464,9 @@ class ValidationContext(CapsuleModel):
         evidence_ids = [item.evidence_id for item in self.trusted_evidence_anchors]
         if len(evidence_ids) != len(set(evidence_ids)):
             raise ValueError("trusted evidence anchors must have unique evidence identifiers")
+        claim_ids = [item.claim_id for item in self.trusted_claim_anchors]
+        if len(claim_ids) != len(set(claim_ids)):
+            raise ValueError("trusted claim anchors must have unique claim identifiers")
         artifact_ids = [item.artifact_id for item in self.trusted_artifact_anchors]
         if len(artifact_ids) != len(set(artifact_ids)):
             raise ValueError("trusted artifact anchors must have unique artifact identifiers")

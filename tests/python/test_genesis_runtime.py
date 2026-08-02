@@ -24,6 +24,8 @@ from sloforge.genesis.runtime import (
     RequestLifecycle,
     RuntimeLimits,
     RuntimeRequest,
+    StateAllocatorConfig,
+    StateAllocatorLayout,
     generate_baseline_runtime,
     load_generated_runtime,
 )
@@ -276,6 +278,34 @@ def test_runtime_limits_reject_non_finite_timeouts_and_non_integer_bounds() -> N
         RuntimeLimits(worker_poll_seconds=math.inf)
     with pytest.raises(ValueError, match="integer limits"):
         RuntimeLimits(maximum_queue_depth=1.5)  # type: ignore[arg-type]
+
+
+def test_paged_allocator_rejects_capacity_smaller_than_rounded_reservation() -> None:
+    with pytest.raises(ValueError, match="rounded per-request state reservation"):
+        StateAllocatorConfig(
+            layout=StateAllocatorLayout.PAGED,
+            page_bytes=64,
+            maximum_bytes_per_request=65,
+            maximum_total_bytes=65,
+        )
+    accepted = StateAllocatorConfig(
+        layout=StateAllocatorLayout.PAGED,
+        page_bytes=64,
+        maximum_bytes_per_request=65,
+        maximum_total_bytes=128,
+    )
+    assert accepted.maximum_total_bytes == 128
+
+
+@pytest.mark.parametrize("timeout_seconds", [0.0, math.inf, math.nan])
+def test_runtime_shutdown_rejects_unbounded_or_zero_timeout(timeout_seconds: float) -> None:
+    runtime = BaselineStreamingRuntime(
+        cast(ReferenceRuntimeAdapter, object()),
+        limits=RuntimeLimits(),
+        runtime_seed=1,
+    )
+    with pytest.raises(ValueError, match="shutdown timeout must be finite and positive"):
+        runtime.shutdown(timeout_seconds)
 
 
 class _BlockingAdapter:
