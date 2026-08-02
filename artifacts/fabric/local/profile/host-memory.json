@@ -1,0 +1,141 @@
+{
+  "artifact_hash": "d71620142f0a15be56375a2930b28de27e935c95f1314e01e0189c78462f7781",
+  "case": {
+    "case_id": "host_memcpy-b1048576-r1-c1",
+    "concurrency": 1,
+    "contention_domains": [
+      "host-memory"
+    ],
+    "direction": "forward",
+    "invocation": {
+      "adapter": "numpy-copyto",
+      "adapter_version": "2.3.5",
+      "argv": [
+        "numpy.copyto"
+      ],
+      "environment": [],
+      "timeout_seconds": 20.0,
+      "working_directory": null
+    },
+    "message_bytes": 1048576,
+    "placement": {
+      "cpu_affinity": [],
+      "gpu_ids": [],
+      "hosts": [
+        "MacBook-Pro-5.local"
+      ],
+      "nic_ids": [],
+      "numa_domains": [],
+      "ranks": [
+        0
+      ]
+    },
+    "primitive": "host_memcpy",
+    "rank_count": 1,
+    "sample_count": 9,
+    "topology_path": [],
+    "warmup_count": 3
+  },
+  "environment": [
+    {
+      "name": "platform",
+      "source": "python-platform",
+      "value": "macOS-15.6.1-arm64-i386-64bit"
+    },
+    {
+      "name": "machine",
+      "source": "python-platform",
+      "value": "arm64"
+    },
+    {
+      "name": "python",
+      "source": "python-runtime",
+      "value": "3.12.7"
+    },
+    {
+      "name": "numpy",
+      "source": "python-package",
+      "value": "2.3.5"
+    }
+  ],
+  "failure_reason": null,
+  "mode": "measured",
+  "raw_artifact": null,
+  "raw_samples": [
+    {
+      "duration_microseconds": 13.042,
+      "sample_index": 0,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 80399938659.71477
+    },
+    {
+      "duration_microseconds": 13.583,
+      "sample_index": 1,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 77197673562.54141
+    },
+    {
+      "duration_microseconds": 13.25,
+      "sample_index": 2,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 79137811320.75471
+    },
+    {
+      "duration_microseconds": 12.834,
+      "sample_index": 3,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 81702976468.75487
+    },
+    {
+      "duration_microseconds": 12.75,
+      "sample_index": 4,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 82241254901.96078
+    },
+    {
+      "duration_microseconds": 12.792,
+      "sample_index": 5,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 81971232020.0125
+    },
+    {
+      "duration_microseconds": 12.916,
+      "sample_index": 6,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 81184267575.10065
+    },
+    {
+      "duration_microseconds": 12.792,
+      "sample_index": 7,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 81971232020.0125
+    },
+    {
+      "duration_microseconds": 12.583,
+      "sample_index": 8,
+      "seed": null,
+      "synthetic": false,
+      "throughput_bytes_per_second": 83332750536.43805
+    }
+  ],
+  "schema_version": "sloforge.fabric.benchmark-result/v1",
+  "status": "success",
+  "summary": {
+    "confidence_level": 0.95,
+    "median_absolute_deviation_microseconds": 0.08399999999999963,
+    "median_ci_high_microseconds": 13.042,
+    "median_ci_low_microseconds": 12.76995,
+    "median_microseconds": 12.834,
+    "p95_microseconds": 13.4498,
+    "p99_microseconds": 13.55636,
+    "sample_count": 9
+  }
+}
