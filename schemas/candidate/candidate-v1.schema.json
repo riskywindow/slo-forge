@@ -1,0 +1,374 @@
+{
+  "$defs": {
+    "ArtifactDigest": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ArtifactDigest",
+      "type": "object"
+    },
+    "BudgetUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Benchmark Count",
+          "type": "integer"
+        },
+        "candidate_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Candidate Count",
+          "type": "integer"
+        },
+        "cloud_cost_usd": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Cloud Cost Usd",
+          "type": "number"
+        },
+        "compilation_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Compilation Count",
+          "type": "integer"
+        },
+        "cpu_time_seconds": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Cpu Time Seconds",
+          "type": "number"
+        },
+        "external_synthesis_cost_usd": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "External Synthesis Cost Usd",
+          "type": "number"
+        },
+        "gpu_time_seconds": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Gpu Time Seconds",
+          "type": "number"
+        },
+        "verifier_time_seconds": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Verifier Time Seconds",
+          "type": "number"
+        },
+        "wall_time_seconds": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Wall Time Seconds",
+          "type": "number"
+        }
+      },
+      "title": "BudgetUsage",
+      "type": "object"
+    },
+    "CandidateFailureState": {
+      "enum": [
+        "STATIC_REJECTED",
+        "COMPILE_REJECTED",
+        "SEMANTIC_REJECTED",
+        "QUALITY_REJECTED",
+        "RESOURCE_REJECTED",
+        "MODEL_CHECK_REJECTED",
+        "PERFORMANCE_REJECTED",
+        "SHADOW_REJECTED",
+        "CANARY_REJECTED",
+        "SANDBOX_VIOLATION",
+        "SUPERSEDED"
+      ],
+      "title": "CandidateFailureState",
+      "type": "string"
+    },
+    "CandidateSuccessState": {
+      "enum": [
+        "PROPOSED",
+        "STATICALLY_VALID",
+        "COMPILED",
+        "REFERENCE_TESTED",
+        "PROPERTY_TESTED",
+        "MODEL_CHECKED",
+        "SIMULATED",
+        "HARDWARE_BENCHMARKED",
+        "SHADOW_VALIDATED",
+        "CANARY_VALIDATED",
+        "CAPSULE_ACCEPTED",
+        "PROMOTED"
+      ],
+      "title": "CandidateSuccessState",
+      "type": "string"
+    },
+    "EvidenceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_uri": {
+          "minLength": 1,
+          "title": "Artifact Uri",
+          "type": "string"
+        },
+        "claim_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "digest": {
+          "$ref": "#/$defs/ArtifactDigest"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "artifact_uri",
+        "digest"
+      ],
+      "title": "EvidenceReference",
+      "type": "object"
+    },
+    "Extensions": {
+      "description": "The sole extension namespace; keys identify their owning organization.",
+      "patternProperties": {
+        "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*/[A-Za-z][A-Za-z0-9_.-]*$": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "title": "Extensions",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "LifecycleEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceReference"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "from_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CandidateSuccessState"
+            },
+            {
+              "$ref": "#/$defs/CandidateFailureState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From State"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "to_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CandidateSuccessState"
+            },
+            {
+              "$ref": "#/$defs/CandidateFailureState"
+            }
+          ],
+          "title": "To State"
+        }
+      },
+      "required": [
+        "sequence",
+        "from_state",
+        "to_state",
+        "reason"
+      ],
+      "title": "LifecycleEvent",
+      "type": "object"
+    },
+    "SearchBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_count": {
+          "minimum": 0,
+          "title": "Benchmark Count",
+          "type": "integer"
+        },
+        "candidate_count": {
+          "minimum": 0,
+          "title": "Candidate Count",
+          "type": "integer"
+        },
+        "cloud_cost_usd": {
+          "minimum": 0.0,
+          "title": "Cloud Cost Usd",
+          "type": "number"
+        },
+        "compilation_count": {
+          "minimum": 0,
+          "title": "Compilation Count",
+          "type": "integer"
+        },
+        "cpu_time_seconds": {
+          "minimum": 0.0,
+          "title": "Cpu Time Seconds",
+          "type": "number"
+        },
+        "external_synthesis_cost_usd": {
+          "minimum": 0.0,
+          "title": "External Synthesis Cost Usd",
+          "type": "number"
+        },
+        "gpu_time_seconds": {
+          "minimum": 0.0,
+          "title": "Gpu Time Seconds",
+          "type": "number"
+        },
+        "verifier_time_seconds": {
+          "minimum": 0.0,
+          "title": "Verifier Time Seconds",
+          "type": "number"
+        },
+        "wall_time_seconds": {
+          "minimum": 0.0,
+          "title": "Wall Time Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "wall_time_seconds",
+        "cpu_time_seconds",
+        "gpu_time_seconds",
+        "cloud_cost_usd",
+        "external_synthesis_cost_usd",
+        "candidate_count",
+        "compilation_count",
+        "benchmark_count",
+        "verifier_time_seconds"
+      ],
+      "title": "SearchBudget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "const": "sloforge.io/genesis/v1",
+      "default": "sloforge.io/genesis/v1",
+      "title": "Api Version",
+      "type": "string"
+    },
+    "budget": {
+      "$ref": "#/$defs/SearchBudget"
+    },
+    "candidate_id": {
+      "minLength": 1,
+      "title": "Candidate Id",
+      "type": "string"
+    },
+    "extensions": {
+      "$ref": "#/$defs/Extensions"
+    },
+    "genome_hash": {
+      "$ref": "#/$defs/ArtifactDigest"
+    },
+    "kind": {
+      "const": "Candidate",
+      "default": "Candidate",
+      "title": "Kind",
+      "type": "string"
+    },
+    "lifecycle": {
+      "items": {
+        "$ref": "#/$defs/LifecycleEvent"
+      },
+      "title": "Lifecycle",
+      "type": "array"
+    },
+    "parent_candidate_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Parent Candidate Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CandidateSuccessState"
+        },
+        {
+          "$ref": "#/$defs/CandidateFailureState"
+        }
+      ],
+      "title": "State"
+    },
+    "transformation_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Transformation Ids",
+      "type": "array"
+    },
+    "usage": {
+      "$ref": "#/$defs/BudgetUsage"
+    }
+  },
+  "required": [
+    "candidate_id",
+    "seed",
+    "genome_hash",
+    "parent_candidate_ids",
+    "transformation_ids",
+    "state",
+    "lifecycle",
+    "budget",
+    "usage"
+  ],
+  "title": "Candidate",
+  "type": "object"
+}

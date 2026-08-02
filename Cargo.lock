@@ -1579,6 +1579,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sloforge-genesis-ir"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+ "schemars",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
 name = "sloforge-loadgen"
 version = "0.1.0"
 dependencies = [
