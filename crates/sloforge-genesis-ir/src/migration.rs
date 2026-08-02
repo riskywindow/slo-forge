@@ -32,6 +32,18 @@ pub fn migrate_document(document: &Value) -> Result<Value, ProtocolError> {
         .or_else(|| values.get("version"))
         .and_then(Value::as_str);
     if version == Some(SCHEMA_VERSION) {
+        let kind = values
+            .get("kind")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if !matches!(
+            kind,
+            "InferenceGenome" | "Transformation" | "Candidate" | "Counterexample"
+        ) {
+            return Err(ProtocolError::Migration(format!(
+                "unsupported document kind {kind:?}"
+            )));
+        }
         return Ok(result);
     }
     if !matches!(version, Some("v1alpha1" | "0.1.0")) {

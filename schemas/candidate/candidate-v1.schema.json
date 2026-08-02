@@ -25,12 +25,14 @@
       "properties": {
         "benchmark_count": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Benchmark Count",
           "type": "integer"
         },
         "candidate_count": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Candidate Count",
           "type": "integer"
@@ -43,6 +45,7 @@
         },
         "compilation_count": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Compilation Count",
           "type": "integer"
@@ -192,6 +195,7 @@
           "type": "string"
         },
         "sequence": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Sequence",
           "type": "integer"
@@ -221,11 +225,13 @@
       "additionalProperties": false,
       "properties": {
         "benchmark_count": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Benchmark Count",
           "type": "integer"
         },
         "candidate_count": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Candidate Count",
           "type": "integer"
@@ -236,6 +242,7 @@
           "type": "number"
         },
         "compilation_count": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Compilation Count",
           "type": "integer"
@@ -331,6 +338,7 @@
       "type": "string"
     },
     "seed": {
+      "maximum": 18446744073709551615,
       "minimum": 0,
       "title": "Seed",
       "type": "integer"

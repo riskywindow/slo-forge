@@ -61,6 +61,7 @@
         },
         "chunk_bytes": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Chunk Bytes",
           "type": "integer"
         },
@@ -93,6 +94,7 @@
         },
         "ranks": {
           "items": {
+            "maximum": 18446744073709551615,
             "minimum": 0,
             "type": "integer"
           },
@@ -250,12 +252,14 @@
       "additionalProperties": false,
       "properties": {
         "expert_id": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Expert Id",
           "type": "integer"
         },
         "logical_ranks": {
           "items": {
+            "maximum": 18446744073709551615,
             "minimum": 0,
             "type": "integer"
           },
@@ -426,6 +430,7 @@
         },
         "minimum_device_memory_bytes": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Minimum Device Memory Bytes",
           "type": "integer"
@@ -537,11 +542,13 @@
           "type": "number"
         },
         "register_estimate": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Register Estimate",
           "type": "integer"
         },
         "shared_memory_bytes": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Shared Memory Bytes",
           "type": "integer"
@@ -567,6 +574,7 @@
         "tile_shape": {
           "items": {
             "exclusiveMinimum": 0,
+            "maximum": 18446744073709551615,
             "type": "integer"
           },
           "title": "Tile Shape",
@@ -574,6 +582,7 @@
         },
         "vector_width": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Vector Width",
           "type": "integer"
         },
@@ -611,30 +620,35 @@
       "properties": {
         "block_x": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Block X",
           "type": "integer"
         },
         "block_y": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Block Y",
           "type": "integer"
         },
         "block_z": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Block Z",
           "type": "integer"
         },
         "pipeline_stages": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Pipeline Stages",
           "type": "integer"
         },
         "warps": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Warps",
           "type": "integer"
         }
@@ -678,18 +692,21 @@
         "context": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Context",
           "type": "integer"
         },
         "data": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Data",
           "type": "integer"
         },
         "expert": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Expert",
           "type": "integer"
         },
@@ -699,12 +716,14 @@
         "pipeline": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Pipeline",
           "type": "integer"
         },
         "tensor": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Tensor",
           "type": "integer"
         }
@@ -761,6 +780,7 @@
           "type": "string"
         },
         "logical_rank": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Logical Rank",
           "type": "integer"
@@ -1072,6 +1092,8 @@
           "title": "Default Deadline Ms"
         },
         "default_priority": {
+          "maximum": 9223372036854775807,
+          "minimum": -9223372036854775808,
           "title": "Default Priority",
           "type": "integer"
         },
@@ -1080,10 +1102,12 @@
         },
         "maximum_queue_depth": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Maximum Queue Depth",
           "type": "integer"
         },
         "maximum_retries": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Maximum Retries",
           "type": "integer"
@@ -1151,30 +1175,35 @@
       "properties": {
         "communication_buffer_bytes": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Communication Buffer Bytes",
           "type": "integer"
         },
         "peak_device_bytes": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Peak Device Bytes",
           "type": "integer"
         },
         "peak_host_bytes": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Peak Host Bytes",
           "type": "integer"
         },
         "queue_entries": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Queue Entries",
           "type": "integer"
         },
         "worker_processes": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Worker Processes",
           "type": "integer"
@@ -1304,6 +1333,7 @@
         },
         "decode_chunk_tokens": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Decode Chunk Tokens",
           "type": "integer"
         },
@@ -1328,6 +1358,7 @@
         },
         "maximum_batch_tokens": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Maximum Batch Tokens",
           "type": "integer"
         },
@@ -1344,6 +1375,7 @@
         },
         "prefill_chunk_tokens": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Prefill Chunk Tokens",
           "type": "integer"
         },
@@ -1473,6 +1505,7 @@
         },
         "migration_chunk_bytes": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Migration Chunk Bytes",
           "type": "integer"
         },
@@ -1547,6 +1580,7 @@
           "type": "array"
         },
         "checkpoint_interval_tokens": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Checkpoint Interval Tokens",
           "type": "integer"
@@ -1566,6 +1600,7 @@
           "$ref": "#/$defs/StateLayout"
         },
         "maximum_bytes_per_request": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Maximum Bytes Per Request",
           "type": "integer"
@@ -1604,6 +1639,7 @@
         },
         "replication_factor": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Replication Factor",
           "type": "integer"
         },
@@ -1653,16 +1689,19 @@
         "divisible_by": {
           "default": 1,
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Divisible By",
           "type": "integer"
         },
         "maximum": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Maximum",
           "type": "integer"
         },
         "minimum": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Minimum",
           "type": "integer"
         },
@@ -2080,6 +2119,7 @@
         },
         "maximum_iterations": {
           "default": 0,
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Maximum Iterations",
           "type": "integer"
@@ -2098,6 +2138,8 @@
         },
         "priority": {
           "default": 0,
+          "maximum": 9223372036854775807,
+          "minimum": -9223372036854775808,
           "title": "Priority",
           "type": "integer"
         },
@@ -2183,6 +2225,7 @@
       "type": "string"
     },
     "seed": {
+      "maximum": 18446744073709551615,
       "minimum": 0,
       "title": "Seed",
       "type": "integer"

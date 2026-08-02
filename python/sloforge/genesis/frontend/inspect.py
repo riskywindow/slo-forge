@@ -67,6 +67,7 @@ _SAFE_PYTHON_CALLS = {
     "zip",
 }
 _SAFE_METHODS = {"append", "copy", "extend", "get", "items", "keys", "pop", "values"}
+_SAFE_IMPORTED_MODULES = {"hashlib", "math"}
 
 OperatorCategory: TypeAlias = Literal[
     "tensor", "state", "control", "sampling", "custom", "python", "unknown"
@@ -240,7 +241,7 @@ class _ModuleInspection:
                 custom is not None
                 or symbol in local_symbols
                 or root in local_symbols
-                or root in imported_roots
+                or (root in imported_roots and root in _SAFE_IMPORTED_MODULES)
                 or symbol in _SAFE_PYTHON_CALLS
                 or leaf in _SAFE_METHODS
                 or category != "python"

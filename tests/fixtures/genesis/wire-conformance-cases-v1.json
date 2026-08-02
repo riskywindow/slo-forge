@@ -1,0 +1,40 @@
+[
+  {
+    "accepted": true,
+    "case_id": "u64-maximum-seed",
+    "document": "inference-genome-v1.json",
+    "pointer": "/seed",
+    "replacement": 18446744073709551615
+  },
+  {
+    "accepted": false,
+    "case_id": "u64-overflow-seed",
+    "document": "inference-genome-v1.json",
+    "pointer": "/seed",
+    "replacement": 18446744073709551616
+  },
+  {
+    "accepted": false,
+    "case_id": "unknown-genome-pattern-region",
+    "document": "transformation-v1.json",
+    "pointer": "/source_pattern/region",
+    "replacement": "opaque_region"
+  },
+  {
+    "accepted": false,
+    "case_id": "unknown-request-event-action",
+    "document": "counterexample-v1.json",
+    "pointer": "/payload",
+    "replacement": {
+      "events": [
+        {
+          "action": "execute_arbitrary_code",
+          "at_step": 0,
+          "request_id": "request-1",
+          "worker_id": null
+        }
+      ],
+      "kind": "request_trace"
+    }
+  }
+]

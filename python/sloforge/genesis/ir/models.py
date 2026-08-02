@@ -34,8 +34,12 @@ ExtensionKey = Annotated[str, StringConstraints(pattern=_EXTENSION_KEY_PATTERN)]
 Probability = Annotated[float, Field(ge=0.0, le=1.0)]
 NonNegativeFloat = Annotated[float, Field(ge=0.0)]
 PositiveFloat = Annotated[float, Field(gt=0.0)]
-NonNegativeInt = Annotated[int, Field(ge=0)]
-PositiveInt = Annotated[int, Field(gt=0)]
+U64_MAX: Final = (1 << 64) - 1
+I64_MIN: Final = -(1 << 63)
+I64_MAX: Final = (1 << 63) - 1
+NonNegativeInt = Annotated[int, Field(ge=0, le=U64_MAX)]
+PositiveInt = Annotated[int, Field(gt=0, le=U64_MAX)]
+SignedInt = Annotated[int, Field(ge=I64_MIN, le=I64_MAX)]
 
 
 class GenesisModel(BaseModel):
@@ -258,7 +262,7 @@ class WorkflowStep(GenesisModel):
     branch_probability: Probability
     expected_latency_ms: NonNegativeFloat
     deadline_ms: PositiveFloat | None = None
-    priority: int = 0
+    priority: SignedInt = 0
     maximum_iterations: NonNegativeInt = 0
     model_cascade_targets: tuple[NonEmptyString, ...] = ()
     expected_future_requests: NonNegativeFloat = 0.0
@@ -320,7 +324,7 @@ class RequestGenome(GenesisModel):
     node: GenomeNodeMetadata
     admission_control: AdmissionControl
     maximum_queue_depth: PositiveInt
-    default_priority: int
+    default_priority: SignedInt
     default_deadline_ms: PositiveFloat | None
     batching_eligible: bool
     routing: RoutingPolicy
@@ -662,6 +666,28 @@ class InferenceGenome(GenesisModel):
 
     @model_validator(mode="after")
     def graph_references_are_closed(self) -> Self:
+        def require_dag(
+            identifiers: set[str], dependencies: dict[str, tuple[str, ...]], label: str
+        ) -> None:
+            visiting: set[str] = set()
+            visited: set[str] = set()
+
+            def visit(identifier: str) -> None:
+                if identifier in visiting:
+                    raise ValueError(f"{label} must be acyclic")
+                if identifier in visited:
+                    return
+                visiting.add(identifier)
+                for dependency in dependencies.get(identifier, ()):
+                    if dependency not in identifiers:
+                        raise ValueError(f"{label} dependency must reference a declared node")
+                    visit(dependency)
+                visiting.remove(identifier)
+                visited.add(identifier)
+
+            for identifier in identifiers:
+                visit(identifier)
+
         step_ids = [step.node.stable_id for step in self.workflow.steps]
         if len(step_ids) != len(set(step_ids)):
             raise ValueError("workflow step stable identifiers must be unique")
@@ -670,9 +696,49 @@ class InferenceGenome(GenesisModel):
         for edge in self.workflow.edges:
             if edge.source_id not in step_ids or edge.target_id not in step_ids:
                 raise ValueError("workflow edge must reference declared steps")
+        workflow_dependencies: dict[str, list[str]] = {step_id: [] for step_id in step_ids}
+        edge_keys: set[tuple[str, str, str]] = set()
+        for edge in self.workflow.edges:
+            key = (edge.source_id, edge.target_id, edge.condition)
+            if key in edge_keys:
+                raise ValueError("workflow edges must be unique")
+            edge_keys.add(key)
+            workflow_dependencies[edge.target_id].append(edge.source_id)
+        require_dag(
+            set(step_ids),
+            {key: tuple(value) for key, value in workflow_dependencies.items()},
+            "workflow DAG",
+        )
         state_ids = [state.state_id for state in self.state.states]
         if len(state_ids) != len(set(state_ids)):
             raise ValueError("state identifiers must be unique")
+        rank_ids = [placement.logical_rank for placement in self.distributed.rank_placement]
+        if len(rank_ids) != len(set(rank_ids)):
+            raise ValueError("rank placements must have unique logical ranks")
+        declared_ranks = set(rank_ids)
+        expert_ids = [placement.expert_id for placement in self.distributed.expert_placement]
+        if len(expert_ids) != len(set(expert_ids)):
+            raise ValueError("expert placements must have unique expert identifiers")
+        for placement in self.distributed.expert_placement:
+            if len(placement.logical_ranks) != len(set(placement.logical_ranks)):
+                raise ValueError("expert placement logical ranks must be unique")
+            if any(rank not in declared_ranks for rank in placement.logical_ranks):
+                raise ValueError("expert placement must reference a declared logical rank")
+        collective_ids = [step.step_id for step in self.distributed.collective_dag]
+        if len(collective_ids) != len(set(collective_ids)):
+            raise ValueError("collective step identifiers must be unique")
+        for step in self.distributed.collective_dag:
+            if len(step.dependencies) != len(set(step.dependencies)):
+                raise ValueError("collective dependencies must be unique")
+            if len(step.ranks) != len(set(step.ranks)):
+                raise ValueError("collective ranks must be unique")
+            if any(rank not in declared_ranks for rank in step.ranks):
+                raise ValueError("collective must reference declared logical ranks")
+        require_dag(
+            set(collective_ids),
+            {step.step_id: step.dependencies for step in self.distributed.collective_dag},
+            "collective DAG",
+        )
         value_ids = [value.value_id for value in self.tensor.values]
         if len(value_ids) != len(set(value_ids)):
             raise ValueError("tensor value identifiers must be unique")
@@ -683,6 +749,47 @@ class InferenceGenome(GenesisModel):
         for operator in self.tensor.operators:
             if any(value_id not in value_ids for value_id in (*operator.inputs, *operator.outputs)):
                 raise ValueError("tensor operator must reference declared values")
+        operator_ids = [operator.operator_id for operator in self.tensor.operators]
+        if len(operator_ids) != len(set(operator_ids)):
+            raise ValueError("tensor operator identifiers must be unique")
+        producers: dict[str, str] = {}
+        for operator in self.tensor.operators:
+            if len(operator.outputs) != len(set(operator.outputs)):
+                raise ValueError("tensor operator outputs must be unique")
+            for output in operator.outputs:
+                if output in producers:
+                    raise ValueError("tensor values must have a single producer")
+                producers[output] = operator.operator_id
+        if any(
+            value.state_dependency not in set(state_ids)
+            for value in self.tensor.values
+            if value.state_dependency is not None
+        ):
+            raise ValueError("tensor state_dependency must reference declared state")
+        if any(
+            output not in producers and output not in self.tensor.graph_inputs
+            for output in self.tensor.graph_outputs
+        ):
+            raise ValueError("tensor graph output must be produced or passed through")
+        kernel_ids = [kernel.kernel_id for kernel in self.kernel.kernels]
+        if len(kernel_ids) != len(set(kernel_ids)):
+            raise ValueError("kernel identifiers must be unique")
+        if any(kernel.fallback_kernel_id not in set(kernel_ids) for kernel in self.kernel.kernels):
+            raise ValueError("kernel fallback must reference a declared kernel")
+        transition_ids = [transition.transition_id for transition in self.recovery.transitions]
+        if len(transition_ids) != len(set(transition_ids)):
+            raise ValueError("recovery transition identifiers must be unique")
+        declared_transitions = set(transition_ids)
+        if any(
+            transition.rollback_transition_id not in declared_transitions
+            for transition in self.recovery.transitions
+        ):
+            raise ValueError("rollback transition must reference a declared transition")
+        if any(
+            identifier not in declared_transitions
+            for identifier in self.distributed.recovery_variant_ids
+        ):
+            raise ValueError("distributed recovery variant must reference a declared transition")
         return self
 
 
@@ -910,7 +1017,7 @@ class Candidate(GenesisModel):
 
 class TensorInputCase(GenesisModel):
     shape: tuple[PositiveInt, ...]
-    strides: tuple[int, ...]
+    strides: tuple[SignedInt, ...]
     dtype: Precision
     values_hex: NonEmptyString
     non_contiguous: bool

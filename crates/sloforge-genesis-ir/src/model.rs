@@ -250,6 +250,27 @@ string_enum!(CounterexampleScope {
     DependencyVersion,
     UniversalPreconditionViolation,
 });
+string_enum!(GenomeRegion {
+    Workflow,
+    Request,
+    Serving,
+    State,
+    Distributed,
+    Tensor,
+    Kernel,
+    Recovery
+});
+string_enum!(RequestEventAction {
+    Admit,
+    Schedule,
+    Prefill,
+    Decode,
+    Emit,
+    Cancel,
+    Disconnect,
+    Fail,
+    Retry
+});
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, JsonSchema, PartialEq, Serialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -838,6 +859,46 @@ fn validate_document_header(
     Ok(())
 }
 
+fn validate_acyclic(
+    path: &str,
+    dependencies: &BTreeMap<String, Vec<String>>,
+) -> Result<(), ValidationError> {
+    fn visit(
+        node: &str,
+        path: &str,
+        dependencies: &BTreeMap<String, Vec<String>>,
+        visiting: &mut BTreeSet<String>,
+        visited: &mut BTreeSet<String>,
+    ) -> Result<(), ValidationError> {
+        if visiting.contains(node) {
+            return Err(ValidationError::new(path, "must be acyclic"));
+        }
+        if visited.contains(node) {
+            return Ok(());
+        }
+        visiting.insert(node.to_owned());
+        for dependency in dependencies.get(node).into_iter().flatten() {
+            if !dependencies.contains_key(dependency) {
+                return Err(ValidationError::new(
+                    path,
+                    "dependency must reference a declared node",
+                ));
+            }
+            visit(dependency, path, dependencies, visiting, visited)?;
+        }
+        visiting.remove(node);
+        visited.insert(node.to_owned());
+        Ok(())
+    }
+
+    let mut visiting = BTreeSet::new();
+    let mut visited = BTreeSet::new();
+    for node in dependencies.keys() {
+        visit(node, path, dependencies, &mut visiting, &mut visited)?;
+    }
+    Ok(())
+}
+
 impl Validate for InferenceGenome {
     // Keeping the complete document validation in one auditable admission gate
     // makes it harder for a newly added genome region to bypass validation.
@@ -905,6 +966,30 @@ impl Validate for InferenceGenome {
                 ));
             }
         }
+        let mut workflow_dependencies: BTreeMap<String, Vec<String>> = self
+            .workflow
+            .steps
+            .iter()
+            .map(|step| (step.node.stable_id.clone(), Vec::new()))
+            .collect();
+        let mut workflow_edges = BTreeSet::new();
+        for edge in &self.workflow.edges {
+            if !workflow_edges.insert((
+                edge.source_id.as_str(),
+                edge.target_id.as_str(),
+                edge.condition.as_str(),
+            )) {
+                return Err(ValidationError::new(
+                    "workflow.edges",
+                    "edges must be unique",
+                ));
+            }
+            workflow_dependencies
+                .get_mut(&edge.target_id)
+                .ok_or_else(|| ValidationError::new("workflow.edges", "target must be declared"))?
+                .push(edge.source_id.clone());
+        }
+        validate_acyclic("workflow.edges", &workflow_dependencies)?;
         for (index, step) in self.workflow.steps.iter().enumerate() {
             step.node
                 .validate_at(&format!("workflow.steps[{index}].node"))?;
@@ -934,11 +1019,6 @@ impl Validate for InferenceGenome {
                 "state identifiers must be unique",
             ));
         }
-        for (index, collective) in self.distributed.collective_dag.iter().enumerate() {
-            collective
-                .node
-                .validate_at(&format!("distributed.collective_dag[{index}].node"))?;
-        }
         self.distributed
             .parallelism
             .node
@@ -962,16 +1042,69 @@ impl Validate for InferenceGenome {
                 .node
                 .validate_at(&format!("distributed.rank_placement[{index}].node"))?;
         }
+        let rank_ids: BTreeSet<_> = self
+            .distributed
+            .rank_placement
+            .iter()
+            .map(|placement| placement.logical_rank)
+            .collect();
+        if rank_ids.len() != self.distributed.rank_placement.len() {
+            return Err(ValidationError::new(
+                "distributed.rank_placement",
+                "logical ranks must be unique",
+            ));
+        }
+        let mut expert_ids = BTreeSet::new();
         for (index, placement) in self.distributed.expert_placement.iter().enumerate() {
             placement
                 .node
                 .validate_at(&format!("distributed.expert_placement[{index}].node"))?;
+            if !expert_ids.insert(placement.expert_id) {
+                return Err(ValidationError::new(
+                    "distributed.expert_placement",
+                    "expert identifiers must be unique",
+                ));
+            }
+            let placement_ranks: BTreeSet<_> = placement.logical_ranks.iter().copied().collect();
+            if placement_ranks.len() != placement.logical_ranks.len()
+                || !placement_ranks.is_subset(&rank_ids)
+            {
+                return Err(ValidationError::new(
+                    format!("distributed.expert_placement[{index}].logical_ranks"),
+                    "must uniquely reference declared logical ranks",
+                ));
+            }
         }
-        for (index, operator) in self.tensor.operators.iter().enumerate() {
-            operator
+        let mut collective_dependencies = BTreeMap::new();
+        for (index, collective) in self.distributed.collective_dag.iter().enumerate() {
+            collective
                 .node
-                .validate_at(&format!("tensor.operators[{index}].node"))?;
+                .validate_at(&format!("distributed.collective_dag[{index}].node"))?;
+            if collective_dependencies
+                .insert(collective.step_id.clone(), collective.dependencies.clone())
+                .is_some()
+            {
+                return Err(ValidationError::new(
+                    "distributed.collective_dag",
+                    "step identifiers must be unique",
+                ));
+            }
+            let dependencies: BTreeSet<_> = collective.dependencies.iter().collect();
+            let ranks: BTreeSet<_> = collective.ranks.iter().copied().collect();
+            if dependencies.len() != collective.dependencies.len() {
+                return Err(ValidationError::new(
+                    format!("distributed.collective_dag[{index}].dependencies"),
+                    "dependencies must be unique",
+                ));
+            }
+            if ranks.len() != collective.ranks.len() || !ranks.is_subset(&rank_ids) {
+                return Err(ValidationError::new(
+                    format!("distributed.collective_dag[{index}].ranks"),
+                    "must uniquely reference declared logical ranks",
+                ));
+            }
         }
+        validate_acyclic("distributed.collective_dag", &collective_dependencies)?;
         let value_ids: BTreeSet<_> = self
             .tensor
             .values
@@ -1016,6 +1149,9 @@ impl Validate for InferenceGenome {
             ));
         }
         for (index, operator) in self.tensor.operators.iter().enumerate() {
+            operator
+                .node
+                .validate_at(&format!("tensor.operators[{index}].node"))?;
             if operator
                 .inputs
                 .iter()
@@ -1028,6 +1164,71 @@ impl Validate for InferenceGenome {
                 ));
             }
         }
+        let operator_ids: BTreeSet<_> = self
+            .tensor
+            .operators
+            .iter()
+            .map(|operator| operator.operator_id.as_str())
+            .collect();
+        if operator_ids.len() != self.tensor.operators.len() {
+            return Err(ValidationError::new(
+                "tensor.operators",
+                "operator identifiers must be unique",
+            ));
+        }
+        let mut producers = BTreeMap::new();
+        for (index, operator) in self.tensor.operators.iter().enumerate() {
+            let outputs: BTreeSet<_> = operator.outputs.iter().collect();
+            if outputs.len() != operator.outputs.len() {
+                return Err(ValidationError::new(
+                    format!("tensor.operators[{index}].outputs"),
+                    "outputs must be unique",
+                ));
+            }
+            for output in &operator.outputs {
+                if producers
+                    .insert(output.as_str(), operator.operator_id.as_str())
+                    .is_some()
+                {
+                    return Err(ValidationError::new(
+                        "tensor.operators",
+                        "tensor values must have a single producer",
+                    ));
+                }
+            }
+        }
+        for (index, value) in self.tensor.values.iter().enumerate() {
+            if value
+                .state_dependency
+                .as_ref()
+                .is_some_and(|dependency| !state_ids.contains(dependency.as_str()))
+            {
+                return Err(ValidationError::new(
+                    format!("tensor.values[{index}].state_dependency"),
+                    "must reference declared state",
+                ));
+            }
+        }
+        if self.tensor.graph_outputs.iter().any(|output| {
+            !producers.contains_key(output.as_str()) && !self.tensor.graph_inputs.contains(output)
+        }) {
+            return Err(ValidationError::new(
+                "tensor.graph_outputs",
+                "must be produced or passed through",
+            ));
+        }
+        let kernel_ids: BTreeSet<_> = self
+            .kernel
+            .kernels
+            .iter()
+            .map(|kernel| kernel.kernel_id.as_str())
+            .collect();
+        if kernel_ids.len() != self.kernel.kernels.len() {
+            return Err(ValidationError::new(
+                "kernel.kernels",
+                "kernel identifiers must be unique",
+            ));
+        }
         for (index, kernel) in self.kernel.kernels.iter().enumerate() {
             kernel
                 .node
@@ -1036,11 +1237,46 @@ impl Validate for InferenceGenome {
                 .source_artifact
                 .digest
                 .validate_at(&format!("kernel.kernels[{index}].source_artifact.digest"))?;
+            if !kernel_ids.contains(kernel.fallback_kernel_id.as_str()) {
+                return Err(ValidationError::new(
+                    format!("kernel.kernels[{index}].fallback_kernel_id"),
+                    "must reference a declared kernel",
+                ));
+            }
+        }
+        let transition_ids: BTreeSet<_> = self
+            .recovery
+            .transitions
+            .iter()
+            .map(|transition| transition.transition_id.as_str())
+            .collect();
+        if transition_ids.len() != self.recovery.transitions.len() {
+            return Err(ValidationError::new(
+                "recovery.transitions",
+                "transition identifiers must be unique",
+            ));
         }
         for (index, transition) in self.recovery.transitions.iter().enumerate() {
             transition
                 .node
                 .validate_at(&format!("recovery.transitions[{index}].node"))?;
+            if !transition_ids.contains(transition.rollback_transition_id.as_str()) {
+                return Err(ValidationError::new(
+                    format!("recovery.transitions[{index}].rollback_transition_id"),
+                    "must reference a declared transition",
+                ));
+            }
+        }
+        if self
+            .distributed
+            .recovery_variant_ids
+            .iter()
+            .any(|identifier| !transition_ids.contains(identifier.as_str()))
+        {
+            return Err(ValidationError::new(
+                "distributed.recovery_variant_ids",
+                "must reference declared recovery transitions",
+            ));
         }
         Ok(())
     }
@@ -1049,7 +1285,7 @@ impl Validate for InferenceGenome {
 #[derive(Clone, Debug, Deserialize, Eq, JsonSchema, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct GenomePattern {
-    pub region: String,
+    pub region: GenomeRegion,
     pub node_ids: Vec<String>,
     pub structural_constraints: Vec<String>,
 }
@@ -1302,7 +1538,7 @@ pub struct TensorInputCase {
 pub struct RequestEventCase {
     pub at_step: u64,
     pub request_id: String,
-    pub action: String,
+    pub action: RequestEventAction,
     pub worker_id: Option<String>,
 }
 

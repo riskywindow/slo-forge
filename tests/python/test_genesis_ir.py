@@ -589,6 +589,86 @@ def test_counterexample_payload_is_discriminated_and_typed() -> None:
         Counterexample.model_validate_json(json.dumps(source))
 
 
+def test_python_integer_domain_matches_rust_wire_widths() -> None:
+    source = genome_dict(seed=(1 << 64) - 1)
+    assert InferenceGenome.model_validate_json(json.dumps(source)).seed == (1 << 64) - 1
+    source["seed"] = 1 << 64
+    with pytest.raises(ValidationError):
+        InferenceGenome.model_validate_json(json.dumps(source))
+    source = genome_dict()
+    source["request"]["default_priority"] = 1 << 63
+    with pytest.raises(ValidationError):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+
+def test_genome_structural_closure_rejects_dangling_and_cyclic_references() -> None:
+    source = genome_dict()
+    source["workflow"]["edges"] = [
+        {
+            "node": _node("workflow.edge.self"),
+            "source_id": "workflow.step.decode",
+            "target_id": "workflow.step.decode",
+            "condition": "always",
+            "probability": 1.0,
+        }
+    ]
+    with pytest.raises(ValidationError, match="workflow DAG"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+    source = genome_dict()
+    source["distributed"]["collective_dag"][0]["dependencies"] = ["local"]
+    with pytest.raises(ValidationError, match="collective DAG"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    source["distributed"]["collective_dag"][0]["ranks"] = [7]
+    with pytest.raises(ValidationError, match="declared logical ranks"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    source["tensor"]["values"][1]["state_dependency"] = "missing-state"
+    with pytest.raises(ValidationError, match="state_dependency"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    duplicate = copy.deepcopy(source["tensor"]["operators"][0])
+    duplicate["operator_id"] = "second-producer"
+    source["tensor"]["operators"].append(duplicate)
+    with pytest.raises(ValidationError, match="single producer"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    source["kernel"]["kernels"][0]["fallback_kernel_id"] = "missing-kernel"
+    with pytest.raises(ValidationError, match="kernel fallback"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    source["recovery"]["transitions"][0]["rollback_transition_id"] = "missing-transition"
+    with pytest.raises(ValidationError, match="rollback transition"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+
+def test_shared_python_rust_wire_accept_reject_corpus() -> None:
+    cases = json.loads((FIXTURES / "wire-conformance-cases-v1.json").read_text(encoding="utf-8"))
+    loaders = {
+        "inference-genome-v1.json": load_inference_genome,
+        "transformation-v1.json": load_transformation,
+        "candidate-v1.json": load_candidate,
+        "counterexample-v1.json": load_counterexample,
+    }
+    for case in cases:
+        document = json.loads((FIXTURES / case["document"]).read_text(encoding="utf-8"))
+        target = document
+        parts = case["pointer"].lstrip("/").split("/")
+        for part in parts[:-1]:
+            target = target[part]
+        target[parts[-1]] = case["replacement"]
+        if case["accepted"]:
+            loaders[case["document"]](document)
+        else:
+            with pytest.raises(ValueError, match="invalid"):
+                loaders[case["document"]](document)
+
+
 def test_alpha_migration_is_lossless_and_does_not_mutate_input() -> None:
     source = genome_dict()
     source["schema_version"] = "0.1.0"

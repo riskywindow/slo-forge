@@ -237,12 +237,14 @@
           "type": "string"
         },
         "seed": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Seed",
           "type": "integer"
         },
         "timeout_seconds": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Timeout Seconds",
           "type": "integer"
         }
@@ -275,6 +277,7 @@
           "type": "string"
         },
         "at_step": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "At Step",
           "type": "integer"
@@ -333,21 +336,25 @@
       "additionalProperties": false,
       "properties": {
         "device_bytes": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Device Bytes",
           "type": "integer"
         },
         "host_bytes": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Host Bytes",
           "type": "integer"
         },
         "process_count": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Process Count",
           "type": "integer"
         },
         "queue_depth": {
+          "maximum": 18446744073709551615,
           "minimum": 0,
           "title": "Queue Depth",
           "type": "integer"
@@ -413,6 +420,7 @@
         "shape": {
           "items": {
             "exclusiveMinimum": 0,
+            "maximum": 18446744073709551615,
             "type": "integer"
           },
           "title": "Shape",
@@ -420,6 +428,8 @@
         },
         "strides": {
           "items": {
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
             "type": "integer"
           },
           "title": "Strides",
@@ -454,6 +464,7 @@
         },
         "devices_per_host": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Devices Per Host",
           "type": "integer"
         },
@@ -467,6 +478,7 @@
         },
         "hosts": {
           "exclusiveMinimum": 0,
+          "maximum": 18446744073709551615,
           "title": "Hosts",
           "type": "integer"
         }
