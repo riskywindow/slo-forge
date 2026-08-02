@@ -6,7 +6,13 @@ command: >-
 seeds: [13, 29, 47]
 topologies:
   - two_node_infiniband
+  - two_node_asymmetric_nvlink
+  - two_node_oversubscribed
   - two_node_degraded_network
+workload_regimes:
+  - mixed_bursty
+  - long_context
+  - expert_skewed
 methods:
   - random_placement
   - sequential_placement
@@ -19,8 +25,8 @@ parallelism_control:
   data_parallel_degree: 2
   expert_parallel_degree: 4
 hypotheses:
-  H1: topology-aware physical placement
-  H2: calibrated digital-twin ranking
+  H1: topology-aware physical placement across favorable, asymmetric, oversubscribed, and degraded topologies and mixed, long-context, and expert-skewed workloads
+  H2: calibrated digital-twin ranking with error grouped by topology, workload, message size, and contention plus Pareto-selection regret
   H3: causal diagnosis of network degradation and rank skew
   H4: diagnosis-driven recovery against generic baselines
 statistics:

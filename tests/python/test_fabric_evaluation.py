@@ -8,8 +8,10 @@ from pydantic import ValidationError
 from sloforge.fabric.evaluation import (
     EvaluationConfig,
     EvaluationMethod,
+    WorkloadRegime,
     _bootstrap_median,
     _spearman,
+    _workload,
     run_fabric_evaluation,
     validate_evaluation_artifacts,
 )
@@ -34,6 +36,24 @@ def test_evaluation_dimensions_are_unique() -> None:
         EvaluationConfig(seeds=(3, 3))
 
 
+def test_expert_skew_evaluation_workload_sets_typed_factor() -> None:
+    balanced = _workload(7, 2, WorkloadRegime.MIXED_BURSTY)
+    skewed = _workload(7, 2, WorkloadRegime.EXPERT_SKEWED)
+    assert all(request.expert_skew_factor == 1.0 for request in balanced.requests)
+    assert all(request.expert_skew_factor == 4.0 for request in skewed.requests)
+
+
+def test_checked_in_evaluation_reports_match_raw_artifacts() -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    result = validate_evaluation_artifacts(
+        artifact_root=repository_root / "artifacts" / "fabric" / "evaluation",
+        report_dir=repository_root / "reports",
+    )
+    assert result.validation_mode == "synthetic_cpu"
+    assert len(result.plan_trials) == 180
+    assert result.diagnosis_summary.top_three_accuracy >= result.diagnosis_summary.top_one_accuracy
+
+
 @pytest.mark.expensive
 def test_artifact_derived_evaluation_round_trip(tmp_path: Path) -> None:
     repository_root = Path(__file__).resolve().parents[2]
@@ -46,6 +66,7 @@ def test_artifact_derived_evaluation_round_trip(tmp_path: Path) -> None:
         config=EvaluationConfig(
             seeds=(7,),
             topology_fixtures=("two_node_infiniband",),
+            workload_regimes=(WorkloadRegime.MIXED_BURSTY,),
             methods=(EvaluationMethod.RANDOM, EvaluationMethod.HIERARCHICAL),
             request_count=2,
             bootstrap_repetitions=100,
