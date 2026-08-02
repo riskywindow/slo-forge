@@ -20,6 +20,7 @@ from sloforge.genesis.ir import (
     write_canonical,
 )
 from sloforge.genesis.policy_dsl import execute_bytecode
+from sloforge.genesis.runtime import load_generated_runtime
 from sloforge.genesis.synthesis import (
     cancellation_fixture_candidates,
     compiled_candidate_policy,
@@ -88,6 +89,28 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
         "maximum_bytes_per_request": 73,
         "maximum_total_bytes": 4096,
     }
+    runtime = load_generated_runtime(
+        accepted_directory / "generated_runtime/runtime_config.json",
+        seed=73129,
+        allow_untrusted_in_process=True,
+    )
+    runtime.start()
+    try:
+        events = list(
+            runtime.submit_text(
+                request_id="paged-state-proof",
+                text="hybrid",
+                maximum_new_tokens=2,
+                seed=17,
+                timeout_seconds=3.0,
+            ).events(3.0)
+        )
+        assert events[-1].kind.value == "completed"
+    finally:
+        runtime.shutdown()
+    assert runtime.health()["state_allocator_layout"] == "paged"
+    assert runtime.metrics()["state_pages_peak"] == 2
+    assert runtime.metrics()["state_reserved_bytes_peak"] == 128
     runtime_evidence = json.loads(
         (accepted_directory / "evidence/runtime-differential-result.json").read_text(
             encoding="utf-8"
