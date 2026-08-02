@@ -71,9 +71,11 @@ calibrated confidence or general multi-fault accuracy.
 
 The broader artifact-derived matrix is deliberately less flattering. Across 180
 synthetic plan trials, the already topology-aligned sequential fixture was
-fastest at 616.434 ms median p95 TTFT; the hierarchical compiler was 1.57%
-slower at 626.120 ms. Twin ranking correlation was 0.881, but 28.35% median
-relative error and 0% interval coverage expose a calibration failure. Autopsy
+fastest at 616.428 ms median p95 TTFT; the hierarchical compiler was 1.56%
+slower at 626.068 ms. The internally calibrated twin reached 0.993 rank
+correlation, 0.0284% median relative error, and 73.33% interval coverage, but
+coverage fell to 20% for expert-skewed traffic and the predictions share
+synthetic calibration inputs with the twin. Autopsy
 was top-1/top-3 correct on 24 cases from two fault families, while threshold
 recovery matched diagnosis-driven restoration with a shorter declared action
 time. Those results support the evidence workflow, not claims of optimizer or

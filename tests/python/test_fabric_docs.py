@@ -102,3 +102,37 @@ def test_autopsy_architecture_matches_current_flagship_evidence() -> None:
     assert f"{len(degraded['events']):,} canonical events" in content
     assert f"{manifest['diagnosis_confidence']:.3f}" in content
     assert f"`{manifest['diagnosis']}` first" in content
+
+
+def test_public_evaluation_claims_match_current_result() -> None:
+    result = json.loads(
+        (ROOT / "artifacts/fabric/evaluation/result.json").read_text(encoding="utf-8")
+    )
+    methods = {item["method"]: item for item in result["method_summaries"]}
+    twin = result["twin_summary"]
+    expert = next(
+        item
+        for item in result["twin_group_summaries"]
+        if item["dimension"] == "workload" and item["value"] == "expert_skewed"
+    )
+    common_values = (
+        f"{methods['hierarchical_compiler']['p95_ttft_ms']['median']:.3f}",
+        f"{twin['rank_correlation']:.3f}",
+        f"{100.0 * twin['interval_coverage']:.2f}%",
+        f"{100.0 * expert['interval_coverage']:.0f}%",
+    )
+    current_documents = (
+        ROOT / "README.md",
+        ROOT / "docs/FABRIC_INTERVIEW_DEEP_DIVE.md",
+        ROOT / "docs/FABRIC_RESUME_BULLETS.md",
+        ROOT / "docs/FABRIC_LIMITATIONS.md",
+        ROOT / "paper/fabric_extension/SLOFORGE_FABRIC.md",
+        ROOT / "FABRIC_FINAL_ADVERSARIAL_REVIEW.md",
+    )
+    for path in current_documents:
+        content = path.read_text(encoding="utf-8")
+        assert all(value in content for value in common_values), path
+    relative_error = f"{100.0 * twin['median_relative_error']:.4f}%"
+    for path in current_documents:
+        if path.name != "FABRIC_RESUME_BULLETS.md":
+            assert relative_error in path.read_text(encoding="utf-8"), path
