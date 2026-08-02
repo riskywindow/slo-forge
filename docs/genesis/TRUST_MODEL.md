@@ -41,34 +41,42 @@ The Python trust lane consists of:
 - `genesis/capsule/io.py`: bounded parsing and publish-once digest-named manifests;
 - `genesis/capsule/validator.py`: independent integrity, provenance, compatibility, freshness, and
   promotion checks;
+- `genesis/capsule/builder.py`: local evidence issuance, reference-package recomputation, bounded
+  proof recomputation, and fresh final-corpus sandbox replay before sealing;
 - `genesis/artifacts/store.py`: atomic immutable SHA-256 object publication;
 - `genesis/sandbox/models.py` and `genesis/sandbox/executor.py`: policy construction, sanitized
   process setup, resource limits, bounded output, timeout, and process-group cleanup;
+- the bounded synthesis checkers, evolution evidence/controller, SynthBench runner/integrity
+  validator, and kernel correctness/benchmark acceptance modules named by the command below;
 - `schemas/genesis_capsule/genesis-capsule-v1.schema.json`: the public wire schema.
 
-On 2026-08-02 the narrow Python TCB listed above measured 2,016 physical lines. The conservative
-package envelope, which also includes the untrusted capsule builder and package exports, measured
-2,839 lines. Reproduce both measurements from the repository root with:
+On 2026-08-02 the narrow capsule/artifact/sandbox subset measured 3,741 physical lines. The
+conservative local evidence and promotion envelope measured 8,552 lines. Reproduce the conservative
+count from the repository root with:
 
 ```bash
 wc -l \
-  python/sloforge/genesis/capsule/{models,canonical,io,validator}.py \
+  python/sloforge/genesis/capsule/{models,canonical,io,validator,builder}.py \
   python/sloforge/genesis/artifacts/store.py \
-  python/sloforge/genesis/sandbox/{models,executor}.py
-wc -l python/sloforge/genesis/{capsule,artifacts,sandbox}/*.py
+  python/sloforge/genesis/sandbox/{models,executor}.py \
+  python/sloforge/genesis/synthesis/{local,fixture}.py \
+  python/sloforge/genesis/evolution/{evidence,controller}.py \
+  python/sloforge/synthbench/{runner,runtime_runner,integrity}.py \
+  python/sloforge/genesis/kernel_lab/{executor,benchmark}.py
 rg '^import |^from ' python/sloforge/genesis/{capsule,artifacts,sandbox} -g '*.py' \
   | sed -E 's/^.*:(from|import) ([A-Za-z0-9_.]+).*$/\2/' \
   | cut -d. -f1 | sort -u
 ```
 
-The narrow source count excludes the JSON Schema, Python interpreter, operating-system kernel,
+The source count excludes the JSON Schema, Python interpreter, operating-system kernel,
 `sandbox-exec`/bubblewrap implementation, and transitive dependencies. The only direct
 non-standard import in the narrow Python TCB is Pydantic; internal `sloforge` imports and Python
 standard-library modules appear in the dependency command. The sandbox additionally depends on
 the OS process/resource APIs and either macOS `sandbox-exec` or Linux `bubblewrap`. Hashing uses
-the standard-library SHA-256 implementation. The capsule builder is intentionally outside the TCB:
-its output must pass the independent validator. Synthesis, search, generated runtimes, PyTorch,
-Triton, external coding agents, and their reasoning are also outside this TCB.
+the standard-library SHA-256 implementation. The local capsule builder is inside this conservative
+envelope because it issues trusted evidence anchors; its output must also pass the separately
+structured capsule validator. Candidate proposal, search scoring, generated runtimes, PyTorch,
+Triton, external coding agents, and their reasoning remain outside this TCB.
 
 TCB size is reported as an approximate auditable surface, not as a proof of absence of bugs.
 Generated line counts, vendored dependency lines, the OS kernel, Python interpreter, and crypto
