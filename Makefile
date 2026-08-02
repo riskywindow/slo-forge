@@ -90,7 +90,7 @@ synthbench-evaluation:
 	uv run --locked python -m sloforge.synthbench.demo --output artifacts/synthbench/evaluation --seed 73129 --count 10 --reset
 
 genesis-evaluation:
-	uv run --locked python -m sloforge.genesis.evaluation --output artifacts/genesis/evaluation --seed 73129 --count 3 --reset
+	uv run --locked python -m sloforge.genesis.evaluation_suite run --output artifacts/genesis/evaluation --seed 73129 --core-runs 3 --campaign-seeds 5 --h1-tasks 5 --reset
 
 clean-room-test:
 	./tools/clean-room-fabric.sh

@@ -248,6 +248,20 @@ def _write_once(path: Path, value: BaseModel | dict[str, object]) -> None:
         handle.write(canonical_json(value) + b"\n")
 
 
+def _safe_reset(path: Path, repository: Path) -> None:
+    if not path.exists() and not path.is_symlink():
+        return
+    if path.is_symlink():
+        raise ValueError(f"refusing to reset symlinked evaluation-suite path: {path}")
+    resolved = path.resolve()
+    if (
+        resolved in {Path("/").resolve(), Path.home().resolve(), repository.resolve()}
+        or len(resolved.parts) < 4
+    ):
+        raise ValueError(f"refusing to reset unsafe evaluation-suite path: {resolved}")
+    shutil.rmtree(resolved)
+
+
 def _reference(root: Path, path: Path) -> ArtifactReference:
     if path.is_symlink():
         raise EvaluationSuiteValidationError("campaign report must not be a symlink")
@@ -1058,14 +1072,17 @@ def run_genesis_evaluation_suite(
     reference_package: Path | None = None,
     diagnosis_path: Path | None = None,
     fabric_fixture: Path | None = None,
+    reset: bool = False,
 ) -> GenesisEvaluationSuiteReport:
     """Run the complete local/synthetic suite without claiming unavailable hardware evidence."""
 
     configuration = configuration or EvaluationSuiteConfiguration()
+    repository = Path(__file__).resolve().parents[3]
+    if reset:
+        _safe_reset(output, repository)
     if output.exists() and (output.is_symlink() or not output.is_dir() or any(output.iterdir())):
         raise FileExistsError(f"suite output must be absent or empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
-    repository = Path(__file__).resolve().parents[3]
     reference_source = reference_package or repository / "models/reference_tasks/hybrid_decoder"
     diagnosis_source = diagnosis_path or repository / "tests/fixtures/autopsy/diagnosis-v1.json"
     fabric_source = (
@@ -1195,6 +1212,7 @@ def main() -> int:
     run_parser.add_argument("--core-runs", type=int, default=2)
     run_parser.add_argument("--campaign-seeds", type=int, default=3)
     run_parser.add_argument("--h1-tasks", type=int, default=3)
+    run_parser.add_argument("--reset", action="store_true")
     validate_parser = subparsers.add_parser("validate")
     validate_parser.add_argument("--report", type=Path, required=True)
     arguments = parser.parse_args()
@@ -1207,6 +1225,7 @@ def main() -> int:
                 campaign_seed_count=arguments.campaign_seeds,
                 h1_task_count=arguments.h1_tasks,
             ),
+            reset=arguments.reset,
         )
     else:
         report = validate_genesis_evaluation_suite(arguments.report)

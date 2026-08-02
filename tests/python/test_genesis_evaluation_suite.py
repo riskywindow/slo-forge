@@ -19,6 +19,7 @@ from sloforge.genesis.evaluation_suite import (
     _campaign_seeds,
     _h1_configuration,
     _reference,
+    _safe_reset,
     _tree_digest,
     _tree_files,
     _write_once,
@@ -173,3 +174,20 @@ def test_suite_report_rejects_incomplete_campaign_matrix(tmp_path: Path) -> None
             report.model_copy(update={"campaigns": report.campaigns[:-1]}).model_dump(),
             strict=True,
         )
+
+
+def test_suite_reset_rejects_symlink_and_repository_root(tmp_path: Path) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    target = tmp_path / "preserved"
+    target.mkdir()
+    marker = target / "marker.txt"
+    marker.write_text("preserve", encoding="utf-8")
+    linked = tmp_path / "linked"
+    linked.symlink_to(target, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="symlinked evaluation-suite"):
+        _safe_reset(linked, repository)
+    with pytest.raises(ValueError, match="unsafe evaluation-suite"):
+        _safe_reset(repository, repository)
+    assert marker.read_text(encoding="utf-8") == "preserve"
