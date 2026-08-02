@@ -29,6 +29,22 @@ from sloforge.forgeci import (
     run_matrix,
     verify_run_artifact,
 )
+from sloforge.forgeci.models import ForgeCIEvaluation
+
+
+def test_checked_in_forgeci_demo_preserves_detection_and_bisection_evidence() -> None:
+    root = Path(__file__).parents[2]
+    artifact_root = root / "artifacts" / "forgeci" / "demo"
+    evaluation = ForgeCIEvaluation.model_validate_json(
+        (artifact_root / "evaluation.json").read_text(encoding="utf-8")
+    )
+
+    assert evaluation.bisection_correct
+    assert evaluation.inconclusive_rate == 0.0
+    assert evaluation.unique_commits_evaluated >= 3
+    assert evaluation.comparison.classification is ComparisonClassification.REGRESSION
+    assert all(metric.degradation_ci_low_percent > 0.0 for metric in evaluation.comparison.metrics)
+    assert (artifact_root / "fixture-repository.bundle").is_file()
 
 
 def _git(repository: Path, *arguments: str) -> str:
