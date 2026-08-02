@@ -3,7 +3,10 @@ SHELL := /bin/bash
 
 .PHONY: bootstrap check demo benchmark-cpu benchmark-gpu docker-smoke package \
 	fabric-check fabric-demo autopsy-demo forgeci-demo warmpath-demo \
-	extension-evaluation clean-room-test
+	extension-evaluation clean-room-test genesis-check genesis-demo \
+	genesis-zero-day-demo genesis-redteam-demo genesis-evolution-demo \
+	synthbench-smoke synthbench-evaluation genesis-evaluation \
+	genesis-docker-smoke genesis-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -58,8 +61,44 @@ extension-evaluation:
 	uv run --locked python -m sloforge.warmpath.evaluation --output artifacts/warmpath/evaluation --report reports/warmpath-evaluation.md --reset
 	uv run --locked python -m sloforge.forgeci.demo --output artifacts/forgeci/demo --report reports/forgeci-evaluation.md --reset
 
+genesis-check:
+	uv run --locked ruff format --check python tests
+	uv run --locked ruff check python tests
+	uv run --locked mypy python/sloforge
+	uv run --locked pytest -q tests/python/test_genesis*.py tests/python/test_synthbench.py
+	cargo fmt --all --check
+	cargo clippy -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-targets --all-features --locked -- -D warnings
+	cargo test -p sloforge-genesis-ir -p sloforge-genesis-modelcheck --all-features --locked
+
+genesis-demo:
+	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/demo --seed 73129 --reset
+
+genesis-zero-day-demo:
+	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/zero-day-demo --seed 73129 --reset
+
+genesis-redteam-demo:
+	uv run --locked python -m sloforge.redteam.demo --output artifacts/genesis/redteam-demo --seed 73129
+
+genesis-evolution-demo:
+	uv run --locked python -m sloforge.genesis.demo --output artifacts/genesis/evolution-demo --seed 73131 --reset
+
+synthbench-smoke:
+	uv run --locked python -m sloforge.synthbench.demo --output artifacts/synthbench/smoke --seed 73129 --count 2 --reset
+
+synthbench-evaluation:
+	uv run --locked python -m sloforge.synthbench.demo --output artifacts/synthbench/evaluation --seed 73129 --count 10 --reset
+
+genesis-evaluation:
+	uv run --locked python -m sloforge.genesis.evaluation --output artifacts/genesis/evaluation --seed 73129 --count 3 --reset
+
 clean-room-test:
 	./tools/clean-room-fabric.sh
+
+genesis-clean-room-test:
+	./tools/clean-room-genesis.sh
+
+genesis-docker-smoke:
+	./tools/genesis-docker-smoke.sh
 
 benchmark-cpu:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/cpu-demo --report-dir reports/cpu-demo --reset
