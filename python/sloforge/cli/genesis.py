@@ -2,27 +2,53 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import platform
+import stat
+import statistics
+import sys
 import tempfile
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
+import yaml
 from rich.console import Console
 
 from sloforge.genesis.capsule import (
+    ArtifactRole,
+    CapsuleValidationReport,
     Digest,
+    GenesisCapsule,
     ValidationContext,
     build_local_capsule,
     load_capsule,
     validate_capsule,
 )
 from sloforge.genesis.compiler import initialize_genesis_run
+from sloforge.genesis.evolution import (
+    CapsuleReference,
+    EvolutionConfig,
+    EvolutionController,
+    EvolutionPhase,
+    EvolutionStore,
+    ExecutionTarget,
+    TriggerObservation,
+)
 from sloforge.genesis.frontend import InspectionResult, inspect_reference_package
 from sloforge.genesis.frontend.package import load_reference_package
-from sloforge.genesis.ir import canonical_hash, load_candidate, load_inference_genome
+from sloforge.genesis.ir import (
+    Candidate,
+    CandidateSuccessState,
+    canonical_hash,
+    load_candidate,
+    load_inference_genome,
+)
+from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
 from sloforge.genesis.search import CandidateDesign
 from sloforge.genesis.synthesis import CancellationPolicyVerifier, synthesize_local_run
 from sloforge.util import sha256_file
@@ -37,6 +63,73 @@ capsule_app = typer.Typer(
 )
 genesis_app.add_typer(capsule_app, name="capsule")
 console = Console()
+
+_REPLAY_RUNNER = '''"""Trusted bounded adapter for one validated capsule replay."""
+import argparse
+import json
+from pathlib import Path
+
+from sloforge.genesis.runtime import load_generated_runtime
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--trace", type=Path, required=True)
+    parser.add_argument("--seed", type=int, required=True)
+    args = parser.parse_args()
+    runtime = load_generated_runtime(Path("runtime_config.json"), seed=args.seed)
+    results = []
+    runtime.start()
+    try:
+        with args.trace.open("rb") as handle:
+            for index, encoded in enumerate(handle):
+                if index >= 128:
+                    raise ValueError("trace exceeds 128-request replay bound")
+                if len(encoded) > 65536:
+                    raise ValueError("trace request exceeds 65536-byte bound")
+                value = json.loads(encoded)
+                if not isinstance(value, dict):
+                    raise TypeError("trace records must be JSON objects")
+                request_id = str(value.get("request_id", f"replay-{index}"))
+                text = str(value.get("text", ""))
+                maximum_new_tokens = int(value.get("maximum_new_tokens", 1))
+                timeout_seconds = float(value.get("timeout_seconds", 3.0))
+                if not request_id or len(request_id.encode()) > 256:
+                    raise ValueError("request_id must contain at most 256 bytes")
+                if len(text.encode()) > 65536:
+                    raise ValueError("request text exceeds 65536-byte bound")
+                if not 1 <= maximum_new_tokens <= 256:
+                    raise ValueError("maximum_new_tokens must be between 1 and 256")
+                if not 0.1 <= timeout_seconds <= 3.0:
+                    raise ValueError("timeout_seconds must be between 0.1 and 3.0")
+                request_seed = value.get("seed", args.seed + index)
+                handle_result = runtime.submit_text(
+                    request_id=request_id,
+                    text=text,
+                    maximum_new_tokens=maximum_new_tokens,
+                    seed=int(request_seed),
+                    timeout_seconds=timeout_seconds,
+                )
+                events = [
+                    {
+                        "kind": event.kind.value,
+                        "sequence": event.sequence,
+                        "token_id": event.token_id,
+                    }
+                    for event in handle_result.events(3.0)
+                ]
+                if not events or events[-1]["kind"] not in {"completed", "cancelled"}:
+                    raise RuntimeError("replay request did not reach a terminal event")
+                results.append({"request_id": handle_result.request_id, "events": events})
+    finally:
+        runtime.shutdown()
+    print(json.dumps({"passed": bool(results), "requests": results}, sort_keys=True))
+    return 0 if results else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
 
 
 def _json_result(value: object) -> None:
@@ -71,6 +164,17 @@ def _atomic_json(path: Path, value: object) -> None:
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+
+
+def _write_new_bytes(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("xb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError as error:
+        raise typer.BadParameter(f"refusing to overwrite evidence artifact: {path}") from error
 
 
 def _package_path(reference: Path) -> Path:
@@ -287,6 +391,34 @@ def verify_command(
 ) -> None:
     """Independently recheck a synthesized candidate's scoped integrity and protocol claim."""
 
+    candidate_ir, design, integrity_errors, passed, evidence_id, failure = _candidate_verification(
+        candidate
+    )
+    _json_result(
+        {
+            "candidate_id": candidate_ir.candidate_id,
+            "passed": passed,
+            "verification_level": "level-3-bounded-protocol-fixture",
+            "claim": "cancelled requests emit no subsequent committed token",
+            "scope": {
+                "protocol": "deadline batching cancellation fixture",
+                "seed": design.seed,
+                "universal_proof": False,
+            },
+            "integrity_errors": integrity_errors,
+            "evidence_id": evidence_id,
+            "failure": failure,
+        }
+    )
+    if not passed:
+        raise typer.Exit(code=1)
+
+
+def _candidate_verification(
+    candidate: Path,
+) -> tuple[Candidate, CandidateDesign, list[str], bool, str, dict[str, object] | None]:
+    """Independently recompute candidate integrity and its bounded protocol result."""
+
     candidate_directory = candidate if candidate.is_dir() else candidate.parent
     candidate_path = candidate_directory / "candidate.json" if candidate.is_dir() else candidate
     design_path = candidate_directory / "candidate_design.json"
@@ -308,25 +440,14 @@ def verify_command(
     ):
         integrity_errors.append("candidate transformation sequence mismatch")
     outcome = CancellationPolicyVerifier().verify(design, None, seed=design.seed)
-    passed = not integrity_errors and outcome.passed
-    _json_result(
-        {
-            "candidate_id": candidate_ir.candidate_id,
-            "passed": passed,
-            "verification_level": "level-3-bounded-protocol-fixture",
-            "claim": "cancelled requests emit no subsequent committed token",
-            "scope": {
-                "protocol": "deadline batching cancellation fixture",
-                "seed": design.seed,
-                "universal_proof": False,
-            },
-            "integrity_errors": integrity_errors,
-            "evidence_id": outcome.evidence_id,
-            "failure": None if outcome.failure is None else outcome.failure.model_dump(mode="json"),
-        }
+    return (
+        candidate_ir,
+        design,
+        integrity_errors,
+        not integrity_errors and outcome.passed,
+        outcome.evidence_id,
+        None if outcome.failure is None else outcome.failure.model_dump(mode="json"),
     )
-    if not passed:
-        raise typer.Exit(code=1)
 
 
 def _parse_timestamp(value: str | None) -> datetime:
@@ -345,15 +466,17 @@ def _parse_timestamp(value: str | None) -> datetime:
 def capsule_build_command(
     candidate: Annotated[Path, typer.Option("--candidate", exists=True, file_okay=False)],
     output: Annotated[Path, typer.Option("--output", "-o")],
+    trust_output: Annotated[Path | None, typer.Option("--trust-output")] = None,
     timestamp: Annotated[str | None, typer.Option("--timestamp")] = None,
 ) -> None:
-    """Build a CPU-local capsule and fail unless the independent promotion gate accepts it."""
+    """Build a capsule and publish its trust context separately from untrusted files."""
 
     try:
         result = build_local_capsule(
             candidate,
             output,
             observed_at=_parse_timestamp(timestamp),
+            trust_output=trust_output,
         )
     except (FileExistsError, ValueError) as error:
         raise typer.BadParameter(str(error)) from error
@@ -370,17 +493,13 @@ def _capsule_manifest(path: Path) -> tuple[Path, Path]:
     return manifests[0], path
 
 
-@capsule_app.command("validate")
-def capsule_validate_command(
-    capsule: Annotated[Path, typer.Argument(exists=True)],
-    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False, readable=True)],
-    expected_digest: Annotated[str, typer.Option("--expected-digest")],
-    hardware: Annotated[
-        Path | None, typer.Option("--hardware", exists=True, dir_okay=False)
-    ] = None,
-) -> None:
-    """Validate a capsule against caller-supplied trust context and expected identity."""
-
+def _validated_capsule(
+    capsule: Path,
+    *,
+    context: Path,
+    expected_digest: str,
+    hardware: Path | None = None,
+) -> tuple[GenesisCapsule, Path, CapsuleValidationReport]:
     manifest_path, root = _capsule_manifest(capsule)
     try:
         context.resolve(strict=True).relative_to(root.resolve(strict=True))
@@ -408,24 +527,549 @@ def capsule_validate_command(
         if not isinstance(document, dict):
             raise typer.BadParameter("hardware contract must be a JSON object")
         digest = Digest(value=sha256_file(hardware))
+        measured_fingerprint = document.get("measured_fingerprint")
+        fingerprint = (
+            Digest(value=measured_fingerprint) if isinstance(measured_fingerprint, str) else digest
+        )
         updates.update(
             {
                 "hardware_contract_hash": digest,
-                "hardware_fingerprint": digest,
+                "hardware_fingerprint": fingerprint,
                 "hardware_architecture": str(document.get("architecture", "unknown")),
             }
         )
     trusted_context = trusted_context.model_copy(update=updates)
     document = load_capsule(manifest_path)
-    report = validate_capsule(document, root, trusted_context)
+    return document, root, validate_capsule(document, root, trusted_context)
+
+
+@capsule_app.command("validate")
+def capsule_validate_command(
+    capsule: Annotated[Path, typer.Argument(exists=True)],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False, readable=True)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
+    hardware: Annotated[
+        Path | None, typer.Option("--hardware", exists=True, dir_okay=False)
+    ] = None,
+) -> None:
+    """Validate a capsule against caller-supplied trust context and expected identity."""
+
+    document, _root, report = _validated_capsule(
+        capsule,
+        context=context,
+        expected_digest=expected_digest,
+        hardware=hardware,
+    )
     _json_result(
         {
             **report.model_dump(mode="json"),
-            "manifest": str(manifest_path.resolve()),
+            "manifest": str(_capsule_manifest(capsule)[0].resolve()),
+            "candidate_genome_hash": document.identity.candidate_genome_hash.value,
             "hardware_backed": False,
         }
     )
     if not report.promotion_eligible:
+        raise typer.Exit(code=1)
+
+
+@genesis_app.command("benchmark")
+def benchmark_command(
+    candidate: Annotated[Path, typer.Option("--candidate", exists=True)],
+    suite: Annotated[Path, typer.Option("--suite", exists=True, dir_okay=False)],
+    output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
+    seed: Annotated[int, typer.Option("--seed", min=0)] = 73129,
+) -> None:
+    """Measure the accepted generated runtime through the strict local sandbox."""
+
+    candidate_directory = candidate if candidate.is_dir() else candidate.parent
+    candidate_ir, _design, integrity_errors, verified, _evidence_id, _failure = (
+        _candidate_verification(candidate)
+    )
+    if not verified:
+        detail = "; ".join(integrity_errors) or "bounded protocol verification failed"
+        raise typer.BadParameter(f"candidate failed independent verification: {detail}")
+    if candidate_ir.state is not CandidateSuccessState.PROPERTY_TESTED:
+        raise typer.BadParameter("benchmarking requires a property-tested candidate")
+    try:
+        suite_document = yaml.safe_load(suite.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        raise typer.BadParameter(f"benchmark suite is invalid: {error}") from error
+    if suite_document is None:
+        suite_document = {}
+    if not isinstance(suite_document, dict):
+        raise typer.BadParameter("benchmark suite must be a JSON/YAML object")
+    repetitions_value = suite_document.get("repetitions", 3)
+    if (
+        not isinstance(repetitions_value, int)
+        or isinstance(repetitions_value, bool)
+        or not 2 <= repetitions_value <= 50
+    ):
+        raise typer.BadParameter("benchmark suite repetitions must be between 2 and 50")
+    run_directory = candidate_directory.parent.parent
+    runtime_directory = run_directory / "generated_runtime"
+    config_path = runtime_directory / "runtime_config.json"
+    if not config_path.is_file():
+        raise typer.BadParameter("candidate run is missing its generated runtime")
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    if not isinstance(config, dict):
+        raise typer.BadParameter("generated runtime configuration must be an object")
+    package_root = Path(str(config.get("reference_package_root", "")))
+    package = load_reference_package(package_root)
+    samples = package.resolve(package.manifest.quality_contract.final_evaluation_corpus)
+    destination = output or candidate_directory / "benchmark"
+    if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
+        raise typer.BadParameter(f"benchmark output is not empty: {destination}")
+    destination.mkdir(parents=True, exist_ok=True)
+    repository_python = Path(__file__).resolve().parents[2]
+    raw: list[dict[str, object]] = []
+    durations: list[float] = []
+    for repetition in range(repetitions_value):
+        sandbox_output = destination / "sandbox" / f"repetition-{repetition:03d}"
+        result = execute_sandboxed(
+            SandboxRequest(
+                argv=(
+                    sys.executable,
+                    "correctness_harness.py",
+                    "--samples",
+                    str(samples),
+                    "--seed",
+                    str(seed),
+                    "--timeout-seconds",
+                    "3",
+                ),
+                working_directory=runtime_directory,
+                read_only_paths=(runtime_directory, package.root, repository_python),
+                artifact_output_directory=sandbox_output,
+                seed=seed + repetition,
+                limits=SandboxLimits(
+                    wall_time_seconds=15.0,
+                    cpu_time_seconds=10,
+                    memory_bytes=2 * 1024 * 1024 * 1024,
+                    process_count=1,
+                    output_bytes=128 * 1024,
+                    artifact_bytes=1024 * 1024,
+                    artifact_entries=16,
+                    open_files=64,
+                ),
+            )
+        )
+        try:
+            harness = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            harness = None
+        passed = bool(
+            result.succeeded and isinstance(harness, dict) and harness.get("passed") is True
+        )
+        durations.append(result.duration_seconds)
+        raw.append(
+            {
+                "repetition": repetition,
+                "input_seed": seed,
+                "sandbox_environment_seed": seed + repetition,
+                "duration_seconds": result.duration_seconds,
+                "termination": result.termination.value,
+                "passed": passed,
+                "stdout_sha256": hashlib.sha256(result.stdout.encode()).hexdigest(),
+                "measurement_scope": "sandboxed_generated_runtime_differential_harness",
+            }
+        )
+    raw_payload = b"".join(
+        json.dumps(item, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n"
+        for item in raw
+    )
+    raw_path = destination / "raw_samples.jsonl"
+    _write_new_bytes(raw_path, raw_payload)
+    passed = all(bool(item["passed"]) for item in raw)
+    summary = {
+        "schema_version": "1.0.0",
+        "candidate_id": candidate_ir.candidate_id,
+        "candidate_genome_hash": candidate_ir.genome_hash.value,
+        "seed": seed,
+        "suite_path": str(suite.resolve()),
+        "suite_sha256": sha256_file(suite),
+        "corpus_path": str(samples.resolve()),
+        "corpus_sha256": sha256_file(samples),
+        "raw_samples_path": str(raw_path.resolve()),
+        "raw_samples_sha256": hashlib.sha256(raw_payload).hexdigest(),
+        "sample_count": len(raw),
+        "median_duration_seconds": statistics.median(durations),
+        "all_differential_runs_passed": passed,
+        "hardware_backed": False,
+        "performance_claim": "none; process-level CPU harness timing only",
+        "environment": {
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+        },
+    }
+    _atomic_json(destination / "summary.json", summary)
+    _json_result(summary)
+    if not passed:
+        raise typer.Exit(code=1)
+
+
+def _capsule_reference(
+    document: GenesisCapsule,
+    report: CapsuleValidationReport,
+    manifest_path: Path,
+) -> CapsuleReference:
+    if (
+        not report.promotion_eligible
+        or report.capsule_digest is None
+        or report.candidate_genome_hash is None
+    ):
+        raise typer.BadParameter("capsule is not independently promotion-eligible")
+    return CapsuleReference(
+        capsule_id=f"capsule-{report.capsule_digest.value[:16]}",
+        capsule_digest=report.capsule_digest.value,
+        genome_hash=report.candidate_genome_hash.value,
+        path=str(manifest_path.resolve()),
+    )
+
+
+@genesis_app.command("deploy")
+def deploy_command(
+    capsule: Annotated[Path, typer.Option("--capsule", exists=True)],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
+    mode: Annotated[Literal["shadow"], typer.Option("--mode")] = "shadow",
+    deployment: Annotated[str | None, typer.Option("--deployment")] = None,
+    output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
+    seed: Annotated[int, typer.Option("--seed", min=0)] = 73129,
+) -> None:
+    """Create a local shadow-only controller; no live traffic is enabled."""
+
+    del mode
+    document, _root, report = _validated_capsule(
+        capsule, context=context, expected_digest=expected_digest
+    )
+    manifest_path = _capsule_manifest(capsule)[0]
+    reference = _capsule_reference(document, report, manifest_path)
+    deployment_id = deployment or f"genesis-{reference.capsule_digest[:12]}"
+    state_path = output or Path("artifacts/genesis/deployments") / deployment_id / "state.json"
+
+    def validator(path: Path) -> CapsuleValidationReport:
+        if path.resolve() != manifest_path.resolve():
+            raise ValueError("controller requested an unknown capsule")
+        return report
+
+    controller = EvolutionController.initialize(
+        store=EvolutionStore(state_path),
+        capsule_validator=validator,
+        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+        deployment_id=deployment_id,
+        champion=reference,
+        seed=seed,
+        now_ms=0,
+    )
+    _json_result(
+        {
+            "deployment_id": deployment_id,
+            "controller_state": str(state_path.resolve()),
+            "phase": controller.snapshot.phase.value,
+            "mode": "shadow",
+            "capsule_digest": reference.capsule_digest,
+            "live_traffic": False,
+            "external_mutation": False,
+            "status": "local_shadow_controller_initialized",
+        }
+    )
+
+
+@genesis_app.command("promote")
+def promote_command(
+    capsule: Annotated[Path, typer.Option("--capsule", exists=True)],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
+    controller_state: Annotated[
+        Path, typer.Option("--controller-state", exists=True, dir_okay=False)
+    ],
+    mode: Annotated[Literal["canary"], typer.Option("--mode")] = "canary",
+    event_id: Annotated[str, typer.Option("--event-id")] = "cli-promote",
+    observed_at_ms: Annotated[int | None, typer.Option("--observed-at-ms", min=0)] = None,
+) -> None:
+    """Promote only a locally persisted challenger with accepted shadow/canary gates."""
+
+    del mode
+    document, _root, report = _validated_capsule(
+        capsule, context=context, expected_digest=expected_digest
+    )
+    manifest_path = _capsule_manifest(capsule)[0]
+    reference = _capsule_reference(document, report, manifest_path)
+
+    def validator(path: Path) -> CapsuleValidationReport:
+        if path.resolve() != manifest_path.resolve():
+            raise ValueError("promotion attempted to validate an untrusted capsule path")
+        return report
+
+    controller = EvolutionController.restore(
+        store=EvolutionStore(controller_state),
+        capsule_validator=validator,
+        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+    )
+    if controller.snapshot.phase is EvolutionPhase.PROMOTED:
+        if controller.snapshot.champion.capsule_digest != reference.capsule_digest:
+            raise typer.BadParameter("controller already promoted a different capsule")
+        snapshot = controller.snapshot
+    else:
+        selected = next(
+            (
+                item
+                for item in controller.snapshot.challengers
+                if item.spec.candidate_id == controller.snapshot.selected_candidate_id
+            ),
+            None,
+        )
+        if selected is None or selected.spec.capsule.capsule_digest != reference.capsule_digest:
+            raise typer.BadParameter("capsule is not the controller's proof-gated challenger")
+        timestamp = (
+            controller.snapshot.last_observed_at_ms + 1
+            if observed_at_ms is None
+            else observed_at_ms
+        )
+        try:
+            snapshot = controller.promote(event_id=event_id, observed_at_ms=timestamp)
+        except RuntimeError as error:
+            raise typer.BadParameter(str(error)) from error
+    _json_result(
+        {
+            "deployment_id": snapshot.deployment_id,
+            "phase": snapshot.phase.value,
+            "champion_capsule_digest": snapshot.champion.capsule_digest,
+            "previous_champion_retained": snapshot.previous_champion is not None,
+            "external_mutation": False,
+            "controller_state": str(controller_state.resolve()),
+        }
+    )
+
+
+def _trigger_observation(trigger: str, *, event_id: str, observed_at_ms: int) -> TriggerObservation:
+    normalized = trigger.replace("-", "_")
+    values: dict[str, object] = {
+        "event_id": event_id,
+        "observed_at_ms": observed_at_ms,
+        "detail": f"offline CLI trigger: {normalized}",
+    }
+    if normalized == "workload_drift":
+        values["workload_js_divergence"] = 1.0
+    elif normalized == "fabric_degradation":
+        values["fabric_health_ratio"] = 0.0
+    elif normalized == "performance_regression":
+        values["performance_regression_ratio"] = 1.0
+    elif normalized in {
+        "model_update",
+        "hardware_change",
+        "dependency_update",
+        "slo_change",
+        "cost_change",
+        "autopsy_bottleneck_change",
+    }:
+        values[
+            {
+                "model_update": "model_updated",
+                "hardware_change": "hardware_changed",
+                "dependency_update": "dependency_updated",
+                "slo_change": "slo_changed",
+                "cost_change": "cost_changed",
+                "autopsy_bottleneck_change": "autopsy_bottleneck_changed",
+            }[normalized]
+        ] = True
+    else:
+        raise typer.BadParameter(f"unsupported evolution trigger: {trigger}")
+    return TriggerObservation.model_validate(values)
+
+
+@genesis_app.command("evolve")
+def evolve_command(
+    deployment: Annotated[str, typer.Option("--deployment")],
+    trigger: Annotated[str, typer.Option("--trigger")],
+    budget_usd: Annotated[float, typer.Option("--budget-usd", min=0.0)] = 0.0,
+    controller_state: Annotated[Path | None, typer.Option("--controller-state")] = None,
+    event_id: Annotated[str, typer.Option("--event-id")] = "cli-evolve",
+) -> None:
+    """Persist one deterministic local evolution trigger without spending external budget."""
+
+    if os.environ.get("SLOFORGE_GENESIS_ALLOW_EXTERNAL_SYNTHESIS") == "1":
+        raise typer.BadParameter("this command does not implement external synthesis")
+    state_path = (
+        controller_state or Path("artifacts/genesis/deployments") / deployment / "state.json"
+    )
+    if not state_path.is_file():
+        raise typer.BadParameter(f"local controller state does not exist: {state_path}")
+
+    def unavailable_validator(_path: Path) -> CapsuleValidationReport:
+        raise ValueError("capsule validation is unavailable during trigger-only evolution")
+
+    controller = EvolutionController.restore(
+        store=EvolutionStore(state_path),
+        capsule_validator=unavailable_validator,
+        config=EvolutionConfig(execution_target=ExecutionTarget.LOCAL),
+    )
+    if controller.snapshot.deployment_id != deployment:
+        raise typer.BadParameter("controller state belongs to another deployment")
+    observation = _trigger_observation(
+        trigger,
+        event_id=event_id,
+        observed_at_ms=controller.snapshot.last_observed_at_ms + 1,
+    )
+    snapshot = controller.observe_trigger(observation)
+    _json_result(
+        {
+            "deployment_id": deployment,
+            "phase": snapshot.phase.value,
+            "trigger": None if snapshot.active_trigger is None else snapshot.active_trigger.value,
+            "budget_usd_ceiling": budget_usd,
+            "spent_usd": 0.0,
+            "external_synthesis": False,
+            "controller_state": str(state_path.resolve()),
+        }
+    )
+
+
+@genesis_app.command("compare")
+def compare_command(
+    champion: Annotated[Path, typer.Option("--champion", exists=True)],
+    challenger: Annotated[Path, typer.Option("--challenger", exists=True)],
+    champion_context: Annotated[
+        Path, typer.Option("--champion-context", exists=True, dir_okay=False)
+    ],
+    challenger_context: Annotated[
+        Path, typer.Option("--challenger-context", exists=True, dir_okay=False)
+    ],
+    champion_digest: Annotated[str, typer.Option("--champion-digest")],
+    challenger_digest: Annotated[str, typer.Option("--challenger-digest")],
+    output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
+) -> None:
+    """Compare two independently validated capsule manifests without executing either."""
+
+    champion_document, _champion_root, champion_report = _validated_capsule(
+        champion, context=champion_context, expected_digest=champion_digest
+    )
+    challenger_document, _challenger_root, challenger_report = _validated_capsule(
+        challenger, context=challenger_context, expected_digest=challenger_digest
+    )
+    if not champion_report.promotion_eligible or not challenger_report.promotion_eligible:
+        raise typer.BadParameter("both capsules must pass independent validation")
+    champion_evidence = {item.evidence_id for item in champion_document.evidence}
+    challenger_evidence = {item.evidence_id for item in challenger_document.evidence}
+    result = {
+        "schema_version": "1.0.0",
+        "champion_digest": champion_digest,
+        "challenger_digest": challenger_digest,
+        "same_source_model": (
+            champion_document.identity.source_model_hash
+            == challenger_document.identity.source_model_hash
+        ),
+        "same_hardware_contract": (
+            champion_document.identity.hardware_contract_hash
+            == challenger_document.identity.hardware_contract_hash
+        ),
+        "added_evidence": sorted(challenger_evidence - champion_evidence),
+        "removed_evidence": sorted(champion_evidence - challenger_evidence),
+        "champion_claim_count": len(champion_document.claims),
+        "challenger_claim_count": len(challenger_document.claims),
+        "hardware_backed_comparison": False,
+    }
+    if output is not None:
+        if output.exists():
+            raise typer.BadParameter(f"refusing to overwrite comparison: {output}")
+        _atomic_json(output, result)
+    _json_result(result)
+
+
+def _extract_runtime_bundle(document: GenesisCapsule, root: Path, destination: Path) -> None:
+    bundles = tuple(
+        artifact
+        for artifact in document.artifacts
+        if artifact.role is ArtifactRole.GENERATED_RUNTIME
+    )
+    if len(bundles) != 1:
+        raise typer.BadParameter("capsule must contain exactly one generated runtime bundle")
+    archive_path = root / bundles[0].path
+    with zipfile.ZipFile(archive_path) as archive:
+        entries = archive.infolist()
+        if len(entries) > 128 or sum(item.file_size for item in entries) > 64 * 1024 * 1024:
+            raise typer.BadParameter("runtime bundle exceeds replay extraction bounds")
+        for item in entries:
+            path = Path(item.filename)
+            mode = item.external_attr >> 16
+            if path.is_absolute() or ".." in path.parts or stat.S_ISLNK(mode):
+                raise typer.BadParameter("runtime bundle contains an unsafe archive entry")
+        archive.extractall(destination)
+
+
+@genesis_app.command("replay")
+def replay_command(
+    capsule: Annotated[Path, typer.Option("--capsule", exists=True)],
+    trace: Annotated[Path, typer.Option("--trace", exists=True, dir_okay=False)],
+    context: Annotated[Path, typer.Option("--context", exists=True, dir_okay=False)],
+    expected_digest: Annotated[str, typer.Option("--expected-digest")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    seed: Annotated[int, typer.Option("--seed", min=0)] = 73129,
+) -> None:
+    """Replay a trace against a validated capsule only inside the strict sandbox."""
+
+    if output.exists():
+        raise typer.BadParameter(f"refusing to overwrite replay evidence: {output}")
+    document, root, report = _validated_capsule(
+        capsule, context=context, expected_digest=expected_digest
+    )
+    if not report.promotion_eligible:
+        raise typer.BadParameter("capsule failed independent validation")
+    with tempfile.TemporaryDirectory(prefix="sloforge-genesis-replay-") as temporary:
+        temporary_root = Path(temporary)
+        runtime_root = temporary_root / "runtime"
+        runtime_root.mkdir()
+        _extract_runtime_bundle(document, root, runtime_root)
+        runner = runtime_root / "replay_runner.py"
+        runner.write_text(_REPLAY_RUNNER, encoding="utf-8")
+        repository_python = Path(__file__).resolve().parents[2]
+        result = execute_sandboxed(
+            SandboxRequest(
+                argv=(
+                    sys.executable,
+                    "replay_runner.py",
+                    "--trace",
+                    str(trace.resolve()),
+                    "--seed",
+                    str(seed),
+                ),
+                working_directory=runtime_root,
+                read_only_paths=(runtime_root, trace, repository_python),
+                artifact_output_directory=temporary_root / "sandbox-output",
+                seed=seed,
+                limits=SandboxLimits(
+                    wall_time_seconds=30.0,
+                    cpu_time_seconds=20,
+                    memory_bytes=2 * 1024 * 1024 * 1024,
+                    process_count=1,
+                    output_bytes=1024 * 1024,
+                    artifact_bytes=1024 * 1024,
+                    artifact_entries=16,
+                    open_files=64,
+                ),
+            )
+        )
+        try:
+            replay = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            replay = None
+        passed = bool(result.succeeded and isinstance(replay, dict) and replay.get("passed"))
+        evidence = {
+            "schema_version": "1.0.0",
+            "capsule_digest": expected_digest,
+            "trace_path": str(trace.resolve()),
+            "trace_sha256": sha256_file(trace),
+            "seed": seed,
+            "sandbox_termination": result.termination.value,
+            "sandbox_capabilities": result.capabilities.model_dump(mode="json"),
+            "process_group_cleaned": result.process_group_cleaned,
+            "passed": passed,
+            "replay": replay,
+            "hardware_backed": False,
+        }
+        _atomic_json(output, evidence)
+    _json_result(evidence)
+    if not passed:
         raise typer.Exit(code=1)
 
 
