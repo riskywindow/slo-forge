@@ -41,6 +41,7 @@ TransitionCompatibilityValidator = Callable[
     [CapsuleReference, CapsuleReference, TransitionCategory], TransitionCompatibility
 ]
 _LIVE_PROMOTION_ENV = "SLOFORGE_GENESIS_ALLOW_LIVE_PROMOTION"
+_EXTERNAL_DEPLOYMENT_ENV = "SLOFORGE_GENESIS_ALLOW_EXTERNAL_DEPLOYMENT"
 
 
 class EvolutionError(RuntimeError):
@@ -655,10 +656,19 @@ class EvolutionController:
     def _require_live_opt_in(self) -> None:
         if not self.config.live_traffic:
             return
-        enabled = os.environ.get(_LIVE_PROMOTION_ENV, "").lower() in {"1", "true", "yes"}
-        if not self.config.live_promotion_authorized or not enabled:
+        live_enabled = os.environ.get(_LIVE_PROMOTION_ENV, "").lower() in {"1", "true", "yes"}
+        if not self.config.live_promotion_authorized or not live_enabled:
             raise EvolutionError(
                 f"live traffic requires config authorization and {_LIVE_PROMOTION_ENV}=1"
+            )
+        external_enabled = os.environ.get(_EXTERNAL_DEPLOYMENT_ENV, "").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        if self.config.execution_target is ExecutionTarget.EXTERNAL and not external_enabled:
+            raise EvolutionError(
+                f"external traffic additionally requires {_EXTERNAL_DEPLOYMENT_ENV}=1"
             )
 
     @_serialized

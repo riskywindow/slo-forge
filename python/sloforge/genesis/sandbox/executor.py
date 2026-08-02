@@ -45,6 +45,7 @@ _BLOCKED_ENVIRONMENT_MARKERS = (
     "KUBECONFIG",
 )
 _ALLOWED_CALLER_ENVIRONMENT = frozenset({"LANG", "LC_ALL", "TZ"})
+_PIPE_DRAIN_GRACE_SECONDS = 0.25
 
 
 def detect_capabilities() -> SandboxCapabilities:
@@ -93,9 +94,10 @@ def detect_capabilities() -> SandboxCapabilities:
         memory_limit=IsolationStatus.BEST_EFFORT,
         process_limit=IsolationStatus.BEST_EFFORT,
         output_limit=IsolationStatus.ENFORCED,
-        child_cleanup=IsolationStatus.ENFORCED,
+        child_cleanup=IsolationStatus.UNAVAILABLE,
         limitations=(
             "no supported kernel sandbox backend was found; strict execution fails closed",
+            "a non-strict caller cannot prevent a generated process from escaping its process group",
         ),
     )
 
@@ -127,32 +129,52 @@ def _sanitized_environment(request: SandboxRequest, output: Path) -> dict[str, s
     return environment
 
 
+def _reject_symlink_components(path: Path, *, label: str) -> None:
+    """Reject existing symlinks in a caller-controlled path spelling."""
+
+    absolute = path if path.is_absolute() else Path.cwd() / path
+    cursor = Path(absolute.anchor)
+    for component in absolute.parts[1:]:
+        cursor = cursor / component
+        if cursor.is_symlink():
+            raise ValueError(f"{label} must not contain symlink components: {cursor}")
+        if not cursor.exists():
+            break
+
+
 def _canonical_paths(request: SandboxRequest) -> tuple[Path, tuple[Path, ...], Path]:
-    output = request.artifact_output_directory
-    if output.exists() and output.is_symlink():
-        raise ValueError("artifact output directory must not be a symlink")
-    if output.exists():
-        if not output.is_dir():
-            raise ValueError("artifact output path must be a directory")
-        if any(output.iterdir()):
-            raise ValueError("artifact output directory must be empty")
-    else:
-        output.mkdir(parents=True)
-    output = output.resolve(strict=True)
-    (output / "tmp").mkdir(mode=0o700, exist_ok=True)
-    (output / "home").mkdir(mode=0o700, exist_ok=True)
+    _reject_symlink_components(request.working_directory, label="working_directory")
     working = request.working_directory.resolve(strict=True)
     if not working.is_dir():
         raise ValueError("working_directory must be a directory")
     read_only: list[Path] = []
     for item in request.read_only_paths:
-        if item.is_symlink():
-            raise ValueError(f"read-only input must not be a symlink: {item}")
+        _reject_symlink_components(item, label="read-only input")
         read_only.append(item.resolve(strict=True))
     if not any(working == item or working.is_relative_to(item) for item in read_only):
         raise ValueError("working_directory must be within an explicit read-only input")
+
+    requested_output = request.artifact_output_directory
+    _reject_symlink_components(requested_output, label="artifact output directory")
+    output = requested_output.resolve(strict=False)
     if any(output == item or output.is_relative_to(item) for item in read_only):
         raise ValueError("artifact output must not be nested in a read-only input")
+    if requested_output.exists():
+        if not requested_output.is_dir():
+            raise ValueError("artifact output path must be a directory")
+        if any(requested_output.iterdir()):
+            raise ValueError("artifact output directory must be empty")
+    else:
+        requested_output.mkdir(mode=0o700, parents=True)
+    _reject_symlink_components(requested_output, label="artifact output directory")
+    canonical_output = requested_output.resolve(strict=True)
+    if canonical_output != output:
+        raise ValueError("artifact output path changed during sandbox setup")
+    output = canonical_output
+    if not output.is_dir() or any(output.iterdir()):
+        raise ValueError("artifact output directory changed during sandbox setup")
+    (output / "tmp").mkdir(mode=0o700)
+    (output / "home").mkdir(mode=0o700)
     return working, tuple(dict.fromkeys(read_only)), output
 
 
@@ -429,6 +451,10 @@ def _bounded_output(
     assert process.stdout is not None
     assert process.stderr is not None
     streams = {process.stdout.fileno(): "stdout", process.stderr.fileno(): "stderr"}
+    pipe_objects = {
+        process.stdout.fileno(): process.stdout,
+        process.stderr.fileno(): process.stderr,
+    }
     for file_descriptor, label in streams.items():
         os.set_blocking(file_descriptor, False)
         selector.register(file_descriptor, selectors.EVENT_READ, label)
@@ -438,12 +464,15 @@ def _bounded_output(
     termination: SandboxTermination | None = None
     violation: str | None = None
     next_resource_check = time.monotonic()
+    forced_at: float | None = None
     while selector.get_map():
-        remaining = deadline - time.monotonic()
+        now = time.monotonic()
+        remaining = deadline - now
         if remaining <= 0 and termination is None:
             termination = SandboxTermination.TIMEOUT
             _kill_process_group(process)
-        now = time.monotonic()
+        if termination is not None and forced_at is None:
+            forced_at = now
         if termination is None and now >= next_resource_check:
             next_resource_check = now + 0.05
             rss_bytes = _process_group_rss_bytes(process.pid)
@@ -459,7 +488,17 @@ def _bounded_output(
                     termination = SandboxTermination.SANDBOX_VIOLATION
                     violation = artifact_violation
                     _kill_process_group(process)
-        events = selector.select(timeout=max(0.0, min(0.05, remaining)))
+        if termination is not None and forced_at is None:
+            forced_at = now
+        if forced_at is not None and now - forced_at >= _PIPE_DRAIN_GRACE_SECONDS:
+            for key in list(selector.get_map().values()):
+                selector.unregister(key.fd)
+                pipe_objects[key.fd].close()
+            break
+        drain_remaining = (
+            _PIPE_DRAIN_GRACE_SECONDS - (now - forced_at) if forced_at is not None else remaining
+        )
+        events = selector.select(timeout=max(0.0, min(0.05, drain_remaining)))
         for key, _ in events:
             try:
                 chunk = os.read(key.fd, 65536)
@@ -559,6 +598,10 @@ def execute_sandboxed(request: SandboxRequest) -> SandboxResult:
     except subprocess.TimeoutExpired:
         _kill_process_group(process)
         return_code = process.wait(timeout=1.0)
+    # Reap same-session children even when the generated parent exited cleanly.
+    # Kernel sandboxes additionally prevent detached descendants; the NONE
+    # backend reports that guarantee as unavailable.
+    _kill_process_group(process)
     if forced is not None:
         termination = forced
     elif return_code == 0:

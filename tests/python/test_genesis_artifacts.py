@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from sloforge.genesis.artifacts import ArtifactStoreError, ContentAddressedArtifactStore
+from sloforge.genesis.capsule import Digest
 
 
 def test_content_addressed_store_deduplicates_and_verifies(tmp_path: Path) -> None:
@@ -64,3 +65,39 @@ def test_content_addressed_store_rejects_symlinked_internal_directory(tmp_path: 
     (root / "objects").symlink_to(outside, target_is_directory=True)
     with pytest.raises(ArtifactStoreError, match="symlink"):
         ContentAddressedArtifactStore(root)
+
+
+def test_content_addressed_store_rejects_symlinked_materialization_parent(
+    tmp_path: Path,
+) -> None:
+    store = ContentAddressedArtifactStore(tmp_path / "cas")
+    artifact = store.put_bytes(b"trusted evidence")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    linked_parent = tmp_path / "capsule"
+    linked_parent.symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ArtifactStoreError, match="symlink component"):
+        store.materialize(artifact.digest, linked_parent / "evidence.json")
+
+    assert not (outside / "evidence.json").exists()
+
+
+def test_content_addressed_store_rehashes_during_materialization(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = ContentAddressedArtifactStore(tmp_path / "cas")
+    artifact = store.put_bytes(b"trusted evidence")
+    original_verify = store._verify_existing
+
+    def swap_after_verify(path: Path, digest: Digest, size_bytes: int | None) -> int:
+        size = original_verify(path, digest, size_bytes)
+        os.chmod(path, 0o644)
+        path.write_bytes(b"hostile replacement")
+        return size
+
+    monkeypatch.setattr(store, "_verify_existing", swap_after_verify)
+    destination = tmp_path / "capsule" / "evidence.json"
+    with pytest.raises(ArtifactStoreError, match="changed during materialization"):
+        store.materialize(artifact.digest, destination)
+    assert not destination.exists()

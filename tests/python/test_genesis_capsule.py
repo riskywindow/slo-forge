@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import zipfile
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -50,6 +51,7 @@ from sloforge.genesis.capsule.validator import (
     _performance_acceptance_failures,
     _validate_runtime_bundle,
 )
+from sloforge.genesis.policy_dsl import compile_policy, parse_policy
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
 OBSERVED = datetime(2025, 12, 1, tzinfo=UTC)
@@ -71,6 +73,7 @@ def _add_artifact(
     payload: bytes,
     *,
     origin: ArtifactOrigin = ArtifactOrigin.VERIFIED_EVIDENCE,
+    media_type: str = "application/json",
 ) -> ArtifactRef:
     relative = f"artifacts/{artifact_id}"
     path = root / relative
@@ -83,12 +86,78 @@ def _add_artifact(
         digest=_digest(payload),
         size_bytes=len(payload),
         path=relative,
-        media_type="application/json",
+        media_type=media_type,
     )
+
+
+def _runtime_bundle(
+    *, candidate_hash: Digest, source_hash: Digest, tokenizer_hash: Digest
+) -> tuple[bytes, dict[str, str]]:
+    policy_source = (
+        b"policy capsule_fixture\ninput queue_length int 0 8\noutput int 1 1\nlimit 8\nreturn 1\n"
+    )
+    policy_bytecode = json.dumps(
+        asdict(compile_policy(parse_policy(policy_source.decode("utf-8")))),
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    tested_config = {
+        "genome_hash": candidate_hash.value,
+        "package_hash": source_hash.value,
+        "policy_bytecode_path": "policy.bytecode.json",
+        "policy_bytecode_sha256": hashlib.sha256(policy_bytecode).hexdigest(),
+        "reference_package_root": "/trusted/reference-package",
+    }
+    tested_config_payload = canonical_json(tested_config) + b"\n"
+    packaged_config = dict(tested_config)
+    packaged_config["reference_package_root"] = "reference_package"
+    entries = {
+        "runtime.py": b"raise SystemExit('sandbox launch required')\n",
+        "correctness_harness.py": b"raise SystemExit('fixture only')\n",
+        "deployment_manifest.json": b"{}\n",
+        "runtime_config.json": canonical_json(packaged_config) + b"\n",
+        "tested_runtime_config.json": tested_config_payload,
+        "policy.slo": policy_source,
+        "policy.bytecode.json": policy_bytecode,
+        "reference_package/reference_package.json": b'{"tokenizer_module":"tokenizer.py"}\n',
+        "reference_package/tokenizer.py": b"tokenizer",
+    }
+    assert hashlib.sha256(entries["reference_package/tokenizer.py"]).hexdigest() == (
+        tokenizer_hash.value
+    )
+    manifest = {
+        "candidate_genome_hash": candidate_hash.value,
+        "direct_launch_supported": False,
+        "entries": {
+            name: hashlib.sha256(payload).hexdigest() for name, payload in sorted(entries.items())
+        },
+        "tested_runtime_config_sha256": hashlib.sha256(tested_config_payload).hexdigest(),
+    }
+    entries["bundle_manifest.json"] = canonical_json(manifest) + b"\n"
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
+        for name, payload in sorted(entries.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o444 << 16
+            archive.writestr(info, payload)
+    tested_hashes = {
+        name: hashlib.sha256(entries[bundle_name]).hexdigest()
+        for name, bundle_name in {
+            "runtime.py": "runtime.py",
+            "correctness_harness.py": "correctness_harness.py",
+            "deployment_manifest.json": "deployment_manifest.json",
+            "policy.bytecode.json": "policy.bytecode.json",
+            "policy.slo": "policy.slo",
+            "runtime_config.json": "tested_runtime_config.json",
+        }.items()
+    }
+    return output.getvalue(), tested_hashes
 
 
 def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
     candidate_hash = _constant_digest("candidate")
+    source_hash = _constant_digest("model")
+    tokenizer_hash = _constant_digest("tokenizer")
     hardware_hash = _constant_digest("hardware")
     definition = _add_artifact(
         root,
@@ -146,12 +215,18 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
         samples_document.model_dump_json().encode(),
         origin=ArtifactOrigin.PERFORMANCE_EVIDENCE,
     )
+    runtime_payload, tested_runtime_hashes = _runtime_bundle(
+        candidate_hash=candidate_hash,
+        source_hash=source_hash,
+        tokenizer_hash=tokenizer_hash,
+    )
     runtime = _add_artifact(
         root,
         "runtime",
         ArtifactRole.GENERATED_RUNTIME,
-        b"generated runtime",
+        runtime_payload,
         origin=ArtifactOrigin.GENERATED_UNTRUSTED,
+        media_type="application/zip",
     )
     deployment = _add_artifact(root, "deployment", ArtifactRole.DEPLOYMENT, b"deployment")
     rollback = _add_artifact(
@@ -186,10 +261,13 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                     "observed": 1.0,
                     "threshold": 1.0,
                     "passed": True,
+                    "runtime_artifact_hashes": tested_runtime_hashes,
                 },
                 sort_keys=True,
             ).encode()
         elif evidence_class is EvidenceClass.RESOURCE:
+            single_runtime_bytes = 1024 + 792 + runtime.size_bytes
+            capacity_bytes = 1024 * 1024
             payload = json.dumps(
                 {
                     "maximum_prompt_tokens": 1,
@@ -201,12 +279,12 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                     "bounded_queue_bytes": 792,
                     "genome_declared_peak_host_bytes": 0,
                     "interpreter_and_model_reserve_bytes": 1024,
-                    "runtime_bundle_bytes": 0,
-                    "single_runtime_peak_bytes": 1816,
-                    "champion_challenger_coexistence_bytes": 3632,
-                    "capacity_bytes": 5120,
+                    "runtime_bundle_bytes": runtime.size_bytes,
+                    "single_runtime_peak_bytes": single_runtime_bytes,
+                    "champion_challenger_coexistence_bytes": 2 * single_runtime_bytes,
+                    "capacity_bytes": capacity_bytes,
                     "safety_margin_fraction": 0.2,
-                    "usable_capacity_bytes": 4096,
+                    "usable_capacity_bytes": int(capacity_bytes * 0.8),
                     "passed": True,
                 },
                 sort_keys=True,
@@ -246,7 +324,16 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
             result=EvidenceResult.PASS,
             issuer=issuer_by_class[evidence_class],
             issuer_version="1.0.0",
-            artifact_ids=(artifact.artifact_id,),
+            artifact_ids=(
+                (
+                    definition.artifact_id,
+                    samples.artifact_id,
+                    software.artifact_id,
+                    baseline.artifact_id,
+                )
+                if evidence_class is EvidenceClass.PERFORMANCE
+                else (artifact.artifact_id,)
+            ),
             observed_at=OBSERVED,
             valid_until=VALID_UNTIL,
             deterministic_seed=73129,
@@ -287,8 +374,8 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
     capsule = GenesisCapsule(
         identity=CapsuleIdentity(
             candidate_genome_hash=candidate_hash,
-            source_model_hash=_constant_digest("model"),
-            tokenizer_hash=_constant_digest("tokenizer"),
+            source_model_hash=source_hash,
+            tokenizer_hash=tokenizer_hash,
             workload_contract_hash=workload_hash,
             hardware_contract_hash=hardware_hash,
             compiler_version="1.0.0",
@@ -351,8 +438,8 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
     assert sealed.capsule_digest is not None
     context = ValidationContext(
         expected_capsule_digest=sealed.capsule_digest,
-        source_model_hash=_constant_digest("model"),
-        tokenizer_hash=_constant_digest("tokenizer"),
+        source_model_hash=source_hash,
+        tokenizer_hash=tokenizer_hash,
         workload_contract_hash=workload_hash,
         hardware_contract_hash=hardware_hash,
         hardware_fingerprint=hardware_hash,
@@ -408,6 +495,91 @@ def test_complete_capsule_is_promotion_eligible(tmp_path: Path) -> None:
     assert report.evidence_complete
     assert report.promotion_eligible
     assert report.issues == ()
+
+
+def test_performance_claim_must_anchor_complete_benchmark_provenance(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    performance = next(
+        record for record in capsule.evidence if record.evidence_class is EvidenceClass.PERFORMANCE
+    )
+    candidate_samples = next(
+        artifact
+        for artifact in capsule.artifacts
+        if artifact.artifact_id == capsule.benchmarks[0].raw_samples_artifact_id
+    )
+    incomplete = performance.model_copy(update={"artifact_ids": (candidate_samples.artifact_id,)})
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "evidence": tuple(
+                    incomplete if record.evidence_id == performance.evidence_id else record
+                    for record in capsule.evidence
+                ),
+            }
+        )
+    )
+    assert resealed.capsule_digest is not None
+    attacker_reanchored = TrustedEvidenceAnchor(
+        evidence_id=incomplete.evidence_id,
+        evidence_record_digest=_digest(canonical_json(incomplete)),
+        issuer=incomplete.issuer,
+        issuer_version=incomplete.issuer_version,
+        artifacts=(
+            TrustedArtifactAnchor(
+                artifact_id=candidate_samples.artifact_id,
+                digest=candidate_samples.digest,
+            ),
+        ),
+    )
+    report = validate_capsule(
+        resealed,
+        tmp_path,
+        context.model_copy(
+            update={
+                "expected_capsule_digest": resealed.capsule_digest,
+                "trusted_evidence_anchors": tuple(
+                    attacker_reanchored if anchor.evidence_id == performance.evidence_id else anchor
+                    for anchor in context.trusted_evidence_anchors
+                ),
+            }
+        ),
+    )
+
+    codes = {issue.code for issue in report.issues}
+    assert ValidationIssueCode.BENCHMARK_PROVENANCE_INVALID in codes
+    assert ValidationIssueCode.EVIDENCE_UNTRUSTED not in codes
+    assert not report.promotion_eligible
+
+
+def test_promotion_rejects_runtime_outside_validated_bundle_format(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    runtime = next(
+        artifact
+        for artifact in capsule.artifacts
+        if artifact.role is ArtifactRole.GENERATED_RUNTIME
+    )
+    mislabeled = runtime.model_copy(update={"media_type": "application/octet-stream"})
+    resealed = seal_capsule(
+        capsule.model_copy(
+            update={
+                "capsule_digest": None,
+                "artifacts": tuple(
+                    mislabeled if artifact.artifact_id == runtime.artifact_id else artifact
+                    for artifact in capsule.artifacts
+                ),
+            }
+        )
+    )
+    assert resealed.capsule_digest is not None
+
+    report = validate_capsule(
+        resealed,
+        tmp_path,
+        context.model_copy(update={"expected_capsule_digest": resealed.capsule_digest}),
+    )
+    assert ValidationIssueCode.REQUIRED_ARTIFACT_MISSING in {issue.code for issue in report.issues}
+    assert not report.promotion_eligible
 
 
 def test_truthful_high_regression_probability_cannot_pass_performance_gate() -> None:
