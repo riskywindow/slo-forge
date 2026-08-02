@@ -12,17 +12,20 @@ mistaken proposal without executing it in the verifier.
 
 ## Decision
 
-Treat all generated output, synthesis/search logic, frontend heuristics, capsule construction, and
-external runtime code as untrusted. The narrow capsule/execution TCB consists of strict capsule
+Treat all generated output, synthesis/search proposals, frontend heuristics, and external runtime
+code as untrusted. The narrow capsule/execution TCB consists of strict capsule
 types and schema, canonical serialization and hashing, bounded immutable I/O, the independent
 capsule validator, content-addressed artifact verification, and sandbox policy/execution. The wider
 operational TCB additionally includes the restricted-DSL compiler/checker, model-check result
-validator, benchmark acceptance logic, promotion state machine, and rollback controller when their
-claims are used.
+validator, local evidence issuer, benchmark acceptance logic, promotion state machine, and rollback
+controller when their claims are used.
 
-The capsule builder is not trusted: it produces a proposal that the independent validator checks.
-Generated code is never imported into the validator process. Every trusted parser is strict,
-bounded, and fail-closed. TCB source size and direct imports are measured with the commands in
+The local capsule builder is part of the conservative evidence-issuance TCB because it creates the
+trusted validation context and evidence anchors. It independently recomputes bounded proof and
+property documents, re-hashes the reference package, and sandbox-replays final-corpus evidence;
+its result must still pass the separately structured capsule validator. Generated code is never
+imported into the validator process. Every trusted parser is strict, bounded, and fail-closed. TCB
+source size and direct imports are measured with the commands in
 [`TRUST_MODEL.md`](../genesis/TRUST_MODEL.md); OS, interpreter, schema, and transitive dependencies
 are disclosed separately.
 
