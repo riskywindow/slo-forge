@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from .models import BottleneckEvidence, RawBottleneckRecord
+from .models import AttributionScope, BottleneckEvidence, EvidenceSource, RawBottleneckRecord
 
 
 class BottleneckEvidenceError(ValueError):
@@ -21,6 +21,14 @@ def validate_bottleneck_evidence(
         raise BottleneckEvidenceError("evidence does not identify the focused operator")
     if evidence.observed_fraction < minimum_fraction:
         raise BottleneckEvidenceError("operator contribution is below the synthesis threshold")
+    if evidence.source is EvidenceSource.CPU_PROFILE_MEASURED and (
+        evidence.attribution_scope is not AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE
+        or evidence.causal_attribution
+        or not evidence.synthetic
+    ):
+        raise BottleneckEvidenceError(
+            "the local CPU target must be labeled as a measured synthetic microprobe"
+        )
     path = Path(evidence.raw_evidence_path)
     try:
         payload = path.read_bytes()
@@ -40,7 +48,7 @@ def validate_bottleneck_evidence(
         raise BottleneckEvidenceError(
             "raw evidence sample count does not match its typed reference"
         )
-    if abs(raw.token_loop_fraction - evidence.observed_fraction) > 1e-12:
+    if raw.attribution_scope != evidence.attribution_scope.value:
+        raise BottleneckEvidenceError("raw evidence attribution scope does not match")
+    if abs(raw.operator_probe_fraction - evidence.observed_fraction) > 1e-12:
         raise BottleneckEvidenceError("raw evidence fraction does not match its typed reference")
-    if evidence.synthetic and evidence.source.value.endswith("measured"):
-        raise BottleneckEvidenceError("measured evidence cannot be marked synthetic")

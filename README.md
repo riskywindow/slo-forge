@@ -255,7 +255,7 @@ sloforge profile \
 
 Install the separate `gpu-vllm` and `gpu-sglang` extras in engine-compatible environments when those servers are requested. The Transformers path is the direct correctness baseline; vLLM and SGLang use managed OpenAI-compatible servers. TensorRT-LLM is isolated behind its optional adapter. Torch Perfetto traces, bounded server logs, package/CUDA metadata, and generated Nsight commands are retained. `make benchmark-gpu` records an explicit unavailable artifact rather than numbers when no NVIDIA device exists.
 
-The Triton fused logits experiment is opt-in and never selected at runtime without a measured 10% benefit:
+The Triton fused logits experiment is opt-in and never selected automatically at runtime. Its isolated-kernel claim gate requires randomized interleaved trials whose lower paired bootstrap bound exceeds a 10% practical threshold; that does not establish end-to-end serving benefit:
 
 ```console
 uv run python benchmarks/gpu/benchmark_fused_logits.py \

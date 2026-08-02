@@ -9,6 +9,7 @@ import pytest
 from sloforge.genesis.kernel_lab import (
     AcceptanceStatus,
     AdapterStatus,
+    AttributionScope,
     BottleneckEvidence,
     BottleneckEvidenceError,
     EvidenceSource,
@@ -22,6 +23,7 @@ from sloforge.genesis.kernel_lab import (
     hybrid_quantized_state_schema,
     run_kernel_lab_demo,
     triton_adapter_status,
+    validate_benchmark_report,
     validate_bottleneck_evidence,
     validate_generated_source,
 )
@@ -31,12 +33,16 @@ SEED = 73129
 
 def _evidence(tmp_path: Path, *, observed_fraction: float = 0.18) -> BottleneckEvidence:
     raw = tmp_path / "autopsy-operator-attribution.json"
+    operator_time = round(observed_fraction * 1_000_000)
+    comparison_time = 1_000_000 - operator_time
     raw.write_text(
         json.dumps(
             {
                 "operator_id": "quantized-state-update",
-                "inclusive_cpu_time_ns": [913, 887, 921, 905, 899, 918, 902],
-                "token_loop_fraction": observed_fraction,
+                "inclusive_cpu_time_ns": [operator_time] * 7,
+                "comparison_work_time_ns": [comparison_time] * 7,
+                "operator_probe_fraction": observed_fraction,
+                "attribution_scope": "measured_synthetic_operator_microprobe",
                 "seed": SEED,
             },
             sort_keys=True,
@@ -44,8 +50,10 @@ def _evidence(tmp_path: Path, *, observed_fraction: float = 0.18) -> BottleneckE
         encoding="utf-8",
     )
     return BottleneckEvidence(
-        evidence_id="autopsy-hybrid-qstate",
+        evidence_id="cpu-microprobe-hybrid-qstate",
         source=EvidenceSource.CPU_PROFILE_MEASURED,
+        attribution_scope=AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE,
+        causal_attribution=False,
         operator_id="quantized-state-update",
         genome_region="state.quantized_state",
         observed_fraction=observed_fraction,
@@ -55,7 +63,7 @@ def _evidence(tmp_path: Path, *, observed_fraction: float = 0.18) -> BottleneckE
         raw_evidence_sha256=hashlib.sha256(raw.read_bytes()).hexdigest(),
         hardware_fingerprint="cpu-local-test",
         workload_fingerprint="hybrid-agentic-mixed",
-        synthetic=False,
+        synthetic=True,
     )
 
 
@@ -243,7 +251,7 @@ def test_cpu_benchmark_preserves_raw_samples_ci_order_and_end_to_end(
     assert {item.regime for item in report.regimes} == {
         "micro_batch_1",
         "micro_noncontiguous",
-        "token_loop_batch_32",
+        "operator_loop_batch_32",
     }
     for regime in report.regimes:
         assert regime.warmup_count == config.warmup_count
@@ -256,15 +264,13 @@ def test_cpu_benchmark_preserves_raw_samples_ci_order_and_end_to_end(
         }
         assert regime.confidence_interval_low_percent <= regime.confidence_interval_high_percent
     decision = decide_candidate(correctness, report)
-    if decision.status is AcceptanceStatus.ACCEPTED:
-        assert decision.claim.startswith("accepted within")
-        assert decision.microbenchmark_status is LabStatus.PASSED
-        assert decision.end_to_end_status is LabStatus.PASSED
-    else:
-        assert decision.claim.startswith("no speedup claim")
+    assert decision.status is not AcceptanceStatus.ACCEPTED
+    assert decision.full_stack_status is LabStatus.UNAVAILABLE
+    assert decision.claim.startswith("no speedup claim")
+    validate_benchmark_report(report)
 
 
-def test_inconclusive_end_to_end_result_cannot_claim_speedup(tmp_path: Path) -> None:
+def test_operator_loop_status_cannot_be_altered_to_change_decision(tmp_path: Path) -> None:
     candidate, source = generate_candidates(seed=SEED)[0]
     correctness = execute_correctness(
         candidate,
@@ -281,19 +287,48 @@ def test_inconclusive_end_to_end_result_cannot_claim_speedup(tmp_path: Path) -> 
         config=_small_benchmark_config(),
     )
     regimes = tuple(
-        item.model_copy(update={"status": LabStatus.INCONCLUSIVE})
-        if item.regime == "token_loop_batch_32"
+        item.model_copy(
+            update={
+                "status": (
+                    LabStatus.FAILED if item.status is not LabStatus.FAILED else LabStatus.PASSED
+                )
+            }
+        )
+        if item.regime == "operator_loop_batch_32"
         else item
         for item in report.regimes
     )
     inconclusive = report.model_copy(update={"status": LabStatus.INCONCLUSIVE, "regimes": regimes})
-    decision = decide_candidate(correctness, inconclusive)
-    assert decision.status is not AcceptanceStatus.ACCEPTED
-    assert decision.end_to_end_status is LabStatus.INCONCLUSIVE
-    assert decision.claim.startswith("no speedup claim")
+    with pytest.raises(ValueError, match="not derived"):
+        decide_candidate(correctness, inconclusive)
 
 
-def test_inconclusive_declared_regime_cannot_claim_speedup(tmp_path: Path) -> None:
+def test_benchmark_recomputation_rejects_tampered_claims(tmp_path: Path) -> None:
+    candidate, source = generate_candidates(seed=SEED)[0]
+    correctness = execute_correctness(
+        candidate,
+        source,
+        generate_correctness_cases(seed=SEED, randomized_cases=1),
+        output_root=tmp_path / "correctness",
+        seed=SEED,
+    )
+    report = benchmark_candidate(
+        candidate,
+        source,
+        correctness,
+        output_root=tmp_path / "benchmark",
+        config=_small_benchmark_config(),
+    )
+    validate_benchmark_report(report)
+    first = report.regimes[0].model_copy(
+        update={"improvement_percent": report.regimes[0].improvement_percent + 50.0}
+    )
+    tampered = report.model_copy(update={"regimes": (first, *report.regimes[1:])})
+    with pytest.raises(ValueError, match="not derived"):
+        validate_benchmark_report(tampered)
+
+
+def test_microbenchmark_status_cannot_be_altered_to_change_decision(tmp_path: Path) -> None:
     candidate, source = generate_candidates(seed=SEED)[0]
     correctness = execute_correctness(
         candidate,
@@ -310,15 +345,20 @@ def test_inconclusive_declared_regime_cannot_claim_speedup(tmp_path: Path) -> No
         config=_small_benchmark_config(),
     )
     regimes = tuple(
-        item.model_copy(update={"status": LabStatus.INCONCLUSIVE})
+        item.model_copy(
+            update={
+                "status": (
+                    LabStatus.FAILED if item.status is not LabStatus.FAILED else LabStatus.PASSED
+                )
+            }
+        )
         if item.regime == "micro_batch_1"
         else item
         for item in report.regimes
     )
     inconclusive = report.model_copy(update={"status": LabStatus.INCONCLUSIVE, "regimes": regimes})
-    decision = decide_candidate(correctness, inconclusive)
-    assert decision.status is not AcceptanceStatus.ACCEPTED
-    assert decision.claim.startswith("no speedup claim")
+    with pytest.raises(ValueError, match="not derived"):
+        decide_candidate(correctness, inconclusive)
 
 
 def test_triton_adapter_is_fail_closed_and_never_claims_execution(
@@ -353,8 +393,7 @@ def test_demo_writes_source_raw_negative_and_aggregate_artifacts(tmp_path: Path)
     )
     assert json.loads((output / "kernel_lab_report.json").read_text())["evidence"]
     assert report.decisions[0].claim in {
-        "accepted within the declared CPU, shape, numerical, and measured workload scope",
-        "no speedup claim; candidate retained with negative or inconclusive evidence",
+        "no speedup claim; isolated operator evidence is not end-to-end serving evidence",
     }
     with pytest.raises(FileExistsError, match="must be empty"):
         run_kernel_lab_demo(

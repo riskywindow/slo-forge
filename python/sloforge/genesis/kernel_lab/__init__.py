@@ -1,6 +1,6 @@
 """Focused, proof-gated Genesis kernel synthesis laboratory."""
 
-from .benchmark import benchmark_candidate, decide_candidate
+from .benchmark import benchmark_candidate, decide_candidate, validate_benchmark_report
 from .cases import generate_correctness_cases, reference_quantized_state_update
 from .demo import run_kernel_lab_demo
 from .evidence import BottleneckEvidenceError, validate_bottleneck_evidence
@@ -16,6 +16,7 @@ from .models import (
     AdapterStatus,
     AliasingConstraint,
     ArchitectureConstraint,
+    AttributionScope,
     BenchmarkRegimeEvidence,
     BenchmarkSample,
     BottleneckEvidence,
@@ -47,6 +48,7 @@ __all__ = [
     "AdapterStatus",
     "AliasingConstraint",
     "ArchitectureConstraint",
+    "AttributionScope",
     "BenchmarkRegimeEvidence",
     "BenchmarkSample",
     "BottleneckEvidence",
@@ -79,6 +81,7 @@ __all__ = [
     "reference_quantized_state_update",
     "run_kernel_lab_demo",
     "triton_adapter_status",
+    "validate_benchmark_report",
     "validate_bottleneck_evidence",
     "validate_generated_source",
 ]

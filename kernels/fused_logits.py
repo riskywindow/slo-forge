@@ -1,15 +1,20 @@
+import hashlib
 import importlib
 import importlib.metadata
 import importlib.util
+import json
 import math
+import platform
 import random
 import statistics
 from collections.abc import Callable, Sequence
-from typing import Any, Self
+from typing import Any, Literal, Self, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from sloforge.util import percentile, utc_now
+
+TimingAlternative: TypeAlias = Literal["reference", "triton"]
 
 
 class KernelTiming(BaseModel):
@@ -34,10 +39,34 @@ class KernelTiming(BaseModel):
         return self
 
 
+class RandomizedCorrectnessEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["passed"] = "passed"
+    seed: int = Field(ge=0)
+    shapes: tuple[tuple[int, int], ...]
+    trials_per_shape: int = Field(gt=0)
+    cases_executed: int = Field(gt=0)
+    case_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    device_index: int = Field(ge=0)
+    hardware_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    relative_tolerance: float = Field(ge=0.0)
+    absolute_tolerance: float = Field(ge=0.0)
+
+
+class InterleavedTimingTrial(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    trial_index: int = Field(ge=0)
+    first: Literal["reference", "triton"]
+    reference_ms: float = Field(gt=0.0)
+    triton_ms: float = Field(gt=0.0)
+
+
 class FusedLogitsBenchmark(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "sloforge.kernel-benchmark/v1"
+    schema_version: Literal["sloforge.kernel-benchmark/v2"] = "sloforge.kernel-benchmark/v2"
     generated_at: str
     seed: int
     shape: tuple[int, int]
@@ -46,15 +75,45 @@ class FusedLogitsBenchmark(BaseModel):
     repetition_penalty: float
     seen_probability: float
     warmups: int
+    samples: int
     device_name: str
     device_index: int = Field(ge=0)
     torch_version: str
     triton_version: str
+    correctness: RandomizedCorrectnessEvidence
+    raw_trials: tuple[InterleavedTimingTrial, ...]
+    raw_samples_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    workload_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    hardware_manifest: tuple[str, ...]
+    hardware_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    software_manifest: tuple[str, ...]
+    software_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     reference: KernelTiming
     triton: KernelTiming
     speedup: float = Field(gt=0)
+    paired_improvement_median_percent: float
+    paired_improvement_ci95_percent: tuple[float, float]
+    practical_significance_percent: float = Field(ge=0.0)
     beneficial: bool
+    claim: str
     enablement: str
+
+    @model_validator(mode="after")
+    def validate_claim_scope(self) -> Self:
+        if self.samples < 20 or len(self.raw_trials) != self.samples:
+            raise ValueError("raw interleaved trial count must match the declared sample count")
+        if self.correctness.device_index != self.device_index:
+            raise ValueError("correctness and benchmark device indices differ")
+        if self.correctness.seed != self.seed or self.shape not in self.correctness.shapes:
+            raise ValueError("correctness evidence does not cover this seeded benchmark shape")
+        if self.correctness.hardware_fingerprint != self.hardware_fingerprint:
+            raise ValueError("correctness and benchmark hardware fingerprints differ")
+        low, high = self.paired_improvement_ci95_percent
+        if not math.isfinite(low) or not math.isfinite(high) or low > high:
+            raise ValueError("paired improvement interval is invalid")
+        if self.beneficial != self.claim.startswith("scoped isolated-kernel speedup"):
+            raise ValueError("beneficial flag and scoped claim disagree")
+        return self
 
 
 def triton_available() -> bool:
@@ -80,6 +139,66 @@ def _require_cuda(*, device: str, device_index: int) -> Any:
             f"CUDA device index {device_index} is unavailable; detected {device_count} device(s)"
         )
     return torch
+
+
+def _sha256_json(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def _hardware_manifest(torch: Any, device_index: int) -> tuple[str, ...]:
+    properties = torch.cuda.get_device_properties(device_index)
+    return (
+        f"device_index={device_index}",
+        f"device_name={torch.cuda.get_device_name(device_index)}",
+        f"compute_capability={properties.major}.{properties.minor}",
+        f"total_memory={properties.total_memory}",
+        f"multiprocessor_count={properties.multi_processor_count}",
+        f"device_count={torch.cuda.device_count()}",
+    )
+
+
+def manifest_fingerprint(manifest: Sequence[str]) -> str:
+    if not manifest or len(manifest) != len(set(manifest)):
+        raise ValueError("provenance manifest must be non-empty and unique")
+    return hashlib.sha256("\0".join(manifest).encode()).hexdigest()
+
+
+def fused_logits_workload_fingerprint(
+    *,
+    shape: tuple[int, int],
+    dtype: str,
+    temperature: float,
+    repetition_penalty: float,
+    seen_probability: float,
+    warmups: int,
+    samples: int,
+    seed: int,
+    practical_significance_percent: float,
+) -> str:
+    return _sha256_json(
+        {
+            "shape": shape,
+            "dtype": dtype,
+            "temperature": temperature,
+            "repetition_penalty": repetition_penalty,
+            "seen_probability": seen_probability,
+            "warmups": warmups,
+            "samples": samples,
+            "seed": seed,
+            "practical_significance_percent": practical_significance_percent,
+            "measurement": "randomized_interleaved_cuda_events",
+        }
+    )
+
+
+def interleaved_trials_bytes(trials: tuple[InterleavedTimingTrial, ...]) -> bytes:
+    return b"".join(
+        json.dumps(trial.model_dump(mode="json"), sort_keys=True, separators=(",", ":")).encode()
+        + b"\n"
+        for trial in trials
+    )
 
 
 def _validate_inputs(
@@ -205,29 +324,32 @@ def run_randomized_correctness(
     trials_per_shape: int = 3,
     device: str = "cuda",
     device_index: int = 0,
-) -> None:
+) -> RandomizedCorrectnessEvidence:
     if trials_per_shape < 1:
         raise ValueError("trials_per_shape must be positive")
     torch = _require_cuda(device=device, device_index=device_index)
     if not triton_available():
         raise RuntimeError("randomized Triton correctness requires Triton")
+    shape_tuple = tuple(shapes)
     rng = random.Random(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    for batch, vocabulary in shapes:
+    case_manifest: list[dict[str, object]] = []
+    for batch, vocabulary in shape_tuple:
         if batch < 1 or vocabulary < 1:
             raise ValueError("correctness shapes must be positive")
-        for _ in range(trials_per_shape):
+        for trial_index in range(trials_per_shape):
             cuda_device = f"cuda:{device_index}"
             dtype = rng.choice((torch.float16, torch.bfloat16, torch.float32))
             temperature = rng.choice((0.05, 0.5, 1.0, 2.0))
             penalty = rng.choice((1.0, 1.01, 1.2, 2.0))
+            seen_probability = rng.random()
             logits = torch.randn((batch, vocabulary), device=cuda_device, dtype=dtype) * 20
             if vocabulary >= 3:
                 logits[0, :3] = torch.tensor(
                     [-float("inf"), 0.0, float("inf")], device=cuda_device, dtype=dtype
                 )
-            seen = torch.rand((batch, vocabulary), device=cuda_device) < rng.random()
+            seen = torch.rand((batch, vocabulary), device=cuda_device) < seen_probability
             expected = reference_logits_preprocess(
                 logits,
                 seen,
@@ -241,6 +363,28 @@ def run_randomized_correctness(
                 repetition_penalty=penalty,
             )
             torch.testing.assert_close(actual, expected, rtol=2e-3, atol=2e-3, equal_nan=True)
+            case_manifest.append(
+                {
+                    "shape": [batch, vocabulary],
+                    "trial_index": trial_index,
+                    "dtype": str(dtype),
+                    "temperature": temperature,
+                    "repetition_penalty": penalty,
+                    "seen_probability": seen_probability,
+                }
+            )
+    hardware = manifest_fingerprint(_hardware_manifest(torch, device_index))
+    return RandomizedCorrectnessEvidence(
+        seed=seed,
+        shapes=shape_tuple,
+        trials_per_shape=trials_per_shape,
+        cases_executed=len(case_manifest),
+        case_manifest_sha256=_sha256_json(case_manifest),
+        device_index=device_index,
+        hardware_fingerprint=hardware,
+        relative_tolerance=2e-3,
+        absolute_tolerance=2e-3,
+    )
 
 
 def _bootstrap_median_ci(samples: Sequence[float], *, seed: int) -> tuple[float, float]:
@@ -251,23 +395,8 @@ def _bootstrap_median_ci(samples: Sequence[float], *, seed: int) -> tuple[float,
     return percentile(medians, 0.025), percentile(medians, 0.975)
 
 
-def _time_cuda(
-    function: Callable[[], Any], *, warmups: int, samples: int, torch: Any, seed: int, name: str
-) -> KernelTiming:
-    for _ in range(warmups):
-        function()
-    torch.cuda.synchronize()
-    measured: list[float] = []
-    for _ in range(samples):
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        start.record()
-        result = function()
-        end.record()
-        end.synchronize()
-        if result is None:
-            raise RuntimeError(f"{name} benchmark returned no result")
-        measured.append(float(start.elapsed_time(end)))
+def _timing_from_samples(samples: Sequence[float], *, seed: int, name: str) -> KernelTiming:
+    measured = list(samples)
     median = statistics.median(measured)
     deviations = [abs(value - median) for value in measured]
     return KernelTiming(
@@ -277,6 +406,79 @@ def _time_cuda(
         p95_ms=percentile(measured, 0.95),
         mad_ms=statistics.median(deviations),
         median_ci95_ms=_bootstrap_median_ci(measured, seed=seed),
+    )
+
+
+def _time_one_cuda(function: Callable[[], Any], *, torch: Any, name: str) -> float:
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
+    start.record()
+    result = function()
+    end.record()
+    end.synchronize()
+    if result is None:
+        raise RuntimeError(f"{name} benchmark returned no result")
+    return max(float(start.elapsed_time(end)), 1e-9)
+
+
+def _measure_interleaved(
+    reference: Callable[[], Any],
+    triton: Callable[[], Any],
+    *,
+    warmups: int,
+    samples: int,
+    torch: Any,
+    seed: int,
+) -> tuple[InterleavedTimingTrial, ...]:
+    implementations: dict[TimingAlternative, Callable[[], Any]] = {
+        "reference": reference,
+        "triton": triton,
+    }
+    generator = random.Random(seed)
+    for warmup_index in range(warmups):
+        order: tuple[TimingAlternative, TimingAlternative] = (
+            ("triton", "reference") if (warmup_index + seed) % 2 else ("reference", "triton")
+        )
+        for name in order:
+            result = implementations[name]()
+            if result is None:
+                raise RuntimeError(f"{name} warmup returned no result")
+    torch.cuda.synchronize()
+    trials: list[InterleavedTimingTrial] = []
+    first_positions: list[TimingAlternative] = [
+        "reference" if index % 2 == 0 else "triton" for index in range(samples)
+    ]
+    generator.shuffle(first_positions)
+    for trial_index, first in enumerate(first_positions):
+        order = (first, "triton" if first == "reference" else "reference")
+        durations: dict[str, float] = {}
+        for name in order:
+            durations[name] = _time_one_cuda(implementations[name], torch=torch, name=name)
+        trials.append(
+            InterleavedTimingTrial(
+                trial_index=trial_index,
+                first=first,
+                reference_ms=durations["reference"],
+                triton_ms=durations["triton"],
+            )
+        )
+    return tuple(trials)
+
+
+def _paired_improvement(
+    trials: Sequence[InterleavedTimingTrial], *, seed: int
+) -> tuple[float, tuple[float, float]]:
+    improvements = tuple(
+        (trial.reference_ms - trial.triton_ms) / trial.reference_ms * 100.0 for trial in trials
+    )
+    generator = random.Random(seed)
+    medians = [
+        statistics.median(generator.choices(improvements, k=len(improvements)))
+        for _ in range(2_000)
+    ]
+    return statistics.median(improvements), (
+        percentile(medians, 0.025),
+        percentile(medians, 0.975),
     )
 
 
@@ -294,6 +496,8 @@ def benchmark_fused_logits(
     enable_triton_experiment: bool,
     device: str = "cuda",
     device_index: int = 0,
+    practical_significance_percent: float = 10.0,
+    correctness: RandomizedCorrectnessEvidence | None = None,
 ) -> FusedLogitsBenchmark:
     """Benchmark only after an explicit opt-in; no result controls production enablement."""
     if not enable_triton_experiment:
@@ -304,6 +508,8 @@ def benchmark_fused_logits(
         raise ValueError("seen_probability must be between zero and one")
     if warmups < 3 or samples < 20:
         raise ValueError("kernel benchmark requires at least 3 warmups and 20 samples")
+    if not math.isfinite(practical_significance_percent) or practical_significance_percent < 0:
+        raise ValueError("practical significance must be finite and non-negative")
     torch = _require_cuda(device=device, device_index=device_index)
     if not triton_available():
         raise RuntimeError("Triton benchmark requested but Triton is not installed")
@@ -317,6 +523,17 @@ def benchmark_fused_logits(
         raise ValueError(f"unsupported dtype {dtype_name!r}; expected one of {sorted(dtypes)}")
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+    hardware_manifest = _hardware_manifest(torch, device_index)
+    hardware_fingerprint = manifest_fingerprint(hardware_manifest)
+    correctness_evidence = correctness or run_randomized_correctness(
+        seed=seed,
+        shapes=((1, 1), (batch, vocabulary)),
+        trials_per_shape=2,
+        device=device,
+        device_index=device_index,
+    )
+    if correctness_evidence.hardware_fingerprint != hardware_fingerprint:
+        raise ValueError("correctness evidence was measured on different hardware")
     cuda_device = f"cuda:{device_index}"
     logits = torch.randn((batch, vocabulary), device=cuda_device, dtype=dtype)
     seen = torch.rand((batch, vocabulary), device=cuda_device) < seen_probability
@@ -327,24 +544,38 @@ def benchmark_fused_logits(
     expected = reference_logits_preprocess(logits, seen, **arguments)
     actual = triton_logits_preprocess(logits, seen, **arguments)
     torch.testing.assert_close(actual, expected, rtol=2e-3, atol=2e-3)
-    reference_timing = _time_cuda(
+    trials = _measure_interleaved(
         lambda: reference_logits_preprocess(logits, seen, **arguments),
-        warmups=warmups,
-        samples=samples,
-        torch=torch,
-        seed=seed,
-        name="pytorch-reference",
-    )
-    triton_timing = _time_cuda(
         lambda: triton_logits_preprocess(logits, seen, **arguments),
         warmups=warmups,
         samples=samples,
         torch=torch,
+        seed=seed,
+    )
+    if {trial.first for trial in trials} != {"reference", "triton"}:
+        raise RuntimeError("randomized measurement order did not exercise both first positions")
+    reference_timing = _timing_from_samples(
+        [trial.reference_ms for trial in trials],
         seed=seed + 1,
+        name="pytorch-reference",
+    )
+    triton_timing = _timing_from_samples(
+        [trial.triton_ms for trial in trials],
+        seed=seed + 2,
         name="triton-fused",
     )
     speedup = reference_timing.median_ms / triton_timing.median_ms
-    return FusedLogitsBenchmark(
+    improvement, improvement_interval = _paired_improvement(trials, seed=seed + 3)
+    beneficial = improvement_interval[0] > practical_significance_percent
+    software_manifest = (
+        f"python={platform.python_version()}",
+        f"torch={torch.__version__}",
+        f"torch_cuda={torch.version.cuda}",
+        f"triton={importlib.metadata.version('triton')}",
+        "timer=cuda_event_elapsed_time",
+        "order=randomized_interleaved_pairs",
+    )
+    report = FusedLogitsBenchmark(
         generated_at=utc_now(),
         seed=seed,
         shape=(batch, vocabulary),
@@ -353,14 +584,107 @@ def benchmark_fused_logits(
         repetition_penalty=repetition_penalty,
         seen_probability=seen_probability,
         warmups=warmups,
+        samples=samples,
         device_name=str(torch.cuda.get_device_name(device_index)),
         device_index=device_index,
         torch_version=str(torch.__version__),
         triton_version=importlib.metadata.version("triton"),
+        correctness=correctness_evidence,
+        raw_trials=trials,
+        raw_samples_sha256=hashlib.sha256(interleaved_trials_bytes(trials)).hexdigest(),
+        workload_fingerprint=fused_logits_workload_fingerprint(
+            shape=(batch, vocabulary),
+            dtype=dtype_name,
+            temperature=temperature,
+            repetition_penalty=repetition_penalty,
+            seen_probability=seen_probability,
+            warmups=warmups,
+            samples=samples,
+            seed=seed,
+            practical_significance_percent=practical_significance_percent,
+        ),
+        hardware_manifest=hardware_manifest,
+        hardware_fingerprint=hardware_fingerprint,
+        software_manifest=software_manifest,
+        software_manifest_sha256=manifest_fingerprint(software_manifest),
         reference=reference_timing,
         triton=triton_timing,
         speedup=speedup,
-        # Require a margin larger than normal timing noise before calling it beneficial.
-        beneficial=speedup >= 1.10,
+        paired_improvement_median_percent=improvement,
+        paired_improvement_ci95_percent=improvement_interval,
+        practical_significance_percent=practical_significance_percent,
+        beneficial=beneficial,
+        claim=(
+            "scoped isolated-kernel speedup supported by the paired confidence gate; "
+            "no end-to-end serving claim"
+            if beneficial
+            else "no speedup claim; paired confidence interval did not clear the practical gate"
+        ),
         enablement="experimental-only; never enabled by the SLOForge runtime",
     )
+    validate_fused_logits_benchmark(report)
+    return report
+
+
+def validate_fused_logits_benchmark(report: FusedLogitsBenchmark) -> None:
+    """Recompute every timing and acceptance field from paired raw GPU trials."""
+
+    if [trial.trial_index for trial in report.raw_trials] != list(range(report.samples)):
+        raise ValueError("interleaved GPU trial indices are incomplete or reordered")
+    if {trial.first for trial in report.raw_trials} != {"reference", "triton"}:
+        raise ValueError("interleaved GPU trials do not include both first positions")
+    digest = hashlib.sha256(interleaved_trials_bytes(report.raw_trials)).hexdigest()
+    if digest != report.raw_samples_sha256:
+        raise ValueError("interleaved GPU raw sample digest mismatch")
+    expected_workload = fused_logits_workload_fingerprint(
+        shape=report.shape,
+        dtype=report.dtype,
+        temperature=report.temperature,
+        repetition_penalty=report.repetition_penalty,
+        seen_probability=report.seen_probability,
+        warmups=report.warmups,
+        samples=report.samples,
+        seed=report.seed,
+        practical_significance_percent=report.practical_significance_percent,
+    )
+    if expected_workload != report.workload_fingerprint:
+        raise ValueError("GPU workload fingerprint is not reproducible")
+    if manifest_fingerprint(report.hardware_manifest) != report.hardware_fingerprint:
+        raise ValueError("GPU hardware fingerprint is not derived from its manifest")
+    if manifest_fingerprint(report.software_manifest) != report.software_manifest_sha256:
+        raise ValueError("GPU software manifest digest mismatch")
+    if (
+        f"device_name={report.device_name}" not in report.hardware_manifest
+        or f"torch={report.torch_version}" not in report.software_manifest
+        or f"triton={report.triton_version}" not in report.software_manifest
+    ):
+        raise ValueError("GPU summary fields are not bound to provenance manifests")
+    reference = _timing_from_samples(
+        [trial.reference_ms for trial in report.raw_trials],
+        seed=report.seed + 1,
+        name="pytorch-reference",
+    )
+    triton = _timing_from_samples(
+        [trial.triton_ms for trial in report.raw_trials],
+        seed=report.seed + 2,
+        name="triton-fused",
+    )
+    improvement, interval = _paired_improvement(report.raw_trials, seed=report.seed + 3)
+    speedup = reference.median_ms / triton.median_ms
+    beneficial = interval[0] > report.practical_significance_percent
+    expected_claim = (
+        "scoped isolated-kernel speedup supported by the paired confidence gate; "
+        "no end-to-end serving claim"
+        if beneficial
+        else "no speedup claim; paired confidence interval did not clear the practical gate"
+    )
+    if (
+        reference != report.reference
+        or triton != report.triton
+        or speedup != report.speedup
+        or improvement != report.paired_improvement_median_percent
+        or interval != report.paired_improvement_ci95_percent
+        or beneficial != report.beneficial
+        or expected_claim != report.claim
+    ):
+        raise ValueError("GPU performance claim is not derived from paired raw trials")

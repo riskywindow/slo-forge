@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 from pathlib import Path
 from types import ModuleType
@@ -66,14 +67,33 @@ def test_triton_benchmark_is_never_default_enabled() -> None:
 
 def test_gpu_benchmark_artifact_schema_validates_without_fabricating_measurements() -> None:
     kernel: Any = _kernel()
+    trials = tuple(
+        kernel.InterleavedTimingTrial(
+            trial_index=index,
+            first="reference" if index % 2 == 0 else "triton",
+            reference_ms=1.0,
+            triton_ms=1.0,
+        )
+        for index in range(20)
+    )
     timing = {
-        "implementation": "schema-validation-only",
-        "samples_ms": [1.0] * 5,
+        "implementation": "pytorch-reference",
+        "samples_ms": [1.0] * 20,
         "median_ms": 1.0,
         "p95_ms": 1.0,
         "mad_ms": 0.0,
         "median_ci95_ms": [1.0, 1.0],
     }
+    triton_timing = {**timing, "implementation": "triton-fused"}
+    hardware_manifest = (
+        "device_index=0",
+        "device_name=schema-only-no-device-claim",
+        "compute_capability=unexercised",
+        "total_memory=0",
+        "multiprocessor_count=0",
+        "device_count=0",
+    )
+    hardware_fingerprint = kernel.manifest_fingerprint(hardware_manifest)
     artifact = kernel.FusedLogitsBenchmark.model_validate(
         {
             "generated_at": "2026-01-01T00:00:00+00:00",
@@ -84,16 +104,58 @@ def test_gpu_benchmark_artifact_schema_validates_without_fabricating_measurement
             "repetition_penalty": 1.1,
             "seen_probability": 0.1,
             "warmups": 3,
+            "samples": 20,
             "device_name": "schema-only-no-device-claim",
             "device_index": 0,
             "torch_version": "unexercised",
             "triton_version": "unexercised",
+            "correctness": {
+                "seed": 7,
+                "shapes": [[1, 32]],
+                "trials_per_shape": 1,
+                "cases_executed": 1,
+                "case_manifest_sha256": "0" * 64,
+                "device_index": 0,
+                "hardware_fingerprint": hardware_fingerprint,
+                "relative_tolerance": 0.002,
+                "absolute_tolerance": 0.002,
+            },
+            "raw_trials": [item.model_dump(mode="json") for item in trials],
+            "raw_samples_sha256": hashlib.sha256(
+                kernel.interleaved_trials_bytes(trials)
+            ).hexdigest(),
+            "workload_fingerprint": kernel.fused_logits_workload_fingerprint(
+                shape=(1, 32),
+                dtype="float16",
+                temperature=1.0,
+                repetition_penalty=1.1,
+                seen_probability=0.1,
+                warmups=3,
+                samples=20,
+                seed=7,
+                practical_significance_percent=10.0,
+            ),
+            "hardware_manifest": hardware_manifest,
+            "hardware_fingerprint": hardware_fingerprint,
+            "software_manifest": ["torch=unexercised", "triton=unexercised"],
+            "software_manifest_sha256": kernel.manifest_fingerprint(
+                ("torch=unexercised", "triton=unexercised")
+            ),
             "reference": timing,
-            "triton": timing,
+            "triton": triton_timing,
             "speedup": 1.0,
+            "paired_improvement_median_percent": 0.0,
+            "paired_improvement_ci95_percent": [0.0, 0.0],
+            "practical_significance_percent": 10.0,
             "beneficial": False,
+            "claim": "no speedup claim; paired confidence interval did not clear the practical gate",
             "enablement": "experimental-only; never enabled by the SLOForge runtime",
         }
     )
-    assert artifact.schema_version == "sloforge.kernel-benchmark/v1"
+    kernel.validate_fused_logits_benchmark(artifact)
+    assert artifact.schema_version == "sloforge.kernel-benchmark/v2"
     assert artifact.beneficial is False
+
+    tampered = artifact.model_copy(update={"speedup": 2.0})
+    with pytest.raises(ValueError, match="not derived"):
+        kernel.validate_fused_logits_benchmark(tampered)

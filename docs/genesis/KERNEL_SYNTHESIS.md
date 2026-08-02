@@ -1,6 +1,6 @@
 # Focused kernel synthesis
 
-Genesis Kernel Lab targets operations only after immutable bottleneck evidence identifies an operator and genome region with enough expected upside. The CPU-exercised target is HybridDecoder's `quantized-state-update`: a per-token persistent-state operation computing symmetric int8, ties-to-even rounding of `previous * 0.625 + activation * 31.0`, saturated to `[-127, 127]`.
+Genesis Kernel Lab targets operations only after immutable evidence identifies an operator and genome region with enough expected upside. The CPU-exercised target is HybridDecoder's `quantized-state-update`: a per-token persistent-state operation computing symmetric int8, ties-to-even rounding of `previous * 0.625 + activation * 31.0`, saturated to `[-127, 127]`. Its target evidence is a measured synthetic operator microprobe, not SLOForge Autopsy output, not causal attribution, and not a share of real inference runtime.
 
 ## Contract and generated surface
 
@@ -14,9 +14,9 @@ The correctness harness does not import generated code into the controller proce
 
 ## Performance evidence
 
-Benchmarking uses equal warmups, randomized reference/candidate order, repeated raw nanosecond samples, deterministic bootstrap confidence intervals, effect size, practical significance, and an explicit noise floor. It records scalar, non-contiguous batch, and end-to-end recurrent token-loop regimes. A candidate is accepted only when correctness passes and both the intended microbenchmark and token-loop intervals exceed the practical/noise threshold. A favorable point estimate is insufficient. Regression, unavailable, and inconclusive results are retained with `no speedup claim`.
+Benchmarking uses equal warmups, randomized reference/candidate order, repeated raw nanosecond samples, deterministic bootstrap confidence intervals, effect size, practical significance, and an explicit noise floor. It records scalar, non-contiguous batch, and repeated operator-loop regimes. The latter repeats only the focused operation; it is not end-to-end model or serving execution. The trusted validator reconstructs the order, trial sets, fingerprints, intervals, regime summaries, and aggregate status from raw samples. Because no full-stack serving benchmark is present, CPU candidates remain non-promotable and carry `no speedup claim` even when an isolated interval is favorable.
 
-The CPU fingerprint and Python software manifest scope every result. These are real local measurements, not GPU evidence. The optional Triton adapter only reports installed-version and opt-in status; it remains fail-closed and unexercised unless a separate real GPU harness and `SLOFORGE_GENESIS_ALLOW_GPU=1` are available. No CPU measurement is presented as a Triton, CUDA, or GPU-kernel result.
+The CPU fingerprint and Python software manifest scope every result. These are real local microprobe measurements over synthetic inputs, not Autopsy or GPU evidence. The optional fused-logits Triton harness requires explicit GPU opt-in, randomized correctness, balanced randomized interleaving, paired raw CUDA-event trials, a paired bootstrap interval, workload/hardware/software provenance, and independent recomputation. A scoped isolated-kernel speedup is recorded only when the lower paired interval clears the practical threshold; it never becomes an end-to-end serving claim or automatic runtime enablement.
 
 ## Validation status
 
@@ -40,4 +40,4 @@ do not by themselves establish a speedup.
 
 ## Artifacts
 
-`run_kernel_lab_demo` writes candidate source, correctness records, benchmark summaries, complete raw JSONL samples, decisions, and the aggregate report beneath its caller-supplied output directory. The repository does not check in generated measurement outputs. Every accepted or negative decision can therefore be reconstructed from its raw artifacts.
+`run_kernel_lab_demo` writes candidate source, correctness records, benchmark summaries, complete raw JSONL samples, decisions, and the aggregate report beneath its caller-supplied output directory. The repository does not check in generated measurement outputs. Every negative or inconclusive decision can therefore be reconstructed from its raw artifacts; isolated CPU evidence cannot create an accepted speedup decision.

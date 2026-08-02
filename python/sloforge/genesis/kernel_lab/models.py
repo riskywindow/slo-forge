@@ -51,6 +51,12 @@ class EvidenceSource(StrEnum):
     DIGITAL_TWIN = "digital_twin"
 
 
+class AttributionScope(StrEnum):
+    AUTOPSY_CAUSAL = "autopsy_causal_attribution"
+    SYNTHETIC_OPERATOR_MICROPROBE = "measured_synthetic_operator_microprobe"
+    DIGITAL_TWIN_ESTIMATE = "digital_twin_estimate"
+
+
 class LabStatus(StrEnum):
     PASSED = "passed"
     FAILED = "failed"
@@ -164,6 +170,8 @@ class OperatorSchema(KernelModel):
 class BottleneckEvidence(KernelModel):
     evidence_id: Identifier
     source: EvidenceSource
+    attribution_scope: AttributionScope
+    causal_attribution: bool
     operator_id: Identifier
     genome_region: Identifier
     observed_fraction: float = Field(gt=0.0, le=1.0)
@@ -182,19 +190,52 @@ class BottleneckEvidence(KernelModel):
             raise ValueError("raw evidence digest must be lowercase sha256")
         return value
 
+    @model_validator(mode="after")
+    def validate_scope(self) -> Self:
+        if self.source is EvidenceSource.AUTOPSY_MEASURED and (
+            self.attribution_scope is not AttributionScope.AUTOPSY_CAUSAL
+            or not self.causal_attribution
+            or self.synthetic
+        ):
+            raise ValueError("Autopsy evidence must be causal, measured, and non-synthetic")
+        if self.source is EvidenceSource.CPU_PROFILE_MEASURED and (
+            self.attribution_scope is not AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE
+            or self.causal_attribution
+        ):
+            raise ValueError("the CPU microprobe must not claim Autopsy causal attribution")
+        if self.source is EvidenceSource.DIGITAL_TWIN and (
+            self.attribution_scope is not AttributionScope.DIGITAL_TWIN_ESTIMATE
+            or self.causal_attribution
+            or not self.synthetic
+        ):
+            raise ValueError("digital-twin evidence must remain a synthetic non-causal estimate")
+        return self
+
 
 class RawBottleneckRecord(KernelModel):
     operator_id: Identifier
     inclusive_cpu_time_ns: tuple[int, ...]
-    token_loop_fraction: float = Field(gt=0.0, le=1.0)
+    comparison_work_time_ns: tuple[int, ...]
+    operator_probe_fraction: float = Field(gt=0.0, le=1.0)
+    attribution_scope: Literal["measured_synthetic_operator_microprobe"] = (
+        "measured_synthetic_operator_microprobe"
+    )
     seed: int = Field(ge=0)
 
     @model_validator(mode="after")
     def validate_samples(self) -> Self:
-        if not self.inclusive_cpu_time_ns or any(
-            sample <= 0 for sample in self.inclusive_cpu_time_ns
+        if (
+            not self.inclusive_cpu_time_ns
+            or len(self.inclusive_cpu_time_ns) != len(self.comparison_work_time_ns)
+            or any(sample <= 0 for sample in self.inclusive_cpu_time_ns)
+            or any(sample <= 0 for sample in self.comparison_work_time_ns)
         ):
             raise ValueError("raw bottleneck samples must be non-empty and positive")
+        recomputed = sum(self.inclusive_cpu_time_ns) / (
+            sum(self.inclusive_cpu_time_ns) + sum(self.comparison_work_time_ns)
+        )
+        if abs(recomputed - self.operator_probe_fraction) > 1e-12:
+            raise ValueError("operator probe fraction is not derived from its raw timings")
         return self
 
 
@@ -304,6 +345,10 @@ class BenchmarkSample(KernelModel):
 
 class BenchmarkRegimeEvidence(KernelModel):
     regime: Identifier
+    measurement_scope: Literal[
+        "isolated_operator_microbenchmark",
+        "repeated_operator_loop_not_serving_end_to_end",
+    ]
     status: LabStatus
     warmup_count: int = Field(gt=0)
     repetitions: int = Field(ge=7)
@@ -340,12 +385,16 @@ class KernelBenchmarkReport(KernelModel):
     status: LabStatus
     candidate: KernelCandidate
     deterministic_seed: int = Field(ge=0)
+    benchmark_config: KernelBenchmarkConfig
     hardware_fingerprint: NonEmpty
     software_manifest: tuple[NonEmpty, ...]
     workload_fingerprint: str
     raw_samples: tuple[BenchmarkSample, ...]
     raw_samples_sha256: str | None
     measurement_provenance: Literal["sandboxed_cpu_wall_clock"] = "sandboxed_cpu_wall_clock"
+    measurement_scope: Literal["isolated_operator_only_not_end_to_end_serving"] = (
+        "isolated_operator_only_not_end_to_end_serving"
+    )
     regimes: tuple[BenchmarkRegimeEvidence, ...]
     sandbox_termination: NonEmpty
     sandbox_backend: NonEmpty
@@ -388,12 +437,16 @@ class KernelBenchmarkConfig(KernelModel):
     wall_time_seconds: float = Field(default=15.0, gt=0.0, le=120.0)
 
 
+KernelBenchmarkReport.model_rebuild()
+
+
 class CandidateDecision(KernelModel):
     candidate_id: Identifier
     status: AcceptanceStatus
     correctness_status: LabStatus
     microbenchmark_status: LabStatus
-    end_to_end_status: LabStatus
+    operator_loop_status: LabStatus
+    full_stack_status: LabStatus
     claim: NonEmpty
     reasons: tuple[NonEmpty, ...]
 
@@ -402,7 +455,8 @@ class CandidateDecision(KernelModel):
         if self.status is AcceptanceStatus.ACCEPTED and (
             self.correctness_status is not LabStatus.PASSED
             or self.microbenchmark_status is not LabStatus.PASSED
-            or self.end_to_end_status is not LabStatus.PASSED
+            or self.operator_loop_status is not LabStatus.PASSED
+            or self.full_stack_status is not LabStatus.PASSED
         ):
             raise ValueError("accepted candidates must pass every required gate")
         return self
