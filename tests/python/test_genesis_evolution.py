@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
@@ -119,6 +120,7 @@ def _controller(
     *,
     config: EvolutionConfig | None = None,
     validator: RecordingValidator | None = None,
+    gate_validator: Callable[[GateObservation, ChallengerSpec], bool] | None = None,
 ) -> tuple[EvolutionController, CapsuleReference, RecordingValidator, EvolutionStore]:
     champion = _capsule(tmp_path, "champion", "a")
     resolved_config = config or _config()
@@ -134,11 +136,8 @@ def _controller(
     controller = EvolutionController.initialize(
         store=store,
         capsule_validator=validator,
-        gate_evidence_validator=(
-            (lambda _observation, _challenger: True)
-            if resolved_config.execution_target is ExecutionTarget.EXTERNAL
-            else None
-        ),
+        gate_evidence_validator=gate_validator
+        or (lambda _observation, _challenger: True),
         transition_compatibility_validator=lambda _champion, _challenger, category: (
             TransitionCompatibility(
                 compatible=category
@@ -357,6 +356,36 @@ def test_external_evolution_requires_level_five_and_trusted_gate_evidence(
         controller.record_gate(observation)
 
 
+def test_local_evolution_rejects_untrusted_and_changed_gate_evidence(tmp_path: Path) -> None:
+    accepted_digests: set[str] = set()
+    controller, _, _, _ = _controller(
+        tmp_path,
+        gate_validator=lambda observation, _challenger: (
+            observation.evidence_digest in accepted_digests
+        ),
+    )
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
+    controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+    shadow = _gate(
+        controller, GateStage.SHADOW, event_id="shadow-evidence", observed_at_ms=40
+    )
+    with pytest.raises(EvolutionError, match="local gate evidence"):
+        controller.record_gate(shadow)
+    accepted_digests.add(shadow.evidence_digest)
+    controller.record_gate(shadow)
+    controller.begin_canary(event_id="canary", observed_at_ms=50)
+    canary = _gate(
+        controller, GateStage.CANARY, event_id="canary-evidence", observed_at_ms=60
+    )
+    accepted_digests.add(canary.evidence_digest)
+    controller.record_gate(canary)
+    accepted_digests.remove(shadow.evidence_digest)
+    with pytest.raises(EvolutionError, match="shadow evidence failed trusted revalidation"):
+        controller.promote(event_id="promote", observed_at_ms=70)
+
+
 def test_controller_refuses_an_unvalidated_bootstrap_champion(tmp_path: Path) -> None:
     champion = _capsule(tmp_path, "champion", "a")
     validator = RecordingValidator("b" * 64, champion_eligible=False)
@@ -410,6 +439,62 @@ def test_promotion_preserves_active_streams_and_retains_rollback(
     assert controller.route_request("new-request") == challenger.capsule
     controller.close_stream("stream-before-promotion", event_id="close-old", observed_at_ms=80)
     assert champion.capsule_id in controller.snapshot.retained_capsule_ids
+
+
+def test_stream_route_and_lease_are_atomic_across_promotion(tmp_path: Path) -> None:
+    controller, champion, _, _ = _controller(tmp_path)
+    challenger = _challenger(
+        tmp_path,
+        _capsule(tmp_path, "challenger", "b"),
+        category=TransitionCategory.REQUEST_BOUNDARY_SWAP,
+    )
+    snapshot, assigned = controller.open_stream_and_route(
+        "atomic-stream",
+        event_id="open-atomic",
+        observed_at_ms=1,
+        externally_visible_output=True,
+    )
+    assert assigned == champion
+    assert snapshot.active_streams[0].capsule_id == champion.capsule_id
+    _ready_to_promote(controller, challenger, start_ms=10)
+    promoted = controller.promote(event_id="promote", observed_at_ms=70)
+    assert controller.route_request("atomic-stream") == champion
+    assert champion in promoted.retained_capsules
+
+
+def test_restore_revalidates_every_active_stream_capsule(tmp_path: Path) -> None:
+    controller, _champion, validator, store = _controller(
+        tmp_path, config=_config(canary_fraction=1.0)
+    )
+    challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
+    _trigger(controller)
+    controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
+    controller.begin_shadow(event_id="shadow", observed_at_ms=30)
+    controller.record_gate(
+        _gate(controller, GateStage.SHADOW, event_id="shadow-pass", observed_at_ms=40)
+    )
+    controller.begin_canary(event_id="canary", observed_at_ms=50)
+    _snapshot, assigned = controller.open_stream_and_route(
+        "active", event_id="open-active", observed_at_ms=51
+    )
+    assert assigned == challenger.capsule
+    controller.record_gate(
+        _gate(
+            controller,
+            GateStage.CANARY,
+            event_id="canary-fail",
+            observed_at_ms=60,
+            passes=False,
+        )
+    )
+    validator.eligible = False
+    with pytest.raises(EvolutionError, match="active-stream capsule"):
+        EvolutionController.restore(
+            store=store,
+            capsule_validator=validator,
+            gate_evidence_validator=lambda _observation, _challenger: True,
+            config=controller.config,
+        )
 
 
 def test_canary_failure_never_interrupts_challenger_stream(tmp_path: Path) -> None:
@@ -534,7 +619,10 @@ def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None
     before_crash = controller.begin_shadow(event_id="shadow", observed_at_ms=30)
 
     restored = EvolutionController.restore(
-        store=store, capsule_validator=validator, config=controller.config
+        store=store,
+        capsule_validator=validator,
+        gate_evidence_validator=lambda _observation, _challenger: True,
+        config=controller.config,
     )
     duplicate = restored.begin_shadow(event_id="shadow", observed_at_ms=30)
     assert duplicate == before_crash
@@ -707,13 +795,8 @@ def test_evolution_store_rejects_symlink_and_predictable_temp_attacks(tmp_path: 
     assert victim.read_text(encoding="utf-8") == "preserve"
 
 
-def test_deterministic_local_fixture_produces_artifact_backed_promotion(tmp_path: Path) -> None:
-    controller, champion, validator, store = _controller(tmp_path)
+def test_local_fixture_refuses_synthetic_gate_observations(tmp_path: Path) -> None:
+    controller, _champion, _validator, _store = _controller(tmp_path)
     challenger = _challenger(tmp_path, _capsule(tmp_path, "challenger", "b"))
-    snapshot = run_local_evolution_fixture(controller, challenger)
-    assert snapshot.phase is EvolutionPhase.PROMOTED
-    assert snapshot.champion == challenger.capsule
-    assert snapshot.previous_champion == champion
-    assert len(validator.paths) == 6
-    assert store.load() == snapshot
-    assert [record.sequence for record in snapshot.audit] == list(range(len(snapshot.audit)))
+    with pytest.raises(ValueError, match="artifact-backed gate evidence"):
+        run_local_evolution_fixture(controller, challenger)

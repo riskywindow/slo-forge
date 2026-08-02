@@ -11,6 +11,7 @@ from .evidence import collect_local_gate_evidence
 from .models import (
     ChallengerSpec,
     EvolutionSnapshot,
+    ExecutionTarget,
     GateObservation,
     GateStage,
     TriggerObservation,
@@ -27,6 +28,13 @@ def run_local_evolution_fixture(
     """Exercise evolution; real capsule replay is required when an evidence path is supplied."""
 
     seed = controller.snapshot.seed
+    if (
+        evidence_directory is None
+        and controller.config.execution_target is not ExecutionTarget.SIMULATED
+    ):
+        raise ValueError(
+            "local or external evolution requires artifact-backed gate evidence"
+        )
 
     def gate_digest(stage: GateStage) -> str:
         payload = (

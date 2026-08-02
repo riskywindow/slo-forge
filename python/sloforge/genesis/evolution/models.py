@@ -276,6 +276,7 @@ class EvolutionSnapshot(EvolutionModel):
     challengers: tuple[ChallengerRecord, ...] = ()
     active_streams: tuple[StreamLease, ...] = ()
     retained_capsule_ids: tuple[Identifier, ...] = ()
+    retained_capsules: tuple[CapsuleReference, ...] = ()
     processed_event_ids: tuple[Identifier, ...] = ()
     processed_events: tuple[ProcessedEventRecord, ...] = ()
     audit: tuple[EvolutionAuditRecord, ...]
@@ -298,6 +299,9 @@ class EvolutionSnapshot(EvolutionModel):
             raise ValueError("processed event ids and payload records must remain aligned")
         if len(self.retained_capsule_ids) != len(set(self.retained_capsule_ids)):
             raise ValueError("retained capsule identifiers must be unique")
+        retained_reference_ids = [item.capsule_id for item in self.retained_capsules]
+        if len(retained_reference_ids) != len(set(retained_reference_ids)):
+            raise ValueError("retained capsule references must have unique identifiers")
         if (
             self.selected_candidate_id is not None
             and self.selected_candidate_id not in candidate_ids
@@ -306,6 +310,7 @@ class EvolutionSnapshot(EvolutionModel):
         known_capsules = {
             self.champion.capsule_id,
             *(item.spec.capsule.capsule_id for item in self.challengers),
+            *retained_reference_ids,
             *self.retained_capsule_ids,
         }
         if any(stream.capsule_id not in known_capsules for stream in self.active_streams):

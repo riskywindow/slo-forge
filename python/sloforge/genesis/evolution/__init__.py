@@ -8,7 +8,7 @@ from .controller import (
     TransitionCompatibilityValidator,
     classify_trigger,
 )
-from .evidence import collect_local_gate_evidence
+from .evidence import collect_local_gate_evidence, local_gate_evidence_validator
 from .fixture import run_local_evolution_fixture
 from .models import (
     EVOLUTION_SCHEMA_VERSION,
@@ -68,6 +68,7 @@ __all__ = [
     "TriggerObservation",
     "classify_trigger",
     "collect_local_gate_evidence",
+    "local_gate_evidence_validator",
     "run_local_evolution_fixture",
     "validate_transition_compatibility",
 ]

@@ -108,21 +108,18 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     assert all(
         claim.scope.assumptions for claim in capsule.claims if claim.category.value == "performance"
     )
-    benchmark = capsule.benchmarks[0]
-    samples = RawBenchmarkSamples.model_validate_json(
-        (
-            output
-            / next(
-                item.path
-                for item in capsule.artifacts
-                if item.artifact_id == benchmark.raw_samples_artifact_id
-            )
-        ).read_bytes(),
-        strict=True,
+    assert capsule.benchmarks == ()
+    performance_claim = next(
+        claim for claim in capsule.claims if claim.category.value == "performance"
     )
-    assert len(samples.samples) == 7
-    assert benchmark.summary.unit == "simulated_milliseconds"
-    assert benchmark.randomized_run_order
+    assert not performance_claim.promotion_required
+    assert "no performance improvement is accepted" in performance_claim.statement
+    simulation_ref = next(
+        item for item in capsule.artifacts if item.artifact_id == "candidate-simulation"
+    )
+    simulation = json.loads((output / simulation_ref.path).read_text(encoding="utf-8"))
+    assert simulation["candidate_genome_hash"] == capsule.identity.candidate_genome_hash.value
+    assert simulation["comparison_permitted"] is False
     by_id = {item.artifact_id: item for item in capsule.artifacts}
     bundle_path = output / by_id["generated-runtime"].path
     extracted = tmp_path / "runtime-bundle"

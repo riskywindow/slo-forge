@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import stat
 import statistics
 import zipfile
 from pathlib import Path
@@ -15,9 +16,11 @@ from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytec
 
 from .canonical import calculate_capsule_digest, canonical_json
 from .models import (
+    ArtifactOrigin,
     ArtifactRef,
     ArtifactRole,
     BenchmarkEvidence,
+    BenchmarkSummary,
     CapsuleValidationReport,
     ClaimCategory,
     CounterexampleCorpus,
@@ -56,6 +59,11 @@ _PROMOTION_CLAIM_CATEGORIES = frozenset(
         ClaimCategory.OPERATIONAL,
     }
 )
+_MAXIMUM_ARTIFACT_COUNT = 4_096
+_MAXIMUM_ARTIFACT_BYTES = 256 * 1024 * 1024
+_MAXIMUM_TOTAL_ARTIFACT_BYTES = 512 * 1024 * 1024
+_MAXIMUM_RUNTIME_BUNDLE_ENTRIES = 4_096
+_MAXIMUM_RUNTIME_BUNDLE_BYTES = 64 * 1024 * 1024
 _ISSUERS_BY_CLASS = {
     EvidenceClass.BUILD: frozenset({EvidenceIssuer.TRUSTED_VALIDATOR, EvidenceIssuer.SANDBOX}),
     EvidenceClass.SEMANTIC: frozenset(
@@ -89,7 +97,12 @@ _ARTIFACT_ROLE_BY_EVIDENCE = {
     EvidenceClass.RESOURCE: frozenset({ArtifactRole.RESOURCE_EVIDENCE}),
     EvidenceClass.PERFORMANCE: frozenset({ArtifactRole.PERFORMANCE_SAMPLES}),
     EvidenceClass.OPERATIONAL: frozenset(
-        {ArtifactRole.OPERATIONAL_EVIDENCE, ArtifactRole.MODEL_CHECK_RESULT}
+        {
+            ArtifactRole.OPERATIONAL_EVIDENCE,
+            ArtifactRole.MODEL_CHECK_RESULT,
+            ArtifactRole.ROLLBACK,
+            ArtifactRole.STATE_CONVERSION,
+        }
     ),
     EvidenceClass.MODEL_CHECK: frozenset({ArtifactRole.MODEL_CHECK_RESULT}),
     EvidenceClass.PROPERTY_TEST: frozenset({ArtifactRole.PROPERTY_TEST_RESULT}),
@@ -142,11 +155,21 @@ def _validate_runtime_bundle(
     prefix = f"artifacts.{artifact.artifact_id}"
     try:
         with zipfile.ZipFile(path) as archive:
-            names = archive.namelist()
+            members = archive.infolist()
+            if not 1 <= len(members) <= _MAXIMUM_RUNTIME_BUNDLE_ENTRIES:
+                raise ValueError("bundle entry count exceeds the trusted validation bound")
+            total_uncompressed = sum(member.file_size for member in members)
+            if total_uncompressed > _MAXIMUM_RUNTIME_BUNDLE_BYTES:
+                raise ValueError("bundle uncompressed size exceeds the trusted validation bound")
+            names = [member.filename for member in members]
             if len(names) != len(set(names)) or any(
                 name.startswith("/") or ".." in Path(name).parts for name in names
             ):
                 raise ValueError("bundle contains duplicate or unsafe paths")
+            if any(
+                member.is_dir() or stat.S_ISLNK(member.external_attr >> 16) for member in members
+            ):
+                raise ValueError("bundle contains a directory or symlink entry")
             required = {
                 "runtime.py",
                 "runtime_config.json",
@@ -280,6 +303,29 @@ def _validate_resource_artifact(path: Path, *, runtime_bundle_bytes: int | None)
     return None
 
 
+def _performance_acceptance_failures(
+    summary: BenchmarkSummary,
+    *,
+    baseline_median: float,
+    regression_probability: float,
+    threshold: float,
+) -> tuple[str, ...]:
+    """Apply conservative promotion gates to independently recomputed statistics."""
+
+    failures: list[str] = []
+    if regression_probability > 0.05:
+        failures.append("paired regression probability gate")
+    if summary.objective == "minimize":
+        conservative_bound = baseline_median * (1.0 - threshold)
+        if summary.confidence_high >= conservative_bound:
+            failures.append("conservative improvement confidence gate")
+    else:
+        conservative_bound = baseline_median * (1.0 + threshold)
+        if summary.confidence_low <= conservative_bound:
+            failures.append("conservative improvement confidence gate")
+    return tuple(failures)
+
+
 def _validate_benchmark(
     benchmark: BenchmarkEvidence,
     artifacts: dict[str, ArtifactRef],
@@ -363,8 +409,10 @@ def _validate_benchmark(
         mismatches.append("validation hardware fingerprint")
     if not benchmark.randomized_run_order:
         mismatches.append("randomized run order")
-    candidate_trials = {sample.trial: sample.seed for sample in samples.samples}
-    baseline_trials = {sample.trial: sample.seed for sample in baseline_samples.samples}
+    candidate_by_trial = {sample.trial: sample for sample in samples.samples}
+    baseline_by_trial = {sample.trial: sample for sample in baseline_samples.samples}
+    candidate_trials = {trial: sample.seed for trial, sample in candidate_by_trial.items()}
+    baseline_trials = {trial: sample.seed for trial, sample in baseline_by_trial.items()}
     if candidate_trials != baseline_trials:
         mismatches.append("paired trial or seed identity")
     expected_execution = {
@@ -386,6 +434,31 @@ def _validate_benchmark(
         or set(observed_execution) != expected_execution
     ):
         mismatches.append("recorded randomized execution order")
+    combined_samples = tuple(("baseline", sample) for sample in baseline_samples.samples) + tuple(
+        ("candidate", sample) for sample in samples.samples
+    )
+    if any(sample.execution_ordinal is None for _alternative, sample in combined_samples):
+        mismatches.append("sample execution ordinals")
+    else:
+        execution_ordinals = [
+            sample.execution_ordinal
+            for _alternative, sample in combined_samples
+            if sample.execution_ordinal is not None
+        ]
+        if sorted(execution_ordinals) != list(range(len(combined_samples))):
+            mismatches.append("sample execution ordinal coverage")
+        else:
+            sample_execution = [
+                (alternative, sample.trial)
+                for alternative, sample in sorted(
+                    combined_samples,
+                    key=lambda item: (
+                        item[1].execution_ordinal if item[1].execution_ordinal is not None else -1
+                    ),
+                )
+            ]
+            if sample_execution != observed_execution:
+                mismatches.append("sample execution order binding")
     values = sorted(sample.value for sample in samples.samples)
     median = statistics.median(values)
     baseline_median = statistics.median(sample.value for sample in baseline_samples.samples)
@@ -427,8 +500,8 @@ def _validate_benchmark(
     ):
         mismatches.append("reported confidence interval")
     expected_regression_probability = paired_regression_probability(
-        tuple(sample.value for sample in baseline_samples.samples),
-        tuple(sample.value for sample in samples.samples),
+        tuple(baseline_by_trial[trial].value for trial in sorted(baseline_by_trial)),
+        tuple(candidate_by_trial[trial].value for trial in sorted(candidate_by_trial)),
         objective=benchmark.summary.objective,
     )
     if not math.isclose(
@@ -444,6 +517,14 @@ def _validate_benchmark(
     )
     if expected_effect <= threshold:
         mismatches.append("practical significance gate")
+    mismatches.extend(
+        _performance_acceptance_failures(
+            benchmark.summary,
+            baseline_median=baseline_median,
+            regression_probability=expected_regression_probability,
+            threshold=threshold,
+        )
+    )
     if mismatches:
         _append(
             issues,
@@ -486,8 +567,19 @@ def validate_capsule(
         )
 
     artifacts = {artifact.artifact_id: artifact for artifact in capsule.artifacts}
+    if len(capsule.artifacts) > _MAXIMUM_ARTIFACT_COUNT:
+        _append(
+            issues,
+            ValidationIssueCode.ARTIFACT_SIZE_MISMATCH,
+            "artifacts",
+            "artifact count exceeds the trusted validation bound",
+        )
+    trusted_artifact_anchors = {
+        item.artifact_id: item.digest for item in context.trusted_artifact_anchors
+    }
     resolved: dict[str, Path] = {}
-    for artifact in capsule.artifacts:
+    observed_artifact_bytes = 0
+    for artifact in capsule.artifacts[:_MAXIMUM_ARTIFACT_COUNT]:
         path = _resolve_artifact(capsule_root, artifact)
         if path is None:
             candidate = capsule_root.joinpath(*artifact.path.split("/"))
@@ -500,6 +592,7 @@ def validate_capsule(
             continue
         resolved[artifact.artifact_id] = path
         actual_size = path.stat().st_size
+        observed_artifact_bytes += actual_size
         if actual_size != artifact.size_bytes:
             _append(
                 issues,
@@ -507,6 +600,18 @@ def validate_capsule(
                 f"artifacts.{artifact.artifact_id}",
                 f"declared {artifact.size_bytes} bytes but found {actual_size}",
             )
+        if (
+            actual_size > _MAXIMUM_ARTIFACT_BYTES
+            or observed_artifact_bytes > _MAXIMUM_TOTAL_ARTIFACT_BYTES
+        ):
+            _append(
+                issues,
+                ValidationIssueCode.ARTIFACT_SIZE_MISMATCH,
+                f"artifacts.{artifact.artifact_id}",
+                "artifact content exceeds the trusted validation resource bound",
+            )
+            resolved.pop(artifact.artifact_id, None)
+            continue
         if _sha256_file(path) != artifact.digest.value:
             _append(
                 issues,
@@ -519,6 +624,28 @@ def validate_capsule(
             and artifact.media_type == "application/zip"
         ):
             _validate_runtime_bundle(capsule, artifact, path, issues)
+
+        if artifact.origin is ArtifactOrigin.TRUSTED:
+            anchored = trusted_artifact_anchors.get(artifact.artifact_id)
+            if anchored != artifact.digest:
+                _append(
+                    issues,
+                    ValidationIssueCode.EVIDENCE_UNTRUSTED,
+                    f"artifacts.{artifact.artifact_id}.origin",
+                    "trusted artifact origin is not bound by the external validation context",
+                )
+
+    rollback_artifacts = [
+        artifact for artifact in capsule.artifacts if artifact.role is ArtifactRole.ROLLBACK
+    ]
+    for artifact in rollback_artifacts:
+        if artifact.origin is not ArtifactOrigin.TRUSTED:
+            _append(
+                issues,
+                ValidationIssueCode.EVIDENCE_UNTRUSTED,
+                f"artifacts.{artifact.artifact_id}.origin",
+                "rollback authority must be externally anchored trusted material",
+            )
 
     _validate_policy_artifacts(resolved, issues)
 
