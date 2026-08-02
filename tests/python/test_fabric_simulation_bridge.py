@@ -9,7 +9,10 @@ from sloforge.autopsy.models import EventType
 from sloforge.fabric.ir import (
     CollectiveOperation,
     CollectivePlan,
+    CommunicationOverlapPlan,
     FabricProfile,
+    ParallelGroup,
+    ParallelismKind,
     PhysicalExecutionPlan,
     TopologyGraph,
     WorkerRole,
@@ -78,6 +81,71 @@ def test_collective_stage_filter_does_not_lower_decode_collectives_before_kv() -
     # Backward-compatible v1 plans could split a parallel group across P/D
     # roles; lower that legacy operation once instead of silently dropping it.
     assert _lower_collective_before_kv({1, 2}, {0, 1}, {2, 3})
+
+
+def test_pipeline_stages_are_lowered_as_dependencies_not_impossible_overlap() -> None:
+    plan, topology, profile = _inputs()
+    plan = plan.model_copy(
+        update={
+            "parallelism": plan.parallelism.model_copy(
+                update={
+                    "tensor_parallel_degree": 1,
+                    "pipeline_parallel_degree": 2,
+                    "expert_parallel_degree": 1,
+                    "prefill_decode_disaggregated": False,
+                    "groups": (
+                        ParallelGroup(
+                            group_id="pp-0",
+                            kind=ParallelismKind.PIPELINE,
+                            rank_ids=(0, 1),
+                        ),
+                    ),
+                }
+            ),
+            "rank_placement": plan.rank_placement.model_copy(
+                update={
+                    "bindings": tuple(
+                        binding.model_copy(update={"worker_role": WorkerRole.AGGREGATED})
+                        for binding in plan.rank_placement.bindings
+                    )
+                }
+            ),
+            "collectives": CollectivePlan(operations=()),
+            "kv_transfer": None,
+            "communication_overlap": CommunicationOverlapPlan(windows=()),
+        }
+    )
+    request = build_simulation_request(
+        plan,
+        topology,
+        profile,
+        SimulationWorkload(
+            request_count=1,
+            arrival_interval_us=0.0,
+            prompt_tokens=128,
+            output_tokens=2,
+        ),
+        seed=13,
+    )
+    prefill_0 = next(
+        operation for operation in request.operations if ":rank-0:prefill" in operation.id
+    )
+    prefill_1 = next(
+        operation for operation in request.operations if ":rank-1:prefill" in operation.id
+    )
+    decode_0 = next(
+        operation for operation in request.operations if operation.id.endswith("rank-0:decode")
+    )
+    decode_1 = next(
+        operation for operation in request.operations if operation.id.endswith("rank-1:decode")
+    )
+    assert prefill_0.id in prefill_1.dependencies
+    assert decode_0.id in decode_1.dependencies
+
+    output = run_simulation(request, repository_root=ROOT)
+    outcomes = {operation.operation_id: operation for operation in output.operations}
+    assert outcomes[prefill_1.id].start_us >= outcomes[prefill_0.id].end_us
+    assert outcomes[decode_1.id].start_us >= outcomes[decode_0.id].end_us
 
 
 def test_expert_skew_scales_only_all_to_all_message_demand() -> None:

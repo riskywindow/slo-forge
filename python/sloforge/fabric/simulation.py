@@ -17,6 +17,7 @@ from sloforge.fabric.ir import (
     ConnectionType,
     FabricProfile,
     HealthState,
+    ParallelismKind,
     PhysicalExecutionPlan,
     RankBinding,
     TopologyEdge,
@@ -552,6 +553,26 @@ def _lower_collective_before_kv(
     )
 
 
+def _pipeline_stage_by_rank(plan: PhysicalExecutionPlan) -> dict[int, int]:
+    """Recover stable PP stage indices from the canonical pipeline groups."""
+
+    stage_by_rank: dict[int, int] = {}
+    for group in plan.parallelism.groups:
+        if group.kind is not ParallelismKind.PIPELINE:
+            continue
+        for stage, rank_id in enumerate(group.rank_ids):
+            existing = stage_by_rank.setdefault(rank_id, stage)
+            if existing != stage:
+                raise ValueError(f"rank {rank_id} has conflicting pipeline stages")
+    if plan.parallelism.pipeline_parallel_degree == 1:
+        return {binding.rank_id: 0 for binding in plan.rank_placement.bindings}
+    rank_ids = {binding.rank_id for binding in plan.rank_placement.bindings}
+    if set(stage_by_rank) != rank_ids:
+        missing = tuple(sorted(rank_ids - set(stage_by_rank)))
+        raise ValueError(f"pipeline plan does not assign stages for ranks {missing}")
+    return stage_by_rank
+
+
 def build_simulation_request(
     plan: PhysicalExecutionPlan,
     topology: TopologyGraph,
@@ -596,6 +617,8 @@ def build_simulation_request(
     )
     operations: list[PhysicalOperation] = []
     uncertainty = 1.0 - plan.predicted_metrics.p95_ttft_ms.confidence
+    pipeline_stage_by_rank = _pipeline_stage_by_rank(plan)
+    pipeline_degree = plan.parallelism.pipeline_parallel_degree
     prefill_by_replica: dict[str, list[RankBinding]] = {}
     decode_by_replica: dict[str, list[RankBinding]] = {}
     for binding in plan.rank_placement.bindings:
@@ -638,41 +661,58 @@ def build_simulation_request(
         decode_bindings = decode_replicas[request_index % len(decode_replicas)]
         active_prefill_ranks = {binding.rank_id for binding in prefill_bindings}
         active_decode_ranks = {binding.rank_id for binding in decode_bindings}
-        prefill_per_rank_us = baseline_prefill_per_rank_us * (
-            shape.prompt_tokens / workload.prompt_tokens
+        prefill_per_stage_us = (
+            baseline_prefill_per_rank_us
+            * (shape.prompt_tokens / workload.prompt_tokens)
+            / pipeline_degree
         )
-        decode_per_rank_us = (
-            plan.predicted_metrics.p99_tpot_ms.estimate * 1_000.0 * shape.output_tokens
+        decode_per_stage_us = (
+            plan.predicted_metrics.p99_tpot_ms.estimate
+            * 1_000.0
+            * shape.output_tokens
+            / pipeline_degree
         )
-        prefill_ids: list[str] = []
+        launch_by_rank: dict[int, str] = {}
         for binding in prefill_bindings:
             launch_id = f"{request_id}:rank-{binding.rank_id}:launch"
-            prefill_id = f"{request_id}:rank-{binding.rank_id}:prefill"
-            operations.extend(
-                (
-                    PhysicalOperation(
-                        id=launch_id,
-                        kind=CpuLaunch(duration_us=workload.cpu_launch_us),
-                        rank_ids=(f"rank-{binding.rank_id}",),
-                        demands=(ResourceDemand(resource_id=f"cpu:{binding.host_id}"),),
-                        earliest_start_us=arrival_us,
-                        uncertainty_fraction=uncertainty,
-                        request_id=request_id,
-                    ),
+            launch_by_rank[binding.rank_id] = launch_id
+            operations.append(
+                PhysicalOperation(
+                    id=launch_id,
+                    kind=CpuLaunch(duration_us=workload.cpu_launch_us),
+                    rank_ids=(f"rank-{binding.rank_id}",),
+                    demands=(ResourceDemand(resource_id=f"cpu:{binding.host_id}"),),
+                    earliest_start_us=arrival_us,
+                    uncertainty_fraction=uncertainty,
+                    request_id=request_id,
+                )
+            )
+        previous_stage_ids: tuple[str, ...] = ()
+        all_prefill_ids: list[str] = []
+        for stage in range(pipeline_degree):
+            stage_ids: list[str] = []
+            for binding in prefill_bindings:
+                if pipeline_stage_by_rank[binding.rank_id] != stage:
+                    continue
+                prefill_id = f"{request_id}:rank-{binding.rank_id}:prefill"
+                operations.append(
                     PhysicalOperation(
                         id=prefill_id,
-                        kind=GpuCompute(duration_us=max(0.001, prefill_per_rank_us)),
+                        kind=GpuCompute(duration_us=max(0.001, prefill_per_stage_us)),
                         rank_ids=(f"rank-{binding.rank_id}",),
-                        dependencies=(launch_id,),
+                        dependencies=(launch_by_rank[binding.rank_id], *previous_stage_ids),
                         demands=(ResourceDemand(resource_id=f"compute:{binding.gpu_id}"),),
                         earliest_start_us=arrival_us,
                         uncertainty_fraction=uncertainty,
                         request_id=request_id,
-                    ),
+                    )
                 )
-            )
-            prefill_ids.append(prefill_id)
-        dependency_ids: tuple[str, ...] = tuple(prefill_ids)
+                stage_ids.append(prefill_id)
+                all_prefill_ids.append(prefill_id)
+            if not stage_ids:
+                raise ValueError(f"prefill replica has no rank for pipeline stage {stage}")
+            previous_stage_ids = tuple(stage_ids)
+        dependency_ids: tuple[str, ...] = tuple(all_prefill_ids)
         for collective_index, collective in enumerate(plan.collectives.operations):
             # Decode-side collectives are already represented by calibrated
             # opaque TPOT. Lowering them here as pre-KV operations would both
@@ -751,19 +791,29 @@ def build_simulation_request(
                     )
                 )
                 dependency_ids = (operation_id,)
-        for binding in decode_bindings:
-            operations.append(
-                PhysicalOperation(
-                    id=f"{request_id}:rank-{binding.rank_id}:decode",
-                    kind=GpuCompute(duration_us=max(0.001, decode_per_rank_us)),
-                    rank_ids=(f"rank-{binding.rank_id}",),
-                    dependencies=dependency_ids,
-                    demands=(ResourceDemand(resource_id=f"compute:{binding.gpu_id}"),),
-                    earliest_start_us=arrival_us,
-                    uncertainty_fraction=uncertainty,
-                    request_id=request_id,
+        previous_stage_ids = dependency_ids
+        for stage in range(pipeline_degree):
+            stage_ids = []
+            for binding in decode_bindings:
+                if pipeline_stage_by_rank[binding.rank_id] != stage:
+                    continue
+                operation_id = f"{request_id}:rank-{binding.rank_id}:decode"
+                operations.append(
+                    PhysicalOperation(
+                        id=operation_id,
+                        kind=GpuCompute(duration_us=max(0.001, decode_per_stage_us)),
+                        rank_ids=(f"rank-{binding.rank_id}",),
+                        dependencies=previous_stage_ids,
+                        demands=(ResourceDemand(resource_id=f"compute:{binding.gpu_id}"),),
+                        earliest_start_us=arrival_us,
+                        uncertainty_fraction=uncertainty,
+                        request_id=request_id,
+                    )
                 )
-            )
+                stage_ids.append(operation_id)
+            if not stage_ids:
+                raise ValueError(f"decode replica has no rank for pipeline stage {stage}")
+            previous_stage_ids = tuple(stage_ids)
     return FabricSimulationRequest(
         seed=seed,
         resources=tuple(resources),

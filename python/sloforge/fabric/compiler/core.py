@@ -10,8 +10,10 @@ from __future__ import annotations
 import hashlib
 import itertools
 import math
+import statistics
 from collections import defaultdict
 from enum import StrEnum
+from functools import cache
 from typing import Annotated, Final, Literal, Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
@@ -328,6 +330,73 @@ def _ordered_gpus(
     return tuple(selected)
 
 
+def _ordered_candidate_gpus(
+    topology: TopologyGraph,
+    *,
+    tp: int,
+    pp: int,
+    dp: int,
+    strategy: OptimizationStrategy,
+    seed: int,
+    excluded: frozenset[str] = frozenset(),
+) -> tuple[GpuNode, ...]:
+    """Place complete replica groups before optimizing order within each group."""
+
+    rank_count = tp * pp * dp
+    if strategy in {
+        OptimizationStrategy.RANDOM_PLACEMENT,
+        OptimizationStrategy.TOPOLOGY_UNAWARE,
+    }:
+        return _ordered_gpus(topology, rank_count, strategy, excluded, seed)
+    replica_size = tp * pp
+    selected: list[GpuNode] = []
+    excluded_ids = set(excluded)
+    host_replica_counts: dict[str, int] = defaultdict(int)
+    for _ in range(dp):
+        replica: tuple[GpuNode, ...] = ()
+        if strategy is OptimizationStrategy.ROBUST_FAILURE:
+            # Prefer a complete replica on the least-used host fault domain.
+            # This differs deliberately from latency-first greedy placement,
+            # while avoiding the worse failure mode of spreading every TP/PP
+            # replica across all hosts.
+            candidates: list[tuple[int, float, str, tuple[GpuNode, ...]]] = []
+            host_ids = sorted({gpu.host_id for gpu in _healthy_gpus(topology)})
+            for host_id in host_ids:
+                other_host_ids = {
+                    gpu.node_id for gpu in _healthy_gpus(topology) if gpu.host_id != host_id
+                }
+                host_group = _ordered_gpus(
+                    topology,
+                    replica_size,
+                    OptimizationStrategy.GREEDY_TOPOLOGY_AWARE,
+                    frozenset(excluded_ids | other_host_ids),
+                    seed,
+                )
+                if len(host_group) != replica_size:
+                    continue
+                affinity = sum(
+                    _pair_score(topology, left, right)
+                    for left, right in itertools.combinations(host_group, 2)
+                )
+                candidates.append((host_replica_counts[host_id], -affinity, host_id, host_group))
+            if candidates:
+                _, _, host_id, replica = min(candidates)
+                host_replica_counts[host_id] += 1
+        if not replica:
+            replica = _ordered_gpus(
+                topology,
+                replica_size,
+                OptimizationStrategy.GREEDY_TOPOLOGY_AWARE,
+                frozenset(excluded_ids),
+                seed,
+            )
+        if len(replica) != replica_size:
+            return ()
+        selected.extend(replica)
+        excluded_ids.update(gpu.node_id for gpu in replica)
+    return tuple(selected)
+
+
 def _nearest_nic(topology: TopologyGraph, gpu: GpuNode) -> tuple[str | None, str | None]:
     nics = tuple(node for node in topology.nodes if isinstance(node, NicNode) and node.active)
     if not nics:
@@ -595,24 +664,57 @@ def _profile_duration(
     )
     if not matches:
         return 0.0, 1.0
-    closest = min(matches, key=lambda item: abs(item.message_bytes - message_bytes))
-    scale = max(0.25, message_bytes / max(1, closest.message_bytes))
-    duration = closest.summary_median_us * scale
-    uncertainty = (
-        max(
-            closest.summary_median_us - closest.confidence_low_us,
-            closest.confidence_high_us - closest.summary_median_us,
+    grouped: dict[int, list[tuple[float, float]]] = defaultdict(list)
+    for point in matches:
+        grouped[point.message_bytes].append(
+            (
+                point.summary_median_us,
+                max(
+                    point.summary_median_us - point.confidence_low_us,
+                    point.confidence_high_us - point.summary_median_us,
+                ),
+            )
         )
-        * scale
+    # Several concrete collective primitives share the canonical "collective"
+    # category. Collapse repeated sizes before interpolation; using same-size
+    # observations as extrapolation points creates a zero byte span and turns
+    # ordinary sample variance into an unbounded slope.
+    points = tuple(
+        (
+            size,
+            statistics.median(value[0] for value in values),
+            statistics.median(value[1] for value in values),
+        )
+        for size, values in sorted(grouped.items())
     )
-    return duration, uncertainty
+
+    if message_bytes <= points[0][0] or len(points) == 1:
+        return points[0][1], points[0][2]
+    for index, right in enumerate(points[1:], start=1):
+        if message_bytes <= right[0]:
+            left = points[index - 1]
+            ratio = (message_bytes - left[0]) / (right[0] - left[0])
+            return (
+                left[1] + (right[1] - left[1]) * ratio,
+                left[2] + (right[2] - left[2]) * ratio,
+            )
+    # Extrapolate the marginal serialization slope, not the entire duration;
+    # multiplying a measured median would incorrectly scale fixed launch latency.
+    previous = points[-2]
+    last = points[-1]
+    byte_span = last[0] - previous[0]
+    extra_bytes = message_bytes - last[0]
+    return (
+        last[1] + max(0.0, last[1] - previous[1]) / byte_span * extra_bytes,
+        last[2] + max(0.0, last[2] - previous[2]) / byte_span * extra_bytes,
+    )
 
 
 def _collectives(
     request: CompilerRequest,
     parallelism: ParallelismPlan,
     placement: RankPlacement,
-) -> tuple[CollectivePlan, CommunicationOverlapPlan, float]:
+) -> tuple[CollectivePlan, CommunicationOverlapPlan, float, str | None]:
     operations: list[CollectiveOperation] = []
     overlap: list[OverlapWindow] = []
     total_us = 0.0
@@ -632,8 +734,20 @@ def _collectives(
             transport, rails, _, path_us = _transport_for_ranks(
                 request.topology, placement, group.rank_ids
             )
+            if not math.isfinite(path_us):
+                return (
+                    CollectivePlan(operations=tuple(operations)),
+                    CommunicationOverlapPlan(windows=tuple(overlap)),
+                    0.0,
+                    "collective_path_unreachable",
+                )
             if transport not in request.constraints.permitted_transports:
-                continue
+                return (
+                    CollectivePlan(operations=tuple(operations)),
+                    CommunicationOverlapPlan(windows=tuple(overlap)),
+                    0.0,
+                    "collective_transport_not_permitted",
+                )
             measured_us, uncertainty_us = _profile_duration(
                 request.fabric_profile,
                 "collective",
@@ -692,14 +806,15 @@ def _collectives(
         CollectivePlan(operations=tuple(operations)),
         CommunicationOverlapPlan(windows=tuple(overlap)),
         total_us,
+        None,
     )
 
 
 def _kv_transfer(
     request: CompilerRequest, placement: RankPlacement, disaggregated: bool
-) -> tuple[KVTransferPlan | None, float]:
+) -> tuple[KVTransferPlan | None, float, str | None]:
     if not disaggregated:
-        return None, 0.0
+        return None, 0.0, None
     prefill_replicas: dict[str, list[RankBinding]] = defaultdict(list)
     decode_replicas: dict[str, list[RankBinding]] = defaultdict(list)
     for binding in placement.bindings:
@@ -708,7 +823,7 @@ def _kv_transfer(
         elif binding.worker_role is WorkerRole.DECODE:
             decode_replicas[binding.replica_id].append(binding)
     if not prefill_replicas or not decode_replicas:
-        return None, math.inf
+        return None, 0.0, "kv_transfer_workers_unavailable"
     kv_bytes = max(
         1,
         sum(layer.kv_bytes_per_token for layer in request.model.layers)
@@ -718,43 +833,51 @@ def _kv_transfer(
     decode_groups = tuple(tuple(value) for _, value in sorted(decode_replicas.items()))
     routes: list[KVTransferRoute] = []
     route_latencies: list[float] = []
-    for index, producers in enumerate(prefill_groups):
-        consumers = decode_groups[index % len(decode_groups)]
-        producer = producers[0]
-        consumer = consumers[0]
-        path, path_us, _ = _shortest_path(
-            request.topology, producer.gpu_id, consumer.gpu_id, kv_bytes
-        )
-        if not path or not math.isfinite(path_us):
-            return None, math.inf
-        rank_pair = (producer.rank_id, consumer.rank_id)
-        transport, _, _, _ = _transport_for_ranks(request.topology, placement, rank_pair)
-        serialization: Literal["raw", "paged", "nixl", "runtime_native"] = (
-            "nixl" if transport in {"infiniband", "roce"} else "paged"
-        )
-        routes.append(
-            KVTransferRoute(
-                route_id=f"kv-prefill-decode-{index}",
-                producer_rank_ids=tuple(binding.rank_id for binding in producers),
-                consumer_rank_ids=tuple(binding.rank_id for binding in consumers),
-                edge_path=path,
-                serialization_format=serialization,
-                chunk_bytes=min(kv_bytes, 2 * 1024 * 1024),
-                maximum_inflight_chunks=4,
-                overlap_with_decode=True,
-                cache_owner="decode",
-                eviction_policy="deadline",
-                retry_limit=1,
-                fallback="recompute",
-                transport_adapter=f"sloforge.{transport}",
-                expected_latency_us=max(path_us, 0.001),
-                expected_cost_usd=0.0,
+    chunk_bytes = min(kv_bytes, 2 * 1024 * 1024)
+    chunk_count = math.ceil(kv_bytes / chunk_bytes)
+    for producer_index, producers in enumerate(prefill_groups):
+        for consumer_index, consumers in enumerate(decode_groups):
+            producer = producers[0]
+            consumer = consumers[0]
+            path, path_us, _ = _shortest_path(
+                request.topology, producer.gpu_id, consumer.gpu_id, kv_bytes
             )
-        )
-        route_latencies.append(path_us)
+            if not path or not math.isfinite(path_us):
+                return None, 0.0, "kv_transfer_path_unreachable"
+            rank_pair = (producer.rank_id, consumer.rank_id)
+            transport, _, _, _ = _transport_for_ranks(request.topology, placement, rank_pair)
+            if transport not in request.constraints.permitted_transports:
+                return None, 0.0, "kv_transfer_transport_not_permitted"
+            serialization: Literal["raw", "paged", "nixl", "runtime_native"] = (
+                "nixl" if transport in {"infiniband", "roce"} else "paged"
+            )
+            routes.append(
+                KVTransferRoute(
+                    route_id=f"kv-prefill-{producer_index}-decode-{consumer_index}",
+                    producer_rank_ids=tuple(binding.rank_id for binding in producers),
+                    consumer_rank_ids=tuple(binding.rank_id for binding in consumers),
+                    edge_path=path,
+                    serialization_format=serialization,
+                    chunk_bytes=chunk_bytes,
+                    # The stable simulator protocol models chunk repetitions.
+                    # Advertising every chunk as admissible preserves total KV
+                    # byte volume; plan-level backpressure remains the hard cap.
+                    maximum_inflight_chunks=chunk_count,
+                    overlap_with_decode=True,
+                    cache_owner="decode",
+                    eviction_policy="deadline",
+                    retry_limit=1,
+                    fallback="recompute",
+                    transport_adapter=f"sloforge.{transport}",
+                    expected_latency_us=max(path_us, 0.001),
+                    expected_cost_usd=0.0,
+                )
+            )
+            route_latencies.append(path_us)
     return (
         KVTransferPlan(routes=tuple(routes), backpressure_limit_bytes=kv_bytes * 2),
         max(route_latencies),
+        None,
     )
 
 
@@ -763,6 +886,71 @@ def _candidate_id(
 ) -> str:
     payload = f"{tp}:{pp}:{dp}:{ep}:{int(disaggregated)}:{','.join(gpu_ids)}"
     return f"physical-{hashlib.sha256(payload.encode()).hexdigest()[:12]}"
+
+
+def _service_availability(placement: RankPlacement, base_availability: float) -> float:
+    """Evaluate replica/pool availability without assuming shared domains are independent."""
+
+    replica_bindings: dict[str, list[RankBinding]] = defaultdict(list)
+    for binding in placement.bindings:
+        replica_bindings[binding.replica_id].append(binding)
+    replica_roles: dict[str, WorkerRole] = {}
+    replica_domains: dict[str, frozenset[str]] = {}
+    for replica_id, bindings in replica_bindings.items():
+        replica_domains[replica_id] = frozenset(binding.fault_domain for binding in bindings)
+        roles = {binding.worker_role for binding in bindings}
+        if len(roles) != 1:
+            raise ValueError("a compiler-generated replica cannot mix worker roles")
+        replica_roles[replica_id] = next(iter(roles))
+
+    pools: tuple[tuple[frozenset[str], ...], ...]
+    if all(role is WorkerRole.AGGREGATED for role in replica_roles.values()):
+        pools = (
+            tuple(
+                sorted(
+                    (replica_domains[replica_id] for replica_id in replica_bindings),
+                    key=lambda domains: tuple(sorted(domains)),
+                )
+            ),
+        )
+    else:
+        # Disaggregated service requires at least one complete replica in each
+        # role pool. Shared host domains remain correlated across both pools.
+        pools = tuple(
+            tuple(
+                sorted(
+                    (
+                        replica_domains[replica_id]
+                        for replica_id, replica_role in replica_roles.items()
+                        if replica_role is role
+                    ),
+                    key=lambda domains: tuple(sorted(domains)),
+                )
+            )
+            for role in (WorkerRole.PREFILL, WorkerRole.DECODE)
+        )
+
+    canonical_pools = tuple(tuple(tuple(sorted(domains)) for domains in pool) for pool in pools)
+
+    @cache
+    def probability(state: tuple[tuple[tuple[str, ...], ...], ...]) -> float:
+        if any(not pool for pool in state):
+            return 0.0
+        if all(any(not domains for domains in pool) for pool in state):
+            return 1.0
+        domain = min(name for pool in state for domains in pool for name in domains)
+        healthy = tuple(
+            tuple(tuple(item for item in domains if item != domain) for domains in pool)
+            for pool in state
+        )
+        failed = tuple(
+            tuple(domains for domains in pool if domain not in domains) for pool in state
+        )
+        return base_availability * probability(healthy) + (1.0 - base_availability) * probability(
+            failed
+        )
+
+    return probability(canonical_pools)
 
 
 def _evaluate_candidate(
@@ -781,12 +969,14 @@ def _evaluate_candidate(
     gpus = (
         preselected_gpus
         if preselected_gpus is not None
-        else _ordered_gpus(
+        else _ordered_candidate_gpus(
             request.topology,
-            rank_count,
-            placement_strategy,
-            excluded,
+            tp=tp,
+            pp=pp,
+            dp=dp,
+            strategy=placement_strategy,
             seed=request.seed,
+            excluded=excluded,
         )
     )
     gpu_ids = tuple(gpu.node_id for gpu in gpus)
@@ -871,10 +1061,33 @@ def _evaluate_candidate(
             rejection_codes=tuple(rejection),
         )
     parallelism = _parallelism(tp, pp, dp, ep, disaggregated)
-    collectives, overlap, collective_us = _collectives(request, parallelism, placement)
-    kv_transfer, kv_us = _kv_transfer(request, placement, disaggregated)
-    if disaggregated and (kv_transfer is None or not math.isfinite(kv_us)):
-        rejection.append("kv_transfer_path_unreachable")
+    collectives, overlap, collective_us, collective_rejection = _collectives(
+        request, parallelism, placement
+    )
+    kv_transfer, kv_us, kv_rejection = _kv_transfer(request, placement, disaggregated)
+    rejection.extend(
+        reason for reason in (collective_rejection, kv_rejection) if reason is not None
+    )
+    if rejection:
+        return CandidateSummary(
+            candidate_id=candidate_id,
+            tensor_parallel=tp,
+            pipeline_parallel=pp,
+            data_parallel=dp,
+            expert_parallel=ep,
+            disaggregated=disaggregated,
+            gpu_ids=gpu_ids,
+            communication_us=0.0,
+            p95_ttft_ms=0.0,
+            p99_tpot_ms=0.0,
+            goodput_tokens_per_second=0.0,
+            cost_per_million_tokens=0.0,
+            availability=0.0,
+            failure_exposure_score=1.0,
+            objective_score=1.0e30,
+            feasible=False,
+            rejection_codes=tuple(rejection),
+        )
     prefill_replicas = max(1, dp // 2) if disaggregated else dp
     decode_replicas = dp - prefill_replicas if disaggregated else dp
     # TP shortens the per-request compute path. PP partitions memory and enables
@@ -906,24 +1119,32 @@ def _evaluate_candidate(
     for binding in placement.bindings:
         host_counts[binding.host_id] += 1
     largest_domain_fraction = max(host_counts.values(), default=rank_count) / rank_count
-    availability = request.assumptions.base_availability ** max(1, len(host_counts))
+    availability = _service_availability(placement, request.assumptions.base_availability)
     failure_exposure = largest_domain_fraction * (1.0 - availability)
-    if ttft_ms > request.constraints.p95_ttft_ms:
+    relative_uncertainty = request.assumptions.measurement_relative_uncertainty
+    robust_ttft_ms = ttft_ms * (1.0 + relative_uncertainty)
+    robust_tpot_ms = tpot_ms * (1.0 + relative_uncertainty)
+    robust_goodput = goodput * (1.0 - relative_uncertainty)
+    robust_cost = cost_per_million * (1.0 + relative_uncertainty)
+    if robust_ttft_ms > request.constraints.p95_ttft_ms:
         rejection.append("p95_ttft_slo")
-    if tpot_ms > request.constraints.p99_tpot_ms:
+    if robust_tpot_ms > request.constraints.p99_tpot_ms:
         rejection.append("p99_tpot_slo")
-    if goodput < request.constraints.minimum_goodput_tokens_per_second:
+    if robust_goodput < request.constraints.minimum_goodput_tokens_per_second:
         rejection.append("minimum_goodput")
+    # Availability is composed from the explicit per-fault-domain assumption,
+    # not from latency measurement residuals; applying that relative error to a
+    # probability near one would manufacture an unrelated five-point outage.
     if availability < request.constraints.minimum_availability:
         rejection.append("minimum_availability")
     if (
         request.constraints.maximum_cost_per_million_tokens is not None
-        and cost_per_million > request.constraints.maximum_cost_per_million_tokens
+        and robust_cost > request.constraints.maximum_cost_per_million_tokens
     ):
         rejection.append("maximum_cost")
     feasible = not rejection
-    violation = max(0.0, ttft_ms / request.constraints.p95_ttft_ms - 1.0) + max(
-        0.0, tpot_ms / request.constraints.p99_tpot_ms - 1.0
+    violation = max(0.0, robust_ttft_ms / request.constraints.p95_ttft_ms - 1.0) + max(
+        0.0, robust_tpot_ms / request.constraints.p99_tpot_ms - 1.0
     )
     objective_terms = {
         CompilerObjective.MINIMIZE_COST: cost_per_million + violation * 1e6,
@@ -974,7 +1195,13 @@ def _evaluate_candidate(
     )
 
 
-def _degrees(maximum: int) -> tuple[int, ...]:
+def _degrees(
+    maximum: int, strategy: OptimizationStrategy, fixed: int | None = None
+) -> tuple[int, ...]:
+    if fixed is not None:
+        return (fixed,)
+    if strategy is OptimizationStrategy.EXHAUSTIVE:
+        return tuple(range(1, maximum + 1))
     values = [1]
     power = 2
     while power <= maximum:
@@ -993,11 +1220,17 @@ def _pareto(candidates: tuple[CandidateSummary, ...]) -> tuple[CandidateSummary,
             and other.p99_tpot_ms <= candidate.p99_tpot_ms
             and other.cost_per_million_tokens <= candidate.cost_per_million_tokens
             and other.failure_exposure_score <= candidate.failure_exposure_score
+            and other.communication_us <= candidate.communication_us
+            and other.goodput_tokens_per_second >= candidate.goodput_tokens_per_second
+            and other.availability >= candidate.availability
             and (
                 other.p95_ttft_ms < candidate.p95_ttft_ms
                 or other.p99_tpot_ms < candidate.p99_tpot_ms
                 or other.cost_per_million_tokens < candidate.cost_per_million_tokens
                 or other.failure_exposure_score < candidate.failure_exposure_score
+                or other.communication_us < candidate.communication_us
+                or other.goodput_tokens_per_second > candidate.goodput_tokens_per_second
+                or other.availability > candidate.availability
             )
             for other in feasible
         )
@@ -1049,9 +1282,7 @@ def _expert_placement(model: ModelGraph, candidate: _Candidate) -> ExpertPlaceme
     ranks_by_replica: dict[str, list[int]] = {}
     for binding in candidate.placement.bindings:
         ranks_by_replica.setdefault(binding.replica_id, []).append(binding.rank_id)
-    replica_ranks = tuple(
-        tuple(sorted(ranks)) for _, ranks in sorted(ranks_by_replica.items())
-    )
+    replica_ranks = tuple(tuple(sorted(ranks)) for _, ranks in sorted(ranks_by_replica.items()))
     assignments = tuple(
         ExpertAssignment(
             expert_id=expert.expert_id,
@@ -1059,9 +1290,7 @@ def _expert_placement(model: ModelGraph, candidate: _Candidate) -> ExpertPlaceme
             # expert set. The tuple represents one owner per replica; choosing
             # the local owner cyclically spreads experts across that replica's
             # EP-capable ranks without coupling separate replica fault domains.
-            rank_ids=tuple(
-                ranks[index % len(ranks)] for ranks in replica_ranks
-            ),
+            rank_ids=tuple(ranks[index % len(ranks)] for ranks in replica_ranks),
             expected_load=expert.expected_load,
             capacity_factor=1.25,
         )
@@ -1136,7 +1365,10 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
     if not gpus:
         raise ValueError("topology contains no non-failed GPUs")
     maximum = min(len(gpus), request.constraints.maximum_ranks)
-    degrees = _degrees(maximum)
+    tp_degrees = _degrees(maximum, request.strategy, request.constraints.tensor_parallel_degree)
+    pp_degrees = _degrees(maximum, request.strategy, request.constraints.pipeline_parallel_degree)
+    dp_degrees = _degrees(maximum, request.strategy, request.constraints.data_parallel_degree)
+    ep_degrees = _degrees(maximum, request.strategy, request.constraints.expert_parallel_degree)
     disaggregation_options = (
         (True,) if request.constraints.require_disaggregation else (False, True)
     )
@@ -1149,30 +1381,29 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         in {
             OptimizationStrategy.RANDOM_PLACEMENT,
             OptimizationStrategy.TOPOLOGY_UNAWARE,
+            OptimizationStrategy.ROBUST_FAILURE,
         }
         else OptimizationStrategy.GREEDY_TOPOLOGY_AWARE
     )
     # The hierarchical strategy prunes impossible degree products before any
     # placement or curve evaluation. Tiny exhaustive mode intentionally visits
     # the same finite space to serve as a correctness oracle.
-    combinations = itertools.product(degrees, degrees, degrees, degrees, disaggregation_options)
-    placement_cache: dict[int, tuple[GpuNode, ...]] = {}
+    combinations = itertools.product(
+        tp_degrees, pp_degrees, dp_degrees, ep_degrees, disaggregation_options
+    )
+    placement_cache: dict[tuple[int, int, int], tuple[GpuNode, ...]] = {}
     for tp, pp, dp, ep, disaggregated in combinations:
-        if (
-            (request.constraints.tensor_parallel_degree not in (None, tp))
-            or (request.constraints.pipeline_parallel_degree not in (None, pp))
-            or (request.constraints.data_parallel_degree not in (None, dp))
-            or (request.constraints.expert_parallel_degree not in (None, ep))
-        ):
-            continue
         rank_count = tp * pp * dp
         if rank_count > maximum:
             continue
-        if rank_count not in placement_cache:
-            placement_cache[rank_count] = _ordered_gpus(
+        placement_key = (tp, pp, dp)
+        if placement_key not in placement_cache:
+            placement_cache[placement_key] = _ordered_candidate_gpus(
                 request.topology,
-                rank_count,
-                placement_strategy,
+                tp=tp,
+                pp=pp,
+                dp=dp,
+                strategy=placement_strategy,
                 seed=request.seed,
             )
         outcome = _evaluate_candidate(
@@ -1183,7 +1414,7 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             ep=ep,
             disaggregated=disaggregated,
             placement_strategy=placement_strategy,
-            preselected_gpus=placement_cache[rank_count],
+            preselected_gpus=placement_cache[placement_key],
         )
         if isinstance(outcome, CandidateSummary):
             summaries.append(outcome)
@@ -1195,6 +1426,8 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         reasons = sorted({code for item in summaries for code in item.rejection_codes})
         raise ValueError(f"no feasible physical plan; rejection codes: {','.join(reasons)}")
     selected = min(feasible, key=lambda item: (item.summary.objective_score, item.candidate_id))
+    frontier = _pareto(tuple(summaries))
+    frontier_ids = {item.candidate_id for item in frontier}
     history: list[OptimizerTraceEntry] = []
     for sequence, item in enumerate(sorted(summaries, key=lambda value: value.candidate_id)):
         history.append(
@@ -1205,12 +1438,20 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
                 decision=(
                     "select"
                     if item.candidate_id == selected.candidate_id
-                    else ("promote" if item.feasible else "reject")
+                    else ("promote" if item.candidate_id in frontier_ids else "reject")
                 ),
                 reason_code=(
                     "minimum_robust_objective"
                     if item.candidate_id == selected.candidate_id
-                    else ("pareto_candidate" if item.feasible else "+".join(item.rejection_codes))
+                    else (
+                        "pareto_candidate"
+                        if item.candidate_id in frontier_ids
+                        else (
+                            "dominated_objective"
+                            if item.feasible
+                            else "+".join(item.rejection_codes)
+                        )
+                    )
                 ),
                 # Compilation ranks the finite candidate space with measured
                 # service/link curves. Runtime validation is an explicit
@@ -1308,7 +1549,6 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
             command=("sloforge", "fabric", "compile"),
         ),
     )
-    frontier = _pareto(tuple(summaries))
     return PhysicalCompileResult(
         selected=plan,
         pareto_frontier=frontier,
