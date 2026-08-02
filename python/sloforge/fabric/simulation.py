@@ -298,12 +298,30 @@ class FabricSimulationOutput(SimulationModel):
     applied_counterfactuals: tuple[CounterfactualModifier, ...]
 
 
+class SimulationRequestShape(SimulationModel):
+    arrival_us: NonNegativeFloat
+    prompt_tokens: Annotated[int, Field(gt=0)]
+    output_tokens: Annotated[int, Field(gt=0, le=4_096)]
+    priority: Literal["high", "normal", "low"]
+    request_class: str = Field(min_length=1)
+
+
 class SimulationWorkload(SimulationModel):
     request_count: Annotated[int, Field(gt=0, le=10_000)]
     arrival_interval_us: NonNegativeFloat
     prompt_tokens: Annotated[int, Field(gt=0)]
     output_tokens: Annotated[int, Field(gt=0, le=4_096)]
     cpu_launch_us: PositiveFloat = 5.0
+    requests: tuple[SimulationRequestShape, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_requests(self) -> SimulationWorkload:
+        if self.requests and len(self.requests) != self.request_count:
+            raise ValueError("explicit request shapes must match request_count")
+        arrivals = [request.arrival_us for request in self.requests]
+        if arrivals != sorted(arrivals):
+            raise ValueError("explicit request arrivals must be ordered")
+        return self
 
 
 class RequestLatency(SimulationModel):
@@ -472,13 +490,28 @@ def build_simulation_request(
     operations: list[PhysicalOperation] = []
     uncertainty = 1.0 - plan.predicted_metrics.p95_ttft_ms.confidence
     rank_count = len(plan.rank_placement.bindings)
-    prefill_per_rank_us = plan.predicted_metrics.p95_ttft_ms.estimate * 1_000.0 / max(1, rank_count)
-    decode_per_rank_us = (
-        plan.predicted_metrics.p99_tpot_ms.estimate * 1_000.0 * workload.output_tokens
+    baseline_prefill_per_rank_us = (
+        plan.predicted_metrics.p95_ttft_ms.estimate * 1_000.0 / max(1, rank_count)
     )
-    for request_index in range(workload.request_count):
+    request_shapes = workload.requests or tuple(
+        SimulationRequestShape(
+            arrival_us=index * workload.arrival_interval_us,
+            prompt_tokens=workload.prompt_tokens,
+            output_tokens=workload.output_tokens,
+            priority="normal",
+            request_class="default",
+        )
+        for index in range(workload.request_count)
+    )
+    for request_index, shape in enumerate(request_shapes):
         request_id = f"request-{request_index:06d}"
-        arrival_us = request_index * workload.arrival_interval_us
+        arrival_us = shape.arrival_us
+        prefill_per_rank_us = baseline_prefill_per_rank_us * (
+            shape.prompt_tokens / workload.prompt_tokens
+        )
+        decode_per_rank_us = (
+            plan.predicted_metrics.p99_tpot_ms.estimate * 1_000.0 * shape.output_tokens
+        )
         prefill_ids: list[str] = []
         for binding in plan.rank_placement.bindings:
             launch_id = f"{request_id}:rank-{binding.rank_id}:launch"
@@ -513,7 +546,7 @@ def build_simulation_request(
             message_bytes = max(
                 1,
                 collective.message_size_intercept_bytes
-                + round(collective.message_size_bytes_per_token * workload.prompt_tokens),
+                + round(collective.message_size_bytes_per_token * shape.prompt_tokens),
             )
             resource_ids = _collective_resource_ids(collective.transport, tuple(resources))
             operations.append(
