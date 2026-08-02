@@ -1,6 +1,6 @@
 use crate::{
     CounterfactualModifier, FabricSimulationRequest, FaultEffect, OperationKind, PhysicalOperation,
-    ResourceKind,
+    ResourceKind, SchedulingMode,
 };
 use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 
@@ -46,12 +46,15 @@ pub fn validate(input: &FabricSimulationRequest) -> Result<(), SimError> {
     }
 
     let mut resource_ids = HashSet::new();
-    let mut resource_kinds = HashMap::new();
+    let mut resource_properties = HashMap::new();
     for resource in &input.resources {
         if resource.id.is_empty() || !resource_ids.insert(resource.id.as_str()) {
             return invalid(format!("empty or duplicate resource id {:?}", resource.id));
         }
-        resource_kinds.insert(resource.id.as_str(), resource.kind);
+        resource_properties.insert(
+            resource.id.as_str(),
+            (resource.kind, resource.scheduling, resource.capacity_units),
+        );
         finite_positive("resource capacity_units", resource.capacity_units)?;
         if resource.max_concurrency == 0 {
             return invalid(format!("resource {} has zero concurrency", resource.id));
@@ -93,7 +96,7 @@ pub fn validate(input: &FabricSimulationRequest) -> Result<(), SimError> {
         }
     }
     for operation in &input.operations {
-        validate_operation(operation, &operation_ids, &resource_kinds)?;
+        validate_operation(operation, &operation_ids, &resource_properties)?;
     }
     validate_acyclic(&input.operations)?;
     validate_faults(input, &resource_ids)?;
@@ -150,7 +153,7 @@ fn validate_curve(resource: &crate::PhysicalResource) -> Result<(), SimError> {
 fn validate_operation(
     operation: &PhysicalOperation,
     operation_ids: &HashSet<&str>,
-    resource_kinds: &HashMap<&str, ResourceKind>,
+    resource_properties: &HashMap<&str, (ResourceKind, SchedulingMode, f64)>,
 ) -> Result<(), SimError> {
     finite_nonnegative("operation earliest_start_us", operation.earliest_start_us)?;
     if !operation.uncertainty_fraction.is_finite()
@@ -174,7 +177,7 @@ fn validate_operation(
     }
     let mut demanded = HashSet::new();
     for demand in &operation.demands {
-        if !resource_kinds.contains_key(demand.resource_id.as_str())
+        if !resource_properties.contains_key(demand.resource_id.as_str())
             || !demanded.insert(demand.resource_id.as_str())
         {
             return invalid(format!(
@@ -183,9 +186,15 @@ fn validate_operation(
             ));
         }
         finite_positive("resource demand units", demand.units)?;
-        let resource = resource_kinds[demand.resource_id.as_str()];
+        let (kind, scheduling, capacity) = resource_properties[demand.resource_id.as_str()];
+        if scheduling == SchedulingMode::Exclusive && demand.units > capacity {
+            return invalid(format!(
+                "operation {} demand exceeds exclusive resource {} capacity",
+                operation.id, demand.resource_id
+            ));
+        }
         if matches!(
-            resource,
+            kind,
             ResourceKind::CpuCoreGroup
                 | ResourceKind::GpuCompute
                 | ResourceKind::GpuCopyEngine
