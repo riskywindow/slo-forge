@@ -26,7 +26,10 @@ Outputs:
 - `results/rank-ordering-raw-samples.jsonl`: warmup and measured paired trials
 - `reports/rank-ordering-experiment.md`: report derived from the result object
 
-To evaluate a hardware-backed run, create the same strict input bundle with
-`calibration_mode=measured_hardware`, measured curves from the Fabric profiler,
-and evidence from a matched fault-free Autopsy capture. The guard rejects a
-synthetic topology mislabeled as measured hardware.
+To evaluate a hardware-backed run, materialize the trace evidence locally and
+create the same strict input bundle with `calibration_mode=measured_hardware`,
+measured curves from the Fabric profiler, and evidence from a matched fault-free
+Autopsy capture. The guard verifies trace bytes and gate fields and rejects
+synthetic topology or evidence mislabeled as measured hardware. Even with
+hardware-backed inputs, this script runs modeled paired trials; it can recommend
+an on-device A/B experiment but cannot enable the ordering by default.

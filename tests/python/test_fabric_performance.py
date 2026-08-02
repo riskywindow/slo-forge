@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import random
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -35,6 +37,7 @@ from sloforge.fabric.performance import (
     optimize_rank_order,
     write_experiment_artifacts,
 )
+from sloforge.fabric.performance.rank_ordering import MAX_TRACE_EVIDENCE_BYTES
 from sloforge.ir import ArtifactDigest
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
@@ -132,6 +135,44 @@ def _topology(rank_count: int = 4, *, calibrated: bool = True) -> TopologyGraph:
         nodes=nodes,
         edges=tuple(edges),
         container_limited=False,
+    )
+
+
+def _uniform_topology() -> TopologyGraph:
+    topology = _topology()
+    edges = tuple(
+        edge.model_copy(
+            update={
+                "connection": ConnectionType.NVLINK,
+                "theoretical_bandwidth_gbps": 100.0,
+                "bandwidth_curve_gbps": _curve(256 * 1024, 100.0),
+                "latency_curve_us": _curve(256 * 1024, 1.0),
+            }
+        )
+        for edge in topology.edges
+    )
+    return topology.model_copy(update={"topology_id": "uniform-4", "edges": edges})
+
+
+def _hardware_provenance_topology() -> TopologyGraph:
+    topology = _topology()
+    measured_provenance = (
+        FactProvenance(
+            source=DiscoverySource.NCCL,
+            observed_at=WHEN,
+            confidence=0.98,
+            source_uri="artifacts/fabric/hardware/nccl-trace.json",
+            field="measured-link-curves",
+        ),
+    )
+    return topology.model_copy(
+        update={
+            "topology_id": "hardware-provenance-4",
+            "edges": tuple(
+                edge.model_copy(update={"discovery_provenance": measured_provenance})
+                for edge in topology.edges
+            ),
+        }
     )
 
 
@@ -281,6 +322,33 @@ def test_large_group_uses_bounded_deterministic_heuristic() -> None:
     assert first.candidates_evaluated < 500
 
 
+@pytest.mark.parametrize("rank_count", (2, 3, 4, 5, 6))
+def test_exact_search_randomized_placements_preserve_ring_invariants(rank_count: int) -> None:
+    topology = _topology(rank_count)
+    gpu_ids = [f"gpu-{rank}" for rank in range(rank_count)]
+    random.Random(1_000 + rank_count).shuffle(gpu_ids)
+    placement = _placement(rank_count).model_copy(
+        update={
+            "bindings": tuple(
+                binding.model_copy(update={"gpu_id": gpu_ids[binding.rank_id]})
+                for binding in _placement(rank_count).bindings
+            )
+        }
+    )
+    result = optimize_rank_order(
+        topology,
+        placement,
+        _operation(rank_count),
+        message_bytes=64 * 1024,
+    )
+    assert set(result.optimized.rank_order) == set(range(rank_count))
+    assert len(result.optimized.routes) == rank_count
+    assert result.optimized.predicted_duration_microseconds <= (
+        result.reference.predicted_duration_microseconds
+    )
+    assert all(route.traversals for route in result.optimized.routes)
+
+
 def test_missing_measured_curve_fails_without_theoretical_fallback() -> None:
     with pytest.raises(CalibrationError, match="no fully measured route"):
         optimize_rank_order(
@@ -317,10 +385,72 @@ def test_experiment_is_paired_deterministic_and_synthetic_never_enables(
 
 def test_unjustified_trace_keeps_reference() -> None:
     topology = _topology()
-    evidence = _evidence().model_copy(update={"collective_critical_path_fraction": 0.01})
-    result = execute_rank_ordering_experiment(_plan(topology), topology, evidence, _config())
+    config = _config().model_copy(update={"minimum_collective_critical_path_fraction": 0.50})
+    result = execute_rank_ordering_experiment(_plan(topology), topology, _evidence(), config)
     assert result.decision.status is IntegrationStatus.KEEP_REFERENCE
     assert not result.decision.trace_justified
+
+
+def test_neutral_topology_reports_inconclusive_and_keeps_default_disabled() -> None:
+    topology = _uniform_topology()
+    result = execute_rank_ordering_experiment(_plan(topology), topology, _evidence(), _config())
+    assert result.optimization.predicted_improvement_percent == pytest.approx(0.0)
+    assert result.decision.status is IntegrationStatus.INCONCLUSIVE
+    assert not result.decision.enabled_by_default
+    assert result.decision.limiting_regimes_bytes == _config().message_sizes_bytes
+
+
+def test_trace_artifact_digest_and_gate_fields_are_verified(tmp_path: Path) -> None:
+    topology = _topology()
+    plan = _plan(topology)
+    tampered = tmp_path / "tampered-trace.json"
+    tampered.write_text("{}", encoding="utf-8")
+    bad_digest = _evidence().model_copy(update={"artifact_uri": str(tampered)})
+    with pytest.raises(ValueError, match="artifact hash mismatch"):
+        execute_rank_ordering_experiment(plan, topology, bad_digest, _config())
+
+    payload = json.loads((RANK_ORDERING_BENCHMARK / "observed-collective-trace.json").read_text())
+    payload["fault_free"] = False
+    mismatched = tmp_path / "mismatched-trace.json"
+    content = json.dumps(payload, sort_keys=True).encode()
+    mismatched.write_bytes(content)
+    mismatched_evidence = _evidence().model_copy(
+        update={
+            "artifact_uri": str(mismatched),
+            "artifact_sha256": hashlib.sha256(content).hexdigest(),
+        }
+    )
+    with pytest.raises(ValueError, match=r"fields do not match.*fault_free"):
+        execute_rank_ordering_experiment(plan, topology, mismatched_evidence, _config())
+
+    oversized = tmp_path / "oversized-trace.json"
+    oversized.write_bytes(b"x" * (MAX_TRACE_EVIDENCE_BYTES + 1))
+    oversized_evidence = _evidence().model_copy(update={"artifact_uri": str(oversized)})
+    with pytest.raises(ValueError, match="safety limit"):
+        execute_rank_ordering_experiment(plan, topology, oversized_evidence, _config())
+
+
+def test_hardware_calibrated_inputs_still_require_on_device_paired_trials(
+    tmp_path: Path,
+) -> None:
+    topology = _hardware_provenance_topology()
+    payload = json.loads((RANK_ORDERING_BENCHMARK / "observed-collective-trace.json").read_text())
+    payload["calibration_mode"] = "measured_hardware"
+    payload["provenance"]["hardware_exercised"] = True
+    artifact = tmp_path / "hardware-trace.json"
+    content = json.dumps(payload, sort_keys=True).encode()
+    artifact.write_bytes(content)
+    evidence = _evidence().model_copy(
+        update={
+            "artifact_uri": str(artifact),
+            "artifact_sha256": hashlib.sha256(content).hexdigest(),
+            "calibration_mode": CalibrationMode.MEASURED_HARDWARE,
+        }
+    )
+    result = execute_rank_ordering_experiment(_plan(topology), topology, evidence, _config())
+    assert result.decision.status is IntegrationStatus.MEASURE_ON_HARDWARE
+    assert not result.decision.enabled_by_default
+    assert "digital-twin executions" in result.decision.rationale
 
 
 def test_invalid_order_and_mislabeled_synthetic_evidence_are_rejected() -> None:

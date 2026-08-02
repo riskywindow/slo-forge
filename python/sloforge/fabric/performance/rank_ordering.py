@@ -3,9 +3,10 @@
 This module deliberately optimizes a narrow physical operation instead of
 claiming to improve a collective implementation.  It selects a rank order for
 ring collectives from calibrated link curves, retains the exact routes used by
-the model, and only enables the order after paired evidence has a confidence
-interval above a practical threshold.  Synthetic calibration can recommend a
-hardware experiment, but can never enable a production default.
+the model, and recommends an on-device experiment only after modeled paired
+evidence has a confidence interval above a practical threshold. Modeled trials
+can never enable a production default, even when their input curves are
+hardware-calibrated.
 """
 
 from __future__ import annotations
@@ -43,6 +44,7 @@ PositiveFinite = Annotated[float, Field(gt=0.0, allow_inf_nan=False)]
 NonNegativeFinite = Annotated[float, Field(ge=0.0, allow_inf_nan=False)]
 Probability = Annotated[float, Field(ge=0.0, le=1.0, allow_inf_nan=False)]
 Sha256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+MAX_TRACE_EVIDENCE_BYTES = 16 * 1024 * 1024
 
 
 class PerformanceModel(BaseModel):
@@ -741,23 +743,14 @@ def _decision(
             limiting_regimes_bytes=limiting,
             trace_justified=True,
         )
-    if evidence.calibration_mode is CalibrationMode.SYNTHETIC_CALIBRATED:
-        return IntegrationDecision(
-            status=IntegrationStatus.MEASURE_ON_HARDWARE,
-            enabled_by_default=False,
-            rationale=(
-                "synthetic calibrated trials show confidence-supported benefit in every regime, "
-                "but production enablement requires matched hardware measurements"
-            ),
-            limiting_regimes_bytes=(),
-            trace_justified=True,
-        )
+    calibration = evidence.calibration_mode.value.replace("_", " ")
     return IntegrationDecision(
-        status=IntegrationStatus.ENABLE,
-        enabled_by_default=True,
+        status=IntegrationStatus.MEASURE_ON_HARDWARE,
+        enabled_by_default=False,
         rationale=(
-            "matched hardware trials show confidence-supported practical benefit in every "
-            "message-size regime"
+            f"{calibration} inputs produce confidence-supported modeled benefit in every "
+            "regime, but the paired A/B trials are digital-twin executions; production "
+            "enablement requires matched on-device measurements of both orderings"
         ),
         limiting_regimes_bytes=(),
         trace_justified=True,
@@ -792,6 +785,63 @@ def _validate_evidence_sources(
     )
     if synthetic and evidence.calibration_mode is CalibrationMode.MEASURED_HARDWARE:
         raise ValueError("synthetic topology provenance cannot be labeled as measured hardware")
+    if evidence.calibration_mode is CalibrationMode.MEASURED_HARDWARE and any(
+        not edge.discovery_provenance for edge in used
+    ):
+        raise ValueError("measured-hardware topology edges require discovery provenance")
+
+
+def _validate_trace_artifact(
+    evidence: CollectiveTraceEvidence,
+    *,
+    evidence_root: Path | None,
+) -> None:
+    """Verify local trace bytes and every evidence field consumed by the gate.
+
+    ``evidence_root`` resolves relative URIs; it is intentionally not a
+    containment sandbox because evidence bundles may live outside the source
+    tree. Absolute and parent-relative paths remain hash- and size-checked.
+    """
+
+    if "://" in evidence.artifact_uri:
+        raise ValueError("trace evidence must be materialized as a local artifact")
+    artifact = Path(evidence.artifact_uri)
+    if not artifact.is_absolute():
+        artifact = (evidence_root or Path.cwd()) / artifact
+    if not artifact.is_file():
+        raise FileNotFoundError(f"trace evidence artifact does not exist: {artifact}")
+    with artifact.open("rb") as handle:
+        content = handle.read(MAX_TRACE_EVIDENCE_BYTES + 1)
+    if len(content) > MAX_TRACE_EVIDENCE_BYTES:
+        raise ValueError(f"trace evidence exceeds the {MAX_TRACE_EVIDENCE_BYTES}-byte safety limit")
+    observed_digest = hashlib.sha256(content).hexdigest()
+    if observed_digest != evidence.artifact_sha256:
+        raise ValueError(
+            "trace evidence artifact hash mismatch: "
+            f"expected {evidence.artifact_sha256}, observed {observed_digest}"
+        )
+    try:
+        payload = json.loads(content)
+    except json.JSONDecodeError as error:
+        raise ValueError(f"trace evidence artifact is not valid JSON: {artifact}") from error
+    expected: dict[str, object] = {
+        "plan_id": evidence.plan_id,
+        "operation_id": evidence.operation_id,
+        "calibration_mode": evidence.calibration_mode.value,
+        "observed_duration_microseconds": list(evidence.observed_duration_microseconds),
+        "collective_critical_path_fraction": evidence.collective_critical_path_fraction,
+        "rank_wait": [sample.model_dump(mode="json") for sample in evidence.rank_wait],
+        "fault_free": evidence.fault_free,
+    }
+    mismatched = tuple(key for key, value in expected.items() if payload.get(key) != value)
+    if mismatched:
+        raise ValueError(
+            "trace evidence fields do not match the referenced artifact: " + ", ".join(mismatched)
+        )
+    if evidence.calibration_mode is CalibrationMode.MEASURED_HARDWARE:
+        provenance = payload.get("provenance")
+        if not isinstance(provenance, dict) or provenance.get("hardware_exercised") is not True:
+            raise ValueError("measured-hardware trace evidence must attest hardware_exercised=true")
 
 
 def execute_rank_ordering_experiment(
@@ -799,6 +849,8 @@ def execute_rank_ordering_experiment(
     topology: TopologyGraph,
     evidence: CollectiveTraceEvidence,
     config: RankOrderingExperimentConfig,
+    *,
+    evidence_root: Path | None = None,
 ) -> RankOrderingExperiment:
     """Run deterministic paired trials and produce a content-addressed artifact."""
 
@@ -817,6 +869,7 @@ def execute_rank_ordering_experiment(
         heuristic_pass_limit=config.heuristic_pass_limit,
     )
     _validate_evidence_sources(topology, evidence, optimization)
+    _validate_trace_artifact(evidence, evidence_root=evidence_root)
 
     rng = random.Random(config.seed)
     trials: list[RankOrderingTrial] = []
@@ -962,13 +1015,17 @@ def _report(experiment: RankOrderingExperiment) -> str:
         )
     )
     if experiment.trace_evidence.calibration_mode is CalibrationMode.SYNTHETIC_CALIBRATED:
-        lines.extend(
-            (
-                "> This is a deterministic synthetic-calibration result, not a GPU measurement. "
-                "It cannot enable a production default.",
-                "",
-            )
+        caveat = (
+            "This is a deterministic synthetic-calibration result, not a GPU measurement. "
+            "It cannot enable a production default."
         )
+    else:
+        caveat = (
+            "The input curves and trace are hardware-backed, but the paired ordering trials "
+            "in this artifact are digital-twin executions. They cannot enable a production "
+            "default without a matched on-device A/B run."
+        )
+    lines.extend((f"> {caveat}", ""))
     return "\n".join(lines)
 
 
