@@ -422,14 +422,28 @@ def attach_counterfactuals(
                 }
             )
         )
+
+    def causal_rank(item: CausalHypothesis) -> int:
+        # A repair whose conservative interval improves the degraded run is
+        # stronger causal evidence than an untested correlated stage symptom.
+        # Untested supported hypotheses remain ahead of counterfactually
+        # contradicted or inconclusive alternatives.
+        if (
+            item.counterfactual is not None
+            and item.rejected_reason is None
+            and item.counterfactual.lower_improvement_ms > 0.0
+        ):
+            return 0
+        if item.rejected_reason is None:
+            return 1
+        if item.counterfactual is not None:
+            return 2
+        return 3
+
     ordered = tuple(
         sorted(
             updated,
-            key=lambda item: (
-                item.rejected_reason is not None,
-                -item.confidence,
-                item.kind.value,
-            ),
+            key=lambda item: (causal_rank(item), -item.confidence, item.kind.value),
         )
     )
     top_three = tuple(item.kind for item in ordered[:3])

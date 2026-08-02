@@ -262,6 +262,53 @@ def test_counterfactual_evidence_reranks_a_contradicted_top_hypothesis() -> None
     assert augmented.hypotheses[1].rejected_reason is not None
 
 
+def test_supported_cause_outranks_an_untested_propagation_symptom() -> None:
+    diagnosis = _diagnosis()
+    symptom = CausalHypothesis(
+        hypothesis_id="h-kv-symptom",
+        kind=BottleneckKind.KV_TRANSFER_BOTTLENECK,
+        target="kv-transfer",
+        supporting_evidence=diagnosis.hypotheses[0].supporting_evidence,
+        contradicting_evidence=(),
+        confidence=0.99,
+    )
+    diagnosis = DiagnosisRecord.model_validate(
+        {
+            **diagnosis.model_dump(mode="python"),
+            "top_hypothesis": symptom.kind,
+            "top_three": (symptom.kind, *diagnosis.top_three),
+            "hypotheses": (symptom, *diagnosis.hypotheses),
+            "confidence": symptom.confidence,
+        }
+    )
+
+    def runner(request: Mapping[str, object]) -> SimulationObservation:
+        return (
+            _observation(10_000.0, 100.0)
+            if request.get("counterfactuals", []) == []
+            else _observation(6_000.0, 100.0)
+        )
+
+    replay = replay_counterfactuals(
+        diagnosis,
+        simulation_request={"seed": 7, "counterfactuals": []},
+        scenarios=(
+            CounterfactualScenario(
+                scenario_id="repair-rail",
+                hypothesis_id="h-network",
+                hypothesis_kind=BottleneckKind.NETWORK_BANDWIDTH_DEGRADATION,
+                rationale="remove the physical cause",
+                modifications=(RemoveFault(fault_id="rail-degraded"),),
+            ),
+        ),
+        healthy_reference_us=5_900.0,
+        runner=runner,
+    )
+    augmented = attach_counterfactuals(diagnosis, replay)
+    assert augmented.top_hypothesis is BottleneckKind.NETWORK_BANDWIDTH_DEGRADATION
+    assert augmented.hypotheses[1].kind is BottleneckKind.KV_TRANSFER_BOTTLENECK
+
+
 def test_minimizer_reduces_events_ranks_and_counters_deterministically() -> None:
     run = _run()
 
