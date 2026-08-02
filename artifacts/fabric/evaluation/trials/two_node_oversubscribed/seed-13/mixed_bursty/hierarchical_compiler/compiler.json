@@ -1,0 +1,3434 @@
+{
+  "all_candidates": [
+    {
+      "availability": 0.998001,
+      "candidate_id": "physical-6871c998ae94",
+      "communication_us": 61732.91733019804,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 2,
+      "disaggregated": true,
+      "expert_parallel": 4,
+      "failure_exposure_score": 0.0009994999999999865,
+      "feasible": true,
+      "goodput_tokens_per_second": 736.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/2",
+        "host-0/gpu/1",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/6",
+        "host-0/gpu/5",
+        "host-0/gpu/7",
+        "host-1/gpu/0",
+        "host-1/gpu/2",
+        "host-1/gpu/1",
+        "host-1/gpu/3",
+        "host-1/gpu/4",
+        "host-1/gpu/6",
+        "host-1/gpu/5",
+        "host-1/gpu/7"
+      ],
+      "objective_score": 151.5865491582471,
+      "p95_ttft_ms": 112.93291733019805,
+      "p99_tpot_ms": 1.2594296458119658,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 8
+    }
+  ],
+  "pareto_frontier": [
+    {
+      "availability": 0.998001,
+      "candidate_id": "physical-6871c998ae94",
+      "communication_us": 61732.91733019804,
+      "cost_per_million_tokens": 24.154589371980677,
+      "data_parallel": 2,
+      "disaggregated": true,
+      "expert_parallel": 4,
+      "failure_exposure_score": 0.0009994999999999865,
+      "feasible": true,
+      "goodput_tokens_per_second": 736.0,
+      "gpu_ids": [
+        "host-0/gpu/0",
+        "host-0/gpu/2",
+        "host-0/gpu/1",
+        "host-0/gpu/3",
+        "host-0/gpu/4",
+        "host-0/gpu/6",
+        "host-0/gpu/5",
+        "host-0/gpu/7",
+        "host-1/gpu/0",
+        "host-1/gpu/2",
+        "host-1/gpu/1",
+        "host-1/gpu/3",
+        "host-1/gpu/4",
+        "host-1/gpu/6",
+        "host-1/gpu/5",
+        "host-1/gpu/7"
+      ],
+      "objective_score": 151.5865491582471,
+      "p95_ttft_ms": 112.93291733019805,
+      "p99_tpot_ms": 1.2594296458119658,
+      "pipeline_parallel": 1,
+      "rejection_codes": [],
+      "tensor_parallel": 8
+    }
+  ],
+  "selected": {
+    "api_version": "sloforge.io/fabric/v1",
+    "bottleneck_prediction": "communication",
+    "collectives": {
+      "operations": [
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0000",
+          "overlap_window_id": "overlap-0000",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0001",
+          "overlap_window_id": "overlap-0001",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0002",
+          "overlap_window_id": "overlap-0002",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0003",
+          "overlap_window_id": "overlap-0003",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0004",
+          "overlap_window_id": "overlap-0004",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0005",
+          "overlap_window_id": "overlap-0005",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0006",
+          "overlap_window_id": "overlap-0006",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0007",
+          "overlap_window_id": "overlap-0007",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0008",
+          "overlap_window_id": "overlap-0008",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0009",
+          "overlap_window_id": "overlap-0009",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0010",
+          "overlap_window_id": "overlap-0010",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0011",
+          "overlap_window_id": "overlap-0011",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0012",
+          "overlap_window_id": "overlap-0012",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0013",
+          "overlap_window_id": "overlap-0013",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0014",
+          "overlap_window_id": "overlap-0014",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0015",
+          "overlap_window_id": "overlap-0015",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0016",
+          "overlap_window_id": "overlap-0016",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0017",
+          "overlap_window_id": "overlap-0017",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0018",
+          "overlap_window_id": "overlap-0018",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0019",
+          "overlap_window_id": "overlap-0019",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0020",
+          "overlap_window_id": "overlap-0020",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0021",
+          "overlap_window_id": "overlap-0021",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0022",
+          "overlap_window_id": "overlap-0022",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0023",
+          "overlap_window_id": "overlap-0023",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0024",
+          "overlap_window_id": "overlap-0024",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0025",
+          "overlap_window_id": "overlap-0025",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0026",
+          "overlap_window_id": "overlap-0026",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0027",
+          "overlap_window_id": "overlap-0027",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0028",
+          "overlap_window_id": "overlap-0028",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0029",
+          "overlap_window_id": "overlap-0029",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0030",
+          "overlap_window_id": "overlap-0030",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0031",
+          "overlap_window_id": "overlap-0031",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0032",
+          "overlap_window_id": "overlap-0032",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0033",
+          "overlap_window_id": "overlap-0033",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0034",
+          "overlap_window_id": "overlap-0034",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0035",
+          "overlap_window_id": "overlap-0035",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0036",
+          "overlap_window_id": "overlap-0036",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0037",
+          "overlap_window_id": "overlap-0037",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0038",
+          "overlap_window_id": "overlap-0038",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0039",
+          "overlap_window_id": "overlap-0039",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0040",
+          "overlap_window_id": "overlap-0040",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0041",
+          "overlap_window_id": "overlap-0041",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0042",
+          "overlap_window_id": "overlap-0042",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "ring",
+          "channel_count": 8,
+          "depends_on": [],
+          "expected_duration_us": 112.57230465337132,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 4096.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_reduce",
+          "operation_id": "collective-0043",
+          "overlap_window_id": "overlap-0043",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "pcie",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0044",
+          "overlap_window_id": "overlap-0044",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0045",
+          "overlap_window_id": "overlap-0045",
+          "participating_ranks": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0046",
+          "overlap_window_id": "overlap-0046",
+          "participating_ranks": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        },
+        {
+          "algorithm": "pairwise",
+          "channel_count": 4,
+          "depends_on": [],
+          "expected_duration_us": 13.156306172839507,
+          "fallback": "host_staged",
+          "message_size_bytes_per_token": 8192.0,
+          "message_size_intercept_bytes": 0,
+          "operation": "all_to_all",
+          "operation_id": "collective-0047",
+          "overlap_window_id": "overlap-0047",
+          "participating_ranks": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "rail_ids": [],
+          "rank_order": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "transport": "nvlink",
+          "uncertainty_us": 1.0
+        }
+      ]
+    },
+    "communication_overlap": {
+      "windows": [
+        {
+          "communication_operation_id": "collective-0000",
+          "compute_operation_id": "layer-0000",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0000"
+        },
+        {
+          "communication_operation_id": "collective-0001",
+          "compute_operation_id": "layer-0001",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0001"
+        },
+        {
+          "communication_operation_id": "collective-0002",
+          "compute_operation_id": "layer-0002",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0002"
+        },
+        {
+          "communication_operation_id": "collective-0003",
+          "compute_operation_id": "layer-0003",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0003"
+        },
+        {
+          "communication_operation_id": "collective-0004",
+          "compute_operation_id": "layer-0004",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0004"
+        },
+        {
+          "communication_operation_id": "collective-0005",
+          "compute_operation_id": "layer-0005",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0005"
+        },
+        {
+          "communication_operation_id": "collective-0006",
+          "compute_operation_id": "layer-0006",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0006"
+        },
+        {
+          "communication_operation_id": "collective-0007",
+          "compute_operation_id": "layer-0007",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0007"
+        },
+        {
+          "communication_operation_id": "collective-0008",
+          "compute_operation_id": "layer-0008",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0008"
+        },
+        {
+          "communication_operation_id": "collective-0009",
+          "compute_operation_id": "layer-0009",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0009"
+        },
+        {
+          "communication_operation_id": "collective-0010",
+          "compute_operation_id": "layer-0010",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0010"
+        },
+        {
+          "communication_operation_id": "collective-0011",
+          "compute_operation_id": "layer-0011",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0011"
+        },
+        {
+          "communication_operation_id": "collective-0012",
+          "compute_operation_id": "layer-0012",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0012"
+        },
+        {
+          "communication_operation_id": "collective-0013",
+          "compute_operation_id": "layer-0013",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0013"
+        },
+        {
+          "communication_operation_id": "collective-0014",
+          "compute_operation_id": "layer-0014",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0014"
+        },
+        {
+          "communication_operation_id": "collective-0015",
+          "compute_operation_id": "layer-0015",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0015"
+        },
+        {
+          "communication_operation_id": "collective-0016",
+          "compute_operation_id": "layer-0016",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0016"
+        },
+        {
+          "communication_operation_id": "collective-0017",
+          "compute_operation_id": "layer-0017",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0017"
+        },
+        {
+          "communication_operation_id": "collective-0018",
+          "compute_operation_id": "layer-0018",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0018"
+        },
+        {
+          "communication_operation_id": "collective-0019",
+          "compute_operation_id": "layer-0019",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0019"
+        },
+        {
+          "communication_operation_id": "collective-0020",
+          "compute_operation_id": "layer-0020",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0020"
+        },
+        {
+          "communication_operation_id": "collective-0021",
+          "compute_operation_id": "layer-0021",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0021"
+        },
+        {
+          "communication_operation_id": "collective-0022",
+          "compute_operation_id": "layer-0022",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0022"
+        },
+        {
+          "communication_operation_id": "collective-0023",
+          "compute_operation_id": "layer-0023",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0023"
+        },
+        {
+          "communication_operation_id": "collective-0024",
+          "compute_operation_id": "layer-0024",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0024"
+        },
+        {
+          "communication_operation_id": "collective-0025",
+          "compute_operation_id": "layer-0025",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0025"
+        },
+        {
+          "communication_operation_id": "collective-0026",
+          "compute_operation_id": "layer-0026",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0026"
+        },
+        {
+          "communication_operation_id": "collective-0027",
+          "compute_operation_id": "layer-0027",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0027"
+        },
+        {
+          "communication_operation_id": "collective-0028",
+          "compute_operation_id": "layer-0028",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0028"
+        },
+        {
+          "communication_operation_id": "collective-0029",
+          "compute_operation_id": "layer-0029",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0029"
+        },
+        {
+          "communication_operation_id": "collective-0030",
+          "compute_operation_id": "layer-0030",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0030"
+        },
+        {
+          "communication_operation_id": "collective-0031",
+          "compute_operation_id": "layer-0031",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0031"
+        },
+        {
+          "communication_operation_id": "collective-0032",
+          "compute_operation_id": "layer-0032",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0032"
+        },
+        {
+          "communication_operation_id": "collective-0033",
+          "compute_operation_id": "layer-0033",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0033"
+        },
+        {
+          "communication_operation_id": "collective-0034",
+          "compute_operation_id": "layer-0034",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0034"
+        },
+        {
+          "communication_operation_id": "collective-0035",
+          "compute_operation_id": "layer-0035",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0035"
+        },
+        {
+          "communication_operation_id": "collective-0036",
+          "compute_operation_id": "layer-0036",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0036"
+        },
+        {
+          "communication_operation_id": "collective-0037",
+          "compute_operation_id": "layer-0037",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0037"
+        },
+        {
+          "communication_operation_id": "collective-0038",
+          "compute_operation_id": "layer-0038",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0038"
+        },
+        {
+          "communication_operation_id": "collective-0039",
+          "compute_operation_id": "layer-0039",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0039"
+        },
+        {
+          "communication_operation_id": "collective-0040",
+          "compute_operation_id": "layer-0040",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0040"
+        },
+        {
+          "communication_operation_id": "collective-0041",
+          "compute_operation_id": "layer-0041",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0041"
+        },
+        {
+          "communication_operation_id": "collective-0042",
+          "compute_operation_id": "layer-0042",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0042"
+        },
+        {
+          "communication_operation_id": "collective-0043",
+          "compute_operation_id": "layer-0043",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0043"
+        },
+        {
+          "communication_operation_id": "collective-0044",
+          "compute_operation_id": "layer-0044",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0044"
+        },
+        {
+          "communication_operation_id": "collective-0045",
+          "compute_operation_id": "layer-0045",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0045"
+        },
+        {
+          "communication_operation_id": "collective-0046",
+          "compute_operation_id": "layer-0046",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0046"
+        },
+        {
+          "communication_operation_id": "collective-0047",
+          "compute_operation_id": "layer-0047",
+          "depends_on": [],
+          "expected_overlap_fraction": 0.1,
+          "fallback_serialization": "critical_path",
+          "resource_contention": "copy_engine",
+          "stream": "communication",
+          "window_id": "overlap-0047"
+        }
+      ]
+    },
+    "compiler_version": "0.1.0",
+    "evidence": [
+      {
+        "api_version": "sloforge.io/fabric/v1",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "c420f1d3bbe7740fb66a6591014b083ef5b54d189b17ba7df57c5273f45116e7"
+        },
+        "generation": null,
+        "kind": "TopologyGraph",
+        "uid": null,
+        "uri": "urn:sloforge:topology:c420f1d3bbe7740fb66a6591014b083ef5b54d189b17ba7df57c5273f45116e7"
+      },
+      {
+        "api_version": "sloforge.io/fabric/v1",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "c6c0614bc912e1102cf84744e0d8c3303bdd800c002a1bc580f8410f2a91a8b0"
+        },
+        "generation": null,
+        "kind": "SoftwareManifest",
+        "uid": null,
+        "uri": "urn:sloforge:software:c6c0614bc912e1102cf84744e0d8c3303bdd800c002a1bc580f8410f2a91a8b0"
+      }
+    ],
+    "expert_placement": {
+      "assignments": [
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-0-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-0-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-1-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-1-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-2-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-2-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-3-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-3-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-4-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-4-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-5-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-5-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-6-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-6-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.3,
+          "expert_id": "block-7-expert-0",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-1",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-2",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-3",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-4",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-5",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-6",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "capacity_factor": 1.25,
+          "expected_load": 0.1,
+          "expert_id": "block-7-expert-7",
+          "rank_ids": [
+            7,
+            15
+          ]
+        }
+      ],
+      "hot_expert_strategy": "rebalance",
+      "maximum_replicas_per_expert": 2,
+      "rebalance_minimum_interval_seconds": 30.0
+    },
+    "extensions": {},
+    "fabric_profile_hash": {
+      "algorithm": "sha256",
+      "value": "5cf2669e662c69d875781c8f9026320e43aaf3bab7a2f8dd7c164270b5fe987f"
+    },
+    "failure_exposure": [
+      {
+        "affected_rank_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "expected_slo_impact_ms": 112.93291733019805,
+        "fault_domain": "host-0",
+        "probability": 0.0010000000000000009
+      },
+      {
+        "affected_rank_ids": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "expected_slo_impact_ms": 112.93291733019805,
+        "fault_domain": "host-1",
+        "probability": 0.0010000000000000009
+      }
+    ],
+    "git_commit": "ab0e51fedb79f70f3d79687b26150080bd7f3ebf",
+    "kind": "PhysicalExecutionPlan",
+    "kv_transfer": {
+      "backpressure_limit_bytes": 536870912,
+      "routes": [
+        {
+          "cache_owner": "decode",
+          "chunk_bytes": 2097152,
+          "consumer_rank_ids": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "edge_path": [
+            "gpu-nic:host-0/gpu/0:host-0/nic/0",
+            "nic-network:host-0/nic/0:rail-0",
+            "nic-network:host-1/nic/0:rail-0",
+            "gpu-nic:host-1/gpu/0:host-1/nic/0"
+          ],
+          "eviction_policy": "deadline",
+          "expected_cost_usd": 0.0,
+          "expected_latency_us": 60827.67133224932,
+          "fallback": "recompute",
+          "maximum_inflight_chunks": 4,
+          "overlap_with_decode": true,
+          "producer_rank_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "retry_limit": 1,
+          "route_id": "kv-prefill-decode-0",
+          "serialization_format": "nixl",
+          "transport_adapter": "sloforge.infiniband"
+        }
+      ]
+    },
+    "logical_deployment_plan": {
+      "api_version": "sloforge.io/v1",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "de3255676e1d5b0557ea2f48841cadca8054f8eb684bfdfbb02a2fcbd5c32225"
+      },
+      "generation": 1,
+      "kind": "DeploymentPlan",
+      "uid": "fabric-evaluation-logical-plan",
+      "uri": "/Users/rishivinodkumar/sloforge/tests/fixtures/ir/deployment-plan-v1.json"
+    },
+    "memory": {
+      "allocations": [
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 0,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 1,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 2,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 3,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 4,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 5,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 6,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 7,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 8,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 9,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 10,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 11,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 12,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 13,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 14,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        },
+        {
+          "activations_bytes": 557056,
+          "capacity_bytes": 85899345920,
+          "communication_buffers_bytes": 67108864,
+          "cuda_graph_bytes": 0,
+          "fragmentation_allowance_bytes": 91253965,
+          "host_pinned_buffers_bytes": 67108864,
+          "kv_cache_bytes": 1086324736,
+          "local_nvme_bytes": 0,
+          "rank_id": 15,
+          "remote_artifacts_bytes": 0,
+          "runtime_workspace_bytes": 268435456,
+          "safety_margin_bytes": 91253965,
+          "weights_bytes": 402653184
+        }
+      ]
+    },
+    "model_graph_hash": {
+      "algorithm": "sha256",
+      "value": "6779796d4225bd0d9cc11569b3d1561fe8ab644e406888dadc67aa8d33584aa5"
+    },
+    "optimizer_history": [
+      {
+        "candidate_id": "physical-6871c998ae94",
+        "decision": "select",
+        "phase": "lower_bound",
+        "reason_code": "minimum_robust_objective",
+        "sequence": 0,
+        "simulator_calls": 0,
+        "solver_time_ms": 0.0
+      }
+    ],
+    "parallelism": {
+      "context_parallel_degree": 1,
+      "data_parallel_degree": 2,
+      "expert_parallel_degree": 4,
+      "groups": [
+        {
+          "group_id": "tp-0-0",
+          "kind": "tensor",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "group_id": "tp-1-0",
+          "kind": "tensor",
+          "rank_ids": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "group_id": "dp-0",
+          "kind": "data",
+          "rank_ids": [
+            0,
+            8
+          ]
+        },
+        {
+          "group_id": "dp-1",
+          "kind": "data",
+          "rank_ids": [
+            1,
+            9
+          ]
+        },
+        {
+          "group_id": "dp-2",
+          "kind": "data",
+          "rank_ids": [
+            2,
+            10
+          ]
+        },
+        {
+          "group_id": "dp-3",
+          "kind": "data",
+          "rank_ids": [
+            3,
+            11
+          ]
+        },
+        {
+          "group_id": "dp-4",
+          "kind": "data",
+          "rank_ids": [
+            4,
+            12
+          ]
+        },
+        {
+          "group_id": "dp-5",
+          "kind": "data",
+          "rank_ids": [
+            5,
+            13
+          ]
+        },
+        {
+          "group_id": "dp-6",
+          "kind": "data",
+          "rank_ids": [
+            6,
+            14
+          ]
+        },
+        {
+          "group_id": "dp-7",
+          "kind": "data",
+          "rank_ids": [
+            7,
+            15
+          ]
+        },
+        {
+          "group_id": "ep-0-0",
+          "kind": "expert",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "group_id": "ep-0-1",
+          "kind": "expert",
+          "rank_ids": [
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "group_id": "ep-1-0",
+          "kind": "expert",
+          "rank_ids": [
+            8,
+            9,
+            10,
+            11
+          ]
+        },
+        {
+          "group_id": "ep-1-1",
+          "kind": "expert",
+          "rank_ids": [
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "group_id": "prefill-pool",
+          "kind": "prefill",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "group_id": "decode-pool",
+          "kind": "decode",
+          "rank_ids": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        }
+      ],
+      "pipeline_parallel_degree": 1,
+      "prefill_decode_disaggregated": true,
+      "replica_groups": [
+        {
+          "group_id": "replica-0",
+          "kind": "data",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "group_id": "replica-1",
+          "kind": "data",
+          "rank_ids": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        }
+      ],
+      "tensor_parallel_degree": 8
+    },
+    "plan_id": "physical-plan-f25d094069175d3f",
+    "predicted_metrics": {
+      "availability": {
+        "confidence": 0.95,
+        "estimate": 0.998001,
+        "lower": 0.94810095,
+        "unit": "probability",
+        "upper": 1.0479010500000001
+      },
+      "communication_overhead_fraction": {
+        "confidence": 0.9,
+        "estimate": 0.26399846993139353,
+        "lower": 0.23759862293825418,
+        "unit": "fraction",
+        "upper": 0.2903983169245329
+      },
+      "cost_usd_per_million_tokens": {
+        "confidence": 0.9,
+        "estimate": 24.154589371980677,
+        "lower": 21.73913043478261,
+        "unit": "USD/1M_tokens",
+        "upper": 26.570048309178745
+      },
+      "goodput_tokens_per_second": {
+        "confidence": 0.9,
+        "estimate": 736.0,
+        "lower": 662.4,
+        "unit": "tokens/s",
+        "upper": 809.6
+      },
+      "p95_end_to_end_ms": {
+        "confidence": 0.9,
+        "estimate": 233.83816332814678,
+        "lower": 210.4543469953321,
+        "unit": "ms",
+        "upper": 257.22197966096144
+      },
+      "p95_ttft_ms": {
+        "confidence": 0.9,
+        "estimate": 112.93291733019805,
+        "lower": 101.63962559717825,
+        "unit": "ms",
+        "upper": 124.22620906321785
+      },
+      "p99_tpot_ms": {
+        "confidence": 0.9,
+        "estimate": 1.2594296458119658,
+        "lower": 1.1334866812307691,
+        "unit": "ms",
+        "upper": 1.3853726103931625
+      },
+      "throughput_tokens_per_second": {
+        "confidence": 0.9,
+        "estimate": 800.0,
+        "lower": 720.0,
+        "unit": "tokens/s",
+        "upper": 880.0
+      }
+    },
+    "rank_placement": {
+      "bindings": [
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/0",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 0,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/2",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 1,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/1",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 2,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/3",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 3,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/4",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 4,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/6",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 5,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/5",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 6,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-0",
+          "gpu_id": "host-0/gpu/7",
+          "host_id": "host-0",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-0/nic/0",
+          "numa_domain_id": "host-0/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 7,
+          "replica_id": "replica-0",
+          "worker_role": "prefill"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/0",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 8,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/2",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 9,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/1",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 10,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/3",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 11,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/4",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 12,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/6",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/0",
+          "process_cpu_affinity": "0-31",
+          "rank_id": 13,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/5",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 14,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        },
+        {
+          "fault_domain": "host-1",
+          "gpu_id": "host-1/gpu/7",
+          "host_id": "host-1",
+          "network_rail_id": "rail-0",
+          "nic_id": "host-1/nic/0",
+          "numa_domain_id": "host-1/numa/1",
+          "process_cpu_affinity": "32-63",
+          "rank_id": 15,
+          "replica_id": "replica-1",
+          "worker_role": "decode"
+        }
+      ]
+    },
+    "recovery_variants": [],
+    "rejected_alternatives": [],
+    "reproducibility": {
+      "command": [
+        "sloforge",
+        "fabric",
+        "compile"
+      ],
+      "environment_digest": {
+        "algorithm": "sha256",
+        "value": "58c9af3bd788f28cbb5f74d33a8b65c38e895d2bc69fd61969105178ae16c8bd"
+      },
+      "generated_at": "2026-01-01T00:00:13Z",
+      "seed": 13
+    },
+    "schema_version": "1.0.0",
+    "topology_fingerprint": {
+      "algorithm": "sha256",
+      "value": "c420f1d3bbe7740fb66a6591014b083ef5b54d189b17ba7df57c5273f45116e7"
+    }
+  },
+  "simulator_calls": 0,
+  "solver_time_ms": 0.0,
+  "strategy": "hierarchical"
+}
