@@ -37,6 +37,7 @@ from sloforge.util import load_json, sha256_file, write_json
 from .autopsy import autopsy_app
 from .fabric import fabric_app
 from .forgeci import forgeci_app
+from .genesis import genesis_app
 from .recovery import recovery_app
 from .warmpath import warmpath_app
 
@@ -54,6 +55,7 @@ app.add_typer(autopsy_app, name="autopsy")
 app.add_typer(recovery_app, name="recovery")
 app.add_typer(forgeci_app, name="forgeci")
 app.add_typer(warmpath_app, name="warmpath")
+app.add_typer(genesis_app, name="genesis")
 console = Console()
 
 

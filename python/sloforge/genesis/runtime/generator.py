@@ -187,6 +187,7 @@ def generate_baseline_runtime(
     output_directory: Path,
     *,
     seed: int,
+    genome_hash: str | None = None,
 ) -> GeneratedRuntimeBundle:
     """Generate a runtime bundle only from a matching static inspection."""
 
@@ -217,6 +218,7 @@ def generate_baseline_runtime(
                 allow_nan=False,
             ).encode("utf-8")
         ).hexdigest(),
+        "genome_hash": genome_hash,
         "generation_seed": seed,
         "limits": {
             "maximum_queue_depth": 32,
@@ -287,9 +289,10 @@ def _load_config(path: Path) -> dict[str, Any]:
         "schema_version",
         "runtime_id",
         "reference_package_root",
-        "package_hash",
-        "inspection_hash",
-        "generation_seed",
+            "package_hash",
+            "inspection_hash",
+            "genome_hash",
+            "generation_seed",
         "limits",
     }
     if set(config) != required:

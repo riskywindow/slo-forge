@@ -140,8 +140,7 @@ def _scope(inspection: InspectionResult) -> tuple[str, ...]:
         for dimension in inspection.graph.symbolic_dimensions
     ]
     bounds.extend(
-        f"{scalar.name}:{scalar.kind}"
-        for scalar in inspection.supported_input_domain.scalars
+        f"{scalar.name}:{scalar.kind}" for scalar in inspection.supported_input_domain.scalars
     )
     return tuple(bounds) or ("declared reference-package input domain",)
 
@@ -195,9 +194,7 @@ def _metadata(
         hardware_preconditions=(HardwarePrecondition(architecture="cpu"),),
         software_preconditions=(
             SoftwarePrecondition(
-                requirements=(
-                    SoftwareRequirement(package="python", version_range=">=3.11,<3.14"),
-                )
+                requirements=(SoftwareRequirement(package="python", version_range=">=3.11,<3.14"),)
             ),
         ),
         uncertainty=Uncertainty(
@@ -246,6 +243,8 @@ def compile_inference_genome(
     *,
     seed: int,
     maximum_queue_depth: int = 32,
+    workload_contract_hash: str | None = None,
+    hardware_contract_hash: str | None = None,
 ) -> InferenceGenome:
     """Compile a conservative, complete genome without executing model source."""
 
@@ -312,9 +311,7 @@ def compile_inference_genome(
     )
     workflow_edges = tuple(
         WorkflowEdge(
-            node=_metadata(
-                f"workflow.edge.{dependency}.{step_id}", inspection, resource=resource
-            ),
+            node=_metadata(f"workflow.edge.{dependency}.{step_id}", inspection, resource=resource),
             source_id=f"workflow.step.{dependency}",
             target_id=f"workflow.step.{step_id}",
             condition="dependency-complete",
@@ -597,7 +594,9 @@ def compile_inference_genome(
             extensions=Extensions(
                 root={
                     "sloforge.dev/recovered-graph": {
-                        "aliases": [alias.model_dump(mode="json") for alias in inspection.graph.aliases],
+                        "aliases": [
+                            alias.model_dump(mode="json") for alias in inspection.graph.aliases
+                        ],
                         "control_flow": [
                             flow.model_dump(mode="json") for flow in inspection.graph.control_flow
                         ],
@@ -693,6 +692,8 @@ def compile_inference_genome(
                 "sloforge.dev/inspection": {
                     "manifest_hash": inspection.manifest_hash,
                     "package_id": inspection.package_id,
+                    "workload_contract_hash": workload_contract_hash,
+                    "hardware_contract_hash": hardware_contract_hash,
                 }
             }
         ),
@@ -705,10 +706,18 @@ def initialize_genesis_run(
     output_directory: Path,
     *,
     seed: int,
+    workload_contract_hash: str | None = None,
+    hardware_contract_hash: str | None = None,
 ) -> InitializedGenesisRun:
     """Persist the genome and generate its conservative runtime as one transaction-like step."""
 
-    genome = compile_inference_genome(package_path, inspection, seed=seed)
+    genome = compile_inference_genome(
+        package_path,
+        inspection,
+        seed=seed,
+        workload_contract_hash=workload_contract_hash,
+        hardware_contract_hash=hardware_contract_hash,
+    )
     output_directory.mkdir(parents=True, exist_ok=True)
     write_canonical(genome, output_directory / "inference_genome.json")
     runtime = generate_baseline_runtime(
@@ -716,6 +725,7 @@ def initialize_genesis_run(
         inspection,
         output_directory / "generated_runtime",
         seed=seed,
+        genome_hash=canonical_hash(genome),
     )
     return InitializedGenesisRun(
         output_directory=output_directory,
