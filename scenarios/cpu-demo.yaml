@@ -1,0 +1,51 @@
+schema_version: sloforge.chaos/v1
+name: cpu-demo-required-faults
+seed: 41
+events:
+  - fault_id: slow-backend
+    fault_type: backend_slowdown
+    start_ms: 1500
+    duration_ms: 900
+    backend_id: balanced
+    magnitude: 3.0
+  - fault_id: backend-process-crash
+    fault_type: backend_crash
+    start_ms: 3000
+    duration_ms: 800
+    backend_id: fast
+    magnitude: 2.5
+  - fault_id: cold-start-spike
+    fault_type: startup_slowdown
+    start_ms: 4300
+    duration_ms: 700
+    backend_id: economy
+    magnitude: 4.0
+  - fault_id: injected-request-errors
+    fault_type: request_errors
+    start_ms: 5200
+    duration_ms: 400
+    backend_id: balanced
+    magnitude: 2.0
+  - fault_id: bounded-queue-saturation
+    fault_type: queue_saturation
+    start_ms: 6000
+    duration_ms: 500
+    magnitude: 2.0
+  - fault_id: replica-capacity-loss
+    fault_type: capacity_loss
+    start_ms: 6900
+    duration_ms: 600
+    backend_id: fast
+    magnitude: 2.0
+  - fault_id: network-jitter
+    fault_type: network_jitter
+    start_ms: 7700
+    duration_ms: 500
+    backend_id: economy
+    magnitude: 2.5
+  - fault_id: simulated-memory-rejection
+    fault_type: simulated_oom
+    start_ms: 8500
+    duration_ms: 400
+    backend_id: balanced
+    magnitude: 2.0

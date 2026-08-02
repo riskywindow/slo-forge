@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "seed": 42,
+  "service_curve": {
+    "id": "fixture/cpu-mock-v1",
+    "measurement_artifact": "artifacts/profiles/mock/raw.json",
+    "prefill_intercept_ms": 0.2,
+    "prefill_ms_per_prompt_token": 0.03,
+    "prefill_ms_per_batch_item": 0.05,
+    "chunk_overhead_ms": 0.1,
+    "chunk_size_tokens": 64,
+    "decode_intercept_ms": 0.2,
+    "decode_ms_per_active_sequence": 0.6,
+    "decode_ms_per_context_token": 0.001,
+    "startup": { "kind": "empirical", "samples_ms": [10.0, 12.0, 14.0] }
+  },
+  "replicas": [
+    {
+      "id": "stable-0",
+      "initially_warm": true,
+      "max_queue": 64,
+      "max_active_sequences": 8,
+      "service_rate_multiplier": 1.0,
+      "hourly_price_usd": 0.25,
+      "canary": false
+    }
+  ],
+  "requests": [],
+  "actions": [],
+  "routing_policy": "slo_slack_aware",
+  "canary_weight": 0.0,
+  "max_events": 100000
+}

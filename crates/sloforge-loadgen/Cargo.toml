@@ -1,0 +1,34 @@
+[package]
+name = "sloforge-loadgen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Deterministic workload generation and streaming replay for SLOForge"
+
+[lib]
+name = "sloforge_loadgen"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sloforge-loadgen"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+futures.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sloforge-sim = { version = "0.1.0", path = "../sloforge-sim" }
+thiserror.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

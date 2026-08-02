@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        python: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.10.2"
+          enable-cache: true
+      - run: uv build
+      - run: uv venv --python "${{ matrix.python }}" "${{ runner.temp }}/sloforge-wheel"
+      - run: uv pip install --python "${{ runner.temp }}/sloforge-wheel/bin/python" dist/sloforge-*.whl
+      - run: >-
+          "${{ runner.temp }}/sloforge-wheel/bin/sloforge" trace generate
+          --seed 7 --count 8 --output "${{ runner.temp }}/trace.jsonl"
+      - run: >-
+          "${{ runner.temp }}/sloforge-wheel/bin/sloforge" trace validate
+          "${{ runner.temp }}/trace.jsonl"
+
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.10.2"
+          enable-cache: true
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: "1.93.1"
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
+      - run: make bootstrap
+      - run: make check
+      - run: make demo
+      - name: Assert evidence-derived report exists
+        run: test -s reports/demo/report-manifest.json && test -s artifacts/demo/evidence/evidence.json
+      - name: Preserve measured demo evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sloforge-cpu-demo-${{ github.sha }}
+          path: |
+            artifacts/demo
+            reports/demo
+          if-no-files-found: error
+          retention-days: 14
+
+  docker-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - run: make docker-smoke

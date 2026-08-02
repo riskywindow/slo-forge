@@ -1,0 +1,28 @@
+{
+  "bind": "0.0.0.0:8000",
+  "backends": [
+    {
+      "name": "docker-smoke-backend",
+      "base_url": "http://backend:8000",
+      "capacity": 4,
+      "estimated_service_ms": 25.0,
+      "price_per_hour_usd": 0.01,
+      "health_path": "/health",
+      "weight": 1
+    }
+  ],
+  "routing_policy": "slo_slack_aware",
+  "admission_capacity": 16,
+  "stream_buffer_bytes": 65536,
+  "max_request_bytes": 65536,
+  "queue_timeout_ms": 1000,
+  "request_timeout_ms": 10000,
+  "connect_timeout_ms": 1000,
+  "health_interval_ms": 500,
+  "health_timeout_ms": 500,
+  "retry_attempts": 1,
+  "breaker_failures": 2,
+  "breaker_cooldown_ms": 1000,
+  "max_trace_events": 1000,
+  "provenance": {"purpose": "docker-smoke"}
+}
