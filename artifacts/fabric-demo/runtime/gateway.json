@@ -1,0 +1,40 @@
+{
+  "admission_capacity": 32,
+  "backends": [
+    {
+      "base_url": "http://127.0.0.1:60090",
+      "capacity": 4,
+      "estimated_service_ms": 12.0,
+      "health_path": "/health",
+      "name": "fabric-backend-0",
+      "price_per_hour_usd": 1.0,
+      "weight": 1
+    },
+    {
+      "base_url": "http://127.0.0.1:60096",
+      "capacity": 4,
+      "estimated_service_ms": 14.0,
+      "health_path": "/health",
+      "name": "fabric-backend-1",
+      "price_per_hour_usd": 1.25,
+      "weight": 1
+    }
+  ],
+  "bind": "127.0.0.1:60098",
+  "breaker_cooldown_ms": 250,
+  "breaker_failures": 2,
+  "connect_timeout_ms": 1000,
+  "health_interval_ms": 100,
+  "health_timeout_ms": 100,
+  "max_request_bytes": 1048576,
+  "max_trace_events": 100000,
+  "provenance": {
+    "physical_plan_id": "physical-plan-75732ff902f1c340"
+  },
+  "queue_timeout_ms": 2000,
+  "request_timeout_ms": 30000,
+  "retry_attempts": 1,
+  "routing_policy": "slo_slack_aware",
+  "stream_buffer_bytes": 262144,
+  "trace_output": "artifacts/fabric-demo/runtime/gateway.perfetto.json"
+}

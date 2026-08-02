@@ -4,28 +4,28 @@
       "action_id": "action-00-stop_routing",
       "attempted_at_ms": 2000,
       "detail": "simulated action stop_routing completed",
-      "idempotency_key": "recovery-79a75de329598f83/0/stop_routing",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/0/stop_routing",
       "succeeded": true
     },
     {
       "action_id": "action-01-drain_worker",
       "attempted_at_ms": 2000,
       "detail": "simulated action drain_worker completed",
-      "idempotency_key": "recovery-79a75de329598f83/1/drain_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/1/drain_worker",
       "succeeded": true
     },
     {
       "action_id": "action-02-restart_worker",
       "attempted_at_ms": 2000,
       "detail": "simulated action restart_worker completed",
-      "idempotency_key": "recovery-79a75de329598f83/2/restart_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/2/restart_worker",
       "succeeded": true
     },
     {
       "action_id": "action-03-change_rank_placement",
       "attempted_at_ms": 2000,
       "detail": "simulated action change_rank_placement completed",
-      "idempotency_key": "recovery-79a75de329598f83/3/change_rank_placement",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/3/change_rank_placement",
       "succeeded": true
     }
   ],
@@ -40,9 +40,9 @@
       "at_ms": 0,
       "event": "created",
       "fields": [],
-      "idempotency_key": "recovery-79a75de329598f83:start",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce:start",
       "reason": "recovery proposal loaded; no mutation performed",
-      "record_id": "recovery-79a75de329598f83:000000:created",
+      "record_id": "recovery-1ecc3a327a5d96ce:000000:created",
       "sequence": 0,
       "state_after": "PROPOSED",
       "state_before": "PROPOSED"
@@ -53,7 +53,7 @@
       "fields": [],
       "idempotency_key": "simulation-validated",
       "reason": "counterfactual simulation validation passed",
-      "record_id": "recovery-79a75de329598f83:000001:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000001:transition",
       "sequence": 1,
       "state_after": "VALIDATED_IN_SIMULATION",
       "state_before": "PROPOSED"
@@ -64,7 +64,7 @@
       "fields": [],
       "idempotency_key": "replacement-build",
       "reason": "beginning idempotent recovery actions",
-      "record_id": "recovery-79a75de329598f83:000002:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000002:transition",
       "sequence": 2,
       "state_after": "BUILDING_REPLACEMENT",
       "state_before": "VALIDATED_IN_SIMULATION"
@@ -78,9 +78,9 @@
           "value": "true"
         }
       ],
-      "idempotency_key": "recovery-79a75de329598f83/0/stop_routing",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/0/stop_routing",
       "reason": "simulated action stop_routing completed",
-      "record_id": "recovery-79a75de329598f83:000002:action:action-00-stop_routing",
+      "record_id": "recovery-1ecc3a327a5d96ce:000002:action:action-00-stop_routing",
       "sequence": 2,
       "state_after": "BUILDING_REPLACEMENT",
       "state_before": "BUILDING_REPLACEMENT"
@@ -94,9 +94,9 @@
           "value": "true"
         }
       ],
-      "idempotency_key": "recovery-79a75de329598f83/1/drain_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/1/drain_worker",
       "reason": "simulated action drain_worker completed",
-      "record_id": "recovery-79a75de329598f83:000002:action:action-01-drain_worker",
+      "record_id": "recovery-1ecc3a327a5d96ce:000002:action:action-01-drain_worker",
       "sequence": 2,
       "state_after": "BUILDING_REPLACEMENT",
       "state_before": "BUILDING_REPLACEMENT"
@@ -110,9 +110,9 @@
           "value": "true"
         }
       ],
-      "idempotency_key": "recovery-79a75de329598f83/2/restart_worker",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/2/restart_worker",
       "reason": "simulated action restart_worker completed",
-      "record_id": "recovery-79a75de329598f83:000002:action:action-02-restart_worker",
+      "record_id": "recovery-1ecc3a327a5d96ce:000002:action:action-02-restart_worker",
       "sequence": 2,
       "state_after": "BUILDING_REPLACEMENT",
       "state_before": "BUILDING_REPLACEMENT"
@@ -126,9 +126,9 @@
           "value": "true"
         }
       ],
-      "idempotency_key": "recovery-79a75de329598f83/3/change_rank_placement",
+      "idempotency_key": "recovery-1ecc3a327a5d96ce/3/change_rank_placement",
       "reason": "simulated action change_rank_placement completed",
-      "record_id": "recovery-79a75de329598f83:000002:action:action-03-change_rank_placement",
+      "record_id": "recovery-1ecc3a327a5d96ce:000002:action:action-03-change_rank_placement",
       "sequence": 2,
       "state_after": "BUILDING_REPLACEMENT",
       "state_before": "BUILDING_REPLACEMENT"
@@ -139,7 +139,7 @@
       "fields": [],
       "idempotency_key": "replacement-ready",
       "reason": "replacement is ready; starting shadow traffic",
-      "record_id": "recovery-79a75de329598f83:000003:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000003:transition",
       "sequence": 3,
       "state_after": "SHADOWING",
       "state_before": "BUILDING_REPLACEMENT"
@@ -150,7 +150,7 @@
       "fields": [],
       "idempotency_key": "shadow-complete",
       "reason": "shadow sample and SLO criteria passed",
-      "record_id": "recovery-79a75de329598f83:000004:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000004:transition",
       "sequence": 4,
       "state_after": "CANARYING",
       "state_before": "SHADOWING"
@@ -161,7 +161,7 @@
       "fields": [],
       "idempotency_key": "canary-complete",
       "reason": "canary sample and SLO criteria passed",
-      "record_id": "recovery-79a75de329598f83:000005:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000005:transition",
       "sequence": 5,
       "state_after": "PROMOTING",
       "state_before": "CANARYING"
@@ -172,7 +172,7 @@
       "fields": [],
       "idempotency_key": "traffic-migrated",
       "reason": "traffic migrated; old workers no longer receive new requests",
-      "record_id": "recovery-79a75de329598f83:000006:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000006:transition",
       "sequence": 6,
       "state_after": "DRAINING_OLD",
       "state_before": "PROMOTING"
@@ -188,7 +188,7 @@
       ],
       "idempotency_key": "draining-streams",
       "reason": "preserving started streaming requests during graceful drain",
-      "record_id": "recovery-79a75de329598f83:000006:wait",
+      "record_id": "recovery-1ecc3a327a5d96ce:000006:wait",
       "sequence": 6,
       "state_after": "DRAINING_OLD",
       "state_before": "DRAINING_OLD"
@@ -199,7 +199,7 @@
       "fields": [],
       "idempotency_key": "drain-complete",
       "reason": "old workers drained; recovery completed",
-      "record_id": "recovery-79a75de329598f83:000007:transition",
+      "record_id": "recovery-1ecc3a327a5d96ce:000007:transition",
       "sequence": 7,
       "state_after": "COMPLETED",
       "state_before": "DRAINING_OLD"
@@ -218,8 +218,8 @@
     "draining-streams",
     "drain-complete"
   ],
-  "recovery_id": "recovery-79a75de329598f83",
-  "recovery_plan_hash": "e9c78022d7133d29b234f9f99bbcd921b21f60038550c57d15517e95c3704c66",
+  "recovery_id": "recovery-1ecc3a327a5d96ce",
+  "recovery_plan_hash": "7d39950277a305c7238cdc9b5fd73a91d0d75df1ff95648a93b7b8f1a897365e",
   "schema_version": "sloforge.recovery.execution/v1",
   "sequence": 7,
   "started_at_ms": 0,
