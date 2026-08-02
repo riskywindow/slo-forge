@@ -4,7 +4,9 @@ set -euo pipefail
 repository_root="$(git rev-parse --show-toplevel)"
 revision="$(git -C "$repository_root" rev-parse HEAD)"
 image="sloforge-genesis-smoke:${revision:0:12}"
+container="sloforge-genesis-smoke-${revision:0:12}"
 cleanup() {
+  docker container rm --force "$container" >/dev/null 2>&1 || true
   docker image rm --force "$image" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT INT TERM
@@ -20,6 +22,7 @@ docker build \
   --tag "$image" \
   "$repository_root"
 docker run --rm \
+  --name "$container" \
   --read-only \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   --security-opt no-new-privileges:true \
