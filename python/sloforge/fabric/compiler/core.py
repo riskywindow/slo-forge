@@ -1017,8 +1017,12 @@ def _metric(value: float, uncertainty: float, unit: str) -> MetricInterval:
     )
 
 
-def _physical_metrics(summary: CandidateSummary, uncertainty: float) -> PhysicalMetrics:
-    e2e = summary.p95_ttft_ms + summary.p99_tpot_ms * 64.0
+def _physical_metrics(
+    summary: CandidateSummary,
+    uncertainty: float,
+    output_tokens_p95: int,
+) -> PhysicalMetrics:
+    e2e = summary.p95_ttft_ms + summary.p99_tpot_ms * output_tokens_p95
     communication_fraction = summary.communication_us / max(1.0, e2e * 1_000.0)
     return PhysicalMetrics(
         p95_ttft_ms=_metric(summary.p95_ttft_ms, uncertainty, "ms"),
@@ -1042,11 +1046,22 @@ def _expert_placement(model: ModelGraph, candidate: _Candidate) -> ExpertPlaceme
     experts = tuple(expert for layer in model.layers for expert in layer.experts)
     if not experts:
         return None
-    ranks = tuple(binding.rank_id for binding in candidate.placement.bindings)
+    ranks_by_replica: dict[str, list[int]] = {}
+    for binding in candidate.placement.bindings:
+        ranks_by_replica.setdefault(binding.replica_id, []).append(binding.rank_id)
+    replica_ranks = tuple(
+        tuple(sorted(ranks)) for _, ranks in sorted(ranks_by_replica.items())
+    )
     assignments = tuple(
         ExpertAssignment(
             expert_id=expert.expert_id,
-            rank_ids=(ranks[index % len(ranks)],),
+            # Every independently routable data replica must contain the whole
+            # expert set. The tuple represents one owner per replica; choosing
+            # the local owner cyclically spreads experts across that replica's
+            # EP-capable ranks without coupling separate replica fault domains.
+            rank_ids=tuple(
+                ranks[index % len(ranks)] for ranks in replica_ranks
+            ),
             expected_load=expert.expected_load,
             capacity_factor=1.25,
         )
@@ -1055,7 +1070,7 @@ def _expert_placement(model: ModelGraph, candidate: _Candidate) -> ExpertPlaceme
     return ExpertPlacement(
         assignments=assignments,
         hot_expert_strategy="rebalance",
-        maximum_replicas_per_expert=2,
+        maximum_replicas_per_expert=len(replica_ranks),
         rebalance_minimum_interval_seconds=30.0,
     )
 
@@ -1099,7 +1114,9 @@ def _recovery_variants(
                 alternate_collectives=alternate.collectives,
                 alternate_kv_transfer=alternate.kv_transfer,
                 expected_degraded_metrics=_physical_metrics(
-                    alternate.summary, request.assumptions.measurement_relative_uncertainty
+                    alternate.summary,
+                    request.assumptions.measurement_relative_uncertainty,
+                    request.constraints.output_tokens_p95,
                 ),
                 transition_cost_usd=(
                     alternate.summary.cost_per_million_tokens / 1_000_000.0 * 1_000.0
@@ -1221,7 +1238,9 @@ def compile_physical_plan(request: CompilerRequest) -> PhysicalCompileResult:
         if item.candidate_id != selected.candidate_id
     )
     physical_metrics = _physical_metrics(
-        selected.summary, request.assumptions.measurement_relative_uncertainty
+        selected.summary,
+        request.assumptions.measurement_relative_uncertainty,
+        request.constraints.output_tokens_p95,
     )
     failure_exposure = tuple(
         FailureExposure(
