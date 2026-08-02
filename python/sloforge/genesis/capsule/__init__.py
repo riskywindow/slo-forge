@@ -1,5 +1,6 @@
 """Proof-carrying Genesis capsule construction and independent validation."""
 
+from .builder import CapsuleBuildResult, build_local_capsule
 from .canonical import calculate_capsule_digest, canonical_json, seal_capsule
 from .io import CapsuleIOError, load_capsule, publish_capsule
 from .models import (
@@ -38,6 +39,7 @@ __all__ = [
     "ArtifactRole",
     "BenchmarkEvidence",
     "BenchmarkSummary",
+    "CapsuleBuildResult",
     "CapsuleIOError",
     "CapsuleIdentity",
     "CapsuleValidationReport",
@@ -60,6 +62,7 @@ __all__ = [
     "ValidationIssue",
     "ValidationIssueCode",
     "VerificationLevel",
+    "build_local_capsule",
     "calculate_capsule_digest",
     "canonical_json",
     "load_capsule",

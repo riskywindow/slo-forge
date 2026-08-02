@@ -5,12 +5,20 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
 import typer
 from rich.console import Console
 
+from sloforge.genesis.capsule import (
+    Digest,
+    ValidationContext,
+    build_local_capsule,
+    load_capsule,
+    validate_capsule,
+)
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import InspectionResult, inspect_reference_package
 from sloforge.genesis.frontend.package import load_reference_package
@@ -23,6 +31,11 @@ genesis_app = typer.Typer(
     help="Synthesize proof-carrying inference implementations from reference packages.",
     no_args_is_help=True,
 )
+capsule_app = typer.Typer(
+    help="Build and independently validate hash-addressed Genesis capsules.",
+    no_args_is_help=True,
+)
+genesis_app.add_typer(capsule_app, name="capsule")
 console = Console()
 
 
@@ -313,6 +326,92 @@ def verify_command(
         }
     )
     if not passed:
+        raise typer.Exit(code=1)
+
+
+def _parse_timestamp(value: str | None) -> datetime:
+    if value is None:
+        return datetime.now(UTC)
+    try:
+        timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise typer.BadParameter("--timestamp must be an ISO-8601 timestamp") from error
+    if timestamp.tzinfo is None or timestamp.utcoffset() is None:
+        raise typer.BadParameter("--timestamp must include an explicit UTC offset")
+    return timestamp.astimezone(UTC)
+
+
+@capsule_app.command("build")
+def capsule_build_command(
+    candidate: Annotated[Path, typer.Option("--candidate", exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    timestamp: Annotated[str | None, typer.Option("--timestamp")] = None,
+) -> None:
+    """Build a CPU-local capsule and fail unless the independent promotion gate accepts it."""
+
+    try:
+        result = build_local_capsule(
+            candidate,
+            output,
+            observed_at=_parse_timestamp(timestamp),
+        )
+    except (FileExistsError, ValueError) as error:
+        raise typer.BadParameter(str(error)) from error
+    _json_result(result.model_dump(mode="json"))
+
+
+def _capsule_manifest(path: Path) -> tuple[Path, Path]:
+    if path.is_file():
+        root = path.parent.parent if path.parent.name == "manifests" else path.parent
+        return path, root
+    manifests = tuple(sorted((path / "manifests").glob("*.json")))
+    if len(manifests) != 1:
+        raise typer.BadParameter("capsule directory must contain exactly one manifest")
+    return manifests[0], path
+
+
+@capsule_app.command("validate")
+def capsule_validate_command(
+    capsule: Annotated[Path, typer.Argument(exists=True)],
+    hardware: Annotated[
+        Path | None, typer.Option("--hardware", exists=True, dir_okay=False)
+    ] = None,
+) -> None:
+    """Validate a capsule against current time, dependency lock, and optional hardware."""
+
+    manifest_path, root = _capsule_manifest(capsule)
+    context_path = root / "validation_context.json"
+    if not context_path.is_file():
+        raise typer.BadParameter("capsule validation context is missing")
+    context = ValidationContext.model_validate_json(context_path.read_bytes(), strict=True)
+    updates: dict[str, object] = {"now": datetime.now(UTC)}
+    repository = Path(__file__).resolve().parents[3]
+    lock_path = repository / "uv.lock"
+    if lock_path.is_file():
+        updates["dependency_lock_hash"] = Digest(value=sha256_file(lock_path))
+    if hardware is not None:
+        document = json.loads(hardware.read_text(encoding="utf-8"))
+        if not isinstance(document, dict):
+            raise typer.BadParameter("hardware contract must be a JSON object")
+        digest = Digest(value=sha256_file(hardware))
+        updates.update(
+            {
+                "hardware_contract_hash": digest,
+                "hardware_fingerprint": digest,
+                "hardware_architecture": str(document.get("architecture", "unknown")),
+            }
+        )
+    context = context.model_copy(update=updates)
+    document = load_capsule(manifest_path)
+    report = validate_capsule(document, root, context)
+    _json_result(
+        {
+            **report.model_dump(mode="json"),
+            "manifest": str(manifest_path.resolve()),
+            "hardware_backed": False,
+        }
+    )
+    if not report.promotion_eligible:
         raise typer.Exit(code=1)
 
 
