@@ -24,6 +24,14 @@ The Rust simulator runs once for the degraded reference and once per scenario.
 Input/output are bounded and execution has a timeout. Malformed or failed output
 becomes `simulation_failed` with no numeric estimate.
 
+The flagship persists the exact degraded simulation request, healthy/degraded
+runs, scenarios, healthy reference, and SHA-256 bindings in
+`artifacts/fabric-demo/autopsy/replay-metadata.json`. Passing that Autopsy
+directory to `sloforge autopsy replay --evidence ...` resolves and verifies the
+bundle without ad hoc input reconstruction. The older single-file form remains
+supported but requires explicit baseline, simulation input, and healthy
+reference arguments.
+
 Each successful scenario records simulated makespan and interval, operation and
 event counts, output hash, improvement bounds, healthy-reference residual, and
 confidence. `attach_counterfactuals` adds the strongest evaluated estimate for
