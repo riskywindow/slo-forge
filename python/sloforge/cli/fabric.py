@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import shutil
 import statistics
 from pathlib import Path
 from typing import Annotated, Literal
 
 import typer
 
+from sloforge.fabric.adapters import (
+    DeploymentTarget,
+    DynamoBackend,
+    FabricAdapterContext,
+    GangScheduler,
+    RuntimeKind,
+    export_physical_plan,
+)
 from sloforge.fabric.compiler import (
     CompilerAssumptions,
     CompilerConstraints,
@@ -487,6 +496,90 @@ def explain_command(
         f"  Recovery variants: {len(physical.recovery_variants)}\n"
         f"  Evidence records: {len(physical.evidence)}"
     )
+
+
+@fabric_app.command("export")
+def export_command(
+    plan: Annotated[Path, typer.Option("--plan", exists=True, dir_okay=False)],
+    topology: Annotated[Path, typer.Option("--topology", exists=True, dir_okay=False)],
+    target: Annotated[DeploymentTarget, typer.Option("--target")],
+    output: Annotated[Path, typer.Option("--output", "-o")],
+    model_id: Annotated[str, typer.Option("--model-id")],
+    model_revision: Annotated[str, typer.Option("--model-revision")],
+    image: Annotated[str, typer.Option("--image")],
+    runtime: Annotated[RuntimeKind, typer.Option("--runtime")],
+    runtime_version: Annotated[str, typer.Option("--runtime-version")],
+    dynamo_backend: Annotated[DynamoBackend | None, typer.Option("--dynamo-backend")] = None,
+    namespace: Annotated[str, typer.Option("--namespace")] = "default",
+    gpu_resource_name: Annotated[str, typer.Option("--gpu-resource-name")] = "nvidia.com/gpu",
+    rdma_resource_name: Annotated[str | None, typer.Option("--rdma-resource-name")] = None,
+    gang_scheduler: Annotated[GangScheduler, typer.Option("--gang-scheduler")] = (
+        GangScheduler.NONE
+    ),
+    cpu_limit_per_rank: Annotated[
+        float, typer.Option("--cpu-limit-per-rank", min=0.001, max=1_024.0)
+    ] = 4.0,
+    memory_limit_gib_per_rank: Annotated[
+        int, typer.Option("--memory-limit-gib-per-rank", min=1, max=1_048_576)
+    ] = 32,
+    pids_limit_per_rank: Annotated[
+        int, typer.Option("--pids-limit-per-rank", min=64, max=1_048_576)
+    ] = 512,
+    shutdown_grace_seconds: Annotated[
+        int, typer.Option("--shutdown-grace-seconds", min=1, max=3_600)
+    ] = 120,
+    allow_advisory_cloud_metadata: Annotated[
+        bool,
+        typer.Option(
+            "--allow-advisory-cloud-metadata",
+            help="Permit explicitly non-enforcing physical metadata for Modal or Truss.",
+        ),
+    ] = False,
+) -> None:
+    """Lower a physical plan into validated offline deployment artifacts."""
+
+    physical = load_physical_execution_plan(plan)
+    graph = load_topology_graph(topology)
+    try:
+        context = FabricAdapterContext(
+            plan=physical,
+            topology=graph,
+            model_id=model_id,
+            model_revision=model_revision,
+            image=image,
+            runtime=runtime,
+            runtime_version=runtime_version,
+            dynamo_backend=dynamo_backend,
+            namespace=namespace,
+            gpu_resource_name=gpu_resource_name,
+            rdma_resource_name=rdma_resource_name,
+            gang_scheduler=gang_scheduler,
+            cpu_limit_per_rank=cpu_limit_per_rank,
+            memory_limit_gib_per_rank=memory_limit_gib_per_rank,
+            pids_limit_per_rank=pids_limit_per_rank,
+            shutdown_grace_seconds=shutdown_grace_seconds,
+            allow_advisory_cloud_metadata=allow_advisory_cloud_metadata,
+        )
+    except ValueError as error:
+        raise typer.BadParameter(f"invalid physical adapter context: {error}") from error
+
+    if output.exists() or output.is_symlink():
+        raise typer.BadParameter(
+            "physical export output must not already exist; choose a new directory"
+        )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.mkdir()
+    try:
+        result = export_physical_plan(context=context, target=target, output=output)
+    except ValueError as error:
+        shutil.rmtree(output)
+        raise typer.BadParameter(f"physical export rejected: {error}") from error
+    except BaseException:
+        # This invocation exclusively created the directory, so removing it
+        # prevents a failed lowering from being mistaken for a valid export.
+        shutil.rmtree(output)
+        raise
+    json_result(result.model_dump(mode="json"))
 
 
 def _simulate(
