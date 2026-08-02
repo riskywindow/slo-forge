@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
-from sloforge.fabric.ir import canonical_hash
+from sloforge.fabric.compiler import (
+    CompilerAssumptions,
+    CompilerConstraints,
+    CompilerObjective,
+    CompilerRequest,
+    OptimizationStrategy,
+    compile_physical_plan,
+)
+from sloforge.fabric.ir import DocumentReference, canonical_hash, load_model_graph
 from sloforge.fabric.profiling import (
     BenchmarkStatus,
     MeasurementMode,
@@ -23,6 +32,9 @@ from sloforge.fabric.profiling import (
 )
 from sloforge.fabric.profiling.models import FabricProfile
 from sloforge.fabric.topology import build_canonical_fixture, build_discovery_fixture
+from sloforge.ir import ArtifactDigest
+
+FABRIC_FIXTURES = Path(__file__).parents[1] / "fixtures" / "fabric"
 
 
 def _executable(tmp_path: Path, name: str) -> Path:
@@ -104,6 +116,43 @@ def test_canonical_topology_input_is_compile_compatible() -> None:
     canonical = to_canonical_profile(raw, topology=topology)
     assert raw.topology_fingerprint == canonical_hash(topology)
     assert canonical.topology_fingerprint.value == canonical_hash(topology)
+
+    digest = ArtifactDigest(value="a" * 64)
+    request = CompilerRequest(
+        logical_deployment_plan=DocumentReference(
+            kind="DeploymentPlan",
+            api_version="sloforge.io/v1",
+            uri="artifacts/plans/logical.json",
+            digest=digest,
+        ),
+        model=load_model_graph(FABRIC_FIXTURES / "model-graph-v1.json"),
+        topology=topology,
+        fabric_profile=canonical,
+        constraints=CompilerConstraints(
+            prompt_tokens_p95=512,
+            output_tokens_p95=64,
+            maximum_concurrent_requests=4,
+            p95_ttft_ms=1_500.0,
+            p99_tpot_ms=150.0,
+            maximum_ranks=2,
+        ),
+        assumptions=CompilerAssumptions(
+            prefill_tokens_per_second_per_gpu=8_000.0,
+            decode_tokens_per_second_per_gpu=120.0,
+            gpu_hourly_price_usd=2.0,
+            base_availability=0.999,
+            cold_start_ms=2_000.0,
+            measurement_relative_uncertainty=0.10,
+        ),
+        objective=CompilerObjective.ROBUST_BALANCED,
+        strategy=OptimizationStrategy.HIERARCHICAL,
+        generated_at=datetime(2026, 8, 1, tzinfo=UTC),
+        seed=37,
+        git_commit="fixture",
+        environment_digest=ArtifactDigest(value="b" * 64),
+    )
+    compiled = compile_physical_plan(request)
+    assert compiled.selected.topology_fingerprint == canonical.topology_fingerprint
 
 
 def test_canonical_profile_rejects_mismatched_topology() -> None:
