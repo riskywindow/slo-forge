@@ -50,6 +50,7 @@ __all__ = [
     "RawCpuSample",
     "SpecialCaseAudit",
     "SpecialCaseFinding",
+    "SynthBenchDemoResult",
     "SynthBenchReport",
     "TaskDescriptor",
     "TaskRunReport",
@@ -62,4 +63,16 @@ __all__ = [
     "load_task",
     "load_workload",
     "run_cpu_benchmark",
+    "run_synthbench_demo",
 ]
+
+
+def __getattr__(name: str) -> object:
+    if name in {"SynthBenchDemoResult", "run_synthbench_demo"}:
+        from .demo import SynthBenchDemoResult, run_synthbench_demo
+
+        return {
+            "SynthBenchDemoResult": SynthBenchDemoResult,
+            "run_synthbench_demo": run_synthbench_demo,
+        }[name]
+    raise AttributeError(name)
