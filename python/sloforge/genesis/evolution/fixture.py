@@ -32,9 +32,7 @@ def run_local_evolution_fixture(
         evidence_directory is None
         and controller.config.execution_target is not ExecutionTarget.SIMULATED
     ):
-        raise ValueError(
-            "local or external evolution requires artifact-backed gate evidence"
-        )
+        raise ValueError("local or external evolution requires artifact-backed gate evidence")
 
     def gate_digest(stage: GateStage) -> str:
         payload = (
