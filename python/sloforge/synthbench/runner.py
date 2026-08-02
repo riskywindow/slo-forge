@@ -9,6 +9,7 @@ import math
 import platform
 import random
 import statistics
+import sys
 import time
 from collections.abc import Callable
 from itertools import pairwise
@@ -19,7 +20,7 @@ from typing import cast
 from sloforge.genesis.compiler import initialize_genesis_run
 from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.genesis.ir import canonical_json
-from sloforge.genesis.runtime import RuntimeRequest, load_generated_runtime
+from sloforge.genesis.sandbox import SandboxLimits, SandboxRequest, execute_sandboxed
 
 from .grammar import load_hidden_cases, load_task, load_workload, verify_public_package
 from .integrity import audit_raw_samples
@@ -146,11 +147,17 @@ class _Executor:
 
 
 class _GenesisExecutor:
-    """Execute requests through the generated bounded Genesis runtime."""
+    """Execute generated runtime requests only through the strict local sandbox."""
 
-    def __init__(self, config_path: Path, *, seed: int) -> None:
+    def __init__(self, config_path: Path, sandbox_root: Path, *, seed: int) -> None:
         self.config_path = config_path
+        self.runtime_root = config_path.parent
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        self.package_root = Path(str(config["reference_package_root"]))
+        self.repository_python = Path(__file__).resolve().parents[2]
+        self.sandbox_root = sandbox_root
         self.seed = seed
+        self.call_index = 0
 
     def execute(
         self,
@@ -161,39 +168,62 @@ class _GenesisExecutor:
         remaining_seconds = (deadline_ns - time.perf_counter_ns()) / 1e9
         if remaining_seconds <= 0:
             raise TimeoutError("ServingSynthBench CPU request exceeded run timeout")
-        runtime = load_generated_runtime(self.config_path, seed=self.seed)
-        runtime.start()
-        try:
-            started = time.perf_counter_ns()
-            handle = runtime.submit(
-                RuntimeRequest(
-                    request_id=request.request_id,
-                    prompt_tokens=request.prompt_tokens,
-                    maximum_new_tokens=request.maximum_new_tokens,
-                    seed=request.seed,
-                    timeout_seconds=remaining_seconds,
-                )
+        call_id = self.call_index
+        self.call_index += 1
+        request_path = self.sandbox_root / "requests" / f"request-{call_id:05d}.json"
+        request_path.parent.mkdir(parents=True, exist_ok=True)
+        request_path.write_bytes(canonical_json(request) + b"\n")
+        output = self.sandbox_root / "outputs" / f"request-{call_id:05d}"
+        bounded_timeout = min(30.0, remaining_seconds)
+        result = execute_sandboxed(
+            SandboxRequest(
+                argv=(
+                    sys.executable,
+                    "-m",
+                    "sloforge.synthbench.runtime_runner",
+                    "--config",
+                    str(self.config_path),
+                    "--request",
+                    str(request_path),
+                    "--seed",
+                    str(self.seed),
+                    "--timeout-seconds",
+                    str(bounded_timeout),
+                ),
+                working_directory=self.runtime_root,
+                read_only_paths=(
+                    self.runtime_root,
+                    self.package_root,
+                    request_path,
+                    self.repository_python,
+                ),
+                artifact_output_directory=output,
+                seed=self.seed,
+                limits=SandboxLimits(
+                    wall_time_seconds=bounded_timeout,
+                    cpu_time_seconds=max(1, min(30, int(bounded_timeout) + 1)),
+                    memory_bytes=2 * 1024 * 1024 * 1024,
+                    process_count=1,
+                    output_bytes=64 * 1024,
+                    artifact_bytes=1024 * 1024,
+                    artifact_entries=16,
+                    open_files=64,
+                ),
             )
-            tokens: list[int] = []
-            token_times: list[int] = []
-            for event in handle.events(remaining_seconds):
-                if event.token_id is not None:
-                    tokens.append(event.token_id)
-                    token_times.append(time.perf_counter_ns())
-                elif event.kind.value in {"error", "cancelled", "timed_out"}:
-                    raise RuntimeError(
-                        f"generated Genesis runtime terminated request as {event.kind.value}"
-                    )
-            ended = time.perf_counter_ns()
-        finally:
-            runtime.shutdown()
-        if not token_times:
-            raise RuntimeError("generated Genesis runtime emitted no tokens")
+        )
+        if not result.succeeded:
+            raise RuntimeError(
+                "sandboxed generated runtime failed: "
+                f"{result.termination.value}: {result.stderr.strip()}"
+            )
+        document = json.loads(result.stdout)
+        tokens = tuple(int(token) for token in document["tokens"])
+        intervals = tuple(int(value) for value in document["inter_token_ns"])
         return (
-            tuple(tokens),
-            max(1, ended - started),
-            max(1, token_times[0] - started),
-            tuple(max(1, right - left) for left, right in pairwise(token_times)),
+            tokens,
+            int(document["latency_ns"]),
+            int(document["ttft_ns"]),
+            intervals,
         )
 
 
@@ -556,7 +586,9 @@ def _run_task(
     executors: dict[BaselineKind, _Executor | _GenesisExecutor] = {
         baseline: (
             _GenesisExecutor(
-                initialized.runtime.output_directory / "runtime_config.json", seed=run_seed
+                initialized.runtime.output_directory / "runtime_config.json",
+                output_directory / "sandbox" / descriptor.task_id / f"seed-{run_seed}" / "public",
+                seed=run_seed,
             )
             if baseline is BaselineKind.GENESIS_FULL
             else _Executor(
@@ -644,7 +676,9 @@ def _run_task(
         hidden_results: list[HiddenCaseResult] = []
         hidden_executor: _Executor | _GenesisExecutor = (
             _GenesisExecutor(
-                initialized.runtime.output_directory / "runtime_config.json", seed=run_seed
+                initialized.runtime.output_directory / "runtime_config.json",
+                output_directory / "sandbox" / descriptor.task_id / f"seed-{run_seed}" / "hidden",
+                seed=run_seed,
             )
             if baseline is BaselineKind.GENESIS_FULL
             else _Executor(
