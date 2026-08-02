@@ -52,4 +52,8 @@ def robust_summary(
     median = statistics.median(samples)
     mad = statistics.median(abs(sample - median) for sample in samples)
     low, high = bootstrap_median_interval(samples, seed=seed)
-    return median, percentile(samples, 0.95), mad, low, high
+    # Linear percentile interpolation can move an endpoint by one ULP even when
+    # every contributing bootstrap statistic equals the sample median. The
+    # interval describes this point estimate, so preserve that invariant rather
+    # than rejecting otherwise valid high-resolution timer samples downstream.
+    return median, percentile(samples, 0.95), mad, min(low, median), max(high, median)

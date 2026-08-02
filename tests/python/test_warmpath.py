@@ -26,6 +26,7 @@ from sloforge.warmpath import (
     simulate_cold_start,
 )
 from sloforge.warmpath.demo import WarmPathDemoManifest
+from sloforge.warmpath.statistics import robust_summary
 
 
 def _sha(payload: bytes) -> str:
@@ -553,3 +554,9 @@ def test_benchmark_template_contains_no_result_values() -> None:
     assert "raw_samples:" in template
     assert "p95_ready_time_ms:" not in template
     assert "benchmark result" not in template.lower()
+
+
+def test_robust_summary_interval_contains_median_under_ulp_interpolation() -> None:
+    samples = (0.000833, 0.000667, 0.000667)
+    median, _, _, low, high = robust_summary(samples, seed=2029)
+    assert low <= median <= high
