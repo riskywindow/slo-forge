@@ -121,6 +121,8 @@ def build_discovery_fixture(spec_or_name: FixtureSpec | str | Path) -> Discovery
         for numa_index in range(spec.numa_per_host):
             socket_id = f"{host}/socket/{numa_index}"
             numa_id = f"{host}/numa/{numa_index}"
+            pcie_root_id = f"{host}/pcie-root/{numa_index}"
+            pcie_switch_id = f"{host}/pcie-switch/{numa_index}"
             nodes.extend(
                 (
                     TopologyNode(
@@ -150,6 +152,28 @@ def build_discovery_fixture(spec_or_name: FixtureSpec | str | Path) -> Discovery
                             ),
                         ),
                     ),
+                    TopologyNode(
+                        node_id=pcie_root_id,
+                        kind=NodeKind.PCIE_ROOT,
+                        host_id=host,
+                        health=HealthState.HEALTHY,
+                        facts=(
+                            _fact("pci_bus_id", f"0000:{numa_index * 32:02x}:00.0"),
+                            _fact("pcie_generation", 5),
+                            _fact("pcie_width", 16),
+                        ),
+                    ),
+                    TopologyNode(
+                        node_id=pcie_switch_id,
+                        kind=NodeKind.PCIE_SWITCH,
+                        host_id=host,
+                        health=HealthState.HEALTHY,
+                        facts=(
+                            _fact("pci_bus_id", f"0000:{numa_index * 32 + 1:02x}:00.0"),
+                            _fact("pcie_generation", 5),
+                            _fact("pcie_width", 16),
+                        ),
+                    ),
                 )
             )
             edges.extend(
@@ -175,6 +199,36 @@ def build_discovery_fixture(spec_or_name: FixtureSpec | str | Path) -> Discovery
                         facts=(
                             _fact("measured_bandwidth", 170_000_000_000, unit="bytes_per_second"),
                             _fact("latency", 0.09, unit="microseconds"),
+                        ),
+                    ),
+                    TopologyEdge(
+                        edge_id=f"pcie:{numa_id}:{pcie_root_id}",
+                        source=numa_id,
+                        target=pcie_root_id,
+                        kind=EdgeKind.PCIE,
+                        directed=False,
+                        full_duplex=True,
+                        sharing_group=f"{host}-pcie-root-{numa_index}",
+                        contention_domain=f"{host}-pcie-root-{numa_index}",
+                        health=HealthState.HEALTHY,
+                        facts=(
+                            _fact("theoretical_bandwidth", 64_000_000_000, unit="bytes_per_second"),
+                            _fact("latency", 0.4, unit="microseconds"),
+                        ),
+                    ),
+                    TopologyEdge(
+                        edge_id=f"pcie:{pcie_root_id}:{pcie_switch_id}",
+                        source=pcie_root_id,
+                        target=pcie_switch_id,
+                        kind=EdgeKind.PCIE,
+                        directed=False,
+                        full_duplex=True,
+                        sharing_group=f"{host}-pcie-root-{numa_index}",
+                        contention_domain=f"{host}-pcie-root-{numa_index}",
+                        health=HealthState.HEALTHY,
+                        facts=(
+                            _fact("theoretical_bandwidth", 64_000_000_000, unit="bytes_per_second"),
+                            _fact("latency", 0.6, unit="microseconds"),
                         ),
                     ),
                 )
@@ -233,6 +287,25 @@ def build_discovery_fixture(spec_or_name: FixtureSpec | str | Path) -> Discovery
                         _fact("latency", 2.1, unit="microseconds"),
                         _fact("pcie_generation", 5),
                         _fact("pcie_width", 16),
+                    ),
+                )
+            )
+            pcie_switch_id = f"{host}/pcie-switch/{numa_index}"
+            edges.append(
+                TopologyEdge(
+                    edge_id=f"pcie:{pcie_switch_id}:{gpu_id}",
+                    source=pcie_switch_id,
+                    target=gpu_id,
+                    kind=EdgeKind.PCIE,
+                    directed=False,
+                    full_duplex=True,
+                    sharing_group=f"{host}-pcie-{numa_index}",
+                    contention_domain=f"{host}-pcie-{numa_index}",
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        _fact("theoretical_bandwidth", 64_000_000_000, unit="bytes_per_second"),
+                        _fact("measured_bandwidth", 52_000_000_000, unit="bytes_per_second"),
+                        _fact("latency", 1.4, unit="microseconds"),
                     ),
                 )
             )

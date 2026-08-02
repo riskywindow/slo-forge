@@ -119,6 +119,16 @@ def _parse_int(value: str | None) -> int | None:
         return None
 
 
+def _pcie_generation(speed: str | None) -> int | None:
+    if speed is None:
+        return None
+    match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*GT/s", speed, re.IGNORECASE)
+    if match is None:
+        return None
+    rate = float(match.group(1))
+    return {2.5: 1, 5.0: 2, 8.0: 3, 16.0: 4, 32.0: 5, 64.0: 6}.get(rate)
+
+
 def _memory_bytes() -> int | None:
     if platform.system() == "Linux":
         text = _read_text(Path("/proc/meminfo"))
@@ -240,6 +250,73 @@ def _discover_gpu_rows() -> tuple[tuple[str, ...], ...]:
         if len(columns) == len(fields):
             rows.append(columns)
     return tuple(rows)
+
+
+def _gpu_topology_edges(
+    host_id: str,
+    gpu_rows: tuple[tuple[str, ...], ...],
+    captured_at: str,
+) -> tuple[TopologyEdge, ...]:
+    """Normalize the official nvidia-smi topology matrix when available."""
+    result = _run(("nvidia-smi", "topo", "-m"), timeout_s=10)
+    if result is None or result.returncode != 0 or not gpu_rows:
+        return ()
+    lines = [line.split() for line in result.stdout.splitlines() if line.strip()]
+    header = next((line for line in lines if line and line[0].startswith("GPU")), None)
+    if header is None:
+        return ()
+    gpu_labels = tuple(label for label in header if re.fullmatch(r"GPU\d+", label))
+    rows = {line[0]: line[1 : 1 + len(gpu_labels)] for line in lines if line[0] in gpu_labels}
+    indexed_nodes = {
+        f"GPU{row[0]}": f"{host_id}/gpu/{row[1]}" for row in gpu_rows if row[0].isdigit()
+    }
+    provenance = _provenance(
+        "nvidia-smi-topology", "command", captured_at, command=("nvidia-smi", "topo", "-m")
+    )
+    edges: list[TopologyEdge] = []
+    for left_index, left_label in enumerate(gpu_labels):
+        for right_index in range(left_index + 1, len(gpu_labels)):
+            right_label = gpu_labels[right_index]
+            row = rows.get(left_label)
+            if row is None or right_index >= len(row):
+                continue
+            link = row[right_index]
+            if (
+                link in {"X", "N/A"}
+                or left_label not in indexed_nodes
+                or right_label not in indexed_nodes
+            ):
+                continue
+            is_nvlink = link.startswith("NV")
+            kind = EdgeKind.GPU_GPU
+            left_node, right_node = indexed_nodes[left_label], indexed_nodes[right_label]
+            edges.append(
+                TopologyEdge(
+                    edge_id=f"gpu-link:{left_node}:{right_node}",
+                    source=left_node,
+                    target=right_node,
+                    kind=kind,
+                    directed=False,
+                    full_duplex=True,
+                    sharing_group=f"{host_id}-{'nvlink' if is_nvlink else 'pcie'}",
+                    contention_domain=f"{host_id}-{'nvlink' if is_nvlink else link.lower()}",
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed(
+                            "connection_type", [("nvlink" if is_nvlink else "pcie", provenance)]
+                        ),
+                        observed("vendor_topology_code", [(link, provenance)]),
+                        observed(
+                            "theoretical_bandwidth", [(None, provenance)], unit="bytes_per_second"
+                        ),
+                        observed(
+                            "measured_bandwidth", [(None, provenance)], unit="bytes_per_second"
+                        ),
+                        observed("latency", [(None, provenance)], unit="microseconds"),
+                    ),
+                )
+            )
+    return tuple(edges)
 
 
 def _software(captured_at: str) -> tuple[SoftwareComponent, ...]:
@@ -481,6 +558,96 @@ def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTop
                 ),
             )
         )
+        pci_device_path = Path("/sys/bus/pci/devices") / pci_bus.lower()
+        generation = _pcie_generation(_read_text(pci_device_path / "current_link_speed"))
+        width = _parse_int(_read_text(pci_device_path / "current_link_width"))
+        root_id = f"{host_id}/pcie-root/{target_numa}"
+        switch_domain = pci_bus.rsplit(":", 1)[0]
+        switch_id = f"{host_id}/pcie-switch/{switch_domain}"
+        if not any(item.node_id == root_id for item in nodes):
+            nodes.append(
+                TopologyNode(
+                    node_id=root_id,
+                    kind=NodeKind.PCIE_ROOT,
+                    host_id=host_id,
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed("numa_node", [(target_numa, proc_prov)]),
+                        observed("pcie_generation", [(generation, proc_prov)]),
+                        observed("pcie_width", [(width, proc_prov)]),
+                    ),
+                )
+            )
+            edges.append(
+                TopologyEdge(
+                    edge_id=f"pcie:{cpu_node}:{root_id}",
+                    source=cpu_node,
+                    target=root_id,
+                    kind=EdgeKind.PCIE,
+                    directed=False,
+                    full_duplex=True,
+                    sharing_group=f"pcie-root-{target_numa}",
+                    contention_domain=f"pcie-root-{target_numa}",
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed(
+                            "theoretical_bandwidth", [(None, proc_prov)], unit="bytes_per_second"
+                        ),
+                    ),
+                )
+            )
+        if not any(item.node_id == switch_id for item in nodes):
+            nodes.append(
+                TopologyNode(
+                    node_id=switch_id,
+                    kind=NodeKind.PCIE_SWITCH,
+                    host_id=host_id,
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed("pci_bus_id", [(switch_domain, proc_prov)]),
+                        observed("pcie_generation", [(generation, proc_prov)]),
+                        observed("pcie_width", [(width, proc_prov)]),
+                    ),
+                )
+            )
+            edges.append(
+                TopologyEdge(
+                    edge_id=f"pcie:{root_id}:{switch_id}",
+                    source=root_id,
+                    target=switch_id,
+                    kind=EdgeKind.PCIE,
+                    directed=False,
+                    full_duplex=True,
+                    sharing_group=f"pcie-root-{target_numa}",
+                    contention_domain=f"pcie-root-{target_numa}",
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed(
+                            "theoretical_bandwidth", [(None, proc_prov)], unit="bytes_per_second"
+                        ),
+                    ),
+                )
+            )
+        edges.append(
+            TopologyEdge(
+                edge_id=f"pcie:{switch_id}:{node_id}",
+                source=switch_id,
+                target=node_id,
+                kind=EdgeKind.PCIE,
+                directed=False,
+                full_duplex=True,
+                sharing_group=f"pcie-{switch_domain}",
+                contention_domain=f"pcie-{switch_domain}",
+                health=HealthState.HEALTHY,
+                facts=(
+                    observed("pcie_generation", [(generation, proc_prov)]),
+                    observed("pcie_width", [(width, proc_prov)]),
+                    observed("theoretical_bandwidth", [(None, proc_prov)], unit="bytes_per_second"),
+                ),
+            )
+        )
+
+    edges.extend(_gpu_topology_edges(host_id, gpu_rows, captured_at))
 
     network_prov = _provenance("socket/sysfs-network", "sysfs", captured_at)
     ib_devices = {candidate.name for candidate in Path("/sys/class/infiniband").glob("*")}
@@ -490,6 +657,9 @@ def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTop
         node_id = f"{host_id}/nic/{ifname}"
         speed_mbps = _parse_int(_read_text(Path("/sys/class/net") / ifname / "speed"))
         carrier = _parse_int(_read_text(Path("/sys/class/net") / ifname / "carrier"))
+        nic_device = Path("/sys/class/net") / ifname / "device"
+        nic_pci_bus = nic_device.resolve().name if nic_device.exists() else None
+        nic_numa = _parse_int(_read_text(nic_device / "numa_node"))
         transport = "infiniband" if ifname in ib_devices or ifname.startswith("ib") else "ethernet"
         nodes.append(
             TopologyNode(
@@ -499,6 +669,8 @@ def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTop
                 health=HealthState.HEALTHY if carrier == 1 else HealthState.UNKNOWN,
                 facts=(
                     observed("interface_name", [(ifname, network_prov)]),
+                    observed("pci_bus_id", [(nic_pci_bus, network_prov)]),
+                    observed("numa_node", [(nic_numa, network_prov)]),
                     observed(
                         "link_speed", [(speed_mbps, network_prov)], unit="megabits_per_second"
                     ),
@@ -567,6 +739,44 @@ def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTop
                 ),
             )
         )
+
+    gpu_numa_by_id = {
+        edge.target: _parse_int(edge.source.rsplit("/", 1)[-1])
+        for edge in edges
+        if edge.kind is EdgeKind.CPU_GPU
+    }
+    nic_nodes = [node for node in nodes if node.kind is NodeKind.NIC]
+    for gpu_id, gpu_numa in gpu_numa_by_id.items():
+        if gpu_numa is None:
+            continue
+        for nic in nic_nodes:
+            nic_numa_fact = nic.fact("numa_node")
+            if (
+                nic_numa_fact is None
+                or nic_numa_fact.state is not FactState.KNOWN
+                or nic_numa_fact.value != gpu_numa
+            ):
+                continue
+            edges.append(
+                TopologyEdge(
+                    edge_id=f"gpu-nic:{gpu_id}:{nic.node_id}",
+                    source=gpu_id,
+                    target=nic.node_id,
+                    kind=EdgeKind.GPU_NIC,
+                    directed=False,
+                    full_duplex=True,
+                    sharing_group=f"numa-{gpu_numa}",
+                    contention_domain=f"numa-pcie-{gpu_numa}",
+                    health=HealthState.HEALTHY,
+                    facts=(
+                        observed(
+                            "measured_bandwidth", [(None, network_prov)], unit="bytes_per_second"
+                        ),
+                        observed("latency", [(None, network_prov)], unit="microseconds"),
+                        observed("gpudirect_rdma", [(None, network_prov)]),
+                    ),
+                )
+            )
 
     in_container, restrictions, host_visible = _container_state()
     visibility_prov = _provenance("process-environment", "environment", captured_at)

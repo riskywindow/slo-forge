@@ -15,10 +15,15 @@ from sloforge.fabric.ir import (
     FactProvenance,
     GpuNode,
     HostNode,
+    MemoryDomainNode,
     MigState,
     NetworkRailNode,
     NicNode,
     NumaDomainNode,
+    NvSwitchNode,
+    PcieNode,
+    RemoteMemoryNode,
+    StorageTierNode,
 )
 from sloforge.fabric.ir import (
     HealthState as CanonicalHealth,
@@ -150,7 +155,19 @@ def _numa_for_gpu(graph: DiscoveryTopologyGraph, gpu_id: str) -> str | None:
 
 def _canonical_node(
     graph: DiscoveryTopologyGraph, node: TopologyNode
-) -> HostNode | CpuSocketNode | NumaDomainNode | GpuNode | NicNode | NetworkRailNode:
+) -> (
+    HostNode
+    | CpuSocketNode
+    | NumaDomainNode
+    | MemoryDomainNode
+    | GpuNode
+    | NvSwitchNode
+    | PcieNode
+    | NicNode
+    | NetworkRailNode
+    | StorageTierNode
+    | RemoteMemoryNode
+):
     provenance = _all_provenance(node)
     if node.kind is NodeKind.HOST:
         return HostNode(
@@ -185,6 +202,24 @@ def _canonical_node(
             memory_bytes=_integer(node, "memory_capacity", positive=True),
             provenance=provenance,
         )
+    if node.kind is NodeKind.MEMORY_DOMAIN:
+        bandwidth = node.fact("measured_bandwidth")
+        bandwidth_gbps = (
+            float(bandwidth.value) * 8 / 1e9
+            if bandwidth
+            and bandwidth.state is FactState.KNOWN
+            and isinstance(bandwidth.value, (int, float))
+            and not isinstance(bandwidth.value, bool)
+            else None
+        )
+        return MemoryDomainNode(
+            node_id=node.node_id,
+            host_id=node.host_id,
+            numa_domain_id=_string(node, "numa_domain_id"),
+            capacity_bytes=_integer(node, "memory_capacity", positive=True),
+            measured_bandwidth_gbps=bandwidth_gbps,
+            provenance=provenance,
+        )
     if node.kind is NodeKind.GPU:
         mig = _optional_bool(node, "mig_mode")
         return GpuNode(
@@ -204,6 +239,43 @@ def _canonical_node(
             numa_domain_id=_numa_for_gpu(graph, node.node_id),
             pci_address=_optional_string(node, "pci_bus_id"),
             health=_health(node.health),
+            provenance=provenance,
+        )
+    if node.kind is NodeKind.NVSWITCH:
+        return NvSwitchNode(
+            node_id=node.node_id,
+            host_id=node.host_id,
+            switch_domain=_string(node, "switch_domain"),
+            generation=_optional_string(node, "generation"),
+            health=_health(node.health),
+            provenance=provenance,
+        )
+    if node.kind in {NodeKind.PCIE_ROOT, NodeKind.PCIE_SWITCH}:
+        generation_fact = node.fact("pcie_generation")
+        width_fact = node.fact("pcie_width")
+        generation = (
+            generation_fact.value
+            if generation_fact
+            and generation_fact.state is FactState.KNOWN
+            and isinstance(generation_fact.value, int)
+            and not isinstance(generation_fact.value, bool)
+            else None
+        )
+        width = (
+            width_fact.value
+            if width_fact
+            and width_fact.state is FactState.KNOWN
+            and isinstance(width_fact.value, int)
+            and not isinstance(width_fact.value, bool)
+            else None
+        )
+        return PcieNode(
+            kind=("pcie_root_complex" if node.kind is NodeKind.PCIE_ROOT else "pcie_switch"),
+            node_id=node.node_id,
+            host_id=node.host_id,
+            pci_address=_optional_string(node, "pci_bus_id"),
+            generation=generation,
+            width=width,
             provenance=provenance,
         )
     if node.kind is NodeKind.NIC:
@@ -244,6 +316,34 @@ def _canonical_node(
             transport=cast(Literal["ethernet", "infiniband", "roce", "synthetic"], transport),
             subnet=_optional_string(node, "subnet"),
             health=_health(node.health),
+            provenance=provenance,
+        )
+    if node.kind is NodeKind.STORAGE_TIER:
+        capacity = node.fact("capacity")
+        capacity_bytes = (
+            capacity.value
+            if capacity
+            and capacity.state is FactState.KNOWN
+            and isinstance(capacity.value, int)
+            and not isinstance(capacity.value, bool)
+            else None
+        )
+        tier = _string(node, "tier")
+        if tier not in {"object", "remote_fs", "local_nvme", "page_cache", "memory"}:
+            raise TopologyConversionError(f"unsupported storage tier {tier!r}")
+        return StorageTierNode(
+            node_id=node.node_id,
+            host_id=node.host_id,
+            tier=cast(Literal["object", "remote_fs", "local_nvme", "page_cache", "memory"], tier),
+            capacity_bytes=capacity_bytes,
+            provenance=provenance,
+        )
+    if node.kind is NodeKind.REMOTE_MEMORY:
+        return RemoteMemoryNode(
+            node_id=node.node_id,
+            host_id=node.host_id,
+            capacity_bytes=_integer(node, "capacity", positive=True),
+            protocol=_string(node, "protocol"),
             provenance=provenance,
         )
     raise TopologyConversionError(
