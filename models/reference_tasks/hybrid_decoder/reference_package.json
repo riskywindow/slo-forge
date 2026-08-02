@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "hybrid-decoder-zero-day",
+  "reference_module": "reference.py",
+  "tokenizer_module": "tokenizer.py",
+  "sample_generator_module": "sample_inputs.py",
+  "sample_corpus": "search_samples.jsonl",
+  "entry_points": {
+    "load_model": "load_model",
+    "allocate_state": "allocate_state",
+    "prefill": "prefill",
+    "decode_step": "decode_step",
+    "sample": "custom_sampler",
+    "tokenize": "encode",
+    "detokenize": "decode_token",
+    "sample_inputs": "sample_inputs",
+    "torch_export": "torch_export_fixture"
+  },
+  "state_contract": {
+    "ownership": "request",
+    "fields": [
+      {"field_id":"kv_window","kind":"kv","dtype":"int64","shape":[{"name":"window","minimum":1,"maximum":6,"multiple_of":1}],"mutable":true,"persistent_across_tokens":true,"reset_at_request_boundary":true,"alias_group":null,"quantization":null},
+      {"field_id":"recurrent_state","kind":"recurrent","dtype":"float64","shape":[{"name":"batch","minimum":1,"maximum":1,"multiple_of":1}],"mutable":true,"persistent_across_tokens":true,"reset_at_request_boundary":true,"alias_group":null,"quantization":null},
+      {"field_id":"quantized_state","kind":"custom","dtype":"int8","shape":[{"name":"batch","minimum":1,"maximum":1,"multiple_of":1}],"mutable":true,"persistent_across_tokens":true,"reset_at_request_boundary":true,"alias_group":null,"quantization":"symmetric-int8-round-nearest"},
+      {"field_id":"expert_loads","kind":"custom","dtype":"int32","shape":[{"name":"experts","minimum":3,"maximum":3,"multiple_of":1}],"mutable":true,"persistent_across_tokens":true,"reset_at_request_boundary":true,"alias_group":null,"quantization":null},
+      {"field_id":"speculative_state","kind":"speculative","dtype":"int32","shape":[{"name":"batch","minimum":1,"maximum":1,"multiple_of":1}],"mutable":true,"persistent_across_tokens":true,"reset_at_request_boundary":true,"alias_group":null,"quantization":null}
+    ],
+    "mutation_atomicity": "per_token",
+    "cancellation_releases_state": true,
+    "migration_supported": false
+  },
+  "semantic_contract": {
+    "token_commitment": "on_emit",
+    "deterministic_for_seed": true,
+    "batching_axes": ["batch"],
+    "batch_isolation": "independent_requests",
+    "streaming_order": "strict_token_order",
+    "cancellation": "immediate_before_commit",
+    "retry_after_first_token": "forbidden",
+    "allowed_control_flow": ["if", "for"],
+    "required_invariants": ["each emitted token advances state exactly once", "state is owned by exactly one request", "sampling is deterministic for an explicit seed"]
+  },
+  "quality_contract": {
+    "metrics": [{"metric":"exact_token_match","threshold":1.0,"comparison":"exact"}],
+    "final_evaluation_corpus": "final_samples.jsonl",
+    "search_corpus": "search_samples.jsonl",
+    "permit_approximation": false
+  },
+  "supported_input_domain": {
+    "tensors": [{"name":"input_ids","dtype":"int64","dimensions":[{"name":"batch","minimum":1,"maximum":1,"multiple_of":1},{"name":"sequence","minimum":1,"maximum":64,"multiple_of":1}],"contiguous":true,"allowed_strides":[]}],
+    "scalars": [{"name":"seed","kind":"integer","minimum":0.0,"maximum":1.8446744073709552e19,"allowed_values":[]}],
+    "maximum_prompt_tokens": 64,
+    "maximum_generated_tokens": 16
+  },
+  "custom_operators": [{
+    "operator_id": "quantized-state-update",
+    "symbol": "quantized_state_update",
+    "semantic_description": "saturating symmetric int8 persistent-state update with round-to-nearest",
+    "exact": true,
+    "input_domain": ["input_ids"],
+    "state_reads": ["quantized_state"],
+    "state_writes": ["quantized_state"],
+    "verification_obligations": ["enumerate int8 boundary behavior", "compare rounding semantics against reference"]
+  }],
+  "workflow": {
+    "steps": [
+      {"step_id":"model","kind":"model","dependencies":[],"deadline_ms":1000,"expected_latency_ms":20},
+      {"step_id":"verify","kind":"verification","dependencies":["model"],"deadline_ms":1200,"expected_latency_ms":5}
+    ]
+  },
+  "software_preconditions": ["Python >=3.11", "PyTorch >=2.5 only when torch_export inspection is requested"]
+}
