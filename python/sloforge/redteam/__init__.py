@@ -17,12 +17,14 @@ from .models import *  # noqa: F403
 from .runner import corpus_from_report, replay_regression_corpus, run_red_team
 
 
-def run_demo(output_directory: Path, *, seed: int = 73129) -> _models.RedTeamDemoResult:
+def run_demo(
+    output_directory: Path, *, seed: int = 73129, reset: bool = False
+) -> _models.RedTeamDemoResult:
     """Lazily load the demo so module execution stays warning-free."""
 
     from .demo import run_demo as run_demo_implementation
 
-    return run_demo_implementation(output_directory, seed=seed)
+    return run_demo_implementation(output_directory, seed=seed, reset=reset)
 
 
 __all__ = [

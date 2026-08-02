@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from pathlib import Path
 
 from sloforge.genesis.ir import write_canonical
@@ -13,7 +14,22 @@ from .models import RedTeamConfiguration, RedTeamDemoResult
 from .runner import corpus_from_report, replay_regression_corpus, run_red_team
 
 
-def run_demo(output_directory: Path, *, seed: int = 73129) -> RedTeamDemoResult:
+def _safe_reset(output: Path, repository: Path) -> None:
+    if not output.exists():
+        return
+    if output.is_symlink():
+        raise ValueError(f"refusing to reset symlinked red-team output: {output}")
+    resolved = output.resolve()
+    if resolved in {Path("/").resolve(), Path.home().resolve(), repository.resolve()}:
+        raise ValueError(f"refusing to reset unsafe red-team output: {resolved}")
+    shutil.rmtree(resolved)
+
+
+def run_demo(
+    output_directory: Path, *, seed: int = 73129, reset: bool = False
+) -> RedTeamDemoResult:
+    if reset:
+        _safe_reset(output_directory, Path(__file__).resolve().parents[3])
     if output_directory.exists() and output_directory.is_symlink():
         raise ValueError("red-team output directory must not be a symlink")
     if output_directory.exists() and any(output_directory.iterdir()):
@@ -74,12 +90,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=73129)
     parser.add_argument("--candidate", default="unsafe-fastpath-v1")
+    parser.add_argument("--reset", action="store_true")
     arguments = parser.parse_args(argv)
     if arguments.seed < 0:
         parser.error("--seed must be non-negative")
     if arguments.candidate != UnsafeStreamingCandidate.descriptor.candidate_id:
         parser.error("the deterministic fixture supports only unsafe-fastpath-v1")
-    result = run_demo(arguments.output, seed=arguments.seed)
+    result = run_demo(arguments.output, seed=arguments.seed, reset=arguments.reset)
     print(json.dumps(result.model_dump(mode="json"), sort_keys=True))
     return 0
 
