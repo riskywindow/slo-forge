@@ -36,7 +36,7 @@ fabric-check:
 	uv run --locked ruff format --check python tests
 	uv run --locked ruff check python tests
 	uv run --locked mypy python/sloforge
-	uv run --locked pytest -q tests/python/test_fabric*.py tests/python/test_autopsy*.py tests/python/test_forgeci.py tests/python/test_warmpath.py
+	uv run --locked pytest -q tests/python/test_fabric*.py tests/python/test_autopsy*.py tests/python/test_forgeci*.py tests/python/test_warmpath*.py
 	cargo fmt --all --check
 	cargo clippy -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-targets --all-features --locked -- -D warnings
 	cargo test -p sloforge-fabric-protocol -p sloforge-fabric-sim --all-features --locked
@@ -51,10 +51,12 @@ forgeci-demo:
 	uv run --locked python -m sloforge.forgeci.demo --output artifacts/forgeci/demo --report reports/forgeci-evaluation.md --reset
 
 warmpath-demo:
-	uv run --locked python -m sloforge.warmpath.demo --artifact-dir artifacts/warmpath --report reports/warmpath-evaluation.md --reset
+	uv run --locked python -m sloforge.warmpath.demo --artifact-dir artifacts/warmpath --report reports/warmpath-demo.md --reset
 
 extension-evaluation:
-	uv run --locked python -m sloforge.fabric.evaluation --output artifacts/fabric/evaluation --report-directory reports --reset
+	uv run --locked python -m sloforge.fabric.evaluation --artifact-dir artifacts/fabric/evaluation --report-dir reports --reset
+	uv run --locked python -m sloforge.warmpath.evaluation --output artifacts/warmpath/evaluation --report reports/warmpath-evaluation.md --reset
+	uv run --locked python -m sloforge.forgeci.demo --output artifacts/forgeci/demo --report reports/forgeci-evaluation.md --reset
 
 clean-room-test:
 	./tools/clean-room-fabric.sh
