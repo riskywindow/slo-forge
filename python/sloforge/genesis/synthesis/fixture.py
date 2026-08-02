@@ -194,11 +194,11 @@ class CancellationPolicyVerifier:
             passed=False,
             evidence_id=f"evidence-{evidence[:24]}",
             failure=VerificationFailure(
-                violated_contract="no committed token is emitted after request cancellation",
+                violated_contract="cancelled work is not scheduled for token commitment",
                 scope=CounterexampleScope.TRANSFORMATION_FAMILY,
                 transformation_id=transformation_id,
-                expected_behavior="cancelled request emits no subsequent committed token",
-                observed_behavior="deadline batch emitted a committed token after cancellation",
+                expected_behavior="policy suppresses scheduling after request cancellation",
+                observed_behavior="deadline batch scheduled cancelled work for token commitment",
                 witness=trace,
             ),
         )

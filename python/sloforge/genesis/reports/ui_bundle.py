@@ -272,9 +272,13 @@ class GenesisUiBundle(_BundleModel):
                 raise ValueError("baseline raw sample count differs from capsule evidence")
             for samples in (self.baseline_samples, self.candidate_samples):
                 if samples.workload_fingerprint != benchmark.workload_fingerprint:
-                    raise ValueError("raw sample workload fingerprint differs from capsule evidence")
+                    raise ValueError(
+                        "raw sample workload fingerprint differs from capsule evidence"
+                    )
                 if samples.hardware_fingerprint != benchmark.hardware_fingerprint:
-                    raise ValueError("raw sample hardware fingerprint differs from capsule evidence")
+                    raise ValueError(
+                        "raw sample hardware fingerprint differs from capsule evidence"
+                    )
         else:
             if any(
                 item is not None
@@ -297,9 +301,7 @@ class GenesisUiBundle(_BundleModel):
                 raise ValueError(
                     "unbenchmarked performance evidence requires one non-promotion scoped claim"
                 )
-            evidence = {
-                item.evidence_id: item for item in self.capsule.evidence
-            }
+            evidence = {item.evidence_id: item for item in self.capsule.evidence}
             if not any(
                 (record := evidence.get(evidence_id)) is not None
                 and record.evidence_class is EvidenceClass.PERFORMANCE
@@ -310,8 +312,7 @@ class GenesisUiBundle(_BundleModel):
             if self.summary.hardware_backed:
                 raise ValueError("simulation-only capsule cannot claim hardware-backed evidence")
             if (
-                self.performance_simulation.candidate_id
-                != self.summary.accepted_candidate_id
+                self.performance_simulation.candidate_id != self.summary.accepted_candidate_id
                 or self.performance_simulation.candidate_genome_hash
                 != self.summary.accepted_genome_hash
                 or self.performance_simulation.seed != self.summary.seed
@@ -536,9 +537,7 @@ def export_genesis_ui_bundle(demo_root: Path, output: Path | None = None) -> Pat
                 and record.result is EvidenceResult.PASS
             ]
             artifact_ids = {
-                artifact_id
-                for record in performance_records
-                for artifact_id in record.artifact_ids
+                artifact_id for record in performance_records for artifact_id in record.artifact_ids
             }
             simulation_refs = [
                 artifact

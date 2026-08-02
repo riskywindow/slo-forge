@@ -19,11 +19,17 @@ from sloforge.genesis.ir import (
     Transformation,
     canonical_hash,
     load_candidate,
+    load_inference_genome,
     load_transformation,
 )
 from sloforge.genesis.policy_dsl import authenticate_bytecode_source, load_bytecode_document
 from sloforge.genesis.search import CandidateDesign
-from sloforge.genesis.synthesis import CancellationPolicyVerifier
+from sloforge.genesis.synthesis import (
+    CancellationPolicyVerifier,
+    CegisRunResult,
+    ConstraintDocument,
+)
+from sloforge.genesis.synthesis.lowering import lower_candidate
 
 from .canonical import canonical_json, seal_capsule
 from .io import publish_capsule
@@ -294,6 +300,7 @@ def _validate_transformation_chain(
     transformation_ids: tuple[str, ...],
     baseline_genome_hash: str,
     candidate_genome_hash: str,
+    trusted_transformations: tuple[Transformation, ...],
 ) -> list[tuple[Path, Transformation]]:
     if len(transformation_paths) != len(transformation_ids):
         raise ValueError("candidate transformation artifact set is incomplete")
@@ -309,6 +316,22 @@ def _validate_transformation_chain(
     ordered_transformations = [
         transformations_by_id[transformation_id] for transformation_id in transformation_ids
     ]
+    trusted_by_id = {
+        transformation.transformation_id: transformation
+        for transformation in trusted_transformations
+    }
+    if (
+        len(trusted_by_id) != len(trusted_transformations)
+        or tuple(transformation.transformation_id for transformation in trusted_transformations)
+        != transformation_ids
+    ):
+        raise ValueError("trusted lowering did not reproduce the accepted transformation sequence")
+    for _path, transformation in ordered_transformations:
+        trusted = trusted_by_id.get(transformation.transformation_id)
+        if trusted is None or canonical_json(transformation) != canonical_json(trusted):
+            raise ValueError(
+                "persisted transformation does not match the trusted lowering derivation"
+            )
     expected_source_hash = baseline_genome_hash
     previous_transformation_id: str | None = None
     for _path, transformation in ordered_transformations:
@@ -421,12 +444,37 @@ def build_local_capsule(
     if candidate.genome_hash.value != canonical_hash(genome_document):
         raise ValueError("candidate genome changed after acceptance")
 
+    baseline = load_inference_genome(run_directory / "inference_genome.json")
+    if canonical_hash(baseline) != str(synthesis["baseline_genome_hash"]):
+        raise ValueError("synthesis baseline genome does not match the persisted baseline")
+    constraint_document = ConstraintDocument.model_validate_json(
+        (run_directory / "synthesis/cegis/constraints.json").read_bytes(), strict=True
+    )
+    cegis_result = CegisRunResult.model_validate_json(
+        (run_directory / "synthesis/cegis_result.json").read_bytes(), strict=True
+    )
+    trusted_lowering = lower_candidate(
+        baseline,
+        design,
+        learned_constraints=tuple(
+            constraint.learned for constraint in constraint_document.constraints
+        ),
+        counterexample_references=cegis_result.counterexample_ids,
+    )
+    if canonical_json(trusted_lowering.design) != canonical_json(design):
+        raise ValueError("candidate design does not match the trusted lowering result")
+    if canonical_hash(trusted_lowering.genome) != candidate.genome_hash.value:
+        raise ValueError("candidate genome does not match the trusted lowering result")
+    if canonical_json(trusted_lowering.genome) != canonical_json(genome_document):
+        raise ValueError("persisted candidate genome differs from the trusted lowering result")
+
     transformation_paths = sorted((candidate_directory / "transformations").glob("*.json"))
     ordered_transformations = _validate_transformation_chain(
         transformation_paths,
         transformation_ids=candidate.transformation_ids,
         baseline_genome_hash=str(synthesis["baseline_genome_hash"]),
         candidate_genome_hash=candidate.genome_hash.value,
+        trusted_transformations=trusted_lowering.transformations,
     )
     transformation_paths = [path for path, _transformation in ordered_transformations]
 
@@ -712,7 +760,7 @@ def build_local_capsule(
         EvidenceClass.OPERATIONAL: EvidenceIssuer.MODEL_CHECKER,
     }
     levels = {
-        EvidenceClass.SEMANTIC: VerificationLevel.PROPERTY,
+        EvidenceClass.SEMANTIC: VerificationLevel.DIFFERENTIAL,
         EvidenceClass.QUALITY: VerificationLevel.DIFFERENTIAL,
         EvidenceClass.RESOURCE: VerificationLevel.PROPERTY,
         EvidenceClass.PERFORMANCE: VerificationLevel.PROPERTY,

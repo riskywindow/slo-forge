@@ -119,7 +119,7 @@ def test_inspect_and_initialize_zero_day_runtime(tmp_path: Path) -> None:
     rejected_directory = run_dir / "candidates" / synthesis["rejected_candidate_ids"][0]
     rejected = runner.invoke(app, ["genesis", "verify", "--candidate", str(rejected_directory)])
     assert rejected.exit_code == 1
-    assert "emitted a committed token after cancellation" in rejected.output
+    assert "scheduled cancelled work for token commitment" in rejected.output
 
 
 def test_inspect_rejects_mismatched_contract(tmp_path: Path) -> None:

@@ -136,8 +136,7 @@ def _controller(
     controller = EvolutionController.initialize(
         store=store,
         capsule_validator=validator,
-        gate_evidence_validator=gate_validator
-        or (lambda _observation, _challenger: True),
+        gate_evidence_validator=gate_validator or (lambda _observation, _challenger: True),
         transition_compatibility_validator=lambda _champion, _challenger, category: (
             TransitionCompatibility(
                 compatible=category
@@ -368,17 +367,13 @@ def test_local_evolution_rejects_untrusted_and_changed_gate_evidence(tmp_path: P
     _trigger(controller)
     controller.register_challenger(challenger, event_id="register", observed_at_ms=20)
     controller.begin_shadow(event_id="shadow", observed_at_ms=30)
-    shadow = _gate(
-        controller, GateStage.SHADOW, event_id="shadow-evidence", observed_at_ms=40
-    )
+    shadow = _gate(controller, GateStage.SHADOW, event_id="shadow-evidence", observed_at_ms=40)
     with pytest.raises(EvolutionError, match="local gate evidence"):
         controller.record_gate(shadow)
     accepted_digests.add(shadow.evidence_digest)
     controller.record_gate(shadow)
     controller.begin_canary(event_id="canary", observed_at_ms=50)
-    canary = _gate(
-        controller, GateStage.CANARY, event_id="canary-evidence", observed_at_ms=60
-    )
+    canary = _gate(controller, GateStage.CANARY, event_id="canary-evidence", observed_at_ms=60)
     accepted_digests.add(canary.evidence_digest)
     controller.record_gate(canary)
     accepted_digests.remove(shadow.evidence_digest)

@@ -29,7 +29,7 @@ The protocol minimizer uses deterministic delta debugging. A reduction is retain
 admit, schedule, prefill, decode, cancel, emit
 ```
 
-It observes a committed token after cancellation, rejects the candidate, and reduces the real failing schedule to:
+It observes cancelled work being scheduled for token commitment, rejects the candidate, and reduces the real failing schedule to:
 
 ```text
 admit, cancel, emit

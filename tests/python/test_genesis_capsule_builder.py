@@ -13,7 +13,6 @@ from typer.testing import CliRunner
 from sloforge.cli.main import app
 from sloforge.genesis.capsule import (
     Digest,
-    RawBenchmarkSamples,
     ValidationContext,
     build_local_capsule,
     load_capsule,
@@ -141,9 +140,10 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     bundle_manifest = json.loads((extracted / "bundle_manifest.json").read_text())
     assert bundle_manifest["direct_launch_supported"] is False
     assert bundle_manifest["trusted_launcher"] == "sloforge.genesis.sandbox.execute_sandboxed"
-    assert bundle_manifest["tested_runtime_config_sha256"] == hashlib.sha256(
-        (extracted / "tested_runtime_config.json").read_bytes()
-    ).hexdigest()
+    assert (
+        bundle_manifest["tested_runtime_config_sha256"]
+        == hashlib.sha256((extracted / "tested_runtime_config.json").read_bytes()).hexdigest()
+    )
     for name, digest in bundle_manifest["entries"].items():
         assert hashlib.sha256((extracted / name).read_bytes()).hexdigest() == digest
     runtime = load_generated_runtime(
@@ -316,7 +316,7 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
     )
     assert evolved.exit_code == 0, evolved.output
     assert '"spent_usd": 0.0' in evolved.output
-    denied_promotion = runner.invoke(
+    promoted = runner.invoke(
         app,
         [
             "genesis",
@@ -331,8 +331,10 @@ def test_local_capsule_builds_from_persisted_evidence_and_validates(tmp_path: Pa
             str(controller_state),
         ],
     )
-    assert denied_promotion.exit_code != 0
-    assert "proof-gated challenger" in denied_promotion.output
+    assert promoted.exit_code == 0, promoted.output
+    assert json.loads(promoted.output)["phase"] == "promoted"
+    assert (controller_state.parent / "runtime-gates/shadow/gate-evidence.json").is_file()
+    assert (controller_state.parent / "runtime-gates/canary/gate-evidence.json").is_file()
 
     suite = tmp_path / "benchmark-suite.json"
     suite.write_text(json.dumps({"repetitions": 2}), encoding="utf-8")
@@ -514,3 +516,22 @@ def test_hostile_policy_bytecode_is_rejected_at_build_and_capsule_validation(
         issue.path == "artifacts.generated-policy-bytecode" and "forbidden opcode" in issue.message
         for issue in report.issues
     )
+
+
+def test_capsule_builder_replays_trusted_transformation_lowering(tmp_path: Path) -> None:
+    candidate = _accepted_candidate(tmp_path)
+    candidate_document = json.loads((candidate / "candidate.json").read_text(encoding="utf-8"))
+    transformation_id = candidate_document["transformation_ids"][0]
+    transformation_path = candidate / "transformations" / f"{transformation_id}.json"
+    forged = json.loads(transformation_path.read_text(encoding="utf-8"))
+    forged["affected_regions"] = ["kernel"]
+    transformation_path.write_text(
+        json.dumps(forged, sort_keys=True, separators=(",", ":")), encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="trusted lowering derivation"):
+        build_local_capsule(
+            candidate,
+            tmp_path / "forged-transformation-capsule",
+            observed_at=datetime(2026, 8, 2, 12, 0, tzinfo=UTC),
+        )
