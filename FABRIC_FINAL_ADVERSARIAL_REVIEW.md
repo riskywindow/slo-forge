@@ -1,6 +1,6 @@
 # SLOForge Fabric final adversarial review
 
-Review source: `8154c2895f38f044ce0e0f8cdf48d1907dff0d33`, followed by review fixes
+Review source through `229a942f3c46d2946e351f63fed91e29997eb601`, including review fixes
 `704bea5` and `4aad2ef`. The working artifact tree was also inspected independently while
 the final evidence regeneration was in progress. This review did not edit the README,
 completion reports, execution ledger, or generated evidence.
@@ -237,6 +237,10 @@ artifacts, oversized payloads, and identity mismatches have tests.
 - `sloforge fabric validate ...`: intentionally exited nonzero on material TTFT prediction
   error and interval miss. The command wrote a typed failure artifact instead of masking the
   result.
+- `sloforge fabric export ...`: the public surface was exercised after integration. Incompatible
+  cross-host local, vLLM-EP, and SGLang-transfer requests each exited 2 with a precise rejection;
+  the final Fabric suite's public-CLI tests generated validated local, Kubernetes, and SGLang
+  artifacts and verified non-mutating/advisory failure paths.
 - `sloforge autopsy compare`, `diagnose`, `replay`, `minimize`, and `report`: passed on the
   flagship bundle. Seven counterfactuals were evaluated; the minimizer now retains matched
   diagnosis evidence.
