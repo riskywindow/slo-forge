@@ -25,6 +25,85 @@ flowchart LR
 
 Python owns profiling orchestration, statistical models, optimization, control experiments, diagnosis, lowering, and reports. Rust owns the asynchronous streaming data plane, bounded telemetry, load generation, and deterministic discrete-event simulation. Their primary boundary is canonical JSON over a stable subprocess protocol: it is debuggable, language-neutral, and keeps a Python crash outside the latency-sensitive gateway process. See [Architecture](docs/ARCHITECTURE.md) and [ADR 0001](docs/adr/0001-rust-python-boundary.md).
 
+## SLOForge Genesis
+
+Genesis extends the existing compiler from choosing a known deployment configuration to synthesizing
+a scoped inference-serving implementation. Its inputs are a typed reference package, workload,
+hardware/fabric contract, semantic and quality contracts, SLOs, an explicit seed, and a finite budget.
+Its output is an eight-region `InferenceGenome`, a generated conservative runtime, typed
+transformations and policies, independently checked evidence, a rejected-candidate corpus, lineage,
+and a hash-addressed `GenesisCapsule`. Generated source and proposal scores never authorize
+deployment.
+
+```mermaid
+flowchart LR
+    R[Reference package + contracts] --> F[Static zero-day frontend]
+    F --> G[InferenceGenome + baseline runtime]
+    G --> S[Budgeted synthesis]
+    S --> V[Independent verification]
+    V -->|counterexample| M[Minimize + learn constraint]
+    M --> S
+    V -->|scoped evidence| C[GenesisCapsule]
+    C --> E[Isolated challenger]
+    E --> P[Shadow / canary / promote / rollback]
+    P --> L[Lineage + invalidation]
+```
+
+The static frontend deliberately does not turn Python source order into a guessed algebraic graph. It
+recovers a typed call and state inventory, but records unresolved SSA input/output bindings and tensor
+metadata as `unresolved_static_call_inventory`; tensor rewrites over those calls remain disabled until
+an export-backed or otherwise proven graph supplies those bindings. The generated baseline instead
+executes declared reference entry points with bounded queues, deterministic seeds, streaming events,
+cancellation checks, request-owned state, and clean shutdown.
+
+The artifact-backed CPU demonstration is:
+
+```console
+make genesis-demo
+make synthbench-smoke
+```
+
+It produces `artifacts/genesis/demo/GENESIS_DEMO_REPORT.json` and
+`artifacts/synthbench/smoke/run/report.json`. The flagship run executes a real unsafe
+cancellation-policy candidate, minimizes the witness to `admit, cancel, emit`, learns a reusable
+`cancel_check_before_emit` precondition, and accepts a corrected candidate that changes both request
+and serving regions. It then builds two separate capsules from independently synthesized candidates,
+registers the second as an isolated challenger, runs deterministic local shadow/canary gates,
+revalidates immediately before promotion, and proves in the fixture that an already visible stream
+remains leased to its original capsule. The later fabric-degradation trigger is simulated, not a
+physical-link experiment.
+
+Capsule validation requires trust material from outside the untrusted capsule tree:
+
+```console
+sloforge genesis capsule validate artifacts/genesis/manual-73129/capsule \
+  --context artifacts/genesis/manual-73129/operator-trust/validation_context.json \
+  --expected-digest "$EXPECTED_CAPSULE_DIGEST"
+```
+
+The operator-controlled context pins model, tokenizer, workload, hardware, dependency lock, verifier
+version, evidence-record issuers, and exact artifact digests. SHA-256 provides content identity, not
+signer authentication; production use must distribute the expected digest and evidence anchors over
+a trusted channel. The CLI rejects a context stored inside the capsule itself. See the exact
+[CPU demo and validation procedure](docs/genesis/DEMO_SCRIPT.md), [capsule format](docs/genesis/GENESIS_CAPSULE.md), and [trust model](docs/genesis/TRUST_MODEL.md).
+
+ServingSynthBench's CPU smoke mode uses seeded randomized model grammars, evaluator-only hidden cases,
+raw timing samples, randomized run order, and artifact-derived metrics. These timings exercise the
+harness; they are not GPU or production serving results. The multi-seed Genesis evaluation is honest
+about the evidence boundary: H2 (whole-stack performance), H4 (Autopsy-guided search efficiency), and
+H5 (lineage transfer efficiency) remain unevaluated campaigns, while the local controller and
+cross-layer candidate results are only scoped or partial evidence.
+
+On the checked Darwin host, the macOS sandbox path was exercised. NVIDIA GPU/Triton execution,
+multi-GPU/multi-node execution, Linux bubblewrap isolation, Docker-daemon smoke, paid synthesis,
+external traffic, and live promotion were not exercised and are never inferred from adapters or
+synthetic evidence. The macOS backend cannot enforce a hard address-space limit, so memory-hostile
+code still requires an outer VM/container boundary. Detailed scope and open hazards are in
+[Genesis limitations](docs/genesis/LIMITATIONS.md), [security](docs/genesis/SECURITY.md), and the
+[adversarial review](docs/genesis/RED_TEAM_REVIEW.md). The paper-style system report is
+[paper/genesis/README.md](paper/genesis/README.md), and the literature/claim boundary is
+[docs/GENESIS_RELATED_WORK.md](docs/GENESIS_RELATED_WORK.md).
+
 ## SLOForge Fabric
 
 Fabric extends the logical compiler into a topology-aware physical execution compiler and self-healing multi-node runtime. It maps tensor, pipeline, data, and expert-parallel ranks onto concrete hosts, GPUs, NUMA domains, NICs, and rails; lowers collectives and KV transfers onto measured paths; validates the resulting `PhysicalExecutionPlan` in a deterministic communication-aware Rust twin; and binds every decision to canonical evidence hashes.
