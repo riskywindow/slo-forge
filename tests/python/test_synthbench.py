@@ -5,7 +5,9 @@ import statistics
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from sloforge.cli.main import app
 from sloforge.genesis.frontend import inspect_reference_package
 from sloforge.synthbench import (
     BaselineKind,
@@ -21,6 +23,8 @@ from sloforge.synthbench import (
     load_hidden_cases,
     run_cpu_benchmark,
 )
+
+runner = CliRunner()
 
 
 def _configuration(*, seed: int = 73129, count: int = 2) -> GrammarConfiguration:
@@ -237,3 +241,55 @@ def test_cpu_runner_requires_multiple_distinct_seeds() -> None:
             repetitions=2,
             maximum_tasks=1,
         )
+
+
+def test_synthbench_cli_generates_runs_and_compares_cpu_artifacts(tmp_path: Path) -> None:
+    tasks = tmp_path / "tasks"
+    generated = runner.invoke(
+        app,
+        [
+            "synthbench",
+            "generate",
+            "--seed",
+            "73129",
+            "--count",
+            "1",
+            "--output",
+            str(tasks),
+        ],
+    )
+    assert generated.exit_code == 0, generated.output
+    run = tmp_path / "runs/genesis"
+    executed = runner.invoke(
+        app,
+        [
+            "synthbench",
+            "run",
+            "--tasks",
+            str(tasks),
+            "--system",
+            "genesis",
+            "--seeds",
+            "1,2",
+            "--repetitions",
+            "2",
+            "--output",
+            str(run),
+        ],
+    )
+    assert executed.exit_code == 0, executed.output
+    compared = runner.invoke(
+        app,
+        [
+            "synthbench",
+            "compare",
+            "--runs",
+            str(tmp_path / "runs"),
+            "--output",
+            str(tmp_path / "comparison"),
+        ],
+    )
+    assert compared.exit_code == 0, compared.output
+    comparison = json.loads((tmp_path / "comparison/comparison.json").read_text(encoding="utf-8"))
+    assert comparison["source"] == "validated_synthbench_reports"
+    assert comparison["hardware_comparison"] == "not_measured_in_cpu_profile"

@@ -40,6 +40,7 @@ from .forgeci import forgeci_app
 from .genesis import genesis_app
 from .lineage import lineage_app
 from .recovery import recovery_app
+from .synthbench import synthbench_app
 from .warmpath import warmpath_app
 
 app = typer.Typer(
@@ -58,6 +59,7 @@ app.add_typer(forgeci_app, name="forgeci")
 app.add_typer(warmpath_app, name="warmpath")
 app.add_typer(genesis_app, name="genesis")
 app.add_typer(lineage_app, name="lineage")
+app.add_typer(synthbench_app, name="synthbench")
 console = Console()
 
 
