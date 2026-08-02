@@ -31,6 +31,16 @@ def _write_once(path: Path, value: object) -> None:
         handle.write("\n")
 
 
+def _generation_seed(bundle_root: Path) -> int:
+    config = json.loads((bundle_root / "runtime_config.json").read_text(encoding="utf-8"))
+    if not isinstance(config, dict):
+        raise TypeError("generated runtime configuration must be an object")
+    value = config.get("generation_seed")
+    if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value < 1 << 64:
+        raise ValueError("generated runtime configuration has an invalid generation seed")
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, required=True)
@@ -45,8 +55,9 @@ def main(argv: list[str] | None = None) -> int:
     if not 1 <= len(trace["requests"]) <= 256:
         raise ValueError("evolution trace request count must be in [1, 256]")
 
+    runtime_seed = _generation_seed(arguments.bundle)
     module = _load_runtime(arguments.bundle)
-    application = module.application(seed=arguments.seed)
+    application = module.application(seed=runtime_seed)
     cases: list[dict[str, object]] = []
     application.start()
     try:
@@ -96,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
         {
             "schema_version": "sloforge.genesis.evolution.runtime-observation/v1",
             "seed": arguments.seed,
+            "runtime_seed": runtime_seed,
             "request_count": len(cases),
             "cases": cases,
         },

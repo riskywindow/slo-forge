@@ -74,6 +74,19 @@ def test_compiler_fails_closed_on_unsupported_semantics() -> None:
         compile_inference_genome(PACKAGE, invalid, seed=7)
 
 
+def test_compiler_recomputes_inspection_instead_of_trusting_package_hash() -> None:
+    inspection = inspect_reference_package(PACKAGE)
+    altered = inspection.model_copy(
+        update={
+            "graph": inspection.graph.model_copy(update={"legal_batching_axes": ()}),
+        }
+    )
+    assert altered.package_hash == inspection.package_hash
+
+    with pytest.raises(GenomeCompilationError, match="independent static inspection"):
+        compile_inference_genome(PACKAGE, altered, seed=7)
+
+
 def test_initialize_generates_hash_bound_runtime(tmp_path: Path) -> None:
     inspection = inspect_reference_package(PACKAGE)
     result = initialize_genesis_run(PACKAGE, inspection, tmp_path / "run", seed=73)

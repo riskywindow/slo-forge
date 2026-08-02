@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from enum import StrEnum
 from pathlib import PurePosixPath
 from typing import Annotated, Literal, Self
@@ -65,6 +66,11 @@ class ScalarDomain(FrontendModel):
 
     @model_validator(mode="after")
     def validate_domain(self) -> Self:
+        if any(
+            value is not None and not math.isfinite(value)
+            for value in (self.minimum, self.maximum)
+        ):
+            raise ValueError("scalar bounds must be finite")
         if self.minimum is not None and self.maximum is not None and self.maximum < self.minimum:
             raise ValueError("scalar maximum cannot be less than minimum")
         return self
@@ -131,6 +137,12 @@ class QualityMetricContract(FrontendModel):
     threshold: float
     comparison: Literal["at_least", "at_most", "exact"]
 
+    @model_validator(mode="after")
+    def finite_threshold(self) -> Self:
+        if not math.isfinite(self.threshold):
+            raise ValueError("quality metric threshold must be finite")
+        return self
+
 
 class QualityContract(FrontendModel):
     metrics: tuple[QualityMetricContract, ...]
@@ -169,13 +181,36 @@ class WorkflowContract(FrontendModel):
 
     @model_validator(mode="after")
     def validate_dag_references(self) -> Self:
-        identifiers = {step.step_id for step in self.steps}
+        ordered_identifiers = [step.step_id for step in self.steps]
+        identifiers = set(ordered_identifiers)
+        if len(identifiers) != len(ordered_identifiers):
+            raise ValueError("workflow step identifiers must be unique")
+        dependencies = {step.step_id: step.dependencies for step in self.steps}
         for step in self.steps:
             unknown = set(step.dependencies) - identifiers
             if unknown:
                 raise ValueError(
                     f"workflow step {step.step_id} has unknown dependencies: {unknown}"
                 )
+            if len(step.dependencies) != len(set(step.dependencies)):
+                raise ValueError(f"workflow step {step.step_id} dependencies must be unique")
+
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(identifier: str) -> None:
+            if identifier in visiting:
+                raise ValueError("workflow contract must be acyclic")
+            if identifier in visited:
+                return
+            visiting.add(identifier)
+            for dependency in dependencies[identifier]:
+                visit(dependency)
+            visiting.remove(identifier)
+            visited.add(identifier)
+
+        for identifier in ordered_identifiers:
+            visit(identifier)
         return self
 
 
@@ -233,6 +268,21 @@ class ReferencePackageManifest(FrontendModel):
                 raise ValueError(
                     f"custom operator {operator.operator_id} references unknown state: {unknown}"
                 )
+        dimensions = {
+            dimension.name
+            for tensor in self.supported_input_domain.tensors
+            for dimension in tensor.dimensions
+        }
+        unknown_batching_axes = set(self.semantic_contract.batching_axes) - dimensions
+        if unknown_batching_axes:
+            raise ValueError(
+                "semantic batching axes must reference declared tensor dimensions: "
+                f"{sorted(unknown_batching_axes)}"
+            )
+        if len(self.semantic_contract.batching_axes) != len(
+            set(self.semantic_contract.batching_axes)
+        ):
+            raise ValueError("semantic batching axes must be unique")
         return self
 
 

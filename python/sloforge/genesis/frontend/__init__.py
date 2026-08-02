@@ -1,6 +1,10 @@
 """Zero-day model package contracts and conservative inspection."""
 
-from .inspect import inspect_reference_package, unsupported_obligations
+from .inspect import (
+    inspect_reference_package,
+    unsupported_obligations,
+    validate_inspection_binding,
+)
 from .models import (
     DiagnosticSeverity,
     InspectionResult,
@@ -18,4 +22,5 @@ __all__ = [
     "inspect_reference_package",
     "load_reference_package",
     "unsupported_obligations",
+    "validate_inspection_binding",
 ]

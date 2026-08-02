@@ -79,6 +79,10 @@ class CandidateDesign(SearchModel):
             raise ValueError("candidate feature vector must contain between 1 and 64 values")
         if not all(math.isfinite(value) for value in self.feature_vector):
             raise ValueError("candidate feature vector must be finite")
+        if len(self.parent_candidate_ids) != len(set(self.parent_candidate_ids)):
+            raise ValueError("parent candidate identifiers must be unique")
+        if self.candidate_id in self.parent_candidate_ids:
+            raise ValueError("candidate cannot be its own parent")
         return self
 
     @property

@@ -172,6 +172,27 @@ fn genome_structural_closure_is_enforced() {
     genome["kernel"]["kernels"][0]["fallback_kernel_id"] = json!("missing-kernel");
     let payload = serde_json::to_vec(&genome).unwrap_or_else(|error| panic!("{error}"));
     assert!(from_json::<InferenceGenome>(&payload).is_err());
+
+    let mut genome: Value = serde_json::from_slice(&fixture("inference-genome-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    genome["serving"]["node"]["stable_id"] = genome["request"]["node"]["stable_id"].clone();
+    let payload = serde_json::to_vec(&genome).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<InferenceGenome>(&payload).is_err());
+}
+
+#[test]
+fn candidate_and_transformation_identity_sets_are_unambiguous() {
+    let mut candidate: Value = serde_json::from_slice(&fixture("candidate-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    candidate["parent_candidate_ids"] = json!([candidate["candidate_id"].clone()]);
+    let payload = serde_json::to_vec(&candidate).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<Candidate>(&payload).is_err());
+
+    let mut transformation: Value = serde_json::from_slice(&fixture("transformation-v1.json"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    transformation["affected_regions"] = json!(["unknown.path"]);
+    let payload = serde_json::to_vec(&transformation).unwrap_or_else(|error| panic!("{error}"));
+    assert!(from_json::<Transformation>(&payload).is_err());
 }
 
 #[test]

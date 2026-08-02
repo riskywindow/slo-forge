@@ -59,6 +59,20 @@ def _batching_delta(
     if parameters["cancel_check_before_emit"] not in {"true", "false"}:
         raise ValueError("cancel_check_before_emit must be Boolean text")
     safe = parameters["cancel_check_before_emit"] == "true"
+    expected_policy = "deadline_cancel_batch" if safe else "deadline_batch"
+    existing_policy = baseline.request.node.extensions.root.get(
+        "sloforge.dev/synthesized-policy"
+    )
+    if (
+        baseline.request.queue_discipline is QueueDiscipline.EARLIEST_DEADLINE
+        and baseline.request.cancellation_behavior
+        is (CancellationBehavior.IMMEDIATE if safe else CancellationBehavior.SAFE_POINT)
+        and baseline.serving.decode_scheduling is DecodeScheduling.SLO_SLACK
+        and isinstance(existing_policy, dict)
+        and existing_policy.get("policy") == expected_policy
+        and existing_policy.get("cancel_check_before_emit") is safe
+    ):
+        raise ValueError("deadline batching mutation has no executable effect")
 
     source_hash = canonical_hash(baseline)
     prior_candidate = baseline.extensions.root.get("sloforge.dev/synthesis-candidate")
@@ -70,7 +84,7 @@ def _batching_delta(
     policy_extension: dict[str, JsonValue] = {
         "cancel_check_before_emit": safe,
         "candidate_id": design.candidate_id,
-        "policy": "deadline_cancel_batch" if safe else "deadline_batch",
+        "policy": expected_policy,
     }
     request_node = baseline.request.node.model_copy(
         update={
@@ -216,6 +230,17 @@ def _state_layout_delta(
         raise ValueError("page_bytes must be an integer") from error
     if not 16 <= page_bytes <= 65536 or page_bytes & (page_bytes - 1):
         raise ValueError("page_bytes must be a power of two in [16, 65536]")
+
+    existing_layout = baseline.state.node.extensions.root.get(
+        "sloforge.dev/synthesized-state-layout"
+    )
+    if (
+        all(state.layout is StateLayout.PAGED for state in baseline.state.states)
+        and isinstance(existing_layout, dict)
+        and existing_layout.get("layout") == StateLayout.PAGED.value
+        and existing_layout.get("page_bytes") == page_bytes
+    ):
+        raise ValueError("paged state mutation has no executable effect")
 
     source_hash = canonical_hash(baseline)
     prior_candidate = baseline.extensions.root.get("sloforge.dev/synthesis-candidate")
@@ -380,6 +405,11 @@ def lower_candidate(
 ) -> LoweredCandidate:
     """Apply every registered mutation and recompute the actual target hash."""
 
+    families = [mutation.family for mutation in design.mutations]
+    if len(families) != len(set(families)):
+        raise ValueError(
+            "trusted lowering permits at most one executable mutation per transformation family"
+        )
     current = baseline
     transformations: list[Transformation] = []
     for mutation in design.mutations:

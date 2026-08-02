@@ -367,3 +367,20 @@ def test_search_never_invokes_stage_without_budget_reservation(tmp_path: Path) -
     assert called_stages == [FidelityStage.STATIC_PRUNING, FidelityStage.ANALYTICAL_BOUND]
     assert result.candidates[0].budget_exhausted
     assert result.candidates[0].final_state is CandidateSuccessState.STATICALLY_VALID
+
+
+def test_search_rejects_conflicting_candidate_identifier_collision(tmp_path: Path) -> None:
+    design = ProposalPortfolio().propose(_request())[0]
+    conflicting = design.model_copy(update={"feature_vector": (99.0,)})
+    configuration = SearchConfiguration(
+        seed=11,
+        budget=_budget(candidate_count=2, compilation_count=2),
+        stages=_stage_plan(),
+        maximum_candidates=2,
+        maximum_archive_size=2,
+    )
+
+    with pytest.raises(ValueError, match="identifier collision"):
+        SearchEngine(configuration, _PassingEvaluator(), output_directory=tmp_path).run(
+            (design, conflicting)
+        )

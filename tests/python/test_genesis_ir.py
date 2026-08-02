@@ -632,6 +632,7 @@ def test_genome_structural_closure_rejects_dangling_and_cyclic_references() -> N
     source = genome_dict()
     duplicate = copy.deepcopy(source["tensor"]["operators"][0])
     duplicate["operator_id"] = "second-producer"
+    duplicate["node"]["stable_id"] = "tensor.op.second-producer"
     source["tensor"]["operators"].append(duplicate)
     with pytest.raises(ValidationError, match="single producer"):
         InferenceGenome.model_validate_json(json.dumps(source))
@@ -645,6 +646,23 @@ def test_genome_structural_closure_rejects_dangling_and_cyclic_references() -> N
     source["recovery"]["transitions"][0]["rollback_transition_id"] = "missing-transition"
     with pytest.raises(ValidationError, match="rollback transition"):
         InferenceGenome.model_validate_json(json.dumps(source))
+
+    source = genome_dict()
+    source["serving"]["node"]["stable_id"] = source["request"]["node"]["stable_id"]
+    with pytest.raises(ValidationError, match="globally unique"):
+        InferenceGenome.model_validate_json(json.dumps(source))
+
+
+def test_candidate_and_transformation_identity_sets_are_unambiguous() -> None:
+    candidate = candidate_dict()
+    candidate["parent_candidate_ids"] = [candidate["candidate_id"]]
+    with pytest.raises(ValidationError, match="own parent"):
+        Candidate.model_validate_json(json.dumps(candidate))
+
+    transformation = transformation_dict()
+    transformation["affected_regions"] = ["unknown.path"]
+    with pytest.raises(ValidationError, match="typed genome-region"):
+        Transformation.model_validate_json(json.dumps(transformation))
 
 
 def test_shared_python_rust_wire_accept_reject_corpus() -> None:

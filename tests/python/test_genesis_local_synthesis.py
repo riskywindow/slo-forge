@@ -83,6 +83,20 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     runtime_config = json.loads(
         (accepted_directory / "generated_runtime/runtime_config.json").read_text(encoding="utf-8")
     )
+    baseline_runtime_config = json.loads(
+        (run.output_directory / "generated_runtime/runtime_config.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    deployment_manifest = json.loads(
+        (accepted_directory / "generated_runtime/deployment_manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert runtime_config["runtime_id"] != baseline_runtime_config["runtime_id"]
+    assert deployment_manifest["runtime_id"] == runtime_config["runtime_id"]
+    assert deployment_manifest["candidate_id"] == accepted.candidate_id
+    assert deployment_manifest["genome_hash"] == accepted.genome_hash.value
     assert runtime_config["state_allocator"] == {
         "layout": "paged",
         "page_bytes": 64,
@@ -118,6 +132,9 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
     )
     assert runtime_evidence["candidate_id"] == accepted.candidate_id
     assert runtime_evidence["candidate_genome_hash"] == accepted.genome_hash.value
+    assert runtime_evidence["corpus_role"] == "final_evaluation"
+    assert runtime_evidence["runtime_seed"] == 73129
+    assert runtime_evidence["candidate_seed"] == accepted.seed
     assert runtime_evidence["passed"] is True
     assert runtime_evidence["state_allocator"] == runtime_config["state_allocator"]
     assert (
@@ -178,6 +195,15 @@ def test_local_synthesis_rejects_minimizes_learns_and_corrects(tmp_path: Path) -
         (run.output_directory / "synthesis/cegis/constraints.json").read_text(encoding="utf-8")
     )
     assert constraints["constraints"][0]["parameter_key"] == "cancel_check_before_emit"
+    rejected_evidence = json.loads(
+        (
+            run.output_directory
+            / "candidates"
+            / result.rejected_candidate_ids[0]
+            / "evidence/runtime-differential-result.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert rejected_evidence["corpus_role"] == "search"
 
 
 def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path) -> None:
@@ -201,14 +227,18 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
             "serving": baseline.serving.model_copy(
                 update={"node": allow_policy_lowering(baseline.serving.node)}
             ),
+            "state": baseline.state.model_copy(
+                update={
+                    "node": allow_policy_lowering(baseline.state.node),
+                    "states": tuple(
+                        state.model_copy(update={"node": allow_policy_lowering(state.node)})
+                        for state in baseline.state.states
+                    ),
+                }
+            ),
         }
     )
     design = cancellation_fixture_candidates(73129)[2]
-    design = design.model_copy(update={"mutations": (design.mutations[0],)})
-    second = design.mutations[0].model_copy(
-        update={"transformation_id": "deadline-batch-finalize", "expected_upside": 0.01}
-    )
-    design = design.model_copy(update={"mutations": (*design.mutations, second)})
 
     lowered = lower_candidate(baseline, design)
 
@@ -267,3 +297,38 @@ def test_multi_transformation_lowering_preserves_derivation_chain(tmp_path: Path
             candidate_genome_hash=canonical_hash(lowered.genome),
             trusted_transformations=lowered.transformations,
         )
+
+
+def test_trusted_lowering_rejects_ambiguous_duplicate_family() -> None:
+    baseline = load_inference_genome(ROOT / "tests/fixtures/genesis/inference-genome-v1.json")
+
+    def allow_policy_lowering(node: GenomeNodeMetadata) -> GenomeNodeMetadata:
+        return node.model_copy(
+            update={
+                "legal_rewrite_rules": (
+                    *node.legal_rewrite_rules,
+                    "genesis.rules/baseline-exact-v1",
+                )
+            }
+        )
+
+    baseline = baseline.model_copy(
+        update={
+            "request": baseline.request.model_copy(
+                update={"node": allow_policy_lowering(baseline.request.node)}
+            ),
+            "serving": baseline.serving.model_copy(
+                update={"node": allow_policy_lowering(baseline.serving.node)}
+            ),
+        }
+    )
+    design = cancellation_fixture_candidates(73129)[0]
+    duplicate = design.mutations[0].model_copy(
+        update={"transformation_id": "deadline-batch-second"}
+    )
+    ambiguous = design.model_copy(update={"mutations": (*design.mutations, duplicate)})
+
+    with pytest.raises(ValueError, match="at most one executable mutation"):
+        lower_candidate(baseline, ambiguous)
+    with pytest.raises(ValueError, match="exactly one batching mutation"):
+        compiled_candidate_policy(ambiguous)

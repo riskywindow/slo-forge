@@ -201,6 +201,60 @@ def test_opaque_imported_call_creates_semantic_obligation(tmp_path: Path) -> Non
     )
 
 
+def test_operator_name_heuristics_do_not_suppress_unknown_semantics(tmp_path: Path) -> None:
+    package = tmp_path / "package"
+    shutil.copytree(HYBRID, package)
+    reference = package / "reference.py"
+    reference.write_text(
+        reference.read_text(encoding="utf-8")
+        + "\nimport secrets\n\ndef opaque_tensor_call() -> object:\n"
+        + "    return secrets.attention()\n",
+        encoding="utf-8",
+    )
+
+    result = inspect_reference_package(package)
+
+    assert any(
+        diagnostic.category == "unknown_semantics"
+        and "secrets.attention" in diagnostic.message
+        for diagnostic in result.diagnostics
+    )
+
+
+def test_auxiliary_modules_and_undeclared_state_are_inspected(tmp_path: Path) -> None:
+    package = tmp_path / "package"
+    shutil.copytree(HYBRID, package)
+    helper = package / "helper.py"
+    helper.write_text(
+        "def attention_helper(state: dict[str, object]) -> int:\n"
+        "    state['not_declared'] = 1\n"
+        "    return 1\n",
+        encoding="utf-8",
+    )
+    reference = package / "reference.py"
+    reference.write_text(
+        reference.read_text(encoding="utf-8") + "\nimport helper\n",
+        encoding="utf-8",
+    )
+    manifest_path = package / "reference_package.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["auxiliary_modules"] = ["helper.py"]
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    result = inspect_reference_package(package)
+
+    assert any(
+        operator.location.relative_path == "helper.py"
+        and operator.symbol == "attention_helper"
+        for operator in result.graph.operators
+    )
+    assert any(
+        diagnostic.severity == DiagnosticSeverity.UNSUPPORTED
+        and "not_declared" in diagnostic.message
+        for diagnostic in result.diagnostics
+    )
+
+
 @pytest.mark.skipif(importlib.util.find_spec("torch") is None, reason="PyTorch is not installed")
 def test_explicit_torch_export_recovers_current_graph_metadata() -> None:
     result = inspect_reference_package(HYBRID, use_torch_export=True)
