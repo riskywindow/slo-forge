@@ -99,8 +99,21 @@ pub fn validate(input: &FabricSimulationRequest) -> Result<(), SimError> {
         validate_operation(operation, &operation_ids, &resource_properties)?;
     }
     validate_acyclic(&input.operations)?;
-    validate_faults(input, &resource_ids)?;
-    validate_counterfactuals(input, &resource_ids)?;
+    let rank_ids: HashSet<_> = input
+        .operations
+        .iter()
+        .flat_map(|operation| operation.rank_ids.iter().map(String::as_str))
+        .collect();
+    let collective_ids: HashSet<_> = input
+        .operations
+        .iter()
+        .filter_map(|operation| match &operation.kind {
+            OperationKind::Collective { collective_id, .. } => Some(collective_id.as_str()),
+            _ => None,
+        })
+        .collect();
+    validate_faults(input, &resource_ids, &rank_ids, &collective_ids)?;
+    validate_counterfactuals(input, &resource_ids, &rank_ids)?;
     Ok(())
 }
 
@@ -319,6 +332,8 @@ fn validate_acyclic(operations: &[PhysicalOperation]) -> Result<(), SimError> {
 fn validate_faults(
     input: &FabricSimulationRequest,
     resource_ids: &HashSet<&str>,
+    rank_ids: &HashSet<&str>,
+    collective_ids: &HashSet<&str>,
 ) -> Result<(), SimError> {
     let mut ids = HashSet::new();
     for fault in &input.faults {
@@ -346,8 +361,20 @@ fn validate_faults(
             FaultEffect::ResourceUnavailable { resource_id } => {
                 known_resource(resource_ids, resource_id)?;
             }
-            FaultEffect::RankSlowdown { multiplier, .. }
-            | FaultEffect::CollectiveDelay { multiplier, .. } => rate_multiplier(*multiplier)?,
+            FaultEffect::RankSlowdown {
+                rank_id,
+                multiplier,
+            } => {
+                known_target(rank_ids, rank_id, "rank")?;
+                rate_multiplier(*multiplier)?;
+            }
+            FaultEffect::CollectiveDelay {
+                collective_id,
+                multiplier,
+            } => {
+                known_target(collective_ids, collective_id, "collective")?;
+                rate_multiplier(*multiplier)?;
+            }
         }
     }
     Ok(())
@@ -356,6 +383,7 @@ fn validate_faults(
 fn validate_counterfactuals(
     input: &FabricSimulationRequest,
     resource_ids: &HashSet<&str>,
+    rank_ids: &HashSet<&str>,
 ) -> Result<(), SimError> {
     let fault_ids: HashSet<_> = input.faults.iter().map(|fault| fault.id.as_str()).collect();
     for modifier in &input.counterfactuals {
@@ -377,9 +405,12 @@ fn validate_counterfactuals(
                 finite_positive("bandwidth_multiplier", *bandwidth_multiplier)?;
             }
             CounterfactualModifier::ScaleRank {
+                rank_id,
                 duration_multiplier,
-                ..
-            } => finite_positive("duration_multiplier", *duration_multiplier)?,
+            } => {
+                known_target(rank_ids, rank_id, "rank")?;
+                finite_positive("duration_multiplier", *duration_multiplier)?;
+            }
             CounterfactualModifier::ReplaceResource {
                 from_resource_id,
                 to_resource_id,
@@ -393,6 +424,14 @@ fn validate_counterfactuals(
         }
     }
     Ok(())
+}
+
+fn known_target(targets: &HashSet<&str>, id: &str, kind: &str) -> Result<(), SimError> {
+    if !id.is_empty() && targets.contains(id) {
+        Ok(())
+    } else {
+        invalid(format!("unknown {kind} target {id:?}"))
+    }
 }
 
 fn known_resource(resources: &HashSet<&str>, id: &str) -> Result<(), SimError> {
