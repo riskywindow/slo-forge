@@ -57,13 +57,13 @@ def detect_capabilities() -> SandboxCapabilities:
             filesystem_write_isolation=IsolationStatus.ENFORCED,
             environment_sanitization=IsolationStatus.ENFORCED,
             cpu_limit=IsolationStatus.ENFORCED,
-            memory_limit=IsolationStatus.UNAVAILABLE,
+            memory_limit=IsolationStatus.BEST_EFFORT,
             process_limit=IsolationStatus.ENFORCED,
             output_limit=IsolationStatus.ENFORCED,
             child_cleanup=IsolationStatus.ENFORCED,
             limitations=(
                 "sandbox-exec is deprecated by Apple and must be revalidated after OS updates",
-                "macOS interpreter mappings make RLIMIT_AS/DATA unsafe; use an outer container for memory isolation",
+                "memory is bounded by a process-group RSS watchdog; use an outer container for kernel-enforced memory isolation",
             ),
         )
     if system == "Linux" and shutil.which("bwrap") is not None:
@@ -114,6 +114,7 @@ def _sanitized_environment(request: SandboxRequest) -> dict[str, str]:
         "PYTHONHASHSEED": str(request.seed),
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONNOUSERSITE": "1",
+        "SLOFORGE_GENESIS_SANDBOX_LAUNCH": "sandbox-executor-v1",
         "HOME": str(request.artifact_output_directory / "home"),
         "TMPDIR": str(request.artifact_output_directory / "tmp"),
     }
@@ -382,9 +383,48 @@ def _validate_artifact_tree(output: Path, maximum_bytes: int, maximum_entries: i
     return None
 
 
+def _process_group_rss_bytes(process_group: int) -> int | None:
+    """Read aggregate RSS without trusting or invoking the generated process."""
+
+    ps = Path("/bin/ps")
+    if not ps.is_file():
+        return None
+    try:
+        completed = subprocess.run(
+            (str(ps), "-axo", "pgid=,rss="),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=0.25,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    total_kib = 0
+    for line in completed.stdout.splitlines():
+        fields = line.split()
+        if len(fields) != 2:
+            continue
+        try:
+            pgid, rss_kib = (int(item) for item in fields)
+        except ValueError:
+            continue
+        if pgid == process_group:
+            total_kib += rss_kib
+    return total_kib * 1024
+
+
 def _bounded_output(
-    process: subprocess.Popen[bytes], maximum_bytes: int, deadline: float
-) -> tuple[bytes, bytes, int, SandboxTermination | None]:
+    process: subprocess.Popen[bytes],
+    maximum_bytes: int,
+    deadline: float,
+    *,
+    memory_bytes: int,
+    artifact_output: Path,
+    artifact_bytes: int,
+    artifact_entries: int,
+) -> tuple[bytes, bytes, int, SandboxTermination | None, str | None]:
     selector = selectors.DefaultSelector()
     assert process.stdout is not None
     assert process.stderr is not None
@@ -396,11 +436,29 @@ def _bounded_output(
     stderr = bytearray()
     observed = 0
     termination: SandboxTermination | None = None
+    violation: str | None = None
+    next_resource_check = time.monotonic()
     while selector.get_map():
         remaining = deadline - time.monotonic()
         if remaining <= 0 and termination is None:
             termination = SandboxTermination.TIMEOUT
             _kill_process_group(process)
+        now = time.monotonic()
+        if termination is None and now >= next_resource_check:
+            next_resource_check = now + 0.05
+            rss_bytes = _process_group_rss_bytes(process.pid)
+            if rss_bytes is not None and rss_bytes > memory_bytes:
+                termination = SandboxTermination.SANDBOX_VIOLATION
+                violation = "process group exceeds the configured memory limit"
+                _kill_process_group(process)
+            if termination is None:
+                artifact_violation = _validate_artifact_tree(
+                    artifact_output, artifact_bytes, artifact_entries
+                )
+                if artifact_violation is not None:
+                    termination = SandboxTermination.SANDBOX_VIOLATION
+                    violation = artifact_violation
+                    _kill_process_group(process)
         events = selector.select(timeout=max(0.0, min(0.05, remaining)))
         for key, _ in events:
             try:
@@ -429,7 +487,7 @@ def _bounded_output(
                 if not chunk:
                     selector.unregister(key.fileobj)
     selector.close()
-    return bytes(stdout), bytes(stderr), observed, termination
+    return bytes(stdout), bytes(stderr), observed, termination, violation
 
 
 def execute_sandboxed(request: SandboxRequest) -> SandboxResult:
@@ -487,8 +545,14 @@ def execute_sandboxed(request: SandboxRequest) -> SandboxResult:
             time.monotonic() - started,
         )
     deadline = started + request.limits.wall_time_seconds
-    stdout, stderr, observed, forced = _bounded_output(
-        process, request.limits.output_bytes, deadline
+    stdout, stderr, observed, forced, runtime_violation = _bounded_output(
+        process,
+        request.limits.output_bytes,
+        deadline,
+        memory_bytes=request.limits.memory_bytes,
+        artifact_output=output,
+        artifact_bytes=request.limits.artifact_bytes,
+        artifact_entries=request.limits.artifact_entries,
     )
     try:
         return_code = process.wait(timeout=1.0)
@@ -508,7 +572,9 @@ def execute_sandboxed(request: SandboxRequest) -> SandboxResult:
     )
     if artifact_violation is not None:
         termination = SandboxTermination.SANDBOX_VIOLATION
-        stderr = stderr + (b"\n" if stderr else b"") + artifact_violation.encode("utf-8")
+        runtime_violation = runtime_violation or artifact_violation
+    if runtime_violation is not None:
+        stderr = stderr + (b"\n" if stderr else b"") + runtime_violation.encode("utf-8")
     return SandboxResult(
         termination=termination,
         return_code=return_code,

@@ -98,6 +98,8 @@ def test_generated_application_exposes_health_metrics_and_bounded_manifest(tmp_p
     assert missing_status == 404
     assert deployment["network_enabled"] is False
     assert deployment["request_timeout_required"] is True
+    assert deployment["direct_launch_supported"] is False
+    assert deployment["trusted_launcher"] == "sloforge.genesis.sandbox.execute_sandboxed"
     assert artifacts["artifacts"]
     compile((output / "runtime.py").read_text(encoding="utf-8"), "runtime.py", "exec")
     compile(
@@ -136,6 +138,23 @@ def test_generated_correctness_harness_executes_reference_fixture(tmp_path: Path
     assert all(case["exact_match"] for case in evidence["cases"])
 
 
+def test_generated_runtime_refuses_untrusted_direct_launch(tmp_path: Path) -> None:
+    output = _generated(tmp_path)
+    environment = {**os.environ, "PYTHONPATH": str(ROOT / "python")}
+    environment.pop("SLOFORGE_GENESIS_SANDBOX_LAUNCH", None)
+    completed = subprocess.run(
+        [sys.executable, "runtime.py", "--seed", "73129"],
+        cwd=output,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        env=environment,
+    )
+    assert completed.returncode == 78
+    assert "trusted Genesis sandbox executor" in completed.stderr
+
+
 def test_generated_subprocess_multiplexes_requests_and_cancellation(tmp_path: Path) -> None:
     package = tmp_path / "slow-reference"
     shutil.copytree(HYBRID, package)
@@ -161,7 +180,11 @@ def test_generated_subprocess_multiplexes_requests_and_cancellation(tmp_path: Pa
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        env={**os.environ, "PYTHONPATH": str(ROOT / "python")},
+        env={
+            **os.environ,
+            "PYTHONPATH": str(ROOT / "python"),
+            "SLOFORGE_GENESIS_SANDBOX_LAUNCH": "sandbox-executor-v1",
+        },
     )
     assert process.stdin is not None
     requests = [

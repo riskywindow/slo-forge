@@ -16,6 +16,7 @@ from sloforge.genesis.sandbox import (
     execute_sandboxed,
 )
 from sloforge.genesis.sandbox.executor import _macos_firmlink_alias
+from sloforge.genesis.sandbox.executor import _process_group_rss_bytes
 
 
 def test_macos_firmlink_aliases_are_symmetric() -> None:
@@ -62,6 +63,13 @@ def test_sandbox_capabilities_are_explicit() -> None:
     assert capabilities.environment_sanitization is IsolationStatus.ENFORCED
     assert capabilities.output_limit is IsolationStatus.ENFORCED
     assert capabilities.limitations
+
+
+def test_parent_resource_watchdog_observes_its_process_group() -> None:
+    import os
+
+    observed = _process_group_rss_bytes(os.getpgrp())
+    assert observed is None or observed > 0
 
 
 def test_sandbox_sanitizes_environment_and_is_deterministic(
@@ -191,6 +199,29 @@ def test_sandbox_stops_output_flood(tmp_path: Path) -> None:
     assert result.termination is SandboxTermination.OUTPUT_LIMIT
     assert len(result.stdout.encode()) <= 128
     assert result.output_bytes > 128
+
+
+def test_sandbox_stops_artifact_entry_flood_while_process_is_running(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "output"
+    script = source / "artifact_flood.py"
+    script.write_text(
+        "import os, time\n"
+        "from pathlib import Path\n"
+        "root = Path(os.environ['HOME']).parent\n"
+        "for index in range(256):\n"
+        "    (root / f'artifact-{index}').write_text('x')\n"
+        "time.sleep(5)\n",
+        encoding="utf-8",
+    )
+    result = execute_sandboxed(_request(source, output, script, wall_time=3.0))
+    if result.capabilities.network_isolation is IsolationStatus.UNAVAILABLE:
+        assert result.termination is SandboxTermination.POLICY_UNAVAILABLE
+        return
+    assert result.termination is SandboxTermination.SANDBOX_VIOLATION
+    assert "entry limit" in result.stderr
+    assert result.duration_seconds < 2.5
     assert result.process_group_cleaned
 
 
