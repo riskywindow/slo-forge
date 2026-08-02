@@ -29,6 +29,7 @@ from sloforge.forgeci import (
     run_matrix,
     verify_run_artifact,
 )
+from sloforge.forgeci.demo import run_forgeci_demo
 from sloforge.forgeci.models import ForgeCIEvaluation
 
 
@@ -45,6 +46,17 @@ def test_checked_in_forgeci_demo_preserves_detection_and_bisection_evidence() ->
     assert evaluation.comparison.classification is ComparisonClassification.REGRESSION
     assert all(metric.degradation_ci_low_percent > 0.0 for metric in evaluation.comparison.metrics)
     assert (artifact_root / "fixture-repository.bundle").is_file()
+
+
+def test_forgeci_demo_preserves_bundle_for_relative_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    output = Path("artifacts/forgeci/demo")
+    report = Path("reports/forgeci-evaluation.md")
+    run_forgeci_demo(output_directory=output, report_path=report, reset=True)
+    assert (output / "fixture-repository.bundle").is_file()
+    assert not (output / "fixture-repository" / "artifacts").exists()
 
 
 def _git(repository: Path, *arguments: str) -> str:

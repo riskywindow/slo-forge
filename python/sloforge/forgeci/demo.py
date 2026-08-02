@@ -20,7 +20,10 @@ def run_forgeci_demo(*, output_directory: Path, report_path: Path, reset: bool) 
         shutil.rmtree(output_directory)
     evaluation = run_fixture_evaluation(output_directory, report_path)
     fixture_repository = output_directory / "fixture-repository"
-    bundle_path = output_directory / "fixture-repository.bundle"
+    # `git -C` changes the child process working directory before resolving
+    # path arguments. Keep the archive destination absolute so a repository-
+    # relative CLI output does not become nested beneath the fixture worktree.
+    bundle_path = (output_directory / "fixture-repository.bundle").resolve()
     completed = subprocess.run(
         ["git", "-C", str(fixture_repository), "bundle", "create", str(bundle_path), "--all"],
         stdin=subprocess.DEVNULL,
