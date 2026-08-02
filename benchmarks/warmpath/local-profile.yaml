@@ -1,0 +1,27 @@
+schema_version: "1.0.0"
+benchmark_id: warmpath-local-reference
+seed: 2026
+warmups: 2
+samples: 7
+timeout_seconds: 10
+artifact_fixture:
+  graph: artifacts/warmpath/input/artifact-graph.json
+  source_directory: artifacts/warmpath/input/files
+storage_tiers:
+  - tier_id: local-nvme
+    kind: local_nvme
+    capacity_bytes: 1073741824
+  - tier_id: page-cache
+    kind: page_cache
+    capacity_bytes: 536870912
+objectives:
+  - name: minimize-p95-ready
+    ready_time_weight: 1.0
+    hourly_cost_weight: 0.0
+    failure_risk_weight: 1000.0
+outputs:
+  raw_samples: artifacts/warmpath/profile/raw
+  environment_manifest: artifacts/warmpath/profile/environment.json
+  profile: artifacts/warmpath/profile/profile.json
+  plan: artifacts/warmpath/plan.json
+  execution: artifacts/warmpath/execution/warmpath-execution.json
