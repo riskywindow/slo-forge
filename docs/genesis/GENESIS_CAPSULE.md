@@ -69,6 +69,57 @@ A counterexample corpus may contain zero found failures only when it declares th
 Omitting the corpus is rejected. A complete capsule can still state negative results, exclusions,
 and unsupported cases without inflating their verification level.
 
+## H6 promotion-attack campaign
+
+The dedicated H6 campaign in
+[`capsule_attacks.py`](../../python/sloforge/genesis/evaluation_campaigns/capsule_attacks.py)
+exercises the production `validate_capsule` entry point, rather than a campaign-local acceptance
+predicate. For each explicit seed it builds a strict, promotion-complete capsule conformance
+vector, verifies that the unmodified vector is eligible under its trusted validation context, and
+then evaluates these ten attacks:
+
+| Attack | Mutation | Expected fail-closed control |
+| --- | --- | --- |
+| Modified runtime artifact | Changes generated-runtime bytes after sealing | Artifact size/digest integrity |
+| Hardware fingerprint mismatch | Supplies a current fingerprint outside the declared scope | Hardware and claim-scope compatibility |
+| Dependency version mismatch | Supplies a different installed runtime version | Dependency compatibility |
+| Stale evidence | Advances trusted validation time past the evidence horizon | Evidence freshness |
+| Incomplete evidence | Removes quality evidence while retaining its required claim | Evidence and required-class completeness |
+| Altered benchmark summary | Re-seals a median not derivable from the raw samples | Independent benchmark recomputation |
+| Altered quality evidence | Changes replayable expected/observed cases without their anchored digest | Artifact integrity and evidence completeness |
+| Missing counterexample corpus | Removes the required corpus from a re-sealed manifest | Counterexample-corpus completeness |
+| Invalid model-check scope | Moves the operational claim outside the validating hardware fingerprint | Claim-scope compatibility |
+| Incompatible state migration | Replaces the anchored state-conversion bytes with an incompatible source genome | State-conversion artifact integrity |
+
+The default matrix is three seeds by ten attack classes. Every mutation record preserves its seed,
+description, changed manifest/context paths, changed-file before/after hashes, expected issue codes,
+and the complete validator report. The campaign validator reopens the stored capsule, context, and
+reports, revalidates them, reconstructs the original conformance vector in a new temporary tree,
+reapplies each mutation, and requires the rebuilt capsule, context, mutation record, issue set, and
+validation report to match. Changing a supporting campaign artifact is itself rejected by its
+recorded SHA-256 digest.
+
+Some re-sealed attacks deliberately substitute the re-sealed digest into the supplied context.
+That exercises evidence anchors and semantic completeness after manifest hashing has passed; it
+does not weaken the operational requirement that the deployment controller independently pin the
+expected capsule digest.
+
+The campaign has an exact, narrow proof scope. Its promotion-complete capsule is a validator
+conformance fixture. Its benchmark numbers are deterministic statistical test vectors, not
+measurements. `hardware_backed_runs` and `gpu_hours` are both zero, and no deployment or performance
+claim is made. The invalid-model-check-scope case checks whether a scoped operational claim contains
+the current hardware; it does not establish model-checker soundness or replay a transition system.
+The state-migration case proves that an anchored conversion artifact cannot be changed unnoticed;
+the capsule validator does not independently execute that conversion or prove semantic state
+compatibility.
+
+Run the campaign and its artifact-replay checks with:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 uv run pytest -q \
+  tests/python/test_genesis_capsule_attack_campaign.py
+```
+
 ## Verification levels and promotion meaning
 
 Claims independently use levels 0 through 5: build, differential, property, bounded exhaustive,
