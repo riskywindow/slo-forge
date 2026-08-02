@@ -1301,8 +1301,40 @@ def _render_fabric_report(result: FabricEvaluationResult) -> str:
             "",
             f"Fastest median: `{fastest.method.value}` at "
             f"{fastest.p95_ttft_ms.median:.3f} ms. {hierarchy_statement}",
+            "",
+            "### H1 by topology and workload",
+            "",
+            "Each row is the median across configured seeds. Full per-seed values and confidence "
+            "inputs are in `artifacts/fabric/evaluation/result.json`.",
+            "",
+            "| topology class | topology | workload | method | p95 TTFT ms | "
+            "communication ms | SLO attainment |",
+            "|---|---|---|---|---:|---:|---:|",
         )
     )
+    group_keys = sorted(
+        {
+            (trial.topology_class, trial.topology, trial.workload_regime)
+            for trial in result.plan_trials
+        },
+        key=lambda value: (value[0], value[1], value[2].value),
+    )
+    for topology_class, topology, workload_regime in group_keys:
+        for method in result.config.methods:
+            selected = tuple(
+                trial
+                for trial in result.plan_trials
+                if trial.topology == topology
+                and trial.workload_regime is workload_regime
+                and trial.method is method
+            )
+            lines.append(
+                f"| {topology_class} | {topology} | {workload_regime.value} | "
+                f"{method.value} | "
+                f"{statistics.median(item.observed_p95_ttft_ms for item in selected):.3f} | "
+                f"{statistics.median(item.communication_time_ms for item in selected):.3f} | "
+                f"{statistics.median(item.slo_attainment for item in selected):.3f} |"
+            )
     lines.extend(
         (
             "",
@@ -1361,6 +1393,8 @@ def _render_autopsy_report(result: FabricEvaluationResult) -> str:
         "# SLOForge Autopsy and recovery evaluation",
         "",
         "All faults and observations in this report come from deterministic simulator artifacts.",
+        "H3 and H4 use the mixed-bursty workload; H1 and H2 additionally cover long-context and "
+        "expert-skewed regimes.",
         "",
         "## H3 — causal diagnosis",
         "",
@@ -1452,6 +1486,26 @@ def validate_evaluation_artifacts(
         path = artifact_root / artifact.path
         if not path.is_file() or sha256_file(path) != artifact.sha256:
             raise RuntimeError(f"evaluation artifact hash mismatch: {artifact.path}")
+    manifest = json.loads((artifact_root / "manifest.json").read_text(encoding="utf-8"))
+    if manifest.get("result_sha256") != sha256_file(result_path):
+        raise RuntimeError("evaluation manifest does not match result.json")
+    if manifest.get("artifact_count") != len(result.artifacts):
+        raise RuntimeError("evaluation manifest artifact count does not match result.json")
+    report_entries = manifest.get("reports")
+    if not isinstance(report_entries, list) or not report_entries:
+        raise RuntimeError("evaluation manifest has no report hashes")
+    for entry in report_entries:
+        if not isinstance(entry, dict):
+            raise RuntimeError("evaluation manifest contains an invalid report entry")
+        raw_path = entry.get("path")
+        expected_sha256 = entry.get("sha256")
+        if not isinstance(raw_path, str) or not isinstance(expected_sha256, str):
+            raise RuntimeError("evaluation manifest contains an invalid report hash")
+        report_path = Path(raw_path)
+        if not report_path.is_absolute():
+            report_path = report_dir / report_path.name
+        if not report_path.is_file() or sha256_file(report_path) != expected_sha256:
+            raise RuntimeError(f"evaluation report hash mismatch: {report_path.name}")
     fabric_report = (report_dir / "fabric-evaluation.md").read_text(encoding="utf-8")
     autopsy_report = (report_dir / "autopsy-evaluation.md").read_text(encoding="utf-8")
     required_values = (
@@ -1462,9 +1516,6 @@ def validate_evaluation_artifacts(
         raise RuntimeError("Fabric report is not derived from result.json")
     if f"{result.diagnosis_summary.top_one_accuracy:.3f}" not in autopsy_report:
         raise RuntimeError("Autopsy report is not derived from result.json")
-    manifest = json.loads((artifact_root / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("result_sha256") != sha256_file(result_path):
-        raise RuntimeError("evaluation manifest does not match result.json")
     return result
 
 

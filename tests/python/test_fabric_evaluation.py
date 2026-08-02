@@ -86,6 +86,13 @@ def test_artifact_derived_evaluation_round_trip(tmp_path: Path) -> None:
     assert validated == result
     assert "Synthetic" in (report_dir / "fabric-evaluation.md").read_text(encoding="utf-8")
 
+    report_path = report_dir / "fabric-evaluation.md"
+    report_text = report_path.read_text(encoding="utf-8")
+    report_path.write_text("tampered report\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="evaluation report hash mismatch"):
+        validate_evaluation_artifacts(artifact_root=artifact_root, report_dir=report_dir)
+    report_path.write_text(report_text, encoding="utf-8")
+
     target = artifact_root / result.artifacts[-1].path
     target.write_text("tampered\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="artifact hash mismatch"):
