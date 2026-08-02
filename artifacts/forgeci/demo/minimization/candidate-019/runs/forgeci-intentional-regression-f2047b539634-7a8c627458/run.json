@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "forgeci-intentional-regression-f2047b539634-7a8c627458",
+  "case_id": "forgeci-intentional-regression",
+  "revision": "f2047b539634bef041c7a3a0712e11604c37ac82",
+  "started_at": "2026-08-02T05:32:40.821804Z",
+  "completed_at": "2026-08-02T05:32:40.904108Z",
+  "success": true,
+  "warmups": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.014878500020131469,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 112.31700432597056
+        },
+        {
+          "name": "throughput_rps",
+          "value": 89.03371363945597
+        }
+      ],
+      "stdout_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/warmup-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/warmup-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.015989875013474375,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 112.16437864626927
+        },
+        {
+          "name": "throughput_rps",
+          "value": 89.15486467889075
+        }
+      ],
+      "stdout_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/warmup-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/warmup-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "trials": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.015354333008872345,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 112.31700432597056
+        },
+        {
+          "name": "throughput_rps",
+          "value": 89.03371363945597
+        }
+      ],
+      "stdout_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.015931415982777253,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 112.16437864626927
+        },
+        {
+          "name": "throughput_rps",
+          "value": 89.15486467889075
+        }
+      ],
+      "stdout_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 2,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2028,
+      "status": "succeeded",
+      "duration_seconds": 0.015809500007890165,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 111.98560480353194
+        },
+        {
+          "name": "throughput_rps",
+          "value": 89.29719152335736
+        }
+      ],
+      "stdout_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0002-attempt-0.stdout",
+      "stderr_path": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458/trials/measurement-0002-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "summaries": [
+    {
+      "name": "p99_ttft_ms",
+      "unit": "ms",
+      "sample_count": 3,
+      "median": 112.16437864626927,
+      "median_absolute_deviation": 0.1526256797012877,
+      "p95": 112.30174175800043,
+      "confidence_level": 0.95,
+      "median_ci_low": 111.98560480353194,
+      "median_ci_high": 112.31700432597056,
+      "raw_samples": [
+        112.31700432597056,
+        112.16437864626927,
+        111.98560480353194
+      ]
+    },
+    {
+      "name": "throughput_rps",
+      "unit": "request/s",
+      "sample_count": 3,
+      "median": 89.15486467889075,
+      "median_absolute_deviation": 0.12115103943477834,
+      "p95": 89.28295883891069,
+      "confidence_level": 0.95,
+      "median_ci_low": 89.03371363945597,
+      "median_ci_high": 89.29719152335736,
+      "raw_samples": [
+        89.03371363945597,
+        89.15486467889075,
+        89.29719152335736
+      ]
+    }
+  ],
+  "environment_manifest": {
+    "platform": "macOS-15.6.1-arm64-i386-64bit",
+    "python_version": "3.12.7",
+    "machine": "arm64",
+    "processor": "i386",
+    "git_commit": "f2047b539634bef041c7a3a0712e11604c37ac82",
+    "environment": [],
+    "hardware_fingerprint": "56be35305c2f48eb794affefc402d278c73f90130675b3d746d822a915b50d1b"
+  },
+  "artifact_directory": "artifacts/forgeci/demo/minimization/candidate-019/runs/forgeci-intentional-regression-f2047b539634-7a8c627458",
+  "artifact_hash": "f881499dcc69542698ff6048c3b981b211b5ed7cb67e3d2ab61da240dd4e5f51",
+  "warnings": []
+}
