@@ -389,6 +389,33 @@ async fn slow_consumer_receives_ordered_bounded_stream() -> Result<(), Box<dyn E
 }
 
 #[tokio::test]
+async fn unpolled_consumer_cannot_retain_admission_past_request_deadline()
+-> Result<(), Box<dyn Error>> {
+    let backend = start_backend("deadline", 1).await?;
+    let mut config = gateway_config(&[("deadline", &backend.url)], 1);
+    config.request_timeout_ms = 75;
+    config.retry_attempts = 0;
+    let gateway = Gateway::new(config)?;
+    let unpolled = gateway
+        .router()
+        .oneshot(completion_request(true, 32)?)
+        .await?;
+    assert_eq!(unpolled.status(), axum::http::StatusCode::OK);
+
+    tokio::time::sleep(Duration::from_millis(125)).await;
+    let recovered = gateway
+        .router()
+        .oneshot(completion_request(false, 1)?)
+        .await?;
+    assert_ne!(
+        recovered.status(),
+        axum::http::StatusCode::TOO_MANY_REQUESTS
+    );
+    drop(unpolled);
+    Ok(())
+}
+
+#[tokio::test]
 async fn buffered_completion_has_a_total_response_bound() -> Result<(), Box<dyn Error>> {
     let backend = start_backend("backend-name-with-enough-width", 1).await?;
     let mut config = gateway_config(&[("wide", &backend.url)], 2);

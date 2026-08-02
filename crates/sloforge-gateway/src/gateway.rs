@@ -16,9 +16,10 @@ use sloforge_telemetry::{Labels, MetricsRegistry, TraceCollector, TraceEvent, Tr
 use std::collections::{BTreeMap, BTreeSet};
 use std::convert::Infallible;
 use std::pin::Pin;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+use std::task::{Context, Poll};
 use std::time::{Duration, Instant};
-use tokio::sync::{OwnedSemaphorePermit, Semaphore};
+use tokio::sync::{OwnedSemaphorePermit, Semaphore, mpsc};
 use tokio::task::JoinHandle;
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::trace::TraceLayer;
@@ -26,6 +27,57 @@ use tracing::{info, warn};
 use uuid::Uuid;
 
 type ExecutionStream = Pin<Box<dyn Stream<Item = ExecutionEvent> + Send>>;
+
+#[derive(Clone)]
+struct AdmissionLease {
+    permit: Arc<Mutex<Option<OwnedSemaphorePermit>>>,
+}
+
+impl AdmissionLease {
+    fn new(permit: OwnedSemaphorePermit) -> Self {
+        Self {
+            permit: Arc::new(Mutex::new(Some(permit))),
+        }
+    }
+
+    fn release(&self) {
+        drop(
+            self.permit
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .take(),
+        );
+    }
+}
+
+struct ReleaseAdmissionOnDrop(AdmissionLease);
+
+impl Drop for ReleaseAdmissionOnDrop {
+    fn drop(&mut self) {
+        self.0.release();
+    }
+}
+
+struct AdmissionGuardedStream {
+    inner: Pin<Box<dyn Stream<Item = Result<Bytes, Infallible>> + Send>>,
+    admission: AdmissionLease,
+    producer: JoinHandle<()>,
+}
+
+impl Stream for AdmissionGuardedStream {
+    type Item = Result<Bytes, Infallible>;
+
+    fn poll_next(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        self.inner.as_mut().poll_next(context)
+    }
+}
+
+impl Drop for AdmissionGuardedStream {
+    fn drop(&mut self) {
+        self.admission.release();
+        self.producer.abort();
+    }
+}
 
 #[derive(Debug)]
 enum ExecutionEvent {
@@ -238,11 +290,11 @@ impl Gateway {
         self: &Arc<Self>,
         request: InferenceRequest,
         context: RequestContext,
-        admission: OwnedSemaphorePermit,
+        admission: AdmissionLease,
     ) -> ExecutionStream {
         let gateway = Arc::clone(self);
         Box::pin(stream! {
-            let _admission = admission;
+            let _admission = ReleaseAdmissionOnDrop(admission);
             info!(
                 request_id = %context.request_id,
                 traceparent = %context.traceparent,
@@ -280,7 +332,9 @@ impl Gateway {
                     gateway.record_route_trace(&context, &backend.config.name);
                     info!(backend = %backend.config.name, attempt, "selected backend");
 
-                    let lease = match backend.acquire(Duration::from_millis(gateway.config.queue_timeout_ms)).await {
+                    let queue_timeout = Duration::from_millis(gateway.config.queue_timeout_ms)
+                        .min(remaining_timeout(context.started, gateway.config.request_timeout_ms));
+                    let lease = match backend.acquire(queue_timeout).await {
                         Ok(lease) => lease,
                         Err(error) => {
                             gateway.backend_error(&backend, &error);
@@ -669,9 +723,11 @@ async fn handle_inference(
     let stream_requested = request.stream;
     let model = request.model.clone();
     let chat_response = request.endpoint == "/v1/chat/completions";
-    let execution = gateway.execution_stream(request, context, admission);
+    let stream_timeout = remaining_timeout(context.started, gateway.config.request_timeout_ms);
+    let admission = AdmissionLease::new(admission);
+    let execution = gateway.execution_stream(request, context, admission.clone());
     let mut response = if stream_requested {
-        streaming_response(execution)
+        streaming_response(execution, stream_timeout, request_id.clone(), admission)
     } else {
         buffered_response(
             execution,
@@ -687,18 +743,72 @@ async fn handle_inference(
     Ok(response)
 }
 
-fn streaming_response(mut execution: ExecutionStream) -> Response {
-    let output = stream! {
-        while let Some(event) = execution.next().await {
-            let data = match event {
-                ExecutionEvent::Data(value) => serde_json::to_string(&value).unwrap_or_else(|_| "{\"error\":{\"message\":\"serialization failure\"}}".to_owned()),
-                ExecutionEvent::Done => "[DONE]".to_owned(),
-                ExecutionEvent::Error(error) => serde_json::to_string(&json!({"error": error})).unwrap_or_else(|_| "{\"error\":{\"message\":\"serialization failure\"}}".to_owned()),
+fn streaming_response(
+    mut execution: ExecutionStream,
+    timeout: Duration,
+    request_id: String,
+    admission: AdmissionLease,
+) -> Response {
+    // Decouple backend execution from socket polling with a one-frame channel. A slow or
+    // abandoned consumer can therefore retain at most one bounded SSE frame, and the producer
+    // independently drops backend/admission leases at the request deadline.
+    let (sender, mut receiver) = mpsc::channel::<Bytes>(1);
+    let producer = tokio::spawn(async move {
+        let deadline = tokio::time::Instant::now() + timeout;
+        loop {
+            let event = tokio::select! {
+                () = sender.closed() => return,
+                result = tokio::time::timeout_at(deadline, execution.next()) => {
+                    match result {
+                        Ok(Some(event)) => event,
+                        Ok(None) => ExecutionEvent::Error(PublicError {
+                            message: "execution ended without a terminal event".to_owned(),
+                            error_type: "backend_stream",
+                            request_id: request_id.clone(),
+                            retryable: true,
+                        }),
+                        Err(_) => ExecutionEvent::Error(PublicError {
+                            message: "gateway stream deadline expired".to_owned(),
+                            error_type: "backend_request_timeout",
+                            request_id: request_id.clone(),
+                            retryable: false,
+                        }),
+                    }
+                }
             };
-            yield Result::<Bytes, Infallible>::Ok(Bytes::from(format!("data: {data}\n\n")));
+            let terminal = !matches!(&event, ExecutionEvent::Data(_));
+            let data = match event {
+                ExecutionEvent::Data(value) => serde_json::to_string(&value).unwrap_or_else(|_| {
+                    "{\"error\":{\"message\":\"serialization failure\"}}".to_owned()
+                }),
+                ExecutionEvent::Done => "[DONE]".to_owned(),
+                ExecutionEvent::Error(error) => serde_json::to_string(&json!({"error": error}))
+                    .unwrap_or_else(|_| {
+                        "{\"error\":{\"message\":\"serialization failure\"}}".to_owned()
+                    }),
+            };
+            let frame = Bytes::from(format!("data: {data}\n\n"));
+            let sent = tokio::select! {
+                () = sender.closed() => false,
+                result = sender.send(frame) => result.is_ok(),
+                () = tokio::time::sleep_until(deadline) => false,
+            };
+            if !sent || terminal {
+                return;
+            }
+        }
+    });
+    let output = stream! {
+        while let Some(frame) = receiver.recv().await {
+            yield Result::<Bytes, Infallible>::Ok(frame);
         }
     };
-    let mut response = Response::new(Body::from_stream(output));
+    let guarded = AdmissionGuardedStream {
+        inner: Box::pin(output),
+        admission,
+        producer,
+    };
+    let mut response = Response::new(Body::from_stream(guarded));
     response.headers_mut().insert(
         axum::http::header::CONTENT_TYPE,
         HeaderValue::from_static("text/event-stream"),
