@@ -21,6 +21,9 @@ describe("Genesis artifact views", () => {
     const html = renderGenesisDashboard(genesisFixture);
     expect(html).toContain("CPU / simulator evidence");
     expect(html).toContain("deterministic simulator result, not hardware timing");
+    expect(html).toContain("No accepted performance claim");
+    expect(html).toContain("Raw benchmark samples</dt><dd>None");
+    expect(html).toContain("not external-production eligible");
     expect(html).toContain("makes no speedup claim");
     expect(html).toContain("SEMANTIC_REJECTED");
   });

@@ -19,5 +19,11 @@ describe("generated Genesis UI bundle", () => {
     );
     expect(parsed.evolution.audit.some(({ action }) => action === "promote")).toBe(true);
     expect(parsed.lineage.stale_seed_suppressed_after_invalidation).toBe(true);
+    expect(parsed.capsule.benchmarks).toEqual([]);
+    expect(parsed.baseline_samples).toBeNull();
+    expect(parsed.candidate_samples).toBeNull();
+    expect(parsed.performance_simulation?.comparison_permitted).toBe(false);
+    expect(parsed.summary.capsule_local_evolution_eligible).toBe(true);
+    expect(parsed.summary.capsule_external_production_eligible).toBe(false);
   });
 });

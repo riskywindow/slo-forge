@@ -22,10 +22,14 @@ export type GenesisDemoSummary = {
   active_stream_preserved: boolean;
   baseline_genome_hash: string;
   capsule_digest: string;
+  capsule_external_production_eligible: boolean;
+  capsule_local_evolution_eligible: boolean;
   capsule_promotion_eligible: boolean;
   cross_layer_accepted: boolean;
   evolution_promoted: boolean;
   hardware_backed: boolean;
+  kernel_causal_attribution: boolean;
+  kernel_measurement_scope: string;
   learned_constraint_ids: string[];
   minimized_counterexample_ids: string[];
   operator_count: number;
@@ -185,8 +189,33 @@ export type BenchmarkDefinition = {
 
 export type BenchmarkSamples = {
   hardware_fingerprint: GenesisDigest;
-  samples: { seed: number; trial: number; value: number }[];
+  samples: { execution_ordinal: number; seed: number; trial: number; value: number }[];
   workload_fingerprint: GenesisDigest;
+};
+
+export type PerformanceSimulationRequest = {
+  deadline_ms: number | null;
+  modeled_service_units: number;
+  ordinal: number;
+  policy_batch_limit: number;
+};
+
+export type PerformanceSimulation = {
+  candidate_genome_hash: string;
+  candidate_id: string;
+  comparison_permitted: false;
+  deadline_order_exercised: boolean;
+  events: (PerformanceSimulationRequest & { completion_units: number })[];
+  hardware_backed: false;
+  policy_bytecode_sha256: string;
+  queue_policy: string;
+  raw_requests: PerformanceSimulationRequest[];
+  result: "pass";
+  runtime_manifest_sha256: string;
+  schema_version: "genesis.candidate-simulation.v1";
+  seed: number;
+  workload_path: string;
+  workload_sha256: string;
 };
 
 export type EvolutionAudit = {
@@ -247,14 +276,15 @@ export type LineageTransferReport = {
 
 export type GenesisArtifactBundle = {
   artifact_type: "sloforge.genesis.ui-bundle/v1";
-  baseline_samples: BenchmarkSamples;
-  benchmark_definition: BenchmarkDefinition;
-  candidate_samples: BenchmarkSamples;
+  baseline_samples: BenchmarkSamples | null;
+  benchmark_definition: BenchmarkDefinition | null;
+  candidate_samples: BenchmarkSamples | null;
   candidates: GenesisCandidateBundle[];
   capsule: GenesisCapsule;
   counterexamples: GenesisCounterexample[];
   evolution: EvolutionSnapshot;
   genome: GenesisGenome;
   lineage: LineageTransferReport;
+  performance_simulation: PerformanceSimulation | null;
   summary: GenesisDemoSummary;
 };

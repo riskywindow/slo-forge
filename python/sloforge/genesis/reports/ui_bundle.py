@@ -18,7 +18,14 @@ from pydantic import (
     model_validator,
 )
 
-from sloforge.genesis.capsule import GenesisCapsule, calculate_capsule_digest
+from sloforge.genesis.capsule import (
+    ArtifactRole,
+    ClaimCategory,
+    EvidenceClass,
+    EvidenceResult,
+    GenesisCapsule,
+    calculate_capsule_digest,
+)
 from sloforge.genesis.capsule.models import RawBenchmarkSamples
 from sloforge.genesis.evolution import EvolutionSnapshot
 from sloforge.genesis.ir import (
@@ -75,16 +82,73 @@ class DemoSummary(_BundleModel):
     capsule_path: _NonEmpty
     capsule_digest: _DigestString
     capsule_promotion_eligible: bool
+    capsule_local_evolution_eligible: bool
+    capsule_external_production_eligible: bool
     redteam_finding_count: int = Field(ge=0)
     redteam_replayed_count: int = Field(ge=0)
     kernel_candidate_count: int = Field(ge=0)
     kernel_speedup_claim_count: int = Field(ge=0)
+    kernel_causal_attribution: bool
+    kernel_measurement_scope: _NonEmpty
     evolution_promoted: bool
     active_stream_preserved: bool
     physical_degradation_triggered: bool
     hardware_backed: bool
     report_path: _NonEmpty
     ui_bundle_path: _NonEmpty
+
+    @model_validator(mode="after")
+    def eligibility_is_monotonic(self) -> Self:
+        if self.capsule_external_production_eligible and not self.capsule_local_evolution_eligible:
+            raise ValueError("external capsule eligibility requires local evolution eligibility")
+        return self
+
+
+class SimulationRequest(_BundleModel):
+    deadline_ms: int | None
+    modeled_service_units: int = Field(ge=0)
+    ordinal: int = Field(ge=0)
+    policy_batch_limit: int = Field(ge=1)
+
+
+class SimulationEvent(SimulationRequest):
+    completion_units: int = Field(ge=0)
+
+
+class PerformanceSimulation(_BundleModel):
+    schema_version: Literal["genesis.candidate-simulation.v1"]
+    candidate_genome_hash: _DigestString
+    candidate_id: _NonEmpty
+    comparison_permitted: Literal[False]
+    deadline_order_exercised: bool
+    events: tuple[SimulationEvent, ...]
+    hardware_backed: Literal[False]
+    policy_bytecode_sha256: _DigestString
+    queue_policy: _NonEmpty
+    raw_requests: tuple[SimulationRequest, ...]
+    result: Literal["pass"]
+    runtime_manifest_sha256: _DigestString
+    seed: int = Field(ge=0)
+    workload_path: _NonEmpty
+    workload_sha256: _DigestString
+
+    @model_validator(mode="after")
+    def events_are_derived_from_requests(self) -> Self:
+        if not self.raw_requests:
+            raise ValueError("performance simulation must contain at least one raw request")
+        expected_ordinals = tuple(range(len(self.raw_requests)))
+        if tuple(item.ordinal for item in self.raw_requests) != expected_ordinals:
+            raise ValueError("simulation request ordinals must be contiguous")
+        if tuple(item.ordinal for item in self.events) != expected_ordinals:
+            raise ValueError("simulation event ordinals must be contiguous")
+        for request, event in zip(self.raw_requests, self.events, strict=True):
+            if (
+                request.deadline_ms != event.deadline_ms
+                or request.modeled_service_units != event.modeled_service_units
+                or request.policy_batch_limit != event.policy_batch_limit
+            ):
+                raise ValueError("simulation event inputs differ from their raw requests")
+        return self
 
 
 class CandidateBundle(_BundleModel):
@@ -155,9 +219,10 @@ class GenesisUiBundle(_BundleModel):
     candidates: tuple[CandidateBundle, ...]
     counterexamples: tuple[Counterexample, ...]
     capsule: GenesisCapsule
-    benchmark_definition: dict[str, JsonValue]
-    baseline_samples: RawBenchmarkSamples
-    candidate_samples: RawBenchmarkSamples
+    benchmark_definition: dict[str, JsonValue] | None
+    baseline_samples: RawBenchmarkSamples | None
+    candidate_samples: RawBenchmarkSamples | None
+    performance_simulation: PerformanceSimulation | None
     evolution: EvolutionSnapshot
     lineage: LineageTransferReport
 
@@ -186,22 +251,72 @@ class GenesisUiBundle(_BundleModel):
             item = counterexamples.get(counterexample_id)
             if item is None or not item.minimized:
                 raise ValueError("summary references a missing or non-minimized counterexample")
-        benchmark = self.capsule.benchmarks[0] if len(self.capsule.benchmarks) == 1 else None
-        if benchmark is None:
-            raise ValueError("UI bundle requires exactly one capsule benchmark")
-        if self.benchmark_definition.get("benchmark_id") != benchmark.benchmark_id:
-            raise ValueError("benchmark definition identifier differs from capsule evidence")
-        if self.benchmark_definition.get("hardware_backed") != self.summary.hardware_backed:
-            raise ValueError("benchmark hardware mode differs from the demo summary")
-        if len(self.candidate_samples.samples) != benchmark.sample_count:
-            raise ValueError("candidate raw sample count differs from capsule evidence")
-        if len(self.baseline_samples.samples) != benchmark.repetitions:
-            raise ValueError("baseline raw sample count differs from capsule evidence")
-        for samples in (self.baseline_samples, self.candidate_samples):
-            if samples.workload_fingerprint != benchmark.workload_fingerprint:
-                raise ValueError("raw sample workload fingerprint differs from capsule evidence")
-            if samples.hardware_fingerprint != benchmark.hardware_fingerprint:
-                raise ValueError("raw sample hardware fingerprint differs from capsule evidence")
+        if len(self.capsule.benchmarks) > 1:
+            raise ValueError("UI bundle supports at most one capsule benchmark")
+        benchmark = self.capsule.benchmarks[0] if self.capsule.benchmarks else None
+        if benchmark is not None:
+            if (
+                self.benchmark_definition is None
+                or self.baseline_samples is None
+                or self.candidate_samples is None
+                or self.performance_simulation is not None
+            ):
+                raise ValueError("accepted benchmark evidence requires definition and raw samples")
+            if self.benchmark_definition.get("benchmark_id") != benchmark.benchmark_id:
+                raise ValueError("benchmark definition identifier differs from capsule evidence")
+            if self.benchmark_definition.get("hardware_backed") != self.summary.hardware_backed:
+                raise ValueError("benchmark hardware mode differs from the demo summary")
+            if len(self.candidate_samples.samples) != benchmark.sample_count:
+                raise ValueError("candidate raw sample count differs from capsule evidence")
+            if len(self.baseline_samples.samples) != benchmark.repetitions:
+                raise ValueError("baseline raw sample count differs from capsule evidence")
+            for samples in (self.baseline_samples, self.candidate_samples):
+                if samples.workload_fingerprint != benchmark.workload_fingerprint:
+                    raise ValueError("raw sample workload fingerprint differs from capsule evidence")
+                if samples.hardware_fingerprint != benchmark.hardware_fingerprint:
+                    raise ValueError("raw sample hardware fingerprint differs from capsule evidence")
+        else:
+            if any(
+                item is not None
+                for item in (
+                    self.benchmark_definition,
+                    self.baseline_samples,
+                    self.candidate_samples,
+                )
+            ):
+                raise ValueError("capsule without a benchmark must not expose synthetic samples")
+            if self.performance_simulation is None:
+                raise ValueError("capsule without a benchmark requires scoped simulation evidence")
+            performance_claims = [
+                claim
+                for claim in self.capsule.claims
+                if claim.category is ClaimCategory.PERFORMANCE
+                and claim.result is EvidenceResult.PASS
+            ]
+            if len(performance_claims) != 1 or performance_claims[0].promotion_required:
+                raise ValueError(
+                    "unbenchmarked performance evidence requires one non-promotion scoped claim"
+                )
+            evidence = {
+                item.evidence_id: item for item in self.capsule.evidence
+            }
+            if not any(
+                (record := evidence.get(evidence_id)) is not None
+                and record.evidence_class is EvidenceClass.PERFORMANCE
+                and record.result is EvidenceResult.PASS
+                for evidence_id in performance_claims[0].evidence_ids
+            ):
+                raise ValueError("performance claim lacks passing simulation evidence")
+            if self.summary.hardware_backed:
+                raise ValueError("simulation-only capsule cannot claim hardware-backed evidence")
+            if (
+                self.performance_simulation.candidate_id
+                != self.summary.accepted_candidate_id
+                or self.performance_simulation.candidate_genome_hash
+                != self.summary.accepted_genome_hash
+                or self.performance_simulation.seed != self.summary.seed
+            ):
+                raise ValueError("performance simulation identity differs from the accepted run")
         if self.evolution.seed != self.summary.seed:
             raise ValueError("evolution and demo seeds differ")
         if self.lineage.seed != self.summary.seed:
@@ -366,33 +481,81 @@ def export_genesis_ui_bundle(demo_root: Path, output: Path | None = None) -> Pat
             or calculate_capsule_digest(capsule) != capsule.capsule_digest
         ):
             raise GenesisUiBundleError("capsule manifest failed its content-addressed digest")
-        if len(capsule.benchmarks) != 1:
-            raise GenesisUiBundleError("Genesis UI bundle requires exactly one capsule benchmark")
-        benchmark = capsule.benchmarks[0]
         capsule_root = root / "capsule"
-        definition = _artifact_json(root, capsule_root, capsule, benchmark.definition_artifact_id)
-        candidate_samples_raw = _artifact_json(
-            root, capsule_root, capsule, benchmark.raw_samples_artifact_id
-        )
-        baseline_samples_raw = _artifact_json(
-            root, capsule_root, capsule, benchmark.baseline_artifact_id
-        )
-        candidate_samples = RawBenchmarkSamples.model_validate_json(
-            json.dumps(candidate_samples_raw, allow_nan=False), strict=True
-        )
-        baseline_samples = RawBenchmarkSamples.model_validate_json(
-            json.dumps(baseline_samples_raw, allow_nan=False), strict=True
-        )
-        definition_ref = next(
-            item
-            for item in capsule.artifacts
-            if item.artifact_id == benchmark.definition_artifact_id
-        )
-        for samples in (candidate_samples, baseline_samples):
-            if samples.benchmark_definition_digest != definition_ref.digest:
+        if len(capsule.benchmarks) > 1:
+            raise GenesisUiBundleError("Genesis UI bundle supports at most one capsule benchmark")
+        benchmark = capsule.benchmarks[0] if capsule.benchmarks else None
+        definition: dict[str, Any] | None = None
+        candidate_samples: RawBenchmarkSamples | None = None
+        baseline_samples: RawBenchmarkSamples | None = None
+        performance_simulation: PerformanceSimulation | None = None
+        if benchmark is not None:
+            definition = _artifact_json(
+                root, capsule_root, capsule, benchmark.definition_artifact_id
+            )
+            candidate_samples_raw = _artifact_json(
+                root, capsule_root, capsule, benchmark.raw_samples_artifact_id
+            )
+            baseline_samples_raw = _artifact_json(
+                root, capsule_root, capsule, benchmark.baseline_artifact_id
+            )
+            candidate_samples = RawBenchmarkSamples.model_validate_json(
+                json.dumps(candidate_samples_raw, allow_nan=False), strict=True
+            )
+            baseline_samples = RawBenchmarkSamples.model_validate_json(
+                json.dumps(baseline_samples_raw, allow_nan=False), strict=True
+            )
+            definition_ref = next(
+                item
+                for item in capsule.artifacts
+                if item.artifact_id == benchmark.definition_artifact_id
+            )
+            for samples in (candidate_samples, baseline_samples):
+                if samples.benchmark_definition_digest != definition_ref.digest:
+                    raise GenesisUiBundleError(
+                        "raw samples do not reference the capsule benchmark definition"
+                    )
+        else:
+            performance_claims = [
+                claim
+                for claim in capsule.claims
+                if claim.category is ClaimCategory.PERFORMANCE
+                and claim.result is EvidenceResult.PASS
+                and not claim.promotion_required
+            ]
+            if len(performance_claims) != 1:
                 raise GenesisUiBundleError(
-                    "raw samples do not reference the capsule benchmark definition"
+                    "unbenchmarked capsule requires exactly one scoped performance claim"
                 )
+            evidence_by_id = {record.evidence_id: record for record in capsule.evidence}
+            performance_records = [
+                record
+                for evidence_id in performance_claims[0].evidence_ids
+                if (record := evidence_by_id.get(evidence_id)) is not None
+                and record.evidence_class is EvidenceClass.PERFORMANCE
+                and record.result is EvidenceResult.PASS
+            ]
+            artifact_ids = {
+                artifact_id
+                for record in performance_records
+                for artifact_id in record.artifact_ids
+            }
+            simulation_refs = [
+                artifact
+                for artifact in capsule.artifacts
+                if artifact.artifact_id in artifact_ids
+                and artifact.role is ArtifactRole.PERFORMANCE_SAMPLES
+            ]
+            if len(simulation_refs) != 1:
+                raise GenesisUiBundleError(
+                    "unbenchmarked capsule requires exactly one performance simulation artifact"
+                )
+            simulation_raw = _artifact_json(
+                root, capsule_root, capsule, simulation_refs[0].artifact_id
+            )
+            performance_simulation = PerformanceSimulation.model_validate_json(
+                json.dumps(simulation_raw, allow_nan=False), strict=True
+            )
 
         evolution = EvolutionSnapshot.model_validate_json(
             _read_bytes(root, root / "evolution/degraded-snapshot.json"), strict=True
@@ -409,6 +572,7 @@ def export_genesis_ui_bundle(demo_root: Path, output: Path | None = None) -> Pat
             benchmark_definition=definition,
             baseline_samples=baseline_samples,
             candidate_samples=candidate_samples,
+            performance_simulation=performance_simulation,
             evolution=evolution,
             lineage=lineage,
         )

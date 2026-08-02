@@ -99,13 +99,23 @@ export function parseGenesisArtifactBundle(input: unknown): GenesisArtifactBundl
   }
   for (const field of [
     "active_stream_preserved",
+    "capsule_external_production_eligible",
+    "capsule_local_evolution_eligible",
     "capsule_promotion_eligible",
     "cross_layer_accepted",
     "evolution_promoted",
     "hardware_backed",
+    "kernel_causal_attribution",
     "physical_degradation_triggered",
     "runtime_differential_passed",
   ]) boolean(summary[field], `$.summary.${field}`);
+  string(summary["kernel_measurement_scope"], "$.summary.kernel_measurement_scope");
+  if (
+    summary["capsule_external_production_eligible"] === true &&
+    summary["capsule_local_evolution_eligible"] !== true
+  ) {
+    problems.push("$.summary external capsule eligibility requires local evolution eligibility");
+  }
   for (const field of ["operator_count", "seed", "state_field_count"]) {
     if (number(summary[field], `$.summary.${field}`) && summary[field] < 0) {
       problems.push(`$.summary.${field} must be non-negative`);
@@ -315,25 +325,41 @@ export function parseGenesisArtifactBundle(input: unknown): GenesisArtifactBundl
     problems.push("$.capsule identity must reference the accepted genome");
   }
   const evidenceIds = new Set<string>();
+  const evidenceClasses = new Map<string, string>();
+  const evidenceResults = new Map<string, string>();
   array(capsule["evidence"], "$.capsule.evidence").forEach((raw, index) => {
     const item = record(raw, `$.capsule.evidence[${index}]`);
     if (string(item["evidence_id"], `$.capsule.evidence[${index}].evidence_id`)) {
       evidenceIds.add(item["evidence_id"]);
+      if (typeof item["evidence_class"] === "string") {
+        evidenceClasses.set(item["evidence_id"], item["evidence_class"]);
+      }
+      if (typeof item["result"] === "string") {
+        evidenceResults.set(item["evidence_id"], item["result"]);
+      }
     }
     for (const field of ["evidence_class", "issuer", "level", "result"]) {
       string(item[field], `$.capsule.evidence[${index}].${field}`);
     }
     number(item["deterministic_seed"], `$.capsule.evidence[${index}].deterministic_seed`);
   });
+  const performanceClaims: UnknownRecord[] = [];
   array(capsule["claims"], "$.capsule.claims").forEach((raw, index) => {
     const item = record(raw, `$.capsule.claims[${index}]`);
     for (const field of ["category", "claim_id", "level", "result", "statement"]) {
       string(item[field], `$.capsule.claims[${index}].${field}`);
     }
     boolean(item["promotion_required"], `$.capsule.claims[${index}].promotion_required`);
-    strings(item["evidence_ids"], `$.capsule.claims[${index}].evidence_ids`).forEach((id) => {
+    const claimEvidenceIds = strings(
+      item["evidence_ids"],
+      `$.capsule.claims[${index}].evidence_ids`,
+    );
+    claimEvidenceIds.forEach((id) => {
       if (!evidenceIds.has(id)) problems.push(`$.capsule.claims[${index}] references missing evidence ${id}`);
     });
+    if (item["category"] === "performance" && item["result"] === "pass") {
+      performanceClaims.push({ ...item, evidence_ids: claimEvidenceIds });
+    }
     const scope = record(item["scope"], `$.capsule.claims[${index}].scope`);
     for (const field of ["assumptions", "exclusions", "input_domain", "shape_domain"]) {
       strings(scope[field], `$.capsule.claims[${index}].scope.${field}`);
@@ -343,47 +369,74 @@ export function parseGenesisArtifactBundle(input: unknown): GenesisArtifactBundl
   strings(hardware["architectures"], "$.capsule.hardware.architectures");
   strings(hardware["restrictions"], "$.capsule.hardware.restrictions");
 
-  const definition = record(root["benchmark_definition"], "$.benchmark_definition");
-  for (const field of ["benchmark_id", "metric", "unit"]) {
-    string(definition[field], `$.benchmark_definition.${field}`);
-  }
-  for (const field of ["confidence", "repetitions", "warmup"]) {
-    number(definition[field], `$.benchmark_definition.${field}`);
-  }
-  boolean(definition["hardware_backed"], "$.benchmark_definition.hardware_backed");
-  if (definition["hardware_backed"] !== summary["hardware_backed"]) {
-    problems.push("$.benchmark_definition.hardware_backed must match $.summary.hardware_backed");
-  }
-  const parseSamples = (name: "baseline_samples" | "candidate_samples") => {
-    const samples = record(root[name], `$.${name}`);
-    const hardwareHash = digest(samples["hardware_fingerprint"], `$.${name}.hardware_fingerprint`);
-    const workloadHash = digest(
-      samples["workload_fingerprint"],
-      `$.${name}.workload_fingerprint`,
-    );
-    const values = array(samples["samples"], `$.${name}.samples`);
-    values.forEach((raw, index) => {
-      const sample = record(raw, `$.${name}.samples[${index}]`);
-      number(sample["seed"], `$.${name}.samples[${index}].seed`);
-      number(sample["value"], `$.${name}.samples[${index}].value`);
-      if (sample["trial"] !== index) problems.push(`$.${name}.samples[${index}].trial must be contiguous`);
-    });
-    return { count: values.length, hardwareHash, workloadHash };
-  };
-  const baseline = parseSamples("baseline_samples");
-  const candidate = parseSamples("candidate_samples");
-  if (baseline.count !== definition["repetitions"] || candidate.count !== definition["repetitions"]) {
-    problems.push("benchmark raw sample counts must match the declared repetitions");
-  }
-  if (baseline.hardwareHash !== candidate.hardwareHash) {
-    problems.push("baseline and candidate hardware fingerprints must match");
-  }
-  if (baseline.workloadHash !== candidate.workloadHash) {
-    problems.push("baseline and candidate workload fingerprints must match");
-  }
   const benchmarks = array(capsule["benchmarks"], "$.capsule.benchmarks");
-  if (benchmarks.length === 0) problems.push("$.capsule.benchmarks must not be empty");
-  benchmarks.forEach((raw, index) => {
+  if (benchmarks.length > 1) problems.push("$.capsule.benchmarks supports at most one entry");
+  if (benchmarks.length === 1) {
+    if (root["performance_simulation"] !== null) {
+      problems.push("$.performance_simulation must be null when benchmark evidence is accepted");
+    }
+    const definition = record(root["benchmark_definition"], "$.benchmark_definition");
+    for (const field of ["benchmark_id", "metric", "unit"]) {
+      string(definition[field], `$.benchmark_definition.${field}`);
+    }
+    for (const field of ["confidence", "repetitions", "warmup"]) {
+      number(definition[field], `$.benchmark_definition.${field}`);
+    }
+    boolean(definition["hardware_backed"], "$.benchmark_definition.hardware_backed");
+    if (definition["hardware_backed"] !== summary["hardware_backed"]) {
+      problems.push("$.benchmark_definition.hardware_backed must match $.summary.hardware_backed");
+    }
+    const parseSamples = (name: "baseline_samples" | "candidate_samples") => {
+      const samples = record(root[name], `$.${name}`);
+      const hardwareHash = digest(
+        samples["hardware_fingerprint"],
+        `$.${name}.hardware_fingerprint`,
+      );
+      const workloadHash = digest(
+        samples["workload_fingerprint"],
+        `$.${name}.workload_fingerprint`,
+      );
+      const executionOrdinals: number[] = [];
+      const values = array(samples["samples"], `$.${name}.samples`);
+      values.forEach((raw, index) => {
+        const sample = record(raw, `$.${name}.samples[${index}]`);
+        number(sample["seed"], `$.${name}.samples[${index}].seed`);
+        number(sample["value"], `$.${name}.samples[${index}].value`);
+        if (number(sample["execution_ordinal"], `$.${name}.samples[${index}].execution_ordinal`)) {
+          executionOrdinals.push(sample["execution_ordinal"]);
+        }
+        if (sample["trial"] !== index) {
+          problems.push(`$.${name}.samples[${index}].trial must be contiguous`);
+        }
+      });
+      return { count: values.length, executionOrdinals, hardwareHash, workloadHash };
+    };
+    const baseline = parseSamples("baseline_samples");
+    const candidate = parseSamples("candidate_samples");
+    if (
+      baseline.count !== definition["repetitions"] ||
+      candidate.count !== definition["repetitions"]
+    ) {
+      problems.push("benchmark raw sample counts must match the declared repetitions");
+    }
+    if (baseline.hardwareHash !== candidate.hardwareHash) {
+      problems.push("baseline and candidate hardware fingerprints must match");
+    }
+    if (baseline.workloadHash !== candidate.workloadHash) {
+      problems.push("baseline and candidate workload fingerprints must match");
+    }
+    const executionOrdinals = [...baseline.executionOrdinals, ...candidate.executionOrdinals];
+    if (
+      executionOrdinals.length !== baseline.count + candidate.count ||
+      new Set(executionOrdinals).size !== executionOrdinals.length ||
+      executionOrdinals.some((ordinal) =>
+        !Number.isInteger(ordinal) || ordinal < 0 || ordinal >= executionOrdinals.length
+      )
+    ) {
+      problems.push("benchmark execution ordinals must uniquely cover randomized run order");
+    }
+    const raw = benchmarks[0];
+    const index = 0;
     const benchmark = record(raw, `$.capsule.benchmarks[${index}]`);
     if (benchmark["benchmark_id"] !== definition["benchmark_id"]) {
       problems.push(`$.capsule.benchmarks[${index}].benchmark_id must match the definition`);
@@ -424,7 +477,112 @@ export function parseGenesisArtifactBundle(input: unknown): GenesisArtifactBundl
       !(summaryRecord["confidence_low"] <= summaryRecord["median"] &&
         summaryRecord["median"] <= summaryRecord["confidence_high"])
     ) problems.push(`$.capsule.benchmarks[${index}].summary confidence interval must contain the median`);
-  });
+  } else {
+    if (
+      root["benchmark_definition"] !== null ||
+      root["baseline_samples"] !== null ||
+      root["candidate_samples"] !== null
+    ) {
+      problems.push("unbenchmarked capsule must not expose benchmark definitions or samples");
+    }
+    if (summary["hardware_backed"] !== false) {
+      problems.push("unbenchmarked simulation evidence cannot be hardware-backed");
+    }
+    if (
+      performanceClaims.length !== 1 ||
+      performanceClaims[0]?.["promotion_required"] !== false
+    ) {
+      problems.push("unbenchmarked capsule requires one non-promotion performance claim");
+    }
+    const performanceEvidenceIds = performanceClaims[0]?.["evidence_ids"];
+    if (
+      !Array.isArray(performanceEvidenceIds) ||
+      !performanceEvidenceIds.some((id) =>
+        typeof id === "string" &&
+        evidenceClasses.get(id) === "performance" &&
+        evidenceResults.get(id) === "pass"
+      )
+    ) {
+      problems.push("unbenchmarked performance claim requires passing performance evidence");
+    }
+    const simulation = record(root["performance_simulation"], "$.performance_simulation");
+    if (simulation["schema_version"] !== "genesis.candidate-simulation.v1") {
+      problems.push("$.performance_simulation.schema_version is unsupported");
+    }
+    if (simulation["result"] !== "pass") {
+      problems.push("$.performance_simulation.result must be pass");
+    }
+    if (simulation["comparison_permitted"] !== false) {
+      problems.push("$.performance_simulation must prohibit performance comparison");
+    }
+    if (simulation["hardware_backed"] !== false) {
+      problems.push("$.performance_simulation must not claim hardware backing");
+    }
+    if (simulation["candidate_id"] !== summary["accepted_candidate_id"]) {
+      problems.push("$.performance_simulation.candidate_id must match the accepted candidate");
+    }
+    if (simulation["candidate_genome_hash"] !== summary["accepted_genome_hash"]) {
+      problems.push("$.performance_simulation.candidate_genome_hash must match the accepted genome");
+    }
+    if (simulation["seed"] !== summary["seed"]) {
+      problems.push("$.performance_simulation.seed must match the demo seed");
+    }
+    for (const field of [
+      "candidate_genome_hash",
+      "candidate_id",
+      "policy_bytecode_sha256",
+      "queue_policy",
+      "runtime_manifest_sha256",
+      "workload_path",
+      "workload_sha256",
+    ]) string(simulation[field], `$.performance_simulation.${field}`);
+    boolean(
+      simulation["deadline_order_exercised"],
+      "$.performance_simulation.deadline_order_exercised",
+    );
+    const parseSimulationRows = (field: "events" | "raw_requests") => {
+      const rows = array(simulation[field], `$.performance_simulation.${field}`);
+      rows.forEach((raw, index) => {
+        const item = record(raw, `$.performance_simulation.${field}[${index}]`);
+        if (item["ordinal"] !== index) {
+          problems.push(`$.performance_simulation.${field}[${index}].ordinal must be contiguous`);
+        }
+        for (const numericField of ["modeled_service_units", "policy_batch_limit"]) {
+          number(
+            item[numericField],
+            `$.performance_simulation.${field}[${index}].${numericField}`,
+          );
+        }
+        if (item["deadline_ms"] !== null) {
+          number(item["deadline_ms"], `$.performance_simulation.${field}[${index}].deadline_ms`);
+        }
+        if (field === "events") {
+          number(
+            item["completion_units"],
+            `$.performance_simulation.${field}[${index}].completion_units`,
+          );
+        }
+      });
+      return rows;
+    };
+    const events = parseSimulationRows("events");
+    const requests = parseSimulationRows("raw_requests");
+    if (events.length === 0 || events.length !== requests.length) {
+      problems.push("performance simulation events must cover every raw request");
+    }
+    events.forEach((raw, index) => {
+      const event = isRecord(raw) ? raw : {};
+      const request = requests[index];
+      if (
+        !isRecord(request) ||
+        event["deadline_ms"] !== request["deadline_ms"] ||
+        event["modeled_service_units"] !== request["modeled_service_units"] ||
+        event["policy_batch_limit"] !== request["policy_batch_limit"]
+      ) {
+        problems.push(`$.performance_simulation.events[${index}] differs from raw request`);
+      }
+    });
+  }
 
   const evolution = record(root["evolution"], "$.evolution");
   string(evolution["phase"], "$.evolution.phase");

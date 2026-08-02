@@ -56,18 +56,26 @@ def test_flagship_emits_ui_bundle_from_exact_persisted_artifacts(tmp_path: Path)
     assert isinstance(capsule, dict)
     benchmarks = capsule["benchmarks"]
     artifacts = capsule["artifacts"]
-    assert isinstance(benchmarks, list) and len(benchmarks) == 1
+    assert benchmarks == []
     assert isinstance(artifacts, list)
-    benchmark = benchmarks[0]
-    assert isinstance(benchmark, dict)
-    paths = {
-        item["artifact_id"]: root / "capsule" / item["path"]
-        for item in artifacts
-        if isinstance(item, dict)
-    }
-    assert bundle["benchmark_definition"] == _json(paths[str(benchmark["definition_artifact_id"])])
-    assert bundle["candidate_samples"] == _json(paths[str(benchmark["raw_samples_artifact_id"])])
-    assert bundle["baseline_samples"] == _json(paths[str(benchmark["baseline_artifact_id"])])
+    assert bundle["benchmark_definition"] is None
+    assert bundle["candidate_samples"] is None
+    assert bundle["baseline_samples"] is None
+    simulation = bundle["performance_simulation"]
+    assert isinstance(simulation, dict)
+    assert simulation["comparison_permitted"] is False
+    assert simulation["hardware_backed"] is False
+    assert simulation["candidate_id"] == result.accepted_candidate_id
+    performance_claims = [
+        item
+        for item in capsule["claims"]
+        if isinstance(item, dict) and item.get("category") == "performance"
+    ]
+    assert len(performance_claims) == 1
+    assert performance_claims[0]["promotion_required"] is False
+    assert "no performance improvement is accepted" in performance_claims[0]["statement"]
+    assert report["capsule_local_evolution_eligible"] is True
+    assert report["capsule_external_production_eligible"] is False
 
     with pytest.raises(GenesisUiBundleError, match="refusing to overwrite"):
         export_genesis_ui_bundle(root)
