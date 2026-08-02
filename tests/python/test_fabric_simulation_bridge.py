@@ -3,7 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from sloforge.autopsy import BottleneckKind, compare_runs, diagnose
+from sloforge.autopsy.capture import _counters as captured_counters
 from sloforge.autopsy.capture import capture_simulation_run
+from sloforge.autopsy.models import EventType
 from sloforge.fabric.ir import (
     FabricProfile,
     PhysicalExecutionPlan,
@@ -15,6 +17,7 @@ from sloforge.fabric.ir import (
 )
 from sloforge.fabric.simulation import (
     FabricSimulationRequest,
+    OperationOutcome,
     RankSlowdownFault,
     RemoveFault,
     ResourceRateFault,
@@ -56,6 +59,25 @@ def test_physical_plan_lowers_to_strict_rust_protocol() -> None:
     assert request.resources
     assert any(operation.kind.type == "collective" for operation in request.operations)
     assert FabricSimulationRequest.model_validate_json(request.model_dump_json()) == request
+
+
+def test_kv_transfer_retains_stage_and_emits_physical_network_counter() -> None:
+    outcome = OperationOutcome(
+        operation_id="request-0:kv-transfer",
+        status="completed",
+        start_us=0.0,
+        end_us=1_000.0,
+        duration_us=1_000.0,
+        base_duration_us=1_000.0,
+        wait_us=0.0,
+        transferred_bytes=1_000_000,
+        uncertainty_us=10.0,
+        rank_ids=("rank-0", "rank-1"),
+        resource_ids=("copy-engine:gpu-0", "nic-network:nic-0:rail-0"),
+    )
+    counters = captured_counters(outcome, EventType.KV_TRANSFER)
+    values = {counter.name: counter.value for counter in counters}
+    assert values["network_bandwidth_gbps"] == 8.0
 
 
 def test_rust_subprocess_runs_and_metrics_are_event_derived() -> None:
