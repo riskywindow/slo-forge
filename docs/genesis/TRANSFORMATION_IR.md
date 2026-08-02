@@ -24,7 +24,7 @@ The designation separates semantics-preserving, approximate-within-budget, polic
 
 The IR does not make proposal estimates authoritative. Search uses estimates only for ordering. A candidate records content identity, parent candidates, transformation IDs, a contiguous lifecycle, hard budget, and actual usage. Learned constraints bind an expression to candidate, family, hardware, dependency, or universal-precondition scope and cite the counterexamples that support it.
 
-The cancellation CEGIS fixture demonstrates the intended lifecycle: an unsafe batching policy is proposed, fails an independent request-schedule check, produces a minimized counterexample, teaches the family precondition `cancel_check_before_emit == true`, suppresses a repeated unsafe proposal, and accepts a corrected request/serving candidate within the bounded fixture scope.
+The cancellation CEGIS fixture demonstrates the intended lifecycle: an unsafe batching policy is proposed, fails an independent request-schedule check, produces a minimized counterexample, teaches the family precondition `cancel_check_before_emit == true`, suppresses a repeated unsafe proposal, and accepts a corrected request/serving plus bounded state-layout candidate within the bounded fixture scope.
 
 ## Specialized compilers
 
@@ -33,4 +33,3 @@ The tensor, state, policy, and distributed modules use smaller typed records opt
 ## Validation and current scope
 
 Python and Rust validate and canonically round-trip the v1 transformation fixture. Schema migration supports only the known alpha aliases. The current repository exercises canonical parsing/conformance and several specialized transformation compilers. It does not expose a universal interpreter that can apply an arbitrary `Transformation` document to any genome, and it does not claim global optimality or semantic correctness from the transformation declaration alone.
-

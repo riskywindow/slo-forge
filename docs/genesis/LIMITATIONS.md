@@ -13,9 +13,9 @@ Genesis reports scoped evidence and does not claim universal model support, univ
 
 - The policy DSL is scalar and loop-free. Bounded equivalence exhaustively enumerates Boolean/integer domains only; floating domains require another verifier.
 - The tensor rewriter implements a small explicit rule set and bounded breadth-first exploration, not general equality saturation or arbitrary tensor-program synthesis.
-- The state compiler checks typed regions and traces but does not perform real DMA, offload, compression, allocator integration, or live state conversion.
+- The accepted CPU runtime lowers a bounded contiguous/paged allocator with exact reservation accounting. The state compiler does not perform real DMA, offload, compression, or live state conversion.
 - Distributed synthesis mutates selected fields of an already valid Fabric plan. It does not synthesize arbitrary TP/PP/DP/EP degrees or new topology from scratch in that module.
-- The local end-to-end synthesis fixture currently joins request and serving policy changes. Other transformation surfaces are independently implemented/tested but are not all composed into the same arbitrary whole-genome search.
+- The local end-to-end synthesis fixture joins request, serving, and state changes through batching and state-layout transformations. Tensor and Fabric mutations are evaluated separately and are not lowered or admitted into the same arbitrary whole-genome runtime.
 
 ## Verification
 
@@ -36,4 +36,3 @@ Genesis reports scoped evidence and does not claim universal model support, univ
 ## Research claims
 
 The implemented cancellation-policy fixture is structurally different from the baseline within this repository and demonstrates real counterexample-guided correction. It is not claimed to be globally novel. Similarly, independent compiler surfaces demonstrate feasibility within declared domains; they do not establish that Genesis will improve every model, workload or machine.
-

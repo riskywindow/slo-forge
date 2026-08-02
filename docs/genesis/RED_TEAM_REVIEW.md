@@ -20,7 +20,7 @@ forge evidence provenance, replay gate observations, or promote a candidate
 whose evidence applies to another genome.
 
 The security boundary assumes the operator supplies the expected capsule digest
-and trusted evidence anchors through a channel outside the untrusted capsule.
+and trusted claim/evidence anchors through a channel outside the untrusted capsule.
 It also assumes that the external gate-evidence validator is part of the trusted
 computing base and validates evidence from an operator-controlled store.
 
