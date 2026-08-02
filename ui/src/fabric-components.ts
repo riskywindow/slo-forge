@@ -1,6 +1,7 @@
 import { escapeHtml } from "./charts";
 import {
   counterfactualRanking,
+  fabricProfileLabel,
   formatBytes,
   hostIds,
   hotExperts,
@@ -73,7 +74,7 @@ function physicalTopologySvg(bundle: FabricArtifactBundle): string {
   </svg>`;
 }
 
-function profileCurveSvg(measurements: FabricMeasurement[]): string {
+function profileCurveSvg(measurements: FabricMeasurement[], profileLabel: string): string {
   const width = 940;
   const height = 270;
   const margin = { bottom: 45, left: 72, right: 25, top: 25 };
@@ -91,8 +92,8 @@ function profileCurveSvg(measurements: FabricMeasurement[]): string {
     </g>`;
   }).join("");
   return `<svg class="chart fabric-profile-chart" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title profile-desc">
-    <title id="profile-title">Representative measured fabric operation durations</title>
-    <desc id="profile-desc">Measured median durations with bootstrap confidence intervals from raw benchmark samples.</desc>
+    <title id="profile-title">Representative ${escapeHtml(profileLabel)} fabric operation durations</title>
+    <desc id="profile-desc">${escapeHtml(profileLabel)} median durations with bootstrap confidence intervals from retained raw samples.</desc>
     ${rows}<text class="axis-label" x="${width - margin.right}" y="${height - 10}" text-anchor="end">duration · microseconds</text>
   </svg>`;
 }
@@ -125,9 +126,10 @@ function paretoSvg(bundle: FabricArtifactBundle): string {
 
 function hero(bundle: FabricArtifactBundle): string {
   const manifest = bundle.manifest;
+  const profileLabel = fabricProfileLabel(bundle);
   return `<section class="hero fabric-hero" aria-labelledby="page-title">
     <div><p class="eyebrow">Topology-aware execution evidence</p><h1 id="page-title">SLOForge Fabric</h1><p><strong>${escapeHtml(bundle.physical_plan.plan_id)}</strong> maps ${bundle.physical_plan.rank_placement.bindings.length} ranks onto ${hostIds(bundle).length} hosts and validates a causal recovery against deterministic simulator evidence.</p></div>
-    <div class="artifact-stamp"><span>${escapeHtml(manifest.schema_version)} · seed ${manifest.seed}</span><code>${escapeHtml(manifest.topology_fingerprint.slice(0, 24))}…</code></div>
+    <div class="artifact-stamp"><span>${escapeHtml(manifest.schema_version)} · seed ${manifest.seed} · ${escapeHtml(profileLabel)}</span><code>${escapeHtml(manifest.topology_fingerprint.slice(0, 24))}…</code></div>
   </section>
   <section class="summary-strip" aria-label="Fabric demonstration outcome">
     ${metricCard("Healthy p95 TTFT", `${manifest.healthy.p95_ttft_ms.toFixed(1)} ms`, `SLO ≤ ${manifest.p95_ttft_slo_ms.toFixed(1)} ms`)}
@@ -139,10 +141,12 @@ function hero(bundle: FabricArtifactBundle): string {
 
 function topologyPanel(bundle: FabricArtifactBundle): string {
   const inventory = topologyInventory(bundle);
+  const edges = bundle.topology.edges;
   return `<section id="fabric-topology" class="panel-section">
     ${sectionHeading("Physical compiler", "Topology graph and rank placement", "The graph is reconstructed from the versioned TopologyGraph and PhysicalExecutionPlan—not from display-time assumptions.")}
     <article class="card chart-card">${physicalTopologySvg(bundle)}<div class="fabric-legend"><span><i class="rank-key prefill"></i>prefill</span><span><i class="rank-key decode"></i>decode</span>${inventory.connections.map((entry) => `<span>${escapeHtml(entry.kind)} · ${entry.count}</span>`).join("")}</div></article>
     <div class="fabric-inventory">${inventory.nodes.map((entry) => metricCard(entry.kind.replaceAll("_", " "), entry.count.toString(), "discovered nodes")).join("")}</div>
+    <div class="card table-card"><div class="table-heading"><h3>Physical topology edges</h3><p>${edges.length} explicit GPU, PCIe, NVLink, NIC, NUMA, and rail relationships from TopologyGraph</p></div><div class="table-scroll"><table><thead><tr><th>Connection</th><th>Source</th><th>Target</th><th>Contention / sharing</th><th>Bandwidth</th><th>Health</th></tr></thead><tbody>${edges.map((edge) => `<tr><td>${escapeHtml(edge.connection)}</td><td><code>${escapeHtml(edge.source_node_id)}</code></td><td><code>${escapeHtml(edge.target_node_id)}</code></td><td>${escapeHtml(edge.contention_domain)} · ${escapeHtml(edge.sharing_group)}</td><td>${edge.theoretical_bandwidth_gbps === null ? "unknown" : `${edge.theoretical_bandwidth_gbps.toFixed(1)} Gbps`} · ${edge.bandwidth_curve_gbps.length} curve points</td><td>${escapeHtml(edge.health)}</td></tr>`).join("")}</tbody></table></div></div>
   </section>`;
 }
 
@@ -162,20 +166,21 @@ function placementPanel(bundle: FabricArtifactBundle): string {
 
 function communicationPanel(bundle: FabricArtifactBundle): string {
   const measurements = representativeFabricMeasurements(bundle);
+  const profileLabel = fabricProfileLabel(bundle);
   const routes = bundle.physical_plan.kv_transfer.routes;
   const linkEvidence = kvLinkEvidence(bundle);
   const collectives = bundle.physical_plan.collectives.operations;
   const overlaps = bundle.physical_plan.communication_overlap.windows;
   return `<section id="fabric-communication" class="panel-section">
     ${sectionHeading("Communication plan", "Collectives, KV flows, and overlap", "Selected operations and transfer paths are shown separately from calibrated measurements; absent compiler operations remain explicit.")}
-    <div class="card chart-card">${profileCurveSvg(measurements)}</div>
+    <div class="card chart-card">${profileCurveSvg(measurements, profileLabel)}</div>
     <div class="fabric-flow-grid">
-      <article class="card"><h3>Collective flows</h3>${collectives.length === 0 ? '<p class="empty">No explicit collective operation is selected for this EP=1 plan. Collective calibration remains in the profile.</p>' : collectives.map((operation) => `<div class="flow-record"><strong>${escapeHtml(operation.operation)}</strong><span>${escapeHtml(operation.algorithm)} · ${escapeHtml(operation.transport)} · ${operation.channel_count} channels</span><small>${operation.participating_ranks.map((rank) => `R${rank}`).join(" → ")} · ${operation.rail_ids.map((rail) => escapeHtml(rail)).join(" + ")} · ${operation.expected_duration_us.toFixed(2)} µs</small></div>`).join("")}</article>
+      <article class="card"><h3>Collective flows</h3>${collectives.length === 0 ? `<p class="empty">No explicit collective operation is selected for this EP=${bundle.physical_plan.parallelism.expert_parallel_degree} plan. Collective calibration remains in the profile.</p>` : collectives.map((operation) => `<div class="flow-record"><strong>${escapeHtml(operation.operation)}</strong><span>${escapeHtml(operation.algorithm)} · ${escapeHtml(operation.transport)} · ${operation.channel_count} channels</span><small>${operation.participating_ranks.map((rank) => `R${rank}`).join(" → ")} · ${operation.rail_ids.map((rail) => escapeHtml(rail)).join(" + ")} · ${operation.expected_duration_us.toFixed(2)} µs</small></div>`).join("")}</article>
       <article class="card"><h3>KV transfer flows</h3>${routes.map((route) => `<div class="flow-record"><strong>${escapeHtml(route.route_id)}</strong><span>${escapeHtml(route.transport_adapter)} · ${formatBytes(route.chunk_bytes)} chunks</span><small>${route.producer_rank_ids.length} producers → ${route.consumer_rank_ids.length} consumers · ${route.expected_latency_us.toFixed(2)} µs · ${route.overlap_with_decode ? "overlapped" : "serialized"}</small><code>${escapeHtml(route.edge_path.join(" → "))}</code></div>`).join("")}</article>
       <article class="card"><h3>Compute–communication overlap</h3>${overlaps.length === 0 ? `<p class="empty">No explicit overlap window was emitted; KV routes independently declare ${routes.filter((route) => route.overlap_with_decode).length} decode-overlap path(s).</p>` : overlaps.map((overlap) => `<div class="flow-record"><strong>${escapeHtml(overlap.window_id)}</strong><span>${escapeHtml(overlap.compute_operation_id)} + ${escapeHtml(overlap.communication_operation_id)}</span><small>${percent(overlap.expected_overlap_fraction)} expected overlap · fallback ${escapeHtml(overlap.fallback_serialization)}</small></div>`).join("")}</article>
     </div>
-    <div class="card table-card"><div class="table-heading"><h3>Measured versus predicted KV link curves</h3><p>The link model is reconstructed from each selected edge's size-dependent latency and bandwidth curves.</p></div><div class="table-scroll"><table><thead><tr><th>Route</th><th>Chunk</th><th>Link-curve prediction</th><th>Compiled route</th><th>Measured median</th><th>Measured interval</th><th>Provenance</th></tr></thead><tbody>${linkEvidence.map((evidence) => `<tr><td><code>${escapeHtml(evidence.routeId)}</code></td><td>${formatBytes(evidence.messageBytes)}</td><td>${evidence.predictedLinkLatencyUs.toFixed(3)} µs</td><td>${evidence.compiledLatencyUs.toFixed(3)} µs</td><td>${evidence.measuredLatencyUs === null ? "unavailable" : `${evidence.measuredLatencyUs.toFixed(3)} µs`}</td><td>${evidence.measuredConfidenceLowUs === null || evidence.measuredConfidenceHighUs === null ? "unavailable" : `${evidence.measuredConfidenceLowUs.toFixed(3)}–${evidence.measuredConfidenceHighUs.toFixed(3)} µs`}</td><td>${evidence.measurementId === null ? "no matching measurement" : `${escapeHtml(evidence.measurementId)} · ${evidence.rawSampleCount} raw samples`}</td></tr>`).join("")}</tbody></table></div></div>
-    <div class="card table-card"><div class="table-heading"><h3>Measured fabric profile</h3><p>Median, p95, and confidence are computed from raw samples.</p></div><div class="table-scroll"><table><thead><tr><th>Measurement</th><th>Shape</th><th>Median</th><th>p95</th><th>Confidence interval</th><th>Samples</th><th>Transport</th></tr></thead><tbody>${measurements.map((measurement) => `<tr><td><code>${escapeHtml(measurement.measurement_id)}</code></td><td>${formatBytes(measurement.message_bytes)} · r${measurement.rank_count} · c${measurement.concurrency}</td><td>${measurement.summary_median_us.toFixed(3)} µs</td><td>${measurement.summary_p95_us.toFixed(3)} µs</td><td>${measurement.confidence_low_us.toFixed(3)}–${measurement.confidence_high_us.toFixed(3)} µs</td><td>${measurement.samples.length} + ${measurement.warmup_count} warmup</td><td>${escapeHtml(measurement.transport)}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="card table-card"><div class="table-heading"><h3>Profiled versus predicted KV link curves</h3><p>The link model is reconstructed from each selected edge's size-dependent latency and bandwidth curves. Profile mode: ${escapeHtml(profileLabel)}.</p></div><div class="table-scroll"><table><thead><tr><th>Route</th><th>Chunk</th><th>Link-curve prediction</th><th>Compiled route</th><th>Profile median</th><th>Profile interval</th><th>Provenance</th></tr></thead><tbody>${linkEvidence.map((evidence) => `<tr><td><code>${escapeHtml(evidence.routeId)}</code></td><td>${formatBytes(evidence.messageBytes)}</td><td>${evidence.predictedLinkLatencyUs.toFixed(3)} µs</td><td>${evidence.compiledLatencyUs.toFixed(3)} µs</td><td>${evidence.measuredLatencyUs === null ? "unavailable" : `${evidence.measuredLatencyUs.toFixed(3)} µs`}</td><td>${evidence.measuredConfidenceLowUs === null || evidence.measuredConfidenceHighUs === null ? "unavailable" : `${evidence.measuredConfidenceLowUs.toFixed(3)}–${evidence.measuredConfidenceHighUs.toFixed(3)} µs`}</td><td>${evidence.measurementId === null ? "no matching profile sample" : `${escapeHtml(evidence.measurementId)} · ${evidence.rawSampleCount} raw samples`}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="card table-card"><div class="table-heading"><h3>Representative ${escapeHtml(profileLabel)} fabric profile</h3><p>${measurements.length} of ${bundle.fabric_profile.measurements.length} shape-nearest measurements are displayed; median, p95, and confidence are computed from retained raw samples.</p></div><div class="table-scroll"><table><thead><tr><th>Measurement</th><th>Shape</th><th>Median</th><th>p95</th><th>Confidence interval</th><th>Samples</th><th>Transport</th></tr></thead><tbody>${measurements.map((measurement) => `<tr><td><code>${escapeHtml(measurement.measurement_id)}</code></td><td>${formatBytes(measurement.message_bytes)} · r${measurement.rank_count} · c${measurement.concurrency}</td><td>${measurement.summary_median_us.toFixed(3)} µs</td><td>${measurement.summary_p95_us.toFixed(3)} µs</td><td>${measurement.confidence_low_us.toFixed(3)}–${measurement.confidence_high_us.toFixed(3)} µs</td><td>${measurement.samples.length} + ${measurement.warmup_count} warmup</td><td>${escapeHtml(measurement.transport)}</td></tr>`).join("")}</tbody></table></div></div>
   </section>`;
 }
 
@@ -198,7 +203,7 @@ function autopsyPanel(bundle: FabricArtifactBundle): string {
     ${sectionHeading("Causal debugger", "Fault, diagnosis, and counterfactual repair", "Autopsy aligns the first divergence with physical evidence, records contradictions, and tests repair hypotheses through simulator replay.")}
     <div class="autopsy-summary card"><div><p class="eyebrow">Current bottleneck</p><h3>${escapeHtml(bundle.manifest.diagnosis.replaceAll("_", " "))}</h3><p>Confidence ${percent(bundle.manifest.diagnosis_confidence)} · first divergence ${diagnosis.first_divergence_ns === null ? "unknown" : `${(diagnosis.first_divergence_ns / 1000).toFixed(3)} µs`}</p></div><div><p class="eyebrow">Injected ground truth</p>${bundle.manifest.ground_truth_faults.map((fault) => `<span class="status-pill danger">${escapeHtml(fault.replaceAll("_", " "))}</span>`).join(" ")}</div></div>
     <div class="causal-grid">
-      <article class="card"><h3>Hypothesis evidence</h3>${hypotheses.slice(0, 8).map((hypothesis, index) => `<div class="hypothesis ${hypothesis.rejected_reason === null ? "supported" : "rejected"}"><span class="causal-index">${index + 1}</span><div><strong>${escapeHtml(hypothesis.kind.replaceAll("_", " "))}</strong><small>${percent(hypothesis.confidence)} · ${hypothesis.supporting_evidence.length} support · ${hypothesis.contradicting_evidence.length} contradiction</small><p>${escapeHtml(hypothesis.supporting_evidence[0]?.explanation ?? hypothesis.rejected_reason ?? "Evidence retained in diagnosis artifact")}</p></div></div>`).join("")}</article>
+      <article class="card"><h3>Hypothesis evidence</h3>${hypotheses.slice(0, 8).map((hypothesis, index) => `<div class="hypothesis ${hypothesis.rejected_reason === null ? "supported" : "rejected"}"><span class="causal-index">${index + 1}</span><div><strong>${escapeHtml(hypothesis.kind.replaceAll("_", " "))}</strong><small>${percent(hypothesis.confidence)} · target ${escapeHtml(hypothesis.target)} · ${hypothesis.supporting_evidence.length} support · ${hypothesis.contradicting_evidence.length} contradiction</small><p>${escapeHtml(hypothesis.supporting_evidence[0]?.explanation ?? hypothesis.rejected_reason ?? "Evidence retained in diagnosis artifact")}</p></div></div>`).join("")}</article>
       <article class="card"><h3>Counterfactual repairs</h3>${counterfactuals.map((evaluation) => `<div class="counterfactual ${evaluation.scenario.scenario_id === selected ? "selected" : ""}"><div><strong>${escapeHtml(evaluation.scenario.scenario_id)}</strong>${evaluation.scenario.scenario_id === selected ? '<span class="status-pill selected">selected</span>' : ""}</div><p>${escapeHtml(evaluation.scenario.rationale)}</p><span class="improvement-bar"><i style="width:${Math.min(evaluation.expected_improvement_ms / Math.max(...counterfactuals.map((item) => item.expected_improvement_ms), 1) * 100, 100).toFixed(1)}%"></i></span><small>${evaluation.expected_improvement_ms.toFixed(1)} ms expected · ${evaluation.lower_improvement_ms.toFixed(1)}–${evaluation.upper_improvement_ms.toFixed(1)} ms · ${escapeHtml(evaluation.status)}</small></div>`).join("")}</article>
     </div>
   </section>`;
@@ -208,14 +213,15 @@ function recoveryPanel(bundle: FabricArtifactBundle): string {
   const recovery = bundle.recovery_plan;
   const audit = bundle.recovery_execution.audit.filter((record) => record.event === "transition" || record.event === "wait");
   return `<section id="fabric-recovery" class="panel-section">
-    ${sectionHeading("Self-healing runtime", "Shadow, canary, promotion, and rollback guards", "The recovery audit is an idempotent state-machine record. Started streams are preserved and external mutation remains disabled in this synthetic run.")}
+    ${sectionHeading("Self-healing runtime", "Shadow, canary, promotion, and rollback guards", `The recovery audit is an idempotent state-machine record. Started streams are ${recovery.traffic_migration.preserve_started_streams ? "preserved" : "not preserved"} and external mutation is ${recovery.external_mutation_authorized ? "authorized" : "disabled"}.`)}
     <div class="summary-strip">
       ${metricCard("Final state", bundle.recovery_execution.state, `${recovery.actions.length} guarded actions`)}
       ${metricCard("Shadow", percent(recovery.traffic_migration.shadow_fraction), `${recovery.traffic_migration.minimum_shadow_samples} minimum samples`)}
       ${metricCard("Canary", percent(recovery.traffic_migration.canary_fraction), `${recovery.traffic_migration.minimum_canary_samples} minimum samples`)}
-      ${metricCard("Rollback", "armed", `${bundle.recovery_execution.action_attempts.filter((attempt) => !attempt.succeeded).length} failed action attempts`)}
+      ${metricCard("Rollback guards", `${recovery.rollback_criteria.length} armed`, `${bundle.recovery_execution.action_attempts.filter((attempt) => !attempt.succeeded).length} failed action attempts`)}
     </div>
     <article class="card recovery-state-machine" aria-label="Recovery state machine audit">${audit.map((record, index) => `<div class="recovery-state ${record.state_after === "COMPLETED" ? "complete" : ""}"><span>${record.at_ms.toFixed(0)} ms</span><strong>${escapeHtml(record.state_after)}</strong><small>${escapeHtml(record.reason)}</small>${index < audit.length - 1 ? '<i aria-hidden="true"></i>' : ""}</div>`).join("")}</article>
+    <article class="card"><h3>Abort and rollback criteria</h3><div class="flow-record">${[...recovery.abort_criteria.map((criterion) => ({ ...criterion, kind: "abort" })), ...recovery.rollback_criteria.map((criterion) => ({ ...criterion, kind: "rollback" }))].map((criterion) => `<span><strong>${escapeHtml(criterion.kind)}</strong> · ${escapeHtml(criterion.metric)} ${escapeHtml(criterion.comparator)} ${criterion.threshold} over ${criterion.window_seconds.toFixed(0)} s</span>`).join("")}</div></article>
     <div class="card table-card"><div class="table-heading"><h3>Recovery actions and safety</h3><p>External mutation authorized: ${recovery.external_mutation_authorized ? "yes" : "no"} · started streams preserved: ${recovery.traffic_migration.preserve_started_streams ? "yes" : "no"}</p></div><div class="table-scroll"><table><thead><tr><th>Order</th><th>Action</th><th>Scope</th><th>Targets</th><th>Timeout</th><th>Attempt</th></tr></thead><tbody>${recovery.actions.map((action) => { const attempt = bundle.recovery_execution.action_attempts.find((item) => item.action_id === action.action_id); return `<tr><td>${action.order}</td><td>${escapeHtml(action.kind)}</td><td>${escapeHtml(action.scope)}</td><td>${action.target_ids.map((target) => escapeHtml(target)).join(" · ")}</td><td>${action.timeout_seconds.toFixed(0)} s</td><td><span class="status-pill ${attempt?.succeeded === true ? "healthy" : "danger"}">${attempt?.succeeded === true ? "passed" : "not passed"}</span></td></tr>`; }).join("")}</tbody></table></div></div>
   </section>`;
 }

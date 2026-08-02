@@ -190,10 +190,22 @@ export function requestMetricComparisons(bundle: FabricArtifactBundle): RequestM
 }
 
 export function paretoCandidates(bundle: FabricArtifactBundle): (PhysicalCandidate & { selected: boolean })[] {
+  const selectedId = bundle.physical_plan.optimizer_history.find(
+    (event) => event.decision === "select",
+  )?.candidate_id;
   return bundle.optimizer.pareto_frontier.map((candidate) => ({
     ...candidate,
-    selected: candidate.candidate_id === bundle.physical_plan.plan_id.replace("physical-plan-", "physical-"),
+    selected: candidate.candidate_id === selectedId,
   }));
+}
+
+export function fabricProfileLabel(bundle: FabricArtifactBundle): string {
+  const modes = bundle.fabric_profile.extensions["sloforge.io/measurement-modes"];
+  if (modes.length === 1 && modes[0] === "synthetic_calibrated") {
+    return "synthetic calibrated";
+  }
+  if (modes.length === 1 && modes[0] === "measured") return "hardware measured";
+  return modes.join(" + ").replaceAll("_", " ");
 }
 
 export function counterfactualRanking(bundle: FabricArtifactBundle): CounterfactualEvaluation[] {
