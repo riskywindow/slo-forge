@@ -5,8 +5,11 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import math
 import os
+import stat
 import tempfile
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -29,8 +32,24 @@ def _canonical_payload(snapshot: EvolutionSnapshot) -> bytes:
 class EvolutionStore:
     """Single-file atomic state store with a content digest and bounded reads."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(
+        self,
+        path: Path,
+        *,
+        lock_timeout_seconds: float = 5.0,
+        lock_poll_seconds: float = 0.01,
+    ) -> None:
+        if (
+            not math.isfinite(lock_timeout_seconds)
+            or lock_timeout_seconds <= 0
+            or not math.isfinite(lock_poll_seconds)
+            or lock_poll_seconds <= 0
+            or lock_poll_seconds > lock_timeout_seconds
+        ):
+            raise ValueError("evolution-store lock bounds must be finite, positive, and ordered")
         self.path = path
+        self.lock_timeout_seconds = lock_timeout_seconds
+        self.lock_poll_seconds = lock_poll_seconds
 
     @property
     def _lock_path(self) -> Path:
@@ -41,16 +60,30 @@ class EvolutionStore:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.parent.is_symlink() or not self.path.parent.is_dir():
             raise EvolutionPersistenceError("evolution state parent must be a real directory")
-        flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0)
+        flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
         try:
             descriptor = os.open(self._lock_path, flags, 0o600)
         except OSError as error:
             raise EvolutionPersistenceError("evolution state lock is unavailable") from error
+        locked = False
         try:
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            deadline = time.monotonic() + self.lock_timeout_seconds
+            while True:
+                try:
+                    fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    locked = True
+                    break
+                except BlockingIOError as error:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise EvolutionPersistenceError(
+                            "evolution state lock acquisition timed out"
+                        ) from error
+                    time.sleep(min(self.lock_poll_seconds, remaining))
             yield
         finally:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
+            if locked:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
             os.close(descriptor)
 
     @property
@@ -119,21 +152,34 @@ class EvolutionStore:
     def _load_unlocked(self) -> EvolutionSnapshot:
         if self.path.is_symlink():
             raise EvolutionPersistenceError("evolution state path must not be a symlink")
+        flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
         try:
-            metadata = self.path.stat()
+            descriptor = os.open(self.path, flags)
         except FileNotFoundError as error:
             raise EvolutionPersistenceError("evolution state does not exist") from error
-        if not self.path.is_file():
-            raise EvolutionPersistenceError("evolution state must be a regular file")
-        size = metadata.st_size
-        if size > MAX_STATE_BYTES:
-            raise EvolutionPersistenceError("persisted evolution state exceeds the read bound")
+        except OSError as error:
+            raise EvolutionPersistenceError("evolution state cannot be opened safely") from error
         try:
-            envelope = PersistedEvolutionState.model_validate_json(
-                self.path.read_bytes(), strict=True
-            )
+            metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(metadata.st_mode):
+                raise EvolutionPersistenceError("evolution state must be a regular file")
+            if metadata.st_size > MAX_STATE_BYTES:
+                raise EvolutionPersistenceError("persisted evolution state exceeds the read bound")
+            with os.fdopen(descriptor, "rb", closefd=True) as handle:
+                descriptor = -1
+                encoded = handle.read(MAX_STATE_BYTES + 1)
+            if len(encoded) > MAX_STATE_BYTES:
+                raise EvolutionPersistenceError(
+                    "persisted evolution state exceeded the read bound while reading"
+                )
+            envelope = PersistedEvolutionState.model_validate_json(encoded, strict=True)
+        except EvolutionPersistenceError:
+            raise
         except (OSError, ValueError) as error:
             raise EvolutionPersistenceError("persisted evolution state is invalid") from error
+        finally:
+            if descriptor >= 0:
+                os.close(descriptor)
         actual = hashlib.sha256(_canonical_payload(envelope.payload)).hexdigest()
         if actual != envelope.payload_sha256:
             raise EvolutionPersistenceError("persisted evolution state digest mismatch")

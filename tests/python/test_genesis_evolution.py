@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
+import os
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -647,6 +649,63 @@ def test_controller_crash_recovery_and_event_idempotency(tmp_path: Path) -> None
     )
     assert advanced.phase is EvolutionPhase.SHADOW_VALIDATED
     assert EvolutionStore(store.path).load() == advanced
+
+
+def test_restore_rejects_relaxed_safety_configuration(tmp_path: Path) -> None:
+    controller, _, validator, store = _controller(tmp_path)
+    relaxed = controller.config.model_copy(update={"minimum_canary_samples": 1})
+
+    with pytest.raises(EvolutionError, match="safety configuration"):
+        EvolutionController.restore(
+            store=store,
+            capsule_validator=validator,
+            config=relaxed,
+        )
+
+
+def test_legacy_snapshot_parses_but_restart_fails_closed_without_config_binding(
+    tmp_path: Path,
+) -> None:
+    controller, _, validator, store = _controller(tmp_path)
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    del envelope["payload"]["controller_safety_config_sha256"]
+    legacy_snapshot = controller.snapshot.model_copy(
+        update={"controller_safety_config_sha256": None}
+    )
+    encoded_payload = json.dumps(
+        legacy_snapshot.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode()
+    envelope["payload_sha256"] = hashlib.sha256(encoded_payload).hexdigest()
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+
+    assert store.load().controller_safety_config_sha256 is None
+    with pytest.raises(EvolutionError, match="safety configuration is unbound"):
+        EvolutionController.restore(
+            store=store,
+            capsule_validator=validator,
+            config=controller.config,
+        )
+
+
+def test_evolution_store_lock_acquisition_has_a_deadline(tmp_path: Path) -> None:
+    _controller_instance, _, _, store = _controller(tmp_path)
+    lock_path = store.path.with_name(f".{store.path.name}.lock")
+    descriptor = os.open(lock_path, os.O_RDWR)
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        contended = EvolutionStore(
+            store.path,
+            lock_timeout_seconds=0.02,
+            lock_poll_seconds=0.005,
+        )
+        with pytest.raises(EvolutionPersistenceError, match="lock acquisition timed out"):
+            contended.load()
+    finally:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        os.close(descriptor)
 
 
 def test_restore_fails_closed_when_champion_cannot_be_revalidated(tmp_path: Path) -> None:

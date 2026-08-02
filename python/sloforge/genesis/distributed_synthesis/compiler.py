@@ -39,9 +39,7 @@ def _canonical_payload_hash(payload: object) -> str:
 
 def _reject_pending_candidate(source: PhysicalExecutionPlan) -> None:
     extension = source.extensions.root.get("sloforge.dev/genesis-candidate")
-    if isinstance(extension, dict) and extension.get("evidence_state") == (
-        "invalidated-pending-revalidation"
-    ):
+    if extension is not None:
         raise DistributedSynthesisError(
             "distributed candidate requires Fabric revalidation before another mutation"
         )
@@ -60,7 +58,12 @@ def _mutate_collective(payload: dict[str, Any], mutation: CollectiveMutation) ->
     operations = cast(list[dict[str, Any]], payload["collectives"]["operations"])
     target = operations[_single_index(operations, "operation_id", mutation.operation_id)]
     participating = target["participating_ranks"]
-    if set(mutation.rank_order) != set(participating):
+    if (
+        len(participating) != len(set(participating))
+        or len(mutation.rank_order) != len(participating)
+        or len(mutation.rank_order) != len(set(mutation.rank_order))
+        or set(mutation.rank_order) != set(participating)
+    ):
         raise DistributedSynthesisError("collective rank_order must permute participating ranks")
     target.update(
         algorithm=mutation.algorithm,
@@ -134,9 +137,10 @@ def compile_distributed_mutation(
 ) -> DistributedSynthesisResult:
     """Apply one mutation, then reparse through canonical Fabric validation."""
 
-    if seed < 0:
-        raise DistributedSynthesisError("seed must be non-negative")
+    if type(seed) is not int or seed < 0:
+        raise DistributedSynthesisError("seed must be a non-negative integer")
     _reject_pending_candidate(source)
+    source_plan_hash = canonical_hash(source)
     payload = source.model_dump(mode="json")
     if isinstance(mutation, CollectiveMutation):
         _mutate_collective(payload, mutation)
@@ -155,6 +159,7 @@ def compile_distributed_mutation(
         json.dumps(
             {
                 "source_plan_id": source.plan_id,
+                "source_plan_hash": source_plan_hash,
                 "mutation": mutation.model_dump(mode="json"),
                 "seed": seed,
             },
@@ -214,6 +219,7 @@ def compile_distributed_mutation(
         "source_predicted_metrics_hash": source_metrics_hash,
         "seed": seed,
         "source_plan_id": source.plan_id,
+        "source_plan_hash": source_plan_hash,
         "transformation_id": mutation.transformation_id,
     }
     candidate = PhysicalExecutionPlan.model_validate_json(
@@ -221,6 +227,8 @@ def compile_distributed_mutation(
     )
     return DistributedSynthesisResult(
         source_plan_id=source.plan_id,
+        source_plan_hash=source_plan_hash,
+        seed=seed,
         candidate_plan=candidate,
         transformation_id=mutation.transformation_id,
         affected_surface=mutation.kind,
