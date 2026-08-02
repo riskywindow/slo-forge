@@ -1,0 +1,791 @@
+{
+  "schema_version": "sloforge.fabric.rank-ordering-input/v1",
+  "topology": {
+    "schema_version": "1.0.0",
+    "api_version": "sloforge.io/fabric/v1",
+    "kind": "TopologyGraph",
+    "topology_id": "asymmetric-4",
+    "discovered_at": "2026-08-01T12:00:00Z",
+    "nodes": [
+      {
+        "kind": "gpu",
+        "node_id": "gpu-0",
+        "host_id": "host-0",
+        "gpu_index": 0,
+        "uuid": "GPU-0",
+        "product": "Synthetic H100",
+        "architecture": "Hopper",
+        "memory_bytes": 85899345920,
+        "compute_capability": "9.0",
+        "mig_state": "disabled",
+        "numa_domain_id": "numa-0",
+        "pci_address": "0000:01:00.0",
+        "health": "healthy",
+        "provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "kind": "gpu",
+        "node_id": "gpu-1",
+        "host_id": "host-0",
+        "gpu_index": 1,
+        "uuid": "GPU-1",
+        "product": "Synthetic H100",
+        "architecture": "Hopper",
+        "memory_bytes": 85899345920,
+        "compute_capability": "9.0",
+        "mig_state": "disabled",
+        "numa_domain_id": "numa-0",
+        "pci_address": "0000:02:00.0",
+        "health": "healthy",
+        "provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "kind": "gpu",
+        "node_id": "gpu-2",
+        "host_id": "host-1",
+        "gpu_index": 2,
+        "uuid": "GPU-2",
+        "product": "Synthetic H100",
+        "architecture": "Hopper",
+        "memory_bytes": 85899345920,
+        "compute_capability": "9.0",
+        "mig_state": "disabled",
+        "numa_domain_id": "numa-1",
+        "pci_address": "0000:03:00.0",
+        "health": "healthy",
+        "provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "kind": "gpu",
+        "node_id": "gpu-3",
+        "host_id": "host-1",
+        "gpu_index": 3,
+        "uuid": "GPU-3",
+        "product": "Synthetic H100",
+        "architecture": "Hopper",
+        "memory_bytes": 85899345920,
+        "compute_capability": "9.0",
+        "mig_state": "disabled",
+        "numa_domain_id": "numa-1",
+        "pci_address": "0000:04:00.0",
+        "health": "healthy",
+        "provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "link-0-1",
+        "source_node_id": "gpu-0",
+        "target_node_id": "gpu-1",
+        "connection": "nvlink",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 100.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 100.0,
+            "p95": 105.0,
+            "robust_dispersion": 1.0,
+            "confidence_low": 98.0,
+            "confidence_high": 102.0,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 1.0,
+            "p95": 1.05,
+            "robust_dispersion": 0.01,
+            "confidence_low": 0.98,
+            "confidence_high": 1.02,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-0-1",
+        "contention_domain": "fabric-0-1",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "edge_id": "link-0-2",
+        "source_node_id": "gpu-0",
+        "target_node_id": "gpu-2",
+        "connection": "nvlink",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 100.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 100.0,
+            "p95": 105.0,
+            "robust_dispersion": 1.0,
+            "confidence_low": 98.0,
+            "confidence_high": 102.0,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 1.0,
+            "p95": 1.05,
+            "robust_dispersion": 0.01,
+            "confidence_low": 0.98,
+            "confidence_high": 1.02,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-0-2",
+        "contention_domain": "fabric-0-2",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "edge_id": "link-0-3",
+        "source_node_id": "gpu-0",
+        "target_node_id": "gpu-3",
+        "connection": "pcie",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 20.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 20.0,
+            "p95": 21.0,
+            "robust_dispersion": 0.2,
+            "confidence_low": 19.6,
+            "confidence_high": 20.4,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 5.0,
+            "p95": 5.25,
+            "robust_dispersion": 0.05,
+            "confidence_low": 4.9,
+            "confidence_high": 5.1,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-0-3",
+        "contention_domain": "fabric-0-3",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "edge_id": "link-1-2",
+        "source_node_id": "gpu-1",
+        "target_node_id": "gpu-2",
+        "connection": "pcie",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 20.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 20.0,
+            "p95": 21.0,
+            "robust_dispersion": 0.2,
+            "confidence_low": 19.6,
+            "confidence_high": 20.4,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 5.0,
+            "p95": 5.25,
+            "robust_dispersion": 0.05,
+            "confidence_low": 4.9,
+            "confidence_high": 5.1,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-1-2",
+        "contention_domain": "fabric-1-2",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "edge_id": "link-1-3",
+        "source_node_id": "gpu-1",
+        "target_node_id": "gpu-3",
+        "connection": "nvlink",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 100.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 100.0,
+            "p95": 105.0,
+            "robust_dispersion": 1.0,
+            "confidence_low": 98.0,
+            "confidence_high": 102.0,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 1.0,
+            "p95": 1.05,
+            "robust_dispersion": 0.01,
+            "confidence_low": 0.98,
+            "confidence_high": 1.02,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-1-3",
+        "contention_domain": "fabric-1-3",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      },
+      {
+        "edge_id": "link-2-3",
+        "source_node_id": "gpu-2",
+        "target_node_id": "gpu-3",
+        "connection": "nvlink",
+        "directionality": "bidirectional",
+        "duplex": "full",
+        "theoretical_bandwidth_gbps": 100.0,
+        "bandwidth_curve_gbps": [
+          {
+            "message_bytes": 262144,
+            "median": 100.0,
+            "p95": 105.0,
+            "robust_dispersion": 1.0,
+            "confidence_low": 98.0,
+            "confidence_high": 102.0,
+            "sample_count": 40
+          }
+        ],
+        "latency_curve_us": [
+          {
+            "message_bytes": 262144,
+            "median": 1.0,
+            "p95": 1.05,
+            "robust_dispersion": 0.01,
+            "confidence_low": 0.98,
+            "confidence_high": 1.02,
+            "sample_count": 40
+          }
+        ],
+        "sharing_group": "fabric-2-3",
+        "contention_domain": "fabric-2-3",
+        "health": "healthy",
+        "measurement_confidence": 0.98,
+        "measured_at": "2026-08-01T12:00:00Z",
+        "measurement_environment_digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "discovery_provenance": [
+          {
+            "source": "synthetic",
+            "observed_at": "2026-08-01T12:00:00Z",
+            "confidence": 1.0,
+            "source_uri": "benchmarks/fabric/rank_ordering/synthetic-calibration.json",
+            "field": "topology"
+          }
+        ]
+      }
+    ],
+    "software": [],
+    "container_limited": false,
+    "discovery_warnings": [],
+    "extensions": {}
+  },
+  "physical_plan": {
+    "schema_version": "1.0.0",
+    "api_version": "sloforge.io/fabric/v1",
+    "kind": "PhysicalExecutionPlan",
+    "plan_id": "rank-ordering-fixture",
+    "logical_deployment_plan": {
+      "kind": "DeploymentPlan",
+      "api_version": "sloforge.io/v1",
+      "uri": "artifacts/plans/logical.json",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "uid": "logical-fixture",
+      "generation": 1
+    },
+    "model_graph_hash": {
+      "algorithm": "sha256",
+      "value": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "topology_fingerprint": {
+      "algorithm": "sha256",
+      "value": "81bf8bf54e4d3b93fceca97d2265b8a5f2f038ef6543e09e5379f43a0f6b04e5"
+    },
+    "fabric_profile_hash": {
+      "algorithm": "sha256",
+      "value": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "parallelism": {
+      "tensor_parallel_degree": 4,
+      "pipeline_parallel_degree": 1,
+      "data_parallel_degree": 1,
+      "expert_parallel_degree": 1,
+      "context_parallel_degree": 1,
+      "prefill_decode_disaggregated": false,
+      "groups": [
+        {
+          "group_id": "tp-0",
+          "kind": "tensor",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "replica_groups": [
+        {
+          "group_id": "replica-0",
+          "kind": "data",
+          "rank_ids": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    "rank_placement": {
+      "bindings": [
+        {
+          "rank_id": 0,
+          "host_id": "host-0",
+          "gpu_id": "gpu-0",
+          "numa_domain_id": "numa-0",
+          "nic_id": "nic-0",
+          "network_rail_id": "rail-0",
+          "process_cpu_affinity": "0-1",
+          "worker_role": "aggregated",
+          "replica_id": "replica-0",
+          "fault_domain": "rack-a"
+        },
+        {
+          "rank_id": 1,
+          "host_id": "host-0",
+          "gpu_id": "gpu-1",
+          "numa_domain_id": "numa-0",
+          "nic_id": "nic-0",
+          "network_rail_id": "rail-0",
+          "process_cpu_affinity": "2-3",
+          "worker_role": "aggregated",
+          "replica_id": "replica-0",
+          "fault_domain": "rack-a"
+        },
+        {
+          "rank_id": 2,
+          "host_id": "host-0",
+          "gpu_id": "gpu-2",
+          "numa_domain_id": "numa-0",
+          "nic_id": "nic-0",
+          "network_rail_id": "rail-0",
+          "process_cpu_affinity": "4-5",
+          "worker_role": "aggregated",
+          "replica_id": "replica-0",
+          "fault_domain": "rack-a"
+        },
+        {
+          "rank_id": 3,
+          "host_id": "host-0",
+          "gpu_id": "gpu-3",
+          "numa_domain_id": "numa-0",
+          "nic_id": "nic-0",
+          "network_rail_id": "rail-0",
+          "process_cpu_affinity": "6-7",
+          "worker_role": "aggregated",
+          "replica_id": "replica-0",
+          "fault_domain": "rack-a"
+        }
+      ]
+    },
+    "expert_placement": null,
+    "collectives": {
+      "operations": [
+        {
+          "operation_id": "tp-all-reduce",
+          "operation": "all_reduce",
+          "participating_ranks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "message_size_intercept_bytes": 0,
+          "message_size_bytes_per_token": 2048.0,
+          "algorithm": "ring",
+          "transport": "nvlink",
+          "channel_count": 4,
+          "rail_ids": [],
+          "rank_order": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "expected_duration_us": 100.0,
+          "uncertainty_us": 5.0,
+          "overlap_window_id": null,
+          "depends_on": [],
+          "fallback": "host_staged"
+        }
+      ]
+    },
+    "kv_transfer": null,
+    "memory": {
+      "allocations": [
+        {
+          "rank_id": 0,
+          "capacity_bytes": 85899345920,
+          "weights_bytes": 82313216,
+          "kv_cache_bytes": 8589934592,
+          "activations_bytes": 1073741824,
+          "cuda_graph_bytes": 268435456,
+          "runtime_workspace_bytes": 1073741824,
+          "communication_buffers_bytes": 536870912,
+          "host_pinned_buffers_bytes": 1073741824,
+          "local_nvme_bytes": 10737418240,
+          "remote_artifacts_bytes": 0,
+          "fragmentation_allowance_bytes": 2147483648,
+          "safety_margin_bytes": 4294967296
+        },
+        {
+          "rank_id": 1,
+          "capacity_bytes": 85899345920,
+          "weights_bytes": 82313216,
+          "kv_cache_bytes": 8589934592,
+          "activations_bytes": 1073741824,
+          "cuda_graph_bytes": 268435456,
+          "runtime_workspace_bytes": 1073741824,
+          "communication_buffers_bytes": 536870912,
+          "host_pinned_buffers_bytes": 1073741824,
+          "local_nvme_bytes": 10737418240,
+          "remote_artifacts_bytes": 0,
+          "fragmentation_allowance_bytes": 2147483648,
+          "safety_margin_bytes": 4294967296
+        },
+        {
+          "rank_id": 2,
+          "capacity_bytes": 85899345920,
+          "weights_bytes": 82313216,
+          "kv_cache_bytes": 8589934592,
+          "activations_bytes": 1073741824,
+          "cuda_graph_bytes": 268435456,
+          "runtime_workspace_bytes": 1073741824,
+          "communication_buffers_bytes": 536870912,
+          "host_pinned_buffers_bytes": 1073741824,
+          "local_nvme_bytes": 10737418240,
+          "remote_artifacts_bytes": 0,
+          "fragmentation_allowance_bytes": 2147483648,
+          "safety_margin_bytes": 4294967296
+        },
+        {
+          "rank_id": 3,
+          "capacity_bytes": 85899345920,
+          "weights_bytes": 82313216,
+          "kv_cache_bytes": 8589934592,
+          "activations_bytes": 1073741824,
+          "cuda_graph_bytes": 268435456,
+          "runtime_workspace_bytes": 1073741824,
+          "communication_buffers_bytes": 536870912,
+          "host_pinned_buffers_bytes": 1073741824,
+          "local_nvme_bytes": 10737418240,
+          "remote_artifacts_bytes": 0,
+          "fragmentation_allowance_bytes": 2147483648,
+          "safety_margin_bytes": 4294967296
+        }
+      ]
+    },
+    "communication_overlap": {
+      "windows": []
+    },
+    "predicted_metrics": {
+      "p95_ttft_ms": {
+        "estimate": 181.0,
+        "lower": 169.0,
+        "upper": 199.0,
+        "confidence": 0.95,
+        "unit": "ms"
+      },
+      "p99_tpot_ms": {
+        "estimate": 31.0,
+        "lower": 28.0,
+        "upper": 36.0,
+        "confidence": 0.95,
+        "unit": "ms"
+      },
+      "p95_end_to_end_ms": {
+        "estimate": 880.0,
+        "lower": 810.0,
+        "upper": 970.0,
+        "confidence": 0.95,
+        "unit": "ms"
+      },
+      "throughput_tokens_per_second": {
+        "estimate": 720.0,
+        "lower": 660.0,
+        "upper": 770.0,
+        "confidence": 0.95,
+        "unit": "tokens/s"
+      },
+      "goodput_tokens_per_second": {
+        "estimate": 690.0,
+        "lower": 625.0,
+        "upper": 745.0,
+        "confidence": 0.95,
+        "unit": "tokens/s"
+      },
+      "cost_usd_per_million_tokens": {
+        "estimate": 2.4,
+        "lower": 2.2,
+        "upper": 2.8,
+        "confidence": 0.95,
+        "unit": "USD/Mtoken"
+      },
+      "availability": {
+        "estimate": 0.998,
+        "lower": 0.995,
+        "upper": 0.999,
+        "confidence": 0.95,
+        "unit": "ratio"
+      },
+      "communication_overhead_fraction": {
+        "estimate": 0.18,
+        "lower": 0.15,
+        "upper": 0.23,
+        "confidence": 0.95,
+        "unit": "ratio"
+      }
+    },
+    "bottleneck_prediction": "expert dispatch all-to-all on shared NVLink domain",
+    "failure_exposure": [
+      {
+        "fault_domain": "rack-a",
+        "affected_rank_ids": [
+          0,
+          1
+        ],
+        "probability": 0.001,
+        "expected_slo_impact_ms": 340.0
+      }
+    ],
+    "optimizer_history": [
+      {
+        "sequence": 0,
+        "candidate_id": "candidate-0",
+        "phase": "feasibility",
+        "decision": "promote",
+        "reason_code": "memory-feasible",
+        "simulator_calls": 0,
+        "solver_time_ms": 0.2
+      },
+      {
+        "sequence": 1,
+        "candidate_id": "candidate-0",
+        "phase": "simulation",
+        "decision": "select",
+        "reason_code": "lowest-robust-cost",
+        "simulator_calls": 8,
+        "solver_time_ms": 12.4
+      }
+    ],
+    "rejected_alternatives": [
+      {
+        "candidate_id": "candidate-1",
+        "stage": "placement",
+        "reason_code": "pcie-contention",
+        "explanation": "ranks shared an oversubscribed PCIe switch",
+        "violated_constraints": [
+          "p99_tpot_ms"
+        ]
+      }
+    ],
+    "recovery_variants": [],
+    "evidence": [
+      {
+        "kind": "FabricProfile",
+        "api_version": "sloforge.io/fabric/v1",
+        "uri": "artifacts/fabric/profile.json",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "uid": "profile-synthetic-two-gpu",
+        "generation": 1
+      }
+    ],
+    "compiler_version": "0.2.0",
+    "git_commit": "be3c483",
+    "reproducibility": {
+      "seed": 7,
+      "generated_at": "2026-08-01T12:10:00Z",
+      "environment_digest": {
+        "algorithm": "sha256",
+        "value": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "command": [
+        "sloforge",
+        "fabric",
+        "compile",
+        "--seed",
+        "7"
+      ]
+    },
+    "extensions": {
+      "sloforge.io/fixture": "physical-v1"
+    }
+  },
+  "trace_evidence": {
+    "schema_version": "sloforge.fabric.collective-evidence/v1",
+    "artifact_uri": "benchmarks/fabric/rank_ordering/observed-collective-trace.json",
+    "artifact_sha256": "951c3362a0ea563531a9e66ffca6267bcd5579c9ad1b421a8ff7ca5481910351",
+    "plan_id": "rank-ordering-fixture",
+    "operation_id": "tp-all-reduce",
+    "calibration_mode": "synthetic_calibrated",
+    "observed_duration_microseconds": [
+      120.0,
+      124.0,
+      122.0,
+      121.0,
+      125.0
+    ],
+    "collective_critical_path_fraction": 0.42,
+    "rank_wait": [],
+    "fault_free": true
+  },
+  "config": {
+    "seed": 17,
+    "message_sizes_bytes": [
+      65536,
+      1048576
+    ],
+    "optimization_message_bytes": 1048576,
+    "warmup_trials": 3,
+    "measured_trials": 25,
+    "bootstrap_rounds": 400,
+    "confidence_level": 0.95,
+    "exact_rank_limit": 8,
+    "heuristic_pass_limit": 20,
+    "link_variation_fraction": 0.02,
+    "minimum_improvement_percent": 1.0,
+    "minimum_collective_critical_path_fraction": 0.1
+  }
+}
