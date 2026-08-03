@@ -21,14 +21,17 @@ def validate_bottleneck_evidence(
         raise BottleneckEvidenceError("evidence does not identify the focused operator")
     if evidence.observed_fraction < minimum_fraction:
         raise BottleneckEvidenceError("operator contribution is below the synthesis threshold")
-    if evidence.source is EvidenceSource.CPU_PROFILE_MEASURED and (
-        evidence.attribution_scope is not AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE
-        or evidence.causal_attribution
-        or not evidence.synthetic
-    ):
-        raise BottleneckEvidenceError(
-            "the local CPU target must be labeled as a measured synthetic microprobe"
-        )
+    if evidence.source is EvidenceSource.CPU_PROFILE_MEASURED:
+        if evidence.causal_attribution:
+            raise BottleneckEvidenceError("CPU profiling cannot claim Autopsy causality")
+        if evidence.attribution_scope is AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE:
+            if not evidence.synthetic:
+                raise BottleneckEvidenceError("the CPU microprobe must remain synthetic")
+        elif evidence.attribution_scope is AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE:
+            if evidence.synthetic:
+                raise BottleneckEvidenceError("the reference workload trace cannot be synthetic")
+        else:
+            raise BottleneckEvidenceError("CPU profile attribution scope is unsupported")
     path = Path(evidence.raw_evidence_path)
     try:
         payload = path.read_bytes()
@@ -50,5 +53,27 @@ def validate_bottleneck_evidence(
         )
     if raw.attribution_scope != evidence.attribution_scope.value:
         raise BottleneckEvidenceError("raw evidence attribution scope does not match")
+    if raw.workload_fingerprint != (
+        evidence.workload_fingerprint
+        if evidence.attribution_scope is AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE
+        else None
+    ):
+        raise BottleneckEvidenceError("raw evidence workload fingerprint does not match")
+    if raw.attribution_scope == AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE.value:
+        trace = Path(str(raw.workload_trace_path))
+        raw_parent = path.resolve(strict=True).parent
+        if trace.is_symlink():
+            raise BottleneckEvidenceError("raw workload trace must not be a symlink")
+        try:
+            trace = trace.resolve(strict=True)
+            trace.relative_to(raw_parent)
+        except (OSError, ValueError) as error:
+            raise BottleneckEvidenceError(
+                "raw workload trace must be retained beside its profile"
+            ) from error
+        if hashlib.sha256(trace.read_bytes()).hexdigest() != raw.workload_trace_sha256:
+            raise BottleneckEvidenceError("raw workload trace digest mismatch")
+        if hashlib.sha256(trace.read_bytes()).hexdigest() != raw.workload_fingerprint:
+            raise BottleneckEvidenceError("raw workload fingerprint is not trace-derived")
     if abs(raw.operator_probe_fraction - evidence.observed_fraction) > 1e-12:
         raise BottleneckEvidenceError("raw evidence fraction does not match its typed reference")

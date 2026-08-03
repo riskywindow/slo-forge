@@ -37,6 +37,8 @@ class _Runtime(Protocol):
         batching_eligible: bool,
     ) -> _Handle: ...
 
+    def health(self) -> dict[str, object]: ...
+
 
 class _Application(Protocol):
     runtime: _Runtime
@@ -102,9 +104,7 @@ def _runtime_seed(
     phase: str,
     position: int,
 ) -> int:
-    identity = (
-        f"{generation_seed}\0{request_seed}\0{request_id}\0{phase}\0{position}"
-    ).encode()
+    identity = (f"{generation_seed}\0{request_seed}\0{request_id}\0{phase}\0{position}").encode()
     return int.from_bytes(hashlib.sha256(identity).digest()[:8], "big", signed=False)
 
 
@@ -148,6 +148,17 @@ def _run_trace(
                 if event.token_id is not None
             ]
             observations.append({"request_id": request_id, "token_ids": tokens})
+        # A terminal event and its lifecycle become visible before the worker's
+        # finally block releases request state. Keep the timer running until
+        # the declared state-release boundary is actually reached.
+        release_deadline = time.monotonic() + timeout_seconds
+        while True:
+            health = application.runtime.health()
+            if health.get("owned_state_count") == 0 and health.get("queue_depth") == 0:
+                break
+            if time.monotonic() >= release_deadline:
+                raise TimeoutError("runtime did not release request state before its deadline")
+            time.sleep(0)
         duration = max(1, time.perf_counter_ns() - started)
     finally:
         application.shutdown()
@@ -255,9 +266,7 @@ def main(argv: list[str] | None = None) -> int:
         "candidate": Path(str(config["candidate_package"])),
     }
     semantics = {
-        alternative: _semantic_replay(
-            packages[alternative], alternative, generation_seed, requests
-        )
+        alternative: _semantic_replay(packages[alternative], alternative, generation_seed, requests)
         for alternative in ("reference", "candidate")
     }
     samples: list[dict[str, object]] = []
@@ -323,9 +332,7 @@ def main(argv: list[str] | None = None) -> int:
                 identity_index,
             )
             identity_index += 1
-            observations.append(
-                {"alternative": alternative, "trial_index": 0, "requests": output}
-            )
+            observations.append({"alternative": alternative, "trial_index": 0, "requests": output})
     result = {
         "schema_version": "sloforge.genesis.kernel-runtime-runner/v1",
         "mode": arguments.mode,

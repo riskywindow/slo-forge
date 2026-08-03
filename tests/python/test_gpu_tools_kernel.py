@@ -65,7 +65,49 @@ def test_triton_benchmark_is_never_default_enabled() -> None:
         )
 
 
-def test_gpu_benchmark_artifact_schema_validates_without_fabricating_measurements() -> None:
+def test_triton_benchmark_requires_environment_opt_in(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("SLOFORGE_GENESIS_ALLOW_GPU", raising=False)
+    kernel: Any = _kernel()
+    with pytest.raises(RuntimeError, match="SLOFORGE_GENESIS_ALLOW_GPU"):
+        kernel.benchmark_fused_logits(
+            batch=1,
+            vocabulary=32,
+            dtype_name="float32",
+            temperature=1.0,
+            repetition_penalty=1.0,
+            seen_probability=0.1,
+            warmups=3,
+            samples=20,
+            seed=1,
+            enable_triton_experiment=True,
+        )
+
+
+def test_reference_rejects_nonfinite_parameters_and_undeclared_layouts() -> None:
+    torch = pytest.importorskip("torch")
+    kernel: Any = _kernel()
+    logits = torch.zeros((2, 3)).transpose(0, 1)
+    seen = torch.zeros_like(logits, dtype=torch.bool)
+    with pytest.raises(ValueError, match="contiguous"):
+        kernel.reference_logits_preprocess(
+            logits,
+            seen,
+            temperature=1.0,
+            repetition_penalty=1.0,
+        )
+    contiguous = torch.zeros((1, 3))
+    with pytest.raises(ValueError, match="finite"):
+        kernel.reference_logits_preprocess(
+            contiguous,
+            torch.zeros_like(contiguous, dtype=torch.bool),
+            temperature=float("nan"),
+            repetition_penalty=1.0,
+        )
+
+
+def test_schema_only_gpu_artifact_is_rejected_as_measurement() -> None:
     kernel: Any = _kernel()
     trials = tuple(
         kernel.InterleavedTimingTrial(
@@ -141,6 +183,7 @@ def test_gpu_benchmark_artifact_schema_validates_without_fabricating_measurement
             "software_manifest_sha256": kernel.manifest_fingerprint(
                 ("torch=unexercised", "triton=unexercised")
             ),
+            "harness_source_sha256": kernel._harness_source_sha256(),
             "reference": timing,
             "triton": triton_timing,
             "speedup": 1.0,
@@ -152,10 +195,7 @@ def test_gpu_benchmark_artifact_schema_validates_without_fabricating_measurement
             "enablement": "experimental-only; never enabled by the SLOForge runtime",
         }
     )
-    kernel.validate_fused_logits_benchmark(artifact)
     assert artifact.schema_version == "sloforge.kernel-benchmark/v2"
     assert artifact.beneficial is False
-
-    tampered = artifact.model_copy(update={"speedup": 2.0})
-    with pytest.raises(ValueError, match="not derived"):
-        kernel.validate_fused_logits_benchmark(tampered)
+    with pytest.raises(ValueError, match="unexercised schema fixtures"):
+        kernel.validate_fused_logits_benchmark(artifact)

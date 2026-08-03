@@ -41,6 +41,16 @@ def test_cpu_genesis_demo_is_artifact_backed_and_cross_layer(
     assert result.active_stream_preserved
     assert result.physical_degradation_triggered
     assert result.hardware_backed is False
+    bottleneck = json.loads(
+        (tmp_path / "demo/kernel/raw-bottleneck.json").read_text(encoding="utf-8")
+    )
+    assert bottleneck["attribution_scope"] == "measured_reference_workload_trace_profile"
+    trace_path = Path(bottleneck["workload_trace_path"])
+    assert trace_path.is_file()
+    assert (
+        hashlib.sha256(trace_path.read_bytes()).hexdigest() == bottleneck["workload_trace_sha256"]
+    )
+    assert bottleneck["workload_fingerprint"] == bottleneck["workload_trace_sha256"]
     report = json.loads(Path(result.report_path).read_text(encoding="utf-8"))
     assert report["accepted_genome_hash"] == result.accepted_genome_hash
     timeline = json.loads((tmp_path / "demo/evolution/timeline.json").read_text(encoding="utf-8"))

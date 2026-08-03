@@ -53,6 +53,7 @@ class EvidenceSource(StrEnum):
 
 class AttributionScope(StrEnum):
     AUTOPSY_CAUSAL = "autopsy_causal_attribution"
+    REFERENCE_WORKLOAD_TRACE_PROFILE = "measured_reference_workload_trace_profile"
     SYNTHETIC_OPERATOR_MICROPROBE = "measured_synthetic_operator_microprobe"
     DIGITAL_TWIN_ESTIMATE = "digital_twin_estimate"
 
@@ -198,11 +199,17 @@ class BottleneckEvidence(KernelModel):
             or self.synthetic
         ):
             raise ValueError("Autopsy evidence must be causal, measured, and non-synthetic")
-        if self.source is EvidenceSource.CPU_PROFILE_MEASURED and (
-            self.attribution_scope is not AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE
-            or self.causal_attribution
-        ):
-            raise ValueError("the CPU microprobe must not claim Autopsy causal attribution")
+        if self.source is EvidenceSource.CPU_PROFILE_MEASURED:
+            if self.causal_attribution:
+                raise ValueError("CPU profiling must not claim Autopsy causal attribution")
+            if self.attribution_scope is AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE:
+                if not self.synthetic:
+                    raise ValueError("the CPU microprobe must remain explicitly synthetic")
+            elif self.attribution_scope is AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE:
+                if self.synthetic:
+                    raise ValueError("a measured reference workload trace is not synthetic")
+            else:
+                raise ValueError("CPU profiling uses an unsupported attribution scope")
         if self.source is EvidenceSource.DIGITAL_TWIN and (
             self.attribution_scope is not AttributionScope.DIGITAL_TWIN_ESTIMATE
             or self.causal_attribution
@@ -217,9 +224,13 @@ class RawBottleneckRecord(KernelModel):
     inclusive_cpu_time_ns: tuple[int, ...]
     comparison_work_time_ns: tuple[int, ...]
     operator_probe_fraction: float = Field(gt=0.0, le=1.0)
-    attribution_scope: Literal["measured_synthetic_operator_microprobe"] = (
-        "measured_synthetic_operator_microprobe"
-    )
+    attribution_scope: Literal[
+        "measured_reference_workload_trace_profile",
+        "measured_synthetic_operator_microprobe",
+    ] = "measured_synthetic_operator_microprobe"
+    workload_fingerprint: str | None = None
+    workload_trace_path: NonEmpty | None = None
+    workload_trace_sha256: str | None = None
     seed: int = Field(ge=0)
 
     @model_validator(mode="after")
@@ -236,6 +247,25 @@ class RawBottleneckRecord(KernelModel):
         )
         if abs(recomputed - self.operator_probe_fraction) > 1e-12:
             raise ValueError("operator probe fraction is not derived from its raw timings")
+        if self.attribution_scope == "measured_reference_workload_trace_profile":
+            if (
+                self.workload_fingerprint is None
+                or _SHA256.fullmatch(self.workload_fingerprint) is None
+            ):
+                raise ValueError("reference trace profiles require a workload fingerprint")
+            if self.workload_trace_path is None or self.workload_trace_sha256 is None:
+                raise ValueError("reference trace profiles require a retained workload trace")
+            if _SHA256.fullmatch(self.workload_trace_sha256) is None:
+                raise ValueError("reference workload trace digest must be lowercase sha256")
+        elif any(
+            item is not None
+            for item in (
+                self.workload_fingerprint,
+                self.workload_trace_path,
+                self.workload_trace_sha256,
+            )
+        ):
+            raise ValueError("synthetic microprobes must not claim trace artifacts")
         return self
 
 
@@ -558,6 +588,10 @@ class RuntimeRequestSemantics(KernelModel):
 
 
 class RuntimeImpactStatistics(KernelModel):
+    analysis_method: Literal["paired_trial_bootstrap_median_improvement"] = (
+        "paired_trial_bootstrap_median_improvement"
+    )
+    benchmark_contract_sha256: str
     status: LabStatus
     reference_median_ns: float = Field(gt=0.0)
     candidate_median_ns: float = Field(gt=0.0)
@@ -568,6 +602,13 @@ class RuntimeImpactStatistics(KernelModel):
     practical_significance_percent: float = Field(ge=0.0)
     noise_floor_percent: float = Field(ge=0.0)
     rationale: NonEmpty
+
+    @field_validator("benchmark_contract_sha256")
+    @classmethod
+    def validate_contract_digest(cls, value: str) -> str:
+        if _SHA256.fullmatch(value) is None:
+            raise ValueError("runtime-impact contract digest must be lowercase sha256")
+        return value
 
 
 class RuntimeImpactValidation(KernelModel):
@@ -600,8 +641,8 @@ class RuntimeImpactReport(KernelModel):
     )
     hardware_backed_gpu: Literal[False] = False
     timing_boundary: Literal[
-        "after_runtime_start_from_interleaved_submission_through_terminal_events"
-    ] = "after_runtime_start_from_interleaved_submission_through_terminal_events"
+        "after_runtime_start_from_interleaved_submission_through_state_release"
+    ] = "after_runtime_start_from_interleaved_submission_through_state_release"
     source_package_hash: str
     patched_package_hash: str
     candidate_source_path: NonEmpty

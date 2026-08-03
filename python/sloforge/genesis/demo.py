@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import cProfile
 import hashlib
 import json
 import os
 import platform
 import random
 import shutil
-import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import CodeType
 
 from pydantic import BaseModel, ConfigDict
 
@@ -47,10 +48,10 @@ from sloforge.genesis.kernel_lab import (
     EvidenceSource,
     KernelBenchmarkConfig,
     RawBottleneckRecord,
-    reference_quantized_state_update,
     run_kernel_lab_demo,
 )
 from sloforge.genesis.reports import export_genesis_ui_bundle
+from sloforge.genesis.runtime.adapter import ReferenceRuntimeAdapter
 from sloforge.genesis.synthesis import synthesize_local_run
 from sloforge.lineage.demo import run_lineage_transfer_demo
 from sloforge.redteam import run_demo as run_redteam_demo
@@ -126,37 +127,135 @@ def _local_hardware_fingerprint() -> str:
     return hashlib.sha256(canonical_json(_local_hardware_identity())).hexdigest()
 
 
-def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
+def _profile_seed(seed: int, request_id: str, phase: str, position: int) -> int:
+    return int.from_bytes(
+        hashlib.sha256(f"{seed}\0{request_id}\0{phase}\0{position}".encode()).digest()[:8],
+        "big",
+    )
+
+
+def _measure_bottleneck(path: Path, *, seed: int, package_root: Path) -> BottleneckEvidence:
+    """Profile the focused operator inside a retained reference workload trace."""
+
+    package = load_reference_package(package_root)
+    corpus_path = package.resolve(package.manifest.quality_contract.search_corpus)
+    corpus = tuple(
+        json.loads(line)
+        for line in corpus_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    )
+    if not corpus or not all(isinstance(item, dict) for item in corpus):
+        raise ValueError("kernel target profiling requires a non-empty object corpus")
     generator = random.Random(seed)
+    requests: list[dict[str, object]] = []
+    for index in range(6):
+        sample = corpus[index % len(corpus)]
+        maximum = sample.get("maximum_new_tokens")
+        text = sample.get("text")
+        if not isinstance(maximum, int) or isinstance(maximum, bool) or not isinstance(text, str):
+            raise TypeError("kernel target corpus row has invalid text or token bound")
+        requests.append(
+            {
+                "request_id": f"kernel-profile-{index:02d}",
+                "text": text + chr(ord("a") + generator.randrange(26)) * (index % 3),
+                "maximum_new_tokens": max(1, min(8, maximum + index % 2)),
+            }
+        )
+    workload_path = path.with_name("reference-workload-trace.json")
+    workload_payload = (
+        canonical_json(
+            {
+                "schema_version": "sloforge.genesis.kernel-target-trace/v1",
+                "seed": seed,
+                "requests": requests,
+            }
+        )
+        + b"\n"
+    )
+    workload_path.parent.mkdir(parents=True, exist_ok=True)
+    if workload_path.exists():
+        raise FileExistsError(f"refusing to overwrite kernel workload trace: {workload_path}")
+    workload_path.write_bytes(workload_payload)
+    workload_fingerprint = hashlib.sha256(workload_payload).hexdigest()
     samples: list[int] = []
     other_samples: list[int] = []
-    for _trial in range(7):
-        inputs = tuple((generator.randint(-127, 127), generator.uniform(-4, 4)) for _ in range(512))
-        start = time.perf_counter_ns()
-        for previous, activation in inputs:
-            reference_quantized_state_update(previous, activation)
-        samples.append(max(1, time.perf_counter_ns() - start))
-        start = time.perf_counter_ns()
-        accumulator = 0
-        for index in range(4096):
-            accumulator ^= (index * 2654435761) & 0xFFFFFFFF
-        if accumulator < 0:  # pragma: no cover - prevents benchmark loop removal
-            raise AssertionError("unreachable accumulator")
-        other_samples.append(max(1, time.perf_counter_ns() - start))
+    reference_path = package.resolve(package.manifest.reference_module).resolve(strict=True)
+    for trial in range(7):
+        adapter = ReferenceRuntimeAdapter(
+            reference_path=reference_path,
+            tokenizer_path=package.resolve(package.manifest.tokenizer_module),
+            entry_points=package.manifest.entry_points,
+            identity=f"kernel_target_profile_{seed}_{trial}",
+            seed=seed,
+        )
+        profiler = cProfile.Profile()
+        profiler.enable()
+        for request in requests:
+            request_id = str(request["request_id"])
+            maximum_new_tokens = request["maximum_new_tokens"]
+            if not isinstance(maximum_new_tokens, int) or isinstance(maximum_new_tokens, bool):
+                raise TypeError("kernel target request token bound must be an integer")
+            prompt = adapter.tokenize(str(request["text"]))
+            state = adapter.allocate_state(
+                request_id,
+                prompt,
+                _profile_seed(seed, request_id, "allocate", 0),
+            )
+            state = adapter.prefill(
+                prompt,
+                state,
+                _profile_seed(seed, request_id, "prefill", 0),
+            )
+            previous = prompt[-1]
+            for position in range(maximum_new_tokens):
+                result = adapter.decode_step(
+                    previous,
+                    state,
+                    position,
+                    _profile_seed(seed, request_id, "decode", position),
+                )
+                state = result.state
+                previous = adapter.sample(
+                    result.logits,
+                    _profile_seed(seed, request_id, "sample", position),
+                )
+        profiler.disable()
+        operator_seconds = 0.0
+        advance_seconds = 0.0
+        for entry in profiler.getstats():
+            code = entry.code
+            if not isinstance(code, CodeType) or Path(code.co_filename).resolve() != reference_path:
+                continue
+            if code.co_name == "quantized_state_update":
+                operator_seconds += entry.totaltime
+            elif code.co_name == "_advance":
+                advance_seconds += entry.totaltime
+        operator_ns = round(operator_seconds * 1_000_000_000)
+        comparison_ns = round((advance_seconds - operator_seconds) * 1_000_000_000)
+        if operator_ns <= 0 or comparison_ns <= 0:
+            raise RuntimeError(
+                "reference workload profile did not resolve positive operator timing"
+            )
+        samples.append(operator_ns)
+        other_samples.append(comparison_ns)
     fraction = sum(samples) / (sum(samples) + sum(other_samples))
     raw = RawBottleneckRecord(
         operator_id="quantized-state-update",
         inclusive_cpu_time_ns=tuple(samples),
         comparison_work_time_ns=tuple(other_samples),
         operator_probe_fraction=fraction,
+        attribution_scope=AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE.value,
+        workload_fingerprint=workload_fingerprint,
+        workload_trace_path=str(workload_path.resolve()),
+        workload_trace_sha256=sha256_file(workload_path),
         seed=seed,
     )
     _write(path, raw)
     hardware_fingerprint = _local_hardware_fingerprint()
     return BottleneckEvidence(
-        evidence_id="cpu-microprobe-hybrid-quantized-state",
+        evidence_id="cpu-trace-profile-hybrid-quantized-state",
         source=EvidenceSource.CPU_PROFILE_MEASURED,
-        attribution_scope=AttributionScope.SYNTHETIC_OPERATOR_MICROPROBE,
+        attribution_scope=AttributionScope.REFERENCE_WORKLOAD_TRACE_PROFILE,
         causal_attribution=False,
         operator_id="quantized-state-update",
         genome_region="state.quantized_state",
@@ -166,10 +265,8 @@ def _measure_bottleneck(path: Path, *, seed: int) -> BottleneckEvidence:
         raw_evidence_path=str(path.resolve()),
         raw_evidence_sha256=sha256_file(path),
         hardware_fingerprint=f"cpu-{hardware_fingerprint[:12]}",
-        workload_fingerprint=hashlib.sha256(
-            b"synthetic-hybrid-quantized-state-operator-microprobe"
-        ).hexdigest(),
-        synthetic=True,
+        workload_fingerprint=workload_fingerprint,
+        synthetic=False,
     )
 
 
@@ -402,9 +499,7 @@ def run_genesis_demo(
         "event_id": "demo-synthesize-challenger",
         "observed_at_ms": 15,
         "trigger_event_id": "fixture-workload-drift",
-        "trigger_snapshot_sha256": sha256_file(
-            output / "evolution/triggered-snapshot.json"
-        ),
+        "trigger_snapshot_sha256": sha256_file(output / "evolution/triggered-snapshot.json"),
         "search_seed": seed + 1,
         "runtime_seed": effective_runtime_seed,
         "candidate_id": challenger_synthesis.accepted_candidate_id,
@@ -414,7 +509,11 @@ def run_genesis_demo(
     _write(synthesis_event_path, synthesis_event)
 
     redteam = run_redteam_demo(output / "redteam", seed=seed)
-    bottleneck = _measure_bottleneck(output / "kernel/raw-bottleneck.json", seed=seed)
+    bottleneck = _measure_bottleneck(
+        output / "kernel/raw-bottleneck.json",
+        seed=seed,
+        package_root=package_root,
+    )
     kernel = run_kernel_lab_demo(
         evidence=bottleneck,
         output_root=output / "kernel/lab",
@@ -474,9 +573,7 @@ def run_genesis_demo(
     write_canonical(degraded, output / "evolution/degraded-snapshot.json")
     timeline_events: list[dict[str, object]] = []
     for audit in degraded.audit:
-        timeline_events.append(
-            {"source": "controller_audit", **audit.model_dump(mode="json")}
-        )
+        timeline_events.append({"source": "controller_audit", **audit.model_dump(mode="json")})
         if audit.event_id == "fixture-workload-drift":
             timeline_events.append(
                 {
