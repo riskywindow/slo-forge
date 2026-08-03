@@ -2,225 +2,234 @@
 
 Date: 2026-08-02 (America/Los_Angeles)
 
-Baseline commit: `435a04799a831c3d19fce18eb816b206d23778d7`
+- Baseline commit: `435a04799a831c3d19fce18eb816b206d23778d7`
+- Immutable baseline tag: `sloforge-genesis-baseline-435a047`
+- Final reviewed implementation ancestry: `8dc39a2d383232449e42a06f23794f9b8e69e06b`
+- Clean-room validated release commit: populated from `artifacts/genesis/clean-room/result.json`
+- Final report publication commit: resolve with `git log -1 --format=%H -- GENESIS_FINAL_REPORT.md`
 
-Baseline tag: `sloforge-genesis-baseline-435a047`
-
-Final core implementation commit: `e52868bd76b486365c9c2360c88fcd996eb317a1`
-
-Clean-room validated release commit: `46814c0f1c29301ff4220c3b56bf663c18ed9301`
-
-Current report commit: resolve with `git log -1 --format=%H -- GENESIS_FINAL_REPORT.md`; later
-report-only evidence-scope corrections do not change the validated implementation.
-
-This report distinguishes exercised CPU evidence, synthetic evidence, and unexercised optional
-hardware/external paths. It does not claim universal correctness, GPU performance, globally novel
-algorithms, or a measured speedup.
+This report distinguishes local CPU measurements, deterministic synthetic/model evidence, bounded
+verification, and unexercised hardware or external paths. It claims neither universal correctness,
+global algorithmic novelty, GPU performance, nor a serving speedup unsupported by raw evidence.
 
 ## Architecture and implementation
 
-Genesis extends SLOForge rather than replacing it. Python owns zero-day inspection, baseline
-runtime generation, restricted policy compilation, tensor/state/distributed transformations,
-search, CEGIS, statistical gates, lineage, evaluation, and reports. Rust owns strict canonical IR
-conformance and bounded protocol model checking. The established boundary remains versioned,
-canonical JSON over bounded subprocess stdin/stdout; the live gateway keeps HTTP/SSE.
+Genesis extends the completed SLOForge, Fabric, Autopsy, recovery, ForgeCI, and WarmPath systems.
+Python owns inspection, runtime generation, synthesis/search, verification orchestration, lineage,
+evolution, benchmarking, and reports. Rust owns strict canonical IR conformance and deterministic
+bounded protocol checking. Their primary boundary remains versioned canonical JSON over bounded,
+timed subprocess stdin/stdout; HTTP/SSE remains confined to the running data plane.
 
-Implemented components include:
+Implemented and integrated:
 
-- typed, versioned `InferenceGenome`, `Transformation`, `Candidate`, `Counterexample`, and
-  `GenesisCapsule` surfaces with JSON Schemas, Python/Rust round trips, migrations, golden fixtures,
-  canonical SHA-256 agreement, extension namespaces, and stable lifecycle states;
-- a zero-day reference-package frontend with AST and optional `torch.export` inspection,
-  state/operator/batching/streaming diagnostics, explicit unresolved obligations, package hashing,
-  and typed randomized task generation;
-- conservative model-specific runtime generation with bounded queues, state ownership, batching,
-  streaming, cancellation, deterministic sampling, health/metrics, sandbox-only loading,
-  differential harnesses, and clean shutdown;
-- a deterministic restricted policy DSL, tensor rewrite engine, state/memory transformation IR,
-  Fabric mutation bridge, multi-objective archive, budget manager, Autopsy mutation guards,
-  candidate lifecycle, and counterexample-guided local synthesis;
-- operator/quality/resource/performance verification, schema-aware fuzzing, numerical contracts,
-  a Rust explicit-state protocol checker, and scoped verification levels;
-- SQLite lineage with negative results, transfer, confidence/invalidation rules, JSON/GraphML
-  export, champion/challenger evolution, guarded shadow/canary/promotion/rollback, red-team
-  adversaries, ServingSynthBench, static artifact views, and an upstream-review bundle;
-- a focused CPU kernel laboratory with retained sources/cases/runner outputs, independent replay,
-  randomized correctness cases, repeated raw timings, confidence gates, and deliberately no
-  end-to-end speedup claim.
+- strict typed `InferenceGenome`, `Transformation`, `Candidate`, `Counterexample`, and
+  `GenesisCapsule` protocols; eight genome regions; JSON Schemas; Python/Rust golden round trips;
+  canonical SHA-256 agreement; explicit migrations, extension namespaces, proof obligations, and
+  auditable lifecycle states;
+- a zero-day AST frontend plus optional `torch.export` adapter, persistent-state and batching
+  analysis, operator contracts, unsupported-feature obligations, typed randomized task grammar,
+  and task-specific-special-casing detection;
+- model-specific generated runtimes with bounded admission and output queues, deterministic
+  sampler, batching, streaming, cancellation, per-request state ownership, bounded paged state,
+  health/metrics, deterministic replay, failure cleanup, and clean shutdown;
+- a restricted typed policy DSL and compiler/interpreter, bounded equivalence checks, tensor
+  rewrites, state transformations, Fabric plan mutations, multi-fidelity deterministic search,
+  hard multi-dimensional budgets, Pareto archive, Autopsy region freezing, and CEGIS;
+- independent differential, property, schema-aware fuzz, quality, conservative resource,
+  statistical performance, explicit-state protocol, artifact/capsule, and promotion gates;
+- content-addressed artifacts, fail-closed generated-code sandbox, transactional SQLite lineage
+  with invalidation/transfer, executable red team, champion/challenger evolution, ServingSynthBench,
+  artifact-backed views, and a local upstream-review bundle;
+- a measured reference-trace-selected CPU kernel experiment, generated source, exact numerical
+  replay, isolated and generated-runtime serving benchmarks, raw samples, paired confidence gates,
+  and preserved negative result. The optional Triton adapter is fail-closed and was not exercised.
+
+No original command, protocol, or schema was replaced. Backward compatibility remains enforced
+within an IR major version, with explicit migrations for incompatible alpha input.
 
 ## Trusted computing base
 
-Generated source, policies, transformations, runtimes, kernels, and synthesis reasoning are
-untrusted. Local evidence authority consists of strict parsers/canonicalization, capsule issuance
-and validation, bounded proof recomputation, sandbox execution, runtime gate replay, benchmark
-integrity reconstruction, kernel correctness replay, promotion control, and rollback control.
+Generated source, policies, transformations, runtime packages, kernels, and synthesis reasoning are
+untrusted. The conservative local authority includes strict parsing/canonicalization, artifact and
+capsule validation/build issuance, bounded-proof recomputation, the sandbox, runtime/evolution gate
+replay, benchmark-integrity reconstruction, kernel acceptance, promotion/rollback control, and the
+clean-room verifier. On the final reviewed source it measures 11,086 physical lines. The narrower
+capsule/artifact/sandbox subset measures 4,257 lines. Exact file lists and reproduction commands are
+in `docs/genesis/TRUST_MODEL.md`; both counts exclude schemas, interpreters, the OS sandbox/kernel,
+cryptographic implementation, and transitive dependencies.
 
-The conservative source-file envelope for these paths is 8,552 physical lines across capsule,
-artifact, sandbox, synthesis-checker, evolution-evidence/controller, SynthBench harness, and kernel
-acceptance files. This count excludes Python, Pydantic, the OS kernel, `sandbox-exec`/bubblewrap,
-schemas, and transitive dependencies. The narrower capsule/artifact/sandbox validation subset is
-3,741 lines. Exact files and reproduction commands are in `docs/genesis/TRUST_MODEL.md`.
-
-The macOS sandbox was exercised with network denial, declared read/write roots, rebuilt
-credential-free environment, CPU/RSS/output/artifact/process limits, deterministic seed metadata,
-fork denial, timeout cleanup, and process-group cleanup. Linux bubblewrap is implemented but was
-not exercised on this host. Windows strict execution is unavailable. No GPU device, cloud
-credential, paid synthesis service, privileged probe, external deployment, or live-production
-promotion was authorized.
+The macOS `sandbox-exec` path was exercised with no network, sanitized environment, declared
+read/write roots, CPU/RSS/process/output/artifact/wall-time bounds, fork denial, deterministic seed
+metadata, and process-group cleanup. Linux bubblewrap is implemented but unexercised here. Runtime
+and frontend loading compiles the exact hashed source bytes and rejects bytecode caches, preventing
+stale or substituted `.pyc` execution. No generated program receives cloud credentials or arbitrary
+repository write access.
 
 ## Generated zero-day runtime
 
-The flagship HybridDecoder reference package contains sliding-window, recurrent/state-space,
-sparse-MoE, quantized persistent-state, speculative-head, and custom-sampler behavior. Genesis
-recovered 79 operator records and five persistent-state fields, constructed a genome, and generated
-the candidate runtime without a hand-written production adapter.
+The unseen HybridDecoder package combines sliding-window attention, recurrent/state-space behavior,
+sparse MoE, quantized persistent state, a speculative head, and a custom sampler. Genesis recovered
+79 operator records and five state fields, built the genome, and generated the serving runtime
+without a hand-written production adapter.
 
-Candidate `candidate-corrected-9e080dc3ce26` reached `SIMULATED`; its genome hash is
-`f44d18e98b1001c9e528d61d707ffe1f364ed918e298179a61dbc6ca905d8860`. The runtime passed exact
-final-corpus differential replay, streaming, cancellation, queue bounds, state ownership,
-deterministic seed, and clean-shutdown checks. The accepted candidate modifies the RequestGenome
-and ServingGenome through one policy transformation and is structurally cross-layer within those
-two regions. Its StateGenome is unchanged. It does not establish a performance improvement.
+Candidate `candidate-corrected-f358aac5a54f` reached `SIMULATED`; genome
+`4db91427bcb35144e076ee8fd21a9b9c32b4d30fe09e25d75c68f409859a8f3b` passed exact reference
+replay, state transitions, streaming, cancellation, queue/resource bounds, ownership/release,
+deterministic seeds, and clean shutdown. It makes algorithmic policy changes to RequestGenome and
+ServingGenome (`deadline_bucket`, SLO-slack scheduling, pre-emit cancellation check) and a bounded
+64-byte paged allocator change to StateGenome. Thus the accepted candidate changes three genome
+regions and two transformation categories; the measured campaign does not establish that this
+combination is faster than the best isolated alternative.
 
-The resulting local capsule is
-`2051608ce0df253e1454c0a1a249d0bdb0ace5e6f6ffbae6cbfd813d31476e07`; it contains 16 artifacts,
-six evidence records, and five scoped claims. It is eligible for the tested local evolution path,
-but is intentionally ineligible for external production and carries no benchmark promotion claim.
+Local capsule `0b7baeeba952b82de333e4bda6eba787ff570c590f7c3456a6220cbee7a1176a`
+contains 17 artifacts, six evidence records, and five independently scoped claims. It is eligible
+for the tested local evolution path, deliberately ineligible for external production, and carries
+no hardware benchmark promotion claim.
 
-## Verification and counterexample case study
+## Verification and counterexample result
 
-The higher modeled expected-upside unsafe batching candidate `candidate-fast-c5f24ba72a3a`
-scheduled work after cancellation. It had no benchmark evidence. The independent verifier rejected
-it with real counterexample
-`counterexample-f1a82ff1eae24eb0395f3581`; minimization retained the smallest reproducing schedule,
-and generalized constraint `constraint-d4cb57a99c1875a2fe18708b` suppressed the repeated unsafe
-family before the corrected candidate was selected.
+The higher modeled-upside candidate `candidate-fast-29ebf72e649f` scheduled a request for token
+commitment after cancellation. The real verifier rejected it, and 15 minimizer evaluations reduced
+the witness to three events: `admit`, `cancel`, `emit`. Counterexample
+`counterexample-da9ead0ea96e115d40f634c5` produced family constraint
+`constraint-d4cb57a99c1875a2fe18708b` (`cancel_check_before_emit == true`). The repeat candidate
+`candidate-repeat-31c430a8d417` was then suppressed before verification, and the corrected
+policy/state candidate was generated and accepted.
 
-The corrected policy was then exhaustively checked over all 66,066 declared integer/boolean input
-states. The separate bounded protocol abstraction visited 20 states and 52 transitions to depth
-four and records `universal_proof: false`. Capsule construction recomputes both documents,
-re-hashes the reference package, binds each final-corpus oracle line, and sandbox-replays the exact
-candidate runtime before sealing. Regression tests reject altered bounds/invariants/transitions,
-equal-but-wrong expected/observed tokens, package drift, transformation drift, hostile policy
-bytecode, stale evidence, hardware mismatch, and artifact tampering.
+The corrected policy was exhaustively evaluated over all 66,066 declared DSL states. The separate
+bounded protocol abstraction visited 20 states and 52 transitions to depth four for one request and
+at most two committed tokens; its artifact explicitly records `universal_proof: false`. Capsule
+construction re-hashes the reference package, binds final-corpus oracle records, recomputes bounded
+evidence, and sandbox-replays the exact runtime. H6 rejected 50/50 retained attacks across 11 issue
+codes, including changed binaries, wrong hardware/dependencies, stale/incomplete evidence, altered
+benchmarks/quality, missing counterexamples, invalid proof scope, and state-conversion mismatch.
 
-Evolution gate validation binds the still-current champion, both exact runtime bundles, trace,
-raw observations, seeds, stages, and summaries, and independently sandbox-replays both runtimes
-again immediately before promotion. Coherent attacks that re-hash a changed champion, trace, or
-equal-but-forged observations are rejected.
+## Test and demo status
 
-## Tests and demonstrations
+Final host validation before clean-room publication:
 
-The final CPU release sequence exercised:
+- `make check`: 728 Python tests passed, five optional PyTorch/GPU tests skipped, and six intentional
+  overflow warnings; Rust formatting, warning-denied workspace Clippy, 128 Rust tests/doc-test lanes,
+  UI typecheck/lint, 37 UI tests (one fixture skip), and production build passed. The final Rust/UI
+  portion was rerun independently after a detached-session record was lost.
+- `make genesis-check`: 362 Genesis/SynthBench Python tests passed, one optional PyTorch skip;
+  Genesis Rust formatting/lint and 30 IR/model-check tests passed.
+- `make fabric-check`: 292 focused Python tests and 31 Fabric Rust tests passed after a serialized
+  rerun. An earlier parallel invocation raced the demo's `--reset`; its six missing-artifact errors
+  are excluded rather than misreported as product failures.
+- `make demo`, `make fabric-demo`, `make autopsy-demo`, `make forgeci-demo`, `make warmpath-demo`,
+  and `make extension-evaluation`: passed. Core replay served 120 live and 120 simulated requests;
+  Fabric/Autopsy restored the synthetic SLO; ForgeCI found its planted first regression; WarmPath
+  restored and checksum-verified its local artifact fixture.
+- `make genesis-demo`, `make genesis-zero-day-demo`, `make genesis-redteam-demo`,
+  `make genesis-evolution-demo`, `make synthbench-smoke`, `make synthbench-evaluation`, and
+  `make genesis-evaluation` plus its independent suite validator: passed.
+- `make genesis-docker-smoke`: failed closed at preflight because the Docker daemon is unavailable;
+  no container was started. Docker execution is implemented but unexercised on this host.
+- `make genesis-clean-room-test`: final result is recorded after running against the committed
+  release candidate; it uses a Git archive, fresh locked environment, built wheel, installed CLI,
+  actual capsule validation, and a portable evidence tarball.
 
-- `make check`: passed on clean-room release revision `46814c0`; Python, Rust workspace formatting,
-  Clippy with warnings denied, Rust tests/doc tests, and UI type/lint/test/build all passed;
-- `make genesis-check`: 270 Python tests passed, one optional PyTorch test skipped, four intentional
-  numerical-overflow warnings; nine Genesis IR conformance tests and 17 model-check tests passed;
-- `make genesis-demo`, `make genesis-zero-day-demo`, `make genesis-redteam-demo`, and
-  `make genesis-evolution-demo`: passed;
-- `make synthbench-smoke` and `make synthbench-evaluation`: passed;
-- `make genesis-evaluation`: passed its content-addressed evidence revalidation;
-- `uv run --locked python -m sloforge.lineage.demo ...`: passed transfer/invalidation mechanics;
-- `make genesis-clean-room-test`: passed bootstrap, Genesis checks, demo, SynthBench smoke,
-  package build, wheel reinstall, and installed CLI smoke from a Git archive;
-- `make genesis-docker-smoke`: attempted, but the installed Docker client could not reach a Docker
-  daemon; Docker execution is therefore unexercised, not passed.
+No SLOForge child process or fault configuration remained after the runs. No cloud resource,
+external deployment, paid synthesis call, privileged probe, or production traffic mutation occurred.
 
-The baseline record also preserves passing pre-Genesis `make check`, Fabric checks/demo, SLOForge
-CPU demo, Autopsy demo, ForgeCI fixture, and WarmPath fixture. No generated-code subprocess or
-fault-injection process remained after validation, and no cloud resources were created.
+## Real benchmark and evaluation highlights
 
-## Benchmark and evaluation results
+ServingSynthBench CPU smoke generated two tasks with 1.0 valid/exact rates and retained 0.077716
+seconds of aggregate request wall duration. The ten-task CPU evaluation also recorded 1.0
+valid/exact rates and 0.403103046 seconds. These duration sums are neither campaign CPU time nor
+production latency. Eager reference and generated Genesis paths are actual local runs; unavailable
+framework/hardware lanes and explicitly labeled surrogates are not independent runtime baselines.
 
-ServingSynthBench CPU smoke generated two tasks and ran two execution seeds per task. Its report
-records eight actual measured baseline runs (direct Python reference plus generated Genesis), 28
-explicitly labelled request-order surrogate runs, and 16 unavailable hardware/framework lanes.
-Valid-system and exact-request rates were 1.0. The sum of retained per-request wall-clock durations
-was 0.08196783 seconds; it is not process CPU time or end-to-end campaign time.
+The independently validated H1-H9 suite has nine CPU/synthetic campaigns, zero hardware-backed
+runs, and zero universal-proof claims:
 
-The CPU evaluation generated ten task grammars and two execution seeds per task. It records 40
-actual measured runs, 140 explicitly labelled surrogates, 80 unavailable lanes, a 1.0 valid-system
-rate, and a 1.0 exact-request rate. The retained-request wall-duration sum was 0.425307152 seconds.
-Every Genesis result is rebound to the descriptor, public workload or committed hidden corpus,
-oracle, request, runtime manifest/files, exact retained runner response, and sandbox evidence.
+- H1 supported in grammar scope: 5/5 valid and exact hidden-task runtimes, 95% Wilson lower bound
+  0.5655, and zero hand-authored model-specific serving lines.
+- H2 supported only in deterministic service-model scope: configuration-only minus Genesis was
+  0.19775 modeled units over five paired seeds, descriptive 95% interval [0.09123, 0.30974].
+- H3 mixed: full CEGIS and bounded model-check-only each escaped 0/10 scoped faults; tests-only
+  escaped 10/10, fuzz-only 5/10, and five learned constraints were reused.
+- H4 mixed: Autopsy guidance avoided 15 invalid candidates and 3.5328 synthetic time units versus
+  unrestricted search, but used three more candidates than random-region search.
+- H5 supported only in synthetic transfer scope: related lineage saved median two candidate units
+  and four synthetic time units; invalidation avoided five negative transfers.
+- H6 supported in local validator-conformance scope: 50/50 attacks rejected.
+- H7 supported in synthetic-controller/local-runtime scope: restoration 1.0 versus 0.0 static,
+  zero interrupted streams, and one exercised rollback.
+- H8 supported in executable-fixture scope: 19 red-team-only contract families; 95/95 converted
+  regressions independently replayed across five seeds.
+- H9 not supported: best single-layer minus Genesis was -0.005625 modeled units, interval
+  [-0.0057125, -0.00555]. The negative result is retained.
 
-The three-seed flagship evaluation recorded 1.0 accepted-runtime differential, local capsule,
-real-rejection, red-team replay, and local evolution-promotion rates, with zero external-production
-eligibility and zero hardware-backed runs. H6 is supported within its local tamper scope. H1, H3,
-H7, and H8 are only partially evaluated. H2, H4, H5, and H9 remain not evaluated because there is
-no hardware-comparable whole-stack campaign, complete ablation campaign, transfer-performance
-campaign, or single-layer-versus-cross-layer performance comparison. These absences are release
-limitations, not inferred successes.
+The trace-selected quantized-state CPU kernel experiment profiled seven reference workload trials
+and attributed 14.16% of observed profile time to the target without claiming causality. Both
+generated candidates passed exact correctness, but neither was accepted. The only generated-runtime
+serving comparison used six requests, seven paired trials, exact token/final-state equality, and
+independent replay: reference median 3,796,666 ns, candidate median 3,850,667 ns, -1.422% point
+estimate, 95% paired interval [-3.495%, 1.752%]. Status: inconclusive/rejected, zero speedup claims.
 
-The red team found 19 unique violation families per run and replayed all of them; across three
-runs the report now distinguishes 57 total findings from 19 unique families. The two CPU kernel
-candidates produced retained correctness and isolated-operator timing evidence but zero speedup
-claims. No statistical significance or end-to-end impact is claimed.
+## Lineage and evolution results
 
-## Lineage and evolution
+The standalone lineage demonstration retrieved one related transformation, kept four unseeded
+candidates for diversity, ignored unrelated lineage, required reverification, and suppressed the
+seed after dependency invalidation. It declares `performance_hypothesis_evaluated: false`; the H5
+cost-unit result comes from the separate five-seed evaluation campaign.
 
-The deterministic lineage demonstration retrieved one related transformation, retained four
-unseeded candidates for diversity, required reverification, ignored unrelated lineage, and
-suppressed the related seed after its dependency was invalidated. It explicitly sets
-`performance_hypothesis_evaluated: false`; no transfer speedup is claimed.
+The flagship workload-drift timeline is artifact-derived: trigger, separately synthesized and
+capsuled challenger, registration, sandboxed shadow, sandboxed canary, revalidation, promotion,
+active-stream preservation, and retained prior champion. A later simulated Fabric degradation
+trigger entered evolution. The H7 campaign additionally exercises invalid-challenger rejection,
+physical-degradation coalescing, rollback, and controller persistence/restart. External live
+promotion remains disabled.
 
-The local workload-drift fixture generated an isolated challenger, validated its capsule, ran bound
-shadow and canary gates, preserved an active stream, promoted the challenger, and retained the old
-champion for rollback. After that promotion the demo classified a physical-degradation trigger and
-entered `evolving`; it did not synthesize, verify, or promote a second degradation-specific
-challenger. External live promotion remains opt-in and was not exercised.
+## Hardware-backed versus synthetic validation
 
-## Hardware-backed versus synthetic evidence
-
-This host was macOS x86_64 with 12 logical CPUs and 24 GiB RAM. It had no NVIDIA GPU, CUDA compiler,
-Triton installation, GPU budget, cloud budget, or multi-node opt-in. All reported timings and
-serving results are CPU/local or deterministic simulation. Hardware adapters, version checks, and
-fail-closed commands exist, but no single-GPU, multi-GPU, multi-node, RDMA/NCCL, CUDA/Triton, Modal,
-Truss, or external-engine result is claimed.
+This was an Apple-Silicon macOS 15.6.1 host running an x86_64 process under Rosetta, with 12 logical
+CPUs and 24 GiB RAM. There was no NVIDIA inventory, CUDA compiler, Triton/PyTorch installation,
+GPU or cloud budget, multi-node opt-in, external synthesis authorization, or live-promotion opt-in.
+Reported runtime and kernel timings are real local CPU measurements; Fabric, controller-time,
+service-model, topology degradation, H2/H4/H5/H7/H9, and some comparison lanes are explicitly
+synthetic. There is no single-GPU, multi-GPU, multi-node, RDMA/NCCL, CUDA/Triton, Modal, Truss,
+external-engine, cloud, or production-traffic measurement.
 
 ## Known limitations and unmet evaluation gates
 
-- The optional PyTorch export frontend test was skipped because PyTorch is not installed; the AST
-  frontend and generated Python task grammar were exercised.
-- Arbitrary tensor rewrites are represented, checked, and costed, but the flagship generated
-  runtime does not lower an arbitrary selected rewrite into model code.
-- The flagship evaluates executable request/serving policy behavior and kernel-lab experiments,
-  and records a physical-degradation trigger classification. State, tensor, and distributed
-  transformation surfaces have focused tests but are not selected by the accepted flagship
-  candidate; this is not a complete measured four-category whole-stack search.
-- The local capsule is not externally promotable because it lacks repeated provenance-complete
-  hardware/service benchmarks and production shadow/canary evidence.
-- ServingSynthBench keeps unavailable engines and explicit request-order surrogates in the schema;
-  those rows are not independent baseline implementations.
-- SynthBench and Genesis evaluation artifact paths are currently host-absolute. Evidence hashes
-  detect mutation, but moving an unpacked report requires path rebasing or regeneration.
-- Confidence intervals exist for kernel/performance gates, but the aggregate valid-system rates do
-  not yet publish task-level Wilson/bootstrap intervals. The fixed HybridDecoder seeds are not
-  independent model-family samples.
-- The upstream-ready bundle is local only; no issue or pull request was opened.
+- The optional `torch.export` path and GPU/Triton tests were skipped because dependencies/hardware
+  are absent; AST inspection and generated pure-Python tasks were exercised.
+- Tensor rewrites are typed and verified but arbitrary selected rewrites are not lowered into the
+  flagship runtime. The Fabric mutation is evaluated and deliberately remains ineligible pending
+  its full revalidation pipeline. The accepted flagship changes policy and state, not all four
+  evaluated transformation categories.
+- H2/H4/H5/H7/H9 use deterministic model or logical units and do not establish hardware serving
+  performance. H3/H4 are mixed and H9 is negative.
+- The local capsule lacks Level-5 hardware/production evidence and cannot be externally promoted.
 - Docker, Linux bubblewrap, Windows, GPU, multi-node, paid synthesis, external deployment, and live
-  production promotion are unexercised.
+  production promotion are unexercised. The build backend itself is not lock-pinned; external
+  package indexes and host toolchains remain supply-chain assumptions.
+- Human-readable artifact records contain host-absolute paths. Hashes detect mutation and the
+  clean-room evidence archive is portable, but unpacked reports may require rebasing/regeneration.
+- The randomized grammar is a small affordable architecture family; fixed seeds and fixture-level
+  confidence intervals do not generalize to arbitrary production models or workloads.
+- The upstream-ready bundle remains local; no pull request or issue was opened.
 
 ## Artifact and documentation inventory
 
-- Baseline: `artifacts/genesis/baseline/record.json`
-- Flagship report/capsule/runtime/counterexamples: `artifacts/genesis/demo/`
-- Zero-day and evolution fixtures: `artifacts/genesis/zero-day-demo/` and
-  `artifacts/genesis/evolution-demo/`
-- Multi-seed evaluation and hypothesis reports: `artifacts/genesis/evaluation/`
-- Lineage transfer: `artifacts/genesis/lineage-transfer-demo/`
-- Red team: `artifacts/genesis/redteam-demo/`
-- ServingSynthBench smoke/evaluation: `artifacts/synthbench/`
-- Clean-room result and log: `artifacts/genesis/clean-room/`
-- Architecture/trust/reproducibility/limitations: `docs/genesis/`
-- Lineage, red-team, and SynthBench specifications: `docs/lineage/`, `docs/redteam/`, and
-  `docs/synthbench/`
-- Related work: `docs/GENESIS_RELATED_WORK.md`
-- ADRs: `docs/adr/`
-- Paper-style system report: `paper/genesis/README.md`
-- Generated upstream-review bundle: `generated/patches/hybrid-quantized-state-update/`
+- Baseline record: `artifacts/genesis/baseline/record.json`
+- Flagship runtime, capsule, kernel evidence, lineage, evolution, and report:
+  `artifacts/genesis/demo/`
+- Zero-day, red-team, and evolution demonstrations: `artifacts/genesis/zero-day-demo/`,
+  `artifacts/genesis/redteam-demo/`, `artifacts/genesis/evolution-demo/`
+- H1-H9 evaluation root: `artifacts/genesis/evaluation/GENESIS_EVALUATION_SUITE.json`
+- Lineage transfer: `artifacts/genesis/lineage-transfer-demo/report.json`
+- ServingSynthBench: `artifacts/synthbench/`
+- Clean-room result/log/portable evidence: `artifacts/genesis/clean-room/`
+- Architecture, trust, security, reproducibility, and limitation docs: `docs/genesis/`
+- Lineage/red-team/SynthBench docs: `docs/lineage/`, `docs/redteam/`, `docs/synthbench/`
+- Related work and ADRs: `docs/GENESIS_RELATED_WORK.md`, `docs/adr/`
+- Paper-style report: `paper/genesis/README.md`
+- Upstream-review bundle: `generated/patches/hybrid-quantized-state-update/`
 
-All numeric claims above are sourced from the named JSON/JSONL artifacts. Hardware and missing
-campaign limitations are repeated deliberately to prevent a CPU fixture from being presented as a
-production or GPU result.
+All numeric claims above are derived from the named JSON/JSONL artifacts or final command logs.
+Unavailable hardware paths and negative results are repeated deliberately so local CPU evidence
+cannot be presented as GPU, production, or universal-proof evidence.

@@ -237,9 +237,9 @@ that could not run here.
 
 | Genesis task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Artifacts | Commit |
 |---|---|---|---|---|---|---|---|---|
-| Baseline, task graph, root integration, CLI, release gates | root | exercised | `main` | root manifests, CLI, ledger, report | all lanes | baseline commands; `make check`; `make genesis-check` | `artifacts/genesis/baseline/record.json` | `3ca2d74`, `e52868b` |
+| Baseline, task graph, root integration, CLI, release gates | root | exercised; Docker daemon unavailable | `main` | root manifests, CLI, ledger, report | all lanes | baseline commands; `make check`; `make genesis-check`; clean room | `artifacts/genesis/baseline/record.json` | `3ca2d74` through `8dc39a2` |
 | InferenceGenome, Transformation, Candidate, Counterexample IR, migrations and conformance | Genesis IR lane | exercised | shared `main` checkout | Genesis IR crates/Python/schemas/goldens | baseline | Python/Rust/schema round trips, hash and migration tests | schemas and golden fixtures | `68d19f0`, `4c5de8c` |
-| GenesisCapsule, artifacts, sandbox and independent validation | Genesis trust lane | exercised on macOS; dedicated H6 attack campaign replays ten promotion attacks per seed; Linux/Windows unexercised | shared `main` checkout | capsule/artifacts/sandbox and H6 campaign | Genesis IR | tamper/stale/hardware/dependency/evidence/benchmark/quality/corpus/scope/migration replay tests | capsule, sandbox, and `campaigns/h6` evidence | `38999aa` through `e52868b`, `a1efea9` |
+| GenesisCapsule, artifacts, sandbox and independent validation | Genesis trust lane | exercised on macOS; H6 replays ten promotion attacks per seed; exact-source loading rejects bytecode caches; Linux/Windows unexercised | shared `main` checkout | capsule/artifacts/sandbox and H6 campaign | Genesis IR | tamper/stale/hardware/dependency/evidence/benchmark/quality/corpus/scope/migration replay tests | capsule, sandbox, and `campaigns/h6` evidence | `38999aa` through `e01120f` |
 | Zero-day frontend and conservative generated baseline runtime | Genesis frontend/runtime lane | AST/runtime exercised; optional PyTorch export skipped | shared `main` checkout | frontend/runtime/reference task | IR | inspect/generate/differential/stream/cancel/bounds/shutdown | `artifacts/genesis/zero-day-demo/` | `e59d6d5`, `89f474d`, `f9bffcf` |
 | Policy DSL and bounded compiler/interpreter | policy lane | exercised | shared `main` checkout | policy DSL | IR | parser/type/interpreter/equivalence and 66,066-state property check | candidate policy evidence | `a3f2e32`, `e52868b` |
 | Tensor rewrite system and symbolic constraints | tensor lane | exercised as rewrite/quality surface; arbitrary runtime lowering unexercised | shared `main` checkout | tensor rewrite modules | frontend/IR | rewrite and approximate-quality tests | rewrite fixtures | `bf45919` |
@@ -254,11 +254,11 @@ that could not run here.
 | Executable red team and minimization | red-team lane | exercised with normal-test versus executable H8 campaign and independent regression replay | shared `main` checkout | redteam/counterexamples and H8 campaign | verification/CEGIS | red-team demo plus campaign replay/tamper tests | 19-family corpus/constraints and `campaigns/h8` | `91e2bd4`, `d3363ae`, `30836c3`, `25c3e4d` |
 | ServingSynthBench grammar, hidden tasks, baselines and reports | SynthBench lane | 2-task smoke and 10-task CPU evaluation exercised | shared `main` checkout | synthbench/benchmarks | frontend/runtime | smoke/evaluation plus oracle/output tampering tests | `artifacts/synthbench/` | `46a0b06` through `e52868b` |
 | Flagship HybridDecoder and artifact-backed demos | flagship lane | exercised CPU-only; accepted candidate changes Request, Serving and State layers; policy/state/Fabric/tensor categories are evaluated with Fabric and tensor work retained at their declared validation boundaries | shared `main` checkout | model/demo/reports and whole-stack campaign | trusted core/evolution | Genesis, zero-day and evolution demos; independently replayed whole-stack campaign | `artifacts/genesis/{demo,zero-day-demo,evolution-demo}/`, `campaigns/whole-stack` | `f60f9b1`, `1e86a0b`, `16df237`, `186b470` |
-| Trace-justified kernel lab and upstream bundle | kernel lane | CPU correctness/microbench exercised; GPU/end-to-end impact unexercised | shared `main` checkout | kernel lab/generated patch | Autopsy/verification | kernel tests/demo, independent replay | kernel artifacts/upstream bundle | `8b97e5a`, `3464328`, `e52868b` |
-| Evaluation H1-H9 and statistical review | evaluation lane | dedicated artifact-backed H1-H8 campaigns implemented; H2 is supported only in deterministic CPU simulation scope and H9 is an explicit scoped negative; final integrated regeneration pending | shared `main` checkout | evaluation and campaign validators | demos | campaign-focused tests; required final `make genesis-evaluation` and self-validator | `artifacts/genesis/evaluation/` | `a36eb28`, `e52868b`, `dfd82cb`, `3a6425e`, `39031e3`, `186b470`, `3da1ac8`, `a1efea9`, `0ebb8f2`, `30836c3` |
+| Trace-justified kernel lab and upstream bundle | kernel lane | measured CPU reference trace, correctness, microbench, generated-runtime serving impact and independent replay exercised; result inconclusive/rejected; GPU unexercised | shared `main` checkout | kernel lab/generated patch | Autopsy/verification | kernel tests/demo, raw paired trials, exact token/state replay | kernel artifacts/upstream bundle | `8b97e5a`, `f1346d1`, `5f51656` |
+| Evaluation H1-H9 and statistical review | evaluation lane | final artifact-backed suite regenerated and independently validated; H1/H2/H5/H6/H7/H8 supported only in declared CPU/synthetic scopes, H3/H4 mixed, H9 negative | shared `main` checkout | evaluation and campaign validators | demos | `make genesis-evaluation`; independent suite validator | `artifacts/genesis/evaluation/` | through `5f51656`; final artifacts regenerated 2026-08-02 |
 | Visualization | visualization lane | artifact-backed static view exercised | shared `main` checkout | UI bundle/report views | artifact schemas | UI checks/build | Genesis UI bundles | `bd514a0` |
-| Security/compiler/formal/GPU/benchmark/concurrency reviews | review lanes | final reviews completed; all high and actionable evidence-medium findings fixed; no GPU available | shared `main` checkout | focused patches/tests | integrated system | review commands, 59 focused trust tests, final gates | findings summarized in final report | `e9fa92c`, `e52868b` |
-| Documentation, ADRs, paper, clean room and final report | root/documentation | exercised except Docker daemon | `main` | README/docs/ADRs/paper/report | stable evidence | inventory, clean room, report verification | `GENESIS_FINAL_REPORT.md` | `b242833`, `d79291b`, final report commit |
+| Security/compiler/formal/GPU/benchmark/concurrency reviews | review lanes | final adversarial, GPU/performance, runtime, and clean-room reviews completed; all high and reasonable medium findings fixed; no GPU available | shared `main` checkout | focused patches/tests | integrated system | review commands, attack replays, final gates | findings summarized in final report | `e9fa92c` through `8dc39a2` |
+| Documentation, ADRs, paper, clean room and final report | root/documentation | final report reconciled to raw evidence; clean-room result recorded separately; Docker daemon unavailable | `main` | README/docs/ADRs/paper/report | stable evidence | inventory, clean room, report verification | `GENESIS_FINAL_REPORT.md` | `b242833`, final report commits |
 
 ### Genesis dependency graph
 
@@ -272,6 +272,27 @@ that could not run here.
    ServingSynthBench and the flagship drift/rejection/promotion demonstration.
 5. Stable raw artifacts unlock evaluation, visualization, documentation,
    adversarial review and clean-room release verification.
+
+### Genesis final acceptance record
+
+- Final source checks: `make check` completed with 728 Python passes, five optional skips,
+  warning-denied workspace Clippy, all 128 Rust test lanes, and UI type/lint/37-pass/build.
+- Genesis checks: 362 Python passes, one optional PyTorch skip, and 30 Genesis Rust tests.
+- Fabric non-regression: serialized `make fabric-check` completed with 292 Python and 31 Rust
+  passes. Core, Fabric, Autopsy, ForgeCI, WarmPath, and extension demonstrations passed.
+- Genesis artifacts: all four Genesis demos, both ServingSynthBench targets, and the final H1-H9
+  evaluation plus its independent validator passed. Canonical flagship candidate is
+  `candidate-corrected-f358aac5a54f`; capsule digest is
+  `0b7baeeba952b82de333e4bda6eba787ff570c590f7c3456a6220cbee7a1176a`.
+- Final reviews: adversarial/evidence, GPU performance, runtime/clean-room, compiler/formal,
+  distributed, numerical, security, benchmark/statistical, concurrency, and hiring-depth findings
+  were integrated. No unresolved high-severity or reasonable medium-severity finding remains.
+- Docker smoke was attempted and failed closed before mutation because no daemon is available.
+  GPU, CUDA/Triton, multi-node, external deployment, and live production validation remain
+  explicitly unexercised; zero hardware speedup claims are present.
+- Clean-room validation is performed only after the release-candidate report is committed. Its
+  commit/hash-bearing result is retained in `artifacts/genesis/clean-room/` and copied into the
+  final report without rewriting measured evidence.
 
 The host had only 330 MiB free when three temporary worktrees were attempted;
 Git aborted each copy before registration. The incomplete directories were
