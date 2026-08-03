@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import py_compile
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,7 @@ from sloforge.genesis.runtime import (
     generate_baseline_runtime,
     load_generated_runtime,
 )
+from sloforge.genesis.runtime.adapter import _load_source
 from sloforge.genesis.runtime.models import RequestControl
 from sloforge.genesis.synthesis import (
     cancellation_fixture_candidates,
@@ -38,6 +40,21 @@ from sloforge.genesis.synthesis import (
 
 ROOT = Path(__file__).resolve().parents[2]
 HYBRID = ROOT / "models" / "reference_tasks" / "hybrid_decoder"
+
+
+def test_source_loader_never_executes_adjacent_unchecked_bytecode(tmp_path: Path) -> None:
+    source = tmp_path / "module.py"
+    source.write_text("VALUE = 'hostile-bytecode'\n", encoding="utf-8")
+    py_compile.compile(
+        str(source),
+        doraise=True,
+        invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH,
+    )
+    source.write_text("VALUE = 'trusted-source'\n", encoding="utf-8")
+
+    loaded = _load_source(source, "genesis_direct_source_regression")
+
+    assert loaded.VALUE == "trusted-source"
 
 
 def _generated(tmp_path: Path, *, seed: int = 73129, package: Path = HYBRID) -> Path:

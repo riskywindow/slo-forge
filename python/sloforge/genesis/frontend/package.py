@@ -94,7 +94,10 @@ def load_reference_package(path: Path) -> LoadedReferencePackage:
     for candidate in sorted(root.rglob("*")):
         relative_entry = candidate.relative_to(root)
         if "__pycache__" in relative_entry.parts or candidate.suffix in {".pyc", ".pyo"}:
-            continue
+            raise ValueError(
+                "reference package contains executable bytecode outside its source identity: "
+                f"{relative_entry.as_posix()}"
+            )
         if candidate.is_symlink():
             raise ValueError(f"reference package contains a symlink: {relative_entry.as_posix()}")
         if candidate.is_dir():

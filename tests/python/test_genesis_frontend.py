@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import py_compile
 import shutil
 from pathlib import Path
 
@@ -185,6 +186,19 @@ def test_package_rejects_symlink_and_dynamic_loading(tmp_path: Path) -> None:
         load_reference_package(package)
 
 
+def test_package_rejects_unhashed_interpreter_bytecode_cache(tmp_path: Path) -> None:
+    package = tmp_path / "package"
+    shutil.copytree(HYBRID, package)
+    py_compile.compile(
+        str(package / "reference.py"),
+        doraise=True,
+        invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH,
+    )
+
+    with pytest.raises(ValueError, match="executable bytecode outside its source identity"):
+        load_reference_package(package)
+
+
 def test_opaque_imported_call_creates_semantic_obligation(tmp_path: Path) -> None:
     package = tmp_path / "package"
     shutil.copytree(HYBRID, package)
@@ -215,8 +229,7 @@ def test_operator_name_heuristics_do_not_suppress_unknown_semantics(tmp_path: Pa
     result = inspect_reference_package(package)
 
     assert any(
-        diagnostic.category == "unknown_semantics"
-        and "secrets.attention" in diagnostic.message
+        diagnostic.category == "unknown_semantics" and "secrets.attention" in diagnostic.message
         for diagnostic in result.diagnostics
     )
 
@@ -244,8 +257,7 @@ def test_auxiliary_modules_and_undeclared_state_are_inspected(tmp_path: Path) ->
     result = inspect_reference_package(package)
 
     assert any(
-        operator.location.relative_path == "helper.py"
-        and operator.symbol == "attention_helper"
+        operator.location.relative_path == "helper.py" and operator.symbol == "attention_helper"
         for operator in result.graph.operators
     )
     assert any(

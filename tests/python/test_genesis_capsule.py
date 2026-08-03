@@ -49,6 +49,9 @@ from sloforge.genesis.capsule import (
 )
 from sloforge.genesis.capsule.validator import (
     _performance_acceptance_failures,
+    _validate_benchmark,
+    _validate_quality_artifact,
+    _validate_resource_artifact,
     _validate_runtime_bundle,
 )
 from sloforge.genesis.policy_dsl import compile_policy, parse_policy
@@ -171,6 +174,9 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                     {"alternative": "candidate", "trial": 0},
                     {"alternative": "baseline", "trial": 1},
                 ],
+                "run_order_algorithm": "python-random-v1",
+                "run_order_seed": 101,
+                "warmup_iterations": 2,
                 "bootstrap_rounds": 2000,
                 "confidence": 0.95,
                 "statistical_seed": 0,
@@ -270,6 +276,7 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
             capacity_bytes = 1024 * 1024
             payload = json.dumps(
                 {
+                    "schema_version": "1.1.0",
                     "maximum_prompt_tokens": 1,
                     "maximum_generated_tokens": 1,
                     "maximum_output_events_per_request": 2,
@@ -285,6 +292,17 @@ def _complete_capsule(root: Path) -> tuple[GenesisCapsule, ValidationContext]:
                     "capacity_bytes": capacity_bytes,
                     "safety_margin_fraction": 0.2,
                     "usable_capacity_bytes": int(capacity_bytes * 0.8),
+                    "reference_state_bytes_per_request": 8,
+                    "genome_state_bytes_per_request": 8,
+                    "genome_state_layouts": ["contiguous"],
+                    "state_allocator_layout": "contiguous",
+                    "state_allocator_page_bytes": 8,
+                    "state_allocator_reserved_bytes_per_request": 8,
+                    "state_allocator_total_bytes": 8,
+                    "state_allocator_layout_matches_genome": True,
+                    "state_allocator_bound_matches_genome": True,
+                    "state_allocator_capacity_valid": True,
+                    "maximum_processes": 2,
                     "passed": True,
                 },
                 sort_keys=True,
@@ -495,6 +513,53 @@ def test_complete_capsule_is_promotion_eligible(tmp_path: Path) -> None:
     assert report.evidence_complete
     assert report.promotion_eligible
     assert report.issues == ()
+
+
+def test_quality_gate_rejects_nan_or_negative_threshold(tmp_path: Path) -> None:
+    evidence = tmp_path / "quality.json"
+    base = {
+        "schema_version": "1.0.0",
+        "cases": [{"expected": [1], "observed": [2], "exact_match": False}],
+        "case_count": 1,
+        "observed": 0.0,
+        "passed": True,
+    }
+    for threshold in (-1.0, float("nan")):
+        evidence.write_text(json.dumps({**base, "threshold": threshold}), encoding="utf-8")
+        assert "finite probabilities" in (_validate_quality_artifact(evidence) or "")
+
+
+def test_resource_gate_rejects_legacy_or_negative_bounds(tmp_path: Path) -> None:
+    capsule, _context = _complete_capsule(tmp_path)
+    resource = next(
+        item for item in capsule.artifacts if item.role is ArtifactRole.RESOURCE_EVIDENCE
+    )
+    path = tmp_path / resource.path
+    document = json.loads(path.read_text(encoding="utf-8"))
+    path.write_text(json.dumps({**document, "schema_version": "1.0.0"}), encoding="utf-8")
+    assert "unsupported schema" in (
+        _validate_resource_artifact(path, runtime_bundle_bytes=None) or ""
+    )
+    path.write_text(json.dumps({**document, "runtime_queue_depth": -1}), encoding="utf-8")
+    assert "out-of-domain" in (_validate_resource_artifact(path, runtime_bundle_bytes=None) or "")
+
+
+def test_benchmark_gate_reconstructs_randomized_order_from_seed(tmp_path: Path) -> None:
+    capsule, context = _complete_capsule(tmp_path)
+    benchmark = capsule.benchmarks[0]
+    artifacts = {item.artifact_id: item for item in capsule.artifacts}
+    resolved = {item.artifact_id: tmp_path / item.path for item in capsule.artifacts}
+    definition_path = resolved[benchmark.definition_artifact_id]
+    definition = json.loads(definition_path.read_text(encoding="utf-8"))
+    definition["execution_order"] = sorted(
+        definition["execution_order"], key=lambda item: (item["alternative"], item["trial"])
+    )
+    definition_path.write_text(json.dumps(definition), encoding="utf-8")
+    issues: list[ValidationIssue] = []
+
+    _validate_benchmark(benchmark, artifacts, resolved, context, issues)
+
+    assert any("deterministic run-order reconstruction" in issue.message for issue in issues)
 
 
 def test_performance_claim_must_anchor_complete_benchmark_provenance(tmp_path: Path) -> None:

@@ -30,6 +30,7 @@ NonEmptyString = Annotated[str, StringConstraints(strip_whitespace=True, min_len
 PositiveInt = Annotated[int, Field(gt=0)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
 NonNegativeFloat = Annotated[float, Field(ge=0.0)]
+UnsignedSeed = Annotated[int, Field(ge=0, lt=1 << 64)]
 
 
 class CapsuleModel(BaseModel):
@@ -197,7 +198,7 @@ class EvidenceRecord(CapsuleModel):
     artifact_ids: tuple[NonEmptyString, ...]
     observed_at: AwareDatetime
     valid_until: AwareDatetime | None
-    deterministic_seed: int | None = None
+    deterministic_seed: UnsignedSeed | None = None
     assumptions: tuple[NonEmptyString, ...] = ()
 
     @field_validator("evidence_id")
@@ -370,7 +371,7 @@ class GenesisCapsule(CapsuleModel):
 
 class RawBenchmarkSample(CapsuleModel):
     trial: NonNegativeInt
-    seed: int
+    seed: UnsignedSeed
     value: NonNegativeFloat
     execution_ordinal: NonNegativeInt | None = None
 
