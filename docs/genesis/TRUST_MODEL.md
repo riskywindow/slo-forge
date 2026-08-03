@@ -50,8 +50,8 @@ The Python trust lane consists of:
   validator, and kernel correctness/benchmark acceptance modules named by the command below;
 - `schemas/genesis_capsule/genesis-capsule-v1.schema.json`: the public wire schema.
 
-On 2026-08-02 the narrow capsule/artifact/sandbox subset measured 4,257 physical lines. The
-conservative local evidence, clean-room, and promotion envelope measured 11,086 lines. Reproduce the conservative
+On 2026-08-02 the narrow capsule/artifact/sandbox subset measured 4,278 physical lines. The
+conservative local evidence, clean-room, and promotion envelope measured 11,120 lines. Reproduce the conservative
 count from the repository root with:
 
 ```bash

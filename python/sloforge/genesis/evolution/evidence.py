@@ -23,6 +23,7 @@ from ..sandbox import (
     SandboxLimits,
     SandboxRequest,
     execute_sandboxed,
+    interpreter_read_roots,
 )
 from .models import CapsuleReference, ChallengerSpec, GateObservation, GateStage
 
@@ -202,7 +203,7 @@ def _execute_runtime(
                 canonical_bundle,
                 canonical_trace,
                 repository_python,
-                Path(sys.prefix),
+                *interpreter_read_roots(),
             ),
             artifact_output_directory=canonical_output,
             seed=seed,

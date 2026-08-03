@@ -53,8 +53,8 @@ Generated source, policies, transformations, runtime packages, kernels, and synt
 untrusted. The conservative local authority includes strict parsing/canonicalization, artifact and
 capsule validation/build issuance, bounded-proof recomputation, the sandbox, runtime/evolution gate
 replay, benchmark-integrity reconstruction, kernel acceptance, promotion/rollback control, and the
-clean-room verifier. On the final reviewed source it measures 11,086 physical lines. The narrower
-capsule/artifact/sandbox subset measures 4,257 lines. Exact file lists and reproduction commands are
+clean-room verifier. On the final reviewed source it measures 11,120 physical lines. The narrower
+capsule/artifact/sandbox subset measures 4,278 lines. Exact file lists and reproduction commands are
 in `docs/genesis/TRUST_MODEL.md`; both counts exclude schemas, interpreters, the OS sandbox/kernel,
 cryptographic implementation, and transitive dependencies.
 

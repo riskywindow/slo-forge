@@ -1,6 +1,6 @@
 """Capability-aware hostile generated-code sandbox."""
 
-from .executor import detect_capabilities, execute_sandboxed
+from .executor import detect_capabilities, execute_sandboxed, interpreter_read_roots
 from .models import (
     EnvironmentVariable,
     IsolationStatus,
@@ -23,4 +23,5 @@ __all__ = [
     "SandboxTermination",
     "detect_capabilities",
     "execute_sandboxed",
+    "interpreter_read_roots",
 ]

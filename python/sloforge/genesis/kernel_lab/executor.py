@@ -12,7 +12,13 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-from ..sandbox import SandboxLimits, SandboxRequest, SandboxTermination, execute_sandboxed
+from ..sandbox import (
+    SandboxLimits,
+    SandboxRequest,
+    SandboxTermination,
+    execute_sandboxed,
+    interpreter_read_roots,
+)
 from .generator import validate_generated_source
 from .models import (
     CaseResult,
@@ -77,7 +83,10 @@ def _sandbox_request(
             mode,
         ),
         working_directory=canonical_source,
-        read_only_paths=(canonical_source, Path(sys.prefix), Path(sys.base_prefix)),
+        read_only_paths=(
+            canonical_source,
+            *interpreter_read_roots(),
+        ),
         artifact_output_directory=canonical_output,
         seed=seed,
         limits=SandboxLimits(
