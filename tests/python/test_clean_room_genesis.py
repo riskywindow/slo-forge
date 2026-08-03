@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import shutil
 import tarfile
 from pathlib import Path
 from types import ModuleType
@@ -86,6 +87,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, str, str, Path, Path, Path]:
                 "kernel_speedup_claim_count": 0,
                 "capsule_path": str(manifest),
                 "capsule_digest": capsule_digest,
+                "accepted_genome_hash": "c" * 64,
                 "output_directory": str(demo),
                 "report_path": str(report),
                 "ui_bundle_path": str(ui),
@@ -105,6 +107,29 @@ def _fixture(tmp_path: Path) -> tuple[Path, str, str, Path, Path, Path]:
         ),
         encoding="utf-8",
     )
+    wheel_capsule = root / "artifacts/genesis/wheel-capsule"
+    shutil.copytree(capsule_root, wheel_capsule)
+    wheel_context = root / "artifacts/genesis/wheel-capsule.validation-context.json"
+    wheel_context.write_text("{}\n", encoding="utf-8")
+    wheel_validation = root / "artifacts/genesis/wheel-capsule-validation.json"
+    wheel_validation.write_text(
+        json.dumps(
+            {
+                "capsule_digest": {"algorithm": "sha256", "value": capsule_digest},
+                "candidate_genome_hash": "c" * 64,
+                "integrity_valid": True,
+                "contract_compatible": True,
+                "evidence_complete": True,
+                "local_evolution_eligible": True,
+                "promotion_eligible": False,
+                "external_production_eligible": False,
+                "hardware_backed": False,
+                "issues": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     log = root / "clean.log"
     wheel = root / "dist/sloforge.whl"
     wheel.parent.mkdir()
@@ -117,6 +142,15 @@ def _fixture(tmp_path: Path) -> tuple[Path, str, str, Path, Path, Path]:
         context.write_text("{}\n", encoding="utf-8")
         archive.add(context, arcname="artifacts/genesis/demo/capsule.validation-context.json")
         archive.add(capsule_root, arcname="artifacts/genesis/demo/capsule")
+        archive.add(
+            wheel_context,
+            arcname="artifacts/genesis/wheel-capsule.validation-context.json",
+        )
+        archive.add(
+            wheel_validation,
+            arcname="artifacts/genesis/wheel-capsule-validation.json",
+        )
+        archive.add(wheel_capsule, arcname="artifacts/genesis/wheel-capsule")
         archive.add(synthbench, arcname="artifacts/synthbench/smoke")
     return root, revision, source_tree, log, wheel, evidence_bundle
 
@@ -160,6 +194,26 @@ def test_clean_room_validator_rejects_tampered_retained_artifact(tmp_path: Path)
     simulation = root / "artifacts/genesis/demo/capsule/artifacts/simulation.json"
     simulation.write_text('{"comparison_permitted":true}\n', encoding="utf-8")
     with pytest.raises(ValueError, match="artifact digest mismatch"):
+        _validator().validate(
+            root=root,
+            revision=revision,
+            source_tree=source_tree,
+            log=log,
+            wheel=wheel,
+            evidence_bundle=evidence_bundle,
+        )
+
+
+def test_clean_room_validator_rejects_failed_installed_wheel_validation(
+    tmp_path: Path,
+) -> None:
+    root, revision, source_tree, log, wheel, evidence_bundle = _fixture(tmp_path)
+    validation_path = root / "artifacts/genesis/wheel-capsule-validation.json"
+    validation = json.loads(validation_path.read_text(encoding="utf-8"))
+    validation["evidence_complete"] = False
+    validation["issues"] = [{"code": "evidence_stale"}]
+    validation_path.write_text(json.dumps(validation), encoding="utf-8")
+    with pytest.raises(ValueError, match="evidence_complete"):
         _validator().validate(
             root=root,
             revision=revision,
