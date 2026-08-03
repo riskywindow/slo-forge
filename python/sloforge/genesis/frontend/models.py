@@ -67,8 +67,7 @@ class ScalarDomain(FrontendModel):
     @model_validator(mode="after")
     def validate_domain(self) -> Self:
         if any(
-            value is not None and not math.isfinite(value)
-            for value in (self.minimum, self.maximum)
+            value is not None and not math.isfinite(value) for value in (self.minimum, self.maximum)
         ):
             raise ValueError("scalar bounds must be finite")
         if self.minimum is not None and self.maximum is not None and self.maximum < self.minimum:
