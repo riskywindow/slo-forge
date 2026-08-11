@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from click import unstyle
 from typer.testing import CliRunner
 
 from sloforge.cli.main import app
@@ -137,7 +138,7 @@ def test_fabric_export_cli_rejects_invalid_target_without_output(tmp_path: Path)
     )
 
     assert result.exit_code == 2
-    assert "Invalid value for '--target'" in result.output
+    assert "Invalid value for '--target'" in unstyle(result.output)
     assert not output.exists()
 
 

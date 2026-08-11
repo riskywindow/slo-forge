@@ -55,6 +55,11 @@ jobs:
           toolchain: "1.93.1"
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@42dc69e1aa15d09112580998cf2ef0119e2e91ae # v2
+      - name: Install Linux sandbox dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends bubblewrap
+          bwrap --version
       - run: make bootstrap
       - run: make check
       - run: make demo

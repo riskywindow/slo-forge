@@ -105,6 +105,15 @@ def test_observed_records_disagreement_instead_of_choosing_source() -> None:
     assert fact.value is None
 
 
+@pytest.mark.parametrize("raw", [None, "", "invalid", "-1", "0"])
+def test_unavailable_sysfs_rate_is_not_treated_as_a_measurement(raw: str | None) -> None:
+    assert discovery_module._parse_positive_int(raw) is None
+
+
+def test_positive_sysfs_rate_is_preserved() -> None:
+    assert discovery_module._parse_positive_int("100000") == 100_000
+
+
 def test_current_host_discovery_has_provenance_and_explicit_unknowns(tmp_path: Path) -> None:
     graph = discover_topology_records(topology_id="test-current-host")
     assert graph.nodes[0].kind is NodeKind.HOST

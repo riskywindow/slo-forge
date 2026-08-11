@@ -119,6 +119,11 @@ def _parse_int(value: str | None) -> int | None:
         return None
 
 
+def _parse_positive_int(value: str | None) -> int | None:
+    parsed = _parse_int(value)
+    return parsed if parsed is not None and parsed > 0 else None
+
+
 def _pcie_generation(speed: str | None) -> int | None:
     if speed is None:
         return None
@@ -655,7 +660,9 @@ def discover_topology_records(*, topology_id: str | None = None) -> DiscoveryTop
         if ifname == "lo":
             continue
         node_id = f"{host_id}/nic/{ifname}"
-        speed_mbps = _parse_int(_read_text(Path("/sys/class/net") / ifname / "speed"))
+        # Linux exposes -1 when a device's link speed is unavailable. Preserve that
+        # epistemic state as unknown instead of producing an invalid negative rate.
+        speed_mbps = _parse_positive_int(_read_text(Path("/sys/class/net") / ifname / "speed"))
         carrier = _parse_int(_read_text(Path("/sys/class/net") / ifname / "carrier"))
         nic_device = Path("/sys/class/net") / ifname / "device"
         nic_pci_bus = nic_device.resolve().name if nic_device.exists() else None

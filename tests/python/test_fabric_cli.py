@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from click import unstyle
 from typer.testing import CliRunner
 
 from sloforge.autopsy import (
@@ -168,7 +169,7 @@ def test_fabric_benchmark_never_hides_synthetic_fallback(tmp_path: Path) -> None
         ],
     )
     assert result.exit_code == 2
-    assert "--synthetic for fixtures" in result.output
+    assert "--synthetic for fixtures" in unstyle(result.output)
 
 
 def _fake_nccl_executable(tmp_path: Path, *, exit_code: int = 0) -> Path:
