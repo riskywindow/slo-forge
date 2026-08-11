@@ -1,8 +1,76 @@
 # SLOForge
 
-SLOForge is an SLO-driven inference deployment compiler and adaptive runtime. It turns a typed model, workload, hardware catalog, price, profiling budget, and latency/goodput/availability constraints into a versioned `DeploymentPlan`, an uncertainty-aware Pareto frontier, deployable artifacts, and a hash-bound `EvidenceBundle`.
+**An SLO-driven compiler and adaptive runtime for LLM inference deployments.**
 
-It is not an LLM proxy or a YAML generator. The compiler performs memory feasibility pruning, measured hardware and engine profiling, service-curve calibration, budgeted candidate search, topology/routing/admission/autoscaling lowering, deployment validation, replay, fault injection, and evidence-backed reporting. Modal and Baseten Truss are optional output targets; the local compiler, Rust simulator, and Rust gateway have no cloud dependency.
+SLOForge compiles a typed model, workload, hardware, cost, and SLO contract into a versioned
+`DeploymentPlan`, an uncertainty-aware Pareto frontier, deployable artifacts, and a hash-bound
+`EvidenceBundle`. It owns feasibility analysis, profiler orchestration, service-curve calibration,
+constrained search, deployment lowering, replay, fault injection, and validation rather than acting
+as an LLM proxy or manifest generator.
+
+The checked-in flagship evidence is a deterministic CPU/mock vertical slice: it runs real Rust
+backend and gateway processes while keeping model behavior synthetic. GPU, cloud, and multi-node
+paths are either unexercised or validated only at their explicitly documented adapter boundaries;
+the repository does not treat those paths as measured production results.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    F[Model + workload + hardware + SLO + budget] --> IR[Typed versioned frontend IR]
+    IR --> P[Feasibility and profiling passes]
+    P --> M[Calibrated service curves and uncertainty]
+    M --> O[Constrained multi-objective optimizer]
+    O --> DP[DeploymentPlan + rejected alternatives]
+    DP --> B{Backends}
+    B --> L[Local / Docker]
+    B --> K[Kubernetes / Helm]
+    B --> C[Modal / Truss]
+    DP --> R[Rust gateway + digital twin]
+    R --> T[Replay + telemetry + fault injection]
+    T --> CT[Predictive controller / rollback]
+    CT --> E[EvidenceBundle + static report + local UI]
+```
+
+Python owns profiling orchestration, modeling, optimization, control experiments, diagnosis,
+lowering, and reports. Rust owns the asynchronous streaming data plane, bounded telemetry, load
+generation, and deterministic simulation. Their primary boundary is canonical, versioned JSON over
+a subprocess protocol. See [Architecture](docs/ARCHITECTURE.md) and
+[ADR 0001](docs/adr/0001-rust-python-boundary.md).
+
+## Implemented surface
+
+- **Compiler:** typed Pydantic/Serde IR, memory feasibility pruning, budgeted profiling, calibrated
+  service models, constrained multi-objective search, rejection explanations, and deployment
+  lowering.
+- **Runtime and twin:** an Axum/Tokio streaming gateway plus deterministic Rust simulation for
+  replay, cancellation, routing, bounded queues, failures, and controller experiments.
+- **Evidence:** raw samples, environment and command provenance, canonical hashes, rejected
+  alternatives, static reports, and fail-closed artifact validation. The core
+  [final report](docs/reports/FINAL_REPORT.md) records the exercised scope.
+- **Deployment outputs:** local and Docker configurations, a compact Kubernetes/Helm target, and
+  offline Modal and Baseten Truss generation. See [Limitations](docs/LIMITATIONS.md) for the exact
+  execution boundary.
+
+| Extension | Implemented focus | Evidence boundary |
+|---|---|---|
+| **Fabric** | topology-aware physical planning, a contention-aware Rust twin, causal diagnosis, and guarded recovery | synthetic multi-node fixtures; no GPU/RDMA execution ([report](docs/reports/FABRIC_FINAL_REPORT.md)) |
+| **Genesis** | typed inference genomes, bounded synthesis, independent verification, lineage, and guarded promotion | local CPU/reference fixtures; no GPU or live deployment ([report](docs/reports/GENESIS_FINAL_REPORT.md)) |
+| **Continuum** | versioned execution-state capsules, conversion planning, pre-copy transfer, fenced cutover, and recovery | deterministic CPU adapters; live GPU/runtime migration unexercised ([report](docs/reports/CONTINUUM_FINAL_REPORT.md)) |
+| **Helix** | coordinated model/environment branching, evidence-linked training, promotion gates, and session pinning | deterministic local CPU/synthetic evaluation ([report](docs/reports/HELIX_FINAL_REPORT.md)) |
+
+## Start here
+
+```console
+make bootstrap
+make check
+make demo
+```
+
+No GPU, model download, cloud account, or credentials are required. See the
+[three-minute CPU quickstart](#three-minute-cpu-quickstart),
+[reproducibility guide](docs/REPRODUCIBILITY.md), and [limitations](docs/LIMITATIONS.md) before
+interpreting the generated metrics.
 
 ## SLOForge Helix
 
@@ -104,27 +172,6 @@ The compatibility artifact contains both the rejected changed-state-producer reu
 | GPU, RDMA, multi-node | unexercised; no performance claim |
 
 The multi-seed benchmark retains raw artifacts, commands, software and hardware manifests, negative results, and 95% confidence intervals while keeping observed-host and synthetic-protocol metrics separate. Start with [the Continuum architecture](docs/continuum/ARCHITECTURE.md), [demo script](docs/continuum/DEMO_SCRIPT.md), [compatibility rules](docs/continuum/COMPATIBILITY.md), [security model](docs/continuum/SECURITY.md), and [limitations](docs/continuum/LIMITATIONS.md).
-
-## Architecture
-
-```mermaid
-flowchart LR
-    F[Model + workload + hardware + SLO + budget] --> IR[Typed versioned frontend IR]
-    IR --> P[Feasibility and profiling passes]
-    P --> M[Calibrated service curves and uncertainty]
-    M --> O[Constrained multi-objective optimizer]
-    O --> DP[DeploymentPlan + rejected alternatives]
-    DP --> B{Backends}
-    B --> L[Local / Docker]
-    B --> K[Kubernetes / Helm]
-    B --> C[Modal / Truss]
-    DP --> R[Rust gateway + digital twin]
-    R --> T[Replay + telemetry + chaos]
-    T --> CT[Predictive controller / rollback]
-    CT --> E[EvidenceBundle + static report + local UI]
-```
-
-Python owns profiling orchestration, statistical models, optimization, control experiments, diagnosis, lowering, and reports. Rust owns the asynchronous streaming data plane, bounded telemetry, load generation, and deterministic discrete-event simulation. Their primary boundary is canonical JSON over a stable subprocess protocol: it is debuggable, language-neutral, and keeps a Python crash outside the latency-sensitive gateway process. See [Architecture](docs/ARCHITECTURE.md) and [ADR 0001](docs/adr/0001-rust-python-boundary.md).
 
 ## SLOForge Genesis
 
@@ -280,7 +327,7 @@ The checked CPU-only Fabric evaluation retains negative results. Across 180 synt
 
 On this checked-in development host, topology discovery and local memory profiling are hardware-backed, but NVIDIA GPU, NVLink, NCCL, RDMA, InfiniBand/RoCE, and multi-node runtime execution are unavailable. Those adapters are version-gated and fixture-tested; the repository does not present synthetic measurements as hardware results. See the [Fabric architecture](docs/fabric/ARCHITECTURE.md), [Autopsy diagnosis model](docs/autopsy/DIAGNOSIS.md), [recovery safety model](docs/recovery/SAFETY.md), [Fabric limitations](docs/FABRIC_LIMITATIONS.md), and [extension report](paper/fabric_extension/SLOFORGE_FABRIC.md).
 
-Runtime lowering is deliberately fail closed. Direct vLLM and SGLang plans reject replicas spanning hosts; tagged NVIDIA Dynamo v1beta1 DGD is the supported multi-node engine path. vLLM expert parallelism must match the runtime TP-by-DP product, SGLang expert parallelism never implicitly enables DP attention, native vLLM NIXL transfer flags remain separate from Dynamo wrapper flags, and generic Kubernetes multi-node export is rejected without an atomic gang contract. Modal and Truss receive advisory metadata only. Exact reviewed versions, fields, and unexercised boundaries are in [Runtime adapters](docs/fabric/RUNTIME_ADAPTERS.md) and [the adapter review](RUNTIME_ADAPTER_REVIEW.md).
+Runtime lowering is deliberately fail closed. Direct vLLM and SGLang plans reject replicas spanning hosts; tagged NVIDIA Dynamo v1beta1 DGD is the supported multi-node engine path. vLLM expert parallelism must match the runtime TP-by-DP product, SGLang expert parallelism never implicitly enables DP attention, native vLLM NIXL transfer flags remain separate from Dynamo wrapper flags, and generic Kubernetes multi-node export is rejected without an atomic gang contract. Modal and Truss receive advisory metadata only. Exact reviewed versions, fields, and unexercised boundaries are in [Runtime adapters](docs/fabric/RUNTIME_ADAPTERS.md) and [the adapter review](docs/reviews/fabric/RUNTIME_ADAPTER_REVIEW.md).
 
 ## Three-minute CPU quickstart
 

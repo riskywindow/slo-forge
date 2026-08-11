@@ -7,7 +7,7 @@ Date: 2026-08-02 (America/Los_Angeles)
 - Final reviewed implementation ancestry: `93e7818b88dd08f177eba97df75122855d83885a`
 - Clean-room validated release commit: `93e7818b88dd08f177eba97df75122855d83885a`
 - Clean-room validated source tree: `0df798cb11520cf03d54b374308ab49886067e2b`
-- Final report publication commit: resolve with `git log -1 --format=%H -- GENESIS_FINAL_REPORT.md`
+- Final report publication commit: resolve with `git log -1 --format=%H -- docs/reports/GENESIS_FINAL_REPORT.md`
 
 This report distinguishes local CPU measurements, deterministic synthetic/model evidence, bounded
 verification, and unexercised hardware or external paths. It claims neither universal correctness,

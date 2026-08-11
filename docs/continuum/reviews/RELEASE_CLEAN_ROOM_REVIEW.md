@@ -153,7 +153,7 @@ Use an explicit allowlist, then inspect the staged set:
 
 ```bash
 git add -- \
-  Cargo.toml Cargo.lock Makefile README.md EXECUTION_LEDGER.md pyproject.toml \
+  Cargo.toml Cargo.lock Makefile README.md docs/reports/EXECUTION_LEDGER.md pyproject.toml \
   python/sloforge/cli/main.py python/sloforge/cli/continuum.py \
   python/sloforge/continuum adapters/continuum \
   crates/sloforge-continuum-ir crates/sloforge-state-transaction \

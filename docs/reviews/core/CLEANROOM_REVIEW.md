@@ -8,7 +8,7 @@ Scope: source bootstrap, Python/Rust packaging, lock files, CI, UI installation,
 
 The credential-free source bootstrap, Python wheel/sdist, Python/Rust checks, CPU-safe GPU status command and Linux Docker streaming smoke pass after the fixes below. A wheel installed into an independent virtual environment can generate and validate a seeded trace. The Docker test builds the gateway from a fresh Linux build stage, starts a mock backend and gateway, waits for both health checks, and observes the streamed `[DONE]` marker.
 
-The two release-process caveats found during this review were resolved before publication: source revision `2c889e6956ac73a1a530f1abb1d7407f70219ffe` was frozen and clean-archive bootstrapped, and the regenerated repository-relative CPU evidence was retained. The subsequent release gates are recorded in `CLEAN_REVISION_AUDIT.md` and `FINAL_REPORT.md`.
+The two release-process caveats found during this review were resolved before publication: source revision `2c889e6956ac73a1a530f1abb1d7407f70219ffe` was frozen and clean-archive bootstrapped, and the regenerated repository-relative CPU evidence was retained. The subsequent release gates are recorded in `docs/reviews/core/CLEAN_REVISION_AUDIT.md` and `docs/reports/FINAL_REPORT.md`.
 
 ## Concrete fixes applied
 

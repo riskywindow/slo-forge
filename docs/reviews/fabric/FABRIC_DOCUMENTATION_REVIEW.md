@@ -52,7 +52,7 @@ The review inspected every required document:
 The review also reconciled these implementation reviews:
 `ARCHITECTURE_DISTRIBUTED_NETWORK_REVIEW.md`,
 `SIMULATOR_OPTIMIZER_REVIEW.md`, `AUTOPSY_STATISTICAL_REVIEW.md`,
-`RUNTIME_ADAPTER_REVIEW.md`, and `SECURITY_REVIEW.md`.
+`RUNTIME_ADAPTER_REVIEW.md`, and `docs/reviews/core/SECURITY_REVIEW.md`.
 
 ## Artifact and claim reconciliation
 

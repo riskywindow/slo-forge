@@ -38,7 +38,8 @@ def _fixture(tmp_path: Path) -> tuple[Path, str, str, Path, Path, Path]:
     source_tree = "b" * 40
     (root / ".sloforge-source-commit").write_text(revision + "\n", encoding="utf-8")
     (root / ".sloforge-source-tree").write_text(source_tree + "\n", encoding="utf-8")
-    (root / "GENESIS_FINAL_REPORT.md").write_text(
+    (root / "docs/reports").mkdir(parents=True)
+    (root / "docs/reports/GENESIS_FINAL_REPORT.md").write_text(
         "435a04799a831c3d19fce18eb816b206d23778d7\n"
         "## Known limitations and unmet evaluation gates\n",
         encoding="utf-8",

@@ -70,9 +70,9 @@ deploy = [
 sloforge = "sloforge.cli.main:app"
 
 [project.urls]
-Documentation = "https://github.com/sloforge/sloforge/tree/main/docs"
-Issues = "https://github.com/sloforge/sloforge/issues"
-Repository = "https://github.com/sloforge/sloforge"
+Documentation = "https://github.com/riskywindow/slo-forge/tree/main/docs"
+Issues = "https://github.com/riskywindow/slo-forge/issues"
+Repository = "https://github.com/riskywindow/slo-forge"
 
 [tool.hatch.build.targets.wheel]
 packages = ["python/sloforge"]

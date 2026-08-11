@@ -87,4 +87,4 @@ No NVIDIA GPU, paid cloud resource, Kubernetes cluster, or credentials were avai
 - Final live demo artifact audit — selected plan/topology matched gateway runtime; 120/120 streaming requests completed; five required live fault operations were recorded; 27/27 indexed SHA-256 values and 24/24 evidence hashes matched.
 - Final release gates — `make check`, `make demo`, `make benchmark-cpu`, `make benchmark-gpu`, `make docker-smoke`, the report round trip, clean-archive `make bootstrap`, stale-claim scan, path/secret scan, and `git diff --check` passed. Python recorded 67 passes with three expected GPU/Torch skips, Rust recorded 62 passes, and the UI recorded 11 passes plus a production build.
 
-All final metric and resume claims were regenerated from that post-review artifact set. The remaining medium-severity boundaries above are retained in `FINAL_REPORT.md` and `docs/LIMITATIONS.md`.
+All final metric and resume claims were regenerated from that post-review artifact set. The remaining medium-severity boundaries above are retained in `docs/reports/FINAL_REPORT.md` and `docs/LIMITATIONS.md`.

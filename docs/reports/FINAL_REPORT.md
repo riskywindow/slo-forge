@@ -81,6 +81,6 @@ H1 and H2 are not claimed as established: no fresh real-GPU experiment campaign 
 - Independent `benchmark-cpu` raw evidence and source reports: `artifacts/cpu-demo/`, `reports/cpu-demo/`; promoted benchmark summary and report outputs: `reports/cpu-benchmark.json`, `reports/evaluation.md`, `reports/evaluation.html`, `reports/evaluation.json`
 - Prometheus/OpenTelemetry/Chrome outputs and plots: `reports/demo/metrics.prom`, `reports/demo/otel-traces.json`, `reports/demo/trace.json`, `reports/demo/pareto.svg`, `reports/demo/controller.svg`
 - GPU unavailable record and reproduction commands: `reports/gpu/`
-- Review records: `FINAL_ADVERSARIAL_REVIEW.md`, `SECURITY_REVIEW.md`, `CLEANROOM_REVIEW.md`, `CLEAN_REVISION_AUDIT.md`, and `docs/REVIEWS.md`
+- Review records: `docs/reviews/core/FINAL_ADVERSARIAL_REVIEW.md`, `docs/reviews/core/SECURITY_REVIEW.md`, `docs/reviews/core/CLEANROOM_REVIEW.md`, `docs/reviews/core/CLEAN_REVISION_AUDIT.md`, and `docs/REVIEWS.md`
 
 The checked evidence is reproducible, repository-relative, and bound to the exact source revision that generated it. Later documentation/artifact publication commits do not change that source provenance.

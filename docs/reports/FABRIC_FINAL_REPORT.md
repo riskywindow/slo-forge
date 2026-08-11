@@ -24,7 +24,7 @@ and `2891a004ec1a88b6c580478ddcea3921f0ff558c8f14c24868a7cd0a139d3d17`.
 - Baseline host: Apple M4 Pro, macOS 15.6.1 arm64, 12 logical CPUs, 24 GiB RAM.
   No NVIDIA GPU, CUDA toolkit, NCCL tests binary, RDMA device, privileged-probe
   authorization, cloud credentials, or GPU budget was available.
-- Baseline validation recorded in `EXECUTION_LEDGER.md`: locked bootstrap
+- Baseline validation recorded in `docs/reports/EXECUTION_LEDGER.md`: locked bootstrap
   passed; `make check` passed with 67 Python tests plus 3 expected no-Torch
   skips, 62 Rust tests, 11 UI tests and a production build; `make demo` passed
   with 120 live gateway requests and 120 simulated requests.
@@ -323,7 +323,7 @@ rule, or production mutation was created by this work.
 
 ## Artifact and documentation locations
 
-- Baseline and execution history: `EXECUTION_LEDGER.md`, tag
+- Baseline and execution history: `docs/reports/EXECUTION_LEDGER.md`, tag
   `sloforge-fabric-baseline-c67e082`.
 - Flagship bundle: `artifacts/fabric-demo/manifest.json` and
   `reports/fabric-demo/`.
@@ -350,12 +350,16 @@ rule, or production mutation was created by this work.
 - Cross-cutting security, reproducibility, limits, related work, demo, interview,
   and resume material: `docs/FABRIC_*.md`.
 - Paper extension: `paper/fabric_extension/SLOFORGE_FABRIC.md`.
-- Reviews: `ARCHITECTURE_DISTRIBUTED_NETWORK_REVIEW.md`,
-  `SIMULATOR_OPTIMIZER_REVIEW.md`, `AUTOPSY_STATISTICAL_REVIEW.md`,
-  `RUNTIME_ADAPTER_REVIEW.md`, `FABRIC_GPU_PERFORMANCE_REVIEW.md`,
-  `FABRIC_SECURITY_CONCURRENCY_REVIEW.md`, `FABRIC_UI_REVIEW.md`,
-  `FABRIC_DOCUMENTATION_REVIEW.md`, `FABRIC_CLEANROOM_REVIEW.md`, and
-  `FABRIC_FINAL_ADVERSARIAL_REVIEW.md`.
+- Reviews: `docs/reviews/fabric/ARCHITECTURE_DISTRIBUTED_NETWORK_REVIEW.md`,
+  `docs/reviews/fabric/SIMULATOR_OPTIMIZER_REVIEW.md`,
+  `docs/reviews/fabric/AUTOPSY_STATISTICAL_REVIEW.md`,
+  `docs/reviews/fabric/RUNTIME_ADAPTER_REVIEW.md`,
+  `docs/reviews/fabric/FABRIC_GPU_PERFORMANCE_REVIEW.md`,
+  `docs/reviews/fabric/FABRIC_SECURITY_CONCURRENCY_REVIEW.md`,
+  `docs/reviews/fabric/FABRIC_UI_REVIEW.md`,
+  `docs/reviews/fabric/FABRIC_DOCUMENTATION_REVIEW.md`,
+  `docs/reviews/fabric/FABRIC_CLEANROOM_REVIEW.md`, and
+  `docs/reviews/fabric/FABRIC_FINAL_ADVERSARIAL_REVIEW.md`.
 
 The final flagship manifest lists 140 artifacts; every file
 existed and all 140 SHA-256 values matched. The manifest itself has SHA-256
@@ -381,5 +385,5 @@ Its physical plan and evaluation record the frozen source `ca39d5e`.
 | Clean archive | **PASS** | `make clean-room-test` passed from committed publication `4eb0066`, including the pre-generation archive contracts. |
 | Source quality scan | **PASS** | No core lexical match and no bare `pass`; remaining lexical matches occur only in historical audits and this completed gate description. |
 | Safety and release hygiene | **PASS** | No tracked credential-like file, paid resource, external mutation, fault rule, labeled container, or orphan SLOForge process; `git diff --check` passed. |
-| Fresh adversarial review | **PASS** | `FABRIC_FINAL_ADVERSARIAL_REVIEW.md`: no unresolved high severity; verdict is deep production-shaped reference system with explicit hardware boundaries. |
+| Fresh adversarial review | **PASS** | `docs/reviews/fabric/FABRIC_FINAL_ADVERSARIAL_REVIEW.md`: no unresolved high severity; verdict is deep production-shaped reference system with explicit hardware boundaries. |
 | Final report verification | **PASS** | Paths, file hashes, source provenance, counts, metrics, negative results, and unexercised paths were reconciled against the published filesystem. |

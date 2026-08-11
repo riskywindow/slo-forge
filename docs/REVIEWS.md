@@ -2,7 +2,7 @@
 
 Review date: 2026-08-01 (America/Los_Angeles)
 
-This document records the initial adversarial review and the disposition of every finding after the final hardening run. The release evidence is the post-review run in `artifacts/demo` and `reports/demo`, generated from source revision `2c889e6956ac73a1a530f1abb1d7407f70219ffe`. Pre-hardening artifact values were deliberately removed so they cannot be mistaken for current results. Detailed implementation evidence is in the root `FINAL_ADVERSARIAL_REVIEW.md`.
+This document records the initial adversarial review and the disposition of every finding after the final hardening run. The release evidence is the post-review run in `artifacts/demo` and `reports/demo`, generated from source revision `2c889e6956ac73a1a530f1abb1d7407f70219ffe`. Pre-hardening artifact values were deliberately removed so they cannot be mistaken for current results. Detailed implementation evidence is in the [final adversarial review](reviews/core/FINAL_ADVERSARIAL_REVIEW.md).
 
 ## Final verdict
 

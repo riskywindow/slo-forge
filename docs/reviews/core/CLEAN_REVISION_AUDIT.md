@@ -153,7 +153,7 @@ cd "$audit_dir"
 make bootstrap
 ```
 
-Result: **PASS** (exit 0). The clean archive created a new locked Python environment and installed 114 packages, built all five Rust workspace crates from `Cargo.lock` in a fresh target directory, and installed 231 UI packages from `package-lock.json`; npm reported zero vulnerabilities. This addendum covers the exact source revision embedded in the final evidence bundle. The full lint/test/demo/Docker matrix was subsequently executed in the integration checkout and is recorded in `FINAL_REPORT.md`.
+Result: **PASS** (exit 0). The clean archive created a new locked Python environment and installed 114 packages, built all five Rust workspace crates from `Cargo.lock` in a fresh target directory, and installed 231 UI packages from `package-lock.json`; npm reported zero vulnerabilities. This addendum covers the exact source revision embedded in the final evidence bundle. The full lint/test/demo/Docker matrix was subsequently executed in the integration checkout and is recorded in `docs/reports/FINAL_REPORT.md`.
 
 The earlier audit remains useful because it additionally exercised isolated wheel/sdist installation, trace roundtrip, source-only secret/path scanning, and the production UI build. No source manifest or packaging regression was introduced between the audited revisions.
 

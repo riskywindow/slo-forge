@@ -27,11 +27,11 @@ make continuum-fork-demo
 For a scriptable live migration and independent verification:
 
 ```bash
-uv run sloforge continuum migrate --mode pre-copy --seed 317 \
+uv run --locked sloforge continuum migrate --mode pre-copy --seed 317 \
   --session session-flagship-001 --output artifacts/continuum/flagship --reset
-uv run sloforge continuum migration verify \
+uv run --locked sloforge continuum migration verify \
   --artifact artifacts/continuum/flagship/flagship.json
-uv run sloforge continuum compatibility \
+uv run --locked sloforge continuum compatibility \
   --artifact artifacts/continuum/flagship/flagship.json \
   --output artifacts/continuum/flagship/compatibility.json
 ```
@@ -50,4 +50,7 @@ The compatibility artifact records both the rejected changed-state-producer reus
 
 The multi-seed benchmark preserves raw artifacts, exact commands, manifests, negative results, and 95% confidence intervals while keeping observed-host and synthetic-protocol metrics separate. Generated reports, rather than README prose, are the source of numeric benchmark claims.
 
-Start with [the architecture](docs/continuum/ARCHITECTURE.md), [the demo script](docs/continuum/DEMO_SCRIPT.md), [compatibility rules](docs/continuum/COMPATIBILITY.md), and [limitations](docs/continuum/LIMITATIONS.md). GPU, RDMA, multi-node, vLLM, and SGLang execution status is artifact-backed; no unavailable hardware path is represented as exercised.
+Start with [the architecture](ARCHITECTURE.md), [the demo script](DEMO_SCRIPT.md),
+[compatibility rules](COMPATIBILITY.md), and [limitations](LIMITATIONS.md). GPU, RDMA,
+multi-node, vLLM, and SGLang execution status is artifact-backed; no unavailable hardware path is
+represented as exercised.

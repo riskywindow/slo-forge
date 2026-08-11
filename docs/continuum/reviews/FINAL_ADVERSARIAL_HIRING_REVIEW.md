@@ -88,7 +88,7 @@ GPU-marker, Docker archive-context, and clean-room scripts are repaired. This it
 is closed only when the final source is committed, CPU/demo/model-check evidence
 is regenerated with that commit, metric bullets are populated solely from those
 new hash-validated artifacts, and `make continuum-clean-room-test` passes from the
-committed archive. `CONTINUUM_FINAL_REPORT.md` must bind the final commit, commands,
+committed archive. `docs/reports/CONTINUUM_FINAL_REPORT.md` must bind the final commit, commands,
 artifact digests, clean-room result, negative results, and unexercised paths.
 
 ## Remaining medium-severity limitations and completion gaps

@@ -94,7 +94,7 @@ def validate(
     if (root / ".sloforge-source-tree").read_text(encoding="utf-8").strip() != source_tree:
         raise ValueError("extracted source tree does not match the requested tree")
 
-    final_report = root / "GENESIS_FINAL_REPORT.md"
+    final_report = root / "docs/reports/GENESIS_FINAL_REPORT.md"
     final_report_text = final_report.read_text(encoding="utf-8")
     if "435a04799a831c3d19fce18eb816b206d23778d7" not in final_report_text:
         raise ValueError("final report does not bind the recorded baseline commit")

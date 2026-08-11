@@ -127,7 +127,7 @@ def test_public_evaluation_claims_match_current_result() -> None:
         ROOT / "docs/FABRIC_RESUME_BULLETS.md",
         ROOT / "docs/FABRIC_LIMITATIONS.md",
         ROOT / "paper/fabric_extension/SLOFORGE_FABRIC.md",
-        ROOT / "FABRIC_FINAL_ADVERSARIAL_REVIEW.md",
+        ROOT / "docs/reviews/fabric/FABRIC_FINAL_ADVERSARIAL_REVIEW.md",
     )
     for path in current_documents:
         content = path.read_text(encoding="utf-8")
