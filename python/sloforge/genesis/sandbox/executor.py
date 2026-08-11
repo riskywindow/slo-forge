@@ -94,12 +94,12 @@ def detect_capabilities() -> SandboxCapabilities:
             environment_sanitization=IsolationStatus.ENFORCED,
             cpu_limit=IsolationStatus.ENFORCED,
             memory_limit=IsolationStatus.BEST_EFFORT,
-            process_limit=IsolationStatus.BEST_EFFORT,
+            process_limit=IsolationStatus.UNAVAILABLE,
             output_limit=IsolationStatus.ENFORCED,
             child_cleanup=IsolationStatus.ENFORCED,
             limitations=(
                 "bubblewrap availability does not guarantee user namespaces are enabled",
-                "RLIMIT_NPROC is user-scoped rather than a cgroup process counter",
+                "process-count isolation requires an outer cgroup because RLIMIT_NPROC is user-scoped",
             ),
         )
     return SandboxCapabilities(
@@ -355,11 +355,11 @@ def _limit_resources(request: SandboxRequest) -> None:
     # assurance. Linux retains the address-space limit.
     if platform.system() != "Darwin":
         apply_best_effort_limit(resource.RLIMIT_AS, limits.memory_bytes)
-    # macOS RLIMIT_NPROC is per-user; lowering it below the host's current
-    # process count prevents sandbox-exec itself from starting its target.
-    # The macOS policy denies process-fork outright, which is stronger.
-    if platform.system() != "Darwin":
-        apply_best_effort_limit(resource.RLIMIT_NPROC, limits.process_count)
+    # RLIMIT_NPROC is per host UID, not per sandbox. Lowering it in the wrapper
+    # can prevent bubblewrap from creating its namespace whenever the calling
+    # UID already owns more processes than the request's bound. macOS denies
+    # process-fork in its sandbox profile; Linux reports process-count isolation
+    # unavailable and requires an outer cgroup for that boundary.
     apply_required_limit(resource.RLIMIT_FSIZE, limits.artifact_bytes)
     apply_required_limit(resource.RLIMIT_NOFILE, limits.open_files)
 

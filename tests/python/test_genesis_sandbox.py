@@ -103,6 +103,20 @@ def test_no_backend_does_not_claim_detached_child_cleanup(
     assert capabilities.child_cleanup is IsolationStatus.UNAVAILABLE
 
 
+def test_linux_bubblewrap_does_not_claim_a_user_scoped_process_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import sloforge.genesis.sandbox.executor as executor
+
+    monkeypatch.setattr(executor.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(
+        executor.shutil, "which", lambda name: "/usr/bin/bwrap" if name == "bwrap" else None
+    )
+    capabilities = executor.detect_capabilities()
+    assert capabilities.backend is SandboxBackend.LINUX_BUBBLEWRAP
+    assert capabilities.process_limit is IsolationStatus.UNAVAILABLE
+
+
 def test_parent_resource_watchdog_observes_its_process_group() -> None:
     import os
 
@@ -427,10 +441,7 @@ def test_macos_sandbox_denies_generated_child_process(tmp_path: Path) -> None:
     )
     result = execute_sandboxed(_request(source, output, script))
     if result.capabilities.backend is not SandboxBackend.MACOS_SANDBOX_EXEC:
-        assert result.capabilities.process_limit in {
-            IsolationStatus.BEST_EFFORT,
-            IsolationStatus.ENFORCED,
-        }
+        assert result.capabilities.process_limit is IsolationStatus.UNAVAILABLE
         return
     assert result.termination is SandboxTermination.SUCCESS, result.stderr
     assert result.stdout.strip() == "spawn-blocked"

@@ -210,9 +210,10 @@ manifests advertise the trusted sandbox launcher and set direct launch support t
   failure remains fail-closed.
 - OS/runtime files required to start the interpreter remain readable. The workspace/user trust
   roots and undeclared sibling files are denied, but this is not a virtual machine boundary.
-- `RLIMIT_AS`, `RLIMIT_NPROC`, and a userspace RSS watchdog are not cgroup substitutes. Capability
-  records identify best-effort boundaries, and production deployment still requires an outer
-  container/VM memory boundary.
+- `RLIMIT_AS` and a userspace RSS watchdog are not cgroup substitutes. `RLIMIT_NPROC` is scoped to
+  the host UID rather than one sandbox, so the Linux backend does not apply or claim a process-count
+  limit; that boundary requires an outer cgroup. Capability records identify these limitations, and
+  production deployment still requires an outer container/VM resource boundary.
 - Windows has no accepted backend and therefore cannot execute with strict defaults.
 - Linux bubblewrap supplies a private minimal `/dev`. The macOS profile does not create a device
   namespace, so it must not be described as proof that all readable device nodes or ioctls are

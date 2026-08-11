@@ -42,9 +42,11 @@ write confinement, child-process denial, credential sanitization, timeout cleanu
 and symlink rejection. It is deprecated platform machinery, does not create a device namespace, and
 is not a VM boundary. System-readable files outside protected roots may remain readable. The Linux
 bubblewrap adapter unshares namespaces and provides a private `/dev`, but it was not executed on
-Linux in this workspace. If the selected host lacks a supported/working backend, strict execution
-returns `policy_unavailable` without running generated code. Windows strict execution is not
-implemented.
+Linux in the retained release workspace. It deliberately reports process-count isolation as
+unavailable because `RLIMIT_NPROC` is scoped to the host UID; production Linux deployments need an
+outer cgroup for that boundary. If the selected host lacks a supported/working backend, strict
+execution returns `policy_unavailable` without running generated code. Windows strict execution is
+not implemented.
 
 Kernel Lab adds an AST allowlist before sandbox execution, rejecting imports, dynamic loading,
 filesystem/process access, arbitrary attributes, and unexpected functions for that restricted
