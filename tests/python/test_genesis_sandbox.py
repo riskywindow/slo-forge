@@ -19,6 +19,7 @@ from sloforge.genesis.sandbox import (
 )
 from sloforge.genesis.sandbox.executor import (
     _bounded_output,
+    _bubblewrap_command,
     _canonical_paths,
     _macos_firmlink_alias,
     _process_group_rss_bytes,
@@ -55,6 +56,29 @@ def test_interpreter_roots_canonicalize_virtualenv_symlink_spelling(
     assert roots == (canonical.resolve(strict=True),)
     for root in roots:
         _reject_symlink_components(root, label="interpreter root")
+
+
+def test_bubblewrap_mounts_current_interpreter_roots(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sloforge.genesis.sandbox.executor as executor
+
+    virtualenv = tmp_path / "virtualenv"
+    base = tmp_path / "base"
+    working = tmp_path / "working"
+    output = tmp_path / "output"
+    for path in (virtualenv, base, working, output):
+        path.mkdir()
+    monkeypatch.setattr(executor, "interpreter_read_roots", lambda: (virtualenv, base))
+
+    command = _bubblewrap_command(("python", "-V"), (), output, working)
+    read_only_bindings = {
+        (command[index + 1], command[index + 2])
+        for index, item in enumerate(command)
+        if item == "--ro-bind"
+    }
+    assert (str(virtualenv), str(virtualenv)) in read_only_bindings
+    assert (str(base), str(base)) in read_only_bindings
 
 
 def _request(

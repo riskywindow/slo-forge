@@ -297,8 +297,11 @@ def _bubblewrap_command(
         "--tmpfs",
         "/tmp",
     ]
-    runtime_roots = [Path(item) for item in ("/usr", "/bin", "/lib", "/lib64", "/etc")]
-    for path in tuple(runtime_roots) + read_only:
+    runtime_roots = [
+        *(Path(item) for item in ("/usr", "/bin", "/lib", "/lib64", "/etc")),
+        *interpreter_read_roots(),
+    ]
+    for path in dict.fromkeys((*runtime_roots, *read_only)):
         if path.exists():
             command.extend(("--ro-bind", str(path), str(path)))
     command.extend(("--bind", str(output), str(output), "--chdir", str(working), "--"))
