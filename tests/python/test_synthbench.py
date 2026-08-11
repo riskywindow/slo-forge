@@ -349,7 +349,10 @@ def test_integrity_auditor_detects_discarded_sample(tmp_path: Path) -> None:
             warmup_count=0,
             repetitions=2,
             maximum_tasks=1,
-            maximum_runtime_seconds=10.0,
+            # This test exercises evidence accounting, not a performance SLO. Keep
+            # the full request corpus but allow the same bounded CI budget as the
+            # primary CPU-runner coverage now that every request enters a kernel sandbox.
+            maximum_runtime_seconds=30.0,
         ),
         tmp_path / "run",
     )
