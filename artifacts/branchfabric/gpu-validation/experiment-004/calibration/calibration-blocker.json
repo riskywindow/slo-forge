@@ -1,0 +1,58 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-calibration-blocker/v1",
+  "status": "valid-blocker",
+  "terminal": true,
+  "reason": "Both bounded calibration invocations failed before the first capacity probe; no empirical capacity interval exists and the remaining protected budget cannot fund another 424 A100-second calibration reservation plus the 680 A100-second v10 reservation.",
+  "capacity_probe_count": 0,
+  "lambda_1_rps": null,
+  "lambda_2_rps": null,
+  "lambda_spike_rps": null,
+  "selected_load": null,
+  "v10_launch_permitted": false,
+  "scientifically_valid": false,
+  "attempts": [
+    {
+      "attempt_id": "exp004-capacity-s41-v1",
+      "function_call_id": "fc-01KZVP7S0E823VKE1BKXER2B8N",
+      "probe_count": 0,
+      "failure": "controller nested-Pydantic serialization TypeError after both engines became ready",
+      "remote_observed_allocation_seconds": 85.441581288,
+      "conservatively_accounted_gpu_seconds": 424.0,
+      "conversion_artifact": {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/logs/exp004-capacity-s41-v1-failure-charge-conversion.json",
+        "artifact_sha256": "67603f453c97754c175bab591cb05a1920b4f897db1694c249777b6319b994e8"
+      }
+    },
+    {
+      "attempt_id": "exp004-capacity-s41-v2",
+      "function_call_id": "fc-01KZVPV1V8K5GGJV55GW4XNNRN",
+      "probe_count": 0,
+      "failure": "115-second engine-readiness timeout; controller postflight found zero compute processes",
+      "client_timeout_seconds": 212.0,
+      "remote_observed_allocation_seconds": 116.544420033,
+      "conservatively_accounted_gpu_seconds": 424.0,
+      "downloaded_manifest_artifact_count": 9,
+      "conversion_artifact": {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/logs/exp004-capacity-s41-v2-failure-charge-conversion.json",
+        "artifact_sha256": "af8e8b0c4d85578d2992aaa61d210eb49fcac03fcf5b273b182182824f71176b"
+      }
+    }
+  ],
+  "budget": {
+    "hard_additional_gpu_seconds": 7200.0,
+    "settled_additional_gpu_seconds": 6431.795790917997,
+    "active_reservation_count": 0,
+    "remaining_hard_budget_gpu_seconds": 768.2042090820032,
+    "protected_v10_maximum_gpu_seconds": 680.0,
+    "remaining_after_protected_v10_gpu_seconds": 88.2042090820032,
+    "minimum_additional_calibration_reservation_gpu_seconds": 424.0,
+    "another_calibration_while_preserving_v10_fits": false,
+    "budget_terminal": true,
+    "ledger": {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55"
+    }
+  },
+  "conclusion": "Experiment 004 v10 was not launched and no serving-capacity or BranchFabric serving-recovery conclusion is claimed.",
+  "recommended_action": "Stop GPU work under the present authorization; redesign engine-readiness calibration or obtain additional budget before a new immutable calibration attempt."
+}

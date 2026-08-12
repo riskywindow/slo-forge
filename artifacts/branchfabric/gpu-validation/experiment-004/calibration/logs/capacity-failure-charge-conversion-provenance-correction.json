@@ -1,0 +1,35 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-failure-charge-provenance-correction/v1",
+  "status": "applied-as-immutable-supplement",
+  "correction": "In both original conversion records, config.artifact_sha256 was mislabeled: its value is the canonical JSON authorization digest, not the byte SHA-256 of the referenced pretty-printed config file. The original records remain immutable; this supplement supplies both values explicitly.",
+  "records": [
+    {
+      "attempt_id": "exp004-capacity-s41-v1",
+      "config_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/calibration-config-v1.json",
+      "config_file_sha256": "0f26aaeaef2fc9fd7fb544176bc89744aa136ece85a112826a3ef6bef511e336",
+      "canonical_config_sha256": "00971722af6163ad35356a80e0b532298c6d1c569e58d461b887de2605b12493",
+      "mislabeled_original_field": "config.artifact_sha256",
+      "original_conversion_record": {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/logs/exp004-capacity-s41-v1-failure-charge-conversion.json",
+        "artifact_sha256": "67603f453c97754c175bab591cb05a1920b4f897db1694c249777b6319b994e8"
+      }
+    },
+    {
+      "attempt_id": "exp004-capacity-s41-v2",
+      "config_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/calibration-config-v2.json",
+      "config_file_sha256": "bd20fe2d7c0b3d0b3cdacde2acf41442bc5976c0c78362b76ec570978966c2e1",
+      "canonical_config_sha256": "bea032a1ca969c3127e1322d8fb0cfd03c0898da466c98cca37a93df0053fd7b",
+      "mislabeled_original_field": "config.artifact_sha256",
+      "original_conversion_record": {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/logs/exp004-capacity-s41-v2-failure-charge-conversion.json",
+        "artifact_sha256": "af8e8b0c4d85578d2992aaa61d210eb49fcac03fcf5b273b182182824f71176b"
+      }
+    }
+  ],
+  "ledger": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+    "settled_additional_gpu_seconds": 6431.795790917997,
+    "active_reservation_count": 0
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-terminal-review/v1",
+  "reviewer": "independent-adversarial-capacity-reviewer",
+  "verdict": "valid-blocker",
+  "reviewed_at_utc": "2026-08-12T19:31:02Z",
+  "findings": {
+    "v2_manifest_sha256": "a3a397da61ca02391be99e331f92092f65b08df342aeec85f87b0d79ef6994bb",
+    "v2_manifest_artifact_count": 9,
+    "v2_inventory_and_hashes_pass": true,
+    "v2_failure_classification": "engine-readiness-timeout-before-first-probe",
+    "capacity_probe_count": 0,
+    "lambda_1_rps": null,
+    "lambda_2_rps": null,
+    "lambda_spike_rps": null,
+    "v10_launch_permitted": false,
+    "ledger_derived_sum_pass": true,
+    "settled_additional_gpu_seconds": 6431.795790917997,
+    "remaining_hard_budget_gpu_seconds": 768.2042090820032,
+    "active_reservation_count": 0,
+    "retry_plus_v10_budget_deficit_gpu_seconds": 335.7957909179968,
+    "provenance_correction_pass": true,
+    "provider_cleanup_pass": true
+  },
+  "conclusion": "No capacity or serving-recovery conclusion is supported. Another bounded calibration invocation cannot be authorized while preserving the required v10 reservation under the current hard ceiling. The valid-blocker completion contract is satisfied."
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-calibration-plan/v1",
+  "status": "offline-plan-only-no-gpu-consumed",
+  "seed": 41,
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "dtype": "bf16",
+  "vllm_version": "0.23.0",
+  "serving_prompt_tokens": 256,
+  "serving_output_tokens": 64,
+  "allocation": {
+    "container_count": 1,
+    "requested_gpu": "A100-80GB",
+    "gpu_count": 2,
+    "load_each_engine_once": true,
+    "reuse_loaded_engines_across_probes": true,
+    "maximum_allocation_wall_seconds": 212.0,
+    "maximum_gpu_seconds": 424.0,
+    "remote_function_timeout_seconds": 130.0,
+    "controller_timeout_seconds": 125.0,
+    "timing_basis": {
+      "v9_concurrent_engine_load_seconds_approximately": 77.5,
+      "maximum_probe_workload_seconds": 36.75,
+      "controller_cleanup_and_publish_headroom_seconds": 10.75,
+      "remote_function_cleanup_headroom_seconds": 5.0,
+      "v9_client_minus_remote_elapsed_seconds": 80.24962999400387,
+      "remote_function_bound_plus_observed_client_overhead_seconds": 210.24962999400387,
+      "client_timeout_noise_headroom_seconds": 1.75037000599613
+    }
+  },
+  "budget": {
+    "ledger_path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "remaining_before_gpu_seconds": 1616.2042090820032,
+    "calibration_fraction_if_fully_consumed": 0.26234308611337553,
+    "remaining_after_full_calibration_reservation_gpu_seconds": 1192.2042090820032,
+    "v10_existing_maximum_reservation_gpu_seconds": 680.0,
+    "remaining_after_both_full_reservations_gpu_seconds": 512.2042090820032,
+    "reservation_gate": "reserve exactly 424 A100-seconds before Modal spawn; clear only after remote identity, success, returned/downloaded manifest digest, and full artifact inventory validation",
+    "terminal_failure_policy": "retain the full 424 A100-second reservation and write an immutable terminal-failure record",
+    "gpu_cost_upper_bound_usd": 0.294256,
+    "cpu_and_memory_cost_upper_bound_usd": 0.07455616,
+    "total_cost_upper_bound_usd": 0.36881216
+  },
+  "measurement": {
+    "minimal_warmup_seconds_per_probe": 1.0,
+    "minimum_stable_window_seconds": 10.0,
+    "maximum_stable_window_seconds": 10.0,
+    "maximum_probe_count": 3,
+    "rate_grid_rps": [10.0, 15.0, 17.25, 20.0, 23.5, 25.0, 30.0, 35.0],
+    "tracing": "minimal",
+    "request_clock": "one immutable constant-cadence global plan, sharded by exact sequence parity to one bounded independent producer thread per worker",
+    "request_timestamps": "record scheduled, offered, enqueued, admitted, first-token, completion, and terminal timestamps for every planned request",
+    "producer_queue_capacity_per_worker": 256,
+    "fixed_tail_drain_seconds": 1.0,
+    "gpu0_only_routing": "all global request IDs route to gpu0; gpu1 remains idle",
+    "two_gpu_routing": "global sequence parity assigns requests round-robin to gpu0 and gpu1",
+    "queue_depth": "scheduled global arrivals minus global completions at each monotonic sample",
+    "sustainable_gates": [
+      "p95_ttft_seconds <= 2.0",
+      "no persistent positive queue-depth drift",
+      "completed_request_rate_rps >= observed_offered_rate_rps",
+      "configured arrival count and empirical offer cadence/lateness/interarrival/burst behavior verified",
+      "admission timestamps monotonic and non-bursty, with maximum admission lag <= 250 ms",
+      "routing, complete request accounting, and exactly 64 output tokens for every completed request verified",
+      "all measurement requests completed"
+    ],
+    "bounded_probe_termination": [
+      "run exactly the 1-second warmup and 10-second measurement windows",
+      "allow exactly one second of tail drain, then abort admitted unfinished requests",
+      "mark queued requests not admitted and preserve a terminal observation for every planned request",
+      "allow conclusive UNSUSTAINABLE when cadence, routing, and terminal accounting are valid but completed throughput is below offered load",
+      "treat smooth admission lag as overload evidence; treat a 500 ms admission burst pattern as methodologically inconclusive"
+    ]
+  },
+  "adaptive_search": [
+    {
+      "step": 1,
+      "topology": "gpu0-only",
+      "rate_rps": 20.0,
+      "reason": "prior v9 drain throughput places the likely boundary near 20 rps"
+    },
+    {
+      "step": 2,
+      "topology": "gpu0-only",
+      "if_step_1_sustainable": 25.0,
+      "if_step_1_unsustainable": 17.25,
+      "reason": "obtain one clearly sustainable and one clearly unsustainable one-GPU point"
+    },
+    {
+      "step": 3,
+      "conditional_paths": {
+        "if_20_stable_25_unsustainable": {
+          "topology": "two-gpu-round-robin",
+          "rate_rps": 30.0
+        },
+        "if_20_unsustainable_17_25_stable": {
+          "topology": "two-gpu-round-robin",
+          "rate_rps": 23.5,
+          "reason": "20/17.25 = 1.1594 and 20/23.5 = 0.8511"
+        }
+      },
+      "two_gpu_rate_rule": "snap measured_one_gpu_overload_rate / 0.85 to the nearest 0.5 rps that leaves the overload at 80-90% of the two-GPU rate",
+      "reason": "demonstrate excess two-GPU capacity at a load already measured as a one-GPU overload"
+    }
+  ],
+  "capacity_definitions": {
+    "lambda_1": "highest tested gpu0-only rate passing every sustainability gate",
+    "lambda_2": "highest tested aggregate two-GPU rate passing every sustainability gate",
+    "lambda_spike": "an actually tested gpu0-only unsustainable rate satisfying 1.15-1.30 x lambda_1 and 0.80-0.90 x lambda_2"
+  },
+  "launch_gate": "v10 remains blocked until an independent reviewer accepts lambda_1, lambda_2, and lambda_spike from raw probe evidence"
+}

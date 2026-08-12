@@ -1,0 +1,100 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-report/v1",
+  "status": "valid-blocker",
+  "scientifically_valid": false,
+  "v10_launched": false,
+  "blocker": "Both bounded capacity-calibration invocations failed before the first probe. No empirical one-/two-GPU capacity interval exists, and another 424 A100-second calibration reservation cannot fit while preserving the 680 A100-second v10 reservation under the 7200 A100-second hard ceiling.",
+  "v9_movement_audit": {
+    "logical_state_bytes": 1056964608,
+    "legacy_reported_amplification": 54.0,
+    "legacy_is_canonical": false,
+    "result": "The recorded ledger contains 51L memory-endpoint touches and 3L PCIe-link traversals, but omits a real 4L restore-import verification. The old 54x therefore combines surface overlap with an omission and is one logical-state multiple below the corrected endpoint-only total.",
+    "memory_endpoint_bytes": 58133053440,
+    "memory_endpoint_amplification": 55.0,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "full_read_write_move_bytes": 61303947264,
+    "full_read_write_move_amplification": 58.0,
+    "avoidable_bytes_lower_bound": 32765902848,
+    "avoidable_amplification_lower_bound": 31.0,
+    "critical_path_full_read_write_move_bytes": 61303947264,
+    "critical_path_full_read_write_move_amplification": 58.0
+  },
+  "d2h_audit": {
+    "logical_bytes": 1056964608,
+    "unique_real_d2h_bytes": 2113929216,
+    "duplicate_accounting_bytes": 0,
+    "required_checkpoint_d2h_bytes": 1056964608,
+    "avoidable_validation_recapture_d2h_bytes": 1056964608,
+    "physical_transfers_bytes": [1056964608, 954204160, 102760448],
+    "explanation": "One full checkpoint capture plus two disjoint destination-validation subsets that together recapture the full logical state. K and V are already included in the logical denominator."
+  },
+  "capacity": {
+    "probe_count": 0,
+    "lambda_1_rps": null,
+    "lambda_2_rps": null,
+    "lambda_spike_rps": null,
+    "attempts": [
+      {
+        "attempt_id": "exp004-capacity-s41-v1",
+        "failure": "Nested CapacityProbePlan serialization TypeError after both engines were ready",
+        "probe_count": 0,
+        "remote_observed_allocation_seconds": 85.441581288,
+        "conservatively_accounted_gpu_seconds": 424.0
+      },
+      {
+        "attempt_id": "exp004-capacity-s41-v2",
+        "failure": "115-second engine-readiness timeout while both workers were compiling the vLLM graph",
+        "probe_count": 0,
+        "remote_observed_allocation_seconds": 116.544420033,
+        "conservatively_accounted_gpu_seconds": 424.0
+      }
+    ]
+  },
+  "v10": {
+    "scientifically_valid": false,
+    "control_p95_ttft_seconds": null,
+    "pre_reclaim_overload": null,
+    "time_to_useful_gpu1_capacity_seconds": null,
+    "time_to_serving_slo_restoration_seconds": null,
+    "queue_drain": null,
+    "gpu0_activity_during_restore": null,
+    "rollout_restore_latency_seconds": null,
+    "branch_resume_correctness": null,
+    "real_physical_movement_bytes": null,
+    "reason": "Not launched because no reviewed calibrated spike exists."
+  },
+  "major_verified_v9_state_pass_chain": {
+    "capture": "native read -> contiguous repack -> unpage -> layer stack -> page concatenate -> D2H -> host materialization -> aggregate/page hashes -> publish re-verification",
+    "restore": "transport verify -> H2D -> redundant import verify -> zero/overlay -> repack/stack -> destination write -> readback/repack/unpage/stack/concatenate -> validation D2H -> expected concatenate -> host compare"
+  },
+  "software_fusion_candidates_not_implemented": [
+    "Fuse capture gather/repack/unpage/stack/concatenate and stream into D2H.",
+    "Remove unchanged-payload publish and import re-verification passes while retaining integrity barriers.",
+    "Feed aggregate and per-page hashes from one streaming host read.",
+    "Eliminate restore zero-fill when every page is fully overwritten.",
+    "Fuse restore overlay/repack/stack into the mandatory native destination write.",
+    "Fuse validation readback transforms and replace bulk host recapture/compare with a device-side digest or comparison proof."
+  ],
+  "budget": {
+    "actual_experiment_004_gpu_seconds": 4136.103347785999,
+    "actual_experiment_004_gpu_hours": 1.148917596607222,
+    "actual_gpu_time_cost_usd": 2.8704557233634835,
+    "conservative_gpu_seconds": 6431.795790917997,
+    "conservative_gpu_hours": 1.7866099419216657,
+    "conservative_gpu_time_cost_usd": 4.46366627889709,
+    "hard_ceiling_gpu_seconds": 7200.0,
+    "remaining_gpu_seconds": 768.2042090820032,
+    "active_reservations": 0
+  },
+  "baseline_campaign_ready": false,
+  "recommended_next_experiment": "With additional authorization, run a new immutable capacity-calibration attempt whose engine-readiness bound covers observed vLLM graph compilation; do not run v10 or the three-way baseline campaign until measured lambda_1, lambda_2, and a reviewer-approved spike exist.",
+  "cleanup": {
+    "status": "clean",
+    "active_tasks": 0,
+    "active_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "persistent_volumes": ["sloforge-branchfabric-results", "sloforge-model-cache"]
+  }
+}

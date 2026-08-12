@@ -1,0 +1,26 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-calibration-outcome/v1",
+  "status": "blocked",
+  "terminal": true,
+  "capacity_probe_count": 0,
+  "lambda_1_rps": null,
+  "lambda_2_rps": null,
+  "lambda_spike_rps": null,
+  "v10_launch_permitted": false,
+  "blocker": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/calibration-blocker.json",
+    "artifact_sha256": "c14f58049078ffd42134df2c7bc03b487484b21734d409fe2f4d7e243c46fd20"
+  },
+  "provenance_correction": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/logs/capacity-failure-charge-conversion-provenance-correction.json",
+    "artifact_sha256": "c54ae780a84e1206dc7873be325c78f0c6b6ad098b9db0167a7f2603ee85f1d1"
+  },
+  "ledger": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+    "settled_additional_gpu_seconds": 6431.795790917997,
+    "active_reservation_count": 0,
+    "remaining_hard_budget_gpu_seconds": 768.2042090820032
+  },
+  "next_action": "No v10 launch. Preserve the blocker and stop GPU work under the current authorization."
+}

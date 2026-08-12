@@ -1,0 +1,114 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v9-serving-loadgen-audit/v1",
+  "audit_mode": "offline-only",
+  "gpu_workloads_invoked": 0,
+  "attempt_id": "exp004-pilot-naive-s41-v9",
+  "raw_provenance": [
+    {
+      "artifact": "raw/pilot-naive-config-v9.json",
+      "sha256": "da6ccffc66f27fbb20803ebf18c7151ffdefde7a4f61bcd9b878a80196a194d8"
+    },
+    {
+      "artifact": "raw/modal/exp004-pilot-naive-s41-v9/serving/result.json",
+      "sha256": "b577199f621075780a0e11d986a6edb1a3a007835971504cbf3899f4fc8f578e"
+    },
+    {
+      "artifact": "raw/modal/exp004-pilot-naive-s41-v9/rollout/result.json",
+      "sha256": "5bc1167139165cc36792186ae607e7a0d971aa8f614f784f5cf93ac5c2d7ae2e"
+    },
+    {
+      "artifact": "raw/modal/exp004-pilot-naive-s41-v9/analysis/pilot-assessment.json",
+      "sha256": "77e1eae74088397a5bdd31574743e5af5d161d88e3857ad36e75308f29649d9c"
+    }
+  ],
+  "configured_streams": {
+    "gpu0_control": {
+      "duration_seconds": 4.0,
+      "rate_requests_per_second": 8.0,
+      "scheduled_requests": 32
+    },
+    "gpu0_spike": {
+      "duration_seconds": 12.0,
+      "rate_requests_per_second": 64.0,
+      "scheduled_requests": 768
+    },
+    "gpu1_spike": {
+      "duration_seconds": 12.0,
+      "rate_requests_per_second": 32.0,
+      "scheduled_requests": 384
+    },
+    "gpu0_restore_continuation": {
+      "rate_requests_per_second": 8.0,
+      "scheduled_requests": 165
+    }
+  },
+  "findings": {
+    "single_global_spike": false,
+    "explanation": "GPU0 and GPU1 independently constructed streams. GPU0 scheduled 64 requests/s and GPU1 scheduled another 32 requests/s. GPU1's stream was backdated to the reclaim trigger and accumulated before GPU1 serving enable, so enabling GPU1 did not redistribute one fixed offered stream.",
+    "gpu0_only_before_reclaim": false,
+    "gpu0_only_before_reclaim_explanation": "The fixed HELIX_RECLAIM_TRIGGER occurred at the first spike arrival. No measured GPU0-only overload interval preceded the trigger, and GPU1 requests were already logically scheduled from that same timestamp.",
+    "gpu1_scheduled_only_after_enable": false,
+    "gpu1_admitted_only_after_enable": true,
+    "gpu1_enable_delay_seconds": 4.764569461,
+    "gpu1_scheduled_requests_accumulated_before_enable": 153,
+    "configured_arrival_cadence_matches_schedule": true,
+    "actual_gpu1_admission_cadence_matches_schedule": false,
+    "arrival_explanation": "The immutable scheduled clocks have exact 15.625 ms and 31.25 ms spike spacing, but the single-threaded engine loop catch-up-admits overdue work. GPU1 therefore admitted a pre-enable backlog as a burst when serving became available.",
+    "timestamps_monotonic_within_each_worker": true,
+    "requested_output_tokens": 64,
+    "all_gpu0_requests_produced_exact_output_tokens": true,
+    "all_gpu1_requests_produced_exact_output_tokens": true,
+    "p95_ttft_calculation": "correct Type-7 percentile of scheduled_arrival_ns to first_token_ns for the arrival cohort",
+    "queue_depth_calculation_valid_for_v10": false,
+    "queue_depth_explanation": "The postprocessor maps raw admitted_ns to ServingObservation.service_start_ns. Its queue metric therefore counts scheduled-but-not-host-admitted work and stops counting a request as soon as engine.add_request returns. It excludes vLLM waiting/running work and cannot establish aggregate backlog drain. v10 must separately report arrived-minus-completed outstanding depth and a true scheduler-wait depth based on first observed engine service.",
+    "restore_load_reduction_causally_gated": false,
+    "restore_load_reduction_explanation": "GPU0 changed from its fixed 64 requests/s spike plan to an 8 requests/s continuation at the fixed spike end, not after queue drain, SLO recovery, or RESTORE_ELIGIBLE. The pre-existing overload backlog remained.",
+    "gpu0_active_during_restore_gate": false,
+    "gpu0_restore_phase_requests_present": 141,
+    "gpu0_restore_phase_emitted_tokens": 0,
+    "gpu0_restore_phase_valid_ttft_samples": 0,
+    "gpu0_restore_activity_explanation": "The v9 assessment correctly fails the interference gate because none of the 141 restore-interference requests emitted a token during ROLLOUT_RESTORE_TRIGGER through ROLLOUT_RESUME_COMPLETE. Tokens from older spike requests do not demonstrate steady restore-phase serving.",
+    "two_gpu_completed_rate_above_offered_gate_present": false,
+    "sustained_negative_queue_trend_gate_present": false,
+    "queue_drain_threshold_gate_present": false,
+    "pre_restore_five_second_slo_stability_gate_present": false,
+    "v9_methodology_valid": false
+  },
+  "v9_observed_metrics": {
+    "control_p95_ttft_seconds": 0.212930199,
+    "control_max_reported_queue_depth": 3,
+    "spike_before_first_gpu1_token_p95_ttft_seconds": 10.0236567232,
+    "spike_before_first_gpu1_token_max_reported_queue_depth": 154,
+    "spike_before_first_gpu1_token_completed_rate_requests_per_second": 17.7737029979,
+    "slo_restoration_status": "not-restored"
+  },
+  "v10_required_architecture": {
+    "global_clock": "One immutable global arrival sequence, bounded and seeded, with 64 output tokens per request.",
+    "routing_epochs": [
+      "control: GPU0 only at measured sustainable restore/control rate",
+      "gpu0-overload: complete calibrated spike on GPU0 only",
+      "two-gpu-recovery: same global spike rate redistributed deterministically across GPU0 and GPU1 after an acknowledged enable boundary",
+      "restore-interference: reduced measured-safe rate on GPU0 only after recovery and GPU1 drain"
+    ],
+    "coordination": "GPU1 publishes serving readiness; GPU0/global dispatcher acknowledges an exact next global sequence as the routing epoch boundary. GPU1 may not backdate arrivals before that boundary.",
+    "online_evidence": "Bounded arrival producer records actual enqueue timestamps independently of blocking engine.step; workers publish per-window completions, tokens, TTFT, scheduler-service starts, and outstanding depth.",
+    "trigger": "Use a fixed bounded overload window only if post-hoc evidence confirms overload, or require the declared rolling TTFT and queue thresholds. Record ReclamationTriggerEvidence.",
+    "recovery_gate": "Require aggregate completed rate greater than the unchanged global offered rate, sustained negative outstanding-depth trend, queue below threshold, p95 TTFT at or below 2 seconds, and at least five seconds stable before restore.",
+    "restore_gate": "Stop assigning GPU1, drain all GPU1 work, keep new GPU0 arrivals active, and require GPU0 completions, emitted tokens, and valid TTFT samples during every restore interval used for interference analysis."
+  },
+  "offline_validation_implementation": {
+    "module": "python/sloforge/helix/characterization/gpu_reclamation_serving_v10.py",
+    "tests": "tests/python/test_gpu_reclamation_serving_v10.py",
+    "assertions": [
+      "single global spike rate is unchanged when GPU1 joins",
+      "GPU0-only routing before the acknowledged enable boundary",
+      "both GPUs receive deterministic shards after enable",
+      "GPU1 receives no restore-phase work",
+      "scheduled arrivals and request IDs are monotonic and unique",
+      "exactly 64 output tokens are observed for every completed request",
+      "routing observations reconcile exactly to the plan",
+      "outstanding depth includes engine-owned work",
+      "GPU0 produces completions, tokens, and TTFT samples during restore"
+    ]
+  }
+}
