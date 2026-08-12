@@ -1,0 +1,14 @@
+{
+  "schema_version": "sloforge.branchfabric.invalidated-analysis/v1",
+  "status": "EXCLUDED_FROM_CORPUS",
+  "raw_measurements_preserved": true,
+  "reason": "Derived trace-level series accidentally included measured trials from every trace level, producing identical series and a false zero-overhead result.",
+  "affected_files": [
+    "instrumentation-overhead.json"
+  ],
+  "unaffected_raw_files": [
+    "overhead-raw-samples.json",
+    "trials/"
+  ],
+  "replacement_artifact": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v2/instrumentation-overhead.json"
+}

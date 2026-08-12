@@ -1,0 +1,40 @@
+{
+  "active_containers": [],
+  "checked_at_utc": "2026-08-12T15:05:18Z",
+  "command_provenance": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal volume list --json"
+  ],
+  "experiment_apps": [
+    {
+      "app_id": "ap-U3T26O1VQf2joGhxXSQYiA",
+      "state": "stopped",
+      "tasks": 0
+    },
+    {
+      "app_id": "ap-PGtzqdizcEOtpunoIWPkcB",
+      "state": "stopped",
+      "tasks": 0
+    },
+    {
+      "app_id": "ap-YUfHdw24WnJ6OXA7Iv4qWB",
+      "state": "stopped",
+      "tasks": 0
+    },
+    {"app_id": "ap-itWq5bNmlfBVeVr71tbsdb", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-keosU94rnzu35UWIahrqvL", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-2V6703tzu520q1DlRos8Ew", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-u1tD2ytUYYMZL1rkYF7CA2", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-iwyocEQ2IDVFU3LCTBfABt", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-apPfbrrfddWWUwpft1q1PU", "state": "stopped", "tasks": 0},
+    {"app_id": "ap-3a7lRIK2maGfmybtUW1QyA", "state": "stopped", "tasks": 0}
+  ],
+  "persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "reservations": [],
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup/v1",
+  "status": "clean"
+}

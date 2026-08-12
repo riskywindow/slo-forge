@@ -1,0 +1,89 @@
+{
+  "actual_modal_gpu_hours": 1.0367031514288887,
+  "actual_modal_gpu_seconds": 3732.1313451439996,
+  "actual_modal_gpu_time_cost_usd": 2.590099153529936,
+  "attempts": [
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v1",
+      "failure": "required nvidia-smi topology matrix was unavailable despite successful P2P and NVLink fallback evidence",
+      "function_call_id": "fc-01KZSZ1CHEVZ3B8MQQNYCBX8YG",
+      "gpu_seconds": 56.299642088,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v1",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v2",
+      "failure": "vLLM 0.23 rejected GPU UUID text in CUDA_VISIBLE_DEVICES; worker fail-fast detection was also absent",
+      "function_call_id": "fc-01KZSZD26X8DHV49TH4S53AD4Z",
+      "gpu_seconds": 1142.916959106,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v2",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v3",
+      "failure": "capture queried the vLLM scheduler with the Helix logical branch ID instead of the internal runtime request ID",
+      "function_call_id": "fc-01KZT02JMJ56MKMQC9E34HR2CE",
+      "gpu_seconds": 361.320341654,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v3",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v4",
+      "failure": "restore staging used the external request ID instead of vLLM's randomized internal scheduler ID",
+      "function_call_id": "fc-01KZT0KPTF5YC3GD1N71X60994",
+      "gpu_seconds": 430.178304508,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v4",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v5",
+      "failure": "restore token-history validation rejected vLLM's read-only ConstantList container before comparing token values",
+      "function_call_id": "fc-01KZT11BRF2WAW8ZPF8BVRA5NM",
+      "gpu_seconds": 281.293957174,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v5",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v6",
+      "failure": "restore staging rejected pending page-zero IDs even though this Qwen KV layout reports needs_kv_cache_zeroing=false",
+      "function_call_id": "fc-01KZT1Q150G6JTFRMMQH858EB2",
+      "gpu_seconds": 425.271727454,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v6",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v7",
+      "failure": "restore staging compared the pending-zero queue with allocate_slots' empty new-compute result instead of the complete externally allocated block table",
+      "function_call_id": "fc-01KZT2X14YEB8PTEKSS95XPTT6",
+      "gpu_seconds": 412.537132324,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v7",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v8",
+      "failure": "the live allocation observer did not assign allocation generations to externally computed restore pages because vLLM returns no new-compute block list for that path",
+      "function_call_id": "fc-01KZT381F1ZC0292Y8RQPKP52J",
+      "gpu_seconds": 287.22896349,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v8",
+      "scientific_status": "invalid"
+    },
+    {
+      "attempt_id": "exp004-pilot-naive-s41-v9",
+      "failure": "the full KV transaction and eight-branch semantic resume succeeded, but the deterministic serving load did not restore the configured TTFT SLO or emit GPU0 tokens during restore; the remote assessment also contained a locally fixed destination-write stage-name mismatch",
+      "function_call_id": "fc-01KZV7QFD6D1N0PRZWZA02RTPE",
+      "gpu_seconds": 335.084317346,
+      "raw_bundle": "raw/modal/exp004-pilot-naive-s41-v9",
+      "scientific_status": "invalid"
+    }
+  ],
+  "classification": null,
+  "classification_reason": "v9 proved the full KV preservation/restore and branch-resume transaction, but it did not prove useful serving SLO restoration or permissible GPU0 interference overlap. The pilot gate therefore still forbids paired baselines, optimization claims, or a BranchFabric classification.",
+  "conservative_ledger_cost_usd": 3.87515427889709,
+  "conservative_ledger_gpu_hours": 1.5510543863661101,
+  "conservative_ledger_gpu_seconds": 5583.795790917997,
+  "hard_limit_gpu_hours": 2.0,
+  "latest_terminal_fix": "The pilot postprocessor now recognizes the worker's destination_native_write_subset stage. Reassessment of immutable v9 data removes that false rejection; the remaining rejections are measured serving-load failures, not KV transaction failures.",
+  "pilot_valid": false,
+  "schema_version": "sloforge.branchfabric.experiment-004-invalid-pilot-summary/v1",
+  "target_gpu_hours": 1.0
+}

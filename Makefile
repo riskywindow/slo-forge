@@ -13,7 +13,11 @@ CARGO_BOUNDED_ENV := CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE
 	continuum-docker-smoke continuum-clean-room-test helix-check helix-demo \
 	helix-branch-demo helix-replay-demo helix-training-demo helix-resource-demo \
 	helix-promotion-demo helix-fault-demo helix-evaluation helix-docker-smoke \
-	helix-clean-room-test
+	helix-clean-room-test branchfabric-trace-check \
+	branchfabric-characterization-cpu branchfabric-characterization-gpu \
+	branchfabric-characterization branchfabric-requirements branchfabric-report \
+	branchfabric-execution-analysis branchfabric-gate branchfabric-no-build-verify \
+	branchfabric-clean-room-test
 
 bootstrap:
 	@command -v uv >/dev/null 2>&1 || { echo "error: uv is required (https://docs.astral.sh/uv/)" >&2; exit 127; }
@@ -191,6 +195,99 @@ helix-docker-smoke:
 
 helix-clean-room-test:
 	./tools/clean-room-helix.sh
+
+branchfabric-trace-check:
+	uv run --locked ruff format --check python/sloforge/helix/characterization python/sloforge/cli/helix.py tests/python/test_branchfabric*.py tests/python/test_helix_cli.py
+	uv run --locked ruff check python/sloforge/helix/characterization python/sloforge/cli/helix.py tests/python/test_branchfabric*.py tests/python/test_helix_cli.py
+	uv run --locked mypy python/sloforge/helix/characterization python/sloforge/cli/helix.py
+	uv run --locked pytest -q tests/python/test_branchfabric*.py tests/python/test_helix_cli.py
+	cargo fmt --all --check
+	$(CARGO_BOUNDED_ENV) cargo test -p sloforge-helix-ir --test branchfabric_trace --locked
+
+branchfabric-characterization-cpu:
+	uv run --locked sloforge helix characterize run \
+		--matrix benchmarks/branchfabric/characterization.yaml \
+		--output artifacts/branchfabric/characterization/cpu-reference \
+		--hardware cpu --seed 20260809 --max-experiments 100000 --timeout-seconds 300 \
+		--replace
+
+branchfabric-characterization-gpu:
+	@set -euo pipefail; \
+	status_path="artifacts/branchfabric/characterization/gpu-status.json"; \
+	revision="$$(git rev-parse HEAD)"; \
+	record_status() { \
+		SLOFORGE_BRANCHFABRIC_STATUS_PATH="$$status_path" \
+		SLOFORGE_BRANCHFABRIC_STATUS="$$1" \
+		SLOFORGE_BRANCHFABRIC_STATUS_REASON="$$2" \
+		SLOFORGE_BRANCHFABRIC_REVISION="$$revision" \
+		SLOFORGE_BRANCHFABRIC_GPU_RESULTS_CLAIMED="$${3:-0}" \
+		uv run --locked python -c 'import json, os, pathlib; path = pathlib.Path(os.environ["SLOFORGE_BRANCHFABRIC_STATUS_PATH"]); path.parent.mkdir(parents=True, exist_ok=True); path.write_text(json.dumps({"schema_version": "sloforge.branchfabric.hardware-status/v1", "status": os.environ["SLOFORGE_BRANCHFABRIC_STATUS"], "reason": os.environ["SLOFORGE_BRANCHFABRIC_STATUS_REASON"], "revision": os.environ["SLOFORGE_BRANCHFABRIC_REVISION"], "gpu_results_claimed": os.environ["SLOFORGE_BRANCHFABRIC_GPU_RESULTS_CLAIMED"] == "1", "paid_resources_created": False, "budget_env_present": bool(os.getenv("SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD"))}, indent=2, sort_keys=True) + "\n")'; \
+	}; \
+	if test "$${SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU:-0}" != "1"; then \
+		record_status unexercised "explicit local GPU opt-in is disabled; no paid resources were created"; \
+		echo "BranchFabric GPU characterization unexercised: set SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU=1 to use accessible local hardware"; \
+	elif ! command -v nvidia-smi >/dev/null 2>&1; then \
+		record_status unavailable "nvidia-smi is unavailable; no compatible NVIDIA device was measured"; \
+		echo "BranchFabric GPU characterization unavailable: no supported NVIDIA device; no hardware-backed result is claimed"; \
+	else \
+		record_status unavailable "compatible local NVIDIA may exist, but the GPU execution stage is not implemented; no hardware-backed result is claimed"; \
+		echo "BranchFabric GPU characterization unavailable: GPU execution stage is not implemented; no result is claimed"; \
+	fi
+
+branchfabric-characterization:
+	$(MAKE) branchfabric-characterization-cpu
+	$(MAKE) branchfabric-characterization-gpu
+
+branchfabric-requirements:
+	uv run --locked sloforge helix characterize requirements \
+		--run artifacts/branchfabric/characterization/cpu-reference \
+		--output artifacts/branchfabric/requirements \
+		--replace
+
+branchfabric-report:
+	uv run --locked sloforge helix characterize report \
+		--run artifacts/branchfabric/characterization/cpu-reference \
+		--output reports/branchfabric-characterization \
+		--replace
+
+branchfabric-gate:
+	uv run --locked python -m sloforge.helix.characterization.gates \
+		--input artifacts/branchfabric/gates/branchfabric_gate_input.json \
+		--output artifacts/branchfabric/gates/branchfabric_gate_result.json \
+		--report BRANCHFABRIC_GATE_REPORT.md --repository-root "$(CURDIR)" --replace
+
+branchfabric-execution-analysis:
+	uv run --locked python -m sloforge.helix.characterization.execution_analysis \
+		--raw artifacts/branchfabric/execution/reclamation/raw/trials.jsonl \
+		--output artifacts/branchfabric/execution/reclamation/analysis.json --replace
+
+branchfabric-no-build-verify:
+	uv run --locked python -m sloforge.helix.characterization.no_build_verifier \
+		--repository-root "$(CURDIR)" \
+		--output artifacts/branchfabric/execution/no-build-verification.json
+
+branchfabric-clean-room-test:
+	@set -euo pipefail; \
+	repository_root="$$(git rev-parse --show-toplevel)"; \
+	revision="$$(git -C "$$repository_root" rev-parse HEAD)"; \
+	clean_root="$$(mktemp -d "$${TMPDIR:-/tmp}/sloforge-branchfabric-clean.XXXXXX")"; \
+	cleanup() { rm -rf -- "$$clean_root"; }; \
+	trap cleanup EXIT INT TERM; \
+	git -C "$$repository_root" archive "$$revision" | tar -x -C "$$clean_root"; \
+	printf '%s\n' "$$revision" > "$$clean_root/.sloforge-source-commit"; \
+	unset PYTHONPATH PYTHONHOME VIRTUAL_ENV UV_PROJECT UV_PROJECT_ENVIRONMENT UV_WORKING_DIR; \
+	unset CARGO_BUILD_TARGET RUSTC_WRAPPER RUSTFLAGS CARGO_ENCODED_RUSTFLAGS MAKEFLAGS MFLAGS; \
+	unset SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD; \
+	export UV_PROJECT_ENVIRONMENT="$$clean_root/.venv"; \
+	export CARGO_TARGET_DIR="$$clean_root/target"; \
+	export SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_ALLOW_GPU=0; \
+	cd "$$clean_root"; \
+	$(MAKE) bootstrap; \
+	$(MAKE) branchfabric-trace-check; \
+	$(MAKE) branchfabric-characterization-cpu; \
+	$(MAKE) branchfabric-requirements; \
+	$(MAKE) branchfabric-report; \
+	$(MAKE) package
 
 benchmark-cpu:
 	uv run --locked python -m sloforge.demo --artifact-dir artifacts/cpu-demo --report-dir reports/cpu-demo --reset

@@ -1,6 +1,234 @@
 # SLOForge execution ledger
 
-Updated: 2026-08-03 (America/Los_Angeles)
+Updated: 2026-08-09 (America/Chicago)
+
+## BranchFabric gated execution
+
+Baseline recorded: 2026-08-09 (America/Chicago).
+
+- Baseline commit: `46955be24d49af7090429444a0ef68f9a5695283`.
+- Immutable tag: `sloforge-branchfabric-execution-baseline-46955be`.
+- Machine-readable baseline:
+  `artifacts/branchfabric/execution/baseline/record.json`.
+- Dependency graph: `docs/branchfabric/EXECUTION_DEPENDENCY_GRAPH.md`.
+- Four total agent slots are available, so root plus three subagents is the
+  maximum concurrency. The requested eight-agent floor is unavailable.
+- All BranchFabric GPU, multi-GPU, multi-node, RTL, FPGA-build, accelerator,
+  external-resource, target, and budget variables were absent. Authorized
+  external spend is zero; no paid resource or target-specific RTL is allowed.
+- `make check` passed with 1,248 Python tests and six declared hardware skips,
+  all warning-denied Rust workspace checks, 37 UI tests with one fixture skip,
+  and the production UI build. The historical CPU demonstrations passed.
+- `make branchfabric-trace-check` passed with 137 Python and five Rust tests.
+- All 40 designated characterization artifacts matched their recorded hashes;
+  the aggregate corpus SHA-256 reproduced. Requirements JSON and the generated
+  characterization report then reproduced byte-for-byte from the retained run.
+- The previous result remains visible and binding: zero `REQUIRED` or
+  `HIGH_VALUE` candidates, fanout/concurrency one in state transfers, zero
+  multicast opportunity, and individual lifecycle-window free-operation bounds
+  below approximately 1.02x.
+
+| Gated execution task | Owner | Status | Branch / worktree | Files owned | Dependencies | Acceptance command | Raw artifacts | Commit |
+|---|---|---|---|---|---|---|---|---|
+| Baseline, authorization, manifests, resource/spend/cleanup ledgers | root | complete | `main` | execution baseline and ledgers; this section | prior release | corpus verifier; `make check`; historical demos | `artifacts/branchfabric/execution/` | baseline `46955be`; integration pending |
+| Prior negative reproduction and independent review | `negative_replication` | launching | `branchfabric/negative-replication` isolated worktree | execution replication review/artifacts only | sealed corpus | five central measurements reproduced from raw evidence | new replication artifacts | pending |
+| Real/highest-fidelity model-state fanout vertical | `fanout_vertical` | launching | `branchfabric/fanout-vertical` isolated worktree | new workload module/tests/artifacts only | Helix/Continuum semantics | fanout 8/16/32, two classes, seeds 41/73/113, raw readiness/sharing samples | new vertical artifacts | pending |
+| Causal reclamation and concurrent-operation vertical | `reclamation_vertical` | launching | `branchfabric/reclamation-vertical` isolated worktree | new transaction module/tests/artifacts only | Continuum transaction; Helix scheduler | serving spike through pause/checkpoint/reclaim/preserve/resume, queue percentiles, fault rejection | new reclamation artifacts | pending |
+| Strong software baselines, gate compiler, manifests, final integration | root | in progress | `main` | baseline/gate/report source and shared manifests | three evidence lanes | targeted tests; independently regenerated gate; `make check` | gate and report artifacts | pending |
+
+Hardware implementation tasks are not ready and may not be launched until
+`artifacts/branchfabric/gates/branchfabric_gate_result.json` says `PASS` from
+hardware-backed evidence. CPU-only or synthetic measurements cannot satisfy
+that gate.
+
+## BranchFabric Characterization / SLOForge Helix Characterization
+
+Baseline recorded: 2026-08-09 (America/Chicago).
+
+- Baseline commit: `d6f77c839334a4644b4e2edf36a7543c68670a2d`.
+- Immutable baseline tag:
+  `sloforge-branchfabric-characterization-baseline-d6f77c8`.
+- Machine-readable baseline:
+  `artifacts/branchfabric/baseline/record.json`.
+- Hardware/software manifests:
+  `artifacts/branchfabric/manifests/{hardware,software}-baseline.json`.
+- Baseline `make check` passed: 1,115 Python tests, six declared optional
+  hardware skips, strict Ruff/mypy, all workspace Rust format,
+  warning-denied Clippy/tests/doc-tests, 37 UI tests with one fixture skip,
+  and the production UI build.
+- The isolated seed-41 Helix CPU demo passed in 12.51 seconds wall time with
+  125,190,144 bytes maximum RSS and produced 145 files (920 KiB). The workload
+  is deterministic local CPU synthetic; host timing is a real local
+  observation collected under high background load and not a stable
+  distribution.
+- The host is an Apple M4 Pro with 12 CPU cores, 24 GiB unified memory, and a
+  16-core integrated Apple GPU. No NVIDIA/CUDA/PyTorch/vLLM/SGLang path,
+  multi-GPU/multi-node inventory, RDMA, or characterization GPU budget is
+  available. No paid resource is authorized.
+- The worktree already contained extensive untracked evidence. It remains
+  user-owned and is not reset; this phase writes only under the requested
+  BranchFabric artifact/report paths.
+- Four total agent slots are available, so root plus three clean worktrees is
+  the maximum concurrency. The eight-agent target is unavailable.
+
+The launch-state graph is `docs/branchfabric/DEPENDENCY_GRAPH.md`; the current
+integration graph and acceptance edges are
+`docs/branchfabric/CHARACTERIZATION_DEPENDENCY_GRAPH.md`. The history below is
+reconciled through requirements compiler commit `d5cb9b2`. Status vocabulary:
+
+- **implemented** means source and focused tests are committed, not that the
+  final clean-room gate has passed;
+- **measured** means host counters or timings were recorded on the named host;
+- **synthetic** means the workload or state fixture is controlled and is not a
+  production distribution;
+- **replayed** means a derived result consumed a retained trace;
+- **unavailable** means the capability gate failed and no substitute hardware
+  metric was generated;
+- **uncommitted evidence** means raw or derived files are present in the shared
+  worktree but are not yet part of an immutable release commit.
+
+All implementation lanes used the shared `main` history. The names below record
+logical ownership; they do not imply that a separate worktree still exists.
+
+| Characterization workstream | Owner | Status | Files owned | Dependencies | Acceptance command | Artifact paths | Commits |
+|---|---|---|---|---|---|---|---|
+| Baseline, manifests, immutable tag | root | complete and tracked | `artifacts/branchfabric/baseline/`; `artifacts/branchfabric/manifests/`; baseline section of this ledger | prior Helix release | `make check`; isolated seed-41 Helix CPU demo | `artifacts/branchfabric/baseline/record.json`; `artifacts/branchfabric/manifests/{hardware,software}-baseline.json` | baseline `d6f77c8`; record `2039cb3` |
+| Characterization dependency graph and execution ledger | ledger_graph | in progress at this checkpoint | `EXECUTION_LEDGER.md`; `docs/branchfabric/CHARACTERIZATION_DEPENDENCY_GRAPH.md` | current history and workstream/artifact inventory | `git diff --check -- EXECUTION_LEDGER.md docs/branchfabric/CHARACTERIZATION_DEPENDENCY_GRAPH.md` | documentation only; no measurement artifact | this handoff commit |
+| Controlled workload matrix and calibrated COW/state projection | root | implemented; controlled synthetic inputs only | `benchmarks/branchfabric/characterization.yaml`; `python/sloforge/helix/characterization/{matrix,projection}.py`; `tests/python/test_branchfabric_{matrix,projection}.py` | baseline | `uv run --locked pytest -q tests/python/test_branchfabric_matrix.py tests/python/test_branchfabric_projection.py` | matrix is tracked; generated projections belong under a characterization run | `5cff5ac`, `3053631` |
+| BranchWorkloadTrace v1 and StateOperationTrace v1 | root integration of trace-schema lane | implemented; Python/Rust conformance committed | `python/sloforge/helix/characterization/trace/`; `schemas/branchfabric/`; `crates/sloforge-helix-ir/src/trace.rs`; `crates/sloforge-helix-ir/tests/branchfabric_trace.rs`; trace-focused Python tests | baseline | `make branchfabric-trace-check` | versioned schemas; JSONL authoritative; Perfetto derived; Parquet capability reported explicitly | `061abc0`, `4d30580`, `596b6e5`, `45e05ac` |
+| Helix BranchPoint-to-promotion lifecycle instrumentation | root integration of Helix instrumentation lane | implemented and exercised by tracked first vertical trace; aligned three-seed corpus is uncommitted evidence | `python/sloforge/helix/characterization/lifecycle/`; `tests/python/test_branchfabric_helix_lifecycle.py` | trace recorder contract | `uv run --locked pytest -q tests/python/test_branchfabric_helix_lifecycle.py tests/python/test_branchfabric_runner.py` | tracked `artifacts/branchfabric/characterization/first-vertical-seed-41-rerun/`; uncommitted `vertical-seed-{41-final,73,113}/` | `a97d970`, `47835ad`, `2f2538f`, `7d82b4d`, `90976c7`, `596b6e5` |
+| Continuum state lifecycle, COW, dirty tracking, checkpoint, transform, transfer, migration, transaction | root integration of Continuum instrumentation lane | implemented; three seed CPU corpus is uncommitted evidence | `python/sloforge/continuum/characterization/`; Continuum characterization test; canonical adapters in `python/sloforge/helix/characterization/trace/adapters.py` | trace schemas; Continuum runtime/storage/transport | `uv run --locked pytest -q tests/python/test_branchfabric_continuum_characterization.py tests/python/test_branchfabric_trace_adapters.py` | uncommitted `artifacts/branchfabric/continuum/seed-{41,73,113}/` | `23305b1`, `47835ad`, `4d30580` |
+| Bounded CPU/memory/resource sampling | root | implemented and exercised in vertical/overhead runs | `python/sloforge/helix/characterization/resources.py`; resource/runner tests | lifecycle runner | `uv run --locked pytest -q tests/python/test_branchfabric_resources.py tests/python/test_branchfabric_runner.py` | resource traces inside tracked first vertical/overhead and uncommitted aligned corpora | `f5635e1`, `99249b0`, `a317690` |
+| Environment-state lifecycle and filesystem behavior | root | implemented; five-fixture study is uncommitted evidence | `python/sloforge/helix/characterization/environment_study.py`; `tests/python/test_branchfabric_environment_study.py` | trace levels; deterministic fixture generator | `uv run --locked pytest -q tests/python/test_branchfabric_environment_study.py` | uncommitted `artifacts/branchfabric/environment/seed-20260809/environment-study.json` | `7ab9f8d` |
+| Instrumentation overhead: disabled/minimal/full | root | valid campaign tracked; three invalidated campaigns preserved and excluded | `python/sloforge/helix/characterization/overhead.py`; overhead tests; tracked v4 campaign | Helix lifecycle and resource sampling | `uv run --locked pytest -q tests/python/test_branchfabric_overhead.py`; source-identity and semantic-equivalence guards in report | valid `artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v4/`; invalidation records in the three earlier campaign directories | `eb226e0`, `0bff159`, `f1ebbf6`, `8750ff7` |
+| Evidence-preserving statistics and methodology | root | implemented; final corpus-wide reconstruction pending | `python/sloforge/helix/characterization/analysis/statistics.py`; `tests/python/test_branchfabric_statistics.py`; `docs/branchfabric/STATISTICAL_METHODOLOGY.md` | retained raw samples | `uv run --locked pytest -q tests/python/test_branchfabric_statistics.py` | summaries remain beside each source study; final corpus summary planned | `59eb220` |
+| Restartable orchestration and active experiment prioritization | root | implemented; final clean CPU-reference run pending | `python/sloforge/helix/characterization/{orchestration,prioritizer}.py`; orchestration/prioritizer tests | matrix, vertical, Continuum, environment, overhead stages | `uv run --locked pytest -q tests/python/test_branchfabric_orchestration.py tests/python/test_branchfabric_prioritizer.py` | final target `artifacts/branchfabric/characterization/cpu-reference/`; ranked queue planned there | `257b184`, `4ff67b5` |
+| Public CLI, Make targets, run/resume workflow | cli_workflow + root | CLI and targets implemented; requirements/report integration in `workflow.py` is in progress and uncommitted | `python/sloforge/cli/helix.py`; `Makefile`; `python/sloforge/helix/characterization/workflow.py`; CLI/workflow tests | all runnable studies | `uv run --locked pytest -q tests/python/test_branchfabric_cli.py tests/python/test_branchfabric_workflow.py`; then `make branchfabric-characterization-cpu` | target `artifacts/branchfabric/characterization/cpu-reference/` | `b0b307e`, `a59d969`, `8750ff7`; later workflow patch not yet committed |
+| Metadata hot-path study and software variants | metadata_study | implemented; CPU study is uncommitted evidence | `python/sloforge/helix/characterization/metadata_study.py`; `tests/python/test_branchfabric_metadata_study.py` | deterministic metadata fixture and statistics | `uv run --locked pytest -q tests/python/test_branchfabric_metadata_study.py` | uncommitted `artifacts/branchfabric/metadata/seed-20260809/metadata-study.json` | `24e779b` |
+| Transform, integrity, transport, multicast analysis | network_transform | implemented; seed-41 replay analyses are uncommitted evidence | `python/sloforge/helix/characterization/analysis/{transform,transport}.py`; corresponding tests | canonical Continuum state trace | `uv run --locked pytest -q tests/python/test_branchfabric_transform_analysis.py tests/python/test_branchfabric_transport_analysis.py` | uncommitted `artifacts/branchfabric/analysis/{transform,transport}/continuum-seed-41.json` | `d0285f8` |
+| Branch DAG, divergence, queue and waterfall analysis | network_transform | implemented; seed-41 replay analysis is uncommitted evidence | `python/sloforge/helix/characterization/workload_analysis.py`; `tests/python/test_branchfabric_workload_analysis.py` | aligned Helix branch/state traces and trajectory artifacts | `uv run --locked pytest -q tests/python/test_branchfabric_workload_analysis.py` | uncommitted `artifacts/branchfabric/analysis/workload/helix-coding-agent-seed-41.json` | `ff2636c` |
+| COW granularity replay | root | implementation integrated; seed-41 derived file is uncommitted evidence; universal page recommendation not yet approved | COW path in `python/sloforge/helix/characterization/workflow.py`; workflow tests | canonical state trace and controlled page sizes | `uv run --locked sloforge helix characterize cow --trace artifacts/branchfabric/characterization/vertical-seed-41-final/state-operation-trace-v1.jsonl --page-sizes 4k,16k,64k,256k,1m,2m --output artifacts/branchfabric/analysis/cow/vertical-seed-41.json` | uncommitted `artifacts/branchfabric/analysis/cow/vertical-seed-41.json` | `8750ff7`; current workflow patch in progress |
+| Strongest reasonable CPU software baselines | cli_workflow | implemented; CPU benchmark is uncommitted evidence; no GPU/network hardware result | `python/sloforge/helix/characterization/software_baselines.py`; `tests/python/test_branchfabric_software_baselines.py` | deterministic payloads; randomized repeated trials | `uv run --locked pytest -q tests/python/test_branchfabric_software_baselines.py` | uncommitted `artifacts/branchfabric/software-baselines/seed-20260809/software-baselines.json` | `e43416f` |
+| Amdahl, roofline and placement models | root | implemented and unit-tested; final trace-bound reports pending | `python/sloforge/helix/characterization/analysis/{amdahl,roofline,placement}.py`; corresponding tests | validated timing decomposition, measured ceilings or explicit unknowns | `uv run --locked pytest -q tests/python/test_branchfabric_amdahl.py tests/python/test_branchfabric_roofline.py tests/python/test_branchfabric_placement.py` | final analysis paths planned under `artifacts/branchfabric/analysis/` | `bd7ec89` |
+| Requirements schema/compiler | earlier requirements lane; requirements_report now owns integration | compiler implemented; evidence-bound requirements file in progress | `python/sloforge/helix/characterization/requirements.py`; `tests/python/test_branchfabric_requirements.py`; requirements path in `workflow.py` | reviewed, hash-bound analyses; explicit unknown/unavailable values | `uv run --locked pytest -q tests/python/test_branchfabric_requirements.py tests/python/test_branchfabric_workflow.py`; `make branchfabric-requirements` | planned `artifacts/branchfabric/requirements/branchfabric_requirements.json` | `a515a3c`; final derivation uncommitted/in progress |
+| Hardware capability gate, GPU, multi-GPU and multi-node disposition | metadata_study | implemented; current host explicitly unavailable; no synthetic hardware substitution and no provisioning | `python/sloforge/helix/characterization/hardware_studies.py`; `tests/python/test_branchfabric_hardware_studies.py` | baseline manifests and budget gate | `uv run --locked pytest -q tests/python/test_branchfabric_hardware_studies.py`; `make branchfabric-characterization-gpu` | uncommitted `artifacts/branchfabric/hardware/status-seed-20260809.json`; future commands embedded in that record | `8a9a505` |
+| Characterization report, design brief, requirements and negative findings | requirements_report | in progress | `python/sloforge/helix/characterization/workflow.py`; `docs/branchfabric/CHARACTERIZATION_DESIGN_BRIEF.md`; `docs/branchfabric/WHAT_NOT_TO_BUILD.md`; `BRANCHFABRIC_CHARACTERIZATION_FINAL_REPORT.md`; `reports/branchfabric-characterization/`; requirements JSON | all reviewed CPU analyses and unavailable-hardware disposition | `make branchfabric-requirements`; `make branchfabric-report`; evidence-reference audit | planned report and requirements paths | no final commit at this checkpoint |
+| Trace/workload/methodology specifications | spec_docs | in progress | `docs/branchfabric/TRACE_SPECIFICATION.md`; `docs/branchfabric/WORKLOAD_SPECIFICATION.md`; supporting methodology documentation | committed schemas, matrix and statistics implementation | document inventory, link check, schema/command cross-check | documentation only | no final commit at this checkpoint |
+| Independent replication of five primary measurements | future replication lane | planned after corpus freeze | new replication records only; raw inputs read-only | frozen corpus and candidate claims | five independent commands recorded with source hashes | planned `artifacts/branchfabric/replication/` | pending |
+| Multidisciplinary and adversarial reviews | future rotating reviewers | planned after draft reports | review findings and narrowly scoped fixes only | frozen draft report, requirements and corpus | reviewer-specific audits; all high and reasonable medium findings resolved | planned `reports/branchfabric-characterization/reviews/` | pending |
+| Full integrated and clean-room release gates | root | planned; not a current completion claim | integration/evidence publication only | every applicable row above | `make check`; `make helix-check`; all BranchFabric Make targets including `make branchfabric-clean-room-test` | final committed corpus, reports and requirements | pending |
+
+### BranchFabric artifact publication state
+
+| Evidence set | Repository state | Permitted use at this checkpoint |
+|---|---|---|
+| Baseline record/manifests and seed-41 baseline demo | tracked | immutable baseline reference |
+| `first-vertical-seed-41-rerun` | tracked | first vertical trace and sharing evidence; it predates the aligned three-seed corpus |
+| `helix-cpu-3seed-2rep-v4` overhead campaign | tracked | valid overhead evidence; semantic/source guards passed in its own report |
+| Earlier overhead campaigns | invalidated records retained; some directories uncommitted | failure-analysis evidence only; excluded from estimates |
+| Aligned Helix seeds 41/73/113 and Continuum seeds 41/73/113 | uncommitted evidence | analysis input pending hash/integrity audit and publication |
+| Environment, metadata and software-baseline CPU studies | uncommitted evidence | study-specific analysis input pending publication |
+| COW, workload, transform and transport analyses | uncommitted derived evidence | draft conclusions only; must retain references to their raw inputs |
+| Hardware status study | uncommitted unavailable-path evidence | proves only current capability absence and future command readiness; contains no GPU/network performance metric |
+| Requirements, final reports, replication and review records | not yet produced or not yet frozen | no release claim permitted |
+
+Raw measurement producers may add new immutable raw files but may not edit
+existing raw files. Analysis and requirements lanes may not fill missing
+measurements with assumptions. The current Apple host provides no compatible
+CUDA GPU, multi-GPU allocation, multi-node allocation, RDMA path, or paid GPU
+budget; those measurements remain **unavailable**, not synthetic stand-ins. No
+lane is authorized to implement RTL, BranchFabric hardware, firmware, a driver,
+an FPGA simulator, or a cycle-accurate simulator.
+
+### BranchFabric Characterization final closure
+
+This closure supersedes the launch-state and publication-state tables above.
+
+- Final measurement producer commit:
+  `0f6f45629c0b40af46f8641d907b32a5a8c6a562`.
+- Final requirements compiler commit:
+  `d5cb9b2e1833d908ccdde5c2980ad48c00ed6b08`.
+- Final release source commit:
+  `d26d6404f4f922f318cbbf13076efce6bd7ffc63`; evidence publication commit:
+  `52bd90f5b9069dfd8ac0e6358ce597d71a78dab3`.
+- The restartable CPU run `a53a739f0488359750d4f70f48f8753a` completed
+  matrix validation, the Helix vertical trace, Continuum state lifecycle,
+  environment study, metadata study, and corrected instrumentation-overhead
+  study under `artifacts/branchfabric/characterization/cpu-reference/`.
+- BranchWorkloadTrace v1 and StateOperationTrace v1 passed strict Python/Rust
+  conformance, ordering, hash-integrity, bounded-buffer, drop-observability,
+  JSONL, Perfetto, and explicit-Parquet-capability checks.
+- The canonical final Helix trace contains 70 branch events and 17 state events;
+  the Continuum trace contains 18 state events. Both report zero dropped and
+  zero filtered events.
+- The designated 40-artifact corpus is sealed by
+  `artifacts/branchfabric/CORPUS_MANIFEST.json`. Requirements are sealed by
+  `artifacts/branchfabric/requirements/branchfabric_requirements.json`.
+- The final requirements classify all 30 StateOperationTrace operations exactly
+  once: zero `REQUIRED`/`HIGH_VALUE`, six `SOFTWARE_ONLY`, ten
+  `NOT_JUSTIFIED`, and fourteen unresolved pending real workloads/hardware.
+- Compatible CUDA GPU, multi-GPU, multi-node, RDMA, NVLink, HBM, PCIe-GPU, and
+  real-NIC measurements remained unavailable. The capability target failed
+  closed and generated no substitute hardware measurement.
+- Independent replication plus adversarial, systems/hardware, statistical, and
+  instrumentation-overhead reviews are retained under
+  `docs/branchfabric/reviews/`. All high-severity and reasonable
+  medium-severity findings inside the exercised boundary were fixed; lack of
+  broader real/hardware evidence remains an explicit limitation.
+- Release validation passed `make branchfabric-trace-check` (137 Python and five
+  Rust trace tests), `make helix-check` (188 Python plus Rust), and `make check`
+  (1,248 Python tests, six declared hardware skips, all Rust workspace checks,
+  and the UI tests/build). A literal archive of `d26d640` bootstrapped, completed
+  all six CPU stages, regenerated requirements/report, and built the sdist and
+  wheel. The explicitly opted-in GPU gate recorded `unavailable`, zero claimed
+  GPU results, and zero paid resources.
+
+| Closed characterization workstream | Final owner | Status | Acceptance evidence | Artifacts | Commits |
+|---|---|---|---|---|---|
+| Schemas, storage, Python/Rust conformance | trace-schema lane + root | complete and exercised | `make branchfabric-trace-check` | `schemas/branchfabric/`; trace specs and goldens | `061abc0`, `4d30580`, `596b6e5`, `45e05ac` |
+| Helix branch DAG and lifecycle instrumentation | Helix instrumentation lane + root | complete in deterministic CPU fixture | lifecycle tests and final 87-event trace | CPU-reference vertical trace, workload/waterfall analysis | `a97d970`, `0f6f456` |
+| Continuum state lifecycle and transport instrumentation | Continuum lane + root | complete in host/simulated-transport fixture | Continuum characterization/adaptor tests | CPU-reference Continuum trace, sharing/transform/transport analyses | `23305b1`, `0f6f456` |
+| Environment, metadata, resource and overhead studies | measurement lanes + root | complete in local CPU scope | focused tests; corrected three-seed/two-repetition overhead run | environment, metadata, software-baseline, resource and v5 overhead artifacts | `24e779b`, `1e9758a` |
+| Matrix, orchestration, restart/resume and active prioritizer | workflow lane + root | complete and exercised | 855 cells evaluated analytically; six-stage run complete | run manifest, matrix study, ranked experiment queue | `257b184`, `1e9758a` |
+| COW, divergence, sharing, Amdahl, roofline, placement and requirements | analysis/requirements lanes + root | complete within available evidence; unsupported values explicit | focused analysis tests; requirement-reference and classification audits | final analyses and requirements JSON | `ab0beba`, `d5cb9b2` |
+| Independent replication and multidisciplinary review | replication/review lanes | complete | five-measurement replication; four independent final reviews | `artifacts/branchfabric/replication/`; `docs/branchfabric/reviews/` | `b00db0a`, `51a76ad`, `28d9705`, `6688319`, `f61a35f` |
+| Reports, design handoff, negative findings and release gates | root | complete and exercised | clean archive of `d26d640`; `make branchfabric-clean-room-test`; `make helix-check`; `make check` | final report, design brief, what-not-to-build, generated report, corpus manifest | `52bd90f`, `d26d640` |
+
+### BranchFabric gated execution
+
+This execution starts from immutable commit
+`46955be24d49af7090429444a0ef68f9a5695283` and follows the no-build completion
+branch. The runner exposed four total agent slots, so root plus three isolated
+lanes was the maximum available concurrency; eight simultaneous agents were not
+possible. No hardware task entered the ready set because the final gate never
+reported `PASS`.
+
+Dependency order: baseline and negative-result audit unlocked the fanout,
+reclamation, software-baseline, and independent-replication lanes. Their frozen
+raw artifacts unlocked effect analysis and the fail-closed gate. The gate
+returned `FAIL_NO_BUILD`, which unlocked only verification, no-build reporting,
+future-measurement planning, and final review. Functional hardware modeling,
+cycle simulation, target selection, driver, RTL, FPGA, and DPU tasks remained
+locked.
+
+| Task | Owner | Status | Branch/worktree and files | Dependencies | Acceptance | Raw artifacts | Commit |
+|---|---|---|---|---|---|---|---|
+| Baseline, authorization, hardware/tool inventory | root | complete | `main`; execution baseline/ledgers | historical closure | immutable tag; `make check`; prior demos; corpus hash audit | `execution/baseline/record.json` | `0bf2762` |
+| Prior negative reproduction | `negative_replication` / Locke | complete; negative affirmed | `branchfabric/negative-replication`; replication JSON/review only | sealed historical corpus | raw Amdahl reconstruction and gate re-audit | `execution/replication/prior-negative-replication.json` | `d9a42ae`, `979a1df` |
+| Fanout/state-sharing vertical | `fanout_vertical` / Euclid | complete in CPU-reference scope | `branchfabric/fanout-vertical`; fanout module/tests/artifacts | Continuum reference semantics | 8/16/32 siblings, two classes, three seeds, independent regeneration | `execution/fanout/`; independent fanout replication | `aeb43fa`, `4c4f901` |
+| Causal reclamation/concurrency vertical | `reclamation_vertical` / Kant + root | complete in local CPU/file scope | `branchfabric/reclamation-vertical`; reclamation module/tests/artifacts | Helix scheduler; Continuum state/transactions | 36 randomized trials; faults; bounded queue; rollback/retry | `execution/reclamation/`; independent replication | `9c18719`, `b6279b6`, `248bb54` |
+| Strong software baseline | root | complete | `main`; shared-root COW and batched unique transfer | fanout/reclamation verticals | focused tests and matched effect analysis | fanout/reclamation raw samples | `b6279b6`, `5ae509a` |
+| Gate compiler and final gate | root | complete; zero candidates | `main`; gates source/input/result/report | frozen raw evidence and manifests | `make branchfabric-gate`; six gate tests; hash closure | `artifacts/branchfabric/gates/` | `d11f72d` through `d113e12` |
+| Transaction/formal verification | Kant independent review + root | complete in declared bounds | review files plus Continuum resume/reclamation fixes | causal transaction | Python fault/retry; five Rust model-check; nine Rust transaction tests | independent transaction replication | `d82f857`, `248bb54` |
+| Statistical, adversarial, GPU/network/FPGA/DPU review | Euclid, Locke, reviewers | complete; no-build affirmed | review files only | final gate and raw evidence | five primary conclusions independently reproduced; exact-current adversarial closure | `execution/reviews/`; `execution/replication/` | `5ef66e5`, `979a1df`, `53dae56`, `ea3c505` |
+| Final integration, reports, cleanup | root | complete no-build | `main`; ledger, verifier, reports, future plan | all prior rows | `make check`; `make helix-check`; trace check; clean archive; no-build verifier | verification/provenance/ledgers | implementation through `d113e12`; report closure follows |
+
+Final result: shared-root/lazy-COW and bounded/batched CPU software were retained.
+Checkpoint/transform/transfer, COW hardware, multicast, and metadata candidates
+are `NOT_JUSTIFIED`. The final gate requires `TERMINATE_HARDWARE_PATH`; no
+target-specific BranchFabric hardware or simulator tree exists. Spend is $0,
+no billable resource or SLOForge experiment process remains, and no fault
+configuration remains active.
 
 ## SLOForge Helix extension
 

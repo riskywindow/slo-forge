@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloforge.io/schemas/branchfabric/trace-manifest-v1.schema.json",
+  "title": "BranchFabric trace manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "identifier": {"type": ["string", "null"]},
+        "numa_node": {"type": ["integer", "null"], "minimum": 0},
+        "memory_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "attributes": {"type": "object", "additionalProperties": {"type": ["string", "integer", "number", "boolean"]}}
+      },
+      "required": ["kind", "name", "identifier", "numa_node", "memory_bytes", "attributes"]
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"name": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}, "source": {"type": "string", "minLength": 1}},
+      "required": ["name", "version", "source"]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {"enum": ["jsonl", "parquet", "perfetto", "manifest", "raw", "resource", "analysis"]},
+        "uri": {"type": "string", "minLength": 1},
+        "byte_length": {"type": "integer", "minimum": 0},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "event_count": {"type": "integer", "minimum": 0}
+      },
+      "required": ["format", "uri", "byte_length", "sha256", "event_count"]
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "sloforge.branchfabric.trace-manifest/v1"},
+    "kind": {"const": "BranchFabricTraceManifest"},
+    "trace_producer_version": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1},
+    "session_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "provenance": {"enum": ["SYNTHETIC", "REPLAYED", "HARDWARE_BACKED_REAL", "SIMULATED_HARDWARE"]},
+    "collection_level": {"enum": ["disabled", "minimal", "full"]},
+    "buffer_capacity_events": {"type": "integer", "minimum": 1},
+    "attempted_events": {"type": "integer", "minimum": 0},
+    "accepted_events": {"type": "integer", "minimum": 0},
+    "dropped_events": {"type": "integer", "minimum": 0},
+    "filtered_events": {"type": "integer", "minimum": 0},
+    "highest_event_sequence": {"type": ["integer", "null"], "minimum": 0},
+    "event_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "sampling": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"mode": {"enum": ["none", "deterministic_stride"]}, "stride": {"type": "integer", "minimum": 1}, "seed": {"type": "integer", "minimum": 0}},
+      "required": ["mode", "stride", "seed"]
+    },
+    "hardware": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "host": {"type": "string", "minLength": 1},
+        "machine": {"type": "string", "minLength": 1},
+        "cpu_model": {"type": "string", "minLength": 1},
+        "logical_cpu_count": {"type": "integer", "minimum": 1},
+        "memory_bytes": {"type": "integer", "minimum": 0},
+        "numa_node_count": {"type": "integer", "minimum": 1},
+        "devices": {"type": "array", "items": {"$ref": "#/$defs/device"}},
+        "pcie_paths": {"type": "array", "items": {"type": "string"}},
+        "network_rails": {"type": "array", "items": {"type": "string"}},
+        "clock_settings": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["host", "machine", "cpu_model", "logical_cpu_count", "memory_bytes", "numa_node_count", "devices", "pcie_paths", "network_rails", "clock_settings"]
+    },
+    "software": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operating_system": {"type": "string", "minLength": 1},
+        "kernel": {"type": "string", "minLength": 1},
+        "python_version": {"type": "string", "minLength": 1},
+        "rust_version": {"type": ["string", "null"]},
+        "components": {"type": "array", "items": {"$ref": "#/$defs/component"}}
+      },
+      "required": ["operating_system", "kernel", "python_version", "rust_version", "components"]
+    },
+    "artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifact"}},
+    "trace_corpus_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "required": ["schema_version", "kind", "trace_producer_version", "trace_id", "session_id", "created_at", "seed", "provenance", "collection_level", "buffer_capacity_events", "attempted_events", "accepted_events", "dropped_events", "filtered_events", "highest_event_sequence", "event_counts", "sampling", "hardware", "software", "artifacts", "trace_corpus_hash"]
+}

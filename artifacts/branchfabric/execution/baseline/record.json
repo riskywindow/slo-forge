@@ -1,0 +1,54 @@
+{
+  "authorization": {
+    "accelerator_budget_usd": 0.0,
+    "allow_external_resources": false,
+    "allow_fpga_build": false,
+    "allow_gpu": false,
+    "allow_multi_gpu": false,
+    "allow_multi_node": false,
+    "allow_rtl": false,
+    "gpu_budget_usd": 0.0,
+    "target": "auto"
+  },
+  "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+  "baseline_tag": "sloforge-branchfabric-execution-baseline-46955be",
+  "characterization_reproduction": {
+    "corpus_artifact_count": 40,
+    "corpus_sha256": "9e000d81afc102c5a05666d6fb48859cb4e136a72ad6fc59f5ce086bfaa0b5d3",
+    "corpus_verified": true,
+    "generated_report_sha256": "28ed02bdfbfa4e95fe9c58a5f61ed46326555058e0bd5c8314bd1cf05f4a32cf",
+    "requirements_sha256": "e77e68915d8e3c214e735a05079d34357b2508fe0a114e85e7852e6ec53baba2",
+    "reproduced_byte_for_byte_from_retained_run": true
+  },
+  "hardware": {
+    "accelerator_toolchains": [],
+    "compatible_cuda_gpu_count": 0,
+    "cpu": "Apple M4 Pro",
+    "dpu_devices": [],
+    "fpga_devices": [],
+    "integrated_gpu": "Apple M4 Pro 16-core Metal 3",
+    "logical_cpu_count": 12,
+    "memory_bytes": 25769803776,
+    "model": "Mac16,8",
+    "network_evidence": "local Wi-Fi/Ethernet interfaces only; no RDMA or physical test NIC path measured",
+    "nvlink_available": false,
+    "rdma_available": false
+  },
+  "prior_negative_result_preserved": true,
+  "schema_version": "sloforge.branchfabric.execution-baseline/v1",
+  "software": {
+    "cargo": "1.93.1",
+    "clang": "Apple clang 16.0.0",
+    "macos": "15.6.1",
+    "node": "22.16.0",
+    "npm": "11.4.2",
+    "python": "3.12.7",
+    "rustc": "1.93.1",
+    "uv": "0.10.2"
+  },
+  "validation": {
+    "branchfabric_trace_check": "PASS: 137 Python tests and 5 Rust tests",
+    "historical_cpu_demos": "PASS: core, Fabric, Autopsy, ForgeCI, WarmPath, Genesis zero-day, Continuum demo/migration/fault/fork/compatibility, and Helix",
+    "make_check": "PASS: 1248 Python tests, 6 declared optional hardware skips, Rust workspace checks, 37 UI tests with 1 fixture skip, production UI build"
+  }
+}

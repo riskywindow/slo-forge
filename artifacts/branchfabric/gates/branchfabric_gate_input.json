@@ -1,0 +1,377 @@
+{
+  "schema_version": "sloforge.branchfabric.gate-input/v1",
+  "phase": "final",
+  "baseline_commit": "46955be24d49af7090429444a0ef68f9a5695283",
+  "generated_at": "2026-08-09T23:59:59Z",
+  "thresholds_changed": false,
+  "candidates": [
+    {
+      "candidate": "checkpoint_transform_transfer_chain",
+      "kind": "DATA_PATH",
+      "workload_classes": ["capacity_reclamation_reference"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+          "sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408",
+          "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+          "sample_count": 36,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/execution/reclamation/analysis.json",
+          "sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 36,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+          "evidence_class": "LOCAL_CPU_REAL",
+          "sample_count": 1,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": null,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": 0.1990330675356517,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "critical_path_bindings": {
+        "state_movement_time_fraction": {
+          "summary_artifact_path": "artifacts/branchfabric/execution/reclamation/analysis.json",
+          "raw_artifact_paths": ["artifacts/branchfabric/execution/reclamation/raw/trials.jsonl"],
+          "workload_classes": ["capacity_reclamation_reference"],
+          "seeds": [41, 73, 113],
+          "derivation_method": "median optimized full-trace migration_ns divided by causal total_interruption_ns",
+          "confidence_level": 0.95,
+          "target_hardware_timing": false
+        }
+      },
+      "headroom_bindings": {},
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": 4,
+        "queue_depth": 8,
+        "working_set_bytes": 6816,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": "stale source and corrupt state rejected; bounded operations return declared failures",
+        "interface_requirement": "Continuum exact-state checkpoint and local-file transport",
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "large_state_operations": false,
+        "repeated_frequency": true,
+        "bandwidth_pressure": false,
+        "temporary_memory_or_interference": false,
+        "full_system_leverage": false
+      }
+    },
+    {
+      "candidate": "shared_root_cow",
+      "kind": "STATE_SHARING",
+      "workload_classes": ["coding_agent", "reasoning_verification"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": false,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+          "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 144,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/execution/fanout/summary.json",
+          "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 144,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+          "evidence_class": "LOCAL_CPU_REAL",
+          "sample_count": 1,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": null,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": 0.000060056175263484067
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "critical_path_bindings": {
+        "branch_readiness_fraction": {
+          "summary_artifact_path": "artifacts/branchfabric/execution/fanout/summary.json",
+          "raw_artifact_paths": ["artifacts/branchfabric/execution/fanout/raw-samples.jsonl"],
+          "workload_classes": ["coding_agent", "reasoning_verification"],
+          "seeds": [41, 73, 113],
+          "derivation_method": "largest measured optimized readiness fraction of the local branch-state readiness-plus-suffix lifecycle",
+          "confidence_level": 0.95,
+          "target_hardware_timing": false
+        }
+      },
+      "headroom_bindings": {},
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": 1,
+        "queue_depth": 1,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "real_physical_state_measured": false,
+        "representative_fanout": false,
+        "shared_root_lifetime_material": false,
+        "allocation_savings_affect_capacity_or_throughput": false,
+        "software_cow_insufficient": false
+      }
+    },
+    {
+      "candidate": "one_to_many_multicast",
+      "kind": "FANOUT",
+      "workload_classes": ["coding_agent", "reasoning_verification"],
+      "seeds": [41, 73, 113],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": false,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+          "sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 144,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/execution/fanout/summary.json",
+          "sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 144,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/analysis/transport/cpu-reference-v3.json",
+          "sha256": "7760078aa431e8822225e6805e58be6862b2a47f4c1ee0f60e71983b345e3e80",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 4,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+          "evidence_class": "LOCAL_CPU_REAL",
+          "sample_count": 1,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": null,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "critical_path_bindings": {},
+      "headroom_bindings": {},
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": null,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "repeated_physical_unicast": false,
+        "destination_count_gt_one": true,
+        "identical_large_source": false,
+        "unicast_material_to_bytes_or_latency": false,
+        "transforms_preserve_benefit": false
+      }
+    },
+    {
+      "candidate": "branch_translation_metadata",
+      "kind": "METADATA",
+      "workload_classes": ["coding_agent_reference"],
+      "seeds": [20260809],
+      "software_baseline_optimized": true,
+      "complete_software_manifest": true,
+      "complete_hardware_manifest": true,
+      "tracing_overhead_controlled": true,
+      "hidden_fallback": false,
+      "hidden_cpu_substitution": false,
+      "fabricated_hardware_result": false,
+      "evidence": [
+        {
+          "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
+          "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f",
+          "evidence_class": "SYNTHETIC",
+          "sample_count": 840,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+          "sha256": "a3012b3532c50ffb792ae573f8ece0ff6b6dcc77201055c73b52817dc72b62f4",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+          "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+          "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+          "sample_count": 18,
+          "raw_samples": true
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+          "sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+          "evidence_class": "LOCAL_CPU_REAL",
+          "sample_count": 1,
+          "raw_samples": false
+        },
+        {
+          "path": "artifacts/branchfabric/manifests/software-baseline.json",
+          "sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd",
+          "evidence_class": "ARTIFACT_REPLAY",
+          "sample_count": 1,
+          "raw_samples": false
+        }
+      ],
+      "critical_path": {
+        "target_critical_path_fraction": 0.0009481418827970806,
+        "gpu_interference_fraction": null,
+        "state_movement_time_fraction": null,
+        "state_movement_bytes_fraction": null,
+        "capacity_reclamation_fraction": null,
+        "branch_readiness_fraction": null
+      },
+      "headroom": {
+        "end_to_end_speedup_lower_bound": null,
+        "p99_branch_readiness_reduction_lower_bound": null,
+        "reclamation_interruption_reduction_lower_bound": null,
+        "gpu_interference_reduction_lower_bound": null,
+        "physical_state_movement_reduction_lower_bound": null,
+        "valid_trajectories_per_gpu_hour_increase_lower_bound": null
+      },
+      "critical_path_bindings": {
+        "target_critical_path_fraction": {
+          "summary_artifact_path": "artifacts/branchfabric/analysis/amdahl/cpu-reference-v3-windowed/amdahl-analysis.json",
+          "raw_artifact_paths": ["artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl"],
+          "workload_classes": ["coding_agent_reference"],
+          "seeds": [20260809],
+          "derivation_method": "exclusive commit duration divided by the Continuum lifecycle window",
+          "confidence_level": null,
+          "target_hardware_timing": false
+        }
+      },
+      "headroom_bindings": {},
+      "platform": {
+        "byte_rate_bytes_per_second": null,
+        "operation_rate_per_second": null,
+        "concurrency": 1,
+        "queue_depth": null,
+        "working_set_bytes": null,
+        "latency_target_ns": null,
+        "bandwidth_target_bytes_per_second": null,
+        "fault_behavior": null,
+        "interface_requirement": null,
+        "credible_resource_estimate": false,
+        "selected_target_fits": false
+      },
+      "workload_value_signals": {
+        "optimized_software_metadata_is_critical": false,
+        "operation_rate_and_concurrency_measured": false,
+        "cache_lock_allocation_pressure_measured": false,
+        "hardware_working_set_and_queue_derived": false,
+        "full_system_leverage": false
+      }
+    }
+  ]
+}

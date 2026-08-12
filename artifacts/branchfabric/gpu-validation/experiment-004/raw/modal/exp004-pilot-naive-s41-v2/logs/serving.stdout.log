@@ -1,0 +1,80 @@
+INFO 08-12 03:15:18 [api_utils.py:273] non-default args: {'tokenizer': '/__modal/volumes/vo-bdk8Kln6w6upZsqHmc8O3M/snapshots/a09a35458c702b33eeacc393d103063234e8bc28', 'download_dir': '/tmp/sloforge-exp004-download', 'dtype': 'bfloat16', 'seed': 41, 'max_model_len': 16656, 'block_size': 16, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.72, 'max_num_seqs': 16, 'disable_log_stats': True, 'revision': 'a09a35458c702b33eeacc393d103063234e8bc28', 'tokenizer_revision': 'a09a35458c702b33eeacc393d103063234e8bc28', 'enable_chunked_prefill': True, 'async_scheduling': False, 'model': '/__modal/volumes/vo-bdk8Kln6w6upZsqHmc8O3M/snapshots/a09a35458c702b33eeacc393d103063234e8bc28'}
+WARNING 08-12 03:15:18 [arg_utils.py:1557] The global random seed is set to 41. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+ERROR 08-12 03:15:36 [registry.py:961] Error in inspecting model architecture 'Qwen2ForCausalLM'
+ERROR 08-12 03:15:36 [registry.py:961] Traceback (most recent call last):
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 1396, in _run_in_subprocess
+ERROR 08-12 03:15:36 [registry.py:961]     returned.check_returncode()
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/subprocess.py", line 502, in check_returncode
+ERROR 08-12 03:15:36 [registry.py:961]     raise CalledProcessError(self.returncode, self.args, self.stdout,
+ERROR 08-12 03:15:36 [registry.py:961] subprocess.CalledProcessError: Command '['/usr/local/bin/python', '-m', 'vllm.model_executor.models.registry']' returned non-zero exit status 1.
+ERROR 08-12 03:15:36 [registry.py:961] 
+ERROR 08-12 03:15:36 [registry.py:961] The above exception was the direct cause of the following exception:
+ERROR 08-12 03:15:36 [registry.py:961] 
+ERROR 08-12 03:15:36 [registry.py:961] Traceback (most recent call last):
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 959, in _try_inspect_model_cls
+ERROR 08-12 03:15:36 [registry.py:961]     return model.inspect_model_cls()
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/logging_utils/log_time.py", line 21, in _wrapper
+ERROR 08-12 03:15:36 [registry.py:961]     result = func(*args, **kwargs)
+ERROR 08-12 03:15:36 [registry.py:961]              ^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 920, in inspect_model_cls
+ERROR 08-12 03:15:36 [registry.py:961]     mi = _run_in_subprocess(
+ERROR 08-12 03:15:36 [registry.py:961]          ^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 1399, in _run_in_subprocess
+ERROR 08-12 03:15:36 [registry.py:961]     raise RuntimeError(
+ERROR 08-12 03:15:36 [registry.py:961] RuntimeError: Error raised in subprocess:
+ERROR 08-12 03:15:36 [registry.py:961] <frozen runpy>:128: RuntimeWarning: 'vllm.model_executor.models.registry' found in sys.modules after import of package 'vllm.model_executor.models', but prior to execution of 'vllm.model_executor.models.registry'; this may result in unpredictable behaviour
+ERROR 08-12 03:15:36 [registry.py:961] Traceback (most recent call last):
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen runpy>", line 198, in _run_module_as_main
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen runpy>", line 88, in _run_code
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 1422, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     _run()
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 1415, in _run
+ERROR 08-12 03:15:36 [registry.py:961]     result = fn()
+ERROR 08-12 03:15:36 [registry.py:961]              ^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 921, in <lambda>
+ERROR 08-12 03:15:36 [registry.py:961]     lambda: _ModelInfo.from_model_cls(self.load_model_cls())
+ERROR 08-12 03:15:36 [registry.py:961]                                       ^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 934, in load_model_cls
+ERROR 08-12 03:15:36 [registry.py:961]     mod = importlib.import_module(self.module_name)
+ERROR 08-12 03:15:36 [registry.py:961]           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/importlib/__init__.py", line 90, in import_module
+ERROR 08-12 03:15:36 [registry.py:961]     return _bootstrap._gcd_import(name[level:], package, level)
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap_external>", line 994, in exec_module
+ERROR 08-12 03:15:36 [registry.py:961]   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/models/qwen2.py", line 40, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     from vllm.model_executor.layers.attention import (
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/layers/attention/__init__.py", line 13, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     from vllm.model_executor.layers.attention.mm_encoder_attention import MMEncoderAttention
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/model_executor/layers/attention/mm_encoder_attention.py", line 11, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     from vllm.kernels.triton.qkv_padded_fp8_quant import (
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/kernels/__init__.py", line 5, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     from . import aiter_ops, oink_ops, vllm_c, xpu_ops
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/kernels/oink_ops.py", line 18, in <module>
+ERROR 08-12 03:15:36 [registry.py:961]     OINK_AVAILABLE = current_platform.has_device_capability(100) and hasattr(
+ERROR 08-12 03:15:36 [registry.py:961]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/cuda.py", line 155, in wrapper
+ERROR 08-12 03:15:36 [registry.py:961]     return fn(*args, **kwargs)
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/cuda.py", line 630, in has_device_capability
+ERROR 08-12 03:15:36 [registry.py:961]     return super().has_device_capability(capability, device_id)
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/interface.py", line 329, in has_device_capability
+ERROR 08-12 03:15:36 [registry.py:961]     current_capability = cls.get_device_capability(device_id=device_id)
+ERROR 08-12 03:15:36 [registry.py:961]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/cuda.py", line 155, in wrapper
+ERROR 08-12 03:15:36 [registry.py:961]     return fn(*args, **kwargs)
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/cuda.py", line 615, in get_device_capability
+ERROR 08-12 03:15:36 [registry.py:961]     physical_device_id = cls.device_id_to_physical_device_id(device_id)
+ERROR 08-12 03:15:36 [registry.py:961]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961]   File "/usr/local/lib/python3.12/site-packages/vllm/platforms/interface.py", line 245, in device_id_to_physical_device_id
+ERROR 08-12 03:15:36 [registry.py:961]     return int(physical_device_id)
+ERROR 08-12 03:15:36 [registry.py:961]            ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR 08-12 03:15:36 [registry.py:961] ValueError: invalid literal for int() with base 10: 'GPU-81e8b26e-f810-8db0-e6d5-97b44fd85667'
+ERROR 08-12 03:15:36 [registry.py:961] 

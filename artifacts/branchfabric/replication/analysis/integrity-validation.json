@@ -1,0 +1,178 @@
+{
+  "all_checks_passed": true,
+  "pinned_source_commit": "f1ebbf621241ca27a40645c04f95bd421079eba8",
+  "schema_version": "sloforge.branchfabric.independent-replication-integrity/v1",
+  "validations": [
+    {
+      "accepted_events": 78,
+      "artifacts": [
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 129715,
+          "expected_event_count": 61,
+          "expected_sha256": "dc3fe9108cbd44d512bb2051f9f2360f4ca6997978b06e463a3dc3086245fb35",
+          "format": "jsonl",
+          "observed_byte_length": 129715,
+          "observed_sha256": "dc3fe9108cbd44d512bb2051f9f2360f4ca6997978b06e463a3dc3086245fb35",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/branch-workload-trace-v1.jsonl",
+          "sha256_matches": true,
+          "validated_event_count": 61
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 31065,
+          "expected_event_count": 17,
+          "expected_sha256": "67957ddaf50d6eb05d8b260d1b5f95be26bc2ea60640da7b2ab3ea82da14b260",
+          "format": "jsonl",
+          "observed_byte_length": 31065,
+          "observed_sha256": "67957ddaf50d6eb05d8b260d1b5f95be26bc2ea60640da7b2ab3ea82da14b260",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/state-operation-trace-v1.jsonl",
+          "sha256_matches": true,
+          "validated_event_count": 17
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 50101,
+          "expected_event_count": 78,
+          "expected_sha256": "e1703604cb1d526df1064ea952b558b3dc2fee0a4d772fe6017776c973e043ae",
+          "format": "perfetto",
+          "observed_byte_length": 50101,
+          "observed_sha256": "e1703604cb1d526df1064ea952b558b3dc2fee0a4d772fe6017776c973e043ae",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/helix-lifecycle.perfetto.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 122008,
+          "expected_event_count": 78,
+          "expected_sha256": "b842ad7cb5662a3a6e2b4833509232699641e66084bb48444e5360f5561bbad0",
+          "format": "raw",
+          "observed_byte_length": 122008,
+          "observed_sha256": "b842ad7cb5662a3a6e2b4833509232699641e66084bb48444e5360f5561bbad0",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/raw-lifecycle-events.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 119210,
+          "expected_event_count": 107,
+          "expected_sha256": "047ac3888311f9c05779ba71c733af9218b33198c97e27ab7c20fd8bb2f148f5",
+          "format": "resource",
+          "observed_byte_length": 119210,
+          "observed_sha256": "047ac3888311f9c05779ba71c733af9218b33198c97e27ab7c20fd8bb2f148f5",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/resource-trace-v1.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 1318,
+          "expected_event_count": 0,
+          "expected_sha256": "dd3b2098a27c796fd1c7ad1fc7cdaf6017af82babb33481cca294b75b0f0334d",
+          "format": "analysis",
+          "observed_byte_length": 1318,
+          "observed_sha256": "dd3b2098a27c796fd1c7ad1fc7cdaf6017af82babb33481cca294b75b0f0334d",
+          "path": "artifacts/branchfabric/replication/helix-seed-149/sharing-analysis.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        }
+      ],
+      "attempted_events": 78,
+      "dropped_events": 0,
+      "expected_trace_corpus_hash": "6c6ef154697ba80a607a56c4dfec90986bd10f5561e700e85c91d8c2fc39058c",
+      "filtered_events": 0,
+      "manifest": "artifacts/branchfabric/replication/helix-seed-149/trace-manifest-v1.json",
+      "manifest_sha256": "cdac890813dc5b7d24d7dcfa237efafa196e9c12a3354de19f207bccf07b939d",
+      "observed_trace_corpus_hash": "6c6ef154697ba80a607a56c4dfec90986bd10f5561e700e85c91d8c2fc39058c",
+      "trace_corpus_hash_matches": true,
+      "trace_id": "3fc3b1a05c3fff58fe5e67cd5af6d95b0ba73266302eb64ba1c9d3bbd9e226e9"
+    },
+    {
+      "accepted_events": 18,
+      "artifacts": [
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 33113,
+          "expected_event_count": 18,
+          "expected_sha256": "eafdd1e27287ad23083787a4ae6c24682dc93e6477e5934204be3ff48bc2e5a6",
+          "format": "jsonl",
+          "observed_byte_length": 33113,
+          "observed_sha256": "eafdd1e27287ad23083787a4ae6c24682dc93e6477e5934204be3ff48bc2e5a6",
+          "path": "artifacts/branchfabric/replication/continuum-seed-149/state-operation-trace-v1.jsonl",
+          "sha256_matches": true,
+          "validated_event_count": 18
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 11768,
+          "expected_event_count": 18,
+          "expected_sha256": "8c99ef387e4c5dd1dec1150ac84c8f65227571dca971453adb5043d7dd186bc3",
+          "format": "perfetto",
+          "observed_byte_length": 11768,
+          "observed_sha256": "8c99ef387e4c5dd1dec1150ac84c8f65227571dca971453adb5043d7dd186bc3",
+          "path": "artifacts/branchfabric/replication/continuum-seed-149/continuum-lifecycle.perfetto.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 23729,
+          "expected_event_count": 18,
+          "expected_sha256": "a298e8300f1a3b76c5b0928dd64a3e902091ed96bb531beec43abcfbe1fed86c",
+          "format": "raw",
+          "observed_byte_length": 23729,
+          "observed_sha256": "a298e8300f1a3b76c5b0928dd64a3e902091ed96bb531beec43abcfbe1fed86c",
+          "path": "artifacts/branchfabric/replication/continuum-seed-149/raw-continuum-observations.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 687,
+          "expected_event_count": 0,
+          "expected_sha256": "78d4e54d8c27784bc28af8b31b22fe00dec20369f5bde859f6305e0224f31898",
+          "format": "analysis",
+          "observed_byte_length": 687,
+          "observed_sha256": "78d4e54d8c27784bc28af8b31b22fe00dec20369f5bde859f6305e0224f31898",
+          "path": "artifacts/branchfabric/replication/continuum-seed-149/sharing-analysis.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        },
+        {
+          "byte_length_matches": true,
+          "event_count_matches": true,
+          "expected_byte_length": 12737,
+          "expected_event_count": 8,
+          "expected_sha256": "8358db0d08403b25a25162adbcafb5fbbec7fe01f6b23edc8db150d4b698b6fb",
+          "format": "resource",
+          "observed_byte_length": 12737,
+          "observed_sha256": "8358db0d08403b25a25162adbcafb5fbbec7fe01f6b23edc8db150d4b698b6fb",
+          "path": "artifacts/branchfabric/replication/continuum-seed-149/resource-trace-v1.json",
+          "sha256_matches": true,
+          "validated_event_count": null
+        }
+      ],
+      "attempted_events": 18,
+      "dropped_events": 0,
+      "expected_trace_corpus_hash": "361d42c06790bef0d22db5e102a982a758dea7e75ad64f7b5a2251b6e2a2d4ce",
+      "filtered_events": 0,
+      "manifest": "artifacts/branchfabric/replication/continuum-seed-149/trace-manifest-v1.json",
+      "manifest_sha256": "dcfe4c0b75928864a687ad9a7dece075d739dc782b40aa512642d9cc0df05698",
+      "observed_trace_corpus_hash": "361d42c06790bef0d22db5e102a982a758dea7e75ad64f7b5a2251b6e2a2d4ce",
+      "trace_corpus_hash_matches": true,
+      "trace_id": "f139d3dbb5aa3ebb5817a8217553b14bcd097d2dccf85c5f49e8e8bb266bdb67"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "artifacts": [
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/continuum-lifecycle.perfetto.json",
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/raw-continuum-observations.json",
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
+    "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace/resource-trace-v1.json"
+  ],
+  "attempted_events": 18,
+  "divergent_continuation_hash": "eeee147e9eb5c936f34f5213068c584c711d9456daf5e3ef0465c8f662413dd5",
+  "dropped_events": 0,
+  "filtered_events": 0,
+  "limitations": [
+    "The Continuum workload is a deterministic synthetic state fixture.",
+    "Reference runtime state names simulated GPU layouts but every byte executes in host memory.",
+    "Pre-copy network latency and bandwidth are deterministic simulated-hardware values.",
+    "No GPU, PCIe, NVLink, RDMA, or multi-node timing is inferred."
+  ],
+  "migration_transaction_id": "ccc4acf7a56ded474269f7f888d30ec9d225ab6407bf71eb1a28b40944bfca56",
+  "migration_transport_kind": "SIMULATED_HARDWARE",
+  "output": "artifacts/branchfabric/characterization/cpu-reference/attempts/continuum_state/attempt-000/continuum-trace",
+  "parquet_status": "unavailable",
+  "resource_sample_count": 8,
+  "resource_samples_dropped": 0,
+  "schema_version": "sloforge.branchfabric.continuum-trace-run/v1",
+  "seed": 20260809,
+  "sharing_analysis": {
+    "branch_count": 2,
+    "cow_bytes": 512,
+    "cow_page_count": 8,
+    "evidence_references": [
+      "python/sloforge/continuum/operations/branching.py:fork_checkpoint",
+      "python/sloforge/continuum/storage/content_store.py:MemoryContentStore.put",
+      "python/sloforge/continuum/adapters/sdk.py:PageTableEntry.copy_on_write_refs"
+    ],
+    "logical_unique_bytes": 3184,
+    "metadata_bytes_per_branch": [
+      164542,
+      164542
+    ],
+    "naive_independent_allocation_bytes": 6368,
+    "physical_allocated_bytes": 3184,
+    "physical_amplification": 1.0,
+    "private_bytes_per_branch": [
+      455,
+      455
+    ],
+    "shared_logical_bytes": 2729,
+    "sharing_efficiency": 0.5,
+    "source_page_refcount": 3
+  },
+  "source_continuation_hash": "3f4763ada56509b210379804a59ff8d731d8afaf8f7b504387746ad1981c8b53",
+  "state_event_count": 18,
+  "timing_measurement_counts": {
+    "HARDWARE_BACKED_REAL": 12,
+    "REPLAYED": 0,
+    "SIMULATED_HARDWARE": 6,
+    "SYNTHETIC": 0
+  },
+  "trace_corpus_hash": "4f9ad372880e9e4d97408cc2ac8c0069ff294e9af04aafb26d19a2a1cc920b4b",
+  "trace_id": "d8ba17ccd488c38079f7ed0883d54028c3c26ecdb3773fa8631b4ffbc47a3746",
+  "workload_evidence_class": "SYNTHETIC"
+}

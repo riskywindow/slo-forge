@@ -1,0 +1,804 @@
+{
+  "artifacts": [
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-software-manifest.json",
+      "sha256": "e684038faba9f9ed74ce7ce4817666a7ee4f03e64268e7d2f12a66518977df59",
+      "size_bytes": 1835
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/branch-workload-trace-v1.jsonl",
+      "sha256": "1647d7ecad74914851b864a770633334c9c526066ed19fe0f5c19e8c53446dfc",
+      "size_bytes": 149333
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/capture/branchpoint.json",
+      "sha256": "29db2c86845af68b45574925c99b34d4dbae85a40f9f2362db3eb47a3e7a3f7b",
+      "size_bytes": 1069
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/capture/coding-failure-capture.continuum.json",
+      "sha256": "8a9befbb97992bc314252a9a349c957f7bf6610c11a4737fd6145666f32e49d2",
+      "size_bytes": 154200
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/capture/journal.json",
+      "sha256": "0422a64fe86d458c650de0feb5212bdf59fc40926958f60498580fc495940fe3",
+      "size_bytes": 1913
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/capture.sqlite",
+      "sha256": "057eaa4193677dde0777fa5b421435548ed761eee870309284c98c3d169fefcc",
+      "size_bytes": 20480
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/credit/branch-relative.json",
+      "sha256": "8c2f791825d1d939d87f7358ee529afe91a1d92d9996a64f2e3318b35b492109",
+      "size_bytes": 3093
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/033c649daba1a053d31ea6f201c9a4a9cac909d8a55826c9ca0a1a213090f874.json",
+      "sha256": "5f103a365c4a3b7132f3b84e4de25d35204e229b73353308cc0891c48bbf081f",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/074b7c5e85042618af803bc8e13dbd06c837fde301777627b227805e85ff0a92.json",
+      "sha256": "7e2a63da87c33d84a5f2d0e5eee08f6e03136f9e474cda523a9734c0f24cfb33",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/0d794a6df0fc64fdd46894996b8969be945565625eac46bac8d0e057bf881302.json",
+      "sha256": "6828f56f01154736fc3ea519ad1e9a6823860cb2a0de0bf0ec7533b588d2e53d",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/1106e62b9d464d2c90b4a75504ece06e1344add8a5134d0085e64106272ba3ec.json",
+      "sha256": "a537cc2beb737d99846f4ff9c6d336dd7f45dbd28068c015848efc585a52db99",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/123089d1ea555f67c86f0ffbae856d81cffd09fea3d960e3a36d4dd4acba0b4c.json",
+      "sha256": "1cb08bd9ed646924fedd221d2dc68c759091ad66b161f417bc2901c071cc16a7",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/12b0b71bdcd2afc292570b816f0f0c1ca34265cc5c4e99f9a2c188a5649a3b94.json",
+      "sha256": "ffcd33b71788613a710e58daff0d43332dbc5d5474ef8f6aca8655497f1adb71",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/12b7b1e836bc2ef1d09e3a26cd268748b46e9fd50190d83e2da05cec3bece264.json",
+      "sha256": "36b60d230271daf486191203cc1b9a2aca6a97f615ecadd11e376e8047242775",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/149a1e1e75767f94b8322bd3012c4aaf74cbf3e20b9dec57fbcdd5df9f80da3d.json",
+      "sha256": "71d08a2f7fd65fa084438a46cef04697b0580fc4d952909fe640efc2d62dd4b5",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/183e18325818dead1ba974993fc6f107cde70727d1396627f0610b4063e1b024.json",
+      "sha256": "a62e7cff9940ff161577c1a274ed075833be03ce4494ff66181643fa20c51af2",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/199fd52d5da83f6752ce5d6438b07b83a82c1472a5c4ea958e59aea1da26220b.json",
+      "sha256": "ec36d8dc998a6912ca2f42b03d4b0601ea65f2f4842dc3cf4d5cc97cd914023e",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/1a0cf668171e676573a2bb593305b6381e4951bc513f8c8a50c49d8d08d05584.json",
+      "sha256": "7b762f37187dbc5f7e62a6889b4832260444c7b4a98b281b476569dc182ec495",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/200702899f914d7bb08ce4b5805ad188a41b9ef0240b7895a4c80a85948b953a.json",
+      "sha256": "c48b7fa5d936debec403d92ccf55a79657e89257c7d33ee12b9c8dcaed5f6969",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/26a7a7764741ec3a5ac8293e2bbdefdb88dbf60e19ac70c026ed80c9eba3cde9.json",
+      "sha256": "6a784f2b5f7b487bfbe3b9d701c5300693b7a66b6ec717cea1a147aabb7ffb5f",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/28689af02d1e8c43f8e0be725a033b57826dfd3c7056a3922cd31a10ca65d59a.json",
+      "sha256": "2f42bf96e6dc9433865898ec6497095c70fd8a1472da46f1dab7da83bcefcadd",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/290906b43ea8bdbd0fa15a43eab0a20278fc84567f5ef7740e272c81f3591a6f.json",
+      "sha256": "9628d9bb11222e5762c586181b9ce054deb41664a4f0c84c0d273b02fbfe0e55",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/31406dbd5c81d463764cc86a3955781cde1267edac6fe3439f6f3088e88fc6e2.json",
+      "sha256": "f92f444a8099315ab410e44a7367d3eeb957f8c7813ed6a68328aaf6d3829472",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/327268fda635c5a8cd937e8fef17d0d2195fdc9bf39ca476695a6ecd209f220c.json",
+      "sha256": "1ebe67f5d480b56c15a7c99a2f9f4c43d28886840ec095be6107a427288eb60d",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/32bf2b0cb4f0c393a15429d6da054828688416256fa8647de5380605cf4e6ac6.json",
+      "sha256": "4fbe6036da0008d9ef7959594fc2edf4e2d15b8d1878c4f5d872ba232a46e1da",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/3341d5cb2250009dec56170e2c2ea56cd760e853d23c14e574272a02f43156bb.json",
+      "sha256": "34806fb6068ab4809a5a4e91975ce7e9b3a85fb90882c318b7185298bd5ccb0e",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/3cefe00367339afdf8ac22478d8b71f3df3c682ba4411307dd95416c70275d02.json",
+      "sha256": "c7d2996d1d98fa3dcb9c7ca1900b102a78a0957bc1b57cca57f8c56f19379ce3",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/3ee94ca37ab761c2a2ef90e22d796ea7a9897f48e284585334d55224f582ee02.json",
+      "sha256": "210ad8d8bd24af45dad9a770a3a033aa7ef3e94987f3a470830b4a454963257c",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/42da6c850ac4ef040c3e97fdc249327fdaacbfabd42c72abb382fd6a95467878.json",
+      "sha256": "f0c36cb072dec48e351ec8dae7770012c7ee3657083350ce4d89c6e1fd22400c",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/436df29ffb13de6aa0ee1c7ddbda86acbcfe6467468fb3cc1ded8b339029cde5.json",
+      "sha256": "101f170832269fa85e22f73c49e35ab37723a1b7ca9ac1eb48d47f89e6dd23d6",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/4913207a9250c9059444b0de18bc672900c950eeb76826851076e99307ba3055.json",
+      "sha256": "1c4f0883ded3ef8b7be91dd736cf1911484b08126ce226a9fe3f149a3b2db4b4",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/4af42fce3a8fa16d66b33f2b81e5c5ef0d9cbb8255757febc92893f2c54f1a0f.json",
+      "sha256": "ebf99a1be2e90a79cd771cc5035e7b7fb871b630938320ea345a884c6e0b6e27",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/4c0b6063326987112f2eb0865183cbeb93ef34b58c655f825f2415ed76ff118f.json",
+      "sha256": "793dd2dd256715ae20171675a172373d951d4b2b124e7bc2be832d84f2af8e37",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/4f1e7b2bdec5f03f6795f9b5cf9fbdbe0ccd345ad7582b9f20da0451bec78ea8.json",
+      "sha256": "f77a4d24538c09e0aec5769837a973ad22f77d047b704571dabacc9d866232fd",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/553e1365d2a86831711a45ccec06932e628c866cf0074a4b082a5a7d69ad9be7.json",
+      "sha256": "e9188cdf91c82aeab330f7a5719249d5acdb1c40dcffee402c574adac729f4fa",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/55b3941a67a6747c8cdf6fcb1fc271c210b2e2664f521e891ab40f0094b5c0a7.json",
+      "sha256": "7f3fd7c03540dce0f180f43287daad75903fe9a7c94abea0c893fbd91a5bacab",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/57626d497779ea649454f08b0209d096bbd75d9a9a7929420eaa0d9574ce193e.json",
+      "sha256": "2674c5ce824cd26d50eabd2c2479325fbbd8583cc8cadee11068be8c34e9a86a",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/5774e857c3b35f40a856a1023330002039c7c57d314f1071537c6d003e86b099.json",
+      "sha256": "9aa333e1782aaca882d19b41cad3daef41b192efc2363d41989f4e0363e36f79",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/5faf1aefccb3824be057131640f00fc15bfd81494298bed052364d1b2c26ffa7.json",
+      "sha256": "0c30ff9b4a420e996c08a75bfe29485e1f0cf53d419a27a71a7c56c5884e508d",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/60207fd65971a4b981f1534001d8f0a340b80082b1e49d3cb0d3bf1b0fcc3b36.json",
+      "sha256": "6de0cad570d554aabcb1f4aebeee689826a75504266df93c36f83aef6e08f17a",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/624a290b072f7bc10b3d38673fbcd7d0a6536a58073165cadea12d2c0ac92d2a.json",
+      "sha256": "4d0e5217d24c45b81db4f491f98620aa0081ab7eb02cb227d4ca589de73a5b57",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/66f9fd663f535e2a5eb9d49891071785238e644e349229d6ed9fc1e973d56604.json",
+      "sha256": "8e416e5462752b0dababd5cd2bcd813521651d38c9ba28bc928356799c421cc5",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/67f358ed06731bd9b8fee8f6be6b0612407ce1691210c2cb9acc66e219acf6b6.json",
+      "sha256": "48873650768f7e5f4a7322c7e2a3d037eae3d1d55a6f6ab083ea8a0a981379ec",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/698d2820dada94f24e975eee29aeb9515fc3417a19075c2b217bb8c7b41fcc45.json",
+      "sha256": "a60c7eca9615f337f4fef479c0f72e8606c89e42401460d51a20572f3c4abef5",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/6dbcc8009ad3cc1a56ae37eb2b2a9b98f36433e17562070014b1316fc4ac76b7.json",
+      "sha256": "a6ade17ae912ecfeb4fd358d06c6594f9d6c9186d4df901b7d9526200445c814",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/759b7161a25fce0aaaadf3a76519fdc820de9588d9dbb71675367441a9af68e0.json",
+      "sha256": "bf7cdc727bb270f555e28fdf154d12d3fe308512fc310ea4f526f0d4ab444ae0",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/7ebfb9ec9f05c945512ee3c35da9d5154e453dc83f289ec81923cafc8305159f.json",
+      "sha256": "e7dbcd97a2800b120bc3b746006c82ea65dc0a40cd3af839199f9d17bf4d9a64",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/82301868f5071277a81e18f2506368cc392533580cc8d4f83e7630f197decee5.json",
+      "sha256": "2e3628bd0b4293273b98c310ac173dca8e7160ae783b15753d69d972b8e95471",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/8517607c489a13edd14b0014fbc7519a69f399bd915983c248ab76e93998ff1e.json",
+      "sha256": "630db22362c6f368a4ad6ba2ee80925e389612fcf9c57d36936b60e0cadd9b4d",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/86508120edd8b59413eaaa81bdd15bd0d586f41828b3aa3e85ea8df8ecf21840.json",
+      "sha256": "fa0117c0c80fd21d31d8a77209e93a2249c078353747a2f83ba7b4b6e92bc1d0",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/8f3bda4bd8987a9488324b862e7c4b0fc5e6ce5dadcd32842315831b1d11d6eb.json",
+      "sha256": "a3dea799a2bf9a1589fe03d965edbc906851a3abf1a29cac707788b4073c979e",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/90652151e573bdc600247bf6681c3dbab5aa79b981ec0cc874880bbc52052049.json",
+      "sha256": "0d0ec8610db6c69c6fce06c5ff49e727108aa4088212449a6f822610148ae6f6",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/955e5aefad873286a0dc62dafa4af6961e7707592c478790877146376f5c663c.json",
+      "sha256": "6fa40440c612e5d70548b42e6e98cac6a78f6faedf035259dacd3d547cd7ba7f",
+      "size_bytes": 1728
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/9b064495ae92d2794159a7ef169deb874c4fb30d0bfd72d033cc364d2a646f66.json",
+      "sha256": "4e0155af614f3557ca2daca50074104bd125328c7b2c22cd575296af91d9a505",
+      "size_bytes": 1728
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/9ddeeed524c70382c65e9ed9731b5a2855fe3fe4e2ef847314d6214f18dfb5c1.json",
+      "sha256": "aded5607e1ba4e19706da45fc6adace9abde0e1edb75171d44ed536d62a472ee",
+      "size_bytes": 1666
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/9f7ab7f87a0668b54d324513a70f5df3557d3591fdbad5dff4ed7d37a241ba9c.json",
+      "sha256": "30711051ba6160a410c5546c920af308ae02e22356a551d4b499b265017083fd",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/a5d6daa69b6f4477acdb02c16d94de744dca85137942644554f834ce143bebb9.json",
+      "sha256": "99c253b8f2639596bccc13c9302c62ceeb6a67ff998a0fe92055a6ef8205d631",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/a9a2035552f44df9401469beb0edb7341d56fa1f9cab97f6cdc5421c99a773b6.json",
+      "sha256": "faa1d9235985bec273ce86993d52ae11e19850794bb378efa6251d9d5a69d14f",
+      "size_bytes": 1728
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ab3822df6953b1296b1238b253497842eed5df0f3713eef5c3b3d35a2d2f99a8.json",
+      "sha256": "b86cc7c3546deff691db659de043bfada6f05f72d6e7d31100f4024047bc9ce5",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ac05ff078fca0f3a1f1829abae524cd2f1f7956552c5f0c852d41064410c905d.json",
+      "sha256": "126769380c1c132048dafeefc14a8eeb9735f5f5c2c51c86586717b1dc7fdb86",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ad75a3737ecedfb1e679cd9f02de6d402365338a98abba393ab746f5d6197bff.json",
+      "sha256": "f3489588e1ebcf63d02891dd85ea554cea3a3131a17bae3d7f64edde95efd1c0",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/b0613a2100d9796ed72f41e7ff4804390513f66fa59f565397337064e4750a22.json",
+      "sha256": "e2039295c398a5032192d9e9cd7de281e428d489787aca0b700ec23ef045f5c2",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/b1d9b35257d8d68dc7d58b7f26f41c3caf4581b56de830f5a7ffba684b604e23.json",
+      "sha256": "60226efc4e601df5948121e03052fc0058d8a82478ba52dc4c315894d12c306f",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/b341fefa8eae8974532be09a8240ed3802d667f4a39428475ec2aba73af266d3.json",
+      "sha256": "68b2432cd74cdf28bf07f7804dba193390da83b231f0c1e531b30c14c1c752d5",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/b6d98c62e3a3d96e2f9bae5503f0193b8924715489d2d2a80e79f973c9f5b2e0.json",
+      "sha256": "f7a6cebb36f1aba84951a9c5ff99e5538134d166428e9a35a5f6e32ec8ba194d",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/b92bbf5d5fb321e1a455046d6781021dd2e91642a95c48c5421e4344e90624c5.json",
+      "sha256": "29264af72ceeffd6870458af614fcb631bfdc3c34353acd194bfa57d810f5161",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/bc967d2e607ce96c5c4d462c9bdb1176febd94a0e8319e2f057471cab2b7bc70.json",
+      "sha256": "8a3a1b687f30d0bdaf5475474f194a05f357fc6cfc7bb4f1638d9f941fccdb09",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/be5e6bbe4d0309ae87b98f113edd2a94921340ed401064040c5f574eb7b976fd.json",
+      "sha256": "18233b986b351161bba2c36845c0625da16e34cd644ff7a4f1128c743d9ba23e",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/bf41b029b8a6b92533b57e3381d0c29cb7b6043848f1156fa0e60bba5e2eb028.json",
+      "sha256": "ed69cacdbfcf0a8f0370b34ccb5ba8da591aea684d5b2f9bc11dc8b3243bcc07",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/c4bb7caec6bdd7ffca66cd18543263f197c81fc0af0a430636a12c61aa8a9a00.json",
+      "sha256": "01c8913bb0b3a44a681fba7fcbcfe94af6a78be9cbddd6bd4047ed2ac3f9bff5",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ca9ed6b3cd8f6fbb379c3106818d61f065996150750e51d5493e16f31489dbe3.json",
+      "sha256": "c49956764608b76ac4945c6048997ef21b6a378f60c35cedc683933fe3132903",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d16c4d63af67ebfda331bffb3e196bc9c94729d5e04544ea4ac9587e2d323742.json",
+      "sha256": "34dd92bc51e4bd1ed4c4928c33767008c007cfbb4af32fa96ff85f83e0e71d77",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d19fc1a7f3205338f7266402258df41b09fa2f3eec613313b5f9ebcd0c399c9f.json",
+      "sha256": "06c4fb88033238d3e1d24f2a0e8ba6c5ca15ad3e9dd5e294ce58fd75a5347ed0",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d65effe68ca37b8af0c2217428f511cb208a6ebab07861e6583e45016b4afb1e.json",
+      "sha256": "bc9544796cab6bb815df1f5d83398777a7aa1e5c07ced334f0340fa98c6ff43c",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d6d1667d5158c9287ca1e183db5eb67448fde7ebc5b0faadf09f607652ec8b9f.json",
+      "sha256": "f813314358350e10196fb664eebfa23984726a2712b2258fdf125d8d0e9c0fab",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d73bda4f468bee9032e79d54ccf787ce12f87d95ef9b08cb73892767c478a342.json",
+      "sha256": "c68207ff5b0b09b6615d4a84d45fe4f746edf694a07f2eff0062eb5c282691fb",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/d85e470bcffc64d877fd8c86a6b5e26bebbd5152b31d1c457bfdc9ada3ced3f1.json",
+      "sha256": "eeb16ce065cb6f169b90024d27af2ecd212de48e720e4fc1a253fa7018b6bfea",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/da30fe4d5fa98eb93e1a7261c112dddc266518657329456690c9e4216c51b891.json",
+      "sha256": "66968c0a414d564155d3f75c3f4d63a36ead3bdb8f9878dedecad746f3b045f3",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/dbafa33f75ae51f3f7758690f4655f3c22868230f64c33f1ee474dfc37910100.json",
+      "sha256": "742465d4bd6ab99367fbcf84db1824e8201a5cc8e3900609f69cb801b132caca",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ddc088e89888756d0ffca20bab5e53a585bc4a8da665d8e4c5573ce5b0e76583.json",
+      "sha256": "894d4fd63f3cd7df2c679da793e1a53d6c82af94700fdae0b11b81415ca1b973",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/df70b05c84003569e88b294ace09a22bb488ce4970fb63428582402c8db5e11f.json",
+      "sha256": "f47e5bed4bf4fd2382e54a8a27d0c840c0b0f0d690011c1d90774a790acd76f6",
+      "size_bytes": 1728
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/e22f073deb172973a6dd7f48068d840e37c09b2c432c8565c18622ebe857c8cc.json",
+      "sha256": "41edece2464f332a8b349c2dd00750bbd418e89a5079c3ca2ab711f0451be3e2",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/e32d71e649efd3c5faf67e485f9483e63ec9b540ef9e1d7cb8736a7f6f706b5e.json",
+      "sha256": "0a7b41dc9ddeb40e017c16b9d146321462c8b75c53dedc0804f4e2cf066bc890",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/e57325d63509a8cbba77373c60743f41ce814596235d9a2cbefefeadd1a34c87.json",
+      "sha256": "df71dc0abafad628b335feaed85ca8db4aa3a1f351382ad6aa5fa5b073a0a28e",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/e77cadd9b1dfd3c00a94dc3cfe49c27ab32eaf7172dbfd36f2dbaa2f290ff5c8.json",
+      "sha256": "374a2dbc2640f75b740df38976bef1ab5419edce236d99617a6bde400adee0f3",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/ebcadaa9aed8cea630158aabc60dca4809298073b1b9c3a439fbb032cf3537e8.json",
+      "sha256": "81b3a46c8585e70e0b0c80c447bf95b9b5473e144f0975b67a67f7e910b8f1cd",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/edca66986333954beab2fb289248c695ef35fca803ad8d54c115b7e9693350df.json",
+      "sha256": "99c01a4508484b28eea0ee9092279a36015112a64e7a32e214d611f57a86e415",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/f4d0d5738602489d93d1cccc5d3c59b0b4bd7b43e0775320e4ad00a220cff964.json",
+      "sha256": "1a6b5025c92da12ed172fbb8c157fbd394316b1de512e79dca1668b02a6b306e",
+      "size_bytes": 1720
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/f6e6398d420afbd79300a29e462b0373ecdd95be5afa9d803c17d82946cc2702.json",
+      "sha256": "866d5c4a7cceda365ca72864ea544b09ef5026744c535f3569789ccd4d39467c",
+      "size_bytes": 1718
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/capsules/fa154841405b733e135e044a9ed43e6908a4f33e7a8f946804c488137c72590f.json",
+      "sha256": "487c62a52c86c394443edeebba71d14b049f66b3e0e7e5cd99c5d636dbd370e4",
+      "size_bytes": 1722
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/8e/e001004648bd19147654b4a6fbb5318d78a196349577e75c80e02fda409f56",
+      "sha256": "8ee001004648bd19147654b4a6fbb5318d78a196349577e75c80e02fda409f56",
+      "size_bytes": 335
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/92/df95489e469df7f4f9e32eb37595099f1dc4a2f76b4e464eb0e6bb4c8b484c",
+      "sha256": "92df95489e469df7f4f9e32eb37595099f1dc4a2f76b4e464eb0e6bb4c8b484c",
+      "size_bytes": 354
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/a3/1b49ceaed2468564ffe8a0f6d264d06c1935e94d0a3476ce6439cd2bb91252",
+      "sha256": "a31b49ceaed2468564ffe8a0f6d264d06c1935e94d0a3476ce6439cd2bb91252",
+      "size_bytes": 167
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/b8/24b290ab91313efd4ba01e46d175523ebf7797c489e61e880c794f4a99441f",
+      "sha256": "b824b290ab91313efd4ba01e46d175523ebf7797c489e61e880c794f4a99441f",
+      "size_bytes": 292
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/bd/b2a17fcec877cac3380a8749aed97437067d8514ffdbc949bd8fe30b8da9c9",
+      "sha256": "bdb2a17fcec877cac3380a8749aed97437067d8514ffdbc949bd8fe30b8da9c9",
+      "size_bytes": 322
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/c1/978dd2e21d1cfd3de06035577e6006493677a60add47457dc9c4558f3bc9bd",
+      "sha256": "c1978dd2e21d1cfd3de06035577e6006493677a60add47457dc9c4558f3bc9bd",
+      "size_bytes": 329
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/environment-store/tenants/tenant-helix-demo/objects/d9/f7c64531aba79452b906ce8d74195c9f87ee181053135c9ac3586420d06d86",
+      "sha256": "d9f7c64531aba79452b906ce8d74195c9f87ee181053135c9ac3586420d06d86",
+      "size_bytes": 98
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/canary/fresh-state-report.json",
+      "sha256": "7068c982678ca5c215a021cb475053a6d6da046fbddcdb24c127234ffb5e05ad",
+      "size_bytes": 154
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/canary.json",
+      "sha256": "5dd381e722e447ff711af657a6e45b6c57a6701b4bca35923a445733ef2e88c2",
+      "size_bytes": 7157
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/champion/fresh-state-report.json",
+      "sha256": "140d2f130574c29678df21e30edcc0aa9b286067c701411966b75ce77f85f69d",
+      "size_bytes": 154
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/champion.json",
+      "sha256": "5d3e05a04e045f8fe6b1f4019d3d41214f5f9c2b1c091ab58c8bf038dc237115",
+      "size_bytes": 7038
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/corrected/fresh-state-report.json",
+      "sha256": "7068c982678ca5c215a021cb475053a6d6da046fbddcdb24c127234ffb5e05ad",
+      "size_bytes": 154
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/corrected.json",
+      "sha256": "74d84f0aeafa8a8ec6f7a08a0663f1a1221db09c0dc5dd642d79eccc1bb86908",
+      "size_bytes": 7044
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/rejected/fresh-state-report.json",
+      "sha256": "834c860820af424b4e977dc873052ddc1948d6af2cba5404408255335b9b4ba8",
+      "size_bytes": 163
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/rejected.json",
+      "sha256": "055374c13c9a57fad873e3ac15f591bd1d99cf1fa308505790f8e1d05193d5fe",
+      "size_bytes": 7058
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/shadow/fresh-state-report.json",
+      "sha256": "7068c982678ca5c215a021cb475053a6d6da046fbddcdb24c127234ffb5e05ad",
+      "size_bytes": 154
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/evaluations/shadow.json",
+      "sha256": "ffe1e381cdeccb00ef365f04b87a74638fd9402106362c3192d1e46acb9731a0",
+      "size_bytes": 7124
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/fixture/repository/probe.py",
+      "sha256": "d9f7c64531aba79452b906ce8d74195c9f87ee181053135c9ac3586420d06d86",
+      "size_bytes": 98
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/fixture/repository/retry_policy.py",
+      "sha256": "a31b49ceaed2468564ffe8a0f6d264d06c1935e94d0a3476ce6439cd2bb91252",
+      "size_bytes": 167
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/fixture/repository/test_retry_policy.py",
+      "sha256": "c1978dd2e21d1cfd3de06035577e6006493677a60add47457dc9c4558f3bc9bd",
+      "size_bytes": 329
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/learning-transactions.sqlite",
+      "sha256": "f65c8618625a42b688196ed0832e965e50c29e1b227d74db8585252c54e98b59",
+      "size_bytes": 53248
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/lineage/graph.json",
+      "sha256": "193ae1fe7d700d880418147ce265dd6a1a5492187b960cadb6ac05ac26a21658",
+      "size_bytes": 4048
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/policies/challenger.json",
+      "sha256": "26b08793b52f254fd3aad2d34a9e744f1ea2f9faeaeec4d64ef8444192c1ab60",
+      "size_bytes": 274
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/policies/champion.json",
+      "sha256": "2d00084b6d7d7af2236968fcf5d2fed535a75a5c9fdf248a7d5bc071faf51a00",
+      "size_bytes": 211
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/policies/rejected.json",
+      "sha256": "75662e42fef5a54f6b7f17a4c5cf27ba9868005ec60335ad1ade65869b695fe2",
+      "size_bytes": 282
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/policy-registry.sqlite",
+      "sha256": "7aad726b746c4a8a0151efcad75d94881d88c8efb83cb11b42d72f7e8f7b43a5",
+      "size_bytes": 57344
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/capsule.json",
+      "sha256": "6ef1442d4aaf07144a479e6a80bfdfc4c290910a33f1fc4b48cc1ee417b3a95a",
+      "size_bytes": 10268
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/canary.json",
+      "sha256": "3aad47a4c33a25615dcf1716dd5ec530af44e046307bd29937106d774eba3237",
+      "size_bytes": 7156
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/compatibility.json",
+      "sha256": "e64a636217d5493bb55c7588d5c6515813e8ee37221a84b044b5d6ff2e9975a4",
+      "size_bytes": 1733
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/lineage.json",
+      "sha256": "86958906b43b3797bf645ad3aabf26c986e95a7744906320cf1ee11dbbdb81c5",
+      "size_bytes": 6897
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/quality.json",
+      "sha256": "2f8d850e4a99aff886ae59e3170b209f70898a931e7c7def47128c603b6741ff",
+      "size_bytes": 7043
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/reward_integrity.json",
+      "sha256": "a777b197a4ab0305e048e4ded09b38f4e4bfc62a386f4a2414bf4417cdcf49f1",
+      "size_bytes": 439
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/safety.json",
+      "sha256": "efa09f7dc7c12c2bd1586421bffdeaa4f1610801de22565d47fafb94299127b4",
+      "size_bytes": 252
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/serving.json",
+      "sha256": "2f8d850e4a99aff886ae59e3170b209f70898a931e7c7def47128c603b6741ff",
+      "size_bytes": 7043
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/evidence/shadow.json",
+      "sha256": "d116a4dc86514f301f5f3176f837025776819b8a1a375c73afe5dadf68914951",
+      "size_bytes": 7123
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/promotion/validation.json",
+      "sha256": "672f4af18b81a41fedfa9253fed78d8e13350042de4ad3aaf2f5c14a0af4fe42",
+      "size_bytes": 2351
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/replay/comparison.json",
+      "sha256": "4ef457d9afb70a55f26be1ac14e76c7c607a8bf36e53a09707c51e7167d28799",
+      "size_bytes": 6513
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/report.md",
+      "sha256": "8ccada331ef4c66fddbd79e8e0c70f13d4bf07313e79fc815ded922b3415c44f",
+      "size_bytes": 868
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/rewards/alternative-tool.json",
+      "sha256": "97d40e2f6bd0f8f126e2d9ca76b7ffbf9bdc1aa3ababff8f864a3ca403a431fe",
+      "size_bytes": 2278
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/rewards/different-rng.json",
+      "sha256": "d4b2223e676ed10c4fb13e12d67c31157e360e2a15c13853b0d6ab9fb771fc73",
+      "size_bytes": 2280
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/rewards/forced-alternative.json",
+      "sha256": "f2f91b2e072f1cbded2ef2d0e0abb6baa2d23c587981d91f62c98b623303267c",
+      "size_bytes": 2278
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/rewards/verifier-assisted.json",
+      "sha256": "6e85def434298cc60c1f77b33fc1c266196704ad8935c877f839f7505858772e",
+      "size_bytes": 2277
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/state-reuse/alternative-tool.json",
+      "sha256": "96faa6b9973d720e950e5e2b1125e1766b3724589f2100fa300a8d7c33ce42dd",
+      "size_bytes": 1003
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/state-reuse/different-rng.json",
+      "sha256": "983624581e93891250b0f8abeb63d4caae4f62a6e20d588fd37cc699152b082b",
+      "size_bytes": 1085
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/state-reuse/forced-alternative.json",
+      "sha256": "ef2f163b02899d0ba36253a834fdaf09a83d8a9ca0e80b4e820f72f251f61206",
+      "size_bytes": 1005
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/state-reuse/verifier-assisted.json",
+      "sha256": "11fbddf8aa820e535293482d37c2b92c8e414ecef121a6f080c81223a6b5e93c",
+      "size_bytes": 1004
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/summary.json",
+      "sha256": "9d218bed7db334841a5b8087e0915d657ed3d2145a401777dfd57ec6afd115cd",
+      "size_bytes": 14041
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/training/batch.json",
+      "sha256": "c80d6851991950ae0d9a13e2cabdeb9f0cd6139657131846544ea9a2a49e9f77",
+      "size_bytes": 6898
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/training/corrected-candidate.json",
+      "sha256": "00d214da536fac950ba3269cf8efcf69df0ff97a7c7eb7e89f2acc4a394a1cba",
+      "size_bytes": 4340
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/training/rejected-candidate.json",
+      "sha256": "e97c544cb3803def1426e34e560465bbd579ea5f581e9644b2d26f0a8e412b9d",
+      "size_bytes": 734
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/alternative-tool.json",
+      "sha256": "fdea44e301c279ad372fb2086c2221b5b4c0de429bf1faaf7fd3c00abd892cf8",
+      "size_bytes": 3449
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/different-rng.json",
+      "sha256": "5d8d2e36f651792240340fd33dbac480c71e442629af0b353585f5b51463c803",
+      "size_bytes": 3445
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/forced-alternative.json",
+      "sha256": "09441a4df75294e54d90ef7e4825f30e0536545ca4a003d2b172d1146ea983e8",
+      "size_bytes": 3466
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/trajectories/verifier-assisted.json",
+      "sha256": "1470269a0f985ede93fc0f7bd9565abe225c70feb68b13a742109548506a2dc8",
+      "size_bytes": 3466
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/transactions/accepted.json",
+      "sha256": "f4df0fc56ed1969af8e1120ec97b73abedaaef283209ffd8ebcb120babae109a",
+      "size_bytes": 2872
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/transactions/rejected.json",
+      "sha256": "d1a476f3c5897fbd9c835d3e7f302c6d9c0c75a045ac60e477f70d117849e5af",
+      "size_bytes": 834
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-demo/transactions/timeline.json",
+      "sha256": "6dc481a92e357b9adbdcd5c427fc0f3ae8bc34efe757d1e3aa29d5bd4bdb21a4",
+      "size_bytes": 4505
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/helix-lifecycle.perfetto.json",
+      "sha256": "b52f22211c0a83868e4185ec14a797ee72fca3382fe9da31249c8e9a05d9210f",
+      "size_bytes": 55667
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/parquet-status.json",
+      "sha256": "82268ca7d4aee1c13eb7bd5f41496a9b34032832d04790790b5244dfeeeab077",
+      "size_bytes": 181
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/raw-lifecycle-events.json",
+      "sha256": "c98aee00cb9f8304ae2d4955c3c9ddb2ff702fc58f77946eb3b2107290afecc5",
+      "size_bytes": 136520
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/resource-trace-v1.json",
+      "sha256": "9155f0e896b658a2850a54dd1d8e1e0c6f0dba084a95e030ed6e2d6ade795c06",
+      "size_bytes": 123650
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/sharing-analysis.json",
+      "sha256": "e63b8e1f6ef2a57999fffba6a5437b5131ae9008bf738cd50f119199ed34dd71",
+      "size_bytes": 1318
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/state-operation-trace-v1.jsonl",
+      "sha256": "fb2be4a476d0508e737f2ed568d4e4cd06ed64d5289d4ba2f16a18f86598f4eb",
+      "size_bytes": 31066
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/trace-manifest-v1.json",
+      "sha256": "4d4737dc6354473b6fe2f8948c4ab4d6c237f2a48b94f29f863ea0c2891c8d95",
+      "size_bytes": 5266
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/vertical-trace/vertical-run.json",
+      "sha256": "e4ca5d233e3aff6604eee043d06d4ab731f5ab8ed5c23b220861e105264ba5fd",
+      "size_bytes": 3567
+    },
+    {
+      "relative_path": "attempts/vertical_trace/attempt-000/worker-result.json",
+      "sha256": "76a4df84f75b6e1180c10fd7ffce9505e1162553b54b9e07b0ab11548b34de3e",
+      "size_bytes": 165
+    }
+  ],
+  "attempt": 0,
+  "attempt_reference": "attempts/vertical_trace/attempt-000",
+  "command": [
+    "python-api",
+    "sloforge.helix.characterization.runner.run_vertical_trace"
+  ],
+  "duration_ns": 11499523417,
+  "error": null,
+  "finished_at": "2026-08-09T23:27:38.681633+00:00",
+  "immutable": true,
+  "previous_checkpoint_sha256": "c35bef5404f677631532c458a55b14545f337484a85acf5c34e8deaae9e7b54f",
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "schema_version": "sloforge.branchfabric.stage-checkpoint/v1",
+  "sequence": 1,
+  "stage": "vertical_trace",
+  "stage_seed": 20260809,
+  "started_at": "2026-08-09T23:27:27.181641+00:00",
+  "status": "SUCCEEDED",
+  "timeout_seconds": 300.0,
+  "worker_exit_code": 0
+}

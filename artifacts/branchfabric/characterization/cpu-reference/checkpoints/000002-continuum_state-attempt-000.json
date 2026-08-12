@@ -1,0 +1,69 @@
+{
+  "artifacts": [
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/continuum-lifecycle.perfetto.json",
+      "sha256": "dbbec42153ac2ecde55ced87faecb1cd09cb52be6ed492a5bd85fa7ef74f7280",
+      "size_bytes": 11771
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/continuum-trace-run.json",
+      "sha256": "e5df2ab61ae159a2ded62027c5f401bada356e4d1e5c81e71336a8621687c860",
+      "size_bytes": 2959
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/parquet-status.json",
+      "sha256": "82268ca7d4aee1c13eb7bd5f41496a9b34032832d04790790b5244dfeeeab077",
+      "size_bytes": 181
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/raw-continuum-observations.json",
+      "sha256": "d9d38bc61f4c5e73486dccfc0bf9b24b130f61049748f6cb3e0eecb18d160c61",
+      "size_bytes": 23819
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/resource-trace-v1.json",
+      "sha256": "656226121a134c2bb6bd665de0bc2ff5f696e490cefcd6fad7aff55f432849b6",
+      "size_bytes": 12728
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/sharing-analysis.json",
+      "sha256": "bf4565b2db19edfdf1a9cee7a3f41810d23885fccab910b515314ab4aece6a9e",
+      "size_bytes": 687
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/state-operation-trace-v1.jsonl",
+      "sha256": "aa8c884f7d1e53ef824ceefc74528ea058c02de31ea6ab86db0d1271bd80fa7b",
+      "size_bytes": 33195
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/continuum-trace/trace-manifest-v1.json",
+      "sha256": "a4ed6a6a970c8b39baca2816fbd937ccb71996575664df83f2a361f1bfc95120",
+      "size_bytes": 4480
+    },
+    {
+      "relative_path": "attempts/continuum_state/attempt-000/worker-result.json",
+      "sha256": "94797da5c2e53afb42644eb02d9abde1cb1c3780ef89063af750f3a6acc0d9a9",
+      "size_bytes": 167
+    }
+  ],
+  "attempt": 0,
+  "attempt_reference": "attempts/continuum_state/attempt-000",
+  "command": [
+    "python-api",
+    "sloforge.continuum.characterization.run_continuum_characterization"
+  ],
+  "duration_ns": 556113584,
+  "error": null,
+  "finished_at": "2026-08-09T23:27:39.308605+00:00",
+  "immutable": true,
+  "previous_checkpoint_sha256": "6846a2de4569244138e8460ae94a5043ab04a4fb1ba4fc530cc750fa1cab159c",
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "schema_version": "sloforge.branchfabric.stage-checkpoint/v1",
+  "sequence": 2,
+  "stage": "continuum_state",
+  "stage_seed": 20260809,
+  "started_at": "2026-08-09T23:27:38.752123+00:00",
+  "status": "SUCCEEDED",
+  "timeout_seconds": 300.0,
+  "worker_exit_code": 0
+}

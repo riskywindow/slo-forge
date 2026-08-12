@@ -288,6 +288,71 @@ class DurableCoordinator:
                 raise CoordinatorConflict("lease renewal compare-and-swap failed")
         return renewed
 
+    def record_committed_progress(
+        self,
+        *,
+        session_id: str,
+        owner_runtime: str,
+        owner_epoch: int,
+        fencing_token: int,
+        state_version: int,
+        token_index: int,
+        now_ms: int,
+    ) -> SessionLease:
+        """CAS-persist client-visible progress under the current owner fence.
+
+        Streaming runtimes call this after the gateway has durably accepted an
+        output boundary and before creating a checkpoint.  It does not change
+        ownership and refuses regressions, expired leases, and stale writers.
+        """
+
+        if state_version < 0 or token_index < -1:
+            raise ValueError("committed state and token watermarks are out of range")
+        with self._write() as connection:
+            row = connection.execute(
+                "SELECT payload,version FROM continuum_leases WHERE session_id=?", (session_id,)
+            ).fetchone()
+            if row is None:
+                raise KeyError(f"unknown session {session_id!r}")
+            current = SessionLease.model_validate_json(row["payload"], strict=True)
+            if now_ms >= current.expiration_ms:
+                raise StaleOwner(f"lease for session {session_id!r} expired")
+            if (
+                current.owner_runtime != owner_runtime
+                or current.owner_epoch != owner_epoch
+                or current.fencing_token != fencing_token
+            ):
+                raise StaleOwner(f"stale owner cannot record progress for session {session_id!r}")
+            if (
+                state_version < current.last_committed_state_version
+                or token_index < current.last_committed_token_index
+            ):
+                raise CoordinatorConflict("committed progress cannot regress")
+            if (
+                state_version == current.last_committed_state_version
+                and token_index == current.last_committed_token_index
+            ):
+                return current
+            updated = current.model_copy(
+                update={
+                    "last_committed_state_version": state_version,
+                    "last_committed_token_index": token_index,
+                    "coordinator_version": current.coordinator_version + 1,
+                }
+            )
+            changed = connection.execute(
+                "UPDATE continuum_leases SET payload=?,version=? WHERE session_id=? AND version=?",
+                (
+                    self._json(updated),
+                    updated.coordinator_version,
+                    session_id,
+                    int(row["version"]),
+                ),
+            ).rowcount
+            if changed != 1:
+                raise CoordinatorConflict("progress compare-and-swap failed")
+        return updated
+
     def begin_transaction(
         self,
         *,

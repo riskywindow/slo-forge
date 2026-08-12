@@ -1,0 +1,21 @@
+{
+  "checkpoint_reference": "checkpoints/000005-instrumentation_overhead-attempt-000.json",
+  "checkpoint_sha256": "22e53a22782cf6343ef1a570234927b13a0e335b6141921a41c8198ecd9fdf2c",
+  "immutable": true,
+  "observed_at": "2026-08-09T23:28:50.262818+00:00",
+  "previous_status_sha256": "eec44308d6ebc0398e0dc2987438f6443f9bb13850dbe8e38ce803b0fc4a4246",
+  "run_id": "a53a739f0488359750d4f70f48f8753a",
+  "run_manifest_sha256": "8985e4f61a072d8d4d31275b9f52e831ff69b22dbd3a02aa5248b6da2bb88a7e",
+  "run_state": "COMPLETE",
+  "running_stage": null,
+  "schema_version": "sloforge.branchfabric.run-status/v1",
+  "sequence": 12,
+  "stages": {
+    "continuum_state": "SUCCEEDED",
+    "environment_state": "SUCCEEDED",
+    "instrumentation_overhead": "SUCCEEDED",
+    "matrix_validate": "SUCCEEDED",
+    "metadata": "SUCCEEDED",
+    "vertical_trace": "SUCCEEDED"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "branch_count": 2,
+  "cow_bytes": 512,
+  "cow_page_count": 8,
+  "evidence_references": [
+    "python/sloforge/continuum/operations/branching.py:fork_checkpoint",
+    "python/sloforge/continuum/storage/content_store.py:MemoryContentStore.put",
+    "python/sloforge/continuum/adapters/sdk.py:PageTableEntry.copy_on_write_refs"
+  ],
+  "logical_unique_bytes": 3184,
+  "metadata_bytes_per_branch": [
+    164542,
+    164542
+  ],
+  "naive_independent_allocation_bytes": 6368,
+  "physical_allocated_bytes": 3184,
+  "physical_amplification": 1.0,
+  "private_bytes_per_branch": [
+    455,
+    455
+  ],
+  "shared_logical_bytes": 2729,
+  "sharing_efficiency": 0.5,
+  "source_page_refcount": 3
+}

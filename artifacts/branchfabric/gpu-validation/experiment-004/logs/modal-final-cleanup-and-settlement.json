@@ -1,0 +1,41 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup/v1",
+  "status": "clean",
+  "checked_at_utc": "2026-08-12T19:31:02Z",
+  "command_provenance": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal volume list --json",
+    "sha256(gpu-hours.json)"
+  ],
+  "experiment_apps": [
+    {
+      "app_id": "ap-VMD7NaDZkfGVyMoD3kXmIY",
+      "description": "sloforge-branchfabric-capacity-calibration-004",
+      "state": "stopped",
+      "tasks": 0
+    },
+    {
+      "app_id": "ap-LleXMCtNqk4lhBba9LiPO9",
+      "description": "sloforge-branchfabric-capacity-calibration-004",
+      "state": "stopped",
+      "tasks": 0
+    }
+  ],
+  "active_containers": [],
+  "endpoints": [],
+  "persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "reservations": [],
+  "owned_child_processes": [],
+  "profilers": [],
+  "ledger": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+    "settled_additional_gpu_seconds": 6431.795790917997,
+    "active_reservation_count": 0
+  }
+}

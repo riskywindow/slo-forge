@@ -1,0 +1,368 @@
+{
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference.json",
+      "sha256": "22eb97b1d19bf31751c700ef7b8f762ac205dc8ef760e737fdb6966df768b9a7"
+    },
+    {
+      "path": "artifacts/branchfabric/metadata/seed-20260809/metadata-study.json",
+      "sha256": "d46a31b60147dc86427295de4c7de12c9078df44034aafdd41e518cfd1a1db8f"
+    },
+    {
+      "path": "artifacts/branchfabric/software-baselines/seed-20260809/software-baselines.json",
+      "sha256": "017b7385ba31cf913582f85f79b20e71976c3e193ab1524c844c4b434621bb9b"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/transport/continuum-seed-41.json",
+      "sha256": "c89982153ee7a0c225a4d66d467a2169e0aeae1f22a2febcf3b729e65a4e5fbd"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/transform/continuum-seed-41.json",
+      "sha256": "d979dd2e63cdd8e659538536d363fbad2ad8db05ae84e2b770601444e28a0af9"
+    },
+    {
+      "path": "artifacts/branchfabric/environment/seed-20260809/environment-study.json",
+      "sha256": "a8e67a84e2ab57d18219dcf93c01df9d66f92fc3a0a27072940af4f77c695cb6"
+    },
+    {
+      "path": "artifacts/branchfabric/hardware/status-seed-20260809.json",
+      "sha256": "6304be53d6d923b31e633840fe43039a80592c564d13eac5537e24a4731c97b3"
+    }
+  ],
+  "locations": [
+    "host_cpu",
+    "gpu",
+    "fpga_hbm",
+    "fpga_ddr",
+    "smartnic_dpu",
+    "cxl_accelerator",
+    "storage_side"
+  ],
+  "operations": [
+    {
+      "observed": {
+        "continuum_fork_latency_ns_three_seeds": [
+          32842750,
+          32699958,
+          41890750
+        ],
+        "helix_fanout": 4
+      },
+      "operation": "STATE_FORK",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Four-fanout Helix fork is host software; state fork hardware has no measured end-to-end leverage and non-CPU paths are unavailable.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "bytes_per_event": 512,
+        "continuum_cow_latency_ns_three_seeds": [
+          20916,
+          19375,
+          15167
+        ],
+        "free_speedup": 1.0034497672003373
+      },
+      "operation": "STATE_COW",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Free Helix COW bounds full-transaction speedup at 1.00345x; no physical filesystem COW or GPU page fault was measured.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "median_ns_per_operation": 4223.96875
+      },
+      "operation": "STATE_ALLOC",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Measured allocation median is 4224 ns at one thread and no end-to-end allocation fraction was observed.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "delta_bytes_three_seeds": [
+          1130,
+          1131,
+          1134
+        ],
+        "free_speedup": 1.0057417387045948
+      },
+      "operation": "STATE_DELTA",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Free delta extraction bounds simulated migration objective speedup at 1.00574x.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "bytes_three_seeds": [
+          3434,
+          3435,
+          3438
+        ],
+        "free_speedup": 1.0234942404207892,
+        "latency_ns_three_seeds": [
+          1779125,
+          1281667,
+          1281417
+        ]
+      },
+      "operation": "STATE_RESHARD",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Largest measured state primitive fraction is 2.30% for a 3.4 KiB host transform; GPU/HBM/PCIe placement is unmeasured.",
+      "recommendation": "UNCERTAIN; CPU SOFTWARE BASELINE"
+    },
+    {
+      "observed": {
+        "event_count": 0
+      },
+      "operation": "STATE_REPACK",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "No distinct repack event was observed; it is folded into the reference conversion semantics.",
+      "recommendation": "NOT CURRENTLY JUSTIFIED"
+    },
+    {
+      "observed": {
+        "event_count": 0
+      },
+      "operation": "STATE_QUANTIZE",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "No quantize or dequantize event was observed.",
+      "recommendation": "NOT CURRENTLY JUSTIFIED"
+    },
+    {
+      "observed": {
+        "event_count": 0
+      },
+      "operation": "STATE_COMPRESS",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "No compression/decompression event was observed.",
+      "recommendation": "NOT CURRENTLY JUSTIFIED"
+    },
+    {
+      "observed": {
+        "critical_path_event_count": 0,
+        "hashlib_sha256_whole_median_ns": 79333
+      },
+      "operation": "STATE_HASH_CHECKSUM",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "The controlled 256 KiB SHA-256 software median is 79.333 us and no traced critical-path hash/checksum event was observed.",
+      "recommendation": "SHOULD REMAIN SOFTWARE"
+    },
+    {
+      "observed": {
+        "network_hardware_measured": false,
+        "real_host_bytes_three_seeds": [
+          3434,
+          3435,
+          3438
+        ],
+        "transport_fanout": 1
+      },
+      "operation": "STATE_SEND_RECEIVE",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Only 3.4 KiB in-process host copies are real; migration network timing is simulated and fanout is one.",
+      "recommendation": "UNCERTAIN"
+    },
+    {
+      "observed": {
+        "opportunity_count_three_seeds": [
+          0,
+          0,
+          0
+        ]
+      },
+      "operation": "STATE_MULTICAST",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Three transport traces contain zero multicast opportunities; multi-destination hardware was unavailable.",
+      "recommendation": "NOT CURRENTLY JUSTIFIED"
+    },
+    {
+      "observed": {
+        "free_speedup": 1.0007565260888949,
+        "latency_ns_three_seeds": [
+          106625,
+          84917,
+          79292
+        ]
+      },
+      "operation": "STATE_COMMIT",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Free commit bounds migration objective speedup at 1.00076x.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "full_transaction_free_speedup": 1.0024869265170817,
+        "migration_free_speedup": 1.0001393844536492
+      },
+      "operation": "STATE_RECLAIM",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Free reclamation bounds full Helix speedup at 1.00249x and migration speedup at 1.00014x.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "largest_observed_batched_throughput_ratio": 1.4626779682419422
+      },
+      "operation": "BRANCH_METADATA",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Batched isolated baselines improve selected metadata operations by up to 1.46x; hardware cycles/cache/lock counters are unavailable.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "disabled_total_trial_median_ms_by_class": {
+          "dependency_heavy": 90.766084,
+          "large": 127.959875,
+          "medium": 49.312459,
+          "service_heavy": 28.09825,
+          "tiny": 8.434167
+        }
+      },
+      "operation": "ENVIRONMENT_SNAPSHOT",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Real host filesystem/database fixture timing exists, but backend is eager restore and physical COW/process startup are unmeasured.",
+      "recommendation": "CPU SOFTWARE"
+    },
+    {
+      "observed": {
+        "median_ns_per_operation": 67632.8125
+      },
+      "operation": "TRANSACTION_ABORT",
+      "placement_assessment": {
+        "cxl_accelerator": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_ddr": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "fpga_hbm": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "gpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "host_cpu": "CURRENT_MEASURED_SOFTWARE",
+        "smartnic_dpu": "UNSUPPORTED_WITH_CURRENT_EVIDENCE",
+        "storage_side": "UNSUPPORTED_WITH_CURRENT_EVIDENCE"
+      },
+      "reason": "Actual Continuum abort metadata median is 67.633 us; no transaction hardware path was measured.",
+      "recommendation": "CPU SOFTWARE"
+    }
+  ],
+  "phase_1_recommendation": "CPU software and measurement infrastructure only; no FPGA, DPU, CXL, or storage-side primitive is evidence-backed for implementation.",
+  "schema_version": "sloforge.branchfabric.hardware-placement-analysis/v1",
+  "scoring_reason": "Counter-complete roofline classified all 35 state samples UNKNOWN; numeric device suitability scores would be invented. The matrix records only measured current placement and evidence-gated recommendations.",
+  "scoring_status": "NOT_PERFORMED"
+}

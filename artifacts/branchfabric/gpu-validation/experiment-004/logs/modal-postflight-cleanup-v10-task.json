@@ -1,0 +1,37 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup/v1",
+  "status": "clean",
+  "checked_at_utc": "2026-08-12T19:28:55Z",
+  "command_provenance": [
+    "modal app stop -y ap-LleXMCtNqk4lhBba9LiPO9",
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal volume list --json"
+  ],
+  "experiment_apps": [
+    {
+      "app_id": "ap-VMD7NaDZkfGVyMoD3kXmIY",
+      "description": "sloforge-branchfabric-capacity-calibration-004",
+      "state": "stopped",
+      "tasks": 0
+    },
+    {
+      "app_id": "ap-LleXMCtNqk4lhBba9LiPO9",
+      "description": "sloforge-branchfabric-capacity-calibration-004",
+      "state": "stopped",
+      "tasks": 0
+    }
+  ],
+  "active_containers": [],
+  "endpoints": [],
+  "persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "reservations": [
+    "exp004-e04866e0a14e78d4b522 pending conservative failure-charge conversion"
+  ],
+  "owned_child_processes": [],
+  "profilers": []
+}

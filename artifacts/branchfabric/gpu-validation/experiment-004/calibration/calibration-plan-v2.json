@@ -1,0 +1,66 @@
+{
+  "schema_version": "sloforge.branchfabric.capacity-calibration-plan/v2",
+  "status": "offline-plan-only-no-gpu-consumed",
+  "attempt_id": "exp004-capacity-s41-v2",
+  "seed": 41,
+  "predecessor_attempt": {
+    "attempt_id": "exp004-capacity-s41-v1",
+    "outcome": "methodological-failure-before-first-probe",
+    "failure": "nested CapacityProbePlan was not JSON serializable",
+    "probe_count": 0,
+    "reservation_state": "full 424 A100-second reservation retained"
+  },
+  "serialization_fix": {
+    "scope": "controller canonical JSON serialization",
+    "rule": "recursively encode nested Pydantic models with model_dump(mode=json)",
+    "regression": "serialize command, plan, raw, probe result, calibration result, and selected load"
+  },
+  "allocation": {
+    "container_count": 1,
+    "requested_gpu": "A100-80GB",
+    "gpu_count": 2,
+    "maximum_allocation_wall_seconds": 212.0,
+    "maximum_gpu_seconds": 424.0,
+    "remote_function_timeout_seconds": 160.0,
+    "controller_timeout_seconds": 150.0,
+    "timing_basis": {
+      "v1_controller_to_both_engines_ready_seconds": 84.449967369,
+      "three_probe_bound_seconds": 36.75,
+      "controller_headroom_after_readiness_and_probes_seconds": 28.800032631,
+      "remote_cleanup_and_publish_headroom_seconds": 10.0,
+      "v1_client_minus_remote_seconds": 47.88843837898794,
+      "remote_bound_plus_observed_client_overhead_seconds": 207.88843837898794,
+      "client_reservation_headroom_seconds": 4.11156162101206
+    }
+  },
+  "budget": {
+    "hard_additional_gpu_seconds": 7200.0,
+    "settled_gpu_seconds_before_calibration": 5583.795790917997,
+    "retained_v1_reservation_gpu_seconds": 424.0,
+    "v2_maximum_reservation_gpu_seconds": 424.0,
+    "v10_maximum_reservation_gpu_seconds": 680.0,
+    "total_conservative_after_all_reservations_gpu_seconds": 7111.795790917997,
+    "hard_ceiling_headroom_after_all_reservations_gpu_seconds": 88.2042090820032,
+    "gate": "positive: v2 may be reserved, but no further corrective calibration invocation is budget-feasible while preserving v10"
+  },
+  "adaptive_search": [
+    {
+      "step": 1,
+      "topology": "gpu0-only",
+      "rate_rps": 20.0
+    },
+    {
+      "step": 2,
+      "if_step_1_sustainable_rps": 25.0,
+      "if_step_1_unsustainable_rps": 17.25,
+      "topology": "gpu0-only"
+    },
+    {
+      "step": 3,
+      "if_20_stable_25_unsustainable_rps": 30.0,
+      "if_20_unsustainable_17_25_stable_rps": 23.5,
+      "topology": "two-gpu-round-robin"
+    }
+  ],
+  "launch_gate": "v10 remains blocked until raw v2 evidence is independently reviewed"
+}

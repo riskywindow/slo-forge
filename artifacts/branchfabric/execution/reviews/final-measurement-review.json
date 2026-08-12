@@ -1,0 +1,303 @@
+{
+  "artifact_bindings": {
+    "canonical_overhead": {
+      "analysis_path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/instrumentation-overhead.json",
+      "analysis_sha256": "137b95696861539271d3a26299c82f99a4648a552dce04897808463744da46f2",
+      "raw_path": "artifacts/branchfabric/overhead/helix-cpu-3seed-2rep-v5-canonical/overhead-raw-samples.json",
+      "raw_sha256": "492e90f1ea0ca35f4db4e664efacd06f9c08e20dad7f6967982a2eedd876c2df"
+    },
+    "fanout": {
+      "fixture_evidence_path": "artifacts/branchfabric/execution/fanout/fixture-evidence.jsonl",
+      "fixture_evidence_sha256": "cdc1b580d2127d11e264f264406a08969bda7447ac6f15b49f77eb663a6d802c",
+      "independent_comparison_path": "artifacts/branchfabric/execution/replication/fanout-independent/comparison.json",
+      "independent_comparison_sha256": "08226e5aa35e938dc239d15fcd3bf25c7d0873d05b56066ebd8f8c9c5df83030",
+      "manifest_path": "artifacts/branchfabric/execution/fanout/manifest.json",
+      "manifest_sha256": "a55415259fd5ef81fecef2deff2d289e1daae2e2cb6ca4fd098658bee2708f9f",
+      "raw_path": "artifacts/branchfabric/execution/fanout/raw-samples.jsonl",
+      "raw_sha256": "af616379666cc4d9043be355976016cc06a57a87b07caa8b60b2ad69d901b810",
+      "summary_path": "artifacts/branchfabric/execution/fanout/summary.json",
+      "summary_sha256": "51768b2b164caacb65d0de4ca3307737c4eda8c83cef030a89dd2597fcffebc4"
+    },
+    "gate": {
+      "input_path": "artifacts/branchfabric/gates/branchfabric_gate_input.json",
+      "input_sha256": "4b70653b883e6a8c6a8b2cdd6f7768e33680ec7a6c1f5368a7467efb6eff8e6d",
+      "report_path": "BRANCHFABRIC_GATE_REPORT.md",
+      "report_sha256": "8c0f76e435b9fdaffd8b8db9fc2e7d7c74ef959dcd150d680a8427af5d17234f",
+      "result_path": "artifacts/branchfabric/gates/branchfabric_gate_result.json",
+      "result_sha256": "0a96f44800ae74c36e62e5744ed877445910119afc5ecfcc75ad4b9bbf0c62b4"
+    },
+    "manifests": {
+      "hardware_path": "artifacts/branchfabric/manifests/hardware-baseline.json",
+      "hardware_sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+      "software_path": "artifacts/branchfabric/manifests/software-baseline.json",
+      "software_sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
+    },
+    "reclamation": {
+      "analysis_path": "artifacts/branchfabric/execution/reclamation/analysis.json",
+      "analysis_sha256": "cbd27f984fa412cd33fd3714b66f8978ab3311736127058b04efc2fdab0adbf0",
+      "campaign_path": "artifacts/branchfabric/execution/reclamation/campaign.json",
+      "campaign_sha256": "daac0cf1f595984d2eb2c5452524ec4ca174285986d934fcd42e68e43cc6287c",
+      "environment_path": "artifacts/branchfabric/execution/reclamation/environment.json",
+      "environment_sha256": "e39cfada6e71977c1926c89cc974eeee1611ba788d199c532d7059acc4966dbe",
+      "manifest_path": "artifacts/branchfabric/execution/reclamation/MANIFEST.json",
+      "manifest_sha256": "cf1e1f363ce95d894416c3abbf56d9735fb55c48db8387126251e376ec846a79",
+      "raw_path": "artifacts/branchfabric/execution/reclamation/raw/trials.jsonl",
+      "raw_sha256": "795a6803c1123555ea5804ddfeca711805235b89eeb30c5e723299bd26e74408"
+    }
+  },
+  "claim_audit": {
+    "hardware_backed_host_timing_measured": true,
+    "physical_gpu_reclamation_measured": false,
+    "physical_network_measured": false,
+    "real_transformer_measured": false,
+    "target_hardware_real_reference_count": 0,
+    "unsupported_hardware_or_real_model_claim_found": false,
+    "warning": "HARDWARE_BACKED_REAL in the host manifest and canonical overhead artifact denotes real host timing or inventory, not BranchFabric accelerator execution."
+  },
+  "fanout_validation": {
+    "all_deterministic_byte_and_semantic_fields_replicated": true,
+    "all_queue_concurrency_one": true,
+    "canonical_fixture_count": 6,
+    "contexts_tokens": [
+      2048,
+      3968
+    ],
+    "dense_randomized_order": true,
+    "fanouts": [
+      8,
+      16,
+      32
+    ],
+    "hardware_gate_eligible": false,
+    "independent_maximum_absolute_readiness_drift_fraction": 0.08390413227520233,
+    "independent_readiness_ci_overlap_count": 4,
+    "independent_readiness_ci_total": 6,
+    "independent_software_effect_ci_overlap_count": 6,
+    "independent_software_effect_ci_total": 6,
+    "maximum_ideal_zero_cost_readiness_speedup": 1.0000600597822242,
+    "measured_sample_count": 108,
+    "model_state_class": "CPU_REFERENCE_MODEL_STATE",
+    "physical_byte_accounting": "DETERMINISTIC_SERIALIZED_STATE_BYTES_NOT_RSS_OS_PAGES_OR_GPU_ALLOCATION",
+    "raw_sample_count": 144,
+    "seed_count": 3,
+    "seeds": [
+      41,
+      73,
+      113
+    ],
+    "unique_sample_ids": 144,
+    "warmup_sample_count": 36,
+    "workload_evidence_class": "SYNTHETIC_CPU_REFERENCE_MODEL_STATE",
+    "workload_labels": [
+      "coding_agent",
+      "reasoning_verification"
+    ]
+  },
+  "findings": [
+    {
+      "id": "BF-FINAL-STAT-M1",
+      "severity": "MEDIUM",
+      "summary": "Reclamation CIs pool trace modes and repetitions within only three deterministic seeds as exchangeable samples.",
+      "impact": "Intervals are valid for the recorded sample vector but are not hierarchical workload-population intervals; positive generalization requires more independent workloads and seed-blocked analysis.",
+      "negative_gate_impact": "NONE: absence of target hardware and calibrated headroom is decisive independently of CI width."
+    },
+    {
+      "id": "BF-FINAL-PROV-M1",
+      "severity": "MEDIUM",
+      "summary": "The reclamation artifacts embed the execution baseline commit, not the exact implementation revision that generated the latest campaign.",
+      "impact": "Standalone artifact provenance requires citing data commit 5ae509add7154daa92816de5f5b4a9c3a3d2de0a, software commit b6279b647a8ef3c96e9865ce9523b786f703a73a, and the raw digest together.",
+      "negative_gate_impact": "NONE: the gate binds the exact raw and derived bytes and fails conservatively."
+    },
+    {
+      "id": "BF-FINAL-TRACE-L1",
+      "severity": "LOW",
+      "summary": "Fanout has no direct disabled/minimal/full tracing control, and the separate canonical Helix overhead paired effects lack paired confidence intervals.",
+      "impact": "Absolute fanout CPU timing is not a calibrated service curve; the canonical overhead study is context, not a fanout correction.",
+      "negative_gate_impact": "NONE: the fanout real-evidence gate already fails tracing control and its ideal headroom is orders of magnitude below threshold."
+    }
+  ],
+  "gate_validation": {
+    "all_evidence_hashes_verified": true,
+    "candidates": [
+      {
+        "candidate": "checkpoint_transform_transfer_chain",
+        "disposition": "NOT_JUSTIFIED",
+        "end_to_end_relevance": "PASS",
+        "platform_feasibility": "FAIL",
+        "real_evidence": "FAIL",
+        "system_level_headroom": "FAIL",
+        "workload_value": "FAIL"
+      },
+      {
+        "candidate": "shared_root_cow",
+        "disposition": "NOT_JUSTIFIED",
+        "end_to_end_relevance": "FAIL",
+        "platform_feasibility": "FAIL",
+        "real_evidence": "FAIL",
+        "system_level_headroom": "FAIL",
+        "workload_value": "FAIL"
+      },
+      {
+        "candidate": "one_to_many_multicast",
+        "disposition": "NOT_JUSTIFIED",
+        "end_to_end_relevance": "FAIL",
+        "platform_feasibility": "FAIL",
+        "real_evidence": "FAIL",
+        "system_level_headroom": "FAIL",
+        "workload_value": "FAIL"
+      },
+      {
+        "candidate": "branch_translation_metadata",
+        "disposition": "NOT_JUSTIFIED",
+        "end_to_end_relevance": "FAIL",
+        "platform_feasibility": "FAIL",
+        "real_evidence": "FAIL",
+        "system_level_headroom": "FAIL",
+        "workload_value": "FAIL"
+      }
+    ],
+    "functional_model_or_cycle_simulator_allowed": false,
+    "hardware_implementation_allowed": false,
+    "negative_result_preserved": true,
+    "outcome": "FAIL_NO_BUILD",
+    "passing_candidates": [],
+    "recomputed_result_exact_match": true,
+    "required_action": "TERMINATE_HARDWARE_PATH",
+    "thresholds_changed": false
+  },
+  "generated_at_utc": "2026-08-10T01:59:10Z",
+  "headline_numbers": {
+    "fanout": {
+      "maximum_additional_ideal_readiness_speedup": 1.0000600597822242,
+      "ready_serialized_byte_reduction_by_fanout": {
+        "16": 0.9411764705882353,
+        "32": 0.9696969696969697,
+        "8": 0.8888888888888888
+      },
+      "strongest_software_baseline": "shared_root_cow_lazy"
+    },
+    "reclamation": {
+      "branch_readiness_paired_speedup": {
+        "ci95_lower": 0.938044520468376,
+        "ci95_upper": 0.9996431060205808,
+        "observed": 0.9802642309420913
+      },
+      "local_serialized_transfer_byte_reduction": 0.875,
+      "migration_fraction_of_interruption_full_trace": {
+        "ci95_lower": 0.1961207851506916,
+        "ci95_upper": 0.22450218085116352,
+        "observed": 0.1990330675356517
+      },
+      "migration_paired_speedup": {
+        "ci95_lower": 2.166316906443428,
+        "ci95_upper": 2.3870827536842123,
+        "observed": 2.2778306139041344
+      },
+      "strongest_software_baseline": "optimized_bounded_parallel",
+      "total_interruption_paired_speedup": {
+        "ci95_lower": 1.2445075107013515,
+        "ci95_upper": 1.2979926622703524,
+        "observed": 1.2720844760027905
+      },
+      "total_interruption_relative_reduction": 0.213835672434498,
+      "total_wall_paired_speedup": {
+        "ci95_lower": 1.1448266923475403,
+        "ci95_upper": 1.18750295933445,
+        "observed": 1.1675466328731288
+      },
+      "total_wall_relative_reduction": 0.14341921670880092
+    }
+  },
+  "reclamation_validation": {
+    "all_campaign_derivations_exact": true,
+    "all_faults_rejected": true,
+    "all_slo_reference_predicates_restored": true,
+    "all_transactions_completed": true,
+    "analysis_recomputed_exact_match": true,
+    "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+    "exact_randomized_matrix_order": true,
+    "maximum_concurrency": 4,
+    "maximum_queue_occupancy": 8,
+    "physical_gpu_bytes_reclaimed_values": [
+      0
+    ],
+    "physical_gpu_capacity_reclaimed_values": [
+      0
+    ],
+    "repetitions": 2,
+    "requested_actual_engines_equal": true,
+    "seed_blocked_median_speedups": {
+      "migration_ns": {
+        "113": 2.296467442563716,
+        "41": 2.2732999086470134,
+        "73": 2.2957553880529646
+      },
+      "total_interruption_ns": {
+        "113": 1.2718453454814225,
+        "41": 1.2877669738446662,
+        "73": 1.247374463677311
+      },
+      "total_wall_ns": {
+        "113": 1.1696992075841837,
+        "41": 1.1816617196970864,
+        "73": 1.153439737122655
+      }
+    },
+    "seeds": [
+      41,
+      73,
+      113
+    ],
+    "software_baselines": [
+      "existing_serial",
+      "optimized_bounded_parallel"
+    ],
+    "trace_levels": [
+      "disabled",
+      "minimal",
+      "full"
+    ],
+    "trial_count": 36,
+    "unique_trial_keys": 36,
+    "workload_classes": [
+      "capacity_reclamation_reference"
+    ]
+  },
+  "review_role": "independent_final_statistical_evidence_and_measurement_bias_reviewer",
+  "reviewed_repository_revision": "d113e12b5d618fa3b39b41a30f5f272bd96a18b2",
+  "schema_version": "sloforge.branchfabric.final-measurement-review/v1",
+  "status": "PASS_NEGATIVE_HARDWARE_CONCLUSION_WITH_SCOPE_LIMITATIONS",
+  "tests": {
+    "command": "VIRTUAL_ENV= uv run --locked pytest -q tests/python/test_branchfabric_gates.py tests/python/test_branchfabric_execution_analysis.py tests/python/test_branchfabric_fanout_vertical.py",
+    "passed": 13,
+    "result": "PASS"
+  },
+  "tracing_control_validation": {
+    "canonical_helix_overhead": {
+      "full_end_to_end_wall_median_relative_change": 0.0038745076917397095,
+      "full_hot_path_wall_median_relative_change": 0.003328247547441236,
+      "full_trace_canonical_event_count": 78,
+      "minimal_trace_canonical_event_count": 58,
+      "paired_confidence_interval_available": false,
+      "pair_count": 6,
+      "semantic_equivalence_verified": true,
+      "total_dropped_events": 0,
+      "workload_evidence_class": "SYNTHETIC"
+    },
+    "fanout_direct_trace_control_available": false,
+    "reclamation": {
+      "existing_serial": {
+        "ci95_lower": -0.03576338535662758,
+        "ci95_upper": 0.05814399576277909,
+        "full_minus_disabled_median_relative_change": -0.006370136068649767,
+        "pair_count": 6
+      },
+      "optimized_bounded_parallel": {
+        "ci95_lower": -0.03635539586523116,
+        "ci95_upper": 0.018897317569361884,
+        "full_minus_disabled_median_relative_change": -0.01602856556489745,
+        "pair_count": 6
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "authorized_by": "user",
+  "budget_environment_variable": "SLOFORGE_GPU_BUDGET_USD",
+  "budget_usd": 40.0,
+  "new_hard_additional_gpu_hours": 2.0,
+  "new_hard_additional_gpu_seconds": 7200.0,
+  "previous_hard_additional_gpu_hours": 1.5,
+  "previous_hard_additional_gpu_seconds": 5400.0,
+  "reason": "User explicitly instructed the sole GPU coordinator not to let the prior hard limit block validation and to launch v9.",
+  "schema_version": "sloforge.branchfabric.experiment-004-gpu-limit-override/v1"
+}

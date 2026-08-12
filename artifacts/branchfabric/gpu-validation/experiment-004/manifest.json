@@ -1,0 +1,90 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-valid-blocker-manifest/v1",
+  "artifact_root": "artifacts/branchfabric/gpu-validation/experiment-004",
+  "completed_at_utc": "2026-08-12T19:31:02Z",
+  "scientific_status": "valid-blocker",
+  "classification": null,
+  "pilot_valid": false,
+  "v10_launched": false,
+  "attempt_count": 11,
+  "latest_attempt_id": "exp004-capacity-s41-v2",
+  "reason": "The v9 state transaction remains correct but its serving methodology is invalid. The complete offline audit corrected movement accounting. Both bounded calibration attempts then failed before the first capacity probe, so no empirical lambda_1, lambda_2, or reviewed spike exists and v10 was not launched.",
+  "budget_terminal": true,
+  "evidence": [
+    {
+      "artifact_reference": "analysis/v9-movement-audit.json",
+      "artifact_sha256": "58916d341a2abfb58b9d65292974fadabb031255fda742bfbf5d9ee74d9e59de",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "analysis/v9-d2h-audit.json",
+      "artifact_sha256": "ba0558e06bb38a12750284ddd4b45f10bd372076e92c70ee319c0068aba3a4c0",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "analysis/movement-formulas.json",
+      "artifact_sha256": "2a5bbfe71cd47770093f691d6a27c09aa5c15a8509217e059eb24e08d8e3d94a",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "analysis/v9-serving-loadgen-audit.json",
+      "artifact_sha256": "0215513d84082d49c915e53c726bf2c3e8e6d9d836e40d56f011c69f15d73907",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-pilot-naive-s41-v9/REMOTE_MANIFEST.json",
+      "artifact_sha256": "9ecfb80002ac0b2ec8ccd23ff1f4d4559ca676d81fcfe35197a4776f85361a11",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/raw/modal/exp004-capacity-s41-v1/REMOTE_MANIFEST.json",
+      "artifact_sha256": "05a19e609e3368351a327752e9099bbb16e2bb78fa0769604e2d87fd98c918f2",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/raw/modal/exp004-capacity-s41-v2/REMOTE_MANIFEST.json",
+      "artifact_sha256": "a3a397da61ca02391be99e331f92092f65b08df342aeec85f87b0d79ef6994bb",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/logs/capacity-failure-charge-conversion-provenance-correction.json",
+      "artifact_sha256": "c54ae780a84e1206dc7873be325c78f0c6b6ad098b9db0167a7f2603ee85f1d1",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/calibration-blocker.json",
+      "artifact_sha256": "c14f58049078ffd42134df2c7bc03b487484b21734d409fe2f4d7e243c46fd20",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/calibration-outcome.json",
+      "artifact_sha256": "9f50bc014cd8010e8fb3164228a0250f798413f83920bd98f2237f3ec1370fd0",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "calibration/reviews/terminal-valid-blocker-review.json",
+      "artifact_sha256": "ae20bfbcab3eb5ce7c3555c6d2308ea96e4a8ed356ac3e7a9e8182de52b51b10",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "gpu-hours.json",
+      "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "logs/modal-final-cleanup-and-settlement.json",
+      "artifact_sha256": "4ad42b0d40743bf93d605cf3f473792dc28f9802ad8fd7f5934b69d3b64d3764",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "../../../../reports/branchfabric-gpu-validation-experiment-004-v10.json",
+      "artifact_sha256": "17dd661f723554f1816120af1c153e3ff3f44db4f7d535740f089ed95fb33b04",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "../../../../reports/branchfabric-gpu-validation-experiment-004-v10.md",
+      "artifact_sha256": "72e6bbabeebcdd067817271ce2b32f5ccc7dd162258377cdfbc402068e60bcee",
+      "sample_selector": "$"
+    }
+  ]
+}

@@ -5,10 +5,12 @@
 mod canonical;
 mod error;
 mod model;
+mod trace;
 
 pub use canonical::{canonical_hash, canonical_json};
 pub use error::{ProtocolError, ValidationError};
 pub use model::*;
+pub use trace::*;
 
 use serde::de::DeserializeOwned;
 

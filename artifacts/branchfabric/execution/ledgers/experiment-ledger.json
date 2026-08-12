@@ -1,0 +1,101 @@
+{
+  "entries": [
+    {
+      "command": "make check",
+      "evidence_class": "LOCAL_HOST_VALIDATION",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "historical CPU demonstration set",
+      "evidence_class": "LOCAL_HOST_AND_SYNTHETIC_MIXED_AS_LABELED_BY_EACH_DEMO",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "make branchfabric-trace-check",
+      "evidence_class": "LOCAL_HOST_VALIDATION",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "verify CORPUS_MANIFEST hashes and aggregate digest",
+      "evidence_class": "ARTIFACT_INTEGRITY",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "regenerate requirements and report from retained cpu-reference run",
+      "evidence_class": "REPLAYED_FROM_RETAINED_RAW_ARTIFACTS",
+      "result": "PASS_BYTE_FOR_BYTE",
+      "seed": 20260809
+    },
+    {
+      "command": "cpu-reference fanout vertical: fanouts 8,16,32; two controlled workload classes; seeds 41,73,113",
+      "evidence_class": "CPU_REFERENCE_MODEL_STATE",
+      "result": "PASS_SOFTWARE_ONLY",
+      "seed": 20260809
+    },
+    {
+      "command": "independent full regeneration of cpu-reference fanout vertical",
+      "evidence_class": "INDEPENDENT_CPU_REFERENCE_REPLICATION",
+      "result": "PASS_CONCLUSION_REPRODUCED",
+      "seed": 20260809
+    },
+    {
+      "command": "causal local reclamation campaign: 36 randomized trials",
+      "evidence_class": "CPU_REFERENCE_LOCAL_TRANSACTION",
+      "result": "PASS_SOFTWARE_ONLY",
+      "seed": 20260809
+    },
+    {
+      "command": "make branchfabric-execution-analysis",
+      "evidence_class": "ARTIFACT_REPLAY",
+      "result": "PASS",
+      "seed": 202608091
+    },
+    {
+      "command": "make branchfabric-gate",
+      "evidence_class": "EVIDENCE_BOUND_GATE",
+      "result": "PASS_WITH_OUTCOME_FAIL_NO_BUILD",
+      "seed": null
+    },
+    {
+      "command": "transaction and reclamation fault verification",
+      "evidence_class": "LOCAL_PROTOCOL_VERIFICATION",
+      "result": "PASS",
+      "seed": null
+    },
+    {
+      "command": "make check",
+      "evidence_class": "FINAL_LOCAL_HOST_VALIDATION",
+      "result": "PASS: 1268 Python, 6 optional skips, Rust workspace, UI",
+      "seed": null
+    },
+    {
+      "command": "make helix-check",
+      "evidence_class": "FINAL_LOCAL_HOST_VALIDATION",
+      "result": "PASS: 188 Python and Helix Rust",
+      "seed": null
+    },
+    {
+      "command": "make branchfabric-trace-check",
+      "evidence_class": "FINAL_LOCAL_HOST_VALIDATION",
+      "result": "PASS: 156 Python and 5 Rust",
+      "seed": null
+    },
+    {
+      "command": "make branchfabric-clean-room-test",
+      "evidence_class": "COMMITTED_ARCHIVE_REPRODUCTION",
+      "result": "PASS: source 979a1df, six CPU stages, negative requirements/report, package",
+      "seed": 20260809
+    },
+    {
+      "command": "final historical CPU demonstration set",
+      "evidence_class": "FINAL_LOCAL_HOST_AND_SYNTHETIC_MIXED_AS_LABELED_BY_EACH_DEMO",
+      "result": "PASS: core, Fabric, Autopsy, ForgeCI, WarmPath, Genesis zero-day, Continuum demo/migration/fault/fork/compatibility, Helix",
+      "seed": null
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.experiment-ledger/v1"
+}

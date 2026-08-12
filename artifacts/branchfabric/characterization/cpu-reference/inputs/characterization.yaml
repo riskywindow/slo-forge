@@ -1,0 +1,109 @@
+schema_version: sloforge.branchfabric.characterization-matrix/v1
+matrix_id: helix-characterization-cpu-v1
+purpose: >-
+  Controlled CPU characterization sweeps for Helix branch state. Values cover
+  design parameters and negative cases; they are not a claimed production
+  workload distribution.
+distribution_claim: false
+run_order_seed: 20260809
+seeds: [41, 73, 113]
+repetitions: 3
+base:
+  workload_class: coding_agent
+  branch_fanout: 8
+  prefix_tokens: 8192
+  suffix_tokens: 256
+  divergence_pattern: mid
+  branch_survival: reward_pruning
+  environment_size: medium
+  tool_behavior: test_heavy
+  policy_mode: same_policy
+  resource_pressure: idle
+  migration_behavior: none
+  page_size_bytes: 65536
+  tensor_parallel: 1
+  state_packing: separate-kv
+  runtime: continuum-reference-token-major
+  device_placement: cpu-local
+  memory_tier: host-dram
+  transport: in-process
+  fault_scenario: none
+  trace_level: full
+  evidence_class: SYNTHETIC
+  hardware: cpu-local
+  simulated_gpu_state: true
+  timeout_seconds: 120
+  estimated_cost_usd: 0.0
+sweeps:
+  - sweep_id: fanout
+    field: branch_fanout
+    values: [1, 2, 4, 8, 16, 32, 64, 128]
+  - sweep_id: prefix
+    field: prefix_tokens
+    values: [1024, 4096, 8192, 16384, 32768, 65536, 131072]
+  - sweep_id: suffix
+    field: suffix_tokens
+    values: [16, 64, 256, 1024, 4096]
+  - sweep_id: divergence
+    field: divergence_pattern
+    values: [immediate, early, mid, late, highly_shared, highly_divergent]
+  - sweep_id: survival
+    field: branch_survival
+    values:
+      [all_complete, aggressive_early_pruning, reward_pruning, random_death, long_tail]
+  - sweep_id: environment
+    field: environment_size
+    values: [none, tiny, medium, large, dependency_heavy, service_heavy]
+  - sweep_id: tools
+    field: tool_behavior
+    values:
+      [none, frequent_cheap, infrequent_expensive, build_heavy, test_heavy, service_heavy]
+  - sweep_id: policy
+    field: policy_mode
+    values: [same_policy, cross_policy, strict, segmented]
+  - sweep_id: pressure
+    field: resource_pressure
+    values:
+      - idle
+      - moderate_serving
+      - heavy_serving
+      - rollout_saturation
+      - cpu_environment_saturation
+      - network_contention
+      - storage_contention
+  - sweep_id: migration
+    field: migration_behavior
+    values:
+      [none, branch_migration, capacity_reclamation, checkpoint_resume, worker_failure_recovery]
+    overrides:
+      workload_class: capacity_reclamation
+  - sweep_id: page-size
+    field: page_size_bytes
+    values: [4096, 16384, 65536, 262144, 1048576, 2097152]
+  - sweep_id: trace-level
+    field: trace_level
+    values: [disabled, minimal, full]
+    repetitions: 7
+  - sweep_id: fault
+    field: fault_scenario
+    values: [none, branch_abort, worker_failure, transfer_retry, storage_slowdown]
+  - sweep_id: workload-class
+    field: workload_class
+    values:
+      - coding_agent
+      - pure_reasoning
+      - verification_heavy
+      - capacity_reclamation
+      - highly_divergent_negative
+  - sweep_id: tensor-parallel
+    field: tensor_parallel
+    values: [1, 2, 4, 8]
+  - sweep_id: state-packing
+    field: state_packing
+    values: [separate-kv, packed-kv, interleaved-kv]
+  - sweep_id: memory-tier
+    field: memory_tier
+    values: [host-dram, local-nvme, simulated-cxl]
+  - sweep_id: transport
+    field: transport
+    values: [in-process, local-file, simulated-network]
