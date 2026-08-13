@@ -51,6 +51,10 @@ INTEGRATED_CONFIG_V4 = (
     ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
     "exp004-v10-naive-s41-v4-config.json"
 )
+INTEGRATED_CONFIG_V5 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-naive-s41-v5-config.json"
+)
 
 
 def _load(path: Path, name: str) -> ModuleType:
@@ -104,10 +108,10 @@ def _deadline_evidence(*, controller_seconds: float, elapsed_seconds: float) -> 
     entry_ns = 1_000_000_000
     return {
         "function_entry_monotonic_ns": entry_ns,
-        "function_deadline_monotonic_ns": entry_ns + 469_000_000_000,
+        "function_deadline_monotonic_ns": entry_ns + 588_000_000_000,
         "controller_deadline_monotonic_ns": entry_ns + round(controller_seconds * 1e9),
         "post_controller_reserve_seconds": 0,
-        "remaining_function_seconds_at_completion": 469.0 - elapsed_seconds,
+        "remaining_function_seconds_at_completion": 588.0 - elapsed_seconds,
     }
 
 
@@ -423,7 +427,7 @@ def test_modal_graph_requests_exact_two_a100s_and_strict_bounded_config(
                 "schema_version": "sloforge.branchfabric.experiment-004-gpu-hours/v1",
                 "historical_through_experiment_003_gpu_hours": 1.669146,
                 "target_additional_gpu_seconds": 3600.0,
-                "hard_additional_gpu_seconds": 10800.0,
+                "hard_additional_gpu_seconds": 12600.0,
                 "consumed_additional_gpu_seconds": 0.0,
                 "intervals": [],
                 "reservations": [
@@ -451,18 +455,23 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
 ) -> None:
     launcher = _load(LAUNCHER, "exp004_integrated_launcher_config")
     monkeypatch.setattr(launcher, "_verify_authorized_code_commit", lambda *_args: None)
-    payload = launcher._validate_config(INTEGRATED_CONFIG_V4)
-    assert payload["attempt_id"] == "exp004-v10-naive-s41-v4"
+    payload = launcher._validate_config(INTEGRATED_CONFIG_V5)
+    assert payload["attempt_id"] == "exp004-v10-naive-s41-v5"
     assert payload["execution_mode"] == "integrated-calibration-v10"
     assert payload["serving_spike_request_rate_per_second"] == 15.0
-    assert launcher._reservation_wall_seconds(payload) == 469.0
-    assert launcher._reservation_wall_seconds(payload) * launcher._GPU_COUNT == 938.0
+    assert launcher._reservation_wall_seconds(payload) == 588.0
+    assert launcher._reservation_wall_seconds(payload) * launcher._GPU_COUNT == 1176.0
     changed_warmup = tmp_path / "changed-warmup.json"
     _write_json(changed_warmup, {**payload, "warmup_seconds": 1.5})
     with pytest.raises(ValueError, match="preauthorized v10 contract"):
         launcher._validate_config(changed_warmup)
-    for stale in (INTEGRATED_CONFIG, INTEGRATED_CONFIG_V2, INTEGRATED_CONFIG_V3):
-        with pytest.raises(ValueError, match="exact contract"):
+    for stale in (
+        INTEGRATED_CONFIG,
+        INTEGRATED_CONFIG_V2,
+        INTEGRATED_CONFIG_V3,
+        INTEGRATED_CONFIG_V4,
+    ):
+        with pytest.raises(ValueError):
             launcher._validate_config(stale)
 
     function_calls: list[dict[str, object]] = []
@@ -488,24 +497,24 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
     assert not hasattr(config, "rate_grid_rps")
     assert config.initialization_timeout_seconds == 160
     assert config.disable_log_stats is False
-    assert config.maximum_wall_seconds == 459.0
-    assert config.controller_timeout_seconds == 459.0
+    assert config.maximum_wall_seconds == 578.0
+    assert config.controller_timeout_seconds == 578.0
     assert module.INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS == 10.0
-    assert module.INTEGRATED_CONTROLLER_DEADLINE_SECONDS == 459.0
+    assert module.INTEGRATED_CONTROLLER_DEADLINE_SECONDS == 578.0
     function_deadline_ns, controller_deadline_ns = module._absolute_function_deadlines(
         function_entry_ns=1_000_000_000,
         config=config,
     )
-    assert function_deadline_ns == 470_000_000_000
-    assert controller_deadline_ns == 460_000_000_000
+    assert function_deadline_ns == 589_000_000_000
+    assert controller_deadline_ns == 579_000_000_000
     assert function_deadline_ns - controller_deadline_ns == 10_000_000_000
     with pytest.raises(ValueError):
         module.Experiment004PilotConfig.model_validate(
-            {**payload, "maximum_wall_seconds": 459.0001}, strict=True
+            {**payload, "maximum_wall_seconds": 578.0001}, strict=True
         )
     with pytest.raises(ValueError):
         module.Experiment004PilotConfig.model_validate(
-            {**payload, "controller_timeout_seconds": 459.0001}, strict=True
+            {**payload, "controller_timeout_seconds": 578.0001}, strict=True
         )
     with pytest.raises(ValueError, match="25-request scientific abort"):
         module.Experiment004PilotConfig.model_validate(

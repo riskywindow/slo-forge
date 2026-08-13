@@ -21,12 +21,12 @@ def test_checked_v10_phase_budget_is_complete_hash_bound_and_evidence_derived() 
     budget = load_v10_phase_budget(PHASE_BUDGET, repository_root=ROOT)
 
     assert tuple(phase.phase for phase in budget.phases) == PHASE_ORDER
-    assert budget.phase_upper_bound_subtotal_wall_seconds == 375.05
+    assert budget.phase_upper_bound_subtotal_wall_seconds == 470.05
     assert budget.safety_margin.selected_margin_fraction == 0.25
-    assert budget.safety_margin.sdk_timeout_rounding_margin_seconds == 0.1875
-    assert budget.safety_margin.selected_upper_bound_seconds == 93.95
-    assert budget.predicted_wall_clock_seconds == 469.0
-    assert budget.required_A100_seconds == 938.0
+    assert budget.safety_margin.sdk_timeout_rounding_margin_seconds == 0.4375
+    assert budget.safety_margin.selected_upper_bound_seconds == 117.95
+    assert budget.predicted_wall_clock_seconds == 588.0
+    assert budget.required_A100_seconds == 1176.0
     assert budget.required_A100_seconds == 2 * budget.predicted_wall_clock_seconds
     assert budget.required_A100_seconds != 1800.0
     assert budget.cleanup_upper_bound_seconds == 10.0
@@ -38,17 +38,17 @@ def test_live_budget_gate_uses_required_phase_budget_without_weakening_ceiling()
     budget = load_v10_phase_budget(PHASE_BUDGET, repository_root=ROOT)
     accepted = evaluate_budget_gate(
         budget,
-        current_conservative_usage_A100_seconds=9622.470997419994,
-        configured_hard_ceiling_A100_seconds=10800.0,
+        current_conservative_usage_A100_seconds=10298.167208919993,
+        configured_hard_ceiling_A100_seconds=12600.0,
     )
     assert accepted == {
         "status": "AUTHORIZE_V10",
         "budget_pass": True,
-        "current_conservative_usage_A100_seconds": 9622.470997419994,
-        "required_A100_seconds": 938.0,
-        "projected_conservative_usage_A100_seconds": 10560.470997419994,
-        "configured_hard_ceiling_A100_seconds": 10800.0,
-        "remaining_A100_seconds_after_reservation": pytest.approx(239.529002580006),
+        "current_conservative_usage_A100_seconds": 10298.167208919993,
+        "required_A100_seconds": 1176.0,
+        "projected_conservative_usage_A100_seconds": 11474.167208919993,
+        "configured_hard_ceiling_A100_seconds": 12600.0,
+        "remaining_A100_seconds_after_reservation": pytest.approx(1125.8327910800071),
     }
 
     blocked = evaluate_budget_gate(
@@ -58,7 +58,7 @@ def test_live_budget_gate_uses_required_phase_budget_without_weakening_ceiling()
     )
     assert blocked["status"] == "BUDGET_BLOCKER"
     assert blocked["budget_pass"] is False
-    assert blocked["projected_conservative_usage_A100_seconds"] == 10938.0
+    assert blocked["projected_conservative_usage_A100_seconds"] == 11176.0
     assert blocked["configured_hard_ceiling_A100_seconds"] == 10800.0
 
 

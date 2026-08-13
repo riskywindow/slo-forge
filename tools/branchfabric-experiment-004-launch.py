@@ -22,7 +22,7 @@ _APP = _ROOT / "experiments/branchfabric/modal_gpu_reclamation.py"
 _EXPERIMENT_ROOT = _ROOT / "artifacts/branchfabric/gpu-validation/experiment-004"
 _LEDGER = _EXPERIMENT_ROOT / "gpu-hours.json"
 _LOCK = _EXPERIMENT_ROOT / "gpu-hours.lock"
-_FUNCTION_WALL_SECONDS = 469.0
+_FUNCTION_WALL_SECONDS = 588.0
 _LEGACY_RESERVATION_WALL_SECONDS = 340.0
 _INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS = 10.0
 _FUNCTION_STARTUP_TIMEOUT_SECONDS = 180.0
@@ -864,13 +864,10 @@ def _load_ledger() -> Any:
     if not _LEDGER.is_file():
         return Experiment004GpuHourLedger(consumed_additional_gpu_seconds=0.0)
     payload = json.loads(_LEDGER.read_text())
-    # Migrate only a recognized prior ceiling after the explicit v10 operator
-    # authorization. The next atomic reservation write persists the new hard
-    # ceiling, so remote validation sees the same immutable ledger.
+    # Recognized older ceilings are never silently increased here. The
+    # persisted ledger is the authoritative user-configured ceiling.
     if payload.get("hard_additional_gpu_seconds") in {5_400.0, 7_200.0}:
-        if os.environ.get("SLOFORGE_EXP004_EXTENDED_GPU_HOURS") != "3.0":
-            raise RuntimeError("v10 requires SLOFORGE_EXP004_EXTENDED_GPU_HOURS=3.0 authorization")
-        payload["hard_additional_gpu_seconds"] = 10_800.0
+        raise RuntimeError("legacy Experiment 004 ceilings require an audited migration")
     return Experiment004GpuHourLedger.model_validate_json(
         json.dumps(payload, sort_keys=True, separators=(",", ":")), strict=True
     )
