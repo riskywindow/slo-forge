@@ -31,6 +31,11 @@ def test_actual_live_driver_cpu_gate_is_source_bound_and_fail_closed() -> None:
     }
     assert all(result["actual_timer_cadence"].values())
     assert result["fixture_config"]["output_tokens"] == 64
+    assert result["fixture_config"]["producer_queue_capacity"] == 256
+    assert (
+        result["fixture_config"]["producer_queue_capacity"]
+        > result["fixture_config"]["maximum_pending_requests"]
+    )
     assert 10 <= result["fixture_config"]["overload_queue_trigger"] <= 30
     assert result["fixture_config"]["overload_queue_abort"] <= 64
 

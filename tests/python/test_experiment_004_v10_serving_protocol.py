@@ -74,6 +74,13 @@ class _FakeEngine:
         )
 
 
+class _FailingEngine(_FakeEngine):
+    def step(self):  # type: ignore[no-untyped-def]
+        if self.requests:
+            raise RuntimeError("synthetic engine failure")
+        return ()
+
+
 def _config():  # type: ignore[no-untyped-def]
     # Direct construction permits a short synthetic stability interval. The
     # production from_mapping gate separately requires at least five seconds.
@@ -95,6 +102,7 @@ def _config():  # type: ignore[no-untyped-def]
         output_tokens=64,
         maximum_wall_seconds=5.0,
         restore_grace_seconds=0.12,
+        producer_queue_capacity=256,
         maximum_pending_requests=100,
         restore_handoff_lead_requests=4,
         overload_queue_trigger=10,
@@ -264,6 +272,7 @@ def test_live_config_requires_explicit_v10_and_production_stability() -> None:
         "serving_output_tokens": 64,
         "maximum_wall_seconds": 90,
         "temporary_serving_seconds": 2.0,
+        "producer_queue_capacity": 256,
         "serving_maximum_pending_requests": 1024,
         "serving_restore_handoff_lead_requests": 4,
         "serving_overload_queue_trigger": 10,
@@ -271,6 +280,7 @@ def test_live_config_requires_explicit_v10_and_production_stability() -> None:
     }
     config = _LIVE.LiveV10Config.from_mapping(payload)
     assert config.spike_rate_per_second == 15.0
+    assert config.producer_queue_capacity == 256
     payload["serving_slo_stability_window_seconds"] = 4.0
     try:
         _LIVE.LiveV10Config.from_mapping(payload)
@@ -278,6 +288,62 @@ def test_live_config_requires_explicit_v10_and_production_stability() -> None:
         assert "at least five seconds" in str(error)
     else:
         raise AssertionError("short production stability window was accepted")
+    payload["serving_slo_stability_window_seconds"] = 5.0
+    payload["producer_queue_capacity"] = 63
+    with pytest.raises(ValueError, match="producer queue capacity"):
+        _LIVE.LiveV10Config.from_mapping(payload)
+
+
+def test_producer_transport_queue_is_distinct_from_active_and_backlog_bounds(
+    tmp_path: Path,
+) -> None:
+    base_config = _config()
+    config = base_config.__class__(
+        **{
+            **base_config.__dict__,
+            "producer_queue_capacity": 256,
+            "maximum_pending_requests": 64,
+            "overload_queue_abort": 64,
+        }
+    )
+    producer = _LIVE._GlobalGpu0Producer(
+        config=config,
+        start_ns=0,
+        barriers=tmp_path,
+        write_new=_write_new,
+    )
+
+    for sequence in range(256):
+        producer._offer(
+            _LIVE.OfferedRequest(
+                sequence=sequence,
+                request_id=f"buffered-{sequence:03d}",
+                phase="gpu0-overload",
+                scheduled_arrival_ns=sequence,
+                device="gpu0",
+            )
+        )
+
+    assert producer.gpu0_queue.maxsize == 256
+    assert producer.gpu0_queue.qsize() == 256
+    assert config.maximum_pending_requests == 64
+    with pytest.raises(RuntimeError, match="admission queue overflowed"):
+        producer._offer(
+            _LIVE.OfferedRequest(
+                sequence=256,
+                request_id="buffered-256",
+                phase="gpu0-overload",
+                scheduled_arrival_ns=256,
+                device="gpu0",
+            )
+        )
+    with pytest.raises(RuntimeError, match="post-reclaim-pre-gpu1"):
+        _LIVE._enforce_pre_gpu1_queue_abort(
+            trigger_written=True,
+            gpu1_first_useful=None,
+            instantaneous_depth=65,
+            maximum_depth=config.overload_queue_abort,
+        )
 
 
 def test_sequence_clock_and_route_are_reconstructible_by_both_workers() -> None:
@@ -309,6 +375,210 @@ def test_hard_queue_abort_remains_live_after_trigger_until_gpu1_is_useful() -> N
         instantaneous_depth=65,
         maximum_depth=64,
     )
+    with pytest.raises(RuntimeError, match="two-gpu-recovery"):
+        _LIVE._enforce_recovery_queue_bound(
+            total_outstanding=65,
+            maximum_depth=64,
+        )
+
+
+def test_incremental_gpu1_telemetry_is_compact_ordered_and_consumed_once(
+    tmp_path: Path,
+) -> None:
+    driver = _LIVE._EngineDriver(
+        engine=_FakeEngine(), prefix=(1,), params=object(), output_tokens=64
+    )
+    first = _LIVE.OfferedRequest(
+        sequence=10,
+        request_id="gpu1-first",
+        phase="two-gpu-recovery",
+        scheduled_arrival_ns=1,
+        device="gpu1",
+    )
+    driver.admit(first)
+    driver.step()
+    published: set[str] = set()
+
+    def empty_state() -> dict[str, int]:
+        return {
+            "request_count": 0,
+            "running_requests": 0,
+            "waiting_requests": 0,
+            "skipped_waiting_requests": 0,
+            "queue_depth": 0,
+        }
+
+    _LIVE._publish_gpu1_incremental_telemetry(
+        driver=driver,
+        barriers=tmp_path,
+        write_new=_write_new,
+        telemetry_sequence=0,
+        published_completed_ids=published,
+        runtime_queue_state=empty_state,
+    )
+    _LIVE._publish_gpu1_incremental_telemetry(
+        driver=driver,
+        barriers=tmp_path,
+        write_new=_write_new,
+        telemetry_sequence=1,
+        published_completed_ids=published,
+        runtime_queue_state=empty_state,
+    )
+
+    first_payload = json.loads((tmp_path / "v10-gpu1-telemetry/000000.json").read_text())
+    second_payload = json.loads((tmp_path / "v10-gpu1-telemetry/000001.json").read_text())
+    assert len(first_payload["completed_requests"]) == 1
+    assert second_payload["completed_requests"] == []
+    assert first_payload["cumulative_completed_requests"] == 1
+    assert second_payload["cumulative_completed_requests"] == 1
+    cursor = _LIVE._Gpu1TelemetryCursor()
+    assert _LIVE._load_gpu1_incremental(tmp_path, cursor)
+    assert cursor.next_sequence == 1
+    assert len(cursor.completed) == 1
+    assert _LIVE._load_gpu1_incremental(tmp_path, cursor)
+    assert cursor.next_sequence == 2
+    assert len(cursor.completed) == 1
+    assert not _LIVE._load_gpu1_incremental(tmp_path, cursor)
+
+
+def test_incremental_gpu1_telemetry_rejects_active_request_disappearance(
+    tmp_path: Path,
+) -> None:
+    active = {
+        "sequence": 10,
+        "request_id": "gpu1-active",
+        "phase": "two-gpu-recovery",
+        "scheduled_arrival_ns": 1,
+        "device": "gpu1",
+        "admitted_ns": 2,
+        "service_start_ns": 3,
+        "first_token_ns": 4,
+    }
+    empty_state = {
+        "request_count": 1,
+        "running_requests": 1,
+        "waiting_requests": 0,
+        "skipped_waiting_requests": 0,
+        "queue_depth": 0,
+    }
+    first = {
+        "schema_version": "sloforge.branchfabric.v10-gpu1-telemetry-incremental/v1",
+        "sequence": 0,
+        "observed_ns": 10,
+        "completed_requests": [],
+        "active_requests": [active],
+        "runtime_queue_state": empty_state,
+        "cumulative_completed_requests": 0,
+        "provenance": {
+            "completed_batch_sha256": _LIVE._canonical_sha256([]),
+            "active_request_ids_sha256": _LIVE._canonical_sha256(["gpu1-active"]),
+        },
+    }
+    second = {
+        **first,
+        "sequence": 1,
+        "observed_ns": 20,
+        "active_requests": [],
+        "runtime_queue_state": {
+            **empty_state,
+            "request_count": 0,
+            "running_requests": 0,
+        },
+        "provenance": {
+            "completed_batch_sha256": _LIVE._canonical_sha256([]),
+            "active_request_ids_sha256": _LIVE._canonical_sha256([]),
+        },
+    }
+    _write_new(tmp_path / "v10-gpu1-telemetry/000000.json", first)
+    _write_new(tmp_path / "v10-gpu1-telemetry/000001.json", second)
+    cursor = _LIVE._Gpu1TelemetryCursor()
+    assert _LIVE._load_gpu1_incremental(tmp_path, cursor)
+    with pytest.raises(ValueError, match="disappeared without completion"):
+        _LIVE._load_gpu1_incremental(tmp_path, cursor)
+
+
+def test_global_offer_watermark_fails_closed_on_stale_or_failed_state(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "v10-global-offer-state.json"
+    base = {
+        "schema_version": "sloforge.branchfabric.v10-global-offer-state/v1",
+        "attempt_id": "exp004-v10-protocol",
+        "generation": 0,
+        "observed_ns": 10,
+        "last_offered_sequence": 4,
+        "next_sequence": 5,
+        "stopped": False,
+        "error": None,
+    }
+    _LIVE._write_replace(path, base)
+    cursor = _LIVE._OfferStateCursor()
+    assert _LIVE._read_offer_state(
+        path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=20
+    ) == base
+    with pytest.raises(RuntimeError, match="stale"):
+        _LIVE._read_offer_state(
+            path,
+            attempt_id="exp004-v10-protocol",
+            cursor=cursor,
+            now_ns=3_000_000_010,
+        )
+    _LIVE._write_replace(
+        path,
+        {
+            **base,
+            "generation": 1,
+            "observed_ns": 30,
+            "stopped": True,
+            "error": {"type": "RuntimeError", "message": "producer failed"},
+        },
+    )
+    with pytest.raises(RuntimeError, match="stopped with an error"):
+        _LIVE._read_offer_state(
+            path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=31
+        )
+
+
+def test_gpu0_source_path_persists_partial_evidence_before_propagation(
+    tmp_path: Path,
+) -> None:
+    config = _config()
+
+    def empty_state() -> dict[str, int]:
+        return {
+            "request_count": 0,
+            "running_requests": 0,
+            "waiting_requests": 0,
+            "skipped_waiting_requests": 0,
+            "queue_depth": 0,
+        }
+
+    with pytest.raises(RuntimeError, match="synthetic engine failure"):
+        _LIVE.run_v10_gpu0(
+            _FailingEngine(),
+            prefix=(1,),
+            params=object(),
+            config=config,
+            start_ns=time.monotonic_ns() + 10_000_000,
+            barriers=tmp_path,
+            write_new=_write_new,
+            runtime_queue_state=empty_state,
+        )
+
+    payload = json.loads((tmp_path / "v10-gpu0-partial-failure.json").read_text())
+    assert payload["error"] == {
+        "type": "RuntimeError",
+        "message": "synthetic engine failure",
+    }
+    assert payload["global_offered_requests"]
+    assert payload["gpu0_requests"]
+    assert payload["global_offer_state"]["stopped"] is True
+    assert payload["queue_state"] == {
+        "external_gpu0_queue_size": 0,
+        "driver_active_requests": 1,
+        "runtime_queue_state": empty_state(),
+        "total_outstanding": 1,
+    }
 
 
 def test_restore_drain_uses_live_scheduler_counts_and_rejects_hidden_work() -> None:
@@ -365,9 +635,56 @@ def test_restore_candidate_rejects_endpoint_only_queue_decrease(
         gpu1_first_useful_ns=first_useful,
         now_ns=now,
         candidate_start_ns=None,
+        scheduler_waiting_backlog=4,
     )
     assert evidence == {}
     assert candidate is None
+
+
+def test_recovery_threshold_uses_scheduler_waiting_not_in_service_total(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = _config()
+    first_useful = 1_000_000_000
+    now = first_useful + int(config.recovery_stability_seconds * 1e9)
+    producer = SimpleNamespace(offered=())
+    monkeypatch.setattr(
+        _LIVE,
+        "_queue_depths_at",
+        lambda _offered, _rows, _timestamp: {
+            "total_outstanding": 8,
+            "waiting_backlog": 8,
+        },
+    )
+    monkeypatch.setattr(
+        _LIVE,
+        "_outstanding_at",
+        lambda _offered, _rows, _timestamp: 8,
+    )
+    monkeypatch.setattr(
+        _LIVE,
+        "_sustained_queue_trend",
+        lambda **_kwargs: {
+            "initial_depth": 12,
+            "final_depth": 8,
+            "sustained_negative": True,
+            "completed_rate_exceeds_offered": True,
+            "passed": True,
+        },
+    )
+
+    evidence, candidate = _LIVE._recovery_evidence(
+        config=config,
+        producer=producer,
+        rows=(),
+        gpu1_first_useful_ns=first_useful,
+        now_ns=now,
+        candidate_start_ns=None,
+        scheduler_waiting_backlog=0,
+    )
+
+    assert evidence == {}
+    assert candidate == now
 
 
 def test_raw_final_gate_rejects_endpoint_decrease_without_sustained_trend() -> None:
@@ -430,6 +747,13 @@ def test_synthetic_live_protocol_overloads_recovers_drains_and_restores(tmp_path
                     start_ns=common_start,
                     barriers=tmp_path,
                     write_new=_write_new,
+                    runtime_queue_state=lambda: {
+                        "request_count": 0,
+                        "running_requests": 0,
+                        "waiting_requests": 0,
+                        "skipped_waiting_requests": 0,
+                        "queue_depth": 0,
+                    },
                 )
             )
         except BaseException as error:

@@ -2940,6 +2940,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
             def execute_transaction() -> dict[str, Any]:
                 if config.get("serving_methodology") == "v10-global-capacity":
+                    from gpu_capacity_calibration_worker import _runtime_queue_state
                     from gpu_reclamation_v10_serving import LiveV10Config, run_v10_gpu0
 
                     return run_v10_gpu0(
@@ -2953,6 +2954,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         start_ns=common_start_ns,
                         barriers=args.barrier_root,
                         write_new=_write_new,
+                        runtime_queue_state=lambda: _runtime_queue_state(adapter),
                     )
                 return _run_raw_serving(
                     adapter._view.llm_engine,

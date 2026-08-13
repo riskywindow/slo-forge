@@ -102,6 +102,7 @@ def _config(*, seed: int) -> Any:
         output_tokens=64,
         maximum_wall_seconds=5.0,
         restore_grace_seconds=0.12,
+        producer_queue_capacity=256,
         maximum_pending_requests=100,
         restore_handoff_lead_requests=4,
         overload_queue_trigger=10,
@@ -229,6 +230,13 @@ def _run_actual_driver(*, config: Any, barriers: Path) -> tuple[dict[str, Any], 
                     start_ns=common_start,
                     barriers=barriers,
                     write_new=_write_new,
+                    runtime_queue_state=lambda: {
+                        "request_count": 0,
+                        "running_requests": 0,
+                        "waiting_requests": 0,
+                        "skipped_waiting_requests": 0,
+                        "queue_depth": 0,
+                    },
                 )
             )
         except BaseException as error:
