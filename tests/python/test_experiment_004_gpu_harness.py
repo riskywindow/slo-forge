@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -33,6 +34,22 @@ MODAL_APP = ROOT / "experiments/branchfabric/modal_gpu_reclamation.py"
 LAUNCHER = ROOT / "tools/branchfabric-experiment-004-launch.py"
 PILOT_CONFIG = (
     ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/pilot-naive-config.json"
+)
+INTEGRATED_CONFIG = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-integrated-s41-v1-config.json"
+)
+INTEGRATED_CONFIG_V2 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-integrated-s41-v2-config.json"
+)
+INTEGRATED_CONFIG_V3 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-integrated-s41-v3-config.json"
+)
+INTEGRATED_CONFIG_V4 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-naive-s41-v4-config.json"
 )
 
 
@@ -67,7 +84,7 @@ def _v10_payload() -> dict[str, object]:
         "serving_slo_stability_window_seconds": 5.0,
         "calibration_attempt_id": "exp004-capacity-fixture",
         "lambda_1_rps": 12.0,
-        "lambda_2_rps": 18.0,
+        "lambda_2_rps": 20.0,
         "lambda_spike_rps": 15.0,
         "calibration_selected_load_artifact": (
             "artifacts/branchfabric/gpu-validation/experiment-004/calibration/selected-load.json"
@@ -78,6 +95,19 @@ def _v10_payload() -> dict[str, object]:
             "agent9-selected-load-approval.json"
         ),
         "agent9_approval_sha256": "2" * 64,
+        "two_gpu_headroom_adr_artifact": None,
+        "two_gpu_headroom_adr_sha256": None,
+    }
+
+
+def _deadline_evidence(*, controller_seconds: float, elapsed_seconds: float) -> dict[str, object]:
+    entry_ns = 1_000_000_000
+    return {
+        "function_entry_monotonic_ns": entry_ns,
+        "function_deadline_monotonic_ns": entry_ns + 469_000_000_000,
+        "controller_deadline_monotonic_ns": entry_ns + round(controller_seconds * 1e9),
+        "post_controller_reserve_seconds": 0,
+        "remaining_function_seconds_at_completion": 469.0 - elapsed_seconds,
     }
 
 
@@ -125,6 +155,65 @@ def _capacity_raw(
         probe_end_ns=plan.measurement_end_ns + 5 * NS_PER_SECOND,
         tail_drain_seconds=5.0,
     )
+
+
+def test_integrated_controller_strictly_decodes_observation_enum_from_json() -> None:
+    controller = _load(CONTROLLER, "exp004_controller_observation_json")
+    raw = _capacity_raw(
+        topology=ProbeTopology.GPU0_ONLY,
+        rate=10.0,
+        capacity=20.0,
+        probe_id="strict-json-enum",
+    )
+    row = raw.observations[0].model_dump(mode="json")
+    round_tripped = json.loads(json.dumps({"observations": [row]}))["observations"][0]
+    assert round_tripped["terminal_state"] == "completed"
+    with pytest.raises(ValueError, match="RequestTerminalState"):
+        CapacityRequestObservation.model_validate(round_tripped, strict=True)
+
+    observation = controller._validate_capacity_observation_json(round_tripped)
+    assert observation == raw.observations[0]
+    assert observation.terminal_state is RequestTerminalState.COMPLETED
+    with pytest.raises(ValueError):
+        controller._validate_capacity_observation_json(
+            {**round_tripped, "global_sequence": str(round_tripped["global_sequence"])}
+        )
+
+
+def test_integrated_controller_requires_both_transaction_compilation_observations() -> None:
+    controller = _load(CONTROLLER, "exp004_controller_transaction_compilation")
+
+    def payload(role: str) -> dict[str, object]:
+        return {
+            "status": "succeeded",
+            "role": role,
+            "measured_transaction_compilation_observation": {
+                "schema_version": (
+                    "sloforge.branchfabric.measured-transaction-compilation-observation/v1"
+                ),
+                "source": "bounded-python-logging-handler",
+                "role": role,
+                "interval_start_ns": 10,
+                "interval_end_ns": 20,
+                "capture_buffer_valid": True,
+                "events": [],
+                "no_deferred_compilation_event": True,
+                "passed": True,
+            },
+        }
+
+    serving = payload("serving")
+    rollout = payload("rollout")
+    assert set(
+        controller._validate_measured_transaction_compilation_payloads((serving, rollout))
+    ) == {"serving", "rollout"}
+    bad_rollout = json.loads(json.dumps(rollout))
+    bad_rollout["measured_transaction_compilation_observation"]["events"] = [
+        "capturing CUDA graphs"
+    ]
+    bad_rollout["measured_transaction_compilation_observation"]["passed"] = False
+    with pytest.raises(RuntimeError, match="rollout measured transaction compilation gate"):
+        controller._validate_measured_transaction_compilation_payloads((serving, bad_rollout))
 
 
 def _write_json(path: Path, value: object) -> None:
@@ -294,6 +383,34 @@ def test_modal_graph_requests_exact_two_a100s_and_strict_bounded_config(
     v10 = module.Experiment004PilotConfig.model_validate(_v10_payload(), strict=True)
     assert v10.serving_methodology == "v10-global-capacity"
     assert v10.serving_spike_request_rate_per_second == 15.0
+    adr_payload = {
+        **_v10_payload(),
+        "lambda_2_rps": 18.0,
+        "two_gpu_headroom_adr_artifact": (
+            "artifacts/branchfabric/gpu-validation/experiment-004/calibration/reviews/"
+            "agent13-two-gpu-headroom-adr.json"
+        ),
+        "two_gpu_headroom_adr_sha256": "3" * 64,
+    }
+    assert (
+        module.Experiment004PilotConfig.model_validate(
+            adr_payload, strict=True
+        ).two_gpu_headroom_adr_sha256
+        == "3" * 64
+    )
+    with pytest.raises(ValueError, match="requires its hash-bound headroom ADR"):
+        module.Experiment004PilotConfig.model_validate(
+            {**_v10_payload(), "lambda_2_rps": 18.0}, strict=True
+        )
+    with pytest.raises(ValueError, match="must not carry an exception ADR"):
+        module.Experiment004PilotConfig.model_validate(
+            {
+                **_v10_payload(),
+                "two_gpu_headroom_adr_artifact": adr_payload["two_gpu_headroom_adr_artifact"],
+                "two_gpu_headroom_adr_sha256": "3" * 64,
+            },
+            strict=True,
+        )
     with pytest.raises(ValueError, match="five seconds"):
         module.Experiment004PilotConfig.model_validate(
             {**_v10_payload(), "serving_slo_stability_window_seconds": 4.0}, strict=True
@@ -306,7 +423,7 @@ def test_modal_graph_requests_exact_two_a100s_and_strict_bounded_config(
                 "schema_version": "sloforge.branchfabric.experiment-004-gpu-hours/v1",
                 "historical_through_experiment_003_gpu_hours": 1.669146,
                 "target_additional_gpu_seconds": 3600.0,
-                "hard_additional_gpu_seconds": 7200.0,
+                "hard_additional_gpu_seconds": 10800.0,
                 "consumed_additional_gpu_seconds": 0.0,
                 "intervals": [],
                 "reservations": [
@@ -326,6 +443,96 @@ def test_modal_graph_requests_exact_two_a100s_and_strict_bounded_config(
     module._validate_local_reservation(config, "exp004-fixture-reservation")
     with pytest.raises(RuntimeError, match="absent or duplicated"):
         module._validate_local_reservation(config, "nonexistent-reservation")
+
+
+def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    launcher = _load(LAUNCHER, "exp004_integrated_launcher_config")
+    monkeypatch.setattr(launcher, "_verify_authorized_code_commit", lambda *_args: None)
+    payload = launcher._validate_config(INTEGRATED_CONFIG_V4)
+    assert payload["attempt_id"] == "exp004-v10-naive-s41-v4"
+    assert payload["execution_mode"] == "integrated-calibration-v10"
+    assert payload["serving_spike_request_rate_per_second"] == 15.0
+    assert launcher._reservation_wall_seconds(payload) == 469.0
+    assert launcher._reservation_wall_seconds(payload) * launcher._GPU_COUNT == 938.0
+    changed_warmup = tmp_path / "changed-warmup.json"
+    _write_json(changed_warmup, {**payload, "warmup_seconds": 1.5})
+    with pytest.raises(ValueError, match="preauthorized v10 contract"):
+        launcher._validate_config(changed_warmup)
+    for stale in (INTEGRATED_CONFIG, INTEGRATED_CONFIG_V2, INTEGRATED_CONFIG_V3):
+        with pytest.raises(ValueError, match="exact contract"):
+            launcher._validate_config(stale)
+
+    function_calls: list[dict[str, object]] = []
+    fake_modal = ModuleType("modal")
+    fake_modal.__version__ = "1.5.3"  # type: ignore[attr-defined]
+    fake_modal.Volume = _FakeVolumeType  # type: ignore[attr-defined]
+    fake_modal.App = lambda *_args, **_kwargs: _FakeApp(function_calls)  # type: ignore[attr-defined]
+    fake_modal.current_function_call_id = lambda: "fixture-call"  # type: ignore[attr-defined]
+    fake_image = ModuleType("modal_real_gpu_cow")
+    fake_image.gpu_image = object()  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "modal", fake_modal)
+    monkeypatch.setitem(sys.modules, "modal_real_gpu_cow", fake_image)
+    monkeypatch.setenv("SLOFORGE_MODAL_PREFLIGHT_TOKEN", "a" * 64)
+    module = _load(MODAL_APP, "exp004_modal_integrated_json")
+    config = module.Experiment004PilotConfig.model_validate(payload, strict=True)
+    assert config.sanity_guard_measurement_seconds == 3.0
+    assert config.lambda_1_rps == 12.0
+    assert config.lambda_spike_rps == 15.0
+    assert config.lambda_2_rps == 20.0
+    assert config.serving_overload_queue_trigger == 20
+    assert config.serving_overload_queue_abort == 25
+    assert config.warmup_seconds == 1.0
+    assert not hasattr(config, "rate_grid_rps")
+    assert config.initialization_timeout_seconds == 160
+    assert config.disable_log_stats is False
+    assert config.maximum_wall_seconds == 459.0
+    assert config.controller_timeout_seconds == 459.0
+    assert module.INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS == 10.0
+    assert module.INTEGRATED_CONTROLLER_DEADLINE_SECONDS == 459.0
+    function_deadline_ns, controller_deadline_ns = module._absolute_function_deadlines(
+        function_entry_ns=1_000_000_000,
+        config=config,
+    )
+    assert function_deadline_ns == 470_000_000_000
+    assert controller_deadline_ns == 460_000_000_000
+    assert function_deadline_ns - controller_deadline_ns == 10_000_000_000
+    with pytest.raises(ValueError):
+        module.Experiment004PilotConfig.model_validate(
+            {**payload, "maximum_wall_seconds": 459.0001}, strict=True
+        )
+    with pytest.raises(ValueError):
+        module.Experiment004PilotConfig.model_validate(
+            {**payload, "controller_timeout_seconds": 459.0001}, strict=True
+        )
+    with pytest.raises(ValueError, match="25-request scientific abort"):
+        module.Experiment004PilotConfig.model_validate(
+            {**payload, "serving_overload_queue_abort": 64}, strict=True
+        )
+    with pytest.raises(ValueError, match="predeclared 1s control warmup"):
+        module.Experiment004PilotConfig.model_validate(
+            {**payload, "warmup_seconds": 1.5}, strict=True
+        )
+    module._require_integrated_controller_success({"status": "succeeded"})
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            r"integrated controller failed: ValidationError: .*terminal_state.*RequestTerminalState"
+        ),
+    ):
+        module._require_integrated_controller_success(
+            {
+                "status": "failed",
+                "controller_error": {
+                    "type": "ValidationError",
+                    "message": (
+                        "terminal_state: Input should be an instance of RequestTerminalState"
+                    ),
+                },
+            }
+        )
 
 
 def test_launcher_validates_complete_config_and_declared_slo_contract(
@@ -385,9 +592,9 @@ def test_v10_launch_binding_requires_hashed_selection_agent9_and_raw_probes(
         ),
         _capacity_raw(
             topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
-            rate=30.0,
+            rate=35.0,
             capacity=40.0,
-            probe_id="capacity-two-30",
+            probe_id="capacity-two-35",
         ),
     )
     results = tuple(evaluate_probe(raw) for raw in raws)
@@ -489,6 +696,83 @@ def test_v10_config_cannot_validate_before_selection_and_approval_exist(
         launcher._validate_config(config_path)
 
 
+def test_headroom_exception_requires_hash_bound_strong_stability_adr(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    launcher = _load(LAUNCHER, "exp004_launcher_headroom_adr")
+    experiment_root = tmp_path / "artifacts/branchfabric/gpu-validation/experiment-004"
+    attempt_id = "exp004-capacity-fixture"
+    result = evaluate_probe(
+        _capacity_raw(
+            topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
+            rate=30.0,
+            capacity=40.0,
+            probe_id="capacity-two-30",
+        )
+    )
+    result_path = (
+        experiment_root
+        / f"calibration/raw/modal/{attempt_id}/calibration/two-gpu/capacity-two-30/result.json"
+    )
+    _write_json(result_path, result)
+    selection_path = experiment_root / "calibration/selected-load.json"
+    _write_json(selection_path, {"fixture": "selected-load"})
+    selection = SimpleNamespace(
+        lambda_spike_rps=25.0,
+        lambda_2_rps=30.0,
+        two_gpu_sustainable_probe_id="capacity-two-30",
+    )
+    strong = {
+        "measurement_seconds": 10.0,
+        "p95_ttft_seconds": result.p95_ttft_seconds,
+        "completed_rate_rps": result.completed_rate_rps,
+        "observed_offered_rate_rps": result.observed_offered_rate_rps,
+        "queue_slope_requests_per_second": result.queue_slope_requests_per_second,
+        "maximum_queue_depth": result.maximum_queue_depth,
+        "all_measurement_requests_completed": result.all_measurement_requests_completed,
+    }
+    adr_path = experiment_root / "calibration/reviews/agent13-two-gpu-headroom-adr.json"
+    adr = {
+        "schema_version": "sloforge.branchfabric.capacity-headroom-adr/v1",
+        "reviewer": "agent13",
+        "verdict": "approved",
+        "calibration_attempt_id": attempt_id,
+        "selected_load_artifact": launcher._SELECTED_LOAD_REFERENCE,
+        "selected_load_sha256": hashlib.sha256(selection_path.read_bytes()).hexdigest(),
+        "spike_over_lambda_2": 25.0 / 30.0,
+        "two_gpu_sustainable_probe_id": "capacity-two-30",
+        "two_gpu_result_provenance": _artifact_ref(result_path),
+        "strong_stability": strong,
+        "justification": (
+            "The measured two-GPU point completed every request with sub-second p95 TTFT, "
+            "no persistent queue drift, and completion throughput at least equal to arrivals."
+        ),
+    }
+    _write_json(adr_path, adr)
+    payload = {
+        "calibration_attempt_id": attempt_id,
+        "two_gpu_headroom_adr_artifact": launcher._HEADROOM_ADR_REFERENCE,
+        "two_gpu_headroom_adr_sha256": hashlib.sha256(adr_path.read_bytes()).hexdigest(),
+    }
+    monkeypatch.setattr(launcher, "_ROOT", tmp_path)
+    monkeypatch.setattr(launcher, "_EXPERIMENT_ROOT", experiment_root)
+
+    launcher._validate_headroom_adr(
+        payload=payload,
+        selection=selection,
+        selection_path=selection_path,
+    )
+    adr["strong_stability"]["p95_ttft_seconds"] = 1.5
+    _write_json(adr_path, adr)
+    payload["two_gpu_headroom_adr_sha256"] = hashlib.sha256(adr_path.read_bytes()).hexdigest()
+    with pytest.raises(ValueError, match="does not prove strong"):
+        launcher._validate_headroom_adr(
+            payload=payload,
+            selection=selection,
+            selection_path=selection_path,
+        )
+
+
 def test_unset_budget_fails_before_lock_or_ledger_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -575,6 +859,10 @@ def test_pilot_settlement_validates_exact_remote_download_and_inventory(
         "pilot_invalid_reasons": ["budget and provider cleanup are pending"],
         "run_error": None,
         "controller": {"status": "succeeded", "inventory_before": inventory},
+        "absolute_deadlines": _deadline_evidence(
+            controller_seconds=float(config["maximum_wall_seconds"]),
+            elapsed_seconds=100.0,
+        ),
         "completed_at_utc": "2026-08-12T00:00:00+00:00",
     }
     remote_path = f"experiment-004/modal/{config['attempt_id']}"
@@ -641,31 +929,237 @@ def test_pilot_settlement_validates_exact_remote_download_and_inventory(
             {**envelope, "result": substituted},
             config,
         )
+    extended_deadline = {
+        **remote,
+        "absolute_deadlines": {
+            **remote["absolute_deadlines"],
+            "controller_deadline_monotonic_ns": (
+                remote["absolute_deadlines"]["controller_deadline_monotonic_ns"] + 1_000_000_000
+            ),
+        },
+    }
+    with pytest.raises(ValueError, match="absolute deadline evidence is invalid"):
+        launcher._validate_remote_identity(
+            reservation_id,
+            {**envelope, "result": extended_deadline},
+            config,
+        )
 
 
-def test_pilot_terminal_failure_preserves_full_reservation(
+def test_pilot_terminal_failure_clears_and_conservatively_charges_full_reservation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     launcher = _load(LAUNCHER, "exp004_launcher_terminal_failure")
     experiment_root = tmp_path / "experiment-004"
-    ledger = experiment_root / "gpu-hours.json"
-    ledger.parent.mkdir(parents=True)
-    ledger.write_text('{"sentinel":"reservation-open"}\n')
+    ledger_path = experiment_root / "gpu-hours.json"
+    reservation_id = "exp004-reservation-fixture"
+    attempt_id = "exp004-v10-fixture"
+    _write_json(
+        ledger_path,
+        Experiment004GpuHourLedger(
+            consumed_additional_gpu_seconds=0.0,
+            reservations=(
+                GpuInvocationReservation(
+                    reservation_id=reservation_id,
+                    invocation_id=attempt_id,
+                    maximum_wall_seconds=340.0,
+                    config_sha256="c" * 64,
+                ),
+            ),
+        ),
+    )
     monkeypatch.setattr(launcher, "_EXPERIMENT_ROOT", experiment_root)
+    monkeypatch.setattr(launcher, "_LEDGER", ledger_path)
 
-    launcher._record_terminal_failure(
-        reservation_id="exp004-reservation-fixture",
-        attempt_id="exp004-v10-fixture",
+    failure = launcher._record_terminal_failure(
+        reservation_id=reservation_id,
+        attempt_id=attempt_id,
         stage="result-validation-settlement",
         error=ValueError("manifest tamper"),
         elapsed_seconds=12.0,
     )
-    failure = json.loads(
-        (experiment_root / "logs/exp004-v10-fixture-terminal-failure.json").read_text()
+    assert failure == json.loads(
+        (experiment_root / f"logs/{attempt_id}-terminal-failure.json").read_text()
     )
-    assert failure["conservatively_committed_gpu_seconds"] == 680.0
-    assert not failure["reservation_cleared"]
-    assert ledger.read_text() == '{"sentinel":"reservation-open"}\n'
+    assert failure["actual_gpu_seconds"] is None
+    assert failure["conservatively_accounted_gpu_seconds"] == 680.0
+    assert failure["reservation_cleared"] is True
+    assert failure["remaining_hard_budget_gpu_seconds"] == 10_120.0
+    settled = Experiment004GpuHourLedger.model_validate_json(ledger_path.read_text(), strict=True)
+    assert not settled.reservations
+    assert not settled.intervals
+    assert settled.consumed_additional_gpu_seconds == 680.0
+    assert settled.conservative_failure_charges[0].reservation_id == reservation_id
+    evidence = Path(str(failure["charge_evidence_reference"]))
+    assert hashlib.sha256(evidence.read_bytes()).hexdigest() == failure["charge_evidence_sha256"]
+
+
+def test_model_validation_failure_bundle_is_hash_validated_settled_and_preserved_invalid(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
+        fail_closed_v10_scientific_validity,
+    )
+
+    launcher = _load(LAUNCHER, "exp004_launcher_failed_bundle_settlement")
+    experiment_root = tmp_path / "experiment-004"
+    ledger_path = experiment_root / "gpu-hours.json"
+    config = _v10_payload()
+    config_digest = hashlib.sha256(launcher._canonical_bytes(config)).hexdigest()
+    reservation_id = "exp004-failed0123456789012"
+    ledger = Experiment004GpuHourLedger(
+        consumed_additional_gpu_seconds=0.0,
+        reservations=(
+            GpuInvocationReservation(
+                reservation_id=reservation_id,
+                invocation_id=str(config["attempt_id"]),
+                maximum_wall_seconds=340.0,
+                config_sha256=config_digest,
+            ),
+        ),
+    )
+    _write_json(ledger_path, ledger)
+    monkeypatch.setattr(launcher, "_LEDGER", ledger_path)
+    monkeypatch.setattr(launcher, "_EXPERIMENT_ROOT", experiment_root)
+    reason = (
+        "GPU pilot/controller failed before scientific validation: "
+        "FileNotFoundError: cached model fixture is absent"
+    )
+    validity = fail_closed_v10_scientific_validity(reason)
+    run_error = {
+        "type": "FileNotFoundError",
+        "message": "cached model fixture is absent",
+        "traceback": "fixture trace",
+    }
+    completion = {
+        "schema_version": "sloforge.branchfabric.experiment-004-function-completion/v1",
+        "status": "failed",
+        "attempt_id": config["attempt_id"],
+        "reservation_id": reservation_id,
+        "config_sha256": config_digest,
+        "function_call_id": "fc-v10-failed-fixture",
+        "requested_gpu": "A100-80GB:2",
+        "gpu_count": 2,
+        "gpu_allocation_seconds": 30.0,
+        "gpu_seconds": 60.0,
+        "gpu_hours": 60.0 / 3600.0,
+        "pilot_valid": False,
+        "scientific_status": "invalid",
+        "measurable_gates_pass": False,
+        "pilot_invalid_reasons": [reason],
+        "run_error": run_error,
+        "controller": {
+            "schema_version": "sloforge.branchfabric.experiment-004-controller-failure/v1",
+            "status": "failed",
+            "transaction_error": run_error,
+        },
+        "absolute_deadlines": _deadline_evidence(
+            controller_seconds=float(config["maximum_wall_seconds"]),
+            elapsed_seconds=30.0,
+        ),
+        "completed_at_utc": "2026-08-12T00:00:00+00:00",
+    }
+    source = tmp_path / "remote-bundle"
+    _write_json(source / "function-completion.json", completion)
+    _write_json(
+        source / "analysis/scientific-validity.remote-provisional.json",
+        validity,
+    )
+    _write_json(
+        source / "topology/topology-commands.json",
+        [
+            {
+                "command": {"name": "gpu_inventory"},
+                "status": "success",
+                "returncode": 0,
+                "stdout": (
+                    "0, GPU-fixture-a100-0, NVIDIA A100-SXM4-80GB, 0000:01:00.0, "
+                    "81920, 575.57.08\n"
+                    "1, GPU-fixture-a100-1, NVIDIA A100-SXM4-80GB, 0000:02:00.0, "
+                    "81920, 575.57.08\n"
+                ),
+            }
+        ],
+    )
+    remote_path = f"experiment-004/modal/{config['attempt_id']}"
+    artifacts = [
+        {
+            "relative_path": path.relative_to(source).as_posix(),
+            "bytes": path.stat().st_size,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
+        for path in sorted(source.rglob("*"))
+        if path.is_file()
+    ]
+    _write_json(
+        source / "REMOTE_MANIFEST.json",
+        {
+            "schema_version": "sloforge.branchfabric.experiment-004-remote-manifest/v1",
+            "attempt_id": config["attempt_id"],
+            "remote_prefix": remote_path,
+            "artifacts": artifacts,
+        },
+    )
+    remote = {
+        **completion,
+        "remote_prefix": remote_path,
+        "remote_manifest_sha256": hashlib.sha256(
+            (source / "REMOTE_MANIFEST.json").read_bytes()
+        ).hexdigest(),
+    }
+    envelope = {
+        "result": remote,
+        "materialized": {
+            "remote_path": remote_path,
+            "volume_name": "sloforge-branchfabric-results",
+        },
+    }
+
+    def materialize(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        target = experiment_root / f"raw/modal/{config['attempt_id']}"
+        shutil.copytree(source, target)
+        return subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(launcher.subprocess, "run", materialize)
+    local_root = launcher._settle(reservation_id, envelope, 20.0, config)
+
+    settled = Experiment004GpuHourLedger.model_validate_json(ledger_path.read_text(), strict=True)
+    assert not settled.reservations
+    assert settled.consumed_additional_gpu_seconds == 60.0
+    assert settled.intervals[-1].actual_gpu_models == (
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB",
+    )
+    canonical = json.loads((local_root / "analysis/scientific-validity.json").read_text())
+    assert canonical["scientifically_valid"] is False
+    settlement = json.loads((local_root / "analysis/failed-run-settlement.json").read_text())
+    assert settlement["status"] == "settled-invalid"
+    assert settlement["classification"] == "runtime-failure"
+    assert settlement["reservation_cleared"] is True
+    assert settlement["remote_observed_allocation_seconds"] == 30.0
+
+
+def test_failed_bundle_scientific_status_mismatch_is_rejected_before_settlement(
+    tmp_path: Path,
+) -> None:
+    from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
+        fail_closed_v10_scientific_validity,
+    )
+
+    launcher = _load(LAUNCHER, "exp004_launcher_failed_bundle_invalidity")
+    local_root = tmp_path / "bundle"
+    _write_json(
+        local_root / "analysis/scientific-validity.remote-provisional.json",
+        fail_closed_v10_scientific_validity("raw reason"),
+    )
+    with pytest.raises(ValueError, match="does not preserve its scientific invalidity"):
+        launcher._validate_downloaded_invalid_outcome(
+            local_root=local_root,
+            remote={
+                "status": "failed",
+                "pilot_invalid_reasons": ["substituted reason"],
+            },
+        )
 
 
 def test_sole_coordinator_reservation_is_explicit_and_second_reservation_fails(
@@ -814,6 +1308,27 @@ def test_timeout_cleanup_kills_descendants_after_worker_leaders_exit(
     while any(_pid_exists(pid) for pid in pids) and time.monotonic() < deadline:
         time.sleep(0.02)
     assert all(not _pid_exists(pid) for pid in pids)
+
+
+def test_integrated_controller_rejects_an_expired_absolute_deadline(tmp_path: Path) -> None:
+    controller = _load(CONTROLLER, "exp004_controller_absolute_deadline")
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"execution_mode": "integrated-calibration-v10"}))
+    worker = tmp_path / "gpu_reclamation_worker.py"
+    worker.write_text("raise SystemExit(0)\n")
+    model = tmp_path / "model"
+    model.mkdir()
+
+    with pytest.raises(ValueError, match="future absolute deadline"):
+        controller.run_integrated_two_gpu_controller(
+            config_path=config,
+            work_root=tmp_path / "work",
+            worker_path=worker,
+            model_snapshot=model,
+            repository_root=tmp_path,
+            readiness_timeout_seconds=1.0,
+            absolute_deadline_ns=time.monotonic_ns() - 1,
+        )
 
 
 def test_peer_probe_fixture_is_bounded_exact_pair_and_parent_cuda_clean(

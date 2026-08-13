@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -9,6 +10,7 @@ from sloforge.helix.characterization.gpu_capacity_calibration import (
     NS_PER_SECOND,
     CapacityCalibrationBounds,
     CapacityProbeRaw,
+    CapacityProbeResult,
     CapacityRequestObservation,
     ProbeTopology,
     ProbeVerdict,
@@ -18,6 +20,12 @@ from sloforge.helix.characterization.gpu_capacity_calibration import (
     early_stop_reason,
     evaluate_probe,
     recommend_next_probe,
+)
+
+ROOT = Path(__file__).resolve().parents[2]
+V2_ONE_GPU_RAW_ROOT = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/"
+    "exp004-v10-integrated-s41-v2/calibration/one-gpu"
 )
 
 
@@ -150,13 +158,122 @@ def test_probe_evaluation_distinguishes_stable_capacity_from_overload() -> None:
     )
 
     assert stable.verdict == ProbeVerdict.SUSTAINABLE
-    assert stable.completed_rate_rps >= stable.observed_offered_rate_rps
+    assert stable.completed_rate_rps >= stable.observed_offered_rate_rps * 0.95
     assert not stable.queue_persistent_positive_drift
     assert stable.p95_ttft_seconds is not None and stable.p95_ttft_seconds <= 2.0
     assert overloaded.verdict == ProbeVerdict.UNSUSTAINABLE
     assert overloaded.queue_persistent_positive_drift
     assert not overloaded.throughput_pass
     assert two_gpu.verdict == ProbeVerdict.SUSTAINABLE
+
+
+def test_completion_rate_counts_interval_events_but_ttft_uses_measurement_cohort() -> None:
+    raw = _observations(
+        topology=ProbeTopology.GPU0_ONLY,
+        rate_rps=20.0,
+        service_capacity_rps=20.0,
+        probe_id="capacity-warmup-exclusion",
+    )
+    result = evaluate_probe(raw)
+    all_completions = sum(
+        item.completed_ns is not None
+        and raw.plan.measurement_start_ns <= item.completed_ns < raw.plan.measurement_end_ns
+        for item in raw.observations
+    )
+    cohort_ids = {
+        item.request_id
+        for item in raw.plan.arrivals
+        if raw.plan.measurement_start_ns <= item.scheduled_arrival_ns < raw.plan.measurement_end_ns
+    }
+    assert all_completions > 0
+    assert result.completed_rate_estimator == "measurement-interval-completion-events"
+    assert result.completed_rate_sample_count == all_completions
+    assert result.interval_completed_requests == all_completions
+    assert result.completed_rate_rps == all_completions / 10.0
+    cohort_ttfts = tuple(
+        (item.first_token_ns - item.scheduled_arrival_ns) / NS_PER_SECOND
+        for item in raw.observations
+        if item.request_id in cohort_ids and item.first_token_ns is not None
+    )
+    assert result.p95_ttft_seconds == pytest.approx(max(cohort_ttfts))
+    assert result.queue_flow_conservation_pass
+    assert result.queue_flow_conservation_error_requests == 0
+
+
+def test_event_window_and_queue_flow_avoid_cohort_completion_boundary_bias() -> None:
+    raw = _observations(
+        topology=ProbeTopology.GPU0_ONLY,
+        rate_rps=10.0,
+        service_capacity_rps=10.0,
+        probe_id="capacity-boundary-displacement",
+    )
+    measurement_ids = {
+        item.request_id
+        for item in raw.plan.arrivals
+        if raw.plan.measurement_start_ns <= item.scheduled_arrival_ns < raw.plan.measurement_end_ns
+    }
+    completion_displacement_ns = 900_000_000
+    delayed = raw.model_copy(
+        update={
+            "observations": tuple(
+                item.model_copy(
+                    update={
+                        "completed_ns": item.completed_ns + completion_displacement_ns,
+                        "terminated_ns": item.terminated_ns + completion_displacement_ns,
+                    }
+                )
+                for item in raw.observations
+            )
+        }
+    )
+    fixed_window_completions = sum(
+        item.request_id in measurement_ids
+        and item.completed_ns is not None
+        and raw.plan.measurement_start_ns <= item.completed_ns < raw.plan.measurement_end_ns
+        for item in delayed.observations
+    )
+
+    result = evaluate_probe(delayed)
+    assert fixed_window_completions == 90
+    assert result.completed_rate_sample_count == 100
+    assert result.completed_rate_rps == pytest.approx(10.0)
+    assert result.interval_offered_requests == 100
+    assert result.queue_flow_expected_end_depth == result.queue_flow_observed_end_depth
+    assert result.queue_flow_conservation_error_requests == 0
+    assert result.queue_flow_conservation_pass
+    assert abs(result.queue_depth_start - result.queue_depth_end) <= 1
+    assert not result.queue_persistent_positive_drift
+    assert result.throughput_pass
+    assert result.verdict is ProbeVerdict.SUSTAINABLE
+
+
+def test_v2_raw_probes_recompute_with_conserved_event_window_capacity() -> None:
+    expected = {
+        10.0: (10.0, 9, 9, ProbeVerdict.SUSTAINABLE),
+        15.0: (14.2, 15, 23, ProbeVerdict.UNSUSTAINABLE),
+        17.25: (14.0, 18, 50, ProbeVerdict.UNSUSTAINABLE),
+        20.0: (14.4, 20, 76, ProbeVerdict.UNSUSTAINABLE),
+    }
+    paths = tuple(sorted(V2_ONE_GPU_RAW_ROOT.glob("*/raw.json")))
+    assert len(paths) == len(expected)
+    for path in paths:
+        raw = CapacityProbeRaw.model_validate_json(path.read_text(), strict=True)
+        result = evaluate_probe(raw)
+        completed, queue_start, queue_end, verdict = expected[result.configured_rate_rps]
+        assert result.completed_rate_rps == pytest.approx(completed)
+        assert result.queue_flow_start_depth == queue_start
+        assert result.queue_flow_expected_end_depth == queue_end
+        assert result.queue_flow_observed_end_depth == queue_end
+        assert result.queue_flow_conservation_pass
+        assert result.queue_flow_conservation_error_requests == 0
+        assert result.verdict is verdict
+    stable = evaluate_probe(
+        CapacityProbeRaw.model_validate_json(
+            next(V2_ONE_GPU_RAW_ROOT.glob("capacity-03-*/raw.json")).read_text(), strict=True
+        )
+    )
+    assert stable.interval_offered_requests == stable.interval_completed_requests == 100
+    assert stable.p95_ttft_seconds == pytest.approx(0.0424315944)
 
 
 def test_probe_fails_closed_on_missing_request_or_misrouting() -> None:
@@ -173,6 +290,7 @@ def test_probe_fails_closed_on_missing_request_or_misrouting() -> None:
     )
 
     assert evaluate_probe(missing).verdict == ProbeVerdict.INCONCLUSIVE
+    assert not evaluate_probe(missing).queue_flow_conservation_pass
     routing = evaluate_probe(misrouted)
     assert routing.verdict == ProbeVerdict.INCONCLUSIVE
     assert not routing.routing_verified
@@ -198,9 +316,9 @@ def test_adaptive_search_uses_three_probes_and_selects_measured_overload() -> No
     stable_two = evaluate_probe(
         _observations(
             topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
-            rate_rps=30.0,
+            rate_rps=35.0,
             service_capacity_rps=40.0,
-            probe_id="capacity-two-30",
+            probe_id="capacity-two-35",
         )
     )
 
@@ -213,17 +331,17 @@ def test_adaptive_search_uses_three_probes_and_selects_measured_overload() -> No
     assert (second.topology, second.rate_rps) == (ProbeTopology.GPU0_ONLY, 25.0)
     assert (third.topology, third.rate_rps) == (
         ProbeTopology.TWO_GPU_ROUND_ROBIN,
-        30.0,
+        35.0,
     )
     assert ready.status == "ready"
     assert ready.selection == choose_spike((stable_one, unstable_one, stable_two))
     assert ready.selection is not None
     assert ready.selection.lambda_1_rps == 20.0
-    assert ready.selection.lambda_2_rps == 30.0
+    assert ready.selection.lambda_2_rps == 35.0
     assert ready.selection.lambda_spike_rps == 25.0
     assert ready.selection.one_gpu_unsustainable_probe_id == "capacity-one-25"
     assert math.isclose(ready.selection.spike_over_lambda_1, 1.25)
-    assert math.isclose(ready.selection.spike_over_lambda_2, 5 / 6)
+    assert math.isclose(ready.selection.spike_over_lambda_2, 5 / 7)
 
 
 def test_adaptive_search_uses_v9_lower_capacity_prior_without_a_fourth_probe() -> None:
@@ -249,8 +367,117 @@ def test_adaptive_search_uses_v9_lower_capacity_prior_without_a_fourth_probe() -
     two_probe = recommend_next_probe((overloaded_20, stable_1725))
     assert (two_probe.topology, two_probe.rate_rps) == (
         ProbeTopology.TWO_GPU_ROUND_ROBIN,
+        25.0,
+    )
+
+
+def test_selected_load_fails_closed_without_preferred_two_gpu_headroom() -> None:
+    stable_one = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=20.0,
+            service_capacity_rps=20.0,
+            probe_id="capacity-one-20",
+        )
+    )
+    unstable_one = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=25.0,
+            service_capacity_rps=20.0,
+            probe_id="capacity-one-25",
+        )
+    )
+    adr_only_two_gpu_point = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
+            rate_rps=30.0,
+            service_capacity_rps=40.0,
+            probe_id="capacity-two-30",
+        )
+    )
+    results = (stable_one, unstable_one, adr_only_two_gpu_point)
+
+    assert choose_spike(results) is None
+    action = recommend_next_probe(results)
+    assert action.status == "probe"
+    assert (action.topology, action.rate_rps) == (
+        ProbeTopology.TWO_GPU_ROUND_ROBIN,
+        35.0,
+    )
+    assert action.selection is None
+
+
+def test_adaptive_search_descends_past_two_overloads_and_finishes_within_eight() -> None:
+    def point(rate: float, capacity: float, probe_id: str) -> CapacityProbeResult:
+        return evaluate_probe(
+            _observations(
+                topology=ProbeTopology.GPU0_ONLY,
+                rate_rps=rate,
+                service_capacity_rps=capacity,
+                probe_id=probe_id,
+            )
+        )
+
+    overloaded_20 = point(20.0, 15.0, "capacity-one-20")
+    overloaded_1725 = point(17.25, 15.0, "capacity-one-1725")
+    stable_15 = point(15.0, 15.0, "capacity-one-15")
+    stable_two = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
+            rate_rps=23.5,
+            service_capacity_rps=35.0,
+            probe_id="capacity-two-235",
+        )
+    )
+
+    assert recommend_next_probe((overloaded_20,)).rate_rps == 17.25
+    assert recommend_next_probe((overloaded_20, overloaded_1725)).rate_rps == 15.0
+    next_overload = recommend_next_probe((overloaded_20, overloaded_1725, stable_15))
+    assert (next_overload.topology, next_overload.rate_rps) == (
+        ProbeTopology.TWO_GPU_ROUND_ROBIN,
         23.5,
     )
+    ready = recommend_next_probe(
+        (overloaded_20, overloaded_1725, stable_15, stable_two),
+        maximum_probes=8,
+    )
+    assert ready.status == "ready"
+    assert ready.selection is not None
+    assert ready.selection.lambda_1_rps == 15.0
+    assert ready.selection.lambda_spike_rps == 17.25
+
+
+def test_adaptive_search_synthesizes_fractional_spike_for_low_lambda1() -> None:
+    overloaded_15 = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=15.0,
+            service_capacity_rps=14.0,
+            probe_id="capacity-one-15",
+        )
+    )
+    stable_10 = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=10.0,
+            service_capacity_rps=10.0,
+            probe_id="capacity-one-10",
+        )
+    )
+    fractional = recommend_next_probe((overloaded_15, stable_10), maximum_probes=8)
+    assert (fractional.topology, fractional.rate_rps) == (ProbeTopology.GPU0_ONLY, 12.0)
+    overloaded_12 = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=12.0,
+            service_capacity_rps=10.0,
+            probe_id="capacity-one-12",
+        )
+    )
+    two_gpu = recommend_next_probe((overloaded_15, stable_10, overloaded_12), maximum_probes=8)
+    assert two_gpu.topology == ProbeTopology.TWO_GPU_ROUND_ROBIN
+    assert two_gpu.rate_rps is not None and 12.0 / two_gpu.rate_rps <= 0.80
 
 
 def test_inconclusive_probe_and_probe_limit_block_v10() -> None:
@@ -270,6 +497,42 @@ def test_inconclusive_probe_and_probe_limit_block_v10() -> None:
     bounded = recommend_next_probe(repeated, maximum_probes=3)
     assert bounded.status == "blocked"
     assert "bounded search" in bounded.reason
+
+
+def test_adaptive_search_continues_above_sustainable_grid_peak_but_stays_bounded() -> None:
+    stable = evaluate_probe(
+        _observations(
+            topology=ProbeTopology.GPU0_ONLY,
+            rate_rps=35.0,
+            service_capacity_rps=35.0,
+            probe_id="capacity-one-35",
+        )
+    )
+    above_grid = recommend_next_probe((stable,), maximum_probes=8)
+    assert (above_grid.topology, above_grid.rate_rps) == (
+        ProbeTopology.GPU0_ONLY,
+        43.75,
+    )
+    assert "96-rps prior cap" in above_grid.reason
+
+    rates = (20.0, 25.0, 30.0, 35.0, 43.75, 54.688, 68.36, 85.45)
+    all_stable = tuple(
+        stable.model_copy(
+            update={
+                "probe_id": f"capacity-one-{index}",
+                "configured_rate_rps": rate,
+            }
+        )
+        for index, rate in enumerate(rates)
+    )
+    before_limit = recommend_next_probe(all_stable[:-1], maximum_probes=8)
+    assert (before_limit.topology, before_limit.rate_rps) == (
+        ProbeTopology.GPU0_ONLY,
+        85.45,
+    )
+    at_limit = recommend_next_probe(all_stable, maximum_probes=8)
+    assert at_limit.status == "blocked"
+    assert "bounded search" in at_limit.reason
 
 
 def test_early_stop_requires_ten_seconds_and_strong_evidence() -> None:

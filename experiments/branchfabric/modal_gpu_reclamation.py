@@ -21,15 +21,26 @@ from pathlib import Path
 from typing import Annotated, Any, Literal, Self
 
 import modal
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    model_validator,
+)
 
 MODAL_SDK_VERSION = "1.5.3"
 APP_NAME = "sloforge-branchfabric-gpu-reclamation-004"
 GPU_REQUEST = "A100-80GB:2"
 GPU_COUNT = 2
-GPU_FUNCTION_TIMEOUT_SECONDS = 340
+GPU_FUNCTION_TIMEOUT_SECONDS = 469
 GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS = 180
-GPU_COORDINATOR_RESERVATION_WALL_SECONDS = 340
+GPU_COORDINATOR_RESERVATION_WALL_SECONDS = 469.0
+INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS = 10.0
+INTEGRATED_CONTROLLER_DEADLINE_SECONDS = (
+    GPU_COORDINATOR_RESERVATION_WALL_SECONDS - INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS
+)
+LEGACY_GPU_COORDINATOR_RESERVATION_WALL_SECONDS = 340
 MODEL_VOLUME_NAME = "sloforge-model-cache"
 RESULTS_VOLUME_NAME = "sloforge-branchfabric-results"
 REMOTE_EXPERIMENT_PREFIX = "experiment-004/modal"
@@ -86,6 +97,9 @@ class Experiment004PilotConfig(_StrictModel):
     fanout: Literal[8] = 8
     suffix_length: Literal[256] = 256
     tracing_level: Literal["disabled", "minimal", "full"] = "minimal"
+    execution_mode: Literal["legacy-transaction", "integrated-calibration-v10"] = (
+        "legacy-transaction"
+    )
     serving_methodology: Literal["v9-independent-shards", "v10-global-capacity"] = (
         "v9-independent-shards"
     )
@@ -108,6 +122,20 @@ class Experiment004PilotConfig(_StrictModel):
     serving_recovery_queue_threshold: int = Field(default=4, ge=0, le=128)
     serving_maximum_pending_requests: int = Field(default=1024, ge=1, le=20_000)
     serving_restore_handoff_lead_requests: int = Field(default=4, ge=2, le=64)
+    serving_overload_queue_trigger: int = Field(default=20, ge=10, le=30)
+    serving_overload_queue_abort: int = Field(default=25, ge=11, le=64)
+    disable_log_stats: bool = True
+    warmup_seconds: float = Field(default=1.0, ge=1.0, le=5.0)
+    sanity_guard_measurement_seconds: Literal[3.0] = 3.0
+    probe_timeout_seconds: float = Field(default=25.0, ge=15.0, le=30.0)
+    tail_drain_seconds: float = Field(default=1.0, ge=1.0, le=2.0)
+    producer_queue_capacity: int = Field(default=256, ge=64, le=512)
+    controller_timeout_seconds: float = Field(
+        default=float(INTEGRATED_CONTROLLER_DEADLINE_SECONDS),
+        ge=120.0,
+        le=float(INTEGRATED_CONTROLLER_DEADLINE_SECONDS),
+    )
+    worker_shutdown_timeout_seconds: float = Field(default=10.0, ge=5.0, le=15.0)
     calibration_attempt_id: _ATTEMPT | None = None
     lambda_1_rps: float | None = Field(default=None, gt=0.0, le=128.0)
     lambda_2_rps: float | None = Field(default=None, gt=0.0, le=256.0)
@@ -116,13 +144,57 @@ class Experiment004PilotConfig(_StrictModel):
     calibration_selected_load_sha256: _SHA256 | None = None
     agent9_approval_artifact: str | None = Field(default=None, min_length=1)
     agent9_approval_sha256: _SHA256 | None = None
-    maximum_wall_seconds: int = Field(default=480, ge=60, le=900)
-    initialization_timeout_seconds: int = Field(default=540, ge=60, le=900)
+    two_gpu_headroom_adr_artifact: str | None = Field(default=None, min_length=1)
+    two_gpu_headroom_adr_sha256: _SHA256 | None = None
+    authorization_artifact: str | None = Field(default=None, min_length=1)
+    authorization_artifact_hash: _SHA256 | None = None
+    phase_budget_artifact: str | None = Field(default=None, min_length=1)
+    phase_budget_sha256: _SHA256 | None = None
+    maximum_wall_seconds: float = Field(
+        default=340.0, ge=60.0, le=INTEGRATED_CONTROLLER_DEADLINE_SECONDS
+    )
+    initialization_timeout_seconds: int = Field(default=160, ge=60, le=400)
     cleanup_timeout_seconds: int = Field(default=60, ge=10, le=120)
 
     @model_validator(mode="after")
     def bounded_function_lifetime(self) -> Self:
-        if self.serving_methodology == "v9-independent-shards":
+        integrated = self.execution_mode == "integrated-calibration-v10"
+        if integrated:
+            if self.serving_methodology != "v10-global-capacity":
+                raise ValueError("integrated v10 must be authorized before allocation")
+            if not math.isclose(self.warmup_seconds, 1.0, rel_tol=0.0, abs_tol=1e-12):
+                raise ValueError("integrated v10 requires the predeclared 1s control warmup")
+            if self.disable_log_stats:
+                raise ValueError("integrated readiness requires vLLM runtime metrics")
+            if self.initialization_timeout_seconds != 160:
+                raise ValueError(
+                    "integrated readiness must use the evidence-derived 160-second bound"
+                )
+            if not self.serving_overload_queue_trigger < self.serving_overload_queue_abort:
+                raise ValueError("overload abort must exceed the bounded trigger")
+            if self.serving_overload_queue_trigger != 20 or self.serving_overload_queue_abort != 25:
+                raise ValueError(
+                    "integrated v10 requires the preselected 20-request trigger and "
+                    "25-request scientific abort"
+                )
+            if self.maximum_wall_seconds > INTEGRATED_CONTROLLER_DEADLINE_SECONDS:
+                raise ValueError(
+                    "integrated controller must leave the exact post-controller reserve"
+                )
+            if (
+                self.lambda_1_rps != 12.0
+                or self.lambda_spike_rps != 15.0
+                or self.lambda_2_rps != 20.0
+                or self.serving_spike_request_rate_per_second != 15.0
+                or self.gpu0_control_request_rate_per_second not in {8.0, 9.0, 10.0}
+                or self.gpu0_restore_request_rate_per_second not in {8.0, 9.0, 10.0}
+                or self.authorization_artifact is None
+                or self.authorization_artifact_hash is None
+                or self.phase_budget_artifact is None
+                or self.phase_budget_sha256 is None
+            ):
+                raise ValueError("integrated v10 preauthorization/budget binding is incomplete")
+        elif self.serving_methodology == "v9-independent-shards":
             if self.serving_slo_stability_window_seconds > self.temporary_serving_seconds:
                 raise ValueError(
                     "serving SLO stability window exceeds the measured serving interval"
@@ -159,8 +231,21 @@ class Experiment004PilotConfig(_StrictModel):
                 raise ValueError("v10 serving spike differs from the approved calibrated spike")
             spike_over_one = self.lambda_spike_rps / self.lambda_1_rps
             spike_over_two = self.lambda_spike_rps / self.lambda_2_rps
-            if not 1.15 <= spike_over_one <= 1.30 or not 0.80 <= spike_over_two <= 0.90:
+            if not 1.15 <= spike_over_one <= 1.30 or not 0.0 < spike_over_two <= 0.90:
                 raise ValueError("v10 calibrated load does not have the required capacity margins")
+            headroom_adr = (
+                self.two_gpu_headroom_adr_artifact,
+                self.two_gpu_headroom_adr_sha256,
+            )
+            if spike_over_two <= 0.80 and any(item is not None for item in headroom_adr):
+                raise ValueError("preferred v10 headroom must not carry an exception ADR")
+            if spike_over_two > 0.80 and (
+                self.two_gpu_headroom_adr_artifact
+                != "artifacts/branchfabric/gpu-validation/experiment-004/calibration/reviews/"
+                "agent13-two-gpu-headroom-adr.json"
+                or self.two_gpu_headroom_adr_sha256 is None
+            ):
+                raise ValueError("v10 >80% two-GPU load requires its hash-bound headroom ADR")
             if self.gpu0_control_request_rate_per_second > self.lambda_1_rps:
                 raise ValueError("v10 control load exceeds measured one-GPU stable capacity")
             if self.gpu0_restore_request_rate_per_second >= self.lambda_1_rps:
@@ -181,7 +266,7 @@ class Experiment004PilotConfig(_StrictModel):
                 <= self.gpu0_control_request_rate_per_second
             ):
                 raise ValueError("v10 spike must exceed the measured GPU0 control rate")
-        if (
+        if not integrated and (
             self.maximum_wall_seconds
             + self.initialization_timeout_seconds
             + self.cleanup_timeout_seconds
@@ -198,7 +283,9 @@ class RemoteAuthorization(_StrictModel):
     )
     reservation_id: _ATTEMPT
     config_sha256: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
-    maximum_gpu_seconds: int = Field(gt=0, le=GPU_COORDINATOR_RESERVATION_WALL_SECONDS * GPU_COUNT)
+    maximum_gpu_seconds: float = Field(
+        gt=0, le=GPU_COORDINATOR_RESERVATION_WALL_SECONDS * GPU_COUNT
+    )
     budget_usd: float = Field(gt=0.0, allow_inf_nan=False)
 
 
@@ -237,7 +324,17 @@ def _validate_authorization(
     digest = hashlib.sha256(_canonical_bytes(config)).hexdigest()
     if authorization.config_sha256 != digest:
         raise RuntimeError("Modal authorization does not match the immutable pilot config")
-    if authorization.maximum_gpu_seconds != GPU_COORDINATOR_RESERVATION_WALL_SECONDS * GPU_COUNT:
+    expected_wall = (
+        GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+        if config.execution_mode == "integrated-calibration-v10"
+        else LEGACY_GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+    )
+    if not math.isclose(
+        authorization.maximum_gpu_seconds,
+        expected_wall * GPU_COUNT,
+        rel_tol=0.0,
+        abs_tol=1e-9,
+    ):
         raise RuntimeError("Modal authorization does not reserve the exact bounded GPU interval")
     return authorization
 
@@ -263,7 +360,14 @@ def _validate_local_reservation(config: Experiment004PilotConfig, reservation_id
         or reservation.config_sha256 != expected_digest
         or reservation.gpu_count != GPU_COUNT
         or reservation.requested_gpu != "A100-80GB"
-        or reservation.maximum_wall_seconds != GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+        or not math.isclose(
+            reservation.maximum_wall_seconds,
+            GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+            if config.execution_mode == "integrated-calibration-v10"
+            else LEGACY_GPU_COORDINATOR_RESERVATION_WALL_SECONDS,
+            rel_tol=0.0,
+            abs_tol=1e-9,
+        )
     ):
         raise RuntimeError("sole-coordinator GPU reservation differs from the Modal pilot")
 
@@ -299,6 +403,48 @@ def _validate_model_snapshot(snapshot: Path) -> dict[str, Any]:
     return manifest
 
 
+def _absolute_function_deadlines(
+    *, function_entry_ns: int, config: Experiment004PilotConfig
+) -> tuple[int, int]:
+    """Return function/controller cutoffs anchored to one entry timestamp."""
+
+    if isinstance(function_entry_ns, bool) or function_entry_ns < 0:
+        raise ValueError("function entry timestamp must be a non-negative integer")
+    function_wall_seconds = (
+        GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+        if config.execution_mode == "integrated-calibration-v10"
+        else GPU_FUNCTION_TIMEOUT_SECONDS
+    )
+    function_deadline_ns = function_entry_ns + round(function_wall_seconds * 1e9)
+    configured_controller_deadline_ns = function_entry_ns + round(
+        float(config.maximum_wall_seconds) * 1e9
+    )
+    if config.execution_mode == "integrated-calibration-v10":
+        reserved_controller_deadline_ns = function_deadline_ns - round(
+            INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS * 1e9
+        )
+        return function_deadline_ns, min(
+            configured_controller_deadline_ns,
+            reserved_controller_deadline_ns,
+        )
+    return function_deadline_ns, configured_controller_deadline_ns
+
+
+def _require_integrated_controller_success(controller: dict[str, Any]) -> None:
+    """Propagate the controller's real failure before reading late artifacts."""
+
+    if controller.get("status") == "succeeded":
+        return
+    controller_error = controller.get("controller_error")
+    if not isinstance(controller_error, dict):
+        raise RuntimeError("integrated controller failed without structured error evidence")
+    error_type = controller_error.get("type")
+    error_message = controller_error.get("message")
+    if not isinstance(error_type, str) or not isinstance(error_message, str):
+        raise RuntimeError("integrated controller failure evidence has an invalid shape")
+    raise RuntimeError(f"integrated controller failed: {error_type}: {error_message}")
+
+
 def _inventory_tree(root: Path) -> list[dict[str, Any]]:
     return [
         {
@@ -317,6 +463,30 @@ results_volume = modal.Volume.from_name(RESULTS_VOLUME_NAME, create_if_missing=F
 # Reuse the exact Experiment 003 dependency image; all installs occur during
 # image construction, never while the A100s are allocated.
 gpu_image = importlib.import_module("modal_real_gpu_cow").gpu_image
+if _LOCAL_REPOSITORY_AVAILABLE and hasattr(gpu_image, "add_local_file"):
+    bundled_root = "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004"
+    gpu_image = (
+        gpu_image.add_local_file(
+            LOCAL_EXPERIMENT_ROOT / "v10-authorization.json",
+            f"{bundled_root}/v10-authorization.json",
+            copy=True,
+        )
+        .add_local_file(
+            LOCAL_EXPERIMENT_ROOT / "v10-phase-budget.json",
+            f"{bundled_root}/v10-phase-budget.json",
+            copy=True,
+        )
+        .add_local_dir(
+            LOCAL_EXPERIMENT_ROOT / "reviews",
+            f"{bundled_root}/reviews",
+            copy=True,
+        )
+        .add_local_dir(
+            LOCAL_EXPERIMENT_ROOT / "raw/modal/exp004-v10-integrated-s41-v3/calibration",
+            f"{bundled_root}/raw/modal/exp004-v10-integrated-s41-v3/calibration",
+            copy=True,
+        )
+    )
 
 app = modal.App(
     APP_NAME,
@@ -328,14 +498,24 @@ _run_pilot_function: Any = None
 def run_pilot(
     config_payload: dict[str, Any], authorization_payload: dict[str, Any]
 ) -> dict[str, Any]:
+    # Modal's timeout is measured across the entire Function body, not merely
+    # the controller.  Anchor every integrated deadline to this first user-code
+    # timestamp so topology/model validation cannot silently extend the paid
+    # interval and so postprocessing, artifact commit, and cleanup retain a
+    # fixed tail reserve.
+    function_entry_ns = time.monotonic_ns()
     config = Experiment004PilotConfig.model_validate(config_payload)
+    function_deadline_ns, controller_deadline_ns = _absolute_function_deadlines(
+        function_entry_ns=function_entry_ns,
+        config=config,
+    )
     authorization = _validate_authorization(config, authorization_payload)
     if modal.__version__ != MODAL_SDK_VERSION:
         raise RuntimeError(f"Modal SDK must be {MODAL_SDK_VERSION}, observed {modal.__version__}")
     function_call_id = modal.current_function_call_id()
     if not function_call_id:
         raise RuntimeError("Modal did not expose the FunctionCall ID")
-    started_ns = time.monotonic_ns()
+    started_ns = function_entry_ns
     work_root = Path("/tmp/sloforge-branchfabric-exp004") / config.attempt_id
     snapshot = MODEL_MOUNT / "snapshots" / MODEL_REVISION
     config_path = work_root.parent / f"{config.attempt_id}.json"
@@ -348,7 +528,6 @@ def run_pilot(
     movement_accounting: dict[str, Any] | None = None
     serving_recovery: dict[str, Any] | None = None
     try:
-        _validate_model_snapshot(snapshot)
         from sloforge.helix.characterization.gpu_reclamation_instrumentation import (
             capture_topology_commands,
             validate_topology_capture,
@@ -356,28 +535,106 @@ def run_pilot(
 
         topology = capture_topology_commands()
         validate_topology_capture(topology, expected_gpu_count=2)
-        from gpu_reclamation_controller import run_two_gpu_controller
+        # Capture the charged physical allocation identity before checking the
+        # model cache. A cache failure must still yield a hash-bound bundle the
+        # local coordinator can settle against actual observed GPU time.
+        _validate_model_snapshot(snapshot)
+        if config.execution_mode == "integrated-calibration-v10":
+            from gpu_reclamation_controller import run_integrated_two_gpu_controller
 
-        controller = run_two_gpu_controller(
-            config_path=config_path,
-            work_root=work_root,
-            worker_path=Path("/opt/sloforge/experiments/branchfabric/gpu_reclamation_worker.py"),
-            model_snapshot=snapshot,
-            readiness_timeout_seconds=float(config.initialization_timeout_seconds),
-            transaction_timeout_seconds=float(config.maximum_wall_seconds),
+            if time.monotonic_ns() >= controller_deadline_ns:
+                raise TimeoutError("pre-controller work exhausted the absolute integrated deadline")
+            controller = run_integrated_two_gpu_controller(
+                config_path=config_path,
+                work_root=work_root,
+                worker_path=Path(
+                    "/opt/sloforge/experiments/branchfabric/gpu_reclamation_worker.py"
+                ),
+                model_snapshot=snapshot,
+                repository_root=Path("/opt/sloforge"),
+                readiness_timeout_seconds=float(config.initialization_timeout_seconds),
+                absolute_deadline_ns=controller_deadline_ns,
+            )
+        else:
+            from gpu_reclamation_controller import run_two_gpu_controller
+
+            controller = run_two_gpu_controller(
+                config_path=config_path,
+                work_root=work_root,
+                worker_path=Path(
+                    "/opt/sloforge/experiments/branchfabric/gpu_reclamation_worker.py"
+                ),
+                model_snapshot=snapshot,
+                readiness_timeout_seconds=float(config.initialization_timeout_seconds),
+                transaction_timeout_seconds=float(config.maximum_wall_seconds),
+            )
+        v10_run = (
+            config.serving_methodology == "v10-global-capacity"
+            or config.execution_mode == "integrated-calibration-v10"
         )
-        if config.serving_methodology == "v10-global-capacity":
+        if v10_run:
+            effective_config_path = work_root / "effective-config.json"
+            if config.execution_mode == "integrated-calibration-v10":
+                _require_integrated_controller_success(controller)
             from sloforge.helix.characterization.gpu_reclamation_v10_postprocess import (
                 assess_v10_directory,
             )
             from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
                 BudgetEvidence,
                 CleanupEvidence,
+                V10PrerequisiteEvidence,
+            )
+
+            authorization_path = Path("/opt/sloforge") / str(config.authorization_artifact)
+            phase_budget_path = Path("/opt/sloforge") / str(config.phase_budget_artifact)
+            readiness_path = work_root / "readiness/both-engines-ready.json"
+            sanity_12_path = work_root / "sanity/12-rps/result.json"
+            sanity_15_path = work_root / "sanity/15-rps/result.json"
+            pending_budget_path = work_root / "analysis/budget-pending-local-settlement.json"
+            pending_cleanup_path = work_root / "analysis/cleanup-pending-provider-teardown.json"
+            _write_new(pending_budget_path, {"status": "pending-local-settlement"})
+            _write_new(pending_cleanup_path, {"status": "pending-provider-teardown"})
+
+            def prerequisite_binding(kind: str, path: Path) -> str:
+                return f"{kind}:{_sha256(path)}:{path.resolve()}"
+
+            prerequisites = V10PrerequisiteEvidence(
+                authorization_valid=True,
+                phase_budget_valid=(
+                    config.phase_budget_sha256 is not None
+                    and _sha256(phase_budget_path) == config.phase_budget_sha256
+                ),
+                two_engine_ready=True,
+                sanity_12rps_stable=(
+                    json.loads((work_root / "sanity/12-rps/assessment.json").read_text()).get(
+                        "passed"
+                    )
+                    is True
+                ),
+                sanity_15rps_overload=(
+                    json.loads((work_root / "sanity/15-rps/assessment.json").read_text()).get(
+                        "passed"
+                    )
+                    is True
+                ),
+                budget_pass=False,
+                cleanup_pass=False,
+                evidence_references=(
+                    prerequisite_binding("authorization", authorization_path),
+                    prerequisite_binding("phase-budget", phase_budget_path),
+                    prerequisite_binding("engine-readiness", readiness_path),
+                    prerequisite_binding("sanity-12rps", sanity_12_path),
+                    prerequisite_binding("sanity-15rps", sanity_15_path),
+                    prerequisite_binding("budget-settlement", pending_budget_path),
+                    prerequisite_binding("modal-cleanup", pending_cleanup_path),
+                ),
             )
 
             scientific_validity, movement_accounting, serving_recovery = assess_v10_directory(
                 work_root=work_root,
-                config=config.model_dump(mode="json"),
+                config=json.loads(effective_config_path.read_text())
+                if config.execution_mode == "integrated-calibration-v10"
+                else config.model_dump(mode="json"),
                 controller=controller,
                 # The remote function cannot observe ledger settlement or its
                 # own provider teardown. Those two gates remain explicitly
@@ -399,6 +656,7 @@ def run_pilot(
                     zero_profilers=False,
                     authorized_persistent_volumes_only=False,
                 ),
+                prerequisites=prerequisites,
             )
         else:
             from sloforge.helix.characterization.gpu_reclamation_pilot import (
@@ -429,7 +687,10 @@ def run_pilot(
             f"GPU pilot/controller failed before scientific validation: "
             f"{run_error['type']}: {run_error['message']}"
         )
-        if config.serving_methodology == "v10-global-capacity":
+        if (
+            config.serving_methodology == "v10-global-capacity"
+            or config.execution_mode == "integrated-calibration-v10"
+        ):
             from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
                 fail_closed_v10_scientific_validity,
             )
@@ -443,9 +704,7 @@ def run_pilot(
                 "invalid_reason": failure_reason,
             }
             serving_recovery = {
-                "schema_version": (
-                    "sloforge.branchfabric.experiment-004-v10-serving-recovery/v1"
-                ),
+                "schema_version": ("sloforge.branchfabric.experiment-004-v10-serving-recovery/v1"),
                 "status": "invalid",
                 "invalid_reason": failure_reason,
             }
@@ -457,7 +716,10 @@ def run_pilot(
                 invalid_reasons=(failure_reason,),
             )
         _write_new(work_root / "function-failure.json", run_error)
-    if config.serving_methodology == "v10-global-capacity":
+    if (
+        config.serving_methodology == "v10-global-capacity"
+        or config.execution_mode == "integrated-calibration-v10"
+    ):
         if scientific_validity is None or movement_accounting is None or serving_recovery is None:
             raise RuntimeError("v10 postprocessor did not produce all required analysis artifacts")
         _write_new(
@@ -480,18 +742,33 @@ def run_pilot(
     )
     elapsed_ns = time.monotonic_ns() - started_ns
     v10_provisional = (
-        config.serving_methodology == "v10-global-capacity"
+        (
+            config.serving_methodology == "v10-global-capacity"
+            or config.execution_mode == "integrated-calibration-v10"
+        )
         and controller.get("status") == "succeeded"
         and scientific_validity is not None
         and all(
             bool(getattr(scientific_validity, field))
             for field in (
+                "authorization_alid",
+                "phase_budget_valid",
+                "two_engine_ready",
+                "sanity_12rps_stable",
+                "sanity_15rps_overload",
+                "control_stable",
                 "state_correctness_pass",
                 "gpu0_overload_pass",
-                "two_gpu_excess_capacity_pass",
+                "bounded_backlog_pass",
+                "gpu1_state_release_pass",
+                "gpu1_hbm_reclaim_pass",
+                "gpu1_useful_capacity_pass",
+                "two_gpu_service_gt_offered_pass",
                 "queue_drain_pass",
                 "slo_restoration_pass",
-                "pre_restore_stability_pass",
+                "slo_stability_pass",
+                "restore_load_reduced_pass",
+                "gpu1_serving_drained_pass",
                 "gpu0_active_during_restore_pass",
                 "branch_resume_pass",
                 "movement_accounting_pass",
@@ -525,6 +802,19 @@ def run_pilot(
         "pilot_invalid_reasons": invalid_reasons,
         "run_error": run_error,
         "controller": controller,
+        "absolute_deadlines": {
+            "function_entry_monotonic_ns": function_entry_ns,
+            "function_deadline_monotonic_ns": function_deadline_ns,
+            "controller_deadline_monotonic_ns": controller_deadline_ns,
+            "post_controller_reserve_seconds": (
+                INTEGRATED_POST_CONTROLLER_RESERVE_SECONDS
+                if config.execution_mode == "integrated-calibration-v10"
+                else 0
+            ),
+            "remaining_function_seconds_at_completion": max(
+                0.0, (function_deadline_ns - time.monotonic_ns()) / 1e9
+            ),
+        },
         "completed_at_utc": datetime.now(UTC).isoformat(),
     }
     _write_new(work_root / "function-completion.json", completion)
@@ -544,9 +834,16 @@ def run_pilot(
         _write_new(staging / "REMOTE_MANIFEST.json", manifest)
         os.replace(staging, final)
         results_volume.commit()
+        inflight = RESULTS_MOUNT / f"{REMOTE_EXPERIMENT_PREFIX}/{config.attempt_id}.inflight"
+        if inflight.exists():
+            shutil.rmtree(inflight)
+            results_volume.commit()
     except BaseException:
         if staging.exists():
             shutil.rmtree(staging)
+        inflight = RESULTS_MOUNT / f"{REMOTE_EXPERIMENT_PREFIX}/{config.attempt_id}.inflight"
+        if inflight.exists():
+            shutil.rmtree(inflight)
         results_volume.commit()
         raise
     return {
@@ -581,7 +878,12 @@ def main(*, config_path: str) -> None:
     authorization = RemoteAuthorization(
         reservation_id=reservation_id,
         config_sha256=hashlib.sha256(_canonical_bytes(config)).hexdigest(),
-        maximum_gpu_seconds=GPU_COORDINATOR_RESERVATION_WALL_SECONDS * GPU_COUNT,
+        maximum_gpu_seconds=(
+            GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+            if config.execution_mode == "integrated-calibration-v10"
+            else LEGACY_GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+        )
+        * GPU_COUNT,
         budget_usd=budget,
     )
     # Preserve the caller's backwards-compatible explicit field set across the
@@ -589,7 +891,13 @@ def main(*, config_path: str) -> None:
     call = _run_pilot_function.spawn(
         json.loads(_canonical_bytes(config)), authorization.model_dump(mode="json")
     )
-    result = call.get(timeout=GPU_FUNCTION_TIMEOUT_SECONDS + GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS)
+    result = call.get(
+        timeout=(
+            GPU_COORDINATOR_RESERVATION_WALL_SECONDS
+            if config.execution_mode == "integrated-calibration-v10"
+            else GPU_FUNCTION_TIMEOUT_SECONDS + GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS
+        )
+    )
     materialized = _materialize(config.attempt_id)
     print(_canonical_bytes({"result": result, "materialized": materialized}).decode(), end="")
 

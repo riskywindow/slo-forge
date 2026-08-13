@@ -18,7 +18,7 @@ import re
 import threading
 import time
 import traceback
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -29,6 +29,68 @@ MODEL_REVISION = "a09a35458c702b33eeacc393d103063234e8bc28"
 POLICY_EPOCH = "branchfabric-modal-exp004-policy-v1"
 RESOURCE_SAMPLE_INTERVAL_MS = 100
 RESOURCE_SAMPLE_GRACE_SECONDS = 10
+_V10_SANITY_GUARD_COUNT = 2
+
+
+class _CacheSaltEngine:
+    """Delegate to one live vLLM engine while isolating serving prefixes.
+
+    vLLM 0.23.0 incorporates ``cache_salt`` into the first block hash and the
+    resulting transitive hash chain.  A deterministic SHA-256 salt per request
+    therefore prevents calibration/control requests from receiving accidental
+    prefix-cache hits without disabling the prefix cache needed by Helix's
+    shared-root rollout state.
+    """
+
+    def __init__(self, engine: Any, *, namespace: str) -> None:
+        if not namespace:
+            raise ValueError("cache-salt namespace must not be empty")
+        self._engine = engine
+        self._namespace = namespace
+        self._salts: dict[str, str] = {}
+        self._salt_values: set[str] = set()
+        self._lock = threading.Lock()
+
+    @property
+    def underlying_engine(self) -> Any:
+        return self._engine
+
+    def add_request(self, request_id: str, prompt: Any, *args: Any, **kwargs: Any) -> Any:
+        request_key = str(request_id)
+        with self._lock:
+            if request_key in self._salts:
+                raise RuntimeError(f"cache-salt request identity was reused: {request_key}")
+            salt = hashlib.sha256(f"{self._namespace}\0{request_key}".encode()).hexdigest()
+            if salt in self._salt_values:
+                raise RuntimeError("deterministic cache-salt collision")
+            self._salts[request_key] = salt
+            self._salt_values.add(salt)
+        if not isinstance(prompt, dict) or "prompt_token_ids" not in prompt:
+            raise TypeError("salted serving requires a TokensPrompt mapping")
+        if "cache_salt" in prompt:
+            raise ValueError("caller supplied an untracked cache_salt")
+        salted_prompt = {**prompt, "cache_salt": salt}
+        return self._engine.add_request(request_id, salted_prompt, *args, **kwargs)
+
+    def evidence(self) -> dict[str, Any]:
+        with self._lock:
+            rows = tuple(sorted(self._salts.items()))
+        encoded_rows = "".join(f"{request_id}\0{salt}\n" for request_id, salt in rows).encode()
+        return {
+            "schema_version": "sloforge.branchfabric.cache-salt-evidence/v1",
+            "policy": "per-request-vllm-cache-salt-sha256",
+            "namespace_sha256": hashlib.sha256(self._namespace.encode()).hexdigest(),
+            "request_count": len(rows),
+            "unique_request_count": len({request_id for request_id, _salt in rows}),
+            "unique_salt_count": len({salt for _request_id, salt in rows}),
+            "request_salt_map_sha256": hashlib.sha256(encoded_rows).hexdigest(),
+            "prefix_cache_remained_enabled": True,
+            "rollout_requests_unsalted_for_shared_root_semantics": True,
+            "passed": len(rows) == len({salt for _request_id, salt in rows}),
+        }
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._engine, name)
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -374,7 +436,10 @@ def _create_adapter(config: dict[str, Any], snapshot: Path, gpu_uuid: str) -> An
         "gpu_memory_utilization": float(config["gpu_memory_utilization"]),
         "download_dir": "/tmp/sloforge-exp004-download",
         "enforce_eager": False,
-        "disable_log_stats": True,
+        # Capacity calibration must prove that runtime metrics are available at
+        # its readiness gate.  Preserve the historical state-transaction
+        # default, but let that dedicated worker opt in without changing v9.
+        "disable_log_stats": bool(config.get("disable_log_stats", True)),
         "trust_remote_code": False,
         "enable_chunked_prefill": True,
         "cpu_offload_gb": 0.0,
@@ -676,6 +741,355 @@ def _prepare_rollouts(
     if set(decode.completed_branch_ids) != set(branches):
         raise RuntimeError("not all eight rollout branches reached the checkpoint boundary")
     return {"root_id": root_id, "root_reference_id": root.root_reference_id, "branches": branches}
+
+
+def _wait_for_any(
+    paths: tuple[Path, ...], *, timeout_s: float, phase: str
+) -> tuple[Path, dict[str, Any]]:
+    """Wait for exactly one immutable protocol command within a fixed bound."""
+
+    if not paths or not math.isfinite(timeout_s) or timeout_s <= 0:
+        raise ValueError("bounded command wait requires paths and a positive timeout")
+    deadline_ns = time.monotonic_ns() + round(timeout_s * 1e9)
+    while True:
+        existing = tuple(path for path in paths if path.is_file())
+        if len(existing) > 1:
+            raise RuntimeError(f"conflicting commands observed during {phase}")
+        if existing:
+            payload = json.loads(existing[0].read_text())
+            if not isinstance(payload, dict):
+                raise ValueError(f"{phase} command must be a JSON object")
+            return existing[0], payload
+        if time.monotonic_ns() >= deadline_ns:
+            raise TimeoutError(f"timed out during {phase}")
+        time.sleep(0.02)
+
+
+def _transaction_ready_path(barrier_root: Path, role: str) -> Path:
+    if role not in {"serving", "rollout"}:
+        raise ValueError("transaction-ready role must be serving or rollout")
+    return barrier_root / f"{role}.transaction-ready.json"
+
+
+def _engine_continuity(
+    adapter: Any,
+    *,
+    engine_nonce: str,
+    engine_started_ns: int,
+    device: str,
+    physical_gpu_uuid: str,
+) -> dict[str, Any]:
+    return {
+        "device": device,
+        "physical_gpu_uuid": physical_gpu_uuid,
+        "pid": os.getpid(),
+        "engine_nonce": engine_nonce,
+        "engine_started_ns": engine_started_ns,
+        "adapter_object_identity": id(adapter),
+        "engine_object_identity": id(adapter._view.llm_engine),
+        "engine_reloaded": False,
+    }
+
+
+def _assert_engine_continuity(adapter: Any, expected: dict[str, Any]) -> None:
+    observed = {
+        "pid": os.getpid(),
+        "adapter_object_identity": id(adapter),
+        "engine_object_identity": id(adapter._view.llm_engine),
+    }
+    if any(observed[field] != expected.get(field) for field in observed):
+        raise RuntimeError("retained engine process/object continuity changed")
+
+
+def _validate_sha256(value: Any, *, field: str) -> str:
+    if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+        raise ValueError(f"integrated transaction {field} must be a lowercase SHA-256")
+    return value
+
+
+def _validate_integrated_transaction_command(
+    *,
+    base_config: dict[str, Any],
+    command: dict[str, Any],
+    selected_load_sha256: str,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Bind v10 to its pre-GPU authorization and completed sanity guards."""
+
+    if command.get("schema_version") != "sloforge.branchfabric.integrated-transaction-command/v1":
+        raise ValueError("integrated transaction command schema differs")
+    effective = command.get("effective_config")
+    if not isinstance(effective, dict):
+        raise ValueError("integrated transaction command lacks a complete effective_config")
+    selection_sha256 = _validate_sha256(command.get("selection_sha256"), field="selection hash")
+    if selection_sha256 != selected_load_sha256:
+        raise ValueError("transaction selection hash differs from final-reset authorization")
+    evidence_hashes = {
+        "authorization_artifact_hash": _validate_sha256(
+            command.get("authorization_artifact_hash"), field="authorization artifact hash"
+        ),
+        "sanity_result_sha256": _validate_sha256(
+            command.get("sanity_result_sha256"), field="sanity result hash"
+        ),
+    }
+    if evidence_hashes["authorization_artifact_hash"] != base_config.get(
+        "authorization_artifact_hash"
+    ):
+        raise ValueError("transaction authorization hash differs from the base config")
+    for field in (
+        "schema_version",
+        "attempt_id",
+        "seed",
+        "gpu_memory_utilization",
+        "serving_prompt_tokens",
+        "serving_output_tokens",
+    ):
+        if field not in base_config or effective.get(field) != base_config[field]:
+            raise ValueError(f"late effective config changed immutable field {field}")
+    if effective.get("serving_methodology") != "v10-global-capacity":
+        raise ValueError("late effective config does not select the frozen v10 methodology")
+    configured_selection = effective.get("calibration_selected_load_sha256")
+    if configured_selection is not None and configured_selection != selection_sha256:
+        raise ValueError("late effective config selected-load binding differs")
+    issued_ns = command.get("issued_at_monotonic_ns")
+    if isinstance(issued_ns, bool) or not isinstance(issued_ns, int) or issued_ns <= 0:
+        raise ValueError("integrated transaction command timestamp is invalid")
+    if effective != base_config:
+        raise ValueError("preauthorized v10 effective config must equal its immutable base config")
+    return effective, evidence_hashes
+
+
+def _run_measured_v10_transaction(
+    *,
+    role: str,
+    work_root: Path,
+    operation: Callable[[], dict[str, Any]],
+    compilation_capture_factory: Callable[[], Any],
+) -> dict[str, Any]:
+    """Observe both retained engines for deferred compilation during v10."""
+
+    if role not in {"serving", "rollout"}:
+        raise ValueError("measured v10 compilation observation requires a worker role")
+    capture = compilation_capture_factory()
+    started_ns = time.monotonic_ns()
+    try:
+        with capture:
+            result = operation()
+    finally:
+        ended_ns = time.monotonic_ns()
+        raw_events = getattr(capture, "events", None)
+        capture_buffer_valid = isinstance(raw_events, list) and all(
+            isinstance(event, str) for event in raw_events
+        )
+        events = tuple(raw_events) if capture_buffer_valid else ()
+        observation = {
+            "schema_version": (
+                "sloforge.branchfabric.measured-transaction-compilation-observation/v1"
+            ),
+            "source": "bounded-python-logging-handler",
+            "role": role,
+            "interval_start_ns": started_ns,
+            "interval_end_ns": ended_ns,
+            "capture_buffer_valid": capture_buffer_valid,
+            "events": events,
+            "no_deferred_compilation_event": capture_buffer_valid and not events,
+            "passed": capture_buffer_valid and not events,
+        }
+        _write_new(work_root / "telemetry/measured-transaction-compilation.json", observation)
+    if not isinstance(result, dict):
+        raise TypeError("measured v10 transaction did not return a JSON object")
+    result["measured_transaction_compilation_observation"] = observation
+    if observation["passed"] is not True:
+        raise RuntimeError("measured v10 transaction observed deferred compilation")
+    return result
+
+
+def _run_integrated_calibration_phase(
+    *,
+    adapter: Any,
+    config: dict[str, Any],
+    inputs: dict[str, Any],
+    role: str,
+    physical_gpu_uuid: str,
+    barrier_root: Path,
+    model_load_started_ns: int,
+    model_ready_ns: int,
+) -> tuple[dict[str, Any], _CacheSaltEngine, dict[str, Any]]:
+    """Warm, calibrate, and hand one unchanged engine into the v10 run."""
+
+    from gpu_capacity_calibration_worker import (
+        _collect_engine_readiness,
+        _CompilationLogCapture,
+        _execute_probe,
+        _reset_probe_state,
+    )
+
+    device = "gpu0" if role == "serving" else "gpu1"
+    prefix = tuple(
+        int(item) for item in inputs["prefix_token_ids"][: int(config["serving_prompt_tokens"])]
+    )
+    if not prefix:
+        raise ValueError("integrated calibration serving prefix is empty")
+    engine_nonce = hashlib.sha256(
+        (
+            f"{config['attempt_id']}\0{role}\0{os.getpid()}\0"
+            f"{model_load_started_ns}\0{id(adapter)}\0{id(adapter._view.llm_engine)}"
+        ).encode()
+    ).hexdigest()
+    continuity = _engine_continuity(
+        adapter,
+        engine_nonce=engine_nonce,
+        engine_started_ns=model_load_started_ns,
+        device=device,
+        physical_gpu_uuid=physical_gpu_uuid,
+    )
+    readiness = _collect_engine_readiness(
+        adapter,
+        device=device,
+        physical_gpu_uuid=physical_gpu_uuid,
+        prefix=prefix,
+        output_tokens=int(config["serving_output_tokens"]),
+        seed=int(config["seed"]),
+        engine_started_ns=model_load_started_ns,
+        model_ready_ns=model_ready_ns,
+        timeout_seconds=float(config["probe_timeout_seconds"]),
+    )
+    readiness.update(
+        {
+            "role": role,
+            **continuity,
+            "runtime_evidence": {
+                "packages": {
+                    name: importlib.metadata.version(name)
+                    for name in ("vllm", "torch", "transformers")
+                },
+                "torch_cuda": __import__("torch").version.cuda,
+                "gpu_name": __import__("torch").cuda.get_device_name(0),
+            },
+            "rollouts_ready": False,
+        }
+    )
+    if not readiness.get("passed"):
+        raise RuntimeError("strict integrated engine readiness failed")
+    _write_new(barrier_root / f"{role}.ready.json", readiness)
+
+    salted_engine = _CacheSaltEngine(
+        adapter._view.llm_engine,
+        namespace=f"{config['attempt_id']}:{device}:calibration-and-serving",
+    )
+    capacity_root = barrier_root / "capacity"
+    abort_path = barrier_root / "abort.json"
+    final_reset_command = capacity_root / "final-reset.command.json"
+    timeout_s = float(config.get("controller_timeout_seconds", config["maximum_wall_seconds"]))
+    configured_probe_limit = _V10_SANITY_GUARD_COUNT
+    final_reset_payload: dict[str, Any] | None = None
+    for probe_index in range(configured_probe_limit):
+        command_path = capacity_root / f"probe-{probe_index:02d}.command.json"
+        selected, command = _wait_for_any(
+            (command_path, final_reset_command, abort_path),
+            timeout_s=timeout_s,
+            phase=f"v10 stale-calibration sanity command {probe_index}",
+        )
+        if selected == abort_path:
+            raise RuntimeError("integrated coordinator aborted before v10")
+        if selected == final_reset_command:
+            final_reset_payload = command
+            break
+        if command.get("schema_version") != "sloforge.branchfabric.capacity-probe-command/v1":
+            raise ValueError("v10 sanity probe command schema differs")
+        plan = command.get("plan")
+        if not isinstance(plan, dict):
+            raise ValueError("integrated capacity probe command lacks its plan")
+        with _CompilationLogCapture() as probe_compilation:
+            raw = _execute_probe(
+                salted_engine,
+                plan_payload=plan,
+                device=device,
+                prefix=prefix,
+                output_tokens=int(config["serving_output_tokens"]),
+                seed=int(config["seed"]),
+                probe_timeout_seconds=float(config["probe_timeout_seconds"]),
+                tail_drain_seconds=float(config["tail_drain_seconds"]),
+                producer_queue_capacity=int(config["producer_queue_capacity"]),
+            )
+        raw["compilation_observation"] = {
+            "source": "bounded-python-logging-handler",
+            "events": tuple(probe_compilation.events),
+            "no_deferred_compilation_event": not probe_compilation.events,
+        }
+        if probe_compilation.events:
+            raise RuntimeError(
+                f"probe {raw['probe_id']} observed deferred vLLM compilation after readiness"
+            )
+        _assert_engine_continuity(adapter, continuity)
+        raw["engine_continuity"] = continuity
+        raw["cache_salt_evidence"] = salted_engine.evidence()
+        raw["prefix_cache_policy"] = {
+            "enabled_for_rollout_semantics": True,
+            "calibration_reuse_prevented": True,
+            "method": "per-request-vllm-cache-salt-sha256",
+            "evidence_sha256": raw["cache_salt_evidence"]["request_salt_map_sha256"],
+        }
+        _write_new(capacity_root / f"probe-{probe_index:02d}.{device}.raw.json", raw)
+        reset = _reset_probe_state(adapter, probe_id=str(raw["probe_id"]))
+        _assert_engine_continuity(adapter, continuity)
+        reset.update(continuity)
+        _write_new(capacity_root / f"probe-{probe_index:02d}.{device}.reset.json", reset)
+    if final_reset_payload is None:
+        selected, final_reset_payload = _wait_for_any(
+            (final_reset_command, abort_path),
+            timeout_s=timeout_s,
+            phase="integrated final sanity reset command",
+        )
+        if selected == abort_path:
+            raise RuntimeError("integrated coordinator aborted before final reset")
+    if (
+        final_reset_payload.get("schema_version")
+        != "sloforge.branchfabric.integrated-final-reset-command/v1"
+    ):
+        raise ValueError("integrated final reset command schema differs")
+    selected_load_sha256 = _validate_sha256(
+        final_reset_payload.get("selected_load_sha256"), field="final reset selected-load hash"
+    )
+    authorization_artifact_hash = _validate_sha256(
+        final_reset_payload.get("authorization_artifact_hash"),
+        field="final reset authorization artifact hash",
+    )
+    if authorization_artifact_hash != config.get("authorization_artifact_hash"):
+        raise ValueError("final reset authorization differs from the immutable config")
+    final_reset = _reset_probe_state(adapter, probe_id="final-calibration-reset")
+    _assert_engine_continuity(adapter, continuity)
+    final_reset.update(continuity)
+    final_reset["selected_load_sha256"] = selected_load_sha256
+    final_reset["authorization_artifact_hash"] = authorization_artifact_hash
+    final_reset["cache_salt_evidence"] = salted_engine.evidence()
+    _write_new(capacity_root / f"final-reset.{device}.json", final_reset)
+
+    selected, transaction_command = _wait_for_any(
+        (barrier_root / "transaction.command.json", abort_path),
+        timeout_s=timeout_s,
+        phase="integrated transaction authorization",
+    )
+    if selected == abort_path:
+        raise RuntimeError("integrated coordinator aborted before transaction authorization")
+    effective_config, evidence_hashes = _validate_integrated_transaction_command(
+        base_config=config,
+        command=transaction_command,
+        selected_load_sha256=selected_load_sha256,
+    )
+    _assert_engine_continuity(adapter, continuity)
+    handoff = {
+        "schema_version": "sloforge.branchfabric.retained-engine-handoff/v1",
+        "device": device,
+        "role": role,
+        **continuity,
+        "selected_load_sha256": selected_load_sha256,
+        "authorization_artifact_hash": authorization_artifact_hash,
+        "pre_gpu_evidence_hashes": evidence_hashes,
+        "final_request_state": final_reset["state_after"],
+        "cache_salt_evidence": salted_engine.evidence(),
+        "passed": True,
+    }
+    return effective_config, salted_engine, handoff
 
 
 def _stage_row(stage: str, start_ns: int, end_ns: int, **attributes: Any) -> dict[str, Any]:
@@ -1086,6 +1500,7 @@ def _run_rollout_transaction(
     trigger_ns: int,
     restore_complete_barrier: Path,
     barrier_root: Path | None = None,
+    serving_engine: Any | None = None,
 ) -> dict[str, Any]:
     import torch  # type: ignore[import-not-found]
 
@@ -1155,30 +1570,46 @@ def _run_rollout_transaction(
         trigger_ns = int(trigger_payload["triggered_ns"])
     else:
         _sleep_until(trigger_ns)
-    reclaim_trigger_observed_ns = phase("HELIX_RECLAIM_TRIGGER", observed_ns=trigger_ns)
+    reclaim_trigger_observed_ns = phase(
+        "RECLAIM_TRIGGER" if v10_methodology else "HELIX_RECLAIM_TRIGGER",
+        observed_ns=trigger_ns,
+    )
     start = time.monotonic_ns()
     phase("ROLLOUT_ADMISSION_STOP")
     stages.append(_stage_row("admission_stop", start, time.monotonic_ns()))
     start = time.monotonic_ns()
     # Exclusive engine-step gate: run_concurrent_branches returned at a valid
     # token boundary and this worker performs no engine.step until release.
-    phase("BRANCH_QUIESCE")
-    stages.append(_stage_row("branch_quiesce", start, time.monotonic_ns()))
+    if v10_methodology:
+        phase("BRANCH_QUIESCE_BEGIN", observed_ns=start)
+    else:
+        phase("BRANCH_QUIESCE")
+    quiesce_end = time.monotonic_ns()
+    if v10_methodology:
+        phase("BRANCH_QUIESCE_END", observed_ns=quiesce_end)
+    stages.append(_stage_row("branch_quiesce", start, quiesce_end))
 
     branches = tuple(str(item) for item in prepared["branches"])
     view = adapter._view
+    live_serving_engine = view.llm_engine if serving_engine is None else serving_engine
+    if (
+        isinstance(live_serving_engine, _CacheSaltEngine)
+        and live_serving_engine.underlying_engine is not view.llm_engine
+    ):
+        raise RuntimeError("GPU1 serving proxy does not wrap the retained rollout engine")
     raw_source_runtime_request_ids = {
         branch_id: adapter._sessions[branch_id].runtime_request_id for branch_id in branches
     }
-    if any(runtime_id is None or str(runtime_id) == "" for runtime_id in raw_source_runtime_request_ids.values()):
+    if any(
+        runtime_id is None or str(runtime_id) == ""
+        for runtime_id in raw_source_runtime_request_ids.values()
+    ):
         raise RuntimeError("source rollout runtime request identities are absent")
     source_runtime_request_ids = {
         branch_id: str(runtime_id)
         for branch_id, runtime_id in raw_source_runtime_request_ids.items()
     }
-    if len(
-        set(source_runtime_request_ids.values())
-    ) != len(source_runtime_request_ids):
+    if len(set(source_runtime_request_ids.values())) != len(source_runtime_request_ids):
         raise RuntimeError("source rollout runtime request identities are duplicated")
     source_sampling_by_branch: dict[str, dict[str, Any]] = {}
     for branch_id in branches:
@@ -1462,13 +1893,19 @@ def _run_rollout_transaction(
         (binding.source.block_index, binding.source.allocation_epoch)
         for binding in plan.capture_evidence.bindings
     }
-    phase("GPU_STATE_RELEASE_BEGIN", logical_bytes=logical_bytes, physical_bytes=physical_bytes)
+    phase(
+        "GPU1_STATE_RELEASE_BEGIN" if v10_methodology else "GPU_STATE_RELEASE_BEGIN",
+        logical_bytes=logical_bytes,
+        physical_bytes=physical_bytes,
+    )
     start = time.monotonic_ns()
     for branch_id in branches:
         adapter.destroy_branch(branch_id, timeout_s=30.0)
     adapter.destroy_session(str(prepared["root_id"]), timeout_s=30.0)
     release_end_ns = phase(
-        "GPU_STATE_RELEASE_END", logical_bytes=logical_bytes, physical_bytes=physical_bytes
+        "GPU1_STATE_RELEASE_END" if v10_methodology else "GPU_STATE_RELEASE_END",
+        logical_bytes=logical_bytes,
+        physical_bytes=physical_bytes,
     )
     stages.append(_stage_row("runtime_state_release", start, release_end_ns))
     start = time.monotonic_ns()
@@ -1490,17 +1927,20 @@ def _run_rollout_transaction(
     if int(memory_after.kv_pool_reserved_bytes) != int(memory_before.kv_pool_reserved_bytes):
         raise RuntimeError("warm role switch unexpectedly changed the vLLM KV pool reservation")
     reclaim_confirmed_ns = phase(
-        "HBM_RECLAIM_CONFIRMED", logical_bytes=logical_bytes, physical_bytes=physical_bytes
+        "GPU1_HBM_RECLAIM_CONFIRMED" if v10_methodology else "HBM_RECLAIM_CONFIRMED",
+        logical_bytes=logical_bytes,
+        physical_bytes=physical_bytes,
     )
     stages.append(_stage_row("capacity_reclaim_confirmation", start, reclaim_confirmed_ns))
     start = time.monotonic_ns()
 
     if v10_methodology:
         assert barrier_root is not None
+        from gpu_capacity_calibration_worker import _runtime_queue_state
         from gpu_reclamation_v10_serving import LiveV10Config, run_v10_gpu1
 
         serving = run_v10_gpu1(
-            view.llm_engine,
+            live_serving_engine,
             prefix=tuple(int(item) for item in inputs["prefix_token_ids"][:256]),
             params=_sampling_params(
                 max_tokens=int(config["serving_output_tokens"]), seed=int(config["seed"])
@@ -1508,9 +1948,10 @@ def _run_rollout_transaction(
             config=LiveV10Config.from_mapping(config),
             barriers=barrier_root,
             write_new=_write_new,
+            runtime_queue_state=lambda: _runtime_queue_state(adapter),
         )
         serving_enable_ns = phase(
-            "SERVING_SECONDARY_ENABLE",
+            "GPU1_SERVING_ENABLE",
             observed_ns=int(serving["enable_ack"]["observed_ns"]),
         )
     else:
@@ -1518,7 +1959,7 @@ def _run_rollout_transaction(
         # retained only for immutable historical reprocessing. It is not a
         # scientifically valid v10 serving methodology.
         serving = _run_raw_serving(
-            view.llm_engine,
+            live_serving_engine,
             prefix=tuple(int(item) for item in inputs["prefix_token_ids"][:256]),
             start_ns=trigger_ns,
             phases=(
@@ -1542,7 +1983,11 @@ def _run_rollout_transaction(
     first_serving_ns = min(int(row["first_token_ns"]) for row in serving["requests"])
     phase_events.append(
         {
-            "phase": "GPU1_FIRST_SERVING_REQUEST",
+            "phase": (
+                "GPU1_FIRST_USEFUL_SERVING_REQUEST"
+                if v10_methodology
+                else "GPU1_FIRST_SERVING_REQUEST"
+            ),
             "monotonic_timestamp_ns": first_serving_ns,
             "logical_bytes": 0,
             "physical_bytes": 0,
@@ -1561,7 +2006,7 @@ def _run_rollout_transaction(
     else:
         restore_trigger_observed_ns = None
     restore_trigger_ns = phase(
-        "ROLLOUT_RESTORE_TRIGGER",
+        "RESTORE_TRIGGER" if v10_methodology else "ROLLOUT_RESTORE_TRIGGER",
         logical_bytes=logical_bytes,
         physical_bytes=physical_bytes,
         observed_ns=restore_trigger_observed_ns,
@@ -2052,6 +2497,23 @@ def _run_rollout_transaction(
     )
     if import_validation_ended_ns is None:
         raise RuntimeError("restore import did not expose its verification/allocation boundary")
+    native_write_intervals = tuple(
+        row for row in write_intervals if row.get("stage") == "destination_native_write_subset"
+    )
+    if not native_write_intervals:
+        raise RuntimeError("restore import performed no destination native writes")
+    phase(
+        "DESTINATION_NATIVE_WRITE_BEGIN",
+        logical_bytes=logical_bytes,
+        physical_bytes=physical_bytes,
+        observed_ns=min(int(row["start_ns"]) for row in native_write_intervals),
+    )
+    phase(
+        "DESTINATION_NATIVE_WRITE_END",
+        logical_bytes=logical_bytes,
+        physical_bytes=physical_bytes,
+        observed_ns=max(int(row["end_ns"]) for row in native_write_intervals),
+    )
     restore_stages.append(
         _stage_row(
             "restore_import_validation",
@@ -2392,21 +2854,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             config, args.model_snapshot.resolve(strict=True), args.physical_gpu_uuid
         )
         model_ready_ns = time.monotonic_ns()
-        prepared = None
-        if args.role == "rollout":
-            prepared = _prepare_rollouts(adapter, config, inputs)
-        else:
-            warm_start = time.monotonic_ns()
-            _run_raw_serving(
-                adapter._view.llm_engine,
-                prefix=tuple(int(item) for item in inputs["prefix_token_ids"][:64]),
-                start_ns=warm_start,
-                phases=((0.1, 10.0, "warmup"),),
-                output_tokens=1,
-                seed=int(config["seed"]),
-                request_prefix="gpu0-warmup",
-            )
-            adapter._view.manager.reset_prefix_cache()
         telemetry = _start_worker_resource_telemetry(
             role=args.role,
             physical_gpu_uuid=args.physical_gpu_uuid,
@@ -2414,17 +2861,60 @@ def main(argv: Sequence[str] | None = None) -> int:
             work_root=work_root,
             config=config,
         )
-        _write_new(
-            args.barrier_root / f"{args.role}.ready.json",
-            {
-                "role": args.role,
-                "pid": os.getpid(),
-                "physical_gpu_uuid": args.physical_gpu_uuid,
-                "model_load_started_ns": model_load_started_ns,
-                "model_ready_ns": model_ready_ns,
+        integrated = config.get("execution_mode") == "integrated-calibration-v10"
+        prepared = None
+        serving_engine: Any = adapter._view.llm_engine
+        retained_engine_handoff: dict[str, Any] | None = None
+        if integrated:
+            config, serving_engine, retained_engine_handoff = _run_integrated_calibration_phase(
+                adapter=adapter,
+                config=config,
+                inputs=inputs,
+                role=args.role,
+                physical_gpu_uuid=args.physical_gpu_uuid,
+                barrier_root=args.barrier_root,
+                model_load_started_ns=model_load_started_ns,
+                model_ready_ns=model_ready_ns,
+            )
+            if args.role == "rollout":
+                prepared = _prepare_rollouts(adapter, config, inputs)
+            transaction_ready = {
+                **retained_engine_handoff,
+                "schema_version": "sloforge.branchfabric.transaction-ready/v1",
                 "rollouts_ready": prepared is not None,
-            },
-        )
+                "branch_count": 0 if prepared is None else len(prepared["branches"]),
+                "observed_at_monotonic_ns": time.monotonic_ns(),
+            }
+            _write_new(
+                _transaction_ready_path(args.barrier_root, args.role),
+                transaction_ready,
+            )
+        else:
+            if args.role == "rollout":
+                prepared = _prepare_rollouts(adapter, config, inputs)
+            else:
+                warm_start = time.monotonic_ns()
+                _run_raw_serving(
+                    adapter._view.llm_engine,
+                    prefix=tuple(int(item) for item in inputs["prefix_token_ids"][:64]),
+                    start_ns=warm_start,
+                    phases=((0.1, 10.0, "warmup"),),
+                    output_tokens=1,
+                    seed=int(config["seed"]),
+                    request_prefix="gpu0-warmup",
+                )
+                adapter._view.manager.reset_prefix_cache()
+            _write_new(
+                args.barrier_root / f"{args.role}.ready.json",
+                {
+                    "role": args.role,
+                    "pid": os.getpid(),
+                    "physical_gpu_uuid": args.physical_gpu_uuid,
+                    "model_load_started_ns": model_load_started_ns,
+                    "model_ready_ns": model_ready_ns,
+                    "rollouts_ready": prepared is not None,
+                },
+            )
         start_barrier = _wait_for(
             args.barrier_root / "start.json",
             timeout_s=float(config["maximum_wall_seconds"]),
@@ -2435,22 +2925,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 int(item)
                 for item in inputs["prefix_token_ids"][: int(config["serving_prompt_tokens"])]
             )
-            if config.get("serving_methodology") == "v10-global-capacity":
-                from gpu_reclamation_v10_serving import LiveV10Config, run_v10_gpu0
 
-                result = run_v10_gpu0(
-                    adapter._view.llm_engine,
-                    prefix=serving_prefix,
-                    params=_sampling_params(
-                        max_tokens=int(config["serving_output_tokens"]), seed=int(config["seed"])
-                    ),
-                    config=LiveV10Config.from_mapping(config),
-                    start_ns=common_start_ns,
-                    barriers=args.barrier_root,
-                    write_new=_write_new,
-                )
-            else:
-                result = _run_raw_serving(
+            def execute_transaction() -> dict[str, Any]:
+                if config.get("serving_methodology") == "v10-global-capacity":
+                    from gpu_reclamation_v10_serving import LiveV10Config, run_v10_gpu0
+
+                    return run_v10_gpu0(
+                        serving_engine,
+                        prefix=serving_prefix,
+                        params=_sampling_params(
+                            max_tokens=int(config["serving_output_tokens"]),
+                            seed=int(config["seed"]),
+                        ),
+                        config=LiveV10Config.from_mapping(config),
+                        start_ns=common_start_ns,
+                        barriers=args.barrier_root,
+                        write_new=_write_new,
+                    )
+                return _run_raw_serving(
                     adapter._view.llm_engine,
                     prefix=serving_prefix,
                     start_ns=common_start_ns,
@@ -2476,48 +2968,52 @@ def main(argv: Sequence[str] | None = None) -> int:
                     continuation_grace_seconds=float(config["temporary_serving_seconds"]),
                     continuation_timeout_seconds=float(config["maximum_wall_seconds"]) / 2.0,
                 )
+
         else:
             assert prepared is not None
             trigger_ns = common_start_ns + int(float(config["baseline_seconds"]) * 1e9)
-            if str(config["tracing_level"]) == "full":
-                # FULL is a bounded diagnostic mode and is never eligible as
-                # a causal performance trial. Minimal/disabled avoid Kineto.
-                profile_path = work_root / "profiles/torch-profiler-chrome-trace.json"
-                profile_path.parent.mkdir(parents=True, exist_ok=True)
-                with torch.profiler.profile(
-                    activities=(
-                        torch.profiler.ProfilerActivity.CPU,
-                        torch.profiler.ProfilerActivity.CUDA,
-                    ),
-                    record_shapes=False,
-                    profile_memory=True,
-                    with_stack=False,
-                    with_flops=False,
-                ) as profiler:
-                    result = _run_rollout_transaction(
-                        adapter,
-                        config,
-                        inputs,
-                        prepared,
-                        trigger_ns,
-                        args.barrier_root / "rollout-restore-complete.json",
-                        args.barrier_root,
-                    )
-                profiler.export_chrome_trace(str(profile_path))
-                result["full_profile"] = {
-                    "schema_version": (
-                        "sloforge.branchfabric.experiment-004-full-profile-reference/v1"
-                    ),
-                    "status": "succeeded",
-                    "causal_trial_eligible": False,
-                    "raw_provenance": _existing_artifact_provenance(
-                        profile_path,
-                        artifact_root=work_root,
-                        sample_selector="$.traceEvents[*]",
-                    ),
-                }
-            else:
-                result = _run_rollout_transaction(
+
+            def execute_transaction() -> dict[str, Any]:
+                if str(config["tracing_level"]) == "full":
+                    # FULL is a bounded diagnostic mode and is never eligible as
+                    # a causal performance trial. Minimal/disabled avoid Kineto.
+                    profile_path = work_root / "profiles/torch-profiler-chrome-trace.json"
+                    profile_path.parent.mkdir(parents=True, exist_ok=True)
+                    with torch.profiler.profile(
+                        activities=(
+                            torch.profiler.ProfilerActivity.CPU,
+                            torch.profiler.ProfilerActivity.CUDA,
+                        ),
+                        record_shapes=False,
+                        profile_memory=True,
+                        with_stack=False,
+                        with_flops=False,
+                    ) as profiler:
+                        transaction_result = _run_rollout_transaction(
+                            adapter,
+                            config,
+                            inputs,
+                            prepared,
+                            trigger_ns,
+                            args.barrier_root / "rollout-restore-complete.json",
+                            args.barrier_root,
+                            serving_engine,
+                        )
+                    profiler.export_chrome_trace(str(profile_path))
+                    transaction_result["full_profile"] = {
+                        "schema_version": (
+                            "sloforge.branchfabric.experiment-004-full-profile-reference/v1"
+                        ),
+                        "status": "succeeded",
+                        "causal_trial_eligible": False,
+                        "raw_provenance": _existing_artifact_provenance(
+                            profile_path,
+                            artifact_root=work_root,
+                            sample_selector="$.traceEvents[*]",
+                        ),
+                    }
+                    return transaction_result
+                return _run_rollout_transaction(
                     adapter,
                     config,
                     inputs,
@@ -2525,7 +3021,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                     trigger_ns,
                     args.barrier_root / "rollout-restore-complete.json",
                     args.barrier_root,
+                    serving_engine,
                 )
+
+        if integrated:
+            from gpu_capacity_calibration_worker import _CompilationLogCapture
+
+            result = _run_measured_v10_transaction(
+                role=args.role,
+                work_root=work_root,
+                operation=execute_transaction,
+                compilation_capture_factory=_CompilationLogCapture,
+            )
+        else:
+            result = execute_transaction()
+        if isinstance(serving_engine, _CacheSaltEngine):
+            cache_salt_evidence = serving_engine.evidence()
+            if cache_salt_evidence["passed"] is not True:
+                raise RuntimeError("serving cache-salt uniqueness evidence failed")
+            result["cache_salt_evidence"] = cache_salt_evidence
+            result["prefix_cache_policy"] = {
+                "enabled_for_rollout_semantics": True,
+                "serving_reuse_prevented": True,
+                "method": "per-request-vllm-cache-salt-sha256",
+                "evidence_sha256": cache_salt_evidence["request_salt_map_sha256"],
+                "rollout_requests_unsalted_for_shared_root_semantics": True,
+            }
+        if retained_engine_handoff is not None:
+            result["retained_engine_handoff"] = retained_engine_handoff
         operation_telemetry = result.pop("_operation_telemetry", None)
         if operation_telemetry is not None:
             operation_provenance = _write_new_artifact(

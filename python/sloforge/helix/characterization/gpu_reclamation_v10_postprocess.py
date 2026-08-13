@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import statistics
 from itertools import pairwise
 from pathlib import Path
@@ -36,6 +37,7 @@ from sloforge.helix.characterization.gpu_reclamation_serving import (
     WeightedTokenDistribution,
 )
 from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
+    BoundedBacklogEvidence,
     BranchResumeEvidence,
     BudgetEvidence,
     CleanupEvidence,
@@ -44,11 +46,13 @@ from sloforge.helix.characterization.gpu_reclamation_v10_validity import (
     TimelineEvidenceKind,
     V10AssessmentWindows,
     V10Phase,
+    V10PrerequisiteEvidence,
     V10ScientificValidity,
     V10Timeline,
     V10TimelineEvent,
     V10ValidityConfig,
     assess_v10_scientific_validity,
+    outstanding_queue_depth_at,
 )
 
 NS_PER_SECOND = 1_000_000_000
@@ -119,15 +123,57 @@ def _phase_timestamp(rollout: dict[str, Any], name: str, *, last: bool = False) 
     return int(rows[-1 if last else 0]["monotonic_timestamp_ns"])
 
 
-def _stage_bounds(rollout: dict[str, Any], stage: str) -> tuple[int, int]:
-    rows = tuple(
-        row
-        for row in (*rollout.get("reclamation_stages", ()), *rollout.get("restore_stages", ()))
-        if str(row.get("stage")) == stage
-    )
-    if len(rows) != 1:
-        raise ValueError(f"v10 expected exactly one {stage!r} stage")
-    return int(rows[0]["start_ns"]), int(rows[0]["end_ns"])
+def _validate_measured_transaction_compilation(
+    *, serving: dict[str, Any], rollout: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    """Revalidate transaction-wide no-compilation evidence from both workers."""
+
+    expected_fields = {
+        "schema_version",
+        "source",
+        "role",
+        "interval_start_ns",
+        "interval_end_ns",
+        "capture_buffer_valid",
+        "events",
+        "no_deferred_compilation_event",
+        "passed",
+    }
+    evidence: dict[str, dict[str, Any]] = {}
+    for role, payload in (("serving", serving), ("rollout", rollout)):
+        observation = payload.get("measured_transaction_compilation_observation")
+        if not isinstance(observation, dict):
+            raise ValueError(f"v10 {role} omitted measured transaction compilation evidence")
+        start_ns = observation.get("interval_start_ns")
+        end_ns = observation.get("interval_end_ns")
+        if (
+            payload.get("role") != role
+            or set(observation) != expected_fields
+            or observation.get("schema_version")
+            != "sloforge.branchfabric.measured-transaction-compilation-observation/v1"
+            or observation.get("source") != "bounded-python-logging-handler"
+            or observation.get("role") != role
+            or isinstance(start_ns, bool)
+            or not isinstance(start_ns, int)
+            or isinstance(end_ns, bool)
+            or not isinstance(end_ns, int)
+            or end_ns <= start_ns
+            or observation.get("capture_buffer_valid") is not True
+            or observation.get("events") != []
+            or observation.get("no_deferred_compilation_event") is not True
+            or observation.get("passed") is not True
+        ):
+            raise ValueError(f"v10 {role} measured transaction compilation gate failed")
+        if role == "serving":
+            payload_start_ns = int(payload["start_ns"])
+            payload_end_ns = int(payload["end_ns"])
+        else:
+            payload_start_ns = _phase_timestamp(payload, "RECLAIM_TRIGGER")
+            payload_end_ns = int(payload["rollout_continuation_complete_ns"])
+        if start_ns > payload_start_ns or end_ns < payload_end_ns:
+            raise ValueError(f"v10 {role} compilation observation does not span the transaction")
+        evidence[role] = observation
+    return evidence
 
 
 def _event(phase: V10Phase, timestamp: int, reference: str) -> V10TimelineEvent:
@@ -244,13 +290,33 @@ def _build_timeline(
     trigger = serving.get("reclamation_trigger_evidence")
     recovery = serving.get("serving_recovery_evidence")
     enable = serving.get("serving_enable_ack")
+    restore_cutover = serving.get("restore_route_cutover")
+    gpu1_drained = serving.get("gpu1_drained")
     restore = serving.get("restore_start")
-    if not all(isinstance(item, dict) for item in (trigger, recovery, enable, restore)):
+    if not all(
+        isinstance(item, dict)
+        for item in (trigger, recovery, enable, restore_cutover, gpu1_drained, restore)
+    ):
         raise ValueError("v10 serving barriers are incomplete")
     assert isinstance(trigger, dict)
     assert isinstance(recovery, dict)
     assert isinstance(enable, dict)
+    assert isinstance(restore_cutover, dict)
+    assert isinstance(gpu1_drained, dict)
     assert isinstance(restore, dict)
+    if (
+        int(gpu1_drained.get("running_requests", -1)) != 0
+        or int(gpu1_drained.get("waiting_requests", -1)) != 0
+        or int(gpu1_drained.get("skipped_waiting_requests", -1)) != 0
+        or int(gpu1_drained.get("scheduler_request_count", -1)) != 0
+        or int(gpu1_drained.get("queue_depth", -1)) != 0
+        or gpu1_drained.get("runtime_state_source") != "live-vllm-0.23-scheduler"
+        or int(gpu1_drained.get("restore_cutover_sequence", -1))
+        != int(restore_cutover["restore_cutover_sequence"])
+        or int(gpu1_drained.get("last_admitted_sequence", -1))
+        >= int(restore_cutover["restore_cutover_sequence"])
+    ):
+        raise ValueError("v10 GPU1 drain evidence is incomplete or crosses the route cutover")
     stability_rows = recovery.get("stability_windows")
     if not isinstance(stability_rows, list) or not stability_rows:
         raise ValueError("v10 recovery omitted stability windows")
@@ -261,18 +327,17 @@ def _build_timeline(
     if queue_trend_end != stability_start:
         raise ValueError("v10 SLO stability began before the sustained queue-drain gate completed")
     evaluated = int(recovery["evaluated_ns"])
-    quiesce_start, quiesce_end = _stage_bounds(rollout, "branch_quiesce")
     restore_trigger = int(restore["observed_ns"])
     continuation_end = int(rollout["rollout_continuation_complete_ns"])
 
     timestamps: dict[V10Phase, tuple[int, str]] = {
         V10Phase.CONTROL_STABLE: (
-            int(trigger["window_start_ns"]),
+            int(serving["spike_start_ns"]),
             "analysis:control-window-p95-and-throughput-confirmed",
         ),
         V10Phase.LOAD_SPIKE_BEGIN: (
-            int(trigger["window_start_ns"]),
-            "serving/result.json#reclamation_trigger_evidence.window_start_ns",
+            int(serving["spike_start_ns"]),
+            "serving/result.json#spike_start_ns",
         ),
         V10Phase.GPU0_OVERLOAD_CONFIRMED: (
             int(trigger["window_end_ns"]),
@@ -287,12 +352,12 @@ def _build_timeline(
             "rollout/result.json#phase_events/ROLLOUT_ADMISSION_STOP",
         ),
         V10Phase.BRANCH_QUIESCE_BEGIN: (
-            quiesce_start,
-            "rollout/result.json#reclamation_stages/branch_quiesce.start_ns",
+            _phase_timestamp(rollout, "BRANCH_QUIESCE_BEGIN"),
+            "rollout/result.json#phase_events/BRANCH_QUIESCE_BEGIN",
         ),
         V10Phase.BRANCH_QUIESCE_END: (
-            quiesce_end,
-            "rollout/result.json#reclamation_stages/branch_quiesce.end_ns",
+            _phase_timestamp(rollout, "BRANCH_QUIESCE_END"),
+            "rollout/result.json#phase_events/BRANCH_QUIESCE_END",
         ),
         V10Phase.STATE_CAPTURE_BEGIN: (
             _phase_timestamp(rollout, "STATE_CAPTURE_BEGIN"),
@@ -330,17 +395,17 @@ def _build_timeline(
             _phase_timestamp(rollout, "STATE_PUBLISH"),
             "rollout/result.json#phase_events/STATE_PUBLISH",
         ),
-        V10Phase.GPU1_KV_RELEASE_BEGIN: (
-            _phase_timestamp(rollout, "GPU_STATE_RELEASE_BEGIN"),
-            "rollout/result.json#phase_events/GPU_STATE_RELEASE_BEGIN",
+        V10Phase.GPU1_STATE_RELEASE_BEGIN: (
+            _phase_timestamp(rollout, "GPU1_STATE_RELEASE_BEGIN"),
+            "rollout/result.json#phase_events/GPU1_STATE_RELEASE_BEGIN",
         ),
-        V10Phase.GPU1_KV_RELEASE_END: (
-            _phase_timestamp(rollout, "GPU_STATE_RELEASE_END"),
-            "rollout/result.json#phase_events/GPU_STATE_RELEASE_END",
+        V10Phase.GPU1_STATE_RELEASE_END: (
+            _phase_timestamp(rollout, "GPU1_STATE_RELEASE_END"),
+            "rollout/result.json#phase_events/GPU1_STATE_RELEASE_END",
         ),
         V10Phase.GPU1_HBM_RECLAIM_CONFIRMED: (
-            _phase_timestamp(rollout, "HBM_RECLAIM_CONFIRMED"),
-            "rollout/result.json#phase_events/HBM_RECLAIM_CONFIRMED",
+            _phase_timestamp(rollout, "GPU1_HBM_RECLAIM_CONFIRMED"),
+            "rollout/result.json#phase_events/GPU1_HBM_RECLAIM_CONFIRMED",
         ),
         V10Phase.GPU1_SERVING_ENABLE: (
             int(enable["observed_ns"]),
@@ -378,9 +443,17 @@ def _build_timeline(
             evaluated,
             "serving/result.json#serving_recovery_evidence.evaluated_ns",
         ),
+        V10Phase.RESTORE_LOAD_REDUCED: (
+            int(restore_cutover["restore_start_ns"]),
+            "barriers/v10-restore-route-cutover.json#restore_start_ns",
+        ),
+        V10Phase.GPU1_SERVING_DRAINED: (
+            int(gpu1_drained["observed_ns"]),
+            "barriers/v10-gpu1-drained.json#observed_ns",
+        ),
         V10Phase.RESTORE_ELIGIBLE: (
-            evaluated,
-            "serving/result.json#serving_recovery_evidence.restore_eligible",
+            restore_trigger,
+            "barriers/v10-restore-start.json#observed_ns",
         ),
         V10Phase.RESTORE_TRIGGER: (
             restore_trigger,
@@ -398,6 +471,10 @@ def _build_timeline(
             _phase_timestamp(rollout, "STATE_IMPORT_BEGIN"),
             "rollout/result.json#phase_events/STATE_IMPORT_BEGIN",
         ),
+        V10Phase.DESTINATION_NATIVE_WRITE_BEGIN: (
+            _phase_timestamp(rollout, "DESTINATION_NATIVE_WRITE_BEGIN"),
+            "rollout/result.json#phase_events/DESTINATION_NATIVE_WRITE_BEGIN",
+        ),
         V10Phase.STATE_VALIDATE_BEGIN: (
             _phase_timestamp(rollout, "STATE_VALIDATE_BEGIN"),
             "rollout/result.json#phase_events/STATE_VALIDATE_BEGIN:first",
@@ -405,6 +482,10 @@ def _build_timeline(
         V10Phase.STATE_VALIDATE_END: (
             _phase_timestamp(rollout, "STATE_VALIDATE_END", last=True),
             "rollout/result.json#phase_events/STATE_VALIDATE_END:last",
+        ),
+        V10Phase.DESTINATION_NATIVE_WRITE_END: (
+            _phase_timestamp(rollout, "DESTINATION_NATIVE_WRITE_END"),
+            "rollout/result.json#phase_events/DESTINATION_NATIVE_WRITE_END",
         ),
         V10Phase.STATE_IMPORT_END: (
             _phase_timestamp(rollout, "STATE_IMPORT_END"),
@@ -429,21 +510,17 @@ def _build_timeline(
     }
     timeline = V10Timeline(events=tuple(_event(phase, *timestamps[phase]) for phase in V10Phase))
     windows = V10AssessmentWindows(
-        control=PhaseInterval(
-            name="v10-control",
-            start_ns=int(serving["start_ns"]),
-            end_ns=int(trigger["window_start_ns"]),
-        ),
+        control=_control_assessment_interval(serving=serving, config=config),
         overload=PhaseInterval(
             name="v10-gpu0-overload",
-            start_ns=int(trigger["window_start_ns"]),
+            start_ns=int(serving["spike_start_ns"]),
             end_ns=int(trigger["window_end_ns"]),
         ),
         two_gpu_excess_capacity=PhaseInterval(
             name="v10-two-gpu-capacity", start_ns=first_useful, end_ns=evaluated
         ),
         queue_drain=PhaseInterval(
-            name="v10-queue-drain", start_ns=first_useful, end_ns=stability_start
+            name="v10-queue-drain", start_ns=queue_trend_start, end_ns=queue_trend_end
         ),
         slo_stability=PhaseInterval(
             name="v10-slo-stability", start_ns=stability_start, end_ns=stability_end
@@ -453,6 +530,31 @@ def _build_timeline(
         ),
     )
     return timeline, windows
+
+
+def _control_assessment_interval(
+    *, serving: dict[str, Any], config: dict[str, Any]
+) -> PhaseInterval:
+    """Exclude only the predeclared empty-queue fill from control assessment."""
+
+    raw_warmup = config.get("warmup_seconds")
+    if isinstance(raw_warmup, bool) or not isinstance(raw_warmup, (int, float)):
+        raise ValueError("v10 control assessment requires a numeric warmup_seconds")
+    warmup_seconds = float(raw_warmup)
+    if not math.isfinite(warmup_seconds) or not math.isclose(
+        warmup_seconds, 1.0, rel_tol=0.0, abs_tol=1e-12
+    ):
+        raise ValueError("integrated v10 control assessment requires its predeclared 1s warmup")
+    start_ns = int(serving["start_ns"])
+    spike_start_ns = int(serving["spike_start_ns"])
+    assessment_start_ns = start_ns + round(warmup_seconds * NS_PER_SECOND)
+    if assessment_start_ns >= spike_start_ns:
+        raise ValueError("v10 control warmup leaves no assessment interval")
+    return PhaseInterval(
+        name="v10-control",
+        start_ns=assessment_start_ns,
+        end_ns=spike_start_ns,
+    )
 
 
 def _build_serving(
@@ -575,6 +677,82 @@ def _build_serving(
         requests=tuple(requests),
     )
     return workload, tuple(observations)
+
+
+def _bounded_backlog_evidence(
+    *,
+    config: dict[str, Any],
+    serving: dict[str, Any],
+    timeline: V10Timeline,
+    workload: ServingWorkload,
+    observations: tuple[ServingObservation, ...],
+) -> BoundedBacklogEvidence:
+    trigger = serving.get("reclamation_trigger_evidence")
+    recovery = serving.get("serving_recovery_evidence")
+    if not isinstance(trigger, dict) or not isinstance(recovery, dict):
+        raise ValueError("v10 bounded-backlog evidence is absent")
+    trigger_observation_ns = int(trigger["window_end_ns"])
+    interval = PhaseInterval(
+        name="v10-bounded-backlog",
+        start_ns=timeline.timestamp(V10Phase.LOAD_SPIKE_BEGIN),
+        end_ns=timeline.timestamp(V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST),
+    )
+    by_request = {row.request_id: row for row in observations}
+    if len(by_request) != len(observations) or set(by_request) != {
+        row.request_id for row in workload.requests
+    }:
+        raise ValueError("v10 bounded-backlog calculation requires complete observations")
+    event_times = {
+        interval.start_ns,
+        interval.end_ns,
+        trigger_observation_ns,
+        *(
+            row.arrival_ns
+            for row in workload.requests
+            if interval.start_ns <= row.arrival_ns <= interval.end_ns
+        ),
+        *(
+            timestamp
+            for row in observations
+            for timestamp in (row.completion_ns, max(interval.start_ns, row.completion_ns - 1))
+            if interval.start_ns <= timestamp <= interval.end_ns
+        ),
+    }
+    maximum_depth = max(
+        outstanding_queue_depth_at(workload, by_request, timestamp) for timestamp in event_times
+    )
+    trigger_depth = outstanding_queue_depth_at(workload, by_request, trigger_observation_ns)
+    first_useful_depth = outstanding_queue_depth_at(workload, by_request, interval.end_ns)
+    configured_trigger = int(config["serving_overload_queue_trigger"])
+    configured_abort = int(config["serving_overload_queue_abort"])
+    if (
+        trigger.get("overload_confirmed") is not True
+        or int(trigger.get("queue_trigger", -1)) != configured_trigger
+        or int(trigger.get("queue_abort", -1)) != configured_abort
+        or int(trigger.get("queue_depth_end", -1)) != trigger_depth
+        or int(recovery.get("queue_depth_at_gpu1_first_useful", -1)) != first_useful_depth
+    ):
+        raise ValueError("v10 raw and recomputed bounded-backlog evidence disagree")
+    preferred_minimum = 10
+    preferred_maximum = 25
+    passed = (
+        preferred_minimum <= configured_trigger <= preferred_maximum
+        and configured_trigger <= trigger_depth <= preferred_maximum
+        and trigger_depth <= maximum_depth <= preferred_maximum
+        and first_useful_depth <= maximum_depth
+    )
+    return BoundedBacklogEvidence(
+        interval=interval,
+        trigger_observation_ns=trigger_observation_ns,
+        trigger_queue_depth=trigger_depth,
+        maximum_queue_depth=maximum_depth,
+        queue_depth_at_gpu1_first_useful=first_useful_depth,
+        configured_trigger_depth=configured_trigger,
+        configured_abort_depth=configured_abort,
+        preferred_minimum_depth=preferred_minimum,
+        preferred_maximum_depth=preferred_maximum,
+        passed=passed,
+    )
 
 
 def _actual_arrival_evidence(*, config: dict[str, Any], serving: dict[str, Any]) -> dict[str, Any]:
@@ -776,8 +954,98 @@ def _validate_fixed_v10_movement_shape(report: StateMovementReport) -> dict[str,
     }
 
 
+def _enriched_state_passes(
+    *,
+    report: StateMovementReport,
+    operation_telemetry: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Attach processor/timing/semantic classifications to every raw pass.
+
+    A single measured CUDA operation can implement several logical segment
+    records. Its event time is therefore repeated with an explicit shared-time
+    semantic and must not be summed across records.
+    """
+
+    operations = operation_telemetry.get("cuda_operations")
+    if not isinstance(operations, list):
+        raise ValueError("v10 state-pass enrichment lacks CUDA operation records")
+    result: list[dict[str, Any]] = []
+    for row in report.passes:
+        gpu_memory = "gpu" in row.source_memory.value or "gpu" in row.destination_memory.value
+        processor = "GPU" if gpu_memory or row.transfer_direction.value != "none" else "CPU"
+        matching = [
+            operation
+            for operation in operations
+            if int(operation["cpu_start_monotonic_ns"]) <= row.end_ns
+            and int(operation["cpu_end_monotonic_ns"]) >= row.start_ns
+        ]
+        cuda_time_ns = (
+            sum(int(operation["cuda_event_elapsed_ns"]) for operation in matching)
+            if processor == "GPU" and matching
+            else None
+        )
+        if processor == "GPU" and cuda_time_ns is None:
+            # Allocation-lifetime records and host-side scheduler metadata may
+            # name a GPU/host buffer without launching a CUDA operation.
+            cuda_time_semantics = "not-applicable-no-cuda-kernel-or-copy-in-pass"
+        elif cuda_time_ns is None:
+            cuda_time_semantics = "not-applicable-cpu-pass"
+        else:
+            cuda_time_semantics = (
+                "shared-underlying-cuda-operation-time-do-not-sum-across-segment-records"
+            )
+        if row.required_unavoidable:
+            avoidability = "required-unavoidable"
+            semantic_requirement = (
+                "required by the frozen transport, correctness, or fresh-destination contract"
+            )
+        else:
+            avoidability = "avoidable-naive-baseline"
+            semantic_requirement = (
+                "current naive materialization or validation implementation; not a semantic minimum"
+            )
+        if not row.required_unavoidable:
+            fusibility = "fusible-candidate"
+        elif row.operation.value in {"d2h", "h2d", "write"}:
+            fusibility = "boundary-operation-not-removable"
+        elif row.operation.value in {"checksum", "validate"}:
+            fusibility = "fusible-only-with-equivalent-integrity-proof"
+        else:
+            fusibility = "fusible-with-adjacent-pass-if-semantics-preserved"
+        result.append(
+            {
+                **row.model_dump(mode="json"),
+                "stage": row.record_id.split(":", 2)[1],
+                "processor": processor,
+                "cpu_process": "rollout-worker",
+                "gpu": row.device if processor == "GPU" else None,
+                "wall_time_ns": row.end_ns - row.start_ns,
+                "cuda_time_ns": cuda_time_ns,
+                "cuda_operation_ids": [str(operation["operation_id"]) for operation in matching],
+                "cuda_time_semantics": cuda_time_semantics,
+                "temporary_buffer": {
+                    "bytes": row.temporary_allocation_bytes,
+                    "memory": (
+                        None
+                        if row.temporary_allocation_memory is None
+                        else row.temporary_allocation_memory.value
+                    ),
+                    "allocation_id": row.temporary_allocation_id,
+                },
+                "semantic_requirement": semantic_requirement,
+                "avoidability_classification": avoidability,
+                "fusibility_classification": fusibility,
+            }
+        )
+    if len(result) != len(report.passes):
+        raise AssertionError("state-pass enrichment lost records")
+    return result
+
+
 def _movement_artifact(
     rollout: dict[str, Any],
+    *,
+    operation_telemetry: dict[str, Any],
 ) -> tuple[dict[str, Any], MovementAccountingEvidence]:
     parsed = StateMovementReport.model_validate(rollout["movement_report"])
     report = build_state_movement_report(
@@ -824,6 +1092,21 @@ def _movement_artifact(
         for row in report.passes
         if row.destination_memory is MemoryDomain.DESTINATION_GPU_NATIVE_PAGED
     )
+    host_domains = {
+        MemoryDomain.PINNED_HOST_TRANSPORT,
+        MemoryDomain.PAGEABLE_HOST_BUFFER,
+        MemoryDomain.HOST_TRANSPORT_STORE,
+        MemoryDomain.HOST_INTEGRITY_METADATA,
+        MemoryDomain.HOST_RUNTIME_METADATA,
+    }
+    host_intermediate_reads = sum(
+        row.bytes_read for row in report.passes if row.source_memory in host_domains
+    )
+    host_intermediate_writes = sum(
+        row.bytes_written for row in report.passes if row.destination_memory in host_domains
+    )
+    if host_intermediate_reads + host_intermediate_writes != accounting.host_intermediate_bytes:
+        raise ValueError("v10 host intermediate read/write split differs from accounting total")
     artifact = {
         "schema_version": "sloforge.branchfabric.experiment-004-v10-movement-accounting/v1",
         "logical_state_bytes": accounting.logical_state_bytes,
@@ -831,11 +1114,14 @@ def _movement_artifact(
         "unique_real_h2d_bytes": accounting.h2d_bytes,
         "source_gpu_reads": source_gpu_reads,
         "source_gpu_writes": source_gpu_writes,
+        "host_intermediate_reads": host_intermediate_reads,
+        "host_intermediate_writes": host_intermediate_writes,
         "host_intermediate_reads_writes": accounting.host_intermediate_bytes,
         "destination_gpu_reads": destination_gpu_reads,
         "destination_gpu_writes": destination_gpu_writes,
         "gpu_intermediate_reads_writes": accounting.gpu_intermediate_bytes,
         "checksum_integrity_bytes": accounting.checksum_bytes,
+        "integrity_read_bytes": accounting.checksum_bytes,
         "temporary_allocation_bytes": {
             "host": accounting.host_temporary_allocation_bytes,
             "gpu": accounting.gpu_temporary_allocation_bytes,
@@ -845,8 +1131,17 @@ def _movement_artifact(
         "full_physical_touch_bytes": evidence.full_physical_touch_bytes,
         "external_movement_bytes": external,
         "avoidable_movement_bytes": avoidable,
+        "avoidable_movement_semantics": (
+            "conservative lower bound: sum of endpoint/link bytes for raw passes marked "
+            "not required_unavoidable by the frozen naive implementation"
+        ),
         "required_movement_bytes": evidence.full_physical_touch_bytes - avoidable,
         "critical_path_movement_bytes": evidence.critical_path_movement_bytes,
+        "critical_path_movement_semantics": (
+            "all fixed naive state-pass bytes: the GPU1 worker synchronously awaits every "
+            "capture, transform, transfer, integrity, import, native-write, and validation "
+            "operation before the dependent state transition can complete"
+        ),
         "amplification": {
             "full_physical_touch": (
                 evidence.full_physical_touch_bytes / evidence.logical_state_bytes
@@ -860,6 +1155,9 @@ def _movement_artifact(
         "all_physical_passes_recorded": True,
         "formulas_recomputed_from_raw_artifacts": True,
         "fixed_naive_pass_graph_evidence": shape_evidence,
+        "state_pass_records": _enriched_state_passes(
+            report=report, operation_telemetry=operation_telemetry
+        ),
         "raw_state_movement_report": report.model_dump(mode="json"),
     }
     return artifact, evidence
@@ -872,6 +1170,7 @@ def assess_v10_directory(
     controller: dict[str, Any],
     budget: BudgetEvidence,
     cleanup: CleanupEvidence,
+    prerequisites: V10PrerequisiteEvidence | None = None,
 ) -> tuple[V10ScientificValidity, dict[str, Any], dict[str, Any]]:
     """Build all three required v10 analysis artifacts from raw files."""
 
@@ -881,10 +1180,43 @@ def assess_v10_directory(
         raise ValueError("v10 workers did not both succeed")
     if serving.get("methodology") != "v10-global-capacity":
         raise ValueError("serving worker did not execute the explicit v10 methodology")
+    compilation_evidence = _validate_measured_transaction_compilation(
+        serving=serving, rollout=rollout
+    )
     timeline, windows = _build_timeline(serving=serving, rollout=rollout, config=config)
     workload, observations = _build_serving(config=config, serving=serving, rollout=rollout)
+    bounded_backlog = _bounded_backlog_evidence(
+        config=config,
+        serving=serving,
+        timeline=timeline,
+        workload=workload,
+        observations=observations,
+    )
     arrival_evidence = _actual_arrival_evidence(config=config, serving=serving)
-    movement_artifact, movement_evidence = _movement_artifact(rollout)
+    operation_telemetry = _load_object(
+        work_root / "rollout/telemetry/cuda-and-host-operations.json"
+    )
+    movement_artifact, movement_evidence = _movement_artifact(
+        rollout, operation_telemetry=operation_telemetry
+    )
+    state_pass_path = work_root / "state-passes/state-pass-records.json"
+    state_pass_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = state_pass_path.with_name(f".{state_pass_path.name}.{os.getpid()}.tmp")
+    temporary.write_bytes(
+        (
+            json.dumps(
+                {
+                    "schema_version": "sloforge.branchfabric.experiment-004-v10-state-passes/v1",
+                    "attempt_id": config["attempt_id"],
+                    "records": movement_artifact["state_pass_records"],
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            + "\n"
+        ).encode()
+    )
+    os.replace(temporary, state_pass_path)
     manifest = CanonicalKvTransportManifest.model_validate(rollout["transport_manifest"])
     semantics = _branch_semantics(config=config, rollout=rollout, manifest=manifest)
     continuation = semantics.continuation_token_counts
@@ -905,12 +1237,20 @@ def assess_v10_directory(
         semantic_continuity=semantics,
     )
     released = rollout.get("source_block_release_summary", {})
+    memory_before = rollout.get("source_memory_before_release", {})
+    memory_after = rollout.get("source_memory_after_release", {})
     logical_bytes = int(rollout["logical_state_bytes"])
     state = StateCorrectnessEvidence(
         logical_state_bytes=logical_bytes,
         preserved_state_bytes=int(rollout["kv_logical_state_bytes"]),
         source_blocks_expected=int(rollout["block_count"]),
         source_blocks_released=int(released.get("exact_source_block_count", -1)),
+        source_kv_assigned_bytes_before=int(memory_before.get("kv_assigned_bytes", -1)),
+        source_kv_assigned_bytes_after=int(memory_after.get("kv_assigned_bytes", -1)),
+        source_kv_pool_reserved_bytes_before=int(memory_before.get("kv_pool_reserved_bytes", -1)),
+        source_kv_pool_reserved_bytes_after=int(memory_after.get("kv_pool_reserved_bytes", -1)),
+        source_kv_unassigned_bytes_before=int(memory_before.get("kv_unassigned_bytes", -1)),
+        source_kv_unassigned_bytes_after=int(memory_after.get("kv_unassigned_bytes", -1)),
         transport_integrity_valid=bool(rollout.get("transport_integrity_valid")),
         fresh_destination_allocations=bool(
             rollout.get("source_destination_fresh")
@@ -932,6 +1272,9 @@ def assess_v10_directory(
         control_offered_rate_per_second=float(config["gpu0_control_request_rate_per_second"]),
         spike_offered_rate_per_second=float(config["serving_spike_request_rate_per_second"]),
         restore_offered_rate_per_second=float(config["gpu0_restore_request_rate_per_second"]),
+        lambda_1_rps=float(config["lambda_1_rps"]),
+        overload_queue_trigger_depth=int(config["serving_overload_queue_trigger"]),
+        overload_queue_abort_depth=int(config["serving_overload_queue_abort"]),
         maximum_p95_ttft_ns=int(float(config["serving_slo_maximum_ttft_seconds"]) * NS_PER_SECOND),
         recovery_queue_depth_threshold=int(config["serving_recovery_queue_threshold"]),
         evaluation_window_ns=int(
@@ -949,23 +1292,30 @@ def assess_v10_directory(
         observations=observations,
         gpu0_device="gpu0",
         gpu1_device="gpu1",
+        bounded_backlog=bounded_backlog,
         state_correctness=state,
         branch_resume=branch_resume,
         movement_accounting=movement_evidence,
         budget=budget,
         cleanup=cleanup,
+        prerequisites=prerequisites,
     )
     serving_recovery = {
         "schema_version": "sloforge.branchfabric.experiment-004-v10-serving-recovery/v1",
         "timeline": timeline.model_dump(mode="json"),
         "assessment_windows": windows.model_dump(mode="json"),
         "reclamation_trigger_evidence": serving["reclamation_trigger_evidence"],
+        "bounded_backlog_evidence": bounded_backlog.model_dump(mode="json"),
         "serving_recovery_evidence": serving["serving_recovery_evidence"],
         "global_offered_request_count": len(workload.requests),
         "complete_observation_count": len(observations),
         "output_tokens_per_request": 64,
         "routing_plan_observation_bijection": True,
         "actual_arrival_evidence": arrival_evidence,
+        "measured_transaction_compilation": {
+            "both_engines_compilation_free": True,
+            "by_role": compilation_evidence,
+        },
     }
     return scientific, movement_artifact, serving_recovery
 

@@ -11,12 +11,25 @@ from types import SimpleNamespace
 
 import pytest
 
+from sloforge.helix.characterization.gpu_reclamation_serving import (
+    ArrivalPhase,
+    ObservationOutcome,
+    ServingMeasurementPlan,
+    ServingObservation,
+    ServingRequest,
+    ServingSpikeConfig,
+    ServingWorkload,
+    WeightedTokenDistribution,
+    measure_serving_intervals,
+)
 from sloforge.helix.characterization.gpu_reclamation_serving_v10 import (
     build_global_serving_plan,
 )
 from sloforge.helix.characterization.gpu_reclamation_v10_postprocess import (
     _actual_arrival_evidence,
     _build_serving,
+    _control_assessment_interval,
+    _validate_measured_transaction_compilation,
     _validate_raw_recovery_trend,
 )
 
@@ -84,7 +97,155 @@ def _config():  # type: ignore[no-untyped-def]
         restore_grace_seconds=0.12,
         maximum_pending_requests=100,
         restore_handoff_lead_requests=4,
+        overload_queue_trigger=10,
+        overload_queue_abort=64,
     )
+
+
+def test_control_assessment_excludes_only_predeclared_empty_queue_fill() -> None:
+    start_ns = 10_000_000_000
+    spike_start_ns = start_ns + 5_000_000_000
+    interval = _control_assessment_interval(
+        serving={"start_ns": start_ns, "spike_start_ns": spike_start_ns},
+        config={"warmup_seconds": 1.0},
+    )
+    assert interval.start_ns == start_ns + 1_000_000_000
+    assert interval.end_ns == spike_start_ns
+
+    # The independently measured request completion latency is approximately
+    # 1.05 seconds. From an empty queue, assessing the entire five-second
+    # traffic interval therefore undercounts completions even at a stable
+    # deterministic 9 rps. The predeclared one-second settling boundary keeps
+    # every request in the raw workload while assessing steady-state service.
+    requests = tuple(
+        ServingRequest(
+            sequence=sequence,
+            request_id=f"control-latency-{sequence:02d}",
+            phase="control",
+            arrival_ns=start_ns + (sequence * 1_000_000_000) // 9,
+            prompt_tokens=256,
+            requested_output_tokens=1,
+        )
+        for sequence in range(45)
+    )
+    observations = tuple(
+        ServingObservation(
+            request_id=request.request_id,
+            arrival_ns=request.arrival_ns,
+            service_start_ns=request.arrival_ns + 30_000_000,
+            token_timestamps_ns=(request.arrival_ns + 40_000_000,),
+            completion_ns=request.arrival_ns + 1_050_000_000,
+            outcome=ObservationOutcome.COMPLETED,
+            device="gpu0",
+        )
+        for request in requests
+    )
+    workload = ServingWorkload(
+        workload_id="a" * 64,
+        start_ns=start_ns,
+        end_ns=start_ns + 7_000_000_000,
+        config=ServingSpikeConfig(
+            seed=41,
+            control_phase="control",
+            spike_phase="tail",
+            phases=(
+                ArrivalPhase(
+                    name="control",
+                    start_offset_ns=0,
+                    end_offset_ns=5_000_000_000,
+                    interarrival_ns=111_111_111,
+                ),
+                ArrivalPhase(
+                    name="tail",
+                    start_offset_ns=5_000_000_000,
+                    end_offset_ns=7_000_000_000,
+                    interarrival_ns=1_000_000_000,
+                ),
+            ),
+            prompt_tokens=WeightedTokenDistribution(values=(256,), weights=(1,)),
+            output_tokens=WeightedTokenDistribution(values=(1,), weights=(1,)),
+        ),
+        requests=requests,
+    )
+    full = measure_serving_intervals(
+        workload,
+        observations,
+        ServingMeasurementPlan(
+            intervals=(interval.model_copy(update={"start_ns": start_ns, "name": "full-control"}),)
+        ),
+    ).intervals[0]
+    settled = measure_serving_intervals(
+        workload,
+        observations,
+        ServingMeasurementPlan(intervals=(interval,)),
+    ).intervals[0]
+
+    assert len(workload.requests) == 45
+    assert full.offered_requests == 45
+    assert full.request_throughput_per_second == pytest.approx(7.2)
+    assert settled.offered_requests == 36
+    assert settled.request_throughput_per_second == pytest.approx(9.0)
+
+
+def test_control_assessment_rejects_posthoc_warmup_changes() -> None:
+    with pytest.raises(ValueError, match="predeclared 1s warmup"):
+        _control_assessment_interval(
+            serving={"start_ns": 0, "spike_start_ns": 5_000_000_000},
+            config={"warmup_seconds": 1.5},
+        )
+
+
+def test_postprocessor_rejects_transaction_compilation_or_partial_coverage() -> None:
+    def observation(role: str, *, start_ns: int, end_ns: int) -> dict[str, object]:
+        return {
+            "schema_version": (
+                "sloforge.branchfabric.measured-transaction-compilation-observation/v1"
+            ),
+            "source": "bounded-python-logging-handler",
+            "role": role,
+            "interval_start_ns": start_ns,
+            "interval_end_ns": end_ns,
+            "capture_buffer_valid": True,
+            "events": [],
+            "no_deferred_compilation_event": True,
+            "passed": True,
+        }
+
+    serving = {
+        "role": "serving",
+        "start_ns": 100,
+        "end_ns": 900,
+        "measured_transaction_compilation_observation": observation(
+            "serving", start_ns=90, end_ns=910
+        ),
+    }
+    rollout = {
+        "role": "rollout",
+        "phase_events": [
+            {"phase": "RECLAIM_TRIGGER", "monotonic_timestamp_ns": 300},
+        ],
+        "rollout_continuation_complete_ns": 800,
+        "measured_transaction_compilation_observation": observation(
+            "rollout", start_ns=90, end_ns=910
+        ),
+    }
+    assert set(_validate_measured_transaction_compilation(serving=serving, rollout=rollout)) == {
+        "serving",
+        "rollout",
+    }
+
+    compiled = json.loads(json.dumps(rollout))
+    compiled["measured_transaction_compilation_observation"]["events"] = [
+        "jit compilation during inference"
+    ]
+    compiled["measured_transaction_compilation_observation"]["passed"] = False
+    with pytest.raises(ValueError, match="rollout measured transaction compilation gate"):
+        _validate_measured_transaction_compilation(serving=serving, rollout=compiled)
+
+    partial = json.loads(json.dumps(serving))
+    partial["measured_transaction_compilation_observation"]["interval_start_ns"] = 101
+    with pytest.raises(ValueError, match="does not span"):
+        _validate_measured_transaction_compilation(serving=partial, rollout=rollout)
 
 
 def test_live_config_requires_explicit_v10_and_production_stability() -> None:
@@ -105,6 +266,8 @@ def test_live_config_requires_explicit_v10_and_production_stability() -> None:
         "temporary_serving_seconds": 2.0,
         "serving_maximum_pending_requests": 1024,
         "serving_restore_handoff_lead_requests": 4,
+        "serving_overload_queue_trigger": 10,
+        "serving_overload_queue_abort": 64,
     }
     config = _LIVE.LiveV10Config.from_mapping(payload)
     assert config.spike_rate_per_second == 15.0
@@ -127,6 +290,49 @@ def test_sequence_clock_and_route_are_reconstructible_by_both_workers() -> None:
         _LIVE.recovery_route(sequence=sequence, enable_cutover_sequence=10)
         for sequence in range(8, 15)
     ] == ["gpu0", "gpu0", "gpu0", "gpu1", "gpu0", "gpu1", "gpu0"]
+
+
+def test_hard_queue_abort_remains_live_after_trigger_until_gpu1_is_useful() -> None:
+    with pytest.raises(RuntimeError, match="post-reclaim-pre-gpu1"):
+        _LIVE._enforce_pre_gpu1_queue_abort(
+            trigger_written=True,
+            gpu1_first_useful=None,
+            instantaneous_depth=65,
+            maximum_depth=64,
+        )
+
+    # The bounded pre-GPU1 guard deliberately stops applying only after the
+    # second engine has completed a useful serving request.
+    _LIVE._enforce_pre_gpu1_queue_abort(
+        trigger_written=True,
+        gpu1_first_useful={"request_id": "gpu1-useful"},
+        instantaneous_depth=65,
+        maximum_depth=64,
+    )
+
+
+def test_restore_drain_uses_live_scheduler_counts_and_rejects_hidden_work() -> None:
+    empty = {
+        "request_count": 0,
+        "running_requests": 0,
+        "waiting_requests": 0,
+        "skipped_waiting_requests": 0,
+        "queue_depth": 0,
+    }
+    assert _LIVE._validated_runtime_drain_state(empty) == empty
+
+    hidden_waiting = {
+        **empty,
+        "request_count": 1,
+        "waiting_requests": 1,
+        "queue_depth": 1,
+    }
+    with pytest.raises(RuntimeError, match="not fully drained"):
+        _LIVE._validated_runtime_drain_state(hidden_waiting)
+
+    inconsistent = {**empty, "waiting_requests": 1}
+    with pytest.raises(ValueError, match="queue-depth accounting"):
+        _LIVE._validated_runtime_drain_state(inconsistent)
 
 
 def test_restore_candidate_rejects_endpoint_only_queue_decrease(
@@ -241,6 +447,13 @@ def test_synthetic_live_protocol_overloads_recovers_drains_and_restores(tmp_path
                     config=config,
                     barriers=tmp_path,
                     write_new=_write_new,
+                    runtime_queue_state=lambda: {
+                        "request_count": 0,
+                        "running_requests": 0,
+                        "waiting_requests": 0,
+                        "skipped_waiting_requests": 0,
+                        "queue_depth": 0,
+                    },
                 )
             )
             _write_new(
