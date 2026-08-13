@@ -742,7 +742,11 @@ def run_integrated_two_gpu_controller(
     controller_error: BaseException | None = None
     results: list[Any] = []
     transaction_compilation_by_role: dict[str, dict[str, Any]] = {}
+    readiness_window_started_ns: int | None = None
+    readiness_deadline_ns: int | None = None
+    engine_start_evidence: tuple[dict[str, Any], ...] = ()
     try:
+        worker_launch_started_ns = time.monotonic_ns()
         for role, gpu in zip(("serving", "rollout"), inventory_before, strict=True):
             role_root = work_root / role
             role_root.mkdir()
@@ -783,13 +787,52 @@ def run_integrated_two_gpu_controller(
                 raise
             children.append((role, child, stdout_handle, stderr_handle))
         child_processes = tuple((role, child) for role, child, *_ in children)
+        engine_start_paths = tuple(
+            barrier_root / f"{role}.engine-started.json" for role, *_ in children
+        )
+        _wait_for_files(
+            engine_start_paths,
+            deadline_ns=overall_deadline_ns,
+            phase="retained-engine startup signal",
+            processes=child_processes,
+        )
+        raw_engine_start_evidence = tuple(
+            json.loads(path.read_text()) for path in engine_start_paths
+        )
+        by_role = {str(item.get("role")): item for item in raw_engine_start_evidence}
+        expected_by_role = {
+            role: (child.pid, str(gpu["uuid"]))
+            for (role, child, *_), gpu in zip(children, inventory_before, strict=True)
+        }
+        observed_ns = time.monotonic_ns()
+        for role, (expected_pid, expected_uuid) in expected_by_role.items():
+            payload = by_role.get(role)
+            if (
+                payload is None
+                or payload.get("schema_version") != "sloforge.branchfabric.retained-engine-start/v1"
+                or payload.get("pid") != expected_pid
+                or payload.get("physical_gpu_uuid") != expected_uuid
+                or isinstance(payload.get("engine_started_ns"), bool)
+                or not isinstance(payload.get("engine_started_ns"), int)
+                or not worker_launch_started_ns <= int(payload["engine_started_ns"]) <= observed_ns
+            ):
+                raise RuntimeError(f"invalid retained-engine startup evidence for {role}")
+        engine_start_evidence = tuple(by_role[role] for role in ("serving", "rollout"))
+        # The phase budget accounts peer probing and worker imports as startup,
+        # and its historical readiness measurement begins at the first real
+        # model-load timestamp.  Derive the 160-second phase deadline from that
+        # same worker-emitted clock origin while retaining the absolute cap.
+        readiness_window_started_ns = min(
+            int(payload["engine_started_ns"]) for payload in engine_start_evidence
+        )
+        readiness_deadline_ns = min(
+            overall_deadline_ns,
+            readiness_window_started_ns + round(readiness_timeout_seconds * 1e9),
+        )
         ready_paths = tuple(barrier_root / f"{role}.ready.json" for role, *_ in children)
         _wait_for_files(
             ready_paths,
-            deadline_ns=min(
-                overall_deadline_ns,
-                started_ns + round(readiness_timeout_seconds * 1e9),
-            ),
+            deadline_ns=readiness_deadline_ns,
             phase="integrated strict readiness",
             processes=child_processes,
         )
@@ -1104,6 +1147,18 @@ def run_integrated_two_gpu_controller(
         ),
         "measured_transaction_compilation_by_role": transaction_compilation_by_role,
         "cuda_peer_access": peer_access,
+        "readiness_clock": {
+            "origin": "first-worker-emitted-model-load-start",
+            "window_started_ns": readiness_window_started_ns,
+            "deadline_ns": readiness_deadline_ns,
+            "configured_timeout_seconds": readiness_timeout_seconds,
+            "engine_start_evidence": engine_start_evidence,
+            "bounded_by_absolute_controller_deadline": (
+                readiness_deadline_ns == overall_deadline_ns
+                if readiness_deadline_ns is not None
+                else None
+            ),
+        },
         "cleanup_actions": cleanup_actions,
         "compute_processes_after": processes_after,
         "controller_error": None

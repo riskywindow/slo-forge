@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import json
 import sys
 import threading
@@ -18,6 +19,20 @@ assert SPEC is not None and SPEC.loader is not None
 WORKER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = WORKER
 SPEC.loader.exec_module(WORKER)
+
+
+def test_integrated_worker_emits_model_load_clock_before_engine_creation() -> None:
+    source = inspect.getsource(WORKER.main)
+
+    integrated_mode = source.index(
+        'integrated = config.get("execution_mode") == "integrated-calibration-v10"'
+    )
+    clock = source.index("model_load_started_ns = time.monotonic_ns()")
+    signal = source.index('f"{args.role}.engine-started.json"')
+    engine_creation = source.index("adapter = _create_adapter(")
+
+    assert integrated_mode < clock < signal < engine_creation
+    assert '"schema_version": "sloforge.branchfabric.retained-engine-start/v1"' in source
 
 
 class _FakeEngine:

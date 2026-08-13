@@ -58,6 +58,32 @@ def test_integrated_controller_has_exact_nonadaptive_sanity_protocol() -> None:
     assert 'two_gpu_capacity_probe_performed": False' in source
 
 
+def test_integrated_readiness_clock_uses_worker_model_load_start() -> None:
+    source = inspect.getsource(CONTROLLER.run_integrated_two_gpu_controller)
+
+    peer_probe_end = source.index("peer_access = _run_peer_probe(")
+    first_worker_launch = source.index(
+        'for role, gpu in zip(("serving", "rollout"), inventory_before, strict=True):'
+    )
+    engine_start_wait = source.index('phase="retained-engine startup signal"')
+    readiness_clock_start = source.index("readiness_window_started_ns = min(")
+    readiness_wait = source.index('phase="integrated strict readiness"')
+
+    assert (
+        peer_probe_end
+        < first_worker_launch
+        < engine_start_wait
+        < readiness_clock_start
+        < readiness_wait
+    )
+    assert "readiness_window_started_ns + round(readiness_timeout_seconds * 1e9)" in source
+    assert not any(
+        line.strip().startswith("started_ns + round(readiness_timeout_seconds * 1e9)")
+        for line in source.splitlines()
+    )
+    assert '"origin": "first-worker-emitted-model-load-start"' in source
+
+
 def test_12_rps_guard_is_short_strict_and_backlog_bounded() -> None:
     assessment = CONTROLLER._assess_sanity_guard(_result(), expected_rate_rps=12.0)
 

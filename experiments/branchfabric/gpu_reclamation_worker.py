@@ -2849,7 +2849,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         ):
             raise RuntimeError("worker runtime pins or A100 visibility are invalid")
         inputs = json.loads((args.model_snapshot / "BRANCHFABRIC_INPUTS.json").read_text())
+        integrated = config.get("execution_mode") == "integrated-calibration-v10"
         model_load_started_ns = time.monotonic_ns()
+        if integrated:
+            _write_new(
+                args.barrier_root / f"{args.role}.engine-started.json",
+                {
+                    "schema_version": "sloforge.branchfabric.retained-engine-start/v1",
+                    "role": args.role,
+                    "device": "gpu0" if args.role == "serving" else "gpu1",
+                    "pid": os.getpid(),
+                    "physical_gpu_uuid": args.physical_gpu_uuid,
+                    "engine_started_ns": model_load_started_ns,
+                },
+            )
         adapter = _create_adapter(
             config, args.model_snapshot.resolve(strict=True), args.physical_gpu_uuid
         )
@@ -2861,7 +2874,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             work_root=work_root,
             config=config,
         )
-        integrated = config.get("execution_mode") == "integrated-calibration-v10"
         prepared = None
         serving_engine: Any = adapter._view.llm_engine
         retained_engine_handoff: dict[str, Any] | None = None
