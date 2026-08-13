@@ -80,9 +80,7 @@ def test_compact_telemetry_contract_consumes_each_completion_exactly_once(
     assert observations["telemetry_snapshot_count"] == 96
     assert observations["telemetry_unique_completion_rows"] == 734
     assert observations["telemetry_cumulative_rows_read_by_v6_pattern"] == 35_192
-    assert observations["telemetry_row_rescan_amplification"] == pytest.approx(
-        47.94550408719346
-    )
+    assert observations["telemetry_row_rescan_amplification"] == pytest.approx(47.94550408719346)
     assert observations["compact_replay_rows_inspected"] == 734
     assert observations["compact_replay_maximum_delta_rows"] == 9
     assert observations["telemetry_cumulative_bytes"] == 52_342_107
@@ -124,12 +122,8 @@ def test_gpu1_admission_is_bounded_by_global_watermark_and_stop_state(
             "error": None,
         }
     )
-    assert gpu1_admission_allowed(
-        sequence=1566, last_admitted_sequence=1564, state=running
-    )
-    assert not gpu1_admission_allowed(
-        sequence=1568, last_admitted_sequence=1566, state=running
-    )
+    assert gpu1_admission_allowed(sequence=1566, last_admitted_sequence=1564, state=running)
+    assert not gpu1_admission_allowed(sequence=1568, last_admitted_sequence=1566, state=running)
     stopped = GlobalOfferState(
         observed_ns=101,
         last_offered_sequence=1566,
@@ -137,9 +131,7 @@ def test_gpu1_admission_is_bounded_by_global_watermark_and_stop_state(
         stopped=True,
         error="bounded GPU0 queue overflow",
     )
-    assert not gpu1_admission_allowed(
-        sequence=1566, last_admitted_sequence=1564, state=stopped
-    )
+    assert not gpu1_admission_allowed(sequence=1566, last_admitted_sequence=1564, state=stopped)
 
 
 def test_gpu0_failure_persists_complete_partial_evidence_before_propagation(

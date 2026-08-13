@@ -30,8 +30,7 @@ _VLLM_RATE = re.compile(
 
 def canonical_json_bytes(value: Any) -> bytes:
     return (
-        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-        + "\n"
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n"
     ).encode("utf-8")
 
 
@@ -46,9 +45,7 @@ def _read_object(path: Path) -> dict[str, Any]:
     return value
 
 
-def queue_depths_at(
-    requests: Iterable[Mapping[str, Any]], *, timestamp_ns: int
-) -> dict[str, int]:
+def queue_depths_at(requests: Iterable[Mapping[str, Any]], *, timestamp_ns: int) -> dict[str, int]:
     """Separate queue backlog from admitted work that is already in service."""
 
     if timestamp_ns < 0:
@@ -294,8 +291,7 @@ def audit_v6_failure(*, repository_root: Path, seed: int) -> dict[str, Any]:
     if seed != 41:
         raise ValueError("the immutable v6 replay requires its recorded seed 41")
     relative_root = Path(
-        "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/"
-        "exp004-v10-naive-s41-v6"
+        "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v6"
     )
     root = repository_root / relative_root
     config_path = root / "effective-config.json"

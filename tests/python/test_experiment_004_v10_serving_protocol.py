@@ -513,9 +513,10 @@ def test_global_offer_watermark_fails_closed_on_stale_or_failed_state(
     }
     _LIVE._write_replace(path, base)
     cursor = _LIVE._OfferStateCursor()
-    assert _LIVE._read_offer_state(
-        path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=20
-    ) == base
+    assert (
+        _LIVE._read_offer_state(path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=20)
+        == base
+    )
     with pytest.raises(RuntimeError, match="stale"):
         _LIVE._read_offer_state(
             path,
@@ -534,9 +535,7 @@ def test_global_offer_watermark_fails_closed_on_stale_or_failed_state(
         },
     )
     with pytest.raises(RuntimeError, match="stopped with an error"):
-        _LIVE._read_offer_state(
-            path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=31
-        )
+        _LIVE._read_offer_state(path, attempt_id="exp004-v10-protocol", cursor=cursor, now_ns=31)
 
 
 def test_gpu0_source_path_persists_partial_evidence_before_propagation(
