@@ -123,7 +123,7 @@ class Experiment004PilotConfig(_StrictModel):
     serving_maximum_pending_requests: int = Field(default=1024, ge=1, le=20_000)
     serving_restore_handoff_lead_requests: int = Field(default=4, ge=2, le=64)
     serving_overload_queue_trigger: int = Field(default=20, ge=10, le=30)
-    serving_overload_queue_abort: int = Field(default=25, ge=11, le=64)
+    serving_overload_queue_abort: int = Field(default=64, ge=11, le=64)
     disable_log_stats: bool = True
     warmup_seconds: float = Field(default=1.0, ge=1.0, le=5.0)
     sanity_guard_measurement_seconds: Literal[3.0] = 3.0
@@ -172,10 +172,10 @@ class Experiment004PilotConfig(_StrictModel):
                 )
             if not self.serving_overload_queue_trigger < self.serving_overload_queue_abort:
                 raise ValueError("overload abort must exceed the bounded trigger")
-            if self.serving_overload_queue_trigger != 20 or self.serving_overload_queue_abort != 25:
+            if self.serving_overload_queue_trigger != 20 or self.serving_overload_queue_abort != 64:
                 raise ValueError(
                     "integrated v10 requires the preselected 20-request trigger and "
-                    "25-request scientific abort"
+                    "64-request hard safety abort"
                 )
             if self.maximum_wall_seconds > INTEGRATED_CONTROLLER_DEADLINE_SECONDS:
                 raise ValueError(

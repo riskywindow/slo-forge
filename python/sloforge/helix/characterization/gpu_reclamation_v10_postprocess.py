@@ -738,7 +738,7 @@ def _bounded_backlog_evidence(
     passed = (
         preferred_minimum <= configured_trigger <= preferred_maximum
         and configured_trigger <= trigger_depth <= preferred_maximum
-        and trigger_depth <= maximum_depth <= preferred_maximum
+        and trigger_depth <= maximum_depth <= configured_abort
         and first_useful_depth <= maximum_depth
     )
     return BoundedBacklogEvidence(

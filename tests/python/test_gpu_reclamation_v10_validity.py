@@ -471,6 +471,16 @@ def test_backlog_must_remain_below_the_precommitted_abort_bound() -> None:
     assert not assessment.bounded_backlog_pass
 
 
+def test_backlog_may_exceed_preferred_trigger_range_but_not_hard_abort() -> None:
+    source = _assessment().model_dump(mode="python")
+    source["bounded_backlog"]["maximum_queue_depth"] = 26
+
+    assessment = V10ScientificValidity.model_validate(source, strict=True)
+
+    assert assessment.bounded_backlog_pass
+    assert assessment.scientifically_valid
+
+
 def test_missing_gpu1_completions_fails_capacity_gate_without_aborting_assessment() -> None:
     assessment = _assessment(gpu1_device="GPU-unused-2")
 

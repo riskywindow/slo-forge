@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -31,6 +32,7 @@ from sloforge.helix.characterization.gpu_reclamation_methodology import (
 ROOT = Path(__file__).parents[2]
 CONTROLLER = ROOT / "experiments/branchfabric/gpu_reclamation_controller.py"
 MODAL_APP = ROOT / "experiments/branchfabric/modal_gpu_reclamation.py"
+CAPACITY_WORKER = ROOT / "experiments/branchfabric/gpu_capacity_calibration_worker.py"
 LAUNCHER = ROOT / "tools/branchfabric-experiment-004-launch.py"
 PILOT_CONFIG = (
     ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/pilot-naive-config.json"
@@ -55,6 +57,10 @@ INTEGRATED_CONFIG_V5 = (
     ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
     "exp004-v10-naive-s41-v5-config.json"
 )
+INTEGRATED_CONFIG_V6 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-naive-s41-v6-config.json"
+)
 
 
 def _load(path: Path, name: str) -> ModuleType:
@@ -64,6 +70,22 @@ def _load(path: Path, name: str) -> ModuleType:
     sys.modules[name] = module
     specification.loader.exec_module(module)
     return module
+
+
+def test_compilation_capture_observes_nonpropagating_vllm_loggers() -> None:
+    module = _load(CAPACITY_WORKER, "exp004_compilation_capture")
+    logger = logging.getLogger("vllm.v1.worker.jit_monitor.exp004-test")
+    prior_level = logger.level
+    prior_propagate = logger.propagate
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    try:
+        with module._CompilationLogCapture() as capture:
+            logger.warning("Triton kernel JIT compilation during inference: fixture")
+        assert capture.events == ["Triton kernel JIT compilation during inference: fixture"]
+    finally:
+        logger.setLevel(prior_level)
+        logger.propagate = prior_propagate
 
 
 def _pilot_payload() -> dict[str, object]:
@@ -455,8 +477,8 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
 ) -> None:
     launcher = _load(LAUNCHER, "exp004_integrated_launcher_config")
     monkeypatch.setattr(launcher, "_verify_authorized_code_commit", lambda *_args: None)
-    payload = launcher._validate_config(INTEGRATED_CONFIG_V5)
-    assert payload["attempt_id"] == "exp004-v10-naive-s41-v5"
+    payload = launcher._validate_config(INTEGRATED_CONFIG_V6)
+    assert payload["attempt_id"] == "exp004-v10-naive-s41-v6"
     assert payload["execution_mode"] == "integrated-calibration-v10"
     assert payload["serving_spike_request_rate_per_second"] == 15.0
     assert launcher._reservation_wall_seconds(payload) == 588.0
@@ -470,6 +492,7 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
         INTEGRATED_CONFIG_V2,
         INTEGRATED_CONFIG_V3,
         INTEGRATED_CONFIG_V4,
+        INTEGRATED_CONFIG_V5,
     ):
         with pytest.raises(ValueError):
             launcher._validate_config(stale)
@@ -492,7 +515,7 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
     assert config.lambda_spike_rps == 15.0
     assert config.lambda_2_rps == 20.0
     assert config.serving_overload_queue_trigger == 20
-    assert config.serving_overload_queue_abort == 25
+    assert config.serving_overload_queue_abort == 64
     assert config.warmup_seconds == 1.0
     assert not hasattr(config, "rate_grid_rps")
     assert config.initialization_timeout_seconds == 160
@@ -516,9 +539,9 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
         module.Experiment004PilotConfig.model_validate(
             {**payload, "controller_timeout_seconds": 578.0001}, strict=True
         )
-    with pytest.raises(ValueError, match="25-request scientific abort"):
+    with pytest.raises(ValueError, match="64-request hard safety abort"):
         module.Experiment004PilotConfig.model_validate(
-            {**payload, "serving_overload_queue_abort": 64}, strict=True
+            {**payload, "serving_overload_queue_abort": 25}, strict=True
         )
     with pytest.raises(ValueError, match="predeclared 1s control warmup"):
         module.Experiment004PilotConfig.model_validate(

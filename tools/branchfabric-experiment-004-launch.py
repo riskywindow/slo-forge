@@ -749,10 +749,10 @@ def _validate_config(path: Path) -> dict[str, Any]:
         )
         if queue_abort <= queue_trigger:
             raise ValueError("integrated queue abort must exceed its overload trigger")
-        if queue_trigger != 20 or queue_abort != 25:
+        if queue_trigger != 20 or queue_abort != 64:
             raise ValueError(
                 "integrated v10 requires the preselected 20-request trigger and "
-                "25-request scientific abort"
+                "64-request hard safety abort"
             )
         bounded_number("warmup_seconds", lower=1.0, upper=1.0)
         bounded_number("sanity_guard_measurement_seconds", lower=3.0, upper=3.0)

@@ -36,8 +36,14 @@ class _CompilationLogCapture(logging.Handler):
     def __init__(self) -> None:
         super().__init__(level=logging.INFO)
         self.events: list[str] = []
+        self._attached_loggers: list[logging.Logger] = []
+        self._seen_records: set[int] = set()
 
     def emit(self, record: logging.LogRecord) -> None:
+        record_identity = id(record)
+        if record_identity in self._seen_records:
+            return
+        self._seen_records.add(record_identity)
         message = record.getMessage()
         if (
             any(marker in message.lower() for marker in _COMPILATION_LOG_MARKERS)
@@ -46,11 +52,24 @@ class _CompilationLogCapture(logging.Handler):
             self.events.append(message[:512])
 
     def __enter__(self) -> _CompilationLogCapture:
-        logging.getLogger().addHandler(self)
+        candidates = [
+            logging.getLogger(),
+            *(
+                logger
+                for logger in logging.root.manager.loggerDict.values()
+                if isinstance(logger, logging.Logger)
+            ),
+        ]
+        for logger in candidates:
+            if logger is logging.getLogger() or not logger.propagate:
+                logger.addHandler(self)
+                self._attached_loggers.append(logger)
         return self
 
     def __exit__(self, *_args: object) -> None:
-        logging.getLogger().removeHandler(self)
+        for logger in self._attached_loggers:
+            logger.removeHandler(self)
+        self._attached_loggers.clear()
 
 
 def _canonical_bytes(value: Any) -> bytes:

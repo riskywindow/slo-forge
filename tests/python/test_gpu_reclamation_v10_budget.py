@@ -38,17 +38,17 @@ def test_live_budget_gate_uses_required_phase_budget_without_weakening_ceiling()
     budget = load_v10_phase_budget(PHASE_BUDGET, repository_root=ROOT)
     accepted = evaluate_budget_gate(
         budget,
-        current_conservative_usage_A100_seconds=10298.167208919993,
+        current_conservative_usage_A100_seconds=10993.070957669981,
         configured_hard_ceiling_A100_seconds=12600.0,
     )
     assert accepted == {
         "status": "AUTHORIZE_V10",
         "budget_pass": True,
-        "current_conservative_usage_A100_seconds": 10298.167208919993,
+        "current_conservative_usage_A100_seconds": 10993.070957669981,
         "required_A100_seconds": 1176.0,
-        "projected_conservative_usage_A100_seconds": 11474.167208919993,
+        "projected_conservative_usage_A100_seconds": 12169.070957669981,
         "configured_hard_ceiling_A100_seconds": 12600.0,
-        "remaining_A100_seconds_after_reservation": pytest.approx(1125.8327910800071),
+        "remaining_A100_seconds_after_reservation": pytest.approx(430.9290423300189),
     }
 
     blocked = evaluate_budget_gate(
