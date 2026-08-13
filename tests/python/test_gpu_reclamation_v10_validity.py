@@ -143,7 +143,7 @@ def _timeline() -> V10Timeline:
         V10Phase.GPU1_HBM_RECLAIM_CONFIRMED: 10 * NS + 800_000_000,
         V10Phase.GPU1_SERVING_ENABLE: 11 * NS,
         V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST: 12 * NS,
-        V10Phase.SERVING_QUEUE_DRAIN_BEGIN: 12 * NS,
+        V10Phase.SERVING_QUEUE_DRAIN_BEGIN: 12 * NS + 500_000_000,
         V10Phase.SERVING_QUEUE_DRAIN_END: 20 * NS,
         V10Phase.SERVING_SLO_RECOVERY_BEGIN: 12 * NS,
         V10Phase.SERVING_SLO_RESTORED: 21 * NS,
@@ -237,6 +237,7 @@ def _assessment(
     *,
     gpu1_device: str = GPU1,
     observations_override: tuple[ServingObservation, ...] | None = None,
+    scheduler_waiting_queue_depths: tuple[int, ...] | None = None,
 ) -> V10ScientificValidity:
     workload, observations = _serving_evidence()
     if observations_override is not None:
@@ -258,7 +259,9 @@ def _assessment(
             two_gpu_excess_capacity=PhaseInterval(
                 name="two-gpu-excess", start_ns=12 * NS, end_ns=26 * NS
             ),
-            queue_drain=PhaseInterval(name="queue-drain", start_ns=12 * NS, end_ns=20 * NS),
+            queue_drain=PhaseInterval(
+                name="queue-drain", start_ns=12 * NS + 500_000_000, end_ns=20 * NS
+            ),
             slo_stability=PhaseInterval(name="slo-stability", start_ns=21 * NS, end_ns=26 * NS),
             restore_activity=PhaseInterval(
                 name="restore-activity", start_ns=29 * NS, end_ns=32 * NS
@@ -352,6 +355,7 @@ def _assessment(
                 )
             ),
         ),
+        scheduler_waiting_queue_depths=scheduler_waiting_queue_depths,
     )
 
 
@@ -361,6 +365,17 @@ def test_valid_v10_requires_every_serving_and_transaction_gate() -> None:
     assert assessment.scientifically_valid
     assert assessment.gpu0_overload.overload_condition_count == 3
     assert assessment.bounded_backlog_pass
+
+
+def test_slo_stability_accepts_exact_scheduler_waiting_samples() -> None:
+    assessment = _assessment(scheduler_waiting_queue_depths=(0,) * 20)
+
+    assert assessment.slo_stability is not None
+    assert assessment.slo_stability.maximum_queue_depth == 0
+    assert assessment.slo_stability_pass
+
+    with pytest.raises(ValueError, match="do not match evaluation windows"):
+        _assessment(scheduler_waiting_queue_depths=(0,) * 19)
     assert assessment.gpu1_hbm_reclaim_pass
     assert assessment.two_gpu_excess_capacity.completed_rate_per_second > 5.0
     assert assessment.queue_drain.trend.direction == "negative"
@@ -564,6 +579,9 @@ def test_timeline_requires_every_event_exactly_once() -> None:
 def test_timeline_accepts_validation_nested_inside_import() -> None:
     timeline = _timeline()
 
+    assert timeline.timestamp(V10Phase.SERVING_SLO_RECOVERY_BEGIN) < timeline.timestamp(
+        V10Phase.SERVING_QUEUE_DRAIN_BEGIN
+    )
     assert timeline.timestamp(V10Phase.STATE_IMPORT_BEGIN) < timeline.timestamp(
         V10Phase.STATE_VALIDATE_BEGIN
     )

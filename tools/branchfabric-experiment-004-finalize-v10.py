@@ -45,6 +45,40 @@ def _write_new(path: Path, value: Any) -> None:
         temporary.unlink(missing_ok=True)
 
 
+def _archive_failed_remote_analysis(run_root: Path) -> None:
+    """Preserve fail-closed remote derivatives before local recomputation.
+
+    These files are not raw measurements.  A remote postprocessor can fail
+    after both workers have durably published their raw results; the local
+    finalizer then supersedes only those failed derived artifacts while
+    retaining their exact bytes for audit.
+    """
+
+    analysis_root = run_root / "analysis"
+    for name in ("scientific-validity", "movement-accounting", "serving-recovery"):
+        current = analysis_root / f"{name}.json"
+        if not current.is_file():
+            continue
+        payload = _load_object(current)
+        failed = payload.get("status") == "invalid" or (
+            name == "scientific-validity"
+            and payload.get("scientifically_valid") is False
+            and any(
+                "timeline violates required causal event order" in str(reason)
+                for reason in payload.get("invalid_reasons", ())
+            )
+        )
+        if not failed:
+            continue
+        archived = analysis_root / f"{name}.remote-postprocess-failure.json"
+        if archived.is_file():
+            if archived.read_bytes() != current.read_bytes():
+                raise ValueError(f"conflicting archived remote analysis: {archived}")
+        else:
+            os.link(current, archived)
+        current.unlink()
+
+
 def _load_object(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text())
     if not isinstance(payload, dict):
@@ -571,7 +605,8 @@ def _build_integrated_prerequisite_evidence(
         (
             manifest.get("schema_version") != "sloforge.branchfabric.integrated-run-manifest/v2",
             manifest.get("attempt_id") != base_config.get("attempt_id"),
-            manifest.get("base_config_sha256") != _sha256(base_config_path),
+            manifest.get("base_config_sha256")
+            != hashlib.sha256(_canonical_bytes(base_config)).hexdigest(),
             manifest.get("engine_reload_count") != 0,
             manifest.get("measured_transaction_compilation_free") is not True,
             manifest.get("single_worker_pair") is not True,
@@ -916,6 +951,7 @@ def main() -> int:
         prerequisites = prerequisite_result
     if config.get("serving_methodology") != "v10-global-capacity":
         raise ValueError("v10 finalizer refuses a non-v10 serving methodology")
+    _archive_failed_remote_analysis(run_root)
     scientific, movement, recovery = assess_v10_directory(
         work_root=run_root,
         config=config,

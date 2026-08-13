@@ -124,8 +124,11 @@ CAUSAL_V10_TIMELINE = (
     V10Phase.GPU1_HBM_RECLAIM_CONFIRMED,
     V10Phase.GPU1_SERVING_ENABLE,
     V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST,
-    V10Phase.SERVING_QUEUE_DRAIN_BEGIN,
     V10Phase.SERVING_SLO_RECOVERY_BEGIN,
+    # The sustained queue-drain series is sampled on the next fixed telemetry
+    # boundary after the first useful GPU1 token.  It therefore cannot be
+    # required to precede the raw first-useful event.
+    V10Phase.SERVING_QUEUE_DRAIN_BEGIN,
     V10Phase.SERVING_QUEUE_DRAIN_END,
     V10Phase.SERVING_SLO_RESTORED,
     V10Phase.SERVING_SLO_STABILITY_BEGIN,
@@ -1163,6 +1166,7 @@ def _slo_stability(
     *,
     config: V10ValidityConfig,
     timeline: V10Timeline,
+    scheduler_waiting_queue_depths: tuple[int, ...] | None = None,
 ) -> SLOStabilityEvidence:
     duration_ns = interval.end_ns - interval.start_ns
     if duration_ns < config.stability_window_ns:
@@ -1206,6 +1210,14 @@ def _slo_stability(
         outstanding_queue_depth_at(workload, by_request, timestamp)
         for timestamp in queue_event_times
     )
+    if scheduler_waiting_queue_depths is None:
+        maximum_queue_depth = maximum_outstanding
+    else:
+        if len(scheduler_waiting_queue_depths) != len(intervals) or any(
+            depth < 0 for depth in scheduler_waiting_queue_depths
+        ):
+            raise ValueError("scheduler-waiting SLO samples do not match evaluation windows")
+        maximum_queue_depth = max(scheduler_waiting_queue_depths)
     have_samples = all(row.ttft.sample_count > 0 for row in measurement.intervals)
     p95_pass = all(evaluation.satisfied for evaluation in evaluations)
     restored_before = (
@@ -1222,7 +1234,7 @@ def _slo_stability(
     passed = (
         have_samples
         and p95_pass
-        and maximum_outstanding <= config.recovery_queue_depth_threshold
+        and maximum_queue_depth <= config.recovery_queue_depth_threshold
         and restored_before
         and restore_after
     )
@@ -1233,7 +1245,7 @@ def _slo_stability(
         evaluation_count=len(evaluations),
         all_windows_have_ttft_samples=have_samples,
         all_windows_p95_ttft_pass=p95_pass,
-        maximum_queue_depth=maximum_outstanding,
+        maximum_queue_depth=maximum_queue_depth,
         queue_depth_threshold=config.recovery_queue_depth_threshold,
         restored_marker_precedes_stability=restored_before,
         restore_trigger_follows_stability=restore_after,
@@ -1420,6 +1432,7 @@ def assess_v10_scientific_validity(
     budget: BudgetEvidence,
     cleanup: CleanupEvidence,
     prerequisites: V10PrerequisiteEvidence | None = None,
+    scheduler_waiting_queue_depths: tuple[int, ...] | None = None,
 ) -> V10ScientificValidity:
     """Evaluate every required v10 gate from explicit immutable evidence."""
 
@@ -1538,6 +1551,7 @@ def assess_v10_scientific_validity(
         windows.slo_stability,
         config=config,
         timeline=timeline,
+        scheduler_waiting_queue_depths=scheduler_waiting_queue_depths,
     )
     restore_activity = _gpu0_restore_activity(
         workload,

@@ -1047,7 +1047,13 @@ def _movement_artifact(
     *,
     operation_telemetry: dict[str, Any],
 ) -> tuple[dict[str, Any], MovementAccountingEvidence]:
-    parsed = StateMovementReport.model_validate(rollout["movement_report"])
+    # The worker crosses the versioned JSON boundary, where tuple-valued model
+    # fields are necessarily encoded as arrays.  Re-enter through JSON mode so
+    # strict validation checks their contents without rejecting valid JSON
+    # container representation.
+    parsed = StateMovementReport.model_validate_json(
+        json.dumps(rollout["movement_report"], sort_keys=True, separators=(",", ":"))
+    )
     report = build_state_movement_report(
         logical_segments=parsed.logical_segments, passes=parsed.passes
     )
@@ -1217,7 +1223,9 @@ def assess_v10_directory(
         ).encode()
     )
     os.replace(temporary, state_pass_path)
-    manifest = CanonicalKvTransportManifest.model_validate(rollout["transport_manifest"])
+    manifest = CanonicalKvTransportManifest.model_validate_json(
+        json.dumps(rollout["transport_manifest"], sort_keys=True, separators=(",", ":"))
+    )
     semantics = _branch_semantics(config=config, rollout=rollout, manifest=manifest)
     continuation = semantics.continuation_token_counts
     branch_resume = BranchResumeEvidence(
@@ -1299,6 +1307,10 @@ def assess_v10_directory(
         budget=budget,
         cleanup=cleanup,
         prerequisites=prerequisites,
+        scheduler_waiting_queue_depths=tuple(
+            int(row["queue_depth_end"])
+            for row in serving["serving_recovery_evidence"]["stability_windows"]
+        ),
     )
     serving_recovery = {
         "schema_version": "sloforge.branchfabric.experiment-004-v10-serving-recovery/v1",
