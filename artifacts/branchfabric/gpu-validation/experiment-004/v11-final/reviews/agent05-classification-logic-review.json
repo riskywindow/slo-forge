@@ -1,0 +1,44 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-classification-review/v1",
+  "agent": 5,
+  "role": "classification-logic reviewer",
+  "reviewed_at_utc": "2026-08-20T02:34:32Z",
+  "scope": "offline-only; no Modal, cloud, CUDA, or GPU invocation",
+  "status": "PASS",
+  "allowed_terminal_states": [
+    "SOFTWARE_WINS",
+    "GPU_SOFTWARE_WINS",
+    "BRANCHFABRIC_HARDWARE_INTEREST",
+    "PRESERVATION_NOT_ECONOMIC",
+    "HARDWARE_GATE_NOT_REACHED"
+  ],
+  "missing_evidence_policy": "HARDWARE_GATE_NOT_REACHED",
+  "mandatory_missing_evidence": [
+    "invalid or unavailable integrated v11 transaction",
+    "missing kill-and-recompute measurement",
+    "missing integrated residual critical-path measurement",
+    "missing Amdahl analysis",
+    "missing economic comparison",
+    "invalid GPU methodology"
+  ],
+  "hardware_gate": {
+    "minimum_integrated_critical_path_fraction": 0.15,
+    "minimum_realistic_end_to_end_speedup": 1.2,
+    "experiment_005_only_for": "BRANCHFABRIC_HARDWARE_INTEREST"
+  },
+  "source_hashes_sha256": {
+    "python/sloforge/helix/characterization/gpu_reclamation_analysis.py": "98a25fff5f162181719a0283a3a2c0d207b74a65e2b344613b65cab2ff1a0fb0",
+    "python/sloforge/helix/characterization/gpu_reclamation_report.py": "df87577b38034ab3f76d7aed5f085c2f3c761011084b2d32ad96512e308b23d6"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_analysis.py": "4008a07e32efec4c0285a9f427ec00b151d3f649a5f15b484e9228e05c696a30",
+    "tests/python/test_gpu_reclamation_report.py": "7fb7e2b14cbd2ce1b37e65948f530923d90a21f1e6354b1d7d26dd4571ca90ba"
+  },
+  "verification": {
+    "command": "uv run --locked pytest -q tests/python/test_gpu_reclamation_analysis.py tests/python/test_gpu_reclamation_report.py",
+    "tests_passed": 28,
+    "status": "PASS"
+  },
+  "gpu_resources_consumed": false,
+  "passed": true
+}

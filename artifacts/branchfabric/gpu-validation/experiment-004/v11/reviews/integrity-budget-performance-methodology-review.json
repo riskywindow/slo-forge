@@ -1,0 +1,458 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-offline-review/v1",
+  "reviewed_at_utc": "2026-08-18T21:45:44Z",
+  "reviewer_role": [
+    "integrity-system-redesign",
+    "property-test-and-correctness",
+    "gpu-budget",
+    "performance-methodology"
+  ],
+  "scope": "Offline review only; no Modal, GPU, remote-compute, or source-implementation mutation was performed.",
+  "decision": "OFFLINE_DESIGN_APPROVED_GPU_BLOCKED",
+  "baseline_verification": {
+    "status": "VERIFIED_FROZEN",
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "execution_commit_exists": true,
+    "analysis_commit_exists": true,
+    "tag": "branchfabric-exp004-naive-baseline-v10",
+    "tag_exists": true,
+    "tag_is_annotated": true,
+    "tag_target_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "manifest_reference": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+    "manifest_file_sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+    "manifest_canonical_body_sha256": "f58dfaab2301ab8f449efa38ba634ada80a41acc70ba97d73bcb151ab1b1d2fd",
+    "canonical_hash_recomputed": true,
+    "scientific_validity_reference": "artifacts/branchfabric/gpu-validation/experiment-004/scientific-validity.json",
+    "scientific_validity_sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+    "scientifically_valid": true,
+    "invalid_reasons": [],
+    "movement_reference": "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+    "movement_sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3",
+    "rollout_result_sha256": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
+    "serving_result_sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
+    "gpu_phase_ledger_sha256": "66c874c1e11a648c6c0e286fd49dc96c17454ac0ece93a27c275419cb0f6adef",
+    "topology_capture_sha256": "c5a05313f106a1dd5023b2011af32c06e66fb92f89567bff908180774b33bc88"
+  },
+  "v10_integrity_and_movement_facts": {
+    "logical_state_bytes": 1056964608,
+    "full_physical_touch_bytes": 61303947264,
+    "full_physical_touch_amplification": 58.0,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "avoidable_movement_bytes": 32765902848,
+    "avoidable_movement_amplification": 31.0,
+    "temporary_allocation_bytes": {
+      "gpu": 14797504512,
+      "host": 7398752256,
+      "peak_host": 2965372928
+    },
+    "state_pass_records": 270,
+    "conceptual_full_state_passes": 30,
+    "integrity_read_bytes": 8455716864,
+    "unique_real_d2h_bytes": 2113929216,
+    "unique_real_h2d_bytes": 1056964608,
+    "current_primitive": "SHA-256 over the complete canonical payload plus SHA-256 per logical page",
+    "current_canonical_layout": "page,layer,token,kv,head,dim",
+    "current_atomicity": "Fresh requests are detached from all scheduler queues, all pages are written and validated before group admission, and failure frees the entire restore incarnation group and resets the prefix cache.",
+    "state_correctness": {
+      "branches": 8,
+      "minimum_continuation_tokens_per_branch": 8,
+      "exact_first_resumed_token_matches": "8/8",
+      "restored_into_fresh_allocations": true,
+      "transport_integrity_valid": true
+    }
+  },
+  "integrity_design": {
+    "required_primitive": "SHA-256",
+    "reason": "It matches the existing SLOForge transport policy, supports incremental hashing, and avoids weakening the v10 collision-resistance contract.",
+    "transport_compatibility": "Keep the frozen v1 canonical payload and existing payload_sha256/content_sha256 meanings byte-for-byte. Add v11 streaming evidence outside the frozen v10 implementation path, or add only backward-compatible optional metadata within the same IR major version.",
+    "source_contract": [
+      "Gather bytes in canonical page, layer, token, K/V, head, dimension order.",
+      "Update one aggregate SHA-256 and the owning logical-page SHA-256 as each bounded D2H chunk becomes host-visible.",
+      "Finalize each page only after its exact declared byte count is observed; reject gaps, overlaps, duplicates, reordered indices, short chunks, and trailing bytes.",
+      "Bind manifest identity, geometry, ordered page descriptors, ordered branch tables, token-history hashes, ancestry, policy epoch, chunk count, and chunk lengths into a separate canonical metadata SHA-256.",
+      "The transport is publishable only when streamed byte counts, page hashes, aggregate payload hash, metadata hash, and capture-plan coverage agree."
+    ],
+    "restore_contract": [
+      "Validate metadata and runtime identity before allocating or exposing destination state.",
+      "Recompute the aggregate and page SHA-256 values while bounded host chunks are consumed for H2D, sharing that read with the restore stream rather than running a separate full-state verification pass.",
+      "Write only to fresh, detached native allocations under the exclusive engine-step gate.",
+      "Compute destination equality over the same logical canonical domain. A device SHA-256 implementation is acceptable only after independent parity tests against hashlib; otherwise use a bounded device-side exact byte comparison against the already-H2D canonical chunk, which is collision-free and transfers only the final pass/fail scalar to the host.",
+      "Compare all page results and the complete ordered coverage result before caching prefix blocks, updating computed-token watermarks, or enqueueing any restored request.",
+      "On mismatch, fail closed, persist mismatch metadata, recapture only for diagnosis, free every restore incarnation allocation, reset prefix-cache ownership, and do not report the optimized path successful."
+    ],
+    "logical_hash_domain": {
+      "includes": [
+        "transport schema and adapter version",
+        "model ID and revision",
+        "tokenizer ID and revision",
+        "dtype and element width",
+        "policy epoch",
+        "canonical axis order and geometry",
+        "ordered logical page ID, logical token start, valid-token count, byte offset, and byte length",
+        "sorted logical page owners and shared/private classification",
+        "ordered logical branch ID, parent branch ID, computed-token boundary, logical page table, and token-history SHA-256",
+        "raw canonical BF16 payload bytes"
+      ],
+      "excludes": [
+        "source physical block index",
+        "destination physical block index",
+        "GPU UUID",
+        "allocation epoch"
+      ],
+      "separate_nonsemantic_evidence": "Physical block IDs, GPU UUIDs, and allocation epochs remain mandatory provenance for freshness, ownership, source release, and anti-staleness checks, but cannot affect logical state equality."
+    }
+  },
+  "integrity_proof_table": [
+    {
+      "invariant": "Canonical payload bytes are intact end to end",
+      "v10_passes": [
+        "capture-integrity-manifest",
+        "capture-integrity-hash-reads",
+        "transport-publish-validation",
+        "transport-publish-hash-reads",
+        "restore-transport-validation",
+        "restore-transport-hash-reads"
+      ],
+      "other_existing_evidence": "payload_sha256 plus content_sha256 for every logical page",
+      "v11_shared_evidence": "Incremental source hashes are finalized during the D2H stream; the same hashes are recomputed as chunks are consumed for H2D.",
+      "can_remove_standalone_pass": true,
+      "remaining_required_work": "One source stream hash and one restore-consumption stream hash; neither permits sampling."
+    },
+    {
+      "invariant": "Restored native contents equal the logical transport state",
+      "v10_passes": [
+        "validation-destination-native-read",
+        "validation-native-axis-contiguous",
+        "validation-unpage-valid-tokens",
+        "validation-stack-layers",
+        "validation-concatenate-pages",
+        "validation-d2h",
+        "validation-expected-page-concatenation",
+        "validation-host-tensor-compare"
+      ],
+      "other_existing_evidence": "Fresh allocation map and atomic detached-request staging",
+      "v11_shared_evidence": "Bounded native logical readback with device SHA-256 parity or exact device comparison against the H2D canonical chunk; return only digest/pass evidence unless mismatch diagnostics are required.",
+      "can_remove_standalone_pass": true,
+      "remaining_required_work": "A complete destination-native logical read and a complete comparison remain correctness-required; full D2H recapture, pageable expected-state concatenation, and host tensor comparison do not."
+    },
+    {
+      "invariant": "Logical page coverage is complete, ordered, unique, and nonoverlapping",
+      "v10_passes": [
+        "transport-publish-validation",
+        "restore-transport-validation",
+        "restore-import-validation"
+      ],
+      "other_existing_evidence": "CanonicalKvTransportManifest validation, capture-plan coverage, exact destination map union, unique destination blocks, and exact byte cursor",
+      "v11_shared_evidence": "Strict chunk/page sequence machine plus canonical metadata SHA-256, checked before visibility",
+      "can_remove_standalone_pass": true,
+      "remaining_required_work": "Bounded metadata validation, set equality, byte-count equality, and final sequence closure."
+    },
+    {
+      "invariant": "Model, tokenizer, policy epoch, dtype, and geometry match",
+      "v10_passes": [
+        "restore-import-validation"
+      ],
+      "other_existing_evidence": "Strict manifest model and validate_transport_identity plus validate_native_tensors",
+      "v11_shared_evidence": "Validate strict metadata and metadata SHA-256 before any native write.",
+      "can_remove_standalone_pass": true,
+      "remaining_required_work": "O(metadata) equality checks; no payload pass."
+    },
+    {
+      "invariant": "Token history, computed-token boundary, branch ancestry, ownership, and shared-prefix semantics match",
+      "v10_passes": [
+        "restore-import-validation"
+      ],
+      "other_existing_evidence": "CanonicalBranchTable token_history_sha256, manifest branch/page cross-validation, and detached runtime request token comparison",
+      "v11_shared_evidence": "Bind ordered branch tables and owners into canonical metadata hash, then repeat runtime token/boundary checks before admission.",
+      "can_remove_standalone_pass": true,
+      "remaining_required_work": "O(metadata plus token history) checks; no KV payload pass beyond integrity."
+    },
+    {
+      "invariant": "Destination allocations are fresh and no stale ownership becomes visible",
+      "v10_passes": [
+        "restore-import-validation"
+      ],
+      "other_existing_evidence": "Fresh runtime request IDs, allocation epochs, one-to-one destination map, detached scheduler state, and failure cleanup",
+      "v11_shared_evidence": "Retain allocation and ownership evidence unchanged; do not use logical hashes as a substitute.",
+      "can_remove_standalone_pass": false,
+      "remaining_required_work": "Metadata/allocation checks and fail-closed cleanup."
+    },
+    {
+      "invariant": "Captured source pages were completely released and cannot retain stale ownership",
+      "v10_passes": [
+        "capacity-reclaim-confirmation"
+      ],
+      "other_existing_evidence": "Exact captured block set, allocation epochs, released refcounts, cleared hashes, zero assigned KV bytes, unchanged warm pool reservation",
+      "v11_shared_evidence": "Retain exact source release proof unchanged.",
+      "can_remove_standalone_pass": false,
+      "remaining_required_work": "Bounded native metadata inspection after release."
+    },
+    {
+      "invariant": "No partially restored state is visible",
+      "v10_passes": [
+        "restore-import-validation"
+      ],
+      "other_existing_evidence": "Exclusive engine-step gate, detached requests, validate-before-cache/enqueue, and group-wide cleanup",
+      "v11_shared_evidence": "Keep the same atomic staging order; streamed chunks must not cause early cache publication or request enqueue.",
+      "can_remove_standalone_pass": false,
+      "remaining_required_work": "Control-plane atomicity, not a full-state movement pass."
+    }
+  ],
+  "zero_fill_security_gate": {
+    "full_pages": "A separate zero pass may be removed only when the direct scatter deterministically overwrites every K/V byte of every layer before visibility.",
+    "partial_final_pages": "Zero at least the unread tail unless a version-specific vLLM kernel and scheduler proof establishes that no execution, hashing, cache publication, speculative path, or tenant transition can read it. The default is fail closed and retain tail zeroing.",
+    "baseline_specific_observation": "The measured 16,384-token prefix and 256-token private suffix align to the observed 1,024 shared and 128 private 16-token pages, so the measured state has no partial final KV page. This does not authorize removing tail handling from generalized fixtures.",
+    "tenant_isolation": "Fresh allocation alone is insufficient if any byte is left unreadably stale; either overwrite or zero every byte that can become runtime-visible."
+  },
+  "current_local_test_coverage_audit": {
+    "review_run": {
+      "locked_command": "uv run --locked pytest -q tests/python/test_vllm_reclamation_adapter.py tests/python/test_vllm_reclamation_capture_plan.py tests/python/test_gpu_reclamation_worker_movement.py tests/python/test_gpu_reclamation_naive.py",
+      "locked_result": "16 passed, 1 skipped",
+      "locked_skip_reason": "The local locked environment does not include torch, so test_vllm_reclamation_adapter.py was collection-skipped.",
+      "torch_command": "PYTHONPATH=python pytest -q tests/python/test_vllm_reclamation_adapter.py tests/python/test_vllm_reclamation_capture_plan.py tests/python/test_gpu_reclamation_worker_movement.py tests/python/test_gpu_reclamation_naive.py",
+      "torch_runtime": "system Python with torch 2.10.0",
+      "torch_result": "29 passed"
+    },
+    "covered_by_v10_tests": [
+      "Deterministic native-canonical-native round trip with a partial page and two native block-dimension placements.",
+      "One-bit transport corruption rejects the aggregate payload digest.",
+      "Missing or duplicate destination mappings are rejected.",
+      "Disjoint restore staging subsets are supported.",
+      "Validation failure frees pages and admits no request.",
+      "Cross-page destination aliasing frees the group.",
+      "Runtime identity and token-history mismatch fail before allocation.",
+      "Prefix state is never published before destination validation.",
+      "Partial admission failure removes the complete restore group.",
+      "Logical capture planning is invariant to physical source IDs and rejects divergent or partial-group sharing.",
+      "Exact source release requires cleared hashes, zero refcounts, and full pool recovery."
+    ],
+    "evidence_files": [
+      "tests/python/test_vllm_reclamation_adapter.py",
+      "tests/python/test_vllm_reclamation_capture_plan.py",
+      "tests/python/test_gpu_reclamation_worker_movement.py",
+      "tests/python/test_gpu_reclamation_naive.py"
+    ],
+    "v11_gaps_before_micro_validation": [
+      "The torch-backed vLLM reclamation adapter suite must also execute without skip in the exact locked or baked local-validation dependency image used to seal the pre-GPU gate; this review's 29-test execution used system torch 2.10.0.",
+      "No randomized/property suite yet covers page order, layer/block geometry, K/V content, chunk sizes, and shared/private splits.",
+      "No streamed hash implementation/parity test exists yet.",
+      "No negative test currently injects missing, duplicate, or reordered stream chunks.",
+      "No test corrupts destination native memory after direct scatter and before optimized validation.",
+      "No double-buffer event-lifetime/race test exists yet.",
+      "No v11 movement ledger test proves every removed pass disappeared without omitting a real read/write.",
+      "No explicit stale-tail tenant-isolation test exists for a v11 reduced-zero-fill path."
+    ],
+    "status": "INCOMPLETE_FOR_V11_GPU_GATE"
+  },
+  "required_fail_closed_tests": [
+    {
+      "test": "randomized_naive_export_equals_v11_export",
+      "requirement": "Across explicit seeds, randomized page order, full and partial pages, layer counts, block counts, K/V axes, and shared/private splits, canonical transport payloads are bitwise equal and all v1 manifest semantic fields/hashes agree."
+    },
+    {
+      "test": "randomized_naive_restore_equals_v11_restore",
+      "requirement": "Logical native state is bitwise equal over every valid token and all required padding is deterministic."
+    },
+    {
+      "test": "stream_chunk_boundary_invariance",
+      "requirement": "Changing bounded chunk sizes and splitting a logical page across buffers does not change aggregate/page SHA-256 values or restored bytes."
+    },
+    {
+      "test": "corrupted_payload_bit",
+      "requirement": "Flip one bit in every representative location, including first/last byte and K/V/layer boundaries; validation rejects, publishes no request, frees all allocations, and emits mismatch evidence."
+    },
+    {
+      "test": "missing_duplicate_reordered_chunk",
+      "requirement": "Each mutation fails sequence, count, range, page, or root validation before visibility."
+    },
+    {
+      "test": "wrong_branch_owner_or_ancestry",
+      "requirement": "Mutation fails strict manifest/metadata hashing even when payload bytes and payload_sha256 remain otherwise valid."
+    },
+    {
+      "test": "wrong_model_tokenizer_policy_dtype_or_geometry",
+      "requirement": "Each mismatch fails before destination native writes."
+    },
+    {
+      "test": "destination_corruption_after_scatter",
+      "requirement": "Corrupt one fresh destination page after write and before validation; native logical validation fails and no branch becomes schedulable."
+    },
+    {
+      "test": "physical_relocation_hash_invariance",
+      "requirement": "Identical logical state in different physical block IDs/allocation epochs yields identical logical hashes while separate freshness evidence proves the allocations changed."
+    },
+    {
+      "test": "partial_page_tail_isolation",
+      "requirement": "Seed stale nonzero destination bytes, restore a partial final page, and prove no stale readable byte remains under the selected zero/overwrite policy."
+    },
+    {
+      "test": "double_buffer_reuse_happens_after_event",
+      "requirement": "Delayed-copy fixtures prove a host or device chunk buffer is never reused before its producer/consumer completion event."
+    },
+    {
+      "test": "device_hash_parity_if_used",
+      "requirement": "A device-side hash must match Python hashlib SHA-256 for empty, short, page-sized, multi-page, misaligned, and randomized payloads; there is no fallback to a weak checksum."
+    },
+    {
+      "test": "mismatch_diagnostic_is_not_success",
+      "requirement": "A naive full recapture may run only after the optimized verifier records failure; the attempt remains failed even if diagnostics locate the mismatch."
+    },
+    {
+      "test": "eight_branch_semantic_continuation",
+      "requirement": "All eight branches produce at least eight continuation tokens and exactly match the first independently recomputed token."
+    }
+  ],
+  "gpu_budget_review": {
+    "ledger_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "authorization_reference": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v10.json",
+    "configured_environment_budget_usd": null,
+    "environment_variable": "SLOFORGE_GPU_BUDGET_USD",
+    "hard_ceiling_a100_seconds": 13500.0,
+    "consumed_conservative_a100_seconds": 12556.823626085978,
+    "active_reservations": 0,
+    "remaining_a100_seconds": 943.176373914022,
+    "remaining_a100_hours": 0.261993437198,
+    "price_usd_per_a100_hour": 2.4984,
+    "remaining_ledger_cost_usd": 0.654564403496,
+    "authorization_scope": "The extant authorization permits one bounded two-A100 v10 retry and explicitly excludes optimized-preservation and kill-and-recompute.",
+    "estimated_campaign": [
+      {
+        "priority": 1,
+        "stage": "v11 state micro-validation",
+        "gpu_count": 1,
+        "conservative_wall_seconds": 525.0,
+        "conservative_a100_seconds": 525.0,
+        "conservative_cost_usd": 0.36435,
+        "basis": "The v10 evidence-derived bound includes 230 seconds startup/import, up to 160 seconds readiness, bounded state preparation/pipeline work, and transaction margin."
+      },
+      {
+        "priority": 2,
+        "stage": "v11 integrated reclamation",
+        "gpu_count": 2,
+        "conservative_wall_seconds": 588.0,
+        "conservative_a100_seconds": 1176.0,
+        "conservative_cost_usd": 0.816144,
+        "basis": "Frozen evidence-derived v10 phase budget; v11 may reduce state time but is not credited before measurement."
+      },
+      {
+        "priority": 3,
+        "stage": "kill-and-recompute arm",
+        "gpu_count": 2,
+        "conservative_wall_seconds": 660.0,
+        "conservative_a100_seconds": 1320.0,
+        "conservative_cost_usd": 0.91608,
+        "basis": "The integrated bound plus explicit recompute allowance; must be replaced by a sealed evidence-derived phase budget before launch."
+      },
+      {
+        "priority": 4,
+        "stage": "optional paired current-hardware v10 arm",
+        "gpu_count": 2,
+        "conservative_wall_seconds": 588.0,
+        "conservative_a100_seconds": 1176.0,
+        "conservative_cost_usd": 0.816144,
+        "basis": "Frozen evidence-derived v10 phase budget; skip when frozen topology/runtime comparability is sufficient."
+      }
+    ],
+    "primary_stages_subtotal_a100_seconds": 3021.0,
+    "primary_stages_with_15_percent_campaign_margin_a100_seconds": 3474.15,
+    "primary_stages_with_margin_cost_usd": 2.41106,
+    "primary_shortfall_a100_seconds": 2530.973626085978,
+    "all_stages_subtotal_a100_seconds": 4197.0,
+    "all_stages_with_15_percent_campaign_margin_a100_seconds": 4826.55,
+    "all_stages_with_margin_cost_usd": 3.349626,
+    "all_stages_shortfall_a100_seconds": 3883.373626085978,
+    "status": "BUDGET_BLOCKER",
+    "blockers": [
+      "SLOFORGE_GPU_BUDGET_USD is not configured.",
+      "The current authorization explicitly excludes v11 optimized-preservation and kill-and-recompute.",
+      "The remaining hard-ledger capacity cannot fund the primary micro-validation, integrated v11, and kill/recompute stages with a conservative margin."
+    ],
+    "required_before_any_gpu_invocation": [
+      "A new explicit v11 authorization whose cumulative A100-second ceiling and USD ceiling cover the selected bounded stage.",
+      "A configured SLOFORGE_GPU_BUDGET_USD no lower than the sealed invocation/cumulative check requires.",
+      "A v11-gpu-budget.json with artifact-bound estimates, current actual/conservative usage, reservation, cost, remaining capacity, and the one authorized coordinator identity.",
+      "An atomic bounded reservation recorded before invocation and settled on every success/failure path."
+    ]
+  },
+  "causal_performance_methodology": {
+    "integrated_trace_level": "minimal",
+    "diagnostic_trace_level": "full only for one bounded state-pipeline diagnostic; never use its wall times as causal integrated results",
+    "profiler_overhead": "Measure minimal-versus-full instrumentation overhead on a bounded representative pipeline inside the authorized micro-validation allocation. Preserve both raw samples and label the full-trace result diagnostic only.",
+    "timing_rules": [
+      "Use monotonic wall time for externally visible milestones and process CPU time for host cost.",
+      "Use CUDA events around device operations and copies; defer event synchronization until a declared observation boundary and record every synchronization.",
+      "Record stream ID, event dependencies, bytes, copy sizes, and overlap for every operation.",
+      "Do not sum overlapping pass durations. Multiple StatePassRecords may share one CUDA operation; stage/chain time comes from the union of intervals in the pass DAG.",
+      "Count physical memory reads and writes once in full physical touch; report PCIe/NVLink transfer bytes separately and never add transfer-byte counters again to the physical-touch numerator.",
+      "Report critical-path movement only for passes whose intervals lie on the measured causal path, with explicit dependency edges.",
+      "Measure pinned, pageable, RSS, GPU temporary, and vLLM-pool peaks from allocation lifetimes rather than cumulative allocation bytes.",
+      "Keep engine/model warmup, runtime versions, model revision, GPU model/UUID/topology, driver, CUDA, seed, load, trigger, and branch geometry identical to v10 where causal comparison is claimed.",
+      "Run only the short 12-rps stable and 15-rps overload guards; do not spend budget on broad recalibration absent material drift.",
+      "Measure GPU0 completions, token rate, TTFT, CPU contention, and link traffic over the exact restore interval; a faster rollout path is not a win if production serving regresses materially."
+    ],
+    "adaptive_repetition": "Start with one micro-validation. After an authorized valid integrated v11 and kill/recompute arm, add paired/randomized repetitions only if the architectural ordering is close or noisy; do not consume budget for cosmetic confidence.",
+    "frozen_v10_comparison": "Do not rerun v10 when model/runtime and A100-SXM4/NVLink topology are sufficiently matched. If topology or driver materially differs, report the frozen comparison as noncausal or spend only the separately authorized minimal paired v10 run."
+  },
+  "go_no_go_gates": {
+    "offline_to_micro": [
+      "Frozen v10 tag/manifest and raw artifact hashes verify.",
+      "The exact classified naive pass DAG exists and its totals reproduce 61,303,947,264 physical bytes, 3,170,893,824 external bytes, and 32,765,902,848 avoidable bytes.",
+      "v11 is a separate implementation path and v10 targeted regression tests pass unchanged.",
+      "All randomized export/restore equality and negative integrity tests pass for explicit seeds.",
+      "The destination admission path remains atomic and all cleanup tests fail closed.",
+      "Every removed zero-fill has a byte-coverage and tenant-isolation proof.",
+      "Expected v11 StatePassRecords cover all real reads, writes, transfers, checksums, temporaries, synchronizations, and DAG edges without inferred savings.",
+      "No unresolved high-severity or reasonable medium-severity review finding remains.",
+      "The v11 authorization, environment budget, phase budget, ledger reservation, and sole GPU coordinator checks pass."
+    ],
+    "micro_to_integrated": [
+      "The exact Qwen2.5-7B-Instruct revision, BF16, 16K shared prefix, 256-token suffix, fanout 8, and native vLLM 0.23 state are used.",
+      "Transport state is bitwise equal to the v10 canonical reference and destination logical state is exact.",
+      "All eight branches resume for at least eight tokens and first resumed tokens match independent recomputation 8/8.",
+      "Fresh allocations, exact release, no stale ownership, no partial visibility, and integrity failure cleanup all pass.",
+      "Measured full physical amplification is at most 20x, or an explicit review proves a comparably material reduction. A reduction smaller than 25 percent from 58x is presumptively NO_MATERIAL_IMPROVEMENT and stops the integrated campaign.",
+      "External movement does not exceed the required D2H plus H2D path absent separately justified diagnostics.",
+      "No movement-accounting, temporary-memory, budget, or cleanup gate fails."
+    ],
+    "integrated_validity": "Reuse all 23 frozen v10 scientific gates without weakening thresholds or evidence derivation, plus v11 pass accounting and integrity evidence.",
+    "hardware_evidence": "No hardware-positive conclusion may use projected removed software passes. Only measured residual, regular, stable-semantic, bandwidth/dataflow-dominated chains on an important critical path may enter the Amdahl hardware gate."
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "finding": "GPU execution is unauthorized and underfunded under the current configuration.",
+      "required_action": "Return BUDGET_BLOCKER and perform no Modal/GPU invocation until a new explicit v11 authorization and environment budget exist."
+    },
+    {
+      "severity": "medium",
+      "finding": "A hash-only destination validator would be a correctness regression if it omitted branch identity/ancestry or used physical block IDs as its domain.",
+      "required_action": "Use canonical logical bytes and separately bind strict identity/branch metadata; retain physical allocation evidence for freshness only."
+    },
+    {
+      "severity": "medium",
+      "finding": "Eliminating whole-page zeroing is unsafe for partial pages without a tail-read and tenant-isolation proof.",
+      "required_action": "Overwrite all full pages and zero partial tails by default; require an independent proof/test for any broader removal."
+    },
+    {
+      "severity": "medium",
+      "finding": "The v10 ledger has 270 segment records but 30 conceptual full-state passes; either number alone can be misleading.",
+      "required_action": "Report both record count and distinct complete-coverage pass count, and compute timing from interval unions rather than summed per-segment durations."
+    }
+  ],
+  "source_evidence": [
+    "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/baseline/v10-naive-baseline-status.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/scientific-validity.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/branch-resume-validation.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v10.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+    "experiments/branchfabric/gpu_reclamation_worker.py",
+    "python/sloforge/continuum/adapters/vllm_reclamation.py",
+    "python/sloforge/helix/characterization/gpu_reclamation_accounting.py",
+    "python/sloforge/helix/characterization/gpu_reclamation_v10_validity.py"
+  ]
+}

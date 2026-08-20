@@ -1,0 +1,131 @@
+{
+  "audit": "v11 local CPU bit-exact equivalence and canonical preservation semantics",
+  "audited_at_utc": "2026-08-19T00:38:01Z",
+  "execution_commit": "1c51853e10809686d4368037153927f25e834117",
+  "frozen_v10_execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+  "gpu_work_performed": false,
+  "independent_reviewer": "Agent 6",
+  "network_work_performed": false,
+  "result": "PASS",
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-review/v1",
+  "environment": {
+    "cuda_available": false,
+    "python_executable": "/Users/rishivinodkumar/anaconda3/bin/python",
+    "pythonpath": "python:.venv/lib/python3.12/site-packages",
+    "torch": "2.10.0"
+  },
+  "source_hashes_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation.py": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "f234ff79e9f3aacd3e0960ffb8838b61d4987ad4609615f6879cdc57074d490c",
+    "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b"
+  },
+  "frozen_v10_evidence": {
+    "current_adapter_sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+    "frozen_commit_adapter_sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+    "git_diff_from_frozen_commit": "empty",
+    "passed": true
+  },
+  "checks": {
+    "bit_exact_export_matches_frozen_v10": "PASS",
+    "canonical_manifest_matches_frozen_v10": "PASS",
+    "consumption_time_authentication": "PASS",
+    "destination_mapping_commitment": "PASS",
+    "deterministic_28_mib_chunks": "PASS",
+    "failure_scrubbing_and_typed_teardown": "PASS",
+    "full_page_zero_fill_elimination": "PASS",
+    "manifest_commitment": "PASS",
+    "no_silent_device_or_memory_mode_switch": "PASS",
+    "partial_tail_exact_zero_proof": "PASS",
+    "per_page_sha256": "PASS",
+    "raw_bfloat16_bit_comparison": "PASS",
+    "restore_logical_equivalence": "PASS",
+    "whole_state_sha256": "PASS"
+  },
+  "exact_16k_chunk_audit": {
+    "chunk_bytes": 29360128,
+    "chunk_count": 36,
+    "descriptor_sha256": "b5fcfc8ffa0aa24f0e859aeb9022d47ea99bd3b00be55845da1053ecf87d0c63",
+    "logical_bytes": 1056964608,
+    "logical_token_bytes": 57344,
+    "pages_per_chunk": [
+      32
+    ],
+    "payload_bytes_per_chunk": [
+      29360128
+    ],
+    "physical_page_bytes": 917504,
+    "repeat_descriptor_sha256": "b5fcfc8ffa0aa24f0e859aeb9022d47ea99bd3b00be55845da1053ecf87d0c63",
+    "repeat_exact": true,
+    "topology": {
+      "private_pages": 128,
+      "shared_pages": 1024,
+      "total_pages": 1152
+    }
+  },
+  "equivalence_matrix": [
+    {
+      "layers": 1,
+      "seed": 41,
+      "v10_payload_and_manifest_equal": true,
+      "v11_restore_equal": true
+    },
+    {
+      "layers": 2,
+      "seed": 73,
+      "v10_payload_and_manifest_equal": true,
+      "v11_restore_equal": true
+    },
+    {
+      "layers": 4,
+      "seed": 113,
+      "v10_payload_and_manifest_equal": true,
+      "v11_restore_equal": true
+    }
+  ],
+  "negative_cases_verified": [
+    "duplicate, empty, and oversized chunk plans",
+    "whole-state payload corruption before restore",
+    "missing, duplicated, and reordered canonical ranges",
+    "wrong transport identity",
+    "incomplete destination coverage",
+    "post-write native destination bit corruption",
+    "in-place payload mutation after verification",
+    "NumPy-alias mutation invisible to the tensor version counter",
+    "untyped or mismatched fused destination evidence",
+    "stale destination allocation evidence",
+    "failure-scrub, free, reset, and final-enqueue failures",
+    "lost admission gate between branch enqueues",
+    "implicit CPU/CUDA memory-mode changes"
+  ],
+  "offline_commands": [
+    {
+      "command": "PYTHONPATH=python:.venv/lib/python3.12/site-packages python -m pytest --collect-only -q tests/python/test_vllm_reclamation_v11.py",
+      "result": "PASS",
+      "summary": "19 tests collected"
+    },
+    {
+      "command": "PYTHONPATH=python:.venv/lib/python3.12/site-packages python -m pytest -q tests/python/test_vllm_reclamation_v11.py",
+      "result": "PASS",
+      "summary": "19 passed in 0.63s"
+    },
+    {
+      "command": "PYTHONPATH=python:.venv/lib/python3.12/site-packages python -m pytest -q tests/python/test_vllm_reclamation_v11.py",
+      "result": "PASS",
+      "summary": "repeat: 19 passed in 0.64s"
+    },
+    {
+      "command": "PYTHONPATH=python:.venv/lib/python3.12/site-packages python -m pytest -q tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_runtime_v11.py",
+      "result": "PASS",
+      "summary": "18 passed in 0.19s"
+    },
+    {
+      "command": "python -m ruff check tests/python/test_vllm_reclamation_v11.py python/sloforge/continuum/adapters/vllm_reclamation_v11.py python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "result": "PASS"
+    }
+  ],
+  "scope_note": "This is local CPU equivalence evidence only. It does not claim CUDA equivalence, real-vLLM continuation correctness, latency, movement, or amplification measurements.",
+  "gpu_allocation_recommendation": "LOCAL_EQUIVALENCE_PASS"
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-trigger-race-review/v1",
+  "agent": 2,
+  "role": "load/controller race reviewer",
+  "reviewed_at_utc": "2026-08-20T02:26:31Z",
+  "scope": "offline-only; no Modal, cloud, CUDA, or GPU invocation",
+  "status": "PASS",
+  "execution_commit_before_offline_fixes": "1c51853e10809686d4368037153927f25e834117",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "status": "FIXED",
+      "finding": "RECLAIM_TRIGGER_EMITTED was stamped while evidence was built, before the one-shot publication lock and immutable writer.",
+      "resolution": "The publisher now stamps emission under the one-shot lock immediately before fsync/exclusive publication and recomputes controller reaction latency from the measured predicate timestamp."
+    },
+    {
+      "severity": "HIGH",
+      "status": "PASS",
+      "finding": "The independent monitor observes producer and driver snapshots while engine.step is blocked and can publish the normal trigger without waiting for main-loop bookkeeping."
+    },
+    {
+      "severity": "HIGH",
+      "status": "PASS",
+      "finding": "The normal predicate requires backlog >=20 across the full deterministic 0.25-second confirmation window, positive queue slope, and offered rate greater than completed rate."
+    },
+    {
+      "severity": "HIGH",
+      "status": "PASS",
+      "finding": "The emergency abort remains an independent total-outstanding guard and aborts at outstanding_requests >=64."
+    },
+    {
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "finding": "Trigger publication is serialized and exactly once even when the independent monitor and frozen controller main loop race to emit."
+    },
+    {
+      "severity": "MEDIUM",
+      "status": "PASS",
+      "finding": "GPU1 records ROLLOUT_ADMISSION_STOP and state quiescence, and validation requires OVERLOAD_DETECTED <= TRIGGER_PREDICATE_SATISFIED <= RECLAIM_TRIGGER_EMITTED <= ROLLOUT_ADMISSION_STOP <= STATE_QUIESCENCE."
+    }
+  ],
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd",
+    "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": "432f0906ced864e10e7be7552c02b5efb9d4b0dd4d358a5ce7788ea0a210d1ca",
+    "experiments/branchfabric/gpu_reclamation_v10_serving.py": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11.py": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599",
+    "tests/python/test_gpu_reclamation_integrated_worker_v11.py": "5292a705779b6ccd5daec3e4b2743daad167e21e64a553c484f40d6c0e6deae9",
+    "tests/python/test_gpu_reclamation_integrated_controller_v11.py": "869ce24d1ba916a6069a59152c68acaf1d28529a8356403e79671c317ac1b401"
+  },
+  "frozen_v10_identity": {
+    "working_tree_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "head_blob_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "byte_identical": true
+  },
+  "verification": [
+    {
+      "command": "uv run --locked ruff check experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+      "status": "PASS"
+    },
+    {
+      "command": "uv run --locked pytest -q tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "status": "PASS",
+      "tests_passed": 82
+    },
+    {
+      "command": "10x test_independent_monitor_emits_once_when_engine_bookkeeping_is_starved",
+      "status": "PASS",
+      "iterations_passed": 10
+    }
+  ],
+  "gpu_resources_consumed": false,
+  "passed": true
+}

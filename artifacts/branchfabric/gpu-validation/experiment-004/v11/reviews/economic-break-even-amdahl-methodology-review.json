@@ -1,0 +1,412 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-economic-amdahl-methodology-review/v1",
+  "reviewer": "economic-break-even-and-amdahl-methodology",
+  "review_date": "2026-08-18",
+  "scope": "Offline-only analytical contract for the Experiment 004 v11 three-way preservation break-even and residual Amdahl analysis.",
+  "gpu_or_remote_compute_used": false,
+  "source_code_modified": false,
+  "status": "METHOD_READY_GPU_MEASUREMENTS_PENDING",
+  "classification_ready": false,
+  "verdict": "The equations and data contracts are ready, but neither preservation parity nor residual hardware headroom may be reported until the optimized-preserve and kill/recompute arms emit complete causal GPU measurements. Frozen v10 values are comparators, not substitutes for those missing observations.",
+  "evidence_classes": {
+    "MEASURED_V10": "A value read directly from the frozen, scientifically valid exp004-v10-naive-s41-v7 artifacts.",
+    "DERIVED_FROM_MEASURED_V10": "A deterministic arithmetic result whose complete inputs are MEASURED_V10 and whose formula is recorded here.",
+    "LOCALLY_MODELED_V11": "An analytical expression, schema, or counterfactual calculated offline. It is not a hardware observation.",
+    "MEASURED_V11": "Reserved for a future valid A100 v11 run with source artifact and sample identifiers.",
+    "UNAVAILABLE": "Not measured yet; encoded as null and prohibited from final quantitative claims."
+  },
+  "evidence_sources": [
+    {
+      "artifact": "reports/branchfabric-gpu-validation-experiment-004-v10-final.json",
+      "sha256": "e273c29dca0571fe3f327d5dffa5890d98dfc23948ec8bb89da21db62ee096f9",
+      "evidence_class": "MEASURED_V10",
+      "sample_selector": "$"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+      "sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3",
+      "evidence_class": "MEASURED_V10",
+      "sample_selector": "$"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/result.json",
+      "sha256": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
+      "evidence_class": "MEASURED_V10",
+      "sample_selector": "$"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-analysis/naive-pass-graph.json",
+      "sha256": "3aadcf22b7aa78dfe4c1a33f8c950a2ff5b63529ab361efc44f5c5ac76c5a0d4",
+      "evidence_class": "DERIVED_FROM_MEASURED_V10",
+      "sample_selector": "$"
+    }
+  ],
+  "measured_v10_inputs": {
+    "attempt_id": "exp004-v10-naive-s41-v7",
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "prefix_tokens": 16384,
+    "branch_count": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "logical_state_bytes": 1056964608,
+    "full_physical_touch_bytes": 61303947264,
+    "external_movement_bytes": 3170893824,
+    "avoidable_movement_bytes": 32765902848,
+    "full_physical_touch_amplification": 58.0,
+    "external_movement_amplification": 3.0,
+    "avoidable_movement_amplification": 31.0,
+    "aggregate_full_state_pass_count": 30,
+    "time_to_hbm_reclamation_seconds": 5.222174431,
+    "time_to_useful_gpu1_capacity_seconds": 5.413681427,
+    "time_to_serving_slo_restoration_seconds": 11.373208336,
+    "rollout_first_resumed_token_seconds_from_restore_trigger": 7.727983415,
+    "rollout_continuation_complete_seconds_from_restore_trigger": 7.848228746,
+    "recompute_control_tokens_prefilled": 133120,
+    "recompute_control_duration_seconds": 1.526659947,
+    "recompute_control_use_restriction": "This post-restore correctness oracle submitted eight complete branch histories. It establishes the independent-history token count but is not a measured KILL_AND_RECOMPUTE arm and must not be used as its causal prefill throughput or cost."
+  },
+  "deterministic_v10_derivations": {
+    "stored_token_equivalents": {
+      "formula": "P + B*A",
+      "value": 18432,
+      "evidence_class": "DERIVED_FROM_MEASURED_V10"
+    },
+    "logical_kv_bytes_per_stored_token": {
+      "formula": "S / (P + B*A)",
+      "value": 57344,
+      "unit": "bytes_per_token",
+      "evidence_class": "DERIVED_FROM_MEASURED_V10"
+    },
+    "independent_recompute_tokens": {
+      "formula": "B*(P + A)",
+      "value": 133120,
+      "evidence_class": "DERIVED_FROM_MEASURED_V10",
+      "cross_check": "Equals rollout.result.json recompute_control.tokens_prefilled."
+    },
+    "shared_prefix_once_recompute_tokens": {
+      "formula": "P + B*A",
+      "value": 18432,
+      "evidence_class": "DERIVED_FROM_MEASURED_V10",
+      "use_restriction": "Counterfactual only. It is not the task-specified independent-prefill kill arm."
+    },
+    "extra_prefix_replays_in_independent_arm": {
+      "formula": "(B - 1)*P",
+      "value": 114688,
+      "evidence_class": "DERIVED_FROM_MEASURED_V10"
+    }
+  },
+  "v11_measurement_slots": {
+    "evidence_class": "UNAVAILABLE",
+    "optimized_export_seconds": null,
+    "optimized_restore_to_first_token_seconds": null,
+    "optimized_full_transaction_seconds": null,
+    "optimized_gpu_seconds": null,
+    "optimized_export_logical_bytes_per_second": null,
+    "optimized_restore_logical_bytes_per_second": null,
+    "optimized_fixed_export_seconds": null,
+    "optimized_fixed_restore_seconds": null,
+    "kill_release_seconds": null,
+    "kill_environment_reconstruction_seconds": null,
+    "kill_recompute_tokens": null,
+    "kill_recompute_gpu_seconds": null,
+    "kill_effective_recompute_tokens_per_second": null,
+    "kill_first_resumed_token_seconds": null,
+    "paired_arm_gpu_hour_price_usd": null,
+    "residual_v11_chain_intervals": null,
+    "reason": "No v11 GPU micro-validation, full integrated optimized run, or measured kill/recompute arm was available during this offline review."
+  },
+  "preservation_break_even_method": {
+    "symbols": {
+      "P": "shared prefix tokens",
+      "B": "branch count",
+      "A": "branch age represented by private suffix tokens per branch",
+      "q": "logical KV bytes per stored-token equivalent for the exact model, dtype, KV geometry, and runtime",
+      "S": "logical state bytes retained by preservation",
+      "m": "measured prefix replay multiplicity in the kill arm; task-specified independent recomputation requires m=B",
+      "R": "actual recompute tokens emitted by the kill arm",
+      "theta": "measured effective kill-arm recompute throughput in tokens/second, computed as R divided by the exclusive recompute-prefill interval",
+      "beta_c": "measured effective optimized capture throughput in logical bytes/second over the complete capture-dependent reclamation contribution",
+      "beta_r": "measured effective optimized restore throughput in logical bytes/second over the complete restore-dependent resume contribution",
+      "C_p": "measured preservation fixed/non-byte time after removing the fitted S/beta_c and S/beta_r terms",
+      "C_k": "measured kill fixed/non-token time after removing R/theta, including release and environment reconstruction",
+      "alpha_p": "1/beta_c + 1/beta_r",
+      "DeltaC": "C_p - C_k"
+    },
+    "state_size_model": {
+      "formula": "S(P,B,A) = q*(P + B*A)",
+      "justification": "The preserved Continuum state stores one shared prefix plus one private suffix per branch.",
+      "validity_scope": "Use q=57344 only for Qwen2.5-7B-Instruct bf16 under the measured vLLM 0.23.0 KV geometry. Re-measure q for another model, dtype, block geometry, compression, or transport schema."
+    },
+    "recompute_work_model": {
+      "general_formula": "R(P,B,A,m) = m*P + B*A",
+      "task_specified_independent_formula": "R_independent(P,B,A) = B*(P + A)",
+      "shared_prefix_once_counterfactual": "R_shared(P,B,A) = P + B*A",
+      "fail_closed_rule": "Use the measured kill arm's emitted recompute_tokens and record m. Do not infer shared-prefix reuse from preserved-state deduplication. If measured R disagrees with the selected formula, the emitted R is authoritative and the analytical curve must be labeled empirical-token interpolation."
+    },
+    "time_objective": {
+      "optimized_preserve_formula": "T_p = C_p + S/beta_c + S/beta_r = C_p + q*alpha_p*(P + B*A)",
+      "kill_formula": "T_k = C_k + R/theta",
+      "parity_condition": "D_time = T_p - T_k = 0",
+      "winner_rule": "OPTIMIZED_PRESERVE is faster where D_time < 0; KILL_AND_RECOMPUTE is faster where D_time > 0; equality is parity.",
+      "comparison_window": "From the common reclaim trigger through the first resumed rollout token. An intentionally fixed restore hold cancels only if paired runs prove it identical; otherwise retain it in C_p and C_k.",
+      "common_future_work": "Tokens generated after the first resumed token cancel only when branch semantics and remaining work are identical. Lost private rollout work before reclaim never cancels and is reported separately."
+    },
+    "closed_form_independent_recompute": {
+      "difference": "D_time = DeltaC + (q*alpha_p - B/theta)*P + B*(q*alpha_p - 1/theta)*A",
+      "prefix_parity": "P_star = -[DeltaC + B*(q*alpha_p - 1/theta)*A] / (q*alpha_p - B/theta)",
+      "branch_count_parity": "B_star = -[DeltaC + q*alpha_p*P] / [q*alpha_p*A - (P + A)/theta]",
+      "branch_age_parity": "A_star = -[DeltaC + (q*alpha_p - B/theta)*P] / [B*(q*alpha_p - 1/theta)]",
+      "threshold_direction_rule": "Evaluate D_time immediately on both integer sides of a finite root. Never assume that preservation wins above the root; the coefficient sign determines direction.",
+      "degenerate_rule": "If a denominator is zero, report ALL_VALUES or NO_VALUES from the remaining constant sign. Never emit an infinite numeric threshold."
+    },
+    "closed_form_shared_prefix_once_counterfactual": {
+      "difference": "D_time = DeltaC + (q*alpha_p - 1/theta)*(P + B*A)",
+      "restriction": "Report only as a separately labeled counterfactual unless the measured kill arm proves m=1."
+    },
+    "gpu_seconds_and_cost_objective": {
+      "gpu_seconds_definition": "Allocated GPU-seconds are the sum of wall occupancy over allocated GPUs for the measured incremental transition. Report device-active GPU time and recompute GPU time separately as subsets; do not add either to allocated GPU-seconds or mix the definitions.",
+      "parity_method": "Fit the same affine structure independently to measured GPU-seconds: G_p = Gp_fixed + gp_byte*S and G_k = Gk_fixed + gk_token*R. Solve G_p-G_k=0 with the same root and sign rules.",
+      "cost_formula": "cost_usd = sum_over_resources(occupancy_seconds_resource * measured_price_usd_per_resource_second)",
+      "fixed_topology_shortcut": "Wall-time parity implies allocated-GPU cost parity only when both arms reserve the same GPU count for the same comparison window and no other priced resources differ.",
+      "required_outputs": [
+        "time break-even",
+        "GPU-seconds break-even",
+        "dollar break-even when a measured price exists",
+        "lost rollout GPU-seconds",
+        "lost rollout private tokens",
+        "recompute tokens"
+      ]
+    },
+    "fit_and_uncertainty_rules": [
+      "Rates are effective end-to-end rates from exclusive causal intervals, not theoretical PCIe, HBM, or model throughput.",
+      "With only one measured state size, q is exact for that fixture but beta and fixed intercepts are not separately identifiable. Use the measured point directly and label all size curves single-point linear analytical interpolation.",
+      "A nonzero fitted intercept requires at least two valid sizes or separately instrumented fixed stages. Otherwise set the intercept to the directly measured non-byte stage sum, not a regression invention.",
+      "Prefer paired seed/topology values. If multiple paired runs exist, compute a curve per pair, then report median and observed range; do not pool unpaired stages.",
+      "Do not extrapolate across model, dtype, page size, engine version, GPU topology, or a range that changes scheduling/concurrency regime.",
+      "Every plotted point carries input artifacts, sample IDs, evidence class, formula version, and whether it is interpolation or extrapolation."
+    ]
+  },
+  "residual_amdahl_method": {
+    "required_paths": [
+      {
+        "id": "time_to_hbm_reclamation",
+        "start_event": "RECLAIM_TRIGGER",
+        "end_event": "GPU1_HBM_RECLAIM_CONFIRMED"
+      },
+      {
+        "id": "time_to_useful_gpu1_capacity",
+        "start_event": "RECLAIM_TRIGGER",
+        "end_event": "GPU1_FIRST_USEFUL_SERVING_REQUEST"
+      },
+      {
+        "id": "time_to_serving_slo_restoration",
+        "start_event": "RECLAIM_TRIGGER",
+        "end_event": "first causally valid SLO restoration marker under the unchanged v10 stability contract"
+      },
+      {
+        "id": "rollout_restore_latency",
+        "start_event": "RESTORE_TRIGGER",
+        "end_event": "FIRST_RESUMED_TOKEN"
+      },
+      {
+        "id": "full_preservation_transaction",
+        "start_event": "RECLAIM_TRIGGER",
+        "end_event": "ROLLOUT_CONTINUATION_COMPLETE"
+      }
+    ],
+    "candidate_fused_chains": [
+      {
+        "id": "A_source_capture_stream",
+        "required_operations": [
+          "source state read",
+          "gather/repack",
+          "integrity",
+          "D2H"
+        ],
+        "path_eligibility": [
+          "time_to_hbm_reclamation",
+          "time_to_useful_gpu1_capacity",
+          "time_to_serving_slo_restoration",
+          "full_preservation_transaction"
+        ],
+        "restriction": "Include only v11 operations still causally required before source release. Hash or copy work hidden by overlap contributes only its blocking critical-path portion."
+      },
+      {
+        "id": "B_destination_restore_stream",
+        "required_operations": [
+          "H2D",
+          "unpack/direct scatter",
+          "destination native write",
+          "integrity"
+        ],
+        "path_eligibility": [
+          "rollout_restore_latency",
+          "full_preservation_transaction"
+        ],
+        "restriction": "Do not assign chain B to reclamation, useful-capacity, or pre-restore SLO paths when restore occurs after those endpoints. Destination integrity includes only the independent pre-visibility proof that remains in v11."
+      },
+      {
+        "id": "C_all_remaining_state_pipeline",
+        "required_operations": [
+          "union of every residual v11 state-pipeline operation in chains A and B",
+          "other residual state-only orchestration on the selected critical path"
+        ],
+        "path_eligibility": [
+          "time_to_hbm_reclamation",
+          "time_to_useful_gpu1_capacity",
+          "time_to_serving_slo_restoration",
+          "rollout_restore_latency",
+          "full_preservation_transaction"
+        ],
+        "restriction": "C is a set union, not A time plus B time plus state total. Each atomic interval appears at most once."
+      }
+    ],
+    "non_overlap_contract": {
+      "atomic_partition": "For each path, sort all measured operation start/end boundaries and partition the path into half-open atomic wall intervals [t_i,t_i+1). Every atomic interval is assigned exactly once to state chain A, state chain B, other residual state, serving/queue dynamics, intentional hold, or other orchestration.",
+      "overlap_attribution": "If CPU, CUDA, and DMA work overlap, attribute only the operation or dependency chain that controls the measured path's completion in that atomic interval. Retain all resource-active times separately, but never add them to wall time.",
+      "shared_timing_rule": "A v10/v11 ledger pass that shares one measured interval with other pass records cannot contribute that interval more than once.",
+      "set_rule": "A, B, and other-state node identifiers must be disjoint. C equals their union. Projections for A, B, and C are independent counterfactuals and are never summed.",
+      "conservation_tests": [
+        "sum atomic wall durations equals the exact path endpoint difference",
+        "no two atomic wall intervals overlap",
+        "every target node belongs to the selected path",
+        "target duration never exceeds baseline path duration",
+        "C target set equals the exact union of all residual state sets"
+      ]
+    },
+    "projection_algorithm": {
+      "preferred": "Replay the measured dependency DAG. Scale only target-node service durations by factor k, retain dependency edges and non-target durations, and recompute the earliest-start/longest-path makespan. This preserves pipelined overlap.",
+      "fallback_for_strictly_serial_exclusive_intervals": "T_k = T - X + X/k, where T is baseline path wall time and X is the union duration of the selected target intervals.",
+      "free_case": "T_free = T - X for serial exclusive intervals, or set target-node duration to zero and replay the DAG.",
+      "speedup": "speedup_k = T/T_k",
+      "reduction_fraction": "(T - T_k)/T",
+      "target_fraction": "X/T",
+      "required_factors": [
+        2,
+        5,
+        10,
+        "effectively_free"
+      ],
+      "rounding": "Calculate in integer nanoseconds. Round each scaled node duration once using the report's declared deterministic rule before DAG replay.",
+      "slo_caveat": "The SLO-restoration projection is a mechanical upper bound unless queue/service replay or a paired causal run models the changed enable time. Do not claim that shortening capture shifts TTFT recovery one-for-one."
+    },
+    "output_fields_per_path_chain_factor": [
+      "path_id",
+      "chain_id",
+      "acceleration_factor",
+      "baseline_total_ns",
+      "target_union_ns",
+      "target_fraction",
+      "projected_total_ns",
+      "projected_speedup",
+      "projected_reduction_fraction",
+      "projection_method",
+      "source_artifact",
+      "source_sha256",
+      "sample_ids",
+      "evidence_class"
+    ],
+    "hardware_gate_use": {
+      "minimum_measured_chain_fraction": 0.15,
+      "minimum_realistic_end_to_end_speedup": 1.2,
+      "software_close_ideal_free_speedup_below": 1.15,
+      "rules": [
+        "The >=15% fraction and >=1.20x realistic improvement must refer to an important task-specified path or economically important Helix metric.",
+        "A 10x or free projection is an upper-bound sensitivity point, not a realistic hardware claim.",
+        "A realistic factor must be justified by measured byte rate, burst rate, state size, latency target, concurrency, stable semantics, placement advantage, and a bandwidth/dataflow-dominated residual.",
+        "No hardware-positive result may use v10 removed work, locally projected v11 pass removal, or theoretical bandwidth in place of a measured post-v11 residual.",
+        "If the optimized state pipeline is below 10% of important paths, ideal-free speedup is below 1.15x, or kill/recompute dominates nearby regimes, close hardware under the task's ordered gate."
+      ]
+    }
+  },
+  "plot_data_contracts": {
+    "preservation_break_even_by_prefix_length": {
+      "series": [
+        "KILL_AND_RECOMPUTE",
+        "NAIVE_PRESERVE",
+        "OPTIMIZED_PRESERVE"
+      ],
+      "x": "prefix_tokens",
+      "y_options": [
+        "seconds_to_first_resumed_token",
+        "gpu_seconds",
+        "cost_usd"
+      ],
+      "fixed_dimensions": [
+        "branch_count",
+        "private_suffix_tokens_per_branch",
+        "model/runtime/topology"
+      ],
+      "required_point_fields": [
+        "prefix_tokens",
+        "branch_count",
+        "private_suffix_tokens_per_branch",
+        "logical_state_bytes",
+        "recompute_tokens",
+        "arm",
+        "value",
+        "unit",
+        "evidence_class",
+        "interpolation_or_extrapolation",
+        "formula_version",
+        "source_sample_ids"
+      ],
+      "render_rule": "Plot measured points as markers. Connect analytical points only with an explicit 'linear analytical interpolation' label; never apply smoothing."
+    },
+    "preservation_break_even_by_branch_count": {
+      "series": [
+        "KILL_AND_RECOMPUTE",
+        "NAIVE_PRESERVE",
+        "OPTIMIZED_PRESERVE"
+      ],
+      "x": "integer_branch_count",
+      "y_options": [
+        "seconds_to_first_resumed_token",
+        "gpu_seconds",
+        "cost_usd"
+      ],
+      "fixed_dimensions": [
+        "prefix_tokens",
+        "private_suffix_tokens_per_branch",
+        "model/runtime/topology"
+      ],
+      "special_rule": "Recompute R for every integer B using the measured prefix replay multiplicity policy. Do not scale from total history tokens while holding logical bytes per history token fixed, because shared-state storage and independent prefix replay scale differently with B.",
+      "render_rule": "Use discrete integer points/steps. No smoothed branch-count curve."
+    },
+    "residual_amdahl_headroom": {
+      "x": "acceleration_factor in [2x,5x,10x,free]",
+      "y": "projected_end_to_end_speedup",
+      "series_key": "path_id plus chain_id",
+      "required_point_fields": "residual_amdahl_method.output_fields_per_path_chain_factor",
+      "render_rule": "Do not render a v11 series until measured v11 interval/DAG evidence is present. Visually distinguish realistic factor from upper-bound 10x/free sensitivity."
+    }
+  },
+  "review_findings": [
+    {
+      "severity": "HIGH",
+      "finding": "The current generic gpu_reclamation_policy.ReclamationWorkload.history_tokens formula is P+B*A. That matches shared-prefix-once replay but not the task-specified independent-prefill kill arm, whose v10 correctness-control token count is B*(P+A)=133120.",
+      "required_action": "For the Experiment 004 v11 economic report, consume the kill arm's emitted recompute_tokens and prefix replay multiplicity. Update or bypass the generic helper before generating branch-count or prefix-length break-even curves; otherwise the baseline case is understated by 114688 prefix-token replays."
+    },
+    {
+      "severity": "HIGH",
+      "finding": "No v11 or kill-arm causal GPU measurements exist in the reviewed evidence.",
+      "required_action": "Keep break-even roots, optimized timing, residual chain fractions, Amdahl numerical projections, and final hardware classification null until the required valid arms complete."
+    },
+    {
+      "severity": "MEDIUM",
+      "finding": "The existing project_amdahl serial formula is valid for an exclusive CriticalPath partition but cannot by itself represent overlap introduced by v11 double buffering.",
+      "required_action": "Use dependency-DAG replay for pipelined v11 chains, or first reduce the trace to a measured non-overlapping blocking partition. Never sum CUDA, DMA, and CPU active times as wall time."
+    },
+    {
+      "severity": "MEDIUM",
+      "finding": "A single 16K/fanout-8 measurement cannot identify both fixed intercept and slope for either preservation or recomputation.",
+      "required_action": "Label the required prefix/branch curves as single-point linear analytical interpolation unless additional valid sizes are measured. Do not fabricate confidence bands or smooth curves."
+    }
+  ],
+  "approval": {
+    "offline_methodology": "APPROVED_WITH_REQUIRED_GUARDS",
+    "gpu_launch": "NOT_REVIEWED_BY_THIS_ARTIFACT",
+    "economic_conclusion": "BLOCKED_ON_MEASURED_V11_AND_KILL_ARMS",
+    "hardware_conclusion": "BLOCKED_ON_MEASURED_POST_SOFTWARE_RESIDUAL"
+  }
+}

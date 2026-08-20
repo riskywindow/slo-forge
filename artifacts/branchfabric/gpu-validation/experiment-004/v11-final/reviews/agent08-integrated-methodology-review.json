@@ -1,0 +1,206 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-integrated-methodology-review/v1",
+  "agent": 8,
+  "role": "integrated-methodology-review",
+  "reviewed_at_utc": "2026-08-20T02:51:34Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "Offline-only independent review of the attempt-c integrated v11 methodology and fail-closed evidence validation. No Modal, provider, cloud, CUDA, GPU, commit, or tag operation was performed.",
+  "offline_only": true,
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "modal_invoked": false,
+  "v11_state_pipeline_optimization_modified": false,
+  "review_result": {
+    "two_a100_topology_handling": "PASS",
+    "short_12_and_15_rps_sanity_guards": "PASS",
+    "nine_to_fifteen_rps_control_and_spike": "PASS",
+    "early_normal_trigger": "PASS",
+    "emergency_ceiling_independence": "PASS",
+    "controller_reaction_latency": "PASS",
+    "v11_state_correctness": "PASS",
+    "integrated_state_pass_accounting": "PASS",
+    "two_gpu_excess_service_and_queue_drain": "PASS",
+    "five_second_slo_recovery": "PASS",
+    "gpu1_drain_and_restore_eligibility": "PASS",
+    "gpu0_activity_during_measured_restore": "PASS",
+    "eight_of_eight_branch_correctness": "PASS",
+    "non_overlapping_critical_path_stages": "PASS",
+    "in_function_cleanup_gate": "PASS",
+    "provider_cleanup_gate": "PASS",
+    "exactly_once_and_budget_admission": "PASS",
+    "fresh_immutable_artifacts": "PASS",
+    "scientific_fail_closed_validation": "PASS"
+  },
+  "methodology_contract": {
+    "attempt_id": "exp004-v11-integrated-s41-c",
+    "gpu_count": 2,
+    "gpu_requirements": "Exactly two visible, distinct NVIDIA A100 GPUs with at least 80 GB each; no silent device or topology substitution.",
+    "topology_comparison_rule": "Direct causal timing comparison to frozen v10 is permitted only when exact A100-SXM4 topology is established. A100 PCIe or otherwise non-comparable topology must be labeled and limited to within-run stage comparisons.",
+    "sanity_guards": {
+      "broad_capacity_recalibration_allowed": false,
+      "guard_a": {
+        "rate_rps": 12.0,
+        "measurement_seconds": 3.0,
+        "required": "bounded queue, completed rate tracks offered rate, no persistent positive queue drift, p95 TTFT below 2 seconds"
+      },
+      "guard_b": {
+        "rate_rps": 15.0,
+        "measurement_seconds": 3.0,
+        "required": "bounded guard backlog and either positive queue slope or completed rate below offered rate; TTFT alone cannot establish overload"
+      },
+      "reset_before_integrated_transaction": true
+    },
+    "control_interval": {
+      "rate_rps": 9.0,
+      "duration_seconds": 5.0,
+      "expected_arrivals": 45,
+      "minimum_completion_fraction": 0.9,
+      "p95_ttft_limit_ns": 2000000000,
+      "maximum_outstanding": 19,
+      "maximum_terminal_outstanding": 4,
+      "all_arrivals_require_ttft_samples": true
+    },
+    "overload": {
+      "spike_rate_rps": 15.0,
+      "normal_trigger_depth": 20,
+      "minimum_scientifically_accepted_trigger_depth": 20,
+      "maximum_scientifically_accepted_trigger_depth": 30,
+      "emergency_abort_depth": 64,
+      "minimum_emergency_headroom_requests": 34,
+      "required_predicate": "positive queue slope and offered rate greater than completed rate for the confirmation window",
+      "maximum_controller_reaction_ns": 100000000,
+      "risk_assessment": "At 15 rps with zero completions, the accepted 20-to-30 depth band spans about 0.667 seconds, greater than 2.6 times the 0.25-second confirmation window. A delayed controller that crosses depth 30 is rejected as scientifically invalid instead of being allowed to approach the independent depth-64 emergency abort."
+    },
+    "recovery": {
+      "aggregate_completion_must_exceed_observed_offer": true,
+      "queue_slope_must_be_negative": true,
+      "backlog_must_drain": true,
+      "required_consecutive_slo_windows": 5,
+      "slo_window_seconds": 1,
+      "p95_ttft_limit_ns": 2000000000,
+      "recovery_queue_threshold": 4
+    },
+    "restore_precondition": {
+      "gpu1_running": 0,
+      "gpu1_waiting": 0,
+      "gpu0_remains_active": true,
+      "gpu0_actual_restore_interval_required": "RESTORE_TRIGGER through FIRST_RESUMED_TOKEN",
+      "required_actual_restore_evidence": "positive arrivals, completions, emitted tokens, and live queue samples; exact rate and TTFT arithmetic is controller-validated"
+    },
+    "branch_correctness": {
+      "branch_count": 8,
+      "minimum_continuation_tokens_per_branch": 8,
+      "exact_first_resumed_token_matches": "8/8",
+      "fresh_disjoint_allocations": true,
+      "real_allocator_epochs": true,
+      "ownership_integrity_and_admission_required": true
+    },
+    "critical_path_accounting": {
+      "overlap_double_count_allowed": false,
+      "reclamation_stages": [
+        "branch_quiesce",
+        "source_authentication",
+        "fused_gather_repack_d2h",
+        "publish_and_release_preconditions",
+        "source_release",
+        "hbm_reclaim_confirmation",
+        "gpu1_serving_ready"
+      ],
+      "restore_stages": [
+        "restore_preconditions",
+        "checkpoint_authentication",
+        "destination_allocation_staging",
+        "fused_h2d_direct_scatter_raw_validation_and_admission",
+        "canonical_pass_validation_and_commit",
+        "first_resumed_token"
+      ],
+      "streaming_overlap_rule": "Wall stages that the frozen v11 implementation overlaps are kept fused; canonical StatePassRecords retain operation-level byte attribution without double-counting elapsed wall time.",
+      "controller_validation": "Stage contiguity, start/end bounds, duration arithmetic, duration conservation, residual-chain arithmetic, phase movement sums, pass counts, and amplification arithmetic are all recomputed fail-closed."
+    },
+    "cleanup": {
+      "in_function_cleanup_required_before_return": true,
+      "provider_cleanup_is_separate_post_return_evidence": true,
+      "scientific_validity_requires_both": true
+    },
+    "execution_admission": {
+      "exactly_one_integrated_attempt": true,
+      "fresh_attempt_identity_required": true,
+      "atomic_gpu_budget_reservation_required": true,
+      "immutable_remote_evidence_required": true,
+      "all_eight_review_roles_required": true,
+      "fresh_make_check_evidence_required": true
+    }
+  },
+  "validation_fixes_made": [
+    "Rejected a 15-rps sanity guard that presents only high TTFT; Guard B now requires positive queue tendency or completed rate below offered rate.",
+    "Added exact 9-rps, five-second control-interval evidence and fail-closed validation of arrivals, completions, TTFT, and backlog.",
+    "Required the normal integrated trigger to occur at depth 20 through 30, retaining the independent depth-64 emergency abort and at least 34 requests of headroom.",
+    "Added post-step live scheduler sampling during the actual GPU1 restore interval without changing the frozen v10 serving implementation or optimized v11 state path.",
+    "Required positive GPU0 arrivals, completions, emitted tokens, and live queue observations from RESTORE_TRIGGER through FIRST_RESUMED_TOKEN.",
+    "Added contiguous non-overlapping reclamation and restore wall-stage partitions plus separate source-export and rollout-restore canonical movement summaries.",
+    "Extended controller validation and mutation tests so missing or arithmetically inconsistent control, restore-activity, critical-path, or phase-movement evidence fails closed."
+  ],
+  "fail_closed_mutation_tests": [
+    "control-interval completion-rate arithmetic inconsistency",
+    "zero emitted tokens during the measured restore interval",
+    "overlap in the restore critical-path partition",
+    "phase movement bytes inconsistent with the integrated total"
+  ],
+  "freeze_integrity": {
+    "frozen_v10_source_matches_annotated_tag": true,
+    "frozen_v10_source_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "v11_core_modified_by_agent08": false,
+    "v11_core_source_hashes_sha256": {
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+      "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30"
+    }
+  },
+  "test_results": [
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "status": "PASS",
+      "passed": 86
+    },
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q trigger/races/worker/controller/modal/methodology targeted suites -k not image_layout_materializes_all_replacement_evidence_bindings",
+      "status": "PASS",
+      "passed": 123,
+      "deselected": 1,
+      "deselection_reason": "This image-layout prelaunch test intentionally requires the root coordinator's fresh post-review make-check.json evidence, which did not yet exist during the independent review."
+    },
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked ruff check Agent 8 edited sources/tests",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check on Agent 8 edited sources/tests",
+      "status": "PASS"
+    }
+  ],
+  "launch_blockers_remaining": [
+    "The root coordinator must run make check after all offline changes and materialize fresh hash-bound make-check.json evidence.",
+    "The outer attempt-c manifest must bind this Agent 8 review and the current post-review source/test hashes before config creation and the single atomic GPU-budget reservation.",
+    "Earlier Agent 2 and Agent 6 review artifacts contain pre-Agent-8 worker/controller/test hashes and must be refreshed or resealed by the root coordinator so no stale review binding is accepted."
+  ],
+  "launch_authorized_by_agent08_alone": false,
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": "1b967aaa7485c807393ae89756b537daabe5c1b0c82e2c2f5ea60fd56948aeb2",
+    "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py": "a96df9ef7ff7b7a7d35708188ca91ec2d230438a1f174f2fe1279f4235b3e2c3",
+    "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd",
+    "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py": "ebea747e9bcae1578db92982f5164160fc55ce4eb9c7ab8f02af92aa91720590",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_worker_v11.py": "898a0715b8763e4f41f3efdd4f4a889d8667a9332e77f52a49e727b09924b9d7",
+    "tests/python/test_gpu_reclamation_integrated_controller_v11.py": "f3fdfd372f0d299fd0d3947c30120ecd82375109b485293eae1310c458cfefc9",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11.py": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599",
+    "tests/python/test_modal_gpu_reclamation_integrated_v11.py": "8cb2d10f3a0516c047bf458b022049a110e22c7a498d7514f48315831ea13844",
+    "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d"
+  },
+  "do_not_launch_modal_from_this_agent": true
+}

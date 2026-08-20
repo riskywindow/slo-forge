@@ -1,0 +1,153 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-gpu-budget-audit/v1",
+  "created_at_utc": "2026-08-19T00:05:35Z",
+  "agent": "agent-07-gpu-budget-auditor",
+  "status": "PASS",
+  "scope": "offline authorization, ledger integrity, one-GPU micro-reservation support, and adaptive stage affordability",
+  "gpu_or_cloud_actions_performed": false,
+  "designated_gpu_coordinator": "/root",
+  "authorization": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "authorized_cumulative_a100_hours": 6.0,
+    "authorized_cumulative_a100_seconds": 21600.0,
+    "authorized_gpu_budget_usd": 40.0,
+    "scope_includes_v11_micro": true,
+    "scope_includes_v11_integrated": true,
+    "scope_includes_kill_recompute": true,
+    "ledger_sha256_commitment_pass": true,
+    "settled_interval_sha256_commitment_pass": true,
+    "hard_ceiling_matches_ledger": true
+  },
+  "ledger": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "bcb6456ef134142aa4c5c60526f649879da065dabc7335d097cc74f7b09b5b9d",
+    "settled_intervals_sha256": "7419da5953c642b261f12f806f8a1f2140d735ca3b24d35f08f466616ad58e5c",
+    "strict_schema_validation_pass": true,
+    "strict_json_round_trip_pass": true,
+    "settled_a100_seconds": 12556.823626085978,
+    "settled_a100_hours": 3.4880065628016603,
+    "active_reservations": 0,
+    "committed_a100_seconds": 12556.823626085978,
+    "remaining_a100_seconds": 9043.176373914022,
+    "remaining_a100_hours": 2.5119934371983397,
+    "price_usd_per_a100_hour": 2.4984,
+    "settled_cost_usd": 8.71443559650367,
+    "remaining_cost_at_ledger_rate_usd": 6.2759644034963324
+  },
+  "one_gpu_shared_ledger_gate": {
+    "status": "PASS",
+    "implementation": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+    "implementation_sha256": "3a6217ec2b9c8ed4302a347ce5e36a0e1b1a19e8c1b1d38df6f6ea186b5507c3",
+    "test": "tests/python/test_gpu_reclamation_v11_budget_ledger.py",
+    "test_sha256": "d6380b4c1b42b8d932cae6a90f945c0c689f775ed1b034f9dcec89d6c1fce72f",
+    "supported_gpu_counts": [
+      1,
+      2
+    ],
+    "default_gpu_count": 2,
+    "v10_default_reservation_serialization_unchanged": true,
+    "v10_persisted_ledger_round_trip_unchanged": true,
+    "reservation_settlement_count_propagation_pass": true,
+    "failure_charge_count_propagation_pass": true,
+    "inventory_cardinality_fail_closed": true,
+    "a100_80gb_sku_fail_closed": true,
+    "sole_active_reservation_invariant_preserved": true
+  },
+  "next_invocation_preflight": {
+    "stage": "v11_state_micro_validation",
+    "priority": 1,
+    "gpu_count": 1,
+    "requested_gpu": "A100-80GB",
+    "predicted_wall_seconds": 525.0,
+    "predicted_a100_seconds": 525.0,
+    "safety_margin_fraction": 0.15,
+    "safety_margin_a100_seconds": 78.75,
+    "conservative_a100_seconds_with_margin": 603.75,
+    "conservative_cost_usd_with_margin": 0.4190025,
+    "ledger_reservation_maximum_a100_seconds": 525.0,
+    "cumulative_projected_a100_seconds_with_margin": 13160.573626085978,
+    "remaining_authorization_after_margin_a100_seconds": 8439.426373914022,
+    "remaining_authorization_after_margin_a100_hours": 2.344285103865006,
+    "hard_limit_passed": true,
+    "reservation_created": false,
+    "reason_reservation_not_created": "offline audit only; the designated GPU coordinator must reserve atomically immediately before the explicit invocation"
+  },
+  "adaptive_stage_envelopes": [
+    {
+      "priority": 1,
+      "stage": "v11_state_micro_validation",
+      "gpu_count": 1,
+      "predicted_wall_seconds": 525.0,
+      "predicted_a100_seconds": 525.0,
+      "safety_margin_fraction": 0.15,
+      "conservative_a100_seconds_with_margin": 603.75,
+      "cumulative_projected_a100_seconds": 13160.573626085978,
+      "remaining_authorization_a100_seconds": 8439.426373914022,
+      "affordable_if_run_next": true
+    },
+    {
+      "priority": 2,
+      "stage": "v11_integrated_reclamation",
+      "gpu_count": 2,
+      "predicted_wall_seconds": 588.0,
+      "predicted_a100_seconds": 1176.0,
+      "safety_margin_fraction": 0.15,
+      "conservative_a100_seconds_with_margin": 1352.4,
+      "cumulative_projected_a100_seconds": 14512.973626085978,
+      "remaining_authorization_a100_seconds": 7087.026373914022,
+      "affordable_after_prior_stage_envelope": true,
+      "requires_micro_go": true
+    },
+    {
+      "priority": 3,
+      "stage": "kill_and_recompute",
+      "gpu_count": 2,
+      "predicted_wall_seconds": 660.0,
+      "predicted_a100_seconds": 1320.0,
+      "safety_margin_fraction": 0.15,
+      "conservative_a100_seconds_with_margin": 1517.9999999999998,
+      "cumulative_projected_a100_seconds": 16030.973626085978,
+      "remaining_authorization_a100_seconds": 5569.026373914022,
+      "affordable_after_prior_stage_envelopes": true,
+      "requires_scientifically_valid_integrated_v11": true
+    }
+  ],
+  "adaptive_execution_requirements": [
+    "reserve only the immediately next authorized stage",
+    "re-read and strictly validate the ledger under its coordinator lock",
+    "recompute actual settled usage and remaining authorization after every invocation",
+    "do not carry an integrated or kill/recompute reservation across an earlier scientific gate",
+    "fail closed if any reservation exists, any artifact commitment changes, or the next envelope exceeds the ceiling"
+  ],
+  "paid_launch_environment_gate": {
+    "variable": "SLOFORGE_GPU_BUDGET_USD",
+    "current_auditor_process_configured": false,
+    "required_value_for_authorized_launch_usd": 40.0,
+    "must_be_set_only_by_designated_gpu_coordinator_on_explicit_launch": true,
+    "launch_without_variable_allowed": false
+  },
+  "tests": {
+    "targeted_pytest": {
+      "status": "PASS",
+      "passed": 32,
+      "failed": 0,
+      "command": "uv run pytest -q tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_gpu_reclamation_methodology.py tests/python/test_gpu_reclamation_v11_methodology.py"
+    },
+    "legacy_gpu_harness_pytest": {
+      "status": "PASS",
+      "passed": 22,
+      "failed": 0,
+      "command": "uv run pytest -q tests/python/test_experiment_004_gpu_harness.py"
+    },
+    "ruff": {
+      "status": "PASS",
+      "command": "uv run ruff check python/sloforge/helix/characterization/gpu_reclamation_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    },
+    "ruff_format": {
+      "status": "PASS",
+      "command": "uv run ruff format --check python/sloforge/helix/characterization/gpu_reclamation_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    }
+  },
+  "decision": "GPU budget PASS for the bounded one-A100 v11 micro-validation, subject to the designated coordinator atomically creating the one-GPU reservation and setting the required paid-launch environment gate immediately before the explicit invocation."
+}

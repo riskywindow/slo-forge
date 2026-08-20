@@ -1,0 +1,33 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-terminal-review-supersession/v1",
+  "status": "PASS_WITH_EXPLICIT_HISTORICAL_AMDAHL_SOURCE_LIMIT",
+  "purpose": "Resolve the two valid micro Amdahl denominators without rewriting immutable independent reviews.",
+  "adversarial_hardware_review": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent20-adversarial-hardware-terminal-review.json",
+    "sha256": "f01d646a9f7d64e84ef0a6d662e7f1948b75cdd3de0d6cce0d0847cc149c4e1c",
+    "required_answer": "NO_ON_CURRENT_EVIDENCE",
+    "reviewed_denominator": "export + restore + continuation = 7.257059092 seconds",
+    "historical_amdahl_status_sha256_declared_by_review": "3717df54b2614120185971d9496a90a4be4f210f6acf04fb05e95cb754391ce6",
+    "historical_amdahl_status_verification": "UNAVAILABLE_NOT_VERIFIED",
+    "denominator_identity": "7.257059092 = 7.051284484 state path + 0.205774608 continuation",
+    "all_numeric_amdahl_fields": "SUPERSEDED_NON_AUTHORITATIVE",
+    "retained_scope": "QUALITATIVE_ADVERSARIAL_NO_ANSWER_ONLY",
+    "numeric_authority": false
+  },
+  "authoritative_terminal_amdahl": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/status.json",
+    "sha256": "14d3560857e510319e2b24042a3cac1962ee4f27cf15e29e1927df59bc6945a0",
+    "denominator": "export + restore state path = 7.051284484 seconds",
+    "methodology_review": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent18-terminal-amdahl-break-even-methodology-review.json",
+      "sha256": "532253c6c9ffa08afd6b1932e8d010024e52d9ade86bdc4be0e6e1d28f7030e1"
+    },
+    "micro_worker_result": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+      "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8"
+    }
+  },
+  "disposition": "The final report and response use only the state-path denominator. Agent20 remains evidence for the required adversarial NO answer and least-overclaiming disposition, not for canonical numeric Amdahl values.",
+  "integrated_amdahl_headroom": null,
+  "no_missing_historical_value_reconstructed": true
+}

@@ -1,0 +1,90 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent03-local-preallocation-retry-audit/v1",
+  "agent": 3,
+  "reviewed_at_utc": "2026-08-19T04:32:53Z",
+  "attempt_id": "exp004-v11-integrated-s41-a",
+  "status": "PASS",
+  "strict_verdict": "PASS_ENVIRONMENT_ONLY_RELAUNCH_IS_FIRST_ACTUAL_INTEGRATED_TRANSACTION",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "evidence": {
+    "local_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/local-launch-preflight-failure.json",
+      "sha256": "d09978ef76b55732caf89580ca83b8f9d24e97a349227578cd9601eb0680e77d",
+      "failure_stage": "LOCAL_MODAL_CLI_MODULE_IMPORT",
+      "failure_type": "ModuleNotFoundError",
+      "failure_message": "No module named 'sloforge'",
+      "client_elapsed_seconds": 0.8148895000012999
+    },
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/config.json",
+      "raw_sha256": "67a6c1bf3f5928e077b9f347e82fe710ff759b607a2b5dd41d6aea6a74c6b4c1",
+      "canonical_sha256": "88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b",
+      "sealed_evidence_revalidated": "PASS"
+    },
+    "reservation": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/gpu-reservation.json",
+      "sha256": "22e404866054c5d314801d709185ddd3bf2fb63858f3eec222a58499632f6108",
+      "reservation_id": "exp004-v11-integrated-s41-a-reservation",
+      "ledger_entry_count": 1,
+      "status": "RESERVED_NOT_YET_LAUNCHED",
+      "gpu_count": 2,
+      "maximum_wall_seconds": 588.0,
+      "maximum_gpu_seconds": 1176.0,
+      "config_canonical_sha256_matches": true
+    },
+    "ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256_before_failed_local_import": "7a76715dfad8f09f02401b75df126a4b0d4f6b05e378c23672d5bdbcf021f927",
+      "sha256_after_failed_local_import": "7a76715dfad8f09f02401b75df126a4b0d4f6b05e378c23672d5bdbcf021f927",
+      "consumed_additional_gpu_seconds": 13761.513626085978,
+      "integrated_intervals": 0,
+      "integrated_failure_charges": 0,
+      "active_integrated_reservations": 1,
+      "unchanged": true
+    },
+    "final_prelaunch_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+      "sha256": "e7b48588923919928e5b2178b93ea1f55e6e94f233609e6fec564b5156b82d67",
+      "integrated_prelaunch_status": "PASS",
+      "all_content_addressed_bindings_revalidated": true
+    }
+  },
+  "scientific_nullity": {
+    "modal_app_created": false,
+    "modal_function_call_created": false,
+    "gpu_allocated": false,
+    "model_loaded": false,
+    "runtime_state_created": false,
+    "measurement_started": false,
+    "provider_clean_after_failure": true,
+    "reservation_consumed": false,
+    "gpu_seconds_consumed": 0.0,
+    "counts_as_integrated_transaction": false
+  },
+  "cause_analysis": {
+    "launcher_import_requires": "repository-local python/ on PYTHONPATH for package sloforge",
+    "failed_environment_omitted_required_path": true,
+    "source_or_config_defect": false,
+    "scientific_methodology_changed": false,
+    "remote_retry_policy_exercised": false
+  },
+  "admissible_correction": {
+    "scope": "coordinator child process environment only",
+    "PYTHONPATH": "python:experiments/branchfabric",
+    "working_directory": "/Users/rishivinodkumar/sloforge",
+    "same_config_required": true,
+    "same_reservation_required": true,
+    "same_attempt_id_required": true,
+    "same_preflight_token_admissible": true,
+    "new_reservation_forbidden": true,
+    "source_change_forbidden": true,
+    "config_change_forbidden": true,
+    "modal_retry_change_forbidden": true,
+    "ledger_settlement_or_charge_for_null_attempt_forbidden": true
+  },
+  "rationale": "Python module import failed locally before the launcher could define or hydrate its Modal app/function. With no FunctionCall, provider allocation, runtime state, measurement, ledger interval, or failure charge, no integrated transaction occurred. Correcting only the child import path restores the already reviewed execution environment without altering any sealed scientific input or consuming a second authorization.",
+  "passed": true
+}

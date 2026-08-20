@@ -1,0 +1,159 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-micro-methodology-audit/v1",
+  "reviewed_at_utc": "2026-08-19T00:40:07Z",
+  "agent": "agent-08-micro-validation-methodology-auditor",
+  "scope": "offline pre-GPU review of the one-A100 v11 micro-validation worker, controller, Modal boundary, configuration, accounting, budget binding, and focused tests",
+  "result": "PASS",
+  "blocking_findings": [],
+  "real_gpu_execution": "NOT_RUN_BY_REVIEWER",
+  "gpu_or_cloud_actions_performed": false,
+  "network_operations": 0,
+  "source_files_modified": false,
+  "summary": "The bounded v11 micro design preserves the exact real-runtime state semantics, uses one pinned A100-80GB environment, obtains all movement totals from measured canonical StatePassRecords, validates fresh allocation lifetimes and 8/8 independent recomputation, and fails closed on topology, identity, integrity, timing, budget, or cleanup violations. Runtime measurements remain unclaimed until the designated coordinator executes the authorized invocation.",
+  "criteria": {
+    "one_real_a100_80gb": {
+      "status": "PASS",
+      "evidence": "The Modal request is exactly A100-80GB:1 with max_containers=1, buffer_containers=0, retries=0 and single_use=true. The CUDA-clean controller requires exactly one nvidia-smi device, an A100 name, at least 79,000 MiB, and a stable GPU UUID; the worker independently requires one CUDA device with compute capability 8.0 and an A100 name."
+    },
+    "model_and_runtime_pins": {
+      "status": "PASS",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "vllm": "0.23.0",
+      "torch": "2.11.0",
+      "dtype": "bfloat16",
+      "evidence": "The immutable methodology config fixes all identities. The image pins the runtime packages, the worker verifies installed vLLM and PyTorch versions, and the remote boundary validates every staged model file against the prepared manifest before starting the controller."
+    },
+    "exact_state_workload": {
+      "status": "PASS",
+      "shared_prefix_tokens": 16384,
+      "branch_count": 8,
+      "private_suffix_tokens_per_branch": 256,
+      "continuation_tokens_per_branch": 8,
+      "block_size_tokens": 16,
+      "shared_blocks": 1024,
+      "private_blocks": 128,
+      "total_blocks": 1152,
+      "logical_state_bytes": 1056964608,
+      "evidence": "The config fixes the token geometry. The worker builds live vLLM rollouts and rejects any topology other than 1,024 eight-owner shared full pages plus 128 single-owner private full pages, exactly 1,152 unique runtime blocks and exactly 1,056,964,608 logical bytes."
+    },
+    "real_runtime_state_and_source_release": {
+      "status": "PASS",
+      "evidence": "Capture plans are derived from live vLLM block tables, physical pages and runtime-issued allocation epochs. Export occurs inside the production capture gate. The worker then invokes the production release path and requires the complete post-free ownership/refcount proof before export completion."
+    },
+    "fresh_destination_allocations": {
+      "status": "PASS",
+      "evidence": "Import creates fresh runtime allocations and requires exactly 1,152 destination lifetimes. It rejects any overlap between source and destination (physical block ID, allocation epoch) pairs. Physical block-ID reuse is accepted only when the allocator issues a distinct later epoch."
+    },
+    "continuation_and_independent_recompute": {
+      "status": "PASS",
+      "evidence": "All eight restored branches must emit at least eight continuation tokens. The oracle drains the restored requests, resets the prefix cache, independently prefills each immutable prompt history with the original effective seed, and requires exact equality for every first resumed token; validate_micro_result fails closed unless the result is 8/8."
+    },
+    "minimal_causal_instrumentation": {
+      "status": "PASS",
+      "evidence": "The causal worker uses CUDA events, monotonic wall clocks, bounded 10 ms RSS sampling and tensor-allocation extents. It does not import or enable a heavy profiler. Heavy-profiler overhead is therefore not applicable to this causal run and must be recorded as such rather than estimated."
+    },
+    "authoritative_state_pass_records": {
+      "status": "PASS",
+      "evidence": "Every v11 GPU memory operation records the canonical StatePassRecord schema at the operation site. The accounting validator enforces complete required fields, CUDA event ownership, device and branch-group consistency, dependency validity, and one timing owner. Physical, external, avoidable and tier totals are derived exclusively from these records; profiler and D2H/H2D counters are not added a second time."
+    },
+    "measured_output_surface": {
+      "status": "PASS",
+      "evidence": "The immutable result includes logical/full/external/avoidable bytes and amplification, full-state pass count, tier bytes, D2H/H2D bytes, pinned/pageable/GPU temporary peaks, export and restore wall/CUDA times, integrity time, synchronization time, all serialized StatePassRecords, topology, allocation lifetimes, integrity evidence and continuation evidence."
+    },
+    "wall_cuda_sync_and_temp_methodology": {
+      "status": "PASS",
+      "evidence": "Export wall time covers capture through source release and ownership proof; restore wall time covers transport verification through import/admission. CUDA time uses non-overlapping event owners. Synchronization time comes from recorded event/stream/scalar waits. Pinned temporary memory uses actual live slot extents; pageable memory uses sampled RSS deltas after resident-checkpoint and pinned attribution; GPU temporary memory uses CUDA allocation deltas plus explicit live extents."
+    },
+    "strict_result_validation_and_go_no_go": {
+      "status": "PASS",
+      "evidence": "The worker rejects any failure of allocator epochs, ownership release, production synchronization, integrity, destination mapping, fresh lifetimes, movement accounting, exact logical size, eight-token continuation, or 8/8 first-token equality. The micro result is an immutable stage output. The coordinator must apply the specified amplification decision thresholds before any separate integrated invocation."
+    },
+    "bounded_execution": {
+      "status": "PASS",
+      "initialization_timeout_seconds": 180,
+      "transaction_timeout_seconds": 320,
+      "cleanup_timeout_seconds": 20,
+      "maximum_wall_seconds": 525,
+      "evidence": "The configuration and remote boundary agree on a 525-second single-GPU ceiling. The controller launches the worker in a fresh process group under an absolute deadline, escalates TERM to KILL on timeout, and verifies the same sole GPU and absence of compute processes afterward."
+    },
+    "budget_binding": {
+      "status": "PASS",
+      "authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+      "ledger_sha256_at_review": "bcb6456ef134142aa4c5c60526f649879da065dabc7335d097cc74f7b09b5b9d",
+      "predicted_a100_seconds": 525.0,
+      "conservative_a100_seconds_with_15_percent_margin": 603.75,
+      "evidence": "Agent 07 independently found 9,043.176373914022 authorized A100-seconds remaining before reservation. The launch boundary requires an exact one-GPU reservation bound to the config SHA, a positive authorized budget environment gate, and a 64-hex preflight token. No reservation was created by this reviewer."
+    },
+    "cleanup_design": {
+      "status": "PASS",
+      "evidence": "The worker stops samplers, closes bindings, tears down adapter state, synchronizes and releases CUDA caches. The controller verifies no GPU compute process remains. Modal uses a single-use container, exposes no endpoint, and only mounts the two authorized persistent volumes. Provider-level app/task/container/reservation/child/profiler cleanup remains mandatory post-invocation evidence."
+    }
+  },
+  "go_no_go_contract": {
+    "correctness_required": true,
+    "excellent_max_amplification": 8.0,
+    "strong_max_amplification": 12.0,
+    "meaningful_max_amplification": 25.0,
+    "weak_max_amplification": 40.0,
+    "continue_normally_only_if_correct_and_amplification_at_most": 25.0,
+    "amplification_over_25": "Continue only with strong measured evidence that residual bytes are unavoidable and latency remains scientifically interesting; obtain an adversarial review for 25x-40x.",
+    "amplification_over_40": "STOP; classify FAILED_TO_REMOVE_PATHOLOGY and do not run the integrated transaction.",
+    "measurement_source": "immutable real-A100 StatePassRecords; never the projected 21x value"
+  },
+  "mandatory_coordinator_obligations": [
+    "After all eight offline reviews and make check pass, create and hash the consolidated gate manifest and bind that exact hash into the immutable micro configuration.",
+    "Immediately before launch, re-read the locked ledger, recompute remaining authorization, and atomically reserve exactly one A100 for at most 525 GPU-seconds; do not reserve integrated or kill/recompute stages.",
+    "Only /root may set SLOFORGE_GPU_BUDGET_USD, the reservation identity and the preflight token or invoke Modal. Use one invocation with no retry.",
+    "Validate the returned immutable artifact with validate_micro_result and compute the gate from measured StatePassRecords. Never substitute projections, profiler totals or algorithmic byte estimates.",
+    "For 25x-40x amplification obtain the required adversarial review before deciding; for more than 40x stop without allocating the integrated run.",
+    "After the invocation, settle actual and conservative GPU usage and cost, then record provider evidence for no active app, task, container, endpoint, reservation, owned child process or profiler. Only sloforge-model-cache and sloforge-branchfabric-results may remain.",
+    "Replace or explicitly supersede the stale pre-authorization micro-validation BUDGET_BLOCKER status artifact so it cannot be mistaken for the current 6.0 A100-hour authorization."
+  ],
+  "non_blocking_observations": [
+    "The strict scientific go/no-go is intentionally a stage boundary outside the worker. This is safe only because integrated v11 is a separate invocation and the coordinator applies the immutable micro result before reserving it.",
+    "There is no dedicated all-in-one v11 launch wrapper. The Modal entrypoint and shared ledger API enforce the required reservation/config binding; the designated coordinator must execute that atomic sequence exactly.",
+    "The controller proves GPU-process cleanup inside the container. Provider-owned resources and the paid reservation can only be proven clean after the real invocation and are therefore launch-closeout obligations, not offline claims.",
+    "This review establishes methodology readiness only. It does not claim real-A100 correctness, amplification, traffic, latency, temporary memory or cleanup results."
+  ],
+  "tests": {
+    "focused_offline_suite": {
+      "status": "PASS",
+      "passed": 76,
+      "failed": 0,
+      "duration_seconds": 1.75,
+      "command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_allocator_epochs.py"
+    },
+    "ruff": {
+      "status": "PASS",
+      "command": "ruff check experiments/branchfabric/gpu_reclamation_worker_v11.py experiments/branchfabric/gpu_reclamation_controller_v11.py experiments/branchfabric/modal_gpu_reclamation_v11.py python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    },
+    "py_compile": "PASS",
+    "static_modal_boundary": {
+      "status": "PASS",
+      "checks": [
+        "no controller or Modal top-level CUDA import",
+        "no heavy profiler call",
+        "no endpoint decorator",
+        "exact one-A100 request",
+        "single-use container and zero retries"
+      ]
+    }
+  },
+  "reviewed_file_sha256": {
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "128465c0f00fa1c67bfb4e78a8e692d1ad9e6dfab76e95efe6f751eb5e516268",
+    "experiments/branchfabric/modal_real_gpu_cow.py": "6721d63d6c5037ca27fe92c66dcd0bf327286cd3cdc080e7c4a2b70aece8bb88",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "f234ff79e9f3aacd3e0960ffb8838b61d4987ad4609615f6879cdc57074d490c",
+    "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d",
+    "tests/python/test_gpu_reclamation_v11_budget_ledger.py": "d6380b4c1b42b8d932cae6a90f945c0c689f775ed1b034f9dcec89d6c1fce72f",
+    "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json": "bcb6456ef134142aa4c5c60526f649879da065dabc7335d097cc74f7b09b5b9d"
+  },
+  "decision": "PASS: the smallest scientifically valid real-A100 v11 micro-validation methodology is ready for the designated GPU coordinator after the consolidated offline gate and atomic budget reservation are bound."
+}

@@ -1,0 +1,376 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-agent18-terminal-amdahl-break-even-review/v1",
+  "review_id": "agent18-terminal-amdahl-break-even-methodology-review",
+  "reviewer_task_path": "/root/review_v11_integrity",
+  "reviewed_at_utc": "2026-08-19T05:35:27Z",
+  "status": "PASS",
+  "passed": true,
+  "review_verdict": "PASS_TERMINAL_NON_FABRICATION_LIMITS_ENFORCED",
+  "scope": "Read-only audit of what residual-chain, Amdahl, preservation break-even, plot, and final-classification analysis remains scientifically calculable after the valid attempt-D A100 micro-validation and the terminal pre-reclaim failure of integrated attempt B.",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "review_artifacts_modified_only": true,
+  "evidence": {
+    "micro_scientific_outcome": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+      "status": "MICRO_VALIDATION_PASS"
+    },
+    "micro_worker_result": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+      "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+      "state_pass_record_count": 10454
+    },
+    "v10_v11_pass_diff": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff.json",
+      "sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99"
+    },
+    "v10_movement_accounting": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/movement-accounting.json",
+      "sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3"
+    },
+    "integrated_terminal_integrity_review": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent15-attempt-b-interference-integrity-cleanup-review.json",
+      "sha256": "0fe2b3e28d003e9506aaf8c8b1e18b1d1afafa0b4ca5992d877da5b9a3d923a2",
+      "attempt_status": "FAILED_TERMINAL",
+      "failure_stage": "PRE_RECLAIM_GPU0_OVERLOAD_BACKLOG_SAFETY_ABORT"
+    },
+    "terminal_economic_review": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent16-economic-budget-cleanup-review.json",
+      "sha256": "d6eb0ba6b9727e73c5db980f6560b6812e410f8c409a453c6cc65eee44e6dae9"
+    },
+    "integrated_postflight": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180",
+      "status": "PASS_CLEANUP_SCIENTIFICALLY_INVALID_BUDGET_CHARGED",
+      "reclaim_trigger_reached": false,
+      "v11_export_started": false,
+      "v11_release_started": false,
+      "v11_import_started": false
+    },
+    "prior_offline_methodology": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/economic-break-even-amdahl-methodology-review.json",
+      "sha256": "283660bbc58f60a175f410bb8fcec10f938f93ae54ac6f47e2b5533c130d6e6c"
+    }
+  },
+  "terminal_evidence_boundary": {
+    "valid_measured_arm": "exp004-v11-micro-s41-d",
+    "invalid_integrated_arm": "exp004-v11-integrated-s41-b",
+    "kill_and_recompute_arm": "NOT_REACHED",
+    "integrated_v11_reclamation": "NOT_REACHED",
+    "integrated_v11_restore": "NOT_REACHED",
+    "rule": "Attempt-D micro measurements remain valid but cannot be relabeled as integrated serving-path measurements. Attempt B contributes only its pre-reclaim failure and cleanup/budget evidence."
+  },
+  "defensible_measured_micro_quantities": {
+    "prefix_tokens": 16384,
+    "branch_count": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "unique_logical_token_equivalents": 18432,
+    "logical_state_bytes": 1056964608,
+    "q_bytes_per_unique_logical_token": 57344,
+    "analytical_independent_recompute_tokens": 133120,
+    "analytical_recompute_formula": "B*(P+A)",
+    "analytical_recompute_status": "FORMULA_VERIFIED_ONLY_NOT_A_MEASURED_KILL_ARM",
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "full_state_pass_count": 10,
+    "export_wall_seconds": 2.61309087,
+    "restore_wall_seconds": 4.438193614,
+    "non_overlapping_export_plus_restore_endpoint_seconds": 7.051284484,
+    "apparent_one_point_full_physical_throughput_bytes_per_second": 3147946035.983534,
+    "apparent_one_point_logical_throughput_bytes_per_second": 149896747.2378044,
+    "apparent_throughput_warning": "These are one-point endpoint ratios. They do not identify a fixed overhead plus byte-rate model and are not fitted beta coefficients."
+  },
+  "micro_residual_stage_observations": {
+    "source_export_stage": {
+      "interpretation": "Measured micro source state stage: native gather/repack, integrity, and D2H plus its bounded control work.",
+      "logical_bytes": 1056964608,
+      "physical_bytes": 9512709120,
+      "physical_amplification": 9.000026157924108,
+      "canonical_full_state_pass_families": 4,
+      "raw_state_pass_records": 2160,
+      "endpoint_wall_seconds": 2.61309087,
+      "cuda_event_time_seconds": 0.133267776,
+      "synchronization_wait_seconds": 0.005271845,
+      "integrity_owner_wall_seconds": 1.390905234,
+      "all_timing_owner_record_wall_union_seconds": 1.501838905,
+      "endpoint_wall_not_covered_by_timing_owner_record_intervals_seconds": 1.111251965,
+      "fraction_of_micro_export_plus_restore_endpoint_sum": 0.3705836682563778,
+      "fraction_of_micro_physical_bytes": 0.4285571069856276
+    },
+    "destination_restore_stage": {
+      "interpretation": "Measured micro destination state stage: preflight and consumption authentication, H2D, direct scatter/native write, and raw-bit validation plus bounded control work.",
+      "logical_bytes": 1056964608,
+      "physical_bytes": 12684353920,
+      "physical_amplification": 12.000736660427517,
+      "canonical_full_state_pass_families": 6,
+      "raw_state_pass_records": 8294,
+      "endpoint_wall_seconds": 4.438193614,
+      "cuda_event_time_seconds": 0.697858271,
+      "synchronization_wait_seconds": 0.516524914,
+      "integrity_owner_wall_seconds": 2.114326745,
+      "all_timing_owner_record_wall_union_seconds": 2.928762252,
+      "endpoint_wall_not_covered_by_timing_owner_record_intervals_seconds": 1.509431362,
+      "fraction_of_micro_export_plus_restore_endpoint_sum": 0.6294163317436222,
+      "fraction_of_micro_physical_bytes": 0.5714428930143724
+    },
+    "dominant_micro_stage": "destination_restore_stage",
+    "timing_non_additivity_rule": "CUDA event time, synchronization wait, integrity owner wall, and endpoint wall are different views and may overlap. They must not be summed into a synthetic critical path. Timing-owner wall intervals are unioned once; uncovered endpoint duration is not classified as CPU, GPU, idle, or synchronization without further trace evidence.",
+    "integrated_critical_path_share": null,
+    "integrated_critical_path_share_status": "NOT_REACHED"
+  },
+  "micro_stage_sensitivity_envelope": {
+    "status": "CALCULABLE_MICRO_STAGE_ONLY",
+    "scope_warning": "This algebra accelerates an entire measured micro endpoint stage, including all of its software/control overhead. It is an optimistic diagnostic envelope, not an isolated residual fused-chain estimate, integrated serving Amdahl result, realistic accelerator projection, or hardware-economic result.",
+    "baseline_seconds": 7.051284484,
+    "equation": "For one stage X in the non-overlapping micro endpoint sum T=E+R, T'(k)=T-X+X/k and speedup=T/T'(k).",
+    "source_export_stage_only": {
+      "baseline_fraction": 0.3705836682563778,
+      "2x": {
+        "projected_micro_endpoint_sum_seconds": 5.744739049,
+        "speedup": 1.227433382762
+      },
+      "5x": {
+        "projected_micro_endpoint_sum_seconds": 4.960811788,
+        "speedup": 1.42139730055
+      },
+      "10x": {
+        "projected_micro_endpoint_sum_seconds": 4.699502701,
+        "speedup": 1.50043205263
+      },
+      "effectively_free": {
+        "projected_micro_endpoint_sum_seconds": 4.438193614,
+        "speedup": 1.588773518523
+      }
+    },
+    "destination_restore_stage_only": {
+      "baseline_fraction": 0.6294163317436222,
+      "2x": {
+        "projected_micro_endpoint_sum_seconds": 4.832187677,
+        "speedup": 1.459232330226
+      },
+      "5x": {
+        "projected_micro_endpoint_sum_seconds": 3.5007295928,
+        "speedup": 2.014232832637
+      },
+      "10x": {
+        "projected_micro_endpoint_sum_seconds": 3.0569102314,
+        "speedup": 2.306670445069
+      },
+      "effectively_free": {
+        "projected_micro_endpoint_sum_seconds": 2.61309087,
+        "speedup": 2.698445953393
+      }
+    },
+    "prohibited_interpretations": [
+      "Do not call either baseline fraction an integrated reclamation, useful-capacity, SLO-restoration, or rollout-restore critical-path share.",
+      "Do not treat aggregate CUDA-event-time divided by endpoint wall as an Amdahl fraction because double buffering and host work can overlap CUDA execution.",
+      "Do not treat the whole-stage acceleration envelope as a realistic single GPU kernel or external-accelerator speedup.",
+      "Do not use these envelopes to satisfy the >=1.20x BranchFabric hardware-interest predicate."
+    ]
+  },
+  "required_integrated_amdahl_paths": {
+    "time_to_hbm_reclamation": {
+      "2x": null,
+      "5x": null,
+      "10x": null,
+      "effectively_free": null,
+      "status": "NOT_REACHED"
+    },
+    "time_to_useful_gpu1_capacity": {
+      "2x": null,
+      "5x": null,
+      "10x": null,
+      "effectively_free": null,
+      "status": "NOT_REACHED"
+    },
+    "time_to_serving_slo_restoration": {
+      "2x": null,
+      "5x": null,
+      "10x": null,
+      "effectively_free": null,
+      "status": "NOT_REACHED"
+    },
+    "rollout_restore_latency": {
+      "2x": null,
+      "5x": null,
+      "10x": null,
+      "effectively_free": null,
+      "status": "NOT_REACHED"
+    },
+    "full_preservation_transaction": {
+      "2x": null,
+      "5x": null,
+      "10x": null,
+      "effectively_free": null,
+      "status": "NOT_REACHED"
+    },
+    "reason": "Attempt B failed before reclaim. No integrated v11 export/release/HBM-reclaim/useful-GPU1/restore interval exists, so neither a denominator nor non-overlapping residual stage intervals exist for these paths."
+  },
+  "preservation_break_even": {
+    "status": "SYMBOLIC_ONLY_NUMERIC_FIT_NOT_IDENTIFIABLE",
+    "measured_at_frozen_micro_point": {
+      "P": 16384,
+      "B": 8,
+      "A": 256,
+      "q": 57344,
+      "a": 21.000762818351625,
+      "micro_export_plus_restore_seconds": 7.051284484
+    },
+    "equations": {
+      "preserve": "T_p(P,B,A)=delta_p + c*(P+B*A), where c=a*q/beta",
+      "kill": "T_k(P,B,A)=delta_k + B*(P+A)/theta",
+      "decision": "OPTIMIZED_PRESERVE beats KILL_AND_RECOMPUTE iff (delta_p-delta_k) + (c-B/theta)*P + B*(c-1/theta)*A < 0",
+      "prefix_root_if_denominator_nonzero": "P*=[delta_k-delta_p+B*(1/theta-c)*A]/(c-B/theta)",
+      "branch_count_root_if_denominator_nonzero": "B*=[delta_k-delta_p-c*P]/[c*A-(P+A)/theta]",
+      "private_suffix_or_age_root_if_denominator_nonzero": "A*=[delta_k-delta_p+(B/theta-c)*P]/[B*(c-1/theta)]"
+    },
+    "identified": [
+      "The frozen point has 18,432 unique logical token-equivalents and q=57,344 logical state bytes per unique token-equivalent.",
+      "Independent kill/recompute work is analytically 133,120 tokens for the frozen topology.",
+      "The valid micro preserve endpoint sum is 7.051284484 seconds and measured physical amplification is 21.000762818351625x at this one point."
+    ],
+    "not_identified": {
+      "theta_independent_recompute_tokens_per_second": null,
+      "delta_k_kill_setup_seconds": null,
+      "delta_p_preserve_fixed_seconds": null,
+      "beta_preserve_physical_bytes_per_second": null,
+      "a_scaling_with_prefix_branch_count_and_suffix": null,
+      "integrated_preserve_seconds": null,
+      "measured_kill_recompute_tokens": null,
+      "measured_kill_recompute_gpu_seconds": null
+    },
+    "one_point_degeneracy": "The identity 7.051284484 = delta_p + a*q*(P+B*A)/beta is one equation with at least delta_p and beta unknown. Infinite coefficient pairs fit it, and a was measured at only one topology. No prefix, branch-count, age, or suffix break-even curve can therefore be fitted.",
+    "conditional_not_a_fit": {
+      "assumptions": "Only if delta_k=0 and the micro endpoint sum is substituted for integrated preserve time at the frozen point",
+      "theta_equality_tokens_per_second": 18878.829850371415,
+      "direction": "Under only those assumptions, preserve would be faster for theta below the equality value.",
+      "use_restriction": "Sensitivity check only. Do not report, plot, or classify this as measured break-even."
+    },
+    "branch_age_private_suffix_alias": "The supplied analytical model has one A variable, so branch age and private suffix length are the same degree of freedom. They cannot be independently fitted without a revised state/recompute model and additional measurements.",
+    "oracle_exclusion": "The attempt-D independent continuation oracle is a correctness oracle over already prepared runtime state. Its elapsed time and token outputs are not a causal kill/re-prefill throughput sample and must not be used for theta, delta_k, recompute GPU-seconds, or cost."
+  },
+  "required_plot_disposition": [
+    {
+      "plot_number": 1,
+      "title": "v10 58x vs measured v11 amplification",
+      "status": "MEASURED_MICRO_COMPARISON_ADMISSIBLE",
+      "rule": "Label v11 as attempt-D micro measurement, not integrated v11."
+    },
+    {
+      "plot_number": 2,
+      "title": "v10 vs v11 physical bytes by memory tier",
+      "status": "MEASURED_STATE_MOVEMENT_COMPARISON_ADMISSIBLE",
+      "rule": "Use exact v10 movement accounting and exact attempt-D StatePassRecord tier totals; label v11 micro."
+    },
+    {
+      "plot_number": 3,
+      "title": "v10 vs v11 full-state pass count",
+      "status": "MEASURED_MICRO_COMPARISON_ADMISSIBLE",
+      "rule": "Use canonical family counts 30 and 10, not raw record cardinalities."
+    },
+    {
+      "plot_number": 4,
+      "title": "v10 vs v11 peak temporary host memory",
+      "status": "MEASURED_MICRO_COMPARISON_ADMISSIBLE",
+      "rule": "Use v10 2,965,372,928 bytes and v11 conservative pinned-plus-pageable 143,552,512 bytes; label v11 micro."
+    },
+    {
+      "plot_number": 5,
+      "title": "v10 vs v11 export/reclamation waterfall",
+      "status": "V11_INTEGRATED_RECLAMATION_NOT_REACHED",
+      "rule": "Render the v11 integrated reclamation cell as NOT_REACHED. A separately labeled 2.613090870-second micro-export diagnostic may not fill the reclamation cell."
+    },
+    {
+      "plot_number": 6,
+      "title": "v10 vs v11 restore waterfall",
+      "status": "V11_INTEGRATED_RESTORE_NOT_REACHED",
+      "rule": "Render the v11 integrated restore cell as NOT_REACHED. A separately labeled 4.438193614-second micro-restore diagnostic may not be presented as integrated restore."
+    },
+    {
+      "plot_number": 7,
+      "title": "v10 vs v11 time to useful GPU1 capacity",
+      "status": "V11_NOT_REACHED",
+      "rule": "No interpolation from micro export or v10."
+    },
+    {
+      "plot_number": 8,
+      "title": "v10 vs v11 SLO restoration",
+      "status": "V11_NOT_REACHED",
+      "rule": "No interpolation from the pre-reclaim failure."
+    },
+    {
+      "plot_number": 9,
+      "title": "naive preserve vs optimized preserve vs kill/recompute",
+      "status": "OPTIMIZED_INTEGRATED_AND_KILL_ARMS_NOT_REACHED",
+      "rule": "Show explicit NOT_REACHED cells or omit the comparative bars; do not mix the micro endpoint with integrated v10 latency."
+    },
+    {
+      "plot_number": 10,
+      "title": "preservation break-even by prefix length",
+      "status": "NOT_IDENTIFIABLE_NO_KILL_ARM_AND_NO_MULTIPOINT_PRESERVE_FIT",
+      "rule": "The symbolic equation may be shown, but no numeric curve or crossing."
+    },
+    {
+      "plot_number": 11,
+      "title": "preservation break-even by branch count",
+      "status": "NOT_IDENTIFIABLE_NO_KILL_ARM_AND_NO_MULTIPOINT_PRESERVE_FIT",
+      "rule": "The symbolic equation may be shown, but no numeric curve or crossing."
+    },
+    {
+      "plot_number": 12,
+      "title": "residual Amdahl headroom",
+      "status": "INTEGRATED_PATHS_NOT_REACHED_MICRO_STAGE_ENVELOPE_OPTIONAL",
+      "rule": "All five required integrated paths remain NOT_REACHED. An optional panel may show the explicitly watermarked MICRO_STAGE_ONLY whole-export/whole-restore sensitivity envelope."
+    },
+    {
+      "plot_number": 13,
+      "title": "before/after state movement Sankey",
+      "status": "MEASURED_STATE_MOVEMENT_COMPARISON_ADMISSIBLE",
+      "rule": "Use v10 movement accounting and measured attempt-D v11 tier/pass bytes; identify different run contexts."
+    },
+    {
+      "plot_number": 14,
+      "title": "GPU0 interference during GPU1 restore",
+      "status": "V11_RESTORE_NOT_REACHED",
+      "rule": "The failed pre-reclaim GPU0 overload samples are not restore-interference samples. Render v11 as NOT_REACHED."
+    }
+  ],
+  "classification_constraints": {
+    "selected_classification": null,
+    "status": "NONE_OF_THE_FOUR_CLASSIFICATIONS_IS_SCIENTIFICALLY_ESTABLISHED",
+    "SOFTWARE_WINS": {
+      "admissible": false,
+      "reason": "The measured amplification reduction is real, but neither remaining-state-pipeline share on an important integrated critical path nor ideal-free full-system speedup was measured."
+    },
+    "GPU_SOFTWARE_WINS": {
+      "admissible": false,
+      "reason": "The micro trace identifies GPU work, but realistic GPU-only headroom and external-accelerator incremental end-to-end improvement were not measured on an integrated path."
+    },
+    "BRANCHFABRIC_HARDWARE_INTEREST": {
+      "admissible": false,
+      "reason": "Required integrated critical-path share, realistic >=1.20x economically important end-to-end improvement, burst/concurrency/interference evidence, and plausible out-of-GPU placement advantage are absent. The explicit experiment rule also forbids hardware interest without measured integrated v11 timings."
+    },
+    "PRESERVATION_NOT_ECONOMIC": {
+      "admissible": false,
+      "reason": "The kill/recompute arm was not run, so preservation cannot be shown inferior at the frozen workload or nearby regimes."
+    },
+    "required_terminal_reporting": "Report the experiment as terminally scientifically invalid after the valid micro gate, with FINAL_CLASSIFICATION=NOT_DETERMINED_FROM_AVAILABLE_EVIDENCE. Forcing one enum member would violate the predicates and fabricate a conclusion.",
+    "experiment_005_status": "NOT_GENERATED_HARDWARE_INTEREST_NOT_ESTABLISHED"
+  },
+  "strict_non_fabrication_rules": [
+    "Keep valid attempt-D micro measurements separate from invalid attempt-B integrated evidence.",
+    "Do not reuse v10 integrated timings as v11 denominators or residual times.",
+    "Do not infer integrated HBM reclamation, useful GPU1, queue drain, SLO restoration, rollout restore, or GPU0 restore interference from micro timing.",
+    "Do not sum endpoint wall, CUDA events, integrity spans, synchronization waits, or timing-owner intervals when they overlap or describe different timing views.",
+    "Do not convert the correctness oracle into kill/recompute throughput, tokens, GPU-seconds, or setup overhead.",
+    "Do not fit fixed overhead and byte throughput from one preserve point.",
+    "Do not draw numeric prefix, branch-count, branch-age, or private-suffix break-even curves without measured kill coefficients and multipoint preserve scaling.",
+    "Do not treat pre-reclaim overload samples as integrated state-pipeline or restore-interference evidence.",
+    "Use null plus explicit NOT_REACHED or NOT_IDENTIFIABLE states; never zero-fill missing measurements.",
+    "Do not generate Experiment 005 or claim BranchFabric hardware interest."
+  ],
+  "review_pass": "The terminal analysis is scientifically sound only if it reports the measured micro stage and byte results, optionally publishes the explicitly scoped micro-stage sensitivity envelope, leaves all integrated Amdahl paths and numeric break-even curves null, and declines all four final classifications as unestablished rather than inventing missing arms."
+}

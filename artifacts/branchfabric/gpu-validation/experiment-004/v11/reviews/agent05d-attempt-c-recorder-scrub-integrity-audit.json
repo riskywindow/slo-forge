@@ -1,0 +1,171 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-review/v1",
+  "review_id": "agent05d-attempt-c-recorder-scrub-integrity-audit",
+  "reviewer_role": "independent-v11-integrity-and-provenance-reviewer",
+  "completed_at_utc": "2026-08-19T02:02:37Z",
+  "status": "PASS",
+  "scope": "Offline audit of attempt-C failure evidence, bounded CUDA-pass remediation, failure-scrub ownership, pass provenance, teardown, retry policy, budget, and scientific admissibility of one replacement micro-validation.",
+  "gpu_or_modal_activity": false,
+  "network_activity": false,
+  "review_independence": {
+    "attempt_c_evidence_reviewed_read_only": true,
+    "accounting_recorder_remediation_authored_by_another_agent": true,
+    "reviewer_authored_adjacent_single_scrub_owner_and_preflight_provenance_fixes": true,
+    "limitations_disclosed": true
+  },
+  "attempt_c_finding": {
+    "classification": "DETERMINISTIC_INSTRUMENTATION_CAPACITY_FAILURE",
+    "scientific_result_produced": false,
+    "correctness_mismatch_observed": false,
+    "primary_failure": "The restore recorder reached its former 4096 pending-CUDA-pass bound before entering the next pass; that next pass did not claim an ID or launch work.",
+    "secondary_failure": "Both the subset-local scrub and stager scrub reused the saturated recorder and failed at accounting admission before their first scrub operation.",
+    "typed_failure": "V11RuntimeTeardownRequired",
+    "typed_failure_message": "v11 cleanup could not prove safe allocator ownership; runtime teardown required: scrub:RuntimeError,prefix-cache-reset:false",
+    "affected_destination_block_count": 1152,
+    "affected_destination_block_unique_count": 1152,
+    "affected_destination_block_min": 1153,
+    "affected_destination_block_max": 2304,
+    "branch_admission_occurred": false,
+    "successful_pass_ledger_published": false,
+    "performance_measurement_admissible": false
+  },
+  "teardown_and_cleanup": {
+    "stager_withheld_free_when_scrub_unproven": true,
+    "stager_withheld_admission": true,
+    "initial_prefix_cache_reset_returned_false_with_1152_live_blocks": true,
+    "worker_finally_cleanup_detached_and_freed_remaining_requests": true,
+    "bounded_post_free_prefix_cache_retry_succeeded": true,
+    "remote_compute_processes_after": 0,
+    "remote_memory_used_mib_after": 4,
+    "cuda_clean_import_after": true,
+    "active_apps_after": 0,
+    "running_tasks_after": 0,
+    "running_containers_after": 0,
+    "endpoints_after": 0,
+    "reservations_after": 0,
+    "owned_child_processes_after": 0,
+    "profilers_after": 0,
+    "provider_cleanup_pass": true,
+    "retry_policy_verdict": "PASS",
+    "retry_policy_reason": "The only prefix-cache retry occurred after the final cleanup path removed and freed all remaining requests. No engine step or state admission occurred between failure and teardown, and provider cleanup closed the process/container boundary."
+  },
+  "remediation_audit": {
+    "bounded_incremental_materialization": {
+      "status": "PASS",
+      "maximum_pending_cuda_passes": 4096,
+      "diagnostic_emergency_reserve": 256,
+      "normal_pending_limit": 3840,
+      "maximum_total_passes": 65536,
+      "normal_total_limit": 65280,
+      "details": "At the normal live-event threshold, pending events are synchronized and converted to canonical records without resolving/freezing the recorder. Each pending item is removed only after its record is appended. Final resolve drains the suffix and is idempotent."
+    },
+    "exact_once_pass_evidence": {
+      "status": "PASS",
+      "details": "Pass IDs remain claimed across materialization batches; duplicate IDs are rejected; already materialized events are not synchronized again; a materialization failure retains the failing item and unmaterialized suffix; CUDA setup failure rolls back its claim."
+    },
+    "diagnostic_scrub_capacity": {
+      "status": "PASS",
+      "details": "Normal work cannot borrow the 256-pass diagnostic lane. DIAGNOSTIC cleanup may use it only after a normal materialization failure, and exhaustion fails closed. A 28-layer scrub needs 57 CUDA records plus one CPU completion fence."
+    },
+    "production_restore_cardinality": {
+      "status": "PASS",
+      "attempt_c_expected_cuda_passes": 8128,
+      "adversarial_singleton_run_cuda_passes": 35904,
+      "details": "Both the attempt-C topology and the conservative singleton-run topology fit below the protected total-record bound while incremental materialization keeps live events bounded."
+    },
+    "single_authoritative_scrub_owner": {
+      "status": "PASS",
+      "details": "Standalone subset writes retain local scrub by default. The production stager callback explicitly delegates failure scrub to import_group_v11, whose outer cleanup scrubs every allocation exactly once, validates typed completion-fenced evidence, then frees. First-subset and remaining-subset failures are covered."
+    },
+    "preflight_consumption_provenance": {
+      "status": "PASS",
+      "details": "V11VerifiedTransport binds every page to the actual full-state preflight pass that authenticated it. A restore subset depends on the deduplicated exact covering pass IDs, including when the subset begins inside a preflight chunk. Missing, duplicate, forged, and invalid-bound provenance fail before destination writes."
+    },
+    "movement_accounting": {
+      "status": "PASS",
+      "details": "Incremental materialization moves evidence, not bytes: it does not create an additional StatePassRecord or physical-memory pass. Actual diagnostic scrub operations retain distinct DIAGNOSTIC records. Profiler/copy-counter observations remain non-authoritative and cannot be added to canonical totals."
+    },
+    "admission_and_freshness": {
+      "status": "PASS",
+      "details": "The recorder changes do not alter epoch consumption, destination commitments, fresh allocation checks, or enqueue order. Adversarial subset failures leave scheduler queues, request tables, manager tables, and computed-token admission state empty."
+    }
+  },
+  "offline_validation": {
+    "targeted_command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py",
+    "targeted_result": "70 passed in 1.67s",
+    "targeted_pass_count": 70,
+    "targeted_fail_count": 0,
+    "ruff_format_result": "PASS; 6 files already formatted",
+    "ruff_lint_result": "PASS; All checks passed",
+    "cuda_execution": "NOT_RUN_OFFLINE",
+    "adversarial_coverage": [
+      "multiple incremental drains preserve exact pass IDs, dependencies, totals, and one synchronization per end event",
+      "final resolve is idempotent and the recorder remains appendable before final resolve",
+      "event synchronization failure retains exactly the unmaterialized suffix",
+      "CUDA setup failure rolls back the claim",
+      "normal work cannot borrow diagnostic pending or total reserve",
+      "diagnostic reserve exhaustion fails closed",
+      "attempt-C and singleton-run pass cardinalities fit protected bounds",
+      "first-subset write failure performs one outer all-allocation scrub and no admission",
+      "remaining-subset write failure performs one outer all-allocation scrub and no admission",
+      "actual scrub zero passes are present once with exact zeroed-byte conservation",
+      "arbitrary subset beginning inside a preflight chunk closes the authoritative pass DAG",
+      "missing, ambiguous, forged, and zero-bound preflight provenance fail closed"
+    ]
+  },
+  "budget": {
+    "ledger_hard_additional_gpu_seconds": 21600.0,
+    "ledger_consumed_additional_gpu_seconds": 13498.623626085977,
+    "ledger_remaining_gpu_seconds": 8101.376373914023,
+    "active_reservations": 0,
+    "replacement_gpu_count": 1,
+    "replacement_timeout_seconds": 525.0,
+    "replacement_predicted_gpu_seconds": 525.0,
+    "safety_margin_fraction": 0.15,
+    "replacement_conservative_gpu_seconds": 603.75,
+    "remaining_after_conservative_replacement_gpu_seconds": 7497.626373914023,
+    "gpu_price_per_hour_usd": 2.4984,
+    "replacement_timeout_cost_usd": 0.36435000000000006,
+    "replacement_conservative_cost_usd": 0.4190025,
+    "status": "PASS"
+  },
+  "attempt_d_scientific_admissibility": {
+    "status": "PASS",
+    "admissible_count": 1,
+    "reason": "Attempts B and C failed at deterministic integration/instrumentation defects before producing a successful micro-validation outcome. The fixes are narrow, source-sealed, workload-independent, and do not tune against amplification or correctness results; one same-method replacement is not outcome cherry-picking.",
+    "mandatory_constraints": [
+      "Use exactly one A100-80GB, seed 41, the existing pinned Qwen revision/runtime, bf16, 16K shared prefix, fanout 8, suffix 256, 1152 pages, and 1056964608 logical bytes.",
+      "Use a new attempt ID, one new one-time launch token, and one bounded reservation.",
+      "Keep the function timeout at 525 seconds and disable automatic Modal retries.",
+      "Do not alter chunking, instrumentation level, state workload, continuation oracle, or go/no-go thresholds after seeing attempt-C.",
+      "Require a complete canonical pass ledger and validate its dependency DAG before publishing any movement or latency result.",
+      "If the same pending-recorder, scrub-accounting, or unknown-preflight-dependency class recurs, stop; do not authorize an iterative retry sequence.",
+      "Run and persist worker-finally and provider postflight cleanup regardless of result."
+    ]
+  },
+  "limitations": [
+    "This review is offline and uses deterministic fake CUDA events for recorder lifecycle tests; the next real-A100 micro-validation remains the required physical validation gate.",
+    "Attempt C is not a measured v11 performance result and supplies no admissible amplification, latency, or movement measurement.",
+    "PASS approves one bounded replacement micro-validation only; it does not approve integrated v11 or kill/recompute execution before the micro gate passes."
+  ],
+  "source_hashes_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "068e01ef8a8c3bfd487a2b57daec21c233336f9fcaf9e103abcd3c90d3cfb929",
+    "tests/python/test_vllm_reclamation_v11.py": "c53ed7e9f7daa08d3d37bae7bf656283f6fb8857fb75dbea60cb63f37ca860f4",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "7dc9f296befe42548b35a7599dd2a24667a4030a1ed15942e7de201d2f28d09f",
+    "tests/python/test_vllm_reclamation_v11_ownership.py": "8ac0f86cb1b475d55d63a2ff5896e96b9ba2b5d2e549ecfc5b5215e87c7e08b7",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "02ac7d54b8bec7bd0de84e5a25696cc28dc7a7cbfae6eec4f6f3a73a0fec9aa5"
+  },
+  "evidence_hashes_sha256": {
+    "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json": "0ccb9bdda15fd5d36204f1363dcfe73af0409cc7c9d283dad826ee276ae10cdb",
+    "attempt-c/remote-download/worker__failure.json": "1fb2cb6f296030e301f0864cf240550ff721b248d128adf9af22ee48e2887b59",
+    "attempt-c/gpu-settlement.json": "21718c18ef04d7803b98cb9707ae7d11b19e8800c7e2b63e28434ad9fcfab4c7",
+    "attempt-c/postflight-cleanup.json": "b162ab290cca53ab115d8bb01ba557b1f733e2fd4017a78c4d038ae7439677d6",
+    "attempt-c/remote-download/controller-result.json": "c668924adc712e1a3ff3eaf8e5e0df708c90435ebed870d596f3346519539898",
+    "attempt-c/config.json": "9043257532365c6e8595dc7aad8e140981d750d056f8b9ae539ae01594a785cc",
+    "attempt-c/remote-manifest-download.json": "c05c9586d55526b2c86ec9c2ef6717f1dd3dd0772a975c09d92bf2aa76bac00f"
+  },
+  "repository_head": "1c51853e10809686d4368037153927f25e834117"
+}

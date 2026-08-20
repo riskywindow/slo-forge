@@ -1,0 +1,72 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-post-fix-review/v1",
+  "agent": 3,
+  "reviewed_at_utc": "2026-08-19T01:26:50Z",
+  "attempt_precondition": "exp004-v11-micro-s41-c",
+  "status": "PASS",
+  "recommendation": "PASS_OFFLINE_REMEDIATION",
+  "gpu_invoked": false,
+  "modal_invoked": false,
+  "network_invoked": false,
+  "v10_modified": false,
+  "prior_fail_artifact": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-b-zero-queue-root-cause-audit.json",
+    "sha256": "0cb68646ffc3d5241dae43bb5e71e224453a14d2fb3b6249b7c859393d59cdfb"
+  },
+  "blocker_closure": {
+    "drain_after_ownership_snapshot": true,
+    "drain_after_completed_capture": true,
+    "drain_before_source_release": true,
+    "no_engine_step_between_drain_and_release": true,
+    "needs_kv_cache_zeroing_exactly_false": true,
+    "sealed_export_gate_before_drain": true,
+    "sealed_export_gate_after_drain": true,
+    "exact_scheduler_manager_identity": true,
+    "take_new_block_ids_required_binding_surface": true,
+    "direct_drain_concurrency_exclusion_tested": true,
+    "expected_source_ids_strict_unique_nonnegative": true,
+    "expected_source_block_count": 1152,
+    "source_plan_epoch_ownership_crosscheck": true,
+    "source_lifetime_commitment": true,
+    "ownership_snapshot_commitment": true,
+    "capture_manifest_commitment": true,
+    "missing_extra_duplicate_mismatch_rejected": true,
+    "typed_teardown_after_destructive_mismatch": true,
+    "structured_failure_evidence_persisted": true,
+    "success_evidence_persisted_in_result": true,
+    "restore_entry_remains_strictly_empty": true,
+    "destination_queue_delta_remains_exact": true
+  },
+  "runtime_ruling": {
+    "exact_source_drain_lifecycle_correct": true,
+    "real_queue_count_assumed": false,
+    "next_run_must_observe_exact_count": 1152,
+    "next_run_must_observe_needs_kv_cache_zeroing": false,
+    "mismatch_action": "V11RuntimeTeardownRequired"
+  },
+  "offline_tests": {
+    "command": "PYTHONPATH=python python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py",
+    "passed": 80,
+    "failed": 0,
+    "elapsed_seconds": 1.71,
+    "ruff_lint": "PASS",
+    "ruff_format": "PASS"
+  },
+  "hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "bb2a8ba7fa4b6c1398e08635aa8b401270d68b301d0997422362b55ddc8fe867",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "7b5752b37897f880f451068ea69e2439c979dbb3324ea0f8c15c354ecde0dc67",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "3adbc2f2e1e0f424f23e6984a75846cc2c1d06c35fa390402f684a5cab587d45",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "02ac7d54b8bec7bd0de84e5a25696cc28dc7a7cbfae6eec4f6f3a73a0fec9aa5",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b",
+    "tests/python/test_vllm_reclamation_v11_ownership.py": "8ac0f86cb1b475d55d63a2ff5896e96b9ba2b5d2e549ecfc5b5215e87c7e08b7",
+    "tests/python/test_vllm_allocator_epochs.py": "2f3751a7c38893a112282605f00f116518e4b7ac8603d7af60f22e76bd78f85b",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "776a9b3ad0ee057524d0652f68688dc2aa7ce811c1b4450ebeac74f5d7fff2af",
+    "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d",
+    "tests/python/test_gpu_reclamation_v11_budget_ledger.py": "d6380b4c1b42b8d932cae6a90f945c0c689f775ed1b034f9dcec89d6c1fce72f"
+  },
+  "repository": {
+    "head": "1c51853e10809686d4368037153927f25e834117",
+    "frozen_v10_execution": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39"
+  }
+}

@@ -580,7 +580,7 @@ class GpuInvocationReservation(_StrictModel):
     reservation_id: NonEmpty
     invocation_id: NonEmpty
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
-    gpu_count: Literal[2] = 2
+    gpu_count: Literal[1, 2] = 2
     maximum_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     config_sha256: Sha256
 
@@ -593,9 +593,9 @@ class GpuActiveInterval(_StrictModel):
     invocation_id: NonEmpty
     function_call_id: NonEmpty
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
-    actual_gpu_models: tuple[NonEmpty, NonEmpty]
-    gpu_uuids: tuple[GpuUuid, GpuUuid]
-    gpu_count: Literal[2] = 2
+    actual_gpu_models: tuple[NonEmpty, ...] = Field(min_length=1, max_length=2)
+    gpu_uuids: tuple[GpuUuid, ...] = Field(min_length=1, max_length=2)
+    gpu_count: Literal[1, 2] = 2
     accounted_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     gpu_price_per_hour_usd: float | None = Field(
         default=None,
@@ -606,13 +606,17 @@ class GpuActiveInterval(_StrictModel):
 
     @model_validator(mode="after")
     def exact_hardware(self) -> Self:
-        if len(set(self.gpu_uuids)) != 2:
-            raise ValueError("settled invocation requires two distinct GPU UUIDs")
+        if len(self.actual_gpu_models) != self.gpu_count:
+            raise ValueError("settled GPU model count does not match the reservation")
+        if len(self.gpu_uuids) != self.gpu_count:
+            raise ValueError("settled GPU UUID count does not match the reservation")
+        if len(set(self.gpu_uuids)) != self.gpu_count:
+            raise ValueError("settled invocation requires distinct GPU UUIDs")
         if any(
             "A100" not in model or "80GB" not in model.replace(" ", "")
             for model in self.actual_gpu_models
         ):
-            raise ValueError("settled invocation did not receive two A100-80GB GPUs")
+            raise ValueError("settled invocation did not receive only A100-80GB GPUs")
         return self
 
     @property
@@ -638,7 +642,7 @@ class GpuConservativeFailureCharge(_StrictModel):
     reservation_id: NonEmpty
     invocation_id: NonEmpty
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
-    gpu_count: Literal[2] = 2
+    gpu_count: Literal[1, 2] = 2
     charged_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     config_sha256: Sha256
     failure_stage: NonEmpty
@@ -748,7 +752,7 @@ class Experiment004GpuHourLedger(_StrictModel):
 
 class GpuBudgetPreflight(_StrictModel):
     invocation_id: NonEmpty
-    gpu_count: Literal[2] = 2
+    gpu_count: Literal[1, 2] = 2
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
     maximum_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     proposed_maximum_gpu_seconds: float = Field(gt=0.0, allow_inf_nan=False)
@@ -767,14 +771,21 @@ def reserve_gpu_invocation(
     invocation_id: str,
     maximum_wall_seconds: float,
     config_sha256: str,
+    gpu_count: Literal[1, 2] = 2,
 ) -> tuple[Experiment004GpuHourLedger, GpuBudgetPreflight]:
-    """Atomically model one explicit two-A100 reservation after budget preflight."""
+    """Atomically model one explicit one- or two-A100 reservation after preflight.
+
+    ``gpu_count`` defaults to two so frozen v10 callers and serialized records
+    retain their existing behavior.  The one-GPU form exists for the bounded
+    v11 state-pipeline micro-validation only.
+    """
 
     if ledger.reservations:
         raise ValueError("another GPU invocation reservation is already active")
     reservation = GpuInvocationReservation(
         reservation_id=reservation_id,
         invocation_id=invocation_id,
+        gpu_count=gpu_count,
         maximum_wall_seconds=maximum_wall_seconds,
         config_sha256=config_sha256,
     )
@@ -784,6 +795,7 @@ def reserve_gpu_invocation(
         raise ValueError("GPU invocation preflight would exceed the configured hard ceiling")
     preflight = GpuBudgetPreflight(
         invocation_id=invocation_id,
+        gpu_count=reservation.gpu_count,
         maximum_wall_seconds=maximum_wall_seconds,
         proposed_maximum_gpu_seconds=reservation.maximum_gpu_seconds,
         consumed_before_gpu_seconds=ledger.consumed_additional_gpu_seconds,
@@ -801,8 +813,8 @@ def settle_gpu_invocation(
     *,
     reservation_id: str,
     function_call_id: str,
-    actual_gpu_models: tuple[str, str],
-    gpu_uuids: tuple[str, str],
+    actual_gpu_models: tuple[str, ...],
+    gpu_uuids: tuple[str, ...],
     client_elapsed_seconds: float,
     remote_observed_allocation_seconds: float,
     raw_manifest: ArtifactSampleRef,
@@ -826,6 +838,7 @@ def settle_gpu_invocation(
     interval = GpuActiveInterval(
         invocation_id=reservation.invocation_id,
         function_call_id=function_call_id,
+        gpu_count=reservation.gpu_count,
         actual_gpu_models=actual_gpu_models,
         gpu_uuids=gpu_uuids,
         accounted_wall_seconds=accounted_wall,
@@ -865,6 +878,7 @@ def charge_failed_gpu_reservation(
     charge = GpuConservativeFailureCharge(
         reservation_id=reservation.reservation_id,
         invocation_id=reservation.invocation_id,
+        gpu_count=reservation.gpu_count,
         charged_wall_seconds=reservation.maximum_wall_seconds,
         config_sha256=reservation.config_sha256,
         failure_stage=failure_stage,

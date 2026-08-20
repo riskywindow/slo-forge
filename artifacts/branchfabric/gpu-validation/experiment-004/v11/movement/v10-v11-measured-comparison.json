@@ -1,0 +1,60 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-v11-measured-movement-comparison/v1",
+  "status": "MICRO_VALIDATION_MEASURED",
+  "logical_state_bytes": 1056964608,
+  "v10": {
+    "full_physical_bytes": 61303947264,
+    "full_physical_amplification": 58.0,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "avoidable_physical_bytes": 32765902848,
+    "avoidable_amplification": 31.0,
+    "full_state_pass_count": 30,
+    "physical_bytes_by_tier": {
+      "GPU_INTERMEDIATE": 30651973632,
+      "HOST_INTERMEDIATE": 24310185984,
+      "NATIVE_ENDPOINT": 3170893824,
+      "LINK": 3170893824
+    }
+  },
+  "v11": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_bytes": 2114200960,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_physical_bytes": 12684381568,
+    "avoidable_amplification": 12.000762818351625,
+    "full_state_pass_count": 10,
+    "physical_bytes_by_tier": {
+      "GPU_INTERMEDIATE": 7399019520,
+      "HOST_INTERMEDIATE": 9512948736,
+      "NATIVE_ENDPOINT": 3170893824,
+      "LINK": 2114200960
+    },
+    "canonical_tier_mapping": {
+      "GPU_INTERMEDIATE": ["GPU_HBM_TEMPORARY"],
+      "HOST_INTERMEDIATE": ["HOST_PINNED", "HOST_PAGEABLE_METADATA"],
+      "NATIVE_ENDPOINT": ["GPU_HBM_NATIVE_POOL"],
+      "LINK": ["LINK_D2H", "LINK_H2D", "LINK_CONTROL"]
+    }
+  },
+  "v10_minus_v11": {
+    "full_physical_bytes_removed": 39106884224,
+    "full_physical_reduction_percent": 63.79181449900818,
+    "external_bytes_removed": 1056692864,
+    "avoidable_bytes_removed": 20081521280,
+    "full_state_passes_removed": 20,
+    "physical_bytes_removed_by_tier": {
+      "GPU_INTERMEDIATE": 23252954112,
+      "HOST_INTERMEDIATE": 14797237248,
+      "NATIVE_ENDPOINT": 0,
+      "LINK": 1056692864
+    }
+  },
+  "provenance": {
+    "v10": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/movement-accounting.json",
+    "v11": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "v11_sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8"
+  }
+}

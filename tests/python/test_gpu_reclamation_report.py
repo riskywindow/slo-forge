@@ -401,20 +401,20 @@ def test_preview_refuses_overwrite_and_plot_ids_are_exact(tmp_path: Path) -> Non
 
 
 def test_decision_filename_contract_does_not_alias_the_outcome() -> None:
-    assert decision_document_path(Experiment004Outcome.GPU_SOFTWARE_TARGET).endswith(
-        "GPU_SOFTWARE_TARGET.md"
+    assert decision_document_path(Experiment004Outcome.GPU_SOFTWARE_WINS).endswith(
+        "GPU_STATE_PIPELINE_DIRECTION.md"
     )
-    assert decision_document_path(Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST).endswith(
-        "STATE_PIPELINE_HARDWARE_INTEREST.md"
+    assert decision_document_path(Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST).endswith(
+        "BRANCHFABRIC_HARDWARE_GATE_FINAL.md"
     )
-    assert decision_document_path(Experiment004Outcome.FABRIC_HARDWARE_INTEREST).endswith(
-        "STATE_PIPELINE_HARDWARE_INTEREST.md"
-    )
-    assert decision_document_path(Experiment004Outcome.MOVEMENT_CLOSED).endswith(
-        "MOVEMENT_CLOSED.md"
+    assert decision_document_path(Experiment004Outcome.SOFTWARE_WINS).endswith(
+        "BRANCHFABRIC_SOFTWARE_CLOSURE_FINAL.md"
     )
     assert decision_document_path(Experiment004Outcome.PRESERVATION_NOT_ECONOMIC).endswith(
-        "MOVEMENT_CLOSED.md"
+        "PRESERVATION_POLICY.md"
+    )
+    assert decision_document_path(Experiment004Outcome.HARDWARE_GATE_NOT_REACHED).endswith(
+        "BRANCHFABRIC_HARDWARE_GATE_FINAL.md"
     )
 
 

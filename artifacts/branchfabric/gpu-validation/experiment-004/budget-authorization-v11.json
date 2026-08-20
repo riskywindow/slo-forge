@@ -1,0 +1,49 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-budget-authorization/v1",
+  "experiment": "branchfabric-gpu-validation-experiment-004-v11",
+  "authorized_at_utc": "2026-08-18T23:46:39Z",
+  "authorization_source": "explicit-user-instruction-current-thread",
+  "authorization_text": [
+    "lets up the gpu authorization ot 6 hours",
+    "just bump the gpu hours and money budget don't do the other stuff"
+  ],
+  "authorized_gpu_budget_usd": 40.0,
+  "money_budget_semantics": "Future paid launch commands may set SLOFORGE_GPU_BUDGET_USD=40.0; this artifact does not launch Modal or mutate the caller's persistent environment.",
+  "authorized_cumulative_a100_hours": 6.0,
+  "authorized_cumulative_gpu_seconds": 21600.0,
+  "ceiling_semantics": "cumulative Experiment 004 A100 device-hours across settled intervals and reservations",
+  "consumed_gpu_seconds_at_authorization": 12556.823626085978,
+  "remaining_gpu_seconds_at_authorization": 9043.176373914022,
+  "remaining_gpu_hours_at_authorization": 2.5119934371983397,
+  "active_reservations_at_authorization": 0,
+  "ledger_path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "previous_ledger_sha256": "cd34f0636d5f091345104f953c27b6cd64966e82241ee14bd0b725239c94d39f",
+  "authorized_ledger_sha256": "bcb6456ef134142aa4c5c60526f649879da065dabc7335d097cc74f7b09b5b9d",
+  "authorized_settled_intervals_sha256": "7419da5953c642b261f12f806f8a1f2140d735ca3b24d35f08f466616ad58e5c",
+  "ledger_mutation": {
+    "hard_additional_gpu_seconds_before": 13500.0,
+    "hard_additional_gpu_seconds_after": 21600.0,
+    "settled_interval_count_before": 18,
+    "settled_interval_count_after": 18,
+    "settled_intervals_changed": false,
+    "reservation_count_before": 0,
+    "reservation_count_after": 0,
+    "serialization_normalized_to_indented_json": true
+  },
+  "money_budget_mutation": {
+    "v11_configured_budget_usd_before": null,
+    "v11_authorized_budget_usd_after": 40.0
+  },
+  "authorized_scope": [
+    "future v11 state micro-validation",
+    "future v11 integrated reclamation",
+    "future kill-and-recompute comparison",
+    "future minimal paired comparison if required"
+  ],
+  "does_not_execute": [
+    "Modal invocation",
+    "GPU allocation",
+    "deployment",
+    "Experiment 005 hardware work"
+  ]
+}

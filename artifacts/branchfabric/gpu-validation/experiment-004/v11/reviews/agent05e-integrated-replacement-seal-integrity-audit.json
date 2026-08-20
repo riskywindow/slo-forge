@@ -1,0 +1,144 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent05e-integrated-replacement-seal-integrity-audit/v1",
+  "review_id": "agent05e-integrated-replacement-seal-integrity-audit",
+  "reviewer_task_path": "/root/review_v11_integrity",
+  "reviewed_at_utc": "2026-08-19T04:58:38Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "Read-only offline integrity and scientific-admission audit of the exact attempt-B replacement seal and remote image evidence layout.",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "verdict": {
+    "replacement_seal_implementation": "PASS",
+    "remote_packaging_implementation": "PASS",
+    "scientific_launch_admission": "CONDITIONAL_PASS_PENDING_FRESH_FULL_MAKE_RESEAL_PREFLIGHT_AND_ATOMIC_RESERVATION",
+    "authorized_attempt_id": "exp004-v11-integrated-s41-b",
+    "authorized_reservation_id": "exp004-v11-integrated-s41-b-reservation",
+    "authorized_replacement_count": 1,
+    "additional_retry_authorized": false
+  },
+  "source_bindings": {
+    "controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c4d1bc57873ac1c9293c168b80fe16ae974c362c1ca33294277cea5cb9f325fb"
+    },
+    "controller_test": {
+      "artifact": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7887de417238c344556aec20ed6154d36bbe368fbd51d4c9ea0aaeb9fbbfed0"
+    },
+    "launcher": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "8dfb80dcb13e76f304b39b4a89705a216941871ce789f0d881a53aff4282abe5"
+    },
+    "launcher_test": {
+      "artifact": "tests/python/test_modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "7f6f6f0351ba96571541b523d8bbbeced97cee8857d01dd22af3fcae0bc81cda"
+    },
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "745adf4d9bc2c9b69e4e389fc0a309d511d8f89486a167a31fa7e94f353976f9"
+    },
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+    }
+  },
+  "replacement_evidence_bindings": {
+    "prior_attempt_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/postflight-cleanup-and-settlement.json",
+      "sha256": "d267b199f196ab6e60b6c318a511c5d36576c9e8615ff7f386981f7eabbe5197"
+    },
+    "packaging_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-integrated-packaging-replacement-audit.json",
+      "sha256": "0eab84d1c5502ea648df2f975aba93132ae8a2d11f0ce241185575551e5cb4fd"
+    },
+    "budget_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent07f-integrated-replacement-admissibility-audit.json",
+      "sha256": "22b7a8bc4e6eec9cd7f61032a0e5e19145f270f96465939982c9706aafeba5d1"
+    },
+    "ledger_before_reservation": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "84175458f5e0b2f54fdc7c1e2c37c7d9b855f4b3771127299bcbeb4ad827f603"
+    }
+  },
+  "integrity_contract": {
+    "non_original_attempt_requires_replacement_block": true,
+    "replacement_attempt_is_exact_s41_b": true,
+    "prior_attempt_is_exact_s41_a": true,
+    "prior_attempt_is_scientifically_null_before_gpu_inventory": true,
+    "ledger_matches_config_pre_reservation_commitment": true,
+    "replacement_paths_are_exact_and_non_substitutable": true,
+    "outer_binding_status_is_exact_pass": true,
+    "cleanup_payload_status_is_exact_special_pass": true,
+    "packaging_and_budget_payload_status_is_exact_pass": true,
+    "cleanup_schema_attempt_nullity_provider_zero_and_ledger_are_validated": true,
+    "packaging_schema_agent_cause_layout_and_current_launcher_hashes_are_validated": true,
+    "budget_schema_admissibility_single_count_identity_reservation_ledger_and_envelope_are_validated": true
+  },
+  "adversarial_results": [
+    {
+      "case": "exact attempt-B replacement fixture",
+      "expected": "PASS",
+      "observed": "PASS"
+    },
+    {
+      "case": "coordinated config-manifest-budget reseal to attempt C",
+      "expected": "REJECT",
+      "observed": "REJECT"
+    },
+    {
+      "case": "rehashed packaging payload status PASS_REVOKED",
+      "expected": "REJECT",
+      "observed": "REJECT"
+    },
+    {
+      "case": "rehashed budget payload status PASS_REVOKED",
+      "expected": "REJECT",
+      "observed": "REJECT"
+    },
+    {
+      "case": "rehashed cleanup embedded FAIL, wrong attempt, wrong ledger, or nonzero provider resource",
+      "expected": "REJECT",
+      "observed": "REJECT"
+    },
+    {
+      "case": "replacement evidence path substitution",
+      "expected": "REJECT",
+      "observed": "REJECT"
+    }
+  ],
+  "remote_packaging": {
+    "tests_tree_destination": "/opt/sloforge/tests",
+    "prior_attempt_cleanup_destination": "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/postflight-cleanup-and-settlement.json",
+    "cleanup_is_added_as_exact_local_file": true,
+    "all_prelaunch_and_replacement_bound_artifacts_exist_locally": true,
+    "functional_layout_validation_uses_production_validate_bound_artifact": true,
+    "image_creation_does_not_create_persistent_volumes": true
+  },
+  "offline_validation": {
+    "focused_command": "PYTHONPATH=python python -m pytest -q tests/python/test_gpu_reclamation_integrated_controller_v11.py tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_modal_gpu_reclamation_integrated_v11.py tests/python/test_gpu_reclamation_v11_methodology.py",
+    "passed": 92,
+    "failed": 0,
+    "warnings": 2,
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "py_compile": "PASS"
+  },
+  "mandatory_before_gpu": [
+    "Run a fresh full make check over these exact source hashes and content-address its PASS result.",
+    "Regenerate the cross-runtime review for the current controller and launcher hashes.",
+    "Reseal the post-micro manifest with the current source, tests, reviews, packaging review, make-check, and this audit hash.",
+    "Generate one fresh strict exp004-v11-integrated-s41-b config binding the resealed post-micro manifest and ledger SHA 84175458f5e0b2f54fdc7c1e2c37c7d9b855f4b3771127299bcbeb4ad827f603.",
+    "Run the production verify_sealed_evidence against the final repository tree and require PASS.",
+    "Record a fresh zero-resource provider preflight, then atomically create the sole exp004-v11-integrated-s41-b-reservation.",
+    "Mint a one-time authorization token for exactly two A100-80GB GPUs and at most 588 seconds, launch once with retries disabled, and settle and clean up afterward."
+  ],
+  "invalidation_conditions": [
+    "Any bound source, test, evidence, review, make-check, post-manifest, config, or ledger hash changes.",
+    "Any attempt ID other than exp004-v11-integrated-s41-b.",
+    "Any active reservation before the atomic attempt-B reservation.",
+    "Any retry or third integrated attempt."
+  ]
+}

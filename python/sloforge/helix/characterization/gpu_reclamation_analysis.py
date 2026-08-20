@@ -20,11 +20,11 @@ class _StrictModel(BaseModel):
 
 
 class Experiment004Outcome(StrEnum):
-    MOVEMENT_CLOSED = "MOVEMENT_CLOSED"
-    GPU_SOFTWARE_TARGET = "GPU_SOFTWARE_TARGET"
-    HOST_PIPELINE_HARDWARE_INTEREST = "HOST_PIPELINE_HARDWARE_INTEREST"
-    FABRIC_HARDWARE_INTEREST = "FABRIC_HARDWARE_INTEREST"
+    SOFTWARE_WINS = "SOFTWARE_WINS"
+    GPU_SOFTWARE_WINS = "GPU_SOFTWARE_WINS"
+    BRANCHFABRIC_HARDWARE_INTEREST = "BRANCHFABRIC_HARDWARE_INTEREST"
     PRESERVATION_NOT_ECONOMIC = "PRESERVATION_NOT_ECONOMIC"
+    HARDWARE_GATE_NOT_REACHED = "HARDWARE_GATE_NOT_REACHED"
 
 
 class CriticalPathKind(StrEnum):
@@ -209,12 +209,14 @@ class HardwareInterestEvidence(_StrictModel):
 
     @property
     def system_gate(self) -> bool:
+        """Require a material share of at least one integrated critical path."""
+
         return any(
             (
                 self.fraction_of_reclamation >= 0.15,
-                self.fraction_of_movement_time >= 0.20,
-                self.serving_degradation_fraction >= 0.20,
-                self.avoidable_physical_byte_fraction >= 0.25,
+                self.fraction_of_resume >= 0.15,
+                self.fraction_of_full_transaction >= 0.15,
+                self.fraction_of_slo_restoration >= 0.15,
             )
         )
 
@@ -238,32 +240,70 @@ class HardwareInterestEvidence(_StrictModel):
             and self.system_gate
             and self.realizability_gate
             and self.ideal_free_end_to_end_speedup >= 1.15
-            and self.realistic_end_to_end_speedup >= 1.15
+            and self.realistic_end_to_end_speedup >= 1.20
         )
 
 
 class OutcomeEvidence(_StrictModel):
-    """Complete evidence required to select exactly one Experiment 004 outcome."""
+    """Evidence available to the final Experiment 004 classification gate.
 
-    valid_pilot: Literal[True]
-    kill_trials: int = Field(ge=1)
-    naive_trials: int = Field(ge=1)
-    optimized_trials: int = Field(ge=1)
-    optimized_semantics_valid: Literal[True]
-    preservation_economic_for_measured_workload: bool
-    optimized_removed_most_naive_headroom: bool
-    profiling_hardware_backed: Literal[True]
-    trace_overhead_gate_passed: Literal[True]
-    optimized_path_measured_after_naive: Literal[True]
-    optimized_path_semantics_match_naive: Literal[True]
-    optimized_movement_fraction: float = Field(ge=0.0, le=1.0, allow_inf_nan=False)
-    chain_gates: tuple[HardwareInterestEvidence, ...]
+    Incomplete evidence is intentionally representable.  The classifier must
+    turn it into ``HARDWARE_GATE_NOT_REACHED`` instead of making callers catch a
+    validation error and choose a misleading fallback outcome.
+    """
 
-    @model_validator(mode="after")
-    def optimized_path_is_a_real_comparator(self) -> Self:
-        if min(self.kill_trials, self.naive_trials, self.optimized_trials) <= 0:
-            raise ValueError("every reclamation mode requires a measured trial")
-        return self
+    valid_pilot: bool | None = None
+    integrated_v11_scientifically_valid: bool | None = None
+    kill_trials: int = Field(default=0, ge=0)
+    naive_trials: int = Field(default=0, ge=0)
+    optimized_trials: int = Field(default=0, ge=0)
+    optimized_semantics_valid: bool | None = None
+    preservation_economic_for_measured_workload: bool | None = None
+    optimized_removed_most_naive_headroom: bool | None = None
+    profiling_hardware_backed: bool | None = None
+    trace_overhead_gate_passed: bool | None = None
+    optimized_path_measured_after_naive: bool | None = None
+    optimized_path_semantics_match_naive: bool | None = None
+    optimized_movement_fraction: float | None = Field(
+        default=None, ge=0.0, le=1.0, allow_inf_nan=False
+    )
+    integrated_residual_critical_path_measured: bool = False
+    amdahl_analysis_calculated: bool = False
+    economic_comparison_established: bool = False
+    gpu_methodology_valid: bool | None = None
+    chain_gates: tuple[HardwareInterestEvidence, ...] = ()
+
+    @property
+    def missing_mandatory_evidence(self) -> tuple[str, ...]:
+        missing: list[str] = []
+        required_true = (
+            ("pilot_scientific_validity", self.valid_pilot),
+            ("integrated_v11_scientific_validity", self.integrated_v11_scientifically_valid),
+            ("optimized_semantics", self.optimized_semantics_valid),
+            ("hardware_backed_profiling", self.profiling_hardware_backed),
+            ("trace_overhead_gate", self.trace_overhead_gate_passed),
+            ("optimized_after_naive", self.optimized_path_measured_after_naive),
+            ("optimized_naive_semantic_equivalence", self.optimized_path_semantics_match_naive),
+            ("integrated_residual_critical_path", self.integrated_residual_critical_path_measured),
+            ("amdahl_analysis", self.amdahl_analysis_calculated),
+            ("economic_comparison", self.economic_comparison_established),
+            ("gpu_methodology", self.gpu_methodology_valid),
+        )
+        missing.extend(name for name, value in required_true if value is not True)
+        for name, count in (
+            ("kill_and_recompute_trial", self.kill_trials),
+            ("naive_preservation_baseline", self.naive_trials),
+            ("integrated_optimized_v11_trial", self.optimized_trials),
+        ):
+            if count < 1:
+                missing.append(name)
+        if self.preservation_economic_for_measured_workload is None:
+            missing.append("preservation_economic_result")
+        if self.optimized_removed_most_naive_headroom is None:
+            missing.append("software_headroom_result")
+        if self.optimized_movement_fraction is None:
+            missing.append("integrated_movement_fraction")
+        return tuple(missing)
 
 
 class OutcomeDecision(_StrictModel):
@@ -271,10 +311,24 @@ class OutcomeDecision(_StrictModel):
     rationale: str = Field(min_length=1, max_length=4096)
     strong_hardware_result: bool
     hardware_interest_chain_ids: tuple[str, ...]
+    missing_mandatory_evidence: tuple[str, ...] = ()
 
 
 def select_outcome(evidence: OutcomeEvidence) -> OutcomeDecision:
-    """Apply the ordered decision gate only to complete optimized evidence."""
+    """Apply the ordered final gate, failing closed when evidence is unavailable."""
+
+    missing = evidence.missing_mandatory_evidence
+    if missing:
+        return OutcomeDecision(
+            outcome=Experiment004Outcome.HARDWARE_GATE_NOT_REACHED,
+            rationale=(
+                "mandatory evidence for the Experiment 004 hardware decision is unavailable or "
+                f"invalid: {', '.join(missing)}"
+            ),
+            strong_hardware_result=False,
+            hardware_interest_chain_ids=(),
+            missing_mandatory_evidence=missing,
+        )
 
     interested = tuple(item for item in evidence.chain_gates if item.hardware_interest)
     interested_ids = tuple(sorted(item.chain.chain_id for item in interested))
@@ -290,7 +344,7 @@ def select_outcome(evidence: OutcomeEvidence) -> OutcomeDecision:
     )
     if fabric:
         return OutcomeDecision(
-            outcome=Experiment004Outcome.FABRIC_HARDWARE_INTEREST,
+            outcome=Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST,
             rationale="an optimized fabric-adjacent chain passed every system and realizability gate",
             strong_hardware_result=any(
                 item.realistic_end_to_end_speedup >= 1.20 for item in fabric
@@ -300,7 +354,7 @@ def select_outcome(evidence: OutcomeEvidence) -> OutcomeDecision:
     host = tuple(item for item in interested if item.chain.placement_class is PlacementClass.HOST)
     if host:
         return OutcomeDecision(
-            outcome=Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST,
+            outcome=Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST,
             rationale="an optimized GPU-host state chain passed every system and realizability gate",
             strong_hardware_result=any(item.realistic_end_to_end_speedup >= 1.20 for item in host),
             hardware_interest_chain_ids=tuple(sorted(item.chain.chain_id for item in host)),
@@ -308,7 +362,7 @@ def select_outcome(evidence: OutcomeEvidence) -> OutcomeDecision:
     gpu = tuple(item for item in interested if item.chain.placement_class is PlacementClass.GPU)
     if gpu or evidence.optimized_removed_most_naive_headroom:
         return OutcomeDecision(
-            outcome=Experiment004Outcome.GPU_SOFTWARE_TARGET,
+            outcome=Experiment004Outcome.GPU_SOFTWARE_WINS,
             rationale=(
                 "the remaining regular path is GPU-local and belongs in CUDA/Triton software"
                 if gpu
@@ -317,17 +371,32 @@ def select_outcome(evidence: OutcomeEvidence) -> OutcomeDecision:
             strong_hardware_result=False,
             hardware_interest_chain_ids=tuple(sorted(item.chain.chain_id for item in gpu)),
         )
-    if evidence.optimized_movement_fraction < 0.15 and not interested:
+    assert evidence.optimized_movement_fraction is not None
+    realistic_speedups = tuple(item.realistic_end_to_end_speedup for item in evidence.chain_gates)
+    software_gate_passed = evidence.optimized_movement_fraction < 0.15 or (
+        bool(realistic_speedups) and max(realistic_speedups) < 1.15
+    )
+    if software_gate_passed:
         rationale = (
-            "optimized preservation movement was below the end-to-end hardware-interest floor"
+            "optimized preservation is below the integrated headroom threshold"
+            if evidence.optimized_movement_fraction < 0.15
+            else "every realistic acceleration projection is below 1.15x end to end"
         )
-    else:
-        rationale = "no optimized chain satisfied both the system and realizability hardware gates"
+        return OutcomeDecision(
+            outcome=Experiment004Outcome.SOFTWARE_WINS,
+            rationale=rationale,
+            strong_hardware_result=False,
+            hardware_interest_chain_ids=interested_ids,
+        )
     return OutcomeDecision(
-        outcome=Experiment004Outcome.MOVEMENT_CLOSED,
-        rationale=rationale,
+        outcome=Experiment004Outcome.HARDWARE_GATE_NOT_REACHED,
+        rationale=(
+            "complete measurements did not establish any allowed numeric terminal gate; "
+            "additional decision evidence is required"
+        ),
         strong_hardware_result=False,
         hardware_interest_chain_ids=interested_ids,
+        missing_mandatory_evidence=("terminal_gate_result",),
     )
 
 

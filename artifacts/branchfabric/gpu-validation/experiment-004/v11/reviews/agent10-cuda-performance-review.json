@@ -1,0 +1,300 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-cuda-performance-review/v1",
+  "review_id": "agent10-cuda-performance-review",
+  "agent": 10,
+  "reviewed_at_utc": "2026-08-19T02:25:53Z",
+  "status": "PASS",
+  "recommendation": "GO_TO_EXACTLY_ONE_INTEGRATED_V11_TRANSACTION_WITH_TIMING_AND_HARDWARE_COMPARABILITY_QUALIFICATIONS",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "review_scope": "Independent post-micro audit of real-A100 StatePassRecord event timing, cardinality, wall/CUDA/synchronization/integrity decomposition, temporary memory, residual CUDA chains, instrumentation minimalism, and integrated-v11 admission.",
+  "attempt": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "status": "succeeded",
+    "gpu_name": "NVIDIA A100 80GB PCIe",
+    "gpu_uuid": "GPU-c3ba4108-e98e-a487-8301-b4a564146d5e",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "vllm": "0.23.0",
+    "torch": "2.11.0",
+    "torch_cuda": "13.0",
+    "dtype": "bfloat16",
+    "logical_state_bytes": 1056964608,
+    "shared_blocks": 1024,
+    "private_blocks": 128,
+    "total_blocks": 1152,
+    "branch_count": 8,
+    "correctness": "8/8 exact first resumed tokens and at least 8 continuation tokens per branch"
+  },
+  "canonical_record_audit": {
+    "status": "PASS",
+    "total_record_count": 10454,
+    "unique_pass_id_count": 10454,
+    "cuda_record_count": 10216,
+    "cpu_record_count": 238,
+    "unique_start_cuda_event_count": 10216,
+    "unique_end_cuda_event_count": 10216,
+    "cuda_records_with_complete_device_stream_event_and_elapsed_fields": 10216,
+    "cpu_records_with_null_cuda_fields": 238,
+    "missing_dependency_count": 0,
+    "dag_visited_record_count": 10454,
+    "dag_cycle_count": 0,
+    "timing_group_count": 10454,
+    "timing_groups_with_exactly_one_owner": 10454,
+    "negative_wall_or_cuda_duration_count": 0,
+    "physical_bytes_recomputed": 22197063040,
+    "physical_bytes_reported": 22197063040,
+    "external_bytes_recomputed": 2114200960,
+    "external_bytes_reported": 2114200960,
+    "cuda_time_ns_recomputed_from_timing_owners": 831126047,
+    "cuda_time_ns_reported": 831126047,
+    "synchronization_time_ns_recomputed_from_timing_owners": 521796759,
+    "synchronization_time_ns_reported": 521796759,
+    "diagnostic_physical_bytes": 0,
+    "verdict": "Every successful-path physical byte and timing sample has one canonical record. Incremental recorder materialization created no synthetic movement record and no duplicate timing owner."
+  },
+  "record_cardinality": {
+    "export_records": 2160,
+    "restore_records": 8294,
+    "export_derivation": {
+      "chunks": 36,
+      "index_upload": 36,
+      "index_select": 1008,
+      "copy_repack": 1008,
+      "d2h": 36,
+      "cuda_event_synchronize": 36,
+      "sha256_whole_and_pages": 36,
+      "total": 2160
+    },
+    "restore_derivation": {
+      "full_state_preflight_hash": 36,
+      "owned_snapshot": 64,
+      "consumption_sha256": 64,
+      "h2d": 64,
+      "destination_index_upload": 1792,
+      "native_scatter": 1792,
+      "raw_bit_equal": 4480,
+      "completion_fence": 2,
+      "total": 8294
+    },
+    "v10_full_state_pass_count": 30,
+    "v11_full_state_pass_count": 10,
+    "full_state_pass_count_reduction_percent": 66.66666666666667,
+    "cardinality_note": "The 10 full-state passes are gap-free semantic pass families. The 10,454 records are their measured per-chunk/per-layer/per-run executions plus bounded index and synchronization records; these quantities must not be conflated."
+  },
+  "measured_phase_timing_seconds": {
+    "export_wall": 2.61309087,
+    "export_cuda_event_sum": 0.133267776,
+    "export_synchronization_attribution": 0.005271845,
+    "export_state_record_timestamp_span": 1.640384241,
+    "restore_wall": 4.438193614,
+    "restore_cuda_event_sum": 0.697858271,
+    "restore_synchronization_attribution": 0.516524914,
+    "restore_state_record_timestamp_span": 4.261723105,
+    "export_plus_restore_wall": 7.051284484,
+    "cuda_event_sum": 0.831126047,
+    "synchronization_attribution": 0.521796759,
+    "reported_sha_only_integrity_wall_sum": 3.505231979
+  },
+  "derived_timing_fractions": {
+    "export_cuda_event_sum_fraction_of_export_wall": 0.05100005420018172,
+    "export_sync_fraction_of_export_wall": 0.0020174748075255417,
+    "restore_cuda_event_sum_fraction_of_restore_wall": 0.15723925806180478,
+    "restore_sync_fraction_of_restore_wall": 0.11638178928712234,
+    "total_cuda_event_sum_fraction_of_export_plus_restore_wall": 0.11786874418212737,
+    "total_sync_fraction_of_export_plus_restore_wall": 0.07400024210964738,
+    "export_record_span_fraction_of_export_wall": 0.6277562942156696,
+    "restore_record_span_fraction_of_restore_wall": 0.9602382130325871,
+    "interpretation": "CUDA-event sums, synchronization attribution, CPU record wall time, record spans, and phase wall time overlap. They are separately measured views and must not be added into a waterfall without interval-union analysis."
+  },
+  "integrity_timing_qualification": {
+    "status": "PASS_WITH_DEFINITION_QUALIFICATION",
+    "reported_integrity_time_seconds": 3.505231979,
+    "reported_field_definition_from_worker_source": "Sum of wall intervals for operations whose name contains sha256.",
+    "export_publish_sha256_wall_seconds": 1.390905234,
+    "restore_preflight_sha256_wall_seconds": 1.397199619,
+    "restore_consumption_sha256_wall_seconds": 0.717127126,
+    "raw_bit_equal_record_count": 4480,
+    "raw_bit_equal_launch_wall_sum_seconds": 0.485534818,
+    "raw_bit_equal_cuda_event_sum_seconds": 0.442472927,
+    "raw_bit_equal_synchronization_attribution_seconds": 0.50256472,
+    "derived_inclusive_hash_plus_raw_validation_work_seconds": 3.990766797,
+    "qualification": "Raw-bit destination comparison is integrity validation but is excluded from the worker's field named integrity_time_ns. Final reports must label 3.505231979 s as SHA-only and separately report raw-bit validation. The derived 3.990766797 s is an aggregate integrity-work sum, not an additive critical-path latency because pipeline overlap exists."
+  },
+  "operation_aggregates": {
+    "export": [
+      {
+        "operation": "index_select",
+        "records": 1008,
+        "physical_bytes": 2113929216,
+        "cuda_event_sum_seconds": 0.046434304
+      },
+      {
+        "operation": "copy_repack",
+        "records": 1008,
+        "physical_bytes": 2113929216,
+        "cuda_event_sum_seconds": 0.040681472
+      },
+      {
+        "operation": "d2h",
+        "records": 36,
+        "physical_bytes": 3170893824,
+        "external_bytes": 1056964608,
+        "cuda_event_sum_seconds": 0.042120384,
+        "derived_payload_throughput_gb_per_s": 25.093897719450993
+      },
+      {
+        "operation": "sha256_whole_and_pages",
+        "records": 36,
+        "physical_bytes": 2113929216,
+        "cpu_wall_sum_seconds": 1.390905234
+      }
+    ],
+    "restore": [
+      {
+        "operation": "sha256_whole_and_pages",
+        "records": 36,
+        "physical_bytes": 2113929216,
+        "cpu_wall_sum_seconds": 1.397199619
+      },
+      {
+        "operation": "owned_snapshot",
+        "records": 64,
+        "physical_bytes": 2113929216,
+        "cpu_wall_sum_seconds": 0.092117112
+      },
+      {
+        "operation": "sha256_pages",
+        "records": 64,
+        "physical_bytes": 1056964608,
+        "cpu_wall_sum_seconds": 0.717127126
+      },
+      {
+        "operation": "h2d",
+        "records": 64,
+        "physical_bytes": 3170893824,
+        "external_bytes": 1056964608,
+        "cuda_event_sum_seconds": 0.063085824,
+        "derived_payload_throughput_gb_per_s": 16.754391731492642
+      },
+      {
+        "operation": "destination_index_upload",
+        "records": 1792,
+        "physical_bytes": 774144,
+        "cuda_event_sum_seconds": 0.1165184
+      },
+      {
+        "operation": "index_copy_native_scatter",
+        "records": 1792,
+        "physical_bytes": 2113929216,
+        "cuda_event_sum_seconds": 0.07578112
+      },
+      {
+        "operation": "raw_bit_equal",
+        "records": 4480,
+        "physical_bytes": 2113933696,
+        "cuda_event_sum_seconds": 0.442472927,
+        "launch_wall_sum_seconds": 0.485534818,
+        "synchronization_attribution_seconds": 0.50256472,
+        "derived_physical_throughput_gb_per_s": 4.7775435896894995,
+        "cuda_p50_microseconds": 72.336,
+        "cuda_p95_microseconds": 113.44,
+        "cuda_max_microseconds": 53589.535
+      }
+    ]
+  },
+  "residual_chains": {
+    "export_source_chain": {
+      "measured_chain": "destination-index upload -> native index_select -> copy_repack -> D2H -> publish SHA-256",
+      "cuda_event_sum_seconds": 0.133267776,
+      "publish_sha256_cpu_wall_seconds": 1.390905234,
+      "phase_wall_seconds": 2.61309087,
+      "dominant_measured_component": "publish SHA-256 CPU wall work",
+      "qualification": "The CUDA chain and CPU hash are pipelined; their aggregate durations are not a serial critical-path measurement."
+    },
+    "restore_chain": {
+      "measured_chain": "preflight SHA-256 -> owned host snapshot -> consumption SHA-256 -> H2D -> destination-index upload -> native index_copy -> raw-bit validation",
+      "cuda_event_sum_seconds": 0.697858271,
+      "sha256_cpu_wall_seconds": 2.114326745,
+      "raw_validation_cuda_seconds": 0.442472927,
+      "raw_validation_launch_wall_seconds": 0.485534818,
+      "phase_wall_seconds": 4.438193614,
+      "dominant_measured_components": [
+        "preflight and consumption SHA-256 CPU work",
+        "4,480 small raw-bit validation launches and their synchronous scalar checks"
+      ],
+      "regular_gpu_optimization_candidate": "Fuse destination index/scatter/raw-bit validation over larger page runs; raw validation alone is 63.4% of restore CUDA-event work and shows a 53.6 ms cold/outlier maximum against a 72.336 us median."
+    },
+    "hardware_conclusion_allowed_from_micro": false,
+    "reason_hardware_conclusion_deferred": "The integrated serving experiment is required to measure state-chain share of HBM reclamation, useful GPU1 capacity, SLO recovery, and rollout interruption."
+  },
+  "temporary_memory": {
+    "checkpoint_resident_host_bytes_excluded": 1056964608,
+    "measured_peak_pinned_host_temporary_bytes": 58720256,
+    "projected_two_slot_pinned_bound_bytes": 58720256,
+    "pinned_bound_match": true,
+    "measured_peak_pageable_host_temporary_bytes": 84832256,
+    "conservative_peak_total_host_temporary_bytes": 143552512,
+    "measured_peak_gpu_temporary_bytes": 59769344,
+    "v10_peak_host_temporary_bytes": 2965372928,
+    "derived_v10_to_v11_conservative_host_temp_reduction_factor": 20.65706051873199,
+    "derived_absolute_host_temp_bytes_saved": 2821820416,
+    "measurement_qualification": "Pinned extent is tracked from pipeline statistics. Pageable temporary is a 10 ms process-RSS peak delta after subtracting resident checkpoint and pinned extent; a sub-10 ms pageable spike could be missed. The conservative total is the sum of measured pinned and simultaneous restore pageable deltas."
+  },
+  "instrumentation": {
+    "status": "PASS",
+    "configured_tracing_level": "minimal",
+    "canonical_cuda_timing": "StatePassRecord CUDA events",
+    "canonical_phase_timing": "monotonic wall clock around export and restore",
+    "host_memory_sampling": "10 ms process RSS sampler plus explicit pinned/checkpoint extents",
+    "pytorch_profiler_enabled_for_causal_phase": false,
+    "nsys_or_ncu_enabled": false,
+    "postflight_profiler_count": 0,
+    "qualification": "vLLM's built-in CUDA-graph memory profiling ran during engine initialization, before the measured export/restore phases; it is not a heavy causal-phase profiler."
+  },
+  "go_no_go": {
+    "correctness_pass": true,
+    "measured_full_physical_amplification": 21.000762818351625,
+    "classification": "MEANINGFUL",
+    "threshold": "correctness passes and amplification <=25x",
+    "decision": "GO",
+    "v10_full_physical_amplification": 58.0,
+    "derived_amplification_removed": 36.999237181648375,
+    "derived_physical_bytes_removed": 39106884224,
+    "derived_physical_bytes_reduction_percent": 63.79181449900818,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_amplification": 12.000762818351625,
+    "integrated_admission": "PASS",
+    "integrated_conditions": [
+      "Run exactly one integrated v11 transaction with minimal causal instrumentation and the frozen load/trigger/recovery methodology.",
+      "Preserve the measured StatePassRecord schema and validate the complete dependency DAG before reporting integrated movement.",
+      "Label the current 3.505231979 s integrity field as SHA-only and separately report raw-bit validation; do not add wall, CUDA, and synchronization totals as disjoint stages.",
+      "For direct v10-v11 latency claims, match the frozen v10 A100-SXM4 topology or explicitly treat A100-PCIe timing as hardware-confounded. Amplification and byte-count comparisons remain valid.",
+      "Do not infer BranchFabric hardware interest from this micro result; integrated critical-path and economic measurements remain mandatory."
+    ]
+  },
+  "derived_artifact_refresh": {
+    "micro_status": "MICRO_VALIDATION_PASS",
+    "micro_status_sha256": "b15d8b1b3bcd6304843959a47ad61a5468947b084b1fc0cfe91ce72e2b48e521",
+    "scientific_outcome_sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+    "state_pass_provenance_sha256": "f1ba76531766ca665c19baa072dd6ad834d3a22976f7a48b43cc2714805975bb",
+    "v10_v11_pass_diff_status": "V10_V11_MEASURED",
+    "v10_v11_pass_diff_sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99"
+  },
+  "evidence_hashes_sha256": {
+    "attempt_d_worker_result": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "attempt_d_config": "f46564187068afec753dc02d9a47abbd674b491e7043d3161df79a20e913b39d",
+    "attempt_d_gpu_settlement": "b8bbfc25a3343836a03b61383801a36ce03aafef028f18ab91fdefbbe167ad75",
+    "attempt_d_postflight_cleanup": "205713205b0f387ae7c7d913f1a10d7fd24c927207e21295aec34d48065026f6",
+    "attempt_d_remote_manifest": "f3b48d25ad14947acd0347ecad2397f768da8dd02d3e928d188dcc3be0008ab6",
+    "attempt_d_worker_stdout": "43ea35d3db5e76459190da4e2a90c1db2a51574e5d230d29a9690ec355f13106",
+    "attempt_d_worker_stderr": "c94c43443ef89d0e54414af5a715bc5b48317adb5f00c978a6a96b9b5a27f814",
+    "attempt_d_offline_manifest": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a",
+    "v10_naive_pass_graph": "df5a9247ef88e0e659ee0af817ef34c6f2995fda52b5ff835a0e8d651a86c10d"
+  },
+  "measured_vs_inferred_policy": {
+    "measured": "Raw byte counters, tier counters, pass/event counts, event elapsed times, record wall intervals, phase wall times, RSS/pinned/GPU peaks, correctness, GPU identity, and cleanup state come directly from attempt-D artifacts.",
+    "derived": "Fractions, throughput, v10-v11 reductions, conservative combined host temp, inclusive integrity-work sum, record timestamp spans, and residual-chain interpretations are arithmetic or reviewer inference over measured fields.",
+    "not_measured": "Integrated serving critical-path share, serving SLO improvement, realistic hardware end-to-end speedup, and economic benefit are not established by this micro-validation."
+  }
+}

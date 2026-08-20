@@ -1,0 +1,208 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-post-micro-review-manifest/v1",
+  "status": "PASS",
+  "integrated_v11_admission": "APPROVED_EXACTLY_ONCE",
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "micro_attempt_id": "exp004-v11-micro-s41-d",
+  "sealed_at_utc": "2026-08-20T03:01:27Z",
+  "micro_go_no_go": {
+    "correctness_pass": true,
+    "first_resumed_tokens_exact": "8/8",
+    "measured_full_physical_amplification": 21.000762818351625,
+    "threshold": 25.0,
+    "classification": "MEANINGFUL",
+    "decision": "GO"
+  },
+  "reviews": [
+    {
+      "agent": 9,
+      "role": "movement-accounting reviewer",
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent09-movement-accounting-review.json",
+      "sha256": "e55cc17548b38fc099df16dc240aa5cfb12b2f6dc606a449cf9c674af64bf14e"
+    },
+    {
+      "agent": 10,
+      "role": "CUDA performance reviewer",
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent10-cuda-performance-review.json",
+      "sha256": "4880be54dc65959a91ced0330d19e9148a700cbc17ac62f2ee8cf8c950aa70a3"
+    },
+    {
+      "agent": 11,
+      "role": "Continuum correctness reviewer",
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent11-continuum-correctness-review.json",
+      "sha256": "b93180c4a2d512a2c6ced59680161e1e8aeec39eeb0b423446018e1e1586b6e1"
+    },
+    {
+      "agent": 12,
+      "role": "adversarial software reviewer",
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent12-adversarial-software-review.json",
+      "sha256": "ae3739962e58de4e2bcab4df2fbe5f4aab2438771461a24fe8467a40e590671c"
+    }
+  ],
+  "integrated_prelaunch": {
+    "status": "PASS",
+    "bindings": [
+      {
+        "label": "methodology",
+        "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+        "sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+      },
+      {
+        "label": "worker",
+        "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+        "sha256": "1b967aaa7485c807393ae89756b537daabe5c1b0c82e2c2f5ea60fd56948aeb2"
+      },
+      {
+        "label": "controller",
+        "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+        "sha256": "a96df9ef7ff7b7a7d35708188ca91ec2d230438a1f174f2fe1279f4235b3e2c3"
+      },
+      {
+        "label": "launcher",
+        "artifact": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+        "sha256": "ebea747e9bcae1578db92982f5164160fc55ce4eb9c7ab8f02af92aa91720590"
+      },
+      {
+        "label": "trigger",
+        "artifact": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+        "sha256": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd"
+      },
+      {
+        "label": "worker_test",
+        "artifact": "tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+        "sha256": "9d88f2cb4ba3b3bf6a5b5514016c06972d61f303ca9f995e00ee160009246f37"
+      },
+      {
+        "label": "controller_test",
+        "artifact": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+        "sha256": "44fb331995b5d4eb0dada853fdb59077e10f5fa0533a3d9a2b4e6c3a40db635a"
+      },
+      {
+        "label": "launcher_test",
+        "artifact": "tests/python/test_modal_gpu_reclamation_integrated_v11.py",
+        "sha256": "8cb2d10f3a0516c047bf458b022049a110e22c7a498d7514f48315831ea13844"
+      },
+      {
+        "label": "trigger_test",
+        "artifact": "tests/python/test_gpu_reclamation_integrated_trigger_v11.py",
+        "sha256": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d"
+      },
+      {
+        "label": "trigger_race_test",
+        "artifact": "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py",
+        "sha256": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599"
+      },
+      {
+        "label": "cross_runtime_review",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-integrated-cross-runtime-audit.json",
+        "sha256": "a5657133a969c383d1c44d960285ebd5a21f07205c08fd93c0ced52f52be56cd"
+      },
+      {
+        "label": "make_check",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/offline-fixes/make-check.json",
+        "sha256": "abe1450d950727165afddc69e15689280591cbee5ffc8ebafa83b2b456f9a1c7"
+      }
+    ]
+  },
+  "final_integrated_pre_gpu_gate": {
+    "status": "PASS",
+    "attempt_id": "exp004-v11-integrated-s41-c",
+    "reviews": [
+      {
+        "agent": 1,
+        "role": "early-trigger-implementation",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent01-early-trigger-implementation.json",
+        "sha256": "6aab21aa42b26a88a77f9cb3ebaddb8e70126099a474e3c65a86491700e11d26"
+      },
+      {
+        "agent": 2,
+        "role": "trigger-race-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent02-trigger-race-review.json",
+        "sha256": "49323add0c84c190e39ec5f5d89fb0e8b37f176be7f33d33532c29da0d8356ce"
+      },
+      {
+        "agent": 3,
+        "role": "process-cleanup-implementation",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent03-process-cleanup-implementation.json",
+        "sha256": "1f444088ce40575068a45d6abdd107f1ee41ee48b35e6459acbf7f3d165701c2"
+      },
+      {
+        "agent": 4,
+        "role": "process-lifecycle-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent04-process-lifecycle-review.json",
+        "sha256": "8aaad0c11e74c9636bed918de431844407e65d8185656b1021b003498326b3ad"
+      },
+      {
+        "agent": 5,
+        "role": "classification-logic-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent05-classification-logic-review.json",
+        "sha256": "330ff69d8ae149798c8f6fc51a3f6e9a57d9c50d9a188d2d55d66b56ec5db3e3"
+      },
+      {
+        "agent": 6,
+        "role": "scientific-validity-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent06-scientific-validity-review.json",
+        "sha256": "343881fd9b409eddf47d188826820333b43023327ce2c1a887c62cf297d1bd60"
+      },
+      {
+        "agent": 7,
+        "role": "gpu-budget-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent07-gpu-budget-review.json",
+        "sha256": "727d1e9a848b26bbe53eaede40b4998cc5405ea15e7a4c7f6a899450680c591b"
+      },
+      {
+        "agent": 8,
+        "role": "integrated-methodology-review",
+        "status": "PASS",
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent08-integrated-methodology-review.json",
+        "sha256": "c4ff365af28e897d0dd8779339b8f78f4b02d7bd05f36740322bcdedf6d59bb6"
+      }
+    ],
+    "make_check": {
+      "status": "PASS",
+      "command": "make check",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/offline-fixes/make-check.json",
+      "sha256": "abe1450d950727165afddc69e15689280591cbee5ffc8ebafa83b2b456f9a1c7"
+    }
+  },
+  "integrated_replacement_authorization": {
+    "status": "APPROVED_EXACTLY_ONCE",
+    "replacement_attempt_id": "exp004-v11-integrated-s41-c",
+    "prior_attempt_id": "exp004-v11-integrated-s41-b",
+    "prior_attempt_scientific_status": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+    "prior_attempt_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180",
+      "status": "PASS"
+    },
+    "ledger_sha256_before_reservation": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7"
+  },
+  "mandatory_interpretation": {
+    "micro_hardware": "NVIDIA A100 80GB PCIe",
+    "frozen_v10_hardware": "NVIDIA A100-SXM4-80GB",
+    "byte_gate_hardware_comparable": true,
+    "micro_latency_directly_comparable_to_v10": false,
+    "integrated_preferred_hardware": "2 x NVIDIA A100-SXM4-80GB",
+    "hardware_interest_established": false,
+    "missing_integrated_evidence_classification": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "conditions": [
+    "Bind this exact manifest and the current ledger hash in the attempt-c config before reservation.",
+    "Reserve exactly two A100-80GB GPUs for at most 588 seconds and launch attempt c exactly once.",
+    "Run only the short 12-rps and 15-rps stale-calibration guards.",
+    "Require normal trigger depth 20 through 30 and preserve the independent emergency abort at 64.",
+    "Fail closed on any integrated scientific-validity, in-function cleanup, or provider cleanup gate.",
+    "Do not claim direct v10 timing causality unless the observed topology matches A100-SXM4-80GB."
+  ]
+}

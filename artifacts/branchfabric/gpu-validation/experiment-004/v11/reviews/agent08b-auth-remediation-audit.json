@@ -1,0 +1,137 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-agent08b-auth-remediation-audit/v1",
+  "reviewed_at_utc": "2026-08-19T01:02:42Z",
+  "agent": "agent-08b-replacement-micro-methodology-auditor",
+  "scope": "offline re-audit of the v11 Modal one-time-token remediation and scientific admissibility of one replacement micro-validation invocation",
+  "result": "PASS",
+  "blocking_findings": [],
+  "gpu_or_modal_actions_performed": false,
+  "network_operations": 0,
+  "source_files_modified_by_reviewer": false,
+  "authorization_remediation": {
+    "status": "PASS",
+    "modal_source": "experiments/branchfabric/modal_gpu_reclamation_v11.py",
+    "modal_source_sha256": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb",
+    "mechanism": "modal.Secret.from_dict supplies SLOFORGE_MODAL_PREFLIGHT_TOKEN only as a runtime function secret",
+    "remote_binding": "The remote module reads the injected environment value and requires authorization.preflight_token_sha256 to equal SHA-256(token); configuration SHA, one A100 identity, and exactly 525 GPU-seconds remain independently bound.",
+    "image_baked": false,
+    "repository_or_result_persisted_raw_token": false,
+    "named_persistent_secret_created": false,
+    "evidence": [
+      "gpu_image is constructed before the Secret and no image construction, env, local-file, or local-directory call receives the token",
+      "the Secret object is attached exactly once through secrets=[_launch_token_secret] to the one-A100 function",
+      "the raw token is absent from config, authorization payload, completion, result publication, logging and immutable result writers; authorization carries only its SHA-256",
+      "the code uses neither Secret.from_name nor a deployed/named secret API",
+      "the function remains A100-80GB:1, timeout 525, retries 0, max_containers 1, buffer_containers 0 and single-use"
+    ],
+    "scope_note": "This proves that SLOForge does not bake or persist the raw token and uses Modal's anonymous runtime-secret attachment. It does not make claims about provider-internal encrypted control-plane retention beyond that API contract."
+  },
+  "first_attempt": {
+    "attempt_id": "exp004-v11-micro-s41-a",
+    "status": "FAILED_BEFORE_SCIENTIFIC_WORK",
+    "failure_stage": "REMOTE_AUTHORIZATION_BEFORE_MODEL_LOAD",
+    "remote_state_work_started": false,
+    "model_loaded": false,
+    "measurement_produced": false,
+    "modal_retry_performed": false,
+    "actual_gpu_seconds": null,
+    "conservatively_charged_gpu_seconds": 525.0,
+    "failure_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/invocation-failure.json",
+    "failure_artifact_sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+    "postflight_cleanup_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/postflight-cleanup.json",
+    "postflight_cleanup_sha256": "f0e66566c3cd31ef5d5d96c87e7283e9bb86680243ebb7ea665c4573b2722f38",
+    "cleanup_pass": true,
+    "cleanup_evidence": {
+      "app_state": "stopped",
+      "tasks": 0,
+      "active_apps": [],
+      "running_tasks": [],
+      "running_containers": [],
+      "active_endpoints": [],
+      "active_reservations": [],
+      "owned_child_processes": [],
+      "profilers": []
+    }
+  },
+  "replacement_micro": {
+    "scientifically_acceptable": true,
+    "decision": "ONE_REPLACEMENT_APPROVED_AFTER_RESEAL_AND_NEW_RESERVATION",
+    "rationale": "The first invocation failed before model loading, live state construction, export/import, continuation, instrumentation, or any measured outcome. It therefore supplies no performance or correctness observation to select on and is not a scientific repetition. A single fresh replacement with the unchanged seed and workload is not cherry-picking.",
+    "required_freshness": [
+      "new unique attempt ID and immutable remote result prefix",
+      "new config bound to the post-failure ledger and resealed offline manifest",
+      "new one-GPU 525-second reservation created atomically immediately before launch",
+      "new one-time 64-hex preflight token",
+      "no automatic retry and no reuse or deletion of the failed attempt artifacts"
+    ],
+    "scientific_parameters_unchanged": true,
+    "unchanged_parameters": [
+      "seed 41",
+      "one A100-80GB",
+      "Qwen2.5-7B-Instruct pinned revision",
+      "vLLM 0.23.0 and PyTorch 2.11.0 BF16",
+      "16,384 shared tokens, fanout 8, 256 private tokens, 1,152 pages and 1,056,964,608 bytes",
+      "8 continuation tokens per branch and 8/8 independent recomputation",
+      "canonical StatePassRecord measurement and strict amplification go/no-go"
+    ]
+  },
+  "reseal_gate": {
+    "status": "REQUIRED_BEFORE_LAUNCH",
+    "old_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest.json",
+    "old_manifest_sha256": "fec8a97465a26b90d9a63d4141fa86b845cc088560f6d466236d5e2972720f84",
+    "old_manifest_modal_sha256": "128465c0f00fa1c67bfb4e78a8e692d1ad9e6dfab76e95efe6f751eb5e516268",
+    "current_modal_sha256": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb",
+    "old_attempt_config_reusable": false,
+    "requirements": [
+      "reseal the offline manifest with the current Modal source, structural test, this Agent08b review, and the post-remediation make-check evidence",
+      "generate a fresh config that binds the resealed manifest and current pre-reservation ledger hash",
+      "validate the fresh config locally before creating the replacement reservation"
+    ]
+  },
+  "current_budget": {
+    "authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "authorized_cumulative_a100_seconds": 21600.0,
+    "ledger_sha256": "fa7800a901f443696d0405d32843b0114f4f2adb780e2fbf0704a09366b6d172",
+    "conservatively_consumed_a100_seconds": 13081.823626085978,
+    "remaining_before_replacement_a100_seconds": 8518.176373914022,
+    "replacement_gpu_count": 1,
+    "replacement_maximum_wall_seconds": 525.0,
+    "replacement_reserved_a100_seconds": 525.0,
+    "replacement_with_15_percent_margin_a100_seconds": 603.75,
+    "projected_cumulative_with_margin_a100_seconds": 13685.573626085978,
+    "projected_remaining_after_margin_a100_seconds": 7914.426373914022,
+    "hard_limit_pass": true,
+    "active_reservations": 0,
+    "first_failure_conservative_cost_usd": 0.36435,
+    "replacement_planning_cost_with_margin_usd": 0.4190025
+  },
+  "tests": {
+    "ruff": "PASS",
+    "py_compile": "PASS",
+    "targeted_suite": {
+      "status": "PASS",
+      "passed": 27,
+      "failed": 0,
+      "command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    },
+    "static_secret_taint_audit": "PASS",
+    "fake_modal_secret_binding_audit": "PASS",
+    "full_make_check": {
+      "status": "PASS",
+      "python": "1767 passed, 8 skipped",
+      "rust": "format, clippy, workspace tests and doc tests PASS",
+      "ui": "typecheck, lint, 37 tests and build PASS"
+    }
+  },
+  "reviewed_sha256": {
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "4b022507a35143def534d5c6bfe8fc8b7c7394f94c655ed8c637ad5985d0eb73",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/modal_real_gpu_cow.py": "6721d63d6c5037ca27fe92c66dcd0bf327286cd3cdc080e7c4a2b70aece8bb88",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718",
+    "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json": "fa7800a901f443696d0405d32843b0114f4f2adb780e2fbf0704a09366b6d172",
+    "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300"
+  },
+  "decision": "PASS: the runtime Secret remediation correctly carries the one-time authorization token without image baking or application-level persistence. Exactly one scientifically fresh replacement micro is acceptable after resealing and atomic budget reservation."
+}

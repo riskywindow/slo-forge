@@ -1,0 +1,241 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-gpu-budget-review/v1",
+  "agent": 7,
+  "role": "gpu-budget-review",
+  "gpu_or_cloud_invoked": false,
+  "review_id": "agent07-gpu-budget-review",
+  "reviewer_task_path": "/root/gpu_budget_review",
+  "reviewed_at_utc": "2026-08-20T02:31:05Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "Offline-only audit of the authoritative Experiment 004 ledger, current-turn authorization, one 588-second two-A100 integrated retry, and one conditional 660-second two-A100 kill/recompute arm.",
+  "gpu_or_cloud_actions_performed": false,
+  "modal_invoked": false,
+  "provider_commands_invoked": false,
+  "gpu_resources_consumed": false,
+  "authoritative_ledger_mutated": false,
+  "reservation_created": false,
+  "designated_gpu_coordinator": "/root",
+  "authorization": {
+    "persisted_authorization": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+      "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+      "authorized_cumulative_a100_hours": 6.0,
+      "authorized_cumulative_a100_seconds": 21600.0,
+      "authorized_gpu_budget_usd": 40.0,
+      "scope_includes_integrated_v11": true,
+      "scope_includes_kill_and_recompute": true,
+      "does_not_authorize_experiment_005_execution": true
+    },
+    "current_turn": {
+      "source": "explicit-user-instruction-current-thread",
+      "canonical_selected_instructions_sha256": "8cbe40cf3a1d9c615b09986bab40e3c783883865f4f727c19cc328127c241bf4",
+      "selected_instructions": [
+        "Run exactly ONE scientifically valid integrated v11 reclamation transaction.",
+        "Run exactly ONE KILL_AND_RECOMPUTE comparison arm.",
+        "Current reported remaining conservative authorization: approximately 1.524023993 A100-hours",
+        "Read the actual configured limit before execution.",
+        "Do not invent additional authorization."
+      ],
+      "interpretation": "This turn authorizes exactly one fresh integrated retry and, only after that retry is scientifically valid, exactly one kill/recompute arm. It does not raise the persisted six-A100-hour or 40-USD ceilings."
+    }
+  },
+  "authoritative_ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+    "settled_intervals_canonical_sha256": "5f0c42629ad0c7b3b2552bba9b9014ac6b342c5149c14483c972c7540914bb85",
+    "conservative_failure_charges_canonical_sha256": "a422f9b5b53dafc7b0837e0640561b3a88157f0b5e3ef219faa9193949d6cc8d",
+    "strict_schema_validation": "PASS",
+    "strict_json_round_trip": "PASS",
+    "hard_ceiling_a100_seconds": 21600.0,
+    "hard_ceiling_a100_hours": 6.0,
+    "settled_interval_a100_seconds": 13236.513626085978,
+    "conservative_failure_charge_a100_seconds": 2877.0,
+    "recomputed_consumed_a100_seconds": 16113.513626085978,
+    "recorded_consumed_a100_seconds": 16113.513626085978,
+    "arithmetic_closes": true,
+    "consumed_conservative_a100_hours": 4.475976007246105,
+    "consumed_conservative_cost_usd": 11.182778456503668,
+    "active_reservation_count": 0,
+    "committed_a100_seconds": 16113.513626085978,
+    "remaining_a100_seconds": 5486.486373914022,
+    "remaining_a100_hours": 1.524023992753895,
+    "remaining_value_at_2_4984_usd_per_a100_hour": 3.8076215434963313,
+    "hard_ceiling_pass": true
+  },
+  "actual_vs_conservative_accounting_before_new_runs": {
+    "price_usd_per_a100_hour": 2.4984,
+    "known_measured_actual_lower_bound_a100_seconds": 14518.928888675978,
+    "known_measured_actual_lower_bound_a100_hours": 4.033035802409994,
+    "known_measured_actual_lower_bound_cost_usd": 10.076136648741128,
+    "bounded_actual_upper_a100_seconds": 15043.928888675978,
+    "bounded_actual_upper_a100_hours": 4.178869135743327,
+    "bounded_actual_upper_cost_usd": 10.440486648741128,
+    "unknown_actual_component": "exp004-v11-micro-s41-a has no trustworthy measured provider duration and is bounded by its 525-A100-second reservation.",
+    "authoritative_budget_value": "The conservative ledger value, not either actual-use bound, controls future admission."
+  },
+  "planned_runs": {
+    "integrated_v11_retry": {
+      "priority": 1,
+      "gpu_count": 2,
+      "requested_gpu": "A100-80GB",
+      "maximum_wall_seconds": 588.0,
+      "exact_reservation_a100_seconds": 1176.0,
+      "exact_reservation_a100_hours": 0.32666666666666666,
+      "exact_reservation_cost_usd": 0.816144,
+      "planning_margin_fraction": 0.15,
+      "planning_margin_a100_seconds": 176.4,
+      "planning_envelope_a100_seconds": 1352.4,
+      "remaining_after_exact_reservation_a100_seconds": 4310.486373914022,
+      "remaining_after_planning_envelope_a100_seconds": 4134.086373914022,
+      "hard_ceiling_pass_without_margin": true,
+      "hard_ceiling_pass_with_margin": true
+    },
+    "conditional_kill_and_recompute": {
+      "priority": 2,
+      "precondition": "The integrated v11 retry is scientifically valid, settled, cleanup-complete, and has no active reservation.",
+      "gpu_count": 2,
+      "requested_gpu": "A100-80GB",
+      "maximum_wall_seconds": 660.0,
+      "exact_reservation_a100_seconds": 1320.0,
+      "exact_reservation_a100_hours": 0.36666666666666664,
+      "exact_reservation_cost_usd": 0.91608,
+      "planning_margin_fraction": 0.15,
+      "planning_margin_a100_seconds": 198.0,
+      "planning_envelope_a100_seconds": 1518.0,
+      "affordable_after_full_integrated_reservation_charge": true,
+      "must_not_be_reserved_before_integrated_settlement": true
+    },
+    "combined_worst_case": {
+      "exact_reservations_a100_seconds": 2496.0,
+      "exact_reservations_a100_hours": 0.6933333333333334,
+      "exact_reservations_cost_usd": 1.732224,
+      "planning_margin_fraction": 0.15,
+      "planning_margin_a100_seconds": 374.4,
+      "planning_envelope_a100_seconds": 2870.4,
+      "planning_envelope_a100_hours": 0.7973333333333333,
+      "planning_envelope_cost_usd": 1.9920576,
+      "projected_cumulative_after_exact_full_charges_a100_seconds": 18609.513626085978,
+      "projected_cumulative_after_exact_full_charges_a100_hours": 5.169309340579438,
+      "projected_cumulative_after_exact_full_charges_cost_usd": 12.915002456503669,
+      "projected_cumulative_with_planning_margin_a100_seconds": 18983.913626085978,
+      "projected_cumulative_with_planning_margin_a100_hours": 5.273309340579438,
+      "projected_cumulative_with_planning_margin_cost_usd": 13.17483605650367,
+      "exact_remaining_headroom_a100_seconds": 2990.486373914022,
+      "exact_remaining_headroom_a100_hours": 0.8306906594205617,
+      "exact_remaining_headroom_value_usd": 2.0753975434963313,
+      "margin_adjusted_remaining_headroom_a100_seconds": 2616.086373914022,
+      "margin_adjusted_remaining_headroom_a100_hours": 0.7266906594205617,
+      "margin_adjusted_remaining_headroom_value_usd": 1.8155639434963313,
+      "hard_ceiling_pass_without_margin": true,
+      "hard_ceiling_pass_with_margin": true,
+      "money_ceiling_pass_with_margin": true
+    },
+    "margin_semantics": "The ledger must reserve the exact bounded device-seconds for only the immediately executing arm. The 15 percent amount is additional admission headroom, not an unbounded runtime allowance and not a simultaneous second reservation."
+  },
+  "stale_terminal_artifacts": [
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/gpu-hours.json",
+      "sha256": "6603204a729323d271d58fd805fbbfc8fc12cdc097e130adb7768e944150ba1b",
+      "stale_state": "TERMINAL_NO_MORE_GPU_AUTHORIZED",
+      "disposition": "Historical terminal snapshot from attempt B; superseded for retry authority by the explicit current-turn instruction, but its measured and conservative accounting remains evidence."
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/v11-gpu-budget.json",
+      "sha256": "b942d72cb6be687fc5a103d58c59cfc9945fa18e6fe46ada749fd6ae982ee31d",
+      "stale_state": "TERMINAL_SETTLED_NO_RETRY_AUTHORIZED",
+      "disposition": "Historical terminal policy snapshot; it is not a fresh attempt-C admission artifact."
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent07g-integrated-final-launch-admission.json",
+      "sha256": "d5d56f5abd07a543654660472b2353f907ff3914dec4758af672cc1e962def75",
+      "stale_state": "AUTHORIZE_EXACTLY_ONE_ATOMIC_ATTEMPT_B_RESERVATION_AND_ONE_LAUNCH",
+      "disposition": "Consumed by attempt B and cannot authorize a new FunctionCall."
+    },
+    {
+      "artifact": "reports/branchfabric-gpu-validation-experiment-004-v11-final.json",
+      "sha256": "1271908f358b4f5baa1dd1de44796d0344bfc32a795caf6b5cbfda91b3d98edd",
+      "stale_state": "TERMINAL_INTEGRATED_INVALID_NO_RETRY with SOFTWARE_WINS",
+      "disposition": "Not budget authority and not valid current classification evidence."
+    }
+  ],
+  "fresh_integrated_attempt_contract": {
+    "proposed_attempt_id": "exp004-v11-integrated-s41-c",
+    "proposed_reservation_id": "exp004-v11-integrated-s41-c-reservation",
+    "attempt_b_reuse_forbidden": true,
+    "reason_attempt_b_reuse_is_forbidden": "The authoritative ledger already contains attempt B as a conservative failure charge, invocation IDs are unique, and the attempt-B remote result prefix is immutable.",
+    "requirements_before_reservation": [
+      "Finish the trigger, lifecycle, classification, methodology, and scientific-validity fixes and freeze their reviewed hashes.",
+      "Create a fresh strict integrated config with attempt-C identity, seed 41, exactly two A100-80GB devices, exactly 588 maximum wall seconds, the current budget-authorization hash, and the authoritative pre-reservation ledger hash.",
+      "Replace attempt-B-only sealed replacement policy with current-turn attempt-C authorization; old attempt-B admission artifacts must not be replayed as authorization.",
+      "Run fresh offline tests and reviews, then hash the final config only after all bound inputs are immutable.",
+      "Perform a fresh provider preflight because this reviewer intentionally made no provider query."
+    ],
+    "atomic_reservation": [
+      "Acquire the sole-coordinator ledger lock and re-read the authoritative ledger.",
+      "Fail closed if the ledger hash differs, any reservation exists, or the 1176-second reservation plus the 15 percent admission envelope no longer fits.",
+      "Call reserve_gpu_invocation for two GPUs and 588 wall seconds, using the fresh config's canonical SHA-256.",
+      "Atomically write and fsync the ledger, then verify exactly one reservation and bind its canonical commitment into the remote authorization.",
+      "Set SLOFORGE_GPU_BUDGET_USD=40.0 only in the designated coordinator's explicit launch environment; use retries=0 and create exactly one FunctionCall."
+    ],
+    "settlement": [
+      "Validate the returned attempt, reservation, config, FunctionCall, two-device inventory, immutable remote manifest, and provider allocation duration before settlement.",
+      "Capture a post-spawn client wait interval separately from image construction and startup; use the conservative maximum of trustworthy post-spawn client and remote allocation durations when it is within 588 seconds.",
+      "On success, settle_gpu_invocation with the validated two-device identities and measured bounded duration.",
+      "On any ambiguous launch, identity, timing, download, or validation failure, charge_failed_gpu_reservation for the full 1176 A100-seconds.",
+      "Never leave an unresolved reservation; preserve actual provider duration separately even when the authoritative ledger uses a conservative full-bound failure charge."
+    ]
+  },
+  "conditional_kill_arm_contract": {
+    "reservation_order": "sequential-only",
+    "requirements": [
+      "Do not create the kill/recompute config or reservation until integrated v11 is scientifically valid, v11 is frozen, the integrated reservation is settled, and cleanup passes.",
+      "Bind the kill config to the measured integrated artifact SHA-256 and the post-integrated authoritative ledger SHA-256.",
+      "Under the same sole-coordinator lock, reserve exactly two A100-80GB devices for exactly 660 wall seconds and verify the 15 percent admission envelope against the then-current ledger.",
+      "Settle a trustworthy result from measured bounded durations; otherwise charge the full 1320-A100-second reservation and record the failure explicitly."
+    ]
+  },
+  "reservation_state": {
+    "authoritative_ledger_active_reservations": 0,
+    "last_content_addressed_provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180",
+      "pass": true,
+      "provider_reservations": 0,
+      "active_apps": 0,
+      "running_tasks": 0,
+      "running_containers": 0,
+      "endpoints": 0
+    },
+    "current_provider_state_claim": "NOT_REQUERIED_BY_OFFLINE_REVIEWER",
+    "fresh_provider_preflight_required": true
+  },
+  "budget_tooling": {
+    "source": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+    "source_sha256": "3a6217ec2b9c8ed4302a347ce5e36a0e1b1a19e8c1b1d38df6f6ea186b5507c3",
+    "v11_methodology": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+    "v11_methodology_sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c",
+    "integrated_modal_surface": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+    "integrated_modal_surface_sha256": "64d214f55c0dee634c7d90a07c3f4e184f761051e5c41f6d29e144a0325e16eb",
+    "supports_one_or_two_gpu_reservations": true,
+    "enforces_at_most_one_active_reservation": true,
+    "enforces_settled_plus_reserved_below_hard_ceiling": true,
+    "full_bound_failure_charge_supported": true,
+    "local_budget_tooling_changes_required": false,
+    "local_budget_tooling_changes_made": false
+  },
+  "tests": {
+    "command": "uv run --locked pytest -q tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_modal_gpu_reclamation_integrated_v11.py",
+    "status": "PASS",
+    "passed": 38,
+    "failed": 0,
+    "duration_seconds": 0.32,
+    "test_artifact_hashes": {
+      "tests/python/test_gpu_reclamation_v11_budget_ledger.py": "d6380b4c1b42b8d932cae6a90f945c0c689f775ed1b034f9dcec89d6c1fce72f",
+      "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d",
+      "tests/python/test_modal_gpu_reclamation_integrated_v11.py": "5eb3434814382dedae52db3c2b9c8f4ad77c6238b7c4880e168c372482b78d2b"
+    }
+  },
+  "findings": [],
+  "decision": "PASS. Exactly one 1176-A100-second integrated reservation followed conditionally by one 1320-A100-second kill/recompute reservation fits the authoritative six-hour ceiling, including a 15 percent planning margin, without inventing new authorization. Admission remains fail-closed until a unique attempt-C config and current sealed reviews are finalized; the old attempt-B config and admission must not be reused."
+}

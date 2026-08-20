@@ -1,0 +1,179 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-replacement-budget-audit/v1",
+  "created_at_utc": "2026-08-19T00:56:28Z",
+  "agent": "agent-07b-independent-replacement-budget-remediation-auditor",
+  "status": "PASS",
+  "decision": "Exactly one replacement v11 micro-validation invocation using 1 A100-80GB for at most 525 wall seconds is authorized, subject to the sole coordinator atomically creating a fresh reservation immediately before launch. The replacement plus a 15% planning margin remains below the configured cumulative ceiling.",
+  "scope": "Offline audit of the failed first micro invocation, conservative charge, cleanup, remote authorization remediation, current cumulative ledger, and one replacement envelope.",
+  "gpu_or_cloud_actions_performed": false,
+  "network_actions_performed": false,
+  "reservation_created_by_auditor": false,
+  "designated_gpu_coordinator": "/root",
+  "repository_head": "1c51853e10809686d4368037153927f25e834117",
+  "first_attempt": {
+    "attempt_id": "exp004-v11-micro-s41-a",
+    "reservation_id": "exp004-v11-micro-s41-a-reservation",
+    "failure_stage": "REMOTE_AUTHORIZATION_BEFORE_MODEL_LOAD",
+    "remote_state_work_started": false,
+    "model_loaded": false,
+    "measurement_produced": false,
+    "retry_performed_by_modal": false,
+    "actual_gpu_seconds": null,
+    "actual_gpu_seconds_status": "UNAVAILABLE_AFTER_PRE_MEASUREMENT_REMOTE_FAILURE",
+    "conservatively_charged_gpu_seconds": 525.0,
+    "accounting_policy": "CHARGE_FULL_PREFLIGHT_BOUND_WITHOUT_FABRICATED_ACTUALS",
+    "conservative_charge_pass": true,
+    "failure_evidence": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/invocation-failure.json",
+      "sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+      "ledger_commitment_matches": true
+    },
+    "original_reservation_evidence": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/budget-reservation.json",
+      "sha256": "69bf075f1c9d6a58cffa8a4cf49deba1595f3e5dbab9eb3ebdf42e84670213ef",
+      "gpu_count": 1,
+      "maximum_gpu_seconds": 525.0,
+      "planning_margin_fraction": 0.15
+    }
+  },
+  "cleanup": {
+    "status": "PASS",
+    "preflight_evidence": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/preflight-cleanup.json",
+      "sha256": "6ba5bf320c5d13ff3d2dc67e79b913d9c09dee2dfe9d99d1ad562a95790f6587",
+      "clean": true
+    },
+    "postflight_evidence": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/postflight-cleanup.json",
+      "sha256": "f0e66566c3cd31ef5d5d96c87e7283e9bb86680243ebb7ea665c4573b2722f38",
+      "app_state": "stopped",
+      "tasks": 0,
+      "active_apps": 0,
+      "running_tasks": 0,
+      "running_containers": 0,
+      "active_endpoints": 0,
+      "active_reservations": 0,
+      "owned_child_processes": 0,
+      "profilers": 0,
+      "clean": true
+    },
+    "only_authorized_persistent_resources": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ]
+  },
+  "authorization": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "authorized_cumulative_a100_hours": 6.0,
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "authorized_gpu_budget_usd": 40.0,
+    "scope_includes_future_v11_micro": true,
+    "hard_ceiling_matches_current_ledger": true
+  },
+  "current_ledger": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "fa7800a901f443696d0405d32843b0114f4f2adb780e2fbf0704a09366b6d172",
+    "strict_schema_validation_pass": true,
+    "derived_consumption_validation_pass": true,
+    "consumed_additional_gpu_seconds": 13081.823626085978,
+    "consumed_additional_gpu_hours": 3.633839896134994,
+    "hard_additional_gpu_seconds": 21600.0,
+    "remaining_gpu_seconds": 8518.176373914022,
+    "remaining_gpu_hours": 2.366160103865006,
+    "active_reservations": 0,
+    "conservative_failure_charges": 1,
+    "no_duplicate_active_and_failure_charged_reservation": true
+  },
+  "remote_authorization_remediation": {
+    "status": "PASS",
+    "failure_cause": "The coordinator preflight capability existed in the local graph-hydration environment but was absent from the remote container environment.",
+    "fix": "Create an ephemeral Modal Secret from the already-present one-time coordinator token and attach that secret to the bounded remote function; retain config-hash, token-hash, exact-duration, and budget checks in the remote authorization validator.",
+    "cause_aligned": true,
+    "secret_is_runtime_injected_not_image_baked": true,
+    "remote_hash_binding_retained": true,
+    "exact_525_second_binding_retained": true,
+    "source": {
+      "path": "experiments/branchfabric/modal_gpu_reclamation_v11.py",
+      "sha256": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb"
+    },
+    "test": {
+      "path": "tests/python/test_gpu_reclamation_runtime_v11.py",
+      "sha256": "4b022507a35143def534d5c6bfe8fc8b7c7394f94c655ed8c637ad5985d0eb73",
+      "asserts_one_a100_525_seconds": true,
+      "asserts_ephemeral_secret_attachment": true
+    },
+    "limitation": "This offline audit establishes that the static remediation addresses the recorded cause; the replacement invocation is the first real remote validation of that remediation."
+  },
+  "replacement_envelope": {
+    "status": "PASS",
+    "gpu_count": 1,
+    "requested_gpu": "A100-80GB",
+    "maximum_wall_seconds": 525.0,
+    "maximum_gpu_seconds": 525.0,
+    "safety_margin_fraction": 0.15,
+    "safety_margin_gpu_seconds": 78.75,
+    "gpu_seconds_with_margin": 603.75,
+    "current_remaining_gpu_seconds": 8518.176373914022,
+    "projected_committed_gpu_seconds": 13606.823626085978,
+    "projected_committed_gpu_hours": 3.7796732294683273,
+    "projected_committed_with_margin_gpu_seconds": 13685.573626085978,
+    "projected_committed_with_margin_gpu_hours": 3.801548229468327,
+    "remaining_after_exact_reservation_gpu_seconds": 7993.176373914022,
+    "remaining_after_planning_margin_gpu_seconds": 7914.426373914022,
+    "price_usd_per_a100_hour": 2.4984,
+    "maximum_cost_usd": 0.36435000000000006,
+    "cost_with_planning_margin_usd": 0.4190025,
+    "hard_limit_passed": true,
+    "reservation_cardinality_after_coordinator_reserves": 1,
+    "authorization_condition": "The sole coordinator must re-read and strictly validate the current ledger, confirm zero active reservations and clean Modal state, create a new unique one-A100/525-second reservation atomically, and launch only that reservation."
+  },
+  "tests": {
+    "pytest": {
+      "status": "PASS",
+      "passed": 17,
+      "failed": 0,
+      "command": "PYTHONPATH=python:experiments/branchfabric:.venv/lib/python3.12/site-packages python -m pytest -q tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_gpu_reclamation_runtime_v11.py"
+    },
+    "ledger_evidence_assertions": {
+      "status": "PASS",
+      "checks": [
+        "strict ledger model validation",
+        "failure evidence SHA-256 matches ledger commitment",
+        "authorization ceiling matches ledger ceiling",
+        "micro-validation is within authorized scope",
+        "postflight app stopped and every active-resource list empty"
+      ]
+    },
+    "py_compile": {
+      "status": "PASS",
+      "command": "PYTHONPATH=python:experiments/branchfabric:.venv/lib/python3.12/site-packages python -m py_compile experiments/branchfabric/modal_gpu_reclamation_v11.py"
+    },
+    "ruff": {
+      "status": "PASS",
+      "command": ".venv/bin/ruff check experiments/branchfabric/modal_gpu_reclamation_v11.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    },
+    "ruff_format": {
+      "status": "PASS",
+      "command": ".venv/bin/ruff format --check experiments/branchfabric/modal_gpu_reclamation_v11.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_budget_ledger.py"
+    }
+  },
+  "implementation_hashes": {
+    "ledger_model": {
+      "path": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+      "sha256": "3a6217ec2b9c8ed4302a347ce5e36a0e1b1a19e8c1b1d38df6f6ea186b5507c3"
+    },
+    "budget_ledger_test": {
+      "path": "tests/python/test_gpu_reclamation_v11_budget_ledger.py",
+      "sha256": "d6380b4c1b42b8d932cae6a90f945c0c689f775ed1b034f9dcec89d6c1fce72f"
+    }
+  },
+  "fail_closed_conditions": [
+    "BUDGET_BLOCKER if the current ledger changes such that less than 603.75 GPU-seconds remain",
+    "BUDGET_BLOCKER if any active reservation exists before replacement reservation creation",
+    "BUDGET_BLOCKER if Modal cleanup is no longer clean",
+    "BUDGET_BLOCKER if the replacement requests more than one A100 or more than 525 seconds",
+    "BUDGET_BLOCKER if the paid-launch environment gate or coordinator preflight token is absent",
+    "BUDGET_BLOCKER if the reservation, config, authorization, or source commitments differ at launch"
+  ]
+}

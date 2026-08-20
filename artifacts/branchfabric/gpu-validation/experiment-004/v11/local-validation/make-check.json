@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-make-check/v1",
+  "completed_at_utc": "2026-08-18T22:42:22Z",
+  "command": "make check",
+  "status": "PASS",
+  "python": {
+    "passed": 1710,
+    "skipped": 8,
+    "note": "The locked environment lacks torch, so torch-dependent v11 tests are exercised by the separate system-PyTorch targeted suite."
+  },
+  "system_pytorch_targeted": {
+    "command": "PYTHONPATH=python python -m pytest -q tests/python/test_experiment_004_v11_analysis.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_adapter.py tests/python/test_vllm_reclamation_capture_plan.py tests/python/test_experiment_004_accounting.py",
+    "passed": 47,
+    "v11_specific": 19
+  },
+  "rust": {
+    "format": "PASS",
+    "clippy": "PASS",
+    "tests": "PASS"
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "tests_passed": 37,
+    "tests_skipped": 1,
+    "build": "PASS"
+  },
+  "gpu_used": false
+}

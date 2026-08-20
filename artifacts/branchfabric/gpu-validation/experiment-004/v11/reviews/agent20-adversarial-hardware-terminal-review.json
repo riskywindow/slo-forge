@@ -1,0 +1,236 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent20-adversarial-hardware-terminal-review/v1",
+  "agent": 20,
+  "reviewed_at_utc": "2026-08-19T05:33:02Z",
+  "status": "PASS_TERMINAL_REVIEW",
+  "terminal": true,
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "fpga_implementation_started": false,
+  "required_question": "After giving software every reasonable chance, would I independently spend engineering time investigating custom hardware for this remaining bottleneck?",
+  "answer": "NO",
+  "final_classification": "SOFTWARE_WINS",
+  "classification_strength": "CONSERVATIVE_TERMINAL_HARDWARE_CLOSURE_NOT_A_MEASURED_END_TO_END_SOFTWARE_WIN",
+  "classification_interpretation": "The mandated classification set has no INCONCLUSIVE option. SOFTWARE_WINS is selected as the least overclaiming terminal disposition because software measurably removed most of the physical pathology while the integrated run produced no state-path critical-share or Amdahl evidence. It closes the custom-hardware case under the experiment's fail-closed evidence rules; it does not assert that the strict <10% critical-path-share or <1.15x ideal-free end-to-end thresholds were measured.",
+  "measured_micro_evidence": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "hardware": "NVIDIA A100 80GB PCIe",
+    "logical_state_bytes": 1056964608,
+    "correctness": {
+      "first_resumed_token_exact_matches": 8,
+      "first_resumed_token_total": 8,
+      "minimum_continuation_tokens_per_branch": 8,
+      "allocator_epoch_pass": true,
+      "post_free_ownership_pass": true,
+      "fresh_destination_allocations_pass": true,
+      "integrity_pass": true,
+      "movement_accounting_pass": true
+    },
+    "v10_to_v11": {
+      "full_physical_amplification": {
+        "v10": 58.0,
+        "v11": 21.000762818351625,
+        "amplification_removed": 36.999237181648375,
+        "physical_bytes_removed": 39106884224,
+        "physical_bytes_reduction_percent": 63.79178824422134
+      },
+      "external_amplification": {
+        "v10": 3.0,
+        "v11": 2.000257098485553,
+        "external_bytes_removed": 1056692864,
+        "reduction_percent": 33.3247633838149
+      },
+      "avoidable_amplification": {
+        "v10": 31.0,
+        "v11": 12.000762818351625,
+        "avoidable_bytes_removed": 20081521280,
+        "reduction_percent": 61.28786187628508
+      },
+      "full_state_pass_count": {
+        "v10": 30,
+        "v11": 10,
+        "passes_removed": 20,
+        "reduction_percent": 66.66666666666666
+      },
+      "peak_host_temporary_bytes": {
+        "v10": 2965372928,
+        "v11_conservative_total": 143552512,
+        "bytes_saved": 2821820416,
+        "reduction_factor": 20.65706051873199,
+        "reduction_percent": 95.15904017857143,
+        "v11_pinned_staging_only_bytes": 58720256
+      }
+    },
+    "timings_seconds": {
+      "export_wall": 2.61309087,
+      "export_cuda_event_sum": 0.133267776,
+      "restore_wall": 4.438193614,
+      "restore_cuda_event_sum": 0.697858271,
+      "export_plus_restore_wall": 7.051284484,
+      "integrity_sha_only_aggregate": 3.505231979,
+      "synchronization_aggregate": 0.521796759,
+      "continuation_start_to_first_resumed_token": 0.083229142,
+      "continuation_start_to_complete": 0.205774608,
+      "qualification": "Single instrumented PCIe-A100 micro observation. CUDA-event, SHA, synchronization, and phase wall measurements overlap and are not additive. Frozen v10 latency used SXM4 and is not directly timing-comparable."
+    }
+  },
+  "residual_micro_chain": {
+    "export": {
+      "chain": "destination-index upload -> native index_select -> copy_repack -> D2H -> publish SHA-256",
+      "phase_wall_seconds": 2.61309087,
+      "cuda_event_sum_seconds": 0.133267776,
+      "publish_sha256_cpu_wall_seconds": 1.390905234,
+      "dominant_measured_component": "CPU publish SHA-256"
+    },
+    "restore": {
+      "chain": "preflight SHA-256 -> owned host snapshot -> consumption SHA-256 -> H2D -> destination-index upload -> native index_copy -> raw-bit validation",
+      "phase_wall_seconds": 4.438193614,
+      "cuda_event_sum_seconds": 0.697858271,
+      "sha256_cpu_wall_seconds": 2.114326745,
+      "raw_validation_cuda_seconds": 0.442472927,
+      "raw_validation_launch_wall_seconds": 0.485534818,
+      "raw_validation_fraction_of_restore_cuda_event_sum": 0.6340441109424065,
+      "software_candidate": "Fuse destination index, scatter, and raw-bit validation across larger page runs; reduce 4,480 small validation launches and synchronous scalar checks."
+    },
+    "interpretation": "Meaningful micro work remains, but it is mixed CPU hashing, data movement, and small GPU launches. The most concrete residual is still a CUDA/software fusion target. Micro-local duration does not establish its share of reclamation, useful-capacity, SLO-restoration, or rollout-interruption critical paths."
+  },
+  "integrated_attempt": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "scientifically_valid": false,
+    "terminal": true,
+    "retry_authorized": false,
+    "failure_phase": "GPU0_PRE_RECLAIM_15_RPS_OVERLOAD",
+    "failure": "bounded backlog safety abort at 65 total outstanding before reclaim trigger",
+    "reclaim_trigger_reached": false,
+    "v11_export_started": false,
+    "v11_release_started": false,
+    "v11_import_started": false,
+    "v11_state_pass_records_produced": false,
+    "integrated_state_pipeline_timing_available": false,
+    "integrated_state_pipeline_critical_share_available": false,
+    "integrated_hardware_comparability_available": false,
+    "classification_impact": "The failed serving transaction supplies no evidence that the residual state chain is important to HBM reclamation, useful GPU1 capacity, serving SLO recovery, restore interruption, or economics."
+  },
+  "branchfabric_hardware_interest_gate": {
+    "all_required": true,
+    "criteria": {
+      "strong_v11_software_optimization_measured": {
+        "value": true,
+        "evidence": "58x to 21.000762818351625x with 8/8 correctness"
+      },
+      "regular_residual_fused_chain_remains": {
+        "value": "PARTIAL_MICRO_ONLY",
+        "evidence": "A repeatable restore validation/scatter chain is visible, but no integrated execution occurred."
+      },
+      "residual_chain_at_least_15_percent_of_important_critical_path": {
+        "value": false,
+        "evidence": "No integrated v11 state path executed; important end-to-end critical-path shares are unmeasured."
+      },
+      "realistic_acceleration_at_least_1_20x_on_economic_metric": {
+        "value": false,
+        "evidence": "Coarse micro-stage Amdahl is calculable, but every integrated economic path impact is null. The coarse stages are not isolated hardware-accelerable residual chains."
+      },
+      "bandwidth_or_dataflow_dominated": {
+        "value": "NOT_ESTABLISHED",
+        "evidence": "The measured micro residual is mixed: CPU SHA-256 and many small GPU launches dominate observed components."
+      },
+      "stable_semantics": {
+        "value": "PARTIAL",
+        "evidence": "Offline production semantics and micro correctness are stable, but no integrated serving execution of the chain was observed."
+      },
+      "bytes_burst_rate_latency_target_and_concurrency_measured": {
+        "value": false,
+        "evidence": "Bytes and isolated micro latency are measured; integrated burst rate, concurrency, service target, and interference are absent."
+      },
+      "plausible_advantage_outside_normal_gpu_execution_path": {
+        "value": false,
+        "evidence": "No placement or end-to-end interference measurement demonstrates an off-GPU advantage."
+      }
+    },
+    "passed": false,
+    "hardware_interest_survives": false
+  },
+  "other_classification_dispositions": {
+    "GPU_SOFTWARE_WINS": {
+      "selected": false,
+      "reason": "The raw-validation/scatter residual naturally suggests CUDA/Triton fusion, but integrated critical share and the required <1.15x realistic external-accelerator end-to-end increment were not measured. Selecting this label would overstate the evidence."
+    },
+    "BRANCHFABRIC_HARDWARE_INTEREST": {
+      "selected": false,
+      "reason": "Forbidden by the experiment contract without measured integrated v11 timings; required critical-share, Amdahl, economics, concurrency, and placement evidence are absent."
+    },
+    "PRESERVATION_NOT_ECONOMIC": {
+      "selected": false,
+      "reason": "The kill/recompute arm did not run, so no measured recompute coefficient or preservation break-even exists."
+    }
+  },
+  "amdahl_and_economics": {
+    "residual_amdahl_status": "MICRO_ONLY_INTEGRATED_ECONOMIC_PATHS_NOT_IDENTIFIABLE",
+    "micro_full_preservation_and_continuation_seconds": 7.257059092,
+    "micro_coarse_stage_speedups": {
+      "source_export_stage": {
+        "2x": 1.219568512957368,
+        "5x": 1.4046139047666861,
+        "10x": 1.4794391091172456,
+        "free": 1.5626849162362766
+      },
+      "restore_stage": {
+        "2x": 1.4404750733460485,
+        "5x": 1.9579255003767864,
+        "10x": 2.2242599114582444,
+        "free": 2.5744609484340923
+      },
+      "all_state_pipeline": {
+        "2x": 1.9448534923135163,
+        "5x": 4.490666840618392,
+        "10x": 7.966884116824446,
+        "free": 35.26702911760626
+      }
+    },
+    "micro_amdahl_qualification": "Source, restore, and all-state stages are coarse non-overlapping measured walls, not isolated hardware-accelerable subchains. Their micro speedups cannot be relabeled as integrated or economic headroom.",
+    "integrated_path_headroom": {
+      "time_to_hbm_reclamation": null,
+      "time_to_useful_gpu1_capacity": null,
+      "time_to_serving_slo_restoration": null,
+      "rollout_restore_latency": null,
+      "full_economic_preservation_transaction": null
+    },
+    "preservation_break_even_status": "PARTIALLY_MEASURED_NOT_IDENTIFIABLE_WITHOUT_KILL_ARM",
+    "measured_preserve_state_path_seconds": 7.051284484,
+    "conditional_recompute_throughput_threshold_tokens_per_second": 18878.829850371414,
+    "conditional_threshold_assumptions": "Kill and preserve fixed overheads are equal and measured preserve time is locally constant.",
+    "measured_recompute_throughput": null,
+    "measured_kill_fixed_overhead": null,
+    "measured_break_even_surface": null,
+    "kill_recompute_result": null,
+    "economic_hardware_headroom": null,
+    "prohibition": "No null integrated impact or kill coefficient is replaced by v10 timing, micro-local fraction, or projected bandwidth."
+  },
+  "software_wins_qualification": {
+    "measured_micro_software_pathology_reduction": true,
+    "remaining_pipeline_below_10_percent_of_important_integrated_paths_measured": false,
+    "ideal_free_full_system_speedup_below_1_15x_measured": false,
+    "measured_end_to_end_software_win": false,
+    "conservative_hardware_closure": true,
+    "why_selected_anyway": "Exactly one terminal classification is mandatory and the evidence cannot support any custom-hardware, GPU-software end-to-end, or preservation-economics claim. SOFTWARE_WINS records the defensible outcome that measured software optimization survives while custom hardware does not clear its burden of proof."
+  },
+  "experiment_005": {
+    "generated": false,
+    "status": "NOT_AUTHORIZED_HARDWARE_INTEREST_DID_NOT_SURVIVE"
+  },
+  "independent_engineering_judgment": "I would not independently spend engineering time investigating custom BranchFabric hardware from this evidence. If work continued outside this terminal experiment, I would first use ordinary software engineering to batch/fuse raw validation and reduce CPU hash/launch overhead, then demand a valid integrated timing DAG before reconsidering hardware.",
+  "evidence_sha256": {
+    "micro_scientific_outcome": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+    "movement_comparison": "10e078d518cc24efa0db744e590338979104e738619c921f99fc4f6ba599f16b",
+    "cuda_performance_review": "4880be54dc65959a91ced0330d19e9148a700cbc17ac62f2ee8cf8c950aa70a3",
+    "adversarial_software_review": "ae3739962e58de4e2bcab4df2fbe5f4aab2438771461a24fe8467a40e590671c",
+    "serving_methodology_terminal_review": "75ed04d42cfde2862e778c4307f845901330f820ccf8e302111b3add307d9c32",
+    "economic_budget_cleanup_review": "d6eb0ba6b9727e73c5db980f6560b6812e410f8c409a453c6cc65eee44e6dae9",
+    "amdahl_status": "3717df54b2614120185971d9496a90a4be4f210f6acf04fb05e95cb754391ce6",
+    "break_even_model": "f1eee0e10a188095b03af0aa6ddf14a421bb491bbba8d005e46d07793640470b"
+  },
+  "final_statement": "SOFTWARE_WINS is the conservative terminal closure. Software measurably removed most of the physical amplification and preserved exact correctness; the single integrated attempt was invalid before the state path, so no custom-hardware case, end-to-end software speedup, preservation break-even, or Amdahl gain is measured. Hardware interest does not survive and Experiment 005 is not generated.",
+  "passed": true
+}

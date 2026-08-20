@@ -1,0 +1,270 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent07d-integrated-budget-seal-audit/v1",
+  "review_id": "agent07d-integrated-budget-seal-audit",
+  "agent": 7,
+  "reviewer_task_path": "/root/integrated_budget_audit",
+  "reviewed_at_utc": "2026-08-19T04:27:36Z",
+  "status": "PASS",
+  "gpu_admission": "APPROVED_EXACTLY_ONCE",
+  "recommendation": "ADMIT_EXACTLY_ONE_INTEGRATED_V11_TRANSACTION_SUBJECT_TO_ATOMIC_ROOT_COORDINATOR_RESERVATION_AND_MANDATORY_POSTFLIGHT_SETTLEMENT_CLEANUP",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "scope": [
+    "current authoritative Experiment 004 GPU-hour ledger and six-hour authorization",
+    "exact two-A100 588-second integrated-v11 reservation and 15-percent planning margin",
+    "integrated methodology, worker, controller, Modal launcher, focused tests, and full make check",
+    "offline, micro-validation, post-micro-review, budget, config, and pre-reservation-ledger commitments",
+    "prior v11 micro-attempt settlement and Modal cleanup evidence",
+    "frozen v10 runtime-path immutability"
+  ],
+  "authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "authorization_source": "explicit-user-instruction-current-thread",
+    "authorized_cumulative_a100_hours": 6.0,
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "authorized_gpu_budget_usd": 40.0,
+    "integrated_reclamation_in_scope": true
+  },
+  "authoritative_ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256_before_reservation": "be29bc61ffd9c6df62e8c0dc9236308674d0c4c0f6d40bb746202ebff272988f",
+    "schema_valid": true,
+    "settled_interval_count": 21,
+    "conservative_failure_charge_count": 1,
+    "active_reservation_count": 0,
+    "settled_raw_artifact_references_checked": 22,
+    "settled_raw_artifact_references_all_exist_and_hash_match": true,
+    "consumed_gpu_seconds": 13761.513626085978,
+    "consumed_a100_hours": 3.822642673912772,
+    "remaining_gpu_seconds": 7838.486373914022,
+    "remaining_a100_hours": 2.1773573260872284,
+    "accounted_interval_cost_usd": 9.186140456503669,
+    "conservative_failure_cost_usd": 0.36435000000000006,
+    "total_conservative_accounted_cost_usd": 9.550490456503669
+  },
+  "planned_invocation": {
+    "attempt_id": "exp004-v11-integrated-s41-a",
+    "designated_gpu_coordinator": "/root",
+    "requested_gpu": "A100-80GB",
+    "gpu_count": 2,
+    "predicted_and_maximum_wall_seconds": 588.0,
+    "predicted_gpu_seconds": 1176.0,
+    "planning_margin_fraction": 0.15,
+    "projected_gpu_seconds_with_margin": 1352.4,
+    "projected_cumulative_without_margin_gpu_seconds": 14937.513626085978,
+    "projected_cumulative_with_margin_gpu_seconds": 15113.913626085978,
+    "remaining_after_exact_reservation_gpu_seconds": 6662.486373914022,
+    "remaining_after_margin_gpu_seconds": 6486.086373914022,
+    "hard_ceiling_pass_without_margin": true,
+    "hard_ceiling_pass_with_margin": true,
+    "gpu_price_per_hour_usd": 2.4984,
+    "exact_reservation_cost_usd": 0.8161440000000001,
+    "planning_margin_cost_usd": 0.9385656,
+    "authorization_cost_pass": true,
+    "adaptive_priority": "one integrated v11 transaction only; no broad recalibration"
+  },
+  "sealed_config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/config.json",
+    "file_sha256": "67a6c1bf3f5928e077b9f347e82fe710ff759b607a2b5dd41d6aea6a74c6b4c1",
+    "canonical_sha256": "88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b",
+    "ledger_sha256_before_reservation": "be29bc61ffd9c6df62e8c0dc9236308674d0c4c0f6d40bb746202ebff272988f",
+    "ledger_commitment_matches_current_raw_file": true,
+    "seed": 41,
+    "gpu_count": 2,
+    "maximum_wall_seconds": 588.0,
+    "prefix_tokens": 16384,
+    "fanout": 8,
+    "private_suffix_tokens": 256,
+    "total_blocks": 1152,
+    "lambda_1_rps": 12.0,
+    "lambda_spike_rps": 15.0,
+    "lambda_2_rps": 20.0,
+    "controller_sealed_evidence_verifier": "PASS",
+    "controller_integrated_prelaunch_labels": [
+      "controller",
+      "controller_test",
+      "cross_runtime_review",
+      "launcher",
+      "launcher_test",
+      "make_check",
+      "methodology",
+      "worker",
+      "worker_test"
+    ]
+  },
+  "sealed_prerequisites": {
+    "offline_attempt_d": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest-attempt-d.json",
+      "sha256": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a",
+      "four_production_gates_pass": true
+    },
+    "micro_attempt_d": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+      "status": "MICRO_VALIDATION_PASS",
+      "integrated_v11_allowed": true
+    },
+    "post_micro_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+      "sha256": "e7b48588923919928e5b2178b93ea1f55e6e94f233609e6fec564b5156b82d67",
+      "status": "PASS",
+      "integrated_v11_admission": "APPROVED_EXACTLY_ONCE",
+      "integrated_prelaunch_status": "PASS",
+      "all_nine_prelaunch_bindings_hash_match": true
+    },
+    "cross_runtime_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-integrated-cross-runtime-audit.json",
+      "sha256": "308e8cd973a6994bf0403eb1a08909ab72cd8eff1f300dd918bd9b42305eb23e",
+      "status": "PASS"
+    },
+    "fresh_make_check": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-integrated-prelaunch.json",
+      "sha256": "5fb9cab71a4b1c6f0f267febb8dbb6dae4a059162c2ee27a7f1224ae41202ee7",
+      "status": "PASS",
+      "python_tests_passed": 1842,
+      "python_tests_skipped": 8,
+      "python_tests_failed": 0,
+      "rust_pass": true,
+      "ui_tests_passed": 37,
+      "ui_tests_skipped": 1,
+      "ui_pass": true,
+      "gpu_or_modal_used": false
+    }
+  },
+  "reviewed_sources": {
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+    },
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "745adf4d9bc2c9b69e4e389fc0a309d511d8f89486a167a31fa7e94f353976f9"
+    },
+    "controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "36c1f95b33ccdba3a2a14a18de3379e73ffee25a181a5ea2762803c102f5f8a7"
+    },
+    "modal_launcher": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "ae0071f12e2a4b26b7ed08a556cc7c4689d42059881b12f4c3f80e1d6e19894f"
+    }
+  },
+  "offline_validation": {
+    "focused_tests_passed": 84,
+    "focused_tests_failed": 0,
+    "ruff_check": "PASS",
+    "local_modal_sdk_version": "1.5.3",
+    "required_modal_sdk_version": "1.5.3",
+    "modal_sdk_version_pass": true
+  },
+  "modal_graph": {
+    "gpu_request": "A100-80GB:2",
+    "maximum_function_seconds": 588,
+    "maximum_gpu_seconds": 1176,
+    "retries": 0,
+    "maximum_containers": 1,
+    "buffer_containers": 0,
+    "single_use_containers": true,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ],
+    "volumes_create_if_missing": false,
+    "endpoint_defined": false,
+    "local_budget_env_required": true,
+    "local_reservation_id_required": true,
+    "one_time_preflight_token_required": true,
+    "remote_authorization_binds_config_token_reservation_and_1176_gpu_seconds": true
+  },
+  "fresh_provider_preflight": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/preflight-cleanup.json",
+    "sha256": "e1fad3fdbdeb5c687637a42448f4a45eca7a68a1780829299cc76b1060a349c8",
+    "status": "PASS",
+    "observed_at_utc": "2026-08-19T04:27:51Z",
+    "modal_sdk_version": "1.5.3",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "other_persistent_resources": []
+  },
+  "prior_v11_attempts": [
+    {
+      "attempt_id": "exp004-v11-micro-s41-a",
+      "accounting": "CONSERVATIVE_FULL_RESERVATION_CHARGE",
+      "gpu_seconds": 525.0,
+      "scientific_status": "NULL_BEFORE_MODEL_LOAD",
+      "cleanup_artifact_sha256": "f0e66566c3cd31ef5d5d96c87e7283e9bb86680243ebb7ea665c4573b2722f38",
+      "cleanup_pass": true
+    },
+    {
+      "attempt_id": "exp004-v11-micro-s41-b",
+      "accounting": "SETTLED",
+      "gpu_seconds": 155.17,
+      "scientific_status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT",
+      "cleanup_artifact_sha256": "4bf07f34e857ddc2642ef6bc1df3f7e2e733041d30445f9c518bf6f2892d9138",
+      "cleanup_pass": true
+    },
+    {
+      "attempt_id": "exp004-v11-micro-s41-c",
+      "accounting": "SETTLED",
+      "gpu_seconds": 261.63,
+      "scientific_status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT",
+      "cleanup_artifact_sha256": "b162ab290cca53ab115d8bb01ba557b1f733e2fd4017a78c4d038ae7439677d6",
+      "cleanup_pass": true
+    },
+    {
+      "attempt_id": "exp004-v11-micro-s41-d",
+      "accounting": "SETTLED",
+      "gpu_seconds": 262.89,
+      "scientific_status": "MICRO_VALIDATION_PASS",
+      "cleanup_artifact_sha256": "205713205b0f387ae7c7d913f1a10d7fd24c927207e21295aec34d48065026f6",
+      "cleanup_pass": true
+    }
+  ],
+  "cleanup_history": {
+    "micro_attempts_checked": 4,
+    "all_cleanup_pass": true,
+    "all_observed_active_apps_zero": true,
+    "all_observed_running_tasks_zero": true,
+    "all_observed_running_containers_zero": true,
+    "all_observed_endpoints_zero": true,
+    "all_observed_reservations_zero": true,
+    "all_observed_owned_child_processes_zero": true,
+    "all_observed_profilers_zero": true,
+    "only_authorized_persistent_resources": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ]
+  },
+  "frozen_v10": {
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "tag_dereferenced_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "checked_runtime_file_count": 7,
+    "all_checked_runtime_git_blobs_identical_to_tag": true,
+    "frozen_adapter_sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+    "v10_modified_by_integrated_v11_work": false
+  },
+  "mandatory_launch_and_postflight_conditions": [
+    "The root coordinator must atomically reserve exactly two A100-80GB GPUs for 588 seconds against config canonical SHA-256 88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b.",
+    "The reservation validator must reconstruct raw pre-reservation ledger SHA-256 be29bc61ffd9c6df62e8c0dc9236308674d0c4c0f6d40bb746202ebff272988f.",
+    "SLOFORGE_GPU_BUDGET_USD must be finite, positive, and no greater than the authorized 40 USD; the approved launch should use the explicit 40 USD authorization.",
+    "SLOFORGE_EXP004_RESERVATION_ID and the one-time 64-hex preflight token must be supplied only by the designated root GPU coordinator.",
+    "Any 12-rps or 15-rps sanity-guard contradiction, scientific-gate failure, hardware mismatch, timeout, or cleanup failure must fail closed.",
+    "After function return, settle the reservation using the conservative maximum observed allocation duration and record the immutable remote manifest.",
+    "After settlement, independently verify zero active Modal apps, tasks, containers, endpoints, reservations, owned child processes, and profilers before any later GPU arm."
+  ],
+  "residual_findings": [],
+  "passed": true
+}

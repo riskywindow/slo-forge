@@ -1,0 +1,95 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-agent02-ownership-refcount-audit/v1",
+  "reviewer": "agent02-ownership-refcount-audit",
+  "review_date": "2026-08-18",
+  "scope": "Independent offline pre-GPU audit of Gate B post-free ownership and refcount proof",
+  "result": "PASS",
+  "gpu_or_modal_used": false,
+  "network_used": false,
+  "source_code_modified_by_reviewer": false,
+  "reviewed_revision": {
+    "working_tree_head": "1c51853e10809686d4368037153927f25e834117",
+    "frozen_v10_execution_tag_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "files": {
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+      "tests/python/test_vllm_reclamation_v11_ownership.py": "2e45a183923de79acf198db5f7ed153712ef9bf268ba23f4e308143ff32efe84",
+      "python/sloforge/continuum/adapters/vllm_live.py": "149d423303dc91201826902bb406c5c6de88aed043933a23e28a4f39fed3b2f0",
+      "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "14e819a5cf3ebd5f73ad2a1b9ab6b975508b6b549422d0568cee1d5dd7a8a497",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "095384e5d892d6a1899a9dc1ddc9e2c2bea9d3dbcc3d8c87176c381aab2afbd0"
+    }
+  },
+  "requirement_results": {
+    "exact_source_block_coverage": "PASS",
+    "per_block_runtime_id": "PASS",
+    "per_block_allocator_epoch": "PASS",
+    "per_block_pre_release_logical_and_runtime_owner": "PASS",
+    "per_block_pre_release_native_refcount": "PASS",
+    "real_abort_free_prefix_cache_release_path": "PASS",
+    "per_block_post_release_native_refcount": "PASS",
+    "per_block_allocator_availability": "PASS",
+    "root_reference_absence": "PASS",
+    "old_scheduler_request_absence": "PASS",
+    "old_adapter_layout_empty": "PASS",
+    "global_live_scheduler_block_referrer_absence": "PASS",
+    "old_native_manager_block_table_absence": "PASS",
+    "allocator_epoch_tombstones": "PASS",
+    "allocator_visible_hbm_pool_accounting_agreement": "PASS",
+    "no_stale_ownership_or_global_native_table_survives": "PASS",
+    "fail_closed_against_detached_native_table": "PASS",
+    "production_engine_step_gate_binding": "PASS"
+  },
+  "resolved_findings": [
+    {
+      "id": "B-01",
+      "original_severity": "BLOCKING",
+      "title": "Detached KVCacheManager request-to-block tables could survive while Gate B reported PASS",
+      "resolution": "The proof now reads the exact vLLM 0.23 SingleTypeKVCacheManager.req_to_blocks key set through KVCacheManager.coordinator. Capture requires every declared source runtime ID in that native ownership map. Post-release requires every old runtime ID absent, exposes the result on the transaction proof and each block transition, and includes it in both passed predicates.",
+      "adversarial_rerun": {
+        "rejected": true,
+        "error": "v11 source release failed the post-free ownership gate",
+        "deliberately_surviving_manager_tables": [
+          "branch.0",
+          "branch.1"
+        ]
+      },
+      "status": "RESOLVED"
+    }
+  ],
+  "blocking_findings": [],
+  "offline_validation": [
+    {
+      "command": "uv run --locked pytest -q tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11_ownership.py",
+      "result": "22 passed in 0.79s",
+      "assessment": "PASS"
+    },
+    {
+      "command": "uv run --locked ruff check python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_ownership.py",
+      "result": "All checks passed",
+      "assessment": "PASS"
+    },
+    {
+      "command": "uv run --locked python -m py_compile python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py python/sloforge/continuum/adapters/vllm_allocator_epochs.py python/sloforge/continuum/adapters/vllm_live.py",
+      "result": "PASS",
+      "assessment": "PASS"
+    },
+    {
+      "command": "agent02 detached-manager-table adversarial reproducer rerun",
+      "result": "V11OwnershipProofError with both deliberately stale native tables still present",
+      "assessment": "PASS"
+    }
+  ],
+  "evidence": [
+    "The boundary rejects adapter proxies by exact VllmLiveStateAdapter type and verifies the pinned vLLM 0.23.0 view.",
+    "Capture and release require a currently held EXPORT_CAPTURE witness bound to the exact scheduler and KV manager.",
+    "The pre-release proof cross-checks logical owners, runtime owners, native refcounts, exact physical block coverage, allocator-issued epochs, KV pool byte accounting, and native req_to_blocks membership.",
+    "Release invokes the adapter's real destroy_branch/destroy_session paths, which bind to LLMEngine.abort_request, KVCacheManager.free, and reset_prefix_cache.",
+    "The post-release proof checks native refcount zero, allocator availability, hash absence, allocator epoch tombstones, root-reference absence, scheduler referrer absence, exact native request-table absence, full free pool, and allocator-visible KV byte reclamation.",
+    "The expected_source_block_count and expected_allocation_epochs interfaces require exact count and identity coverage, so the production run must provide all 1152 source blocks rather than a sampled subset."
+  ],
+  "limitations": [
+    "This is an offline structural and adversarial review; no A100 allocation was made.",
+    "The local fixture validates the count-generic per-block algorithm on three blocks. Exact 1152-block runtime records remain a mandatory output of the real-A100 micro-validation."
+  ],
+  "pre_gpu_decision": "APPROVE_GATE_B",
+  "re_review_required": false
+}

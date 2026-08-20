@@ -1,0 +1,82 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-make-check-evidence/v1",
+  "status": "PASS",
+  "completed_at_utc": "2026-08-19T02:07:40Z",
+  "command": "make check",
+  "working_directory": "/Users/rishivinodkumar/sloforge",
+  "python": {
+    "ruff_format": "PASS",
+    "ruff_check": "PASS",
+    "mypy": "PASS_484_SOURCE_FILES",
+    "pytest": "PASS_1777",
+    "pytest_skipped_optional_dependencies": 8,
+    "pytest_warnings": 6
+  },
+  "rust": {
+    "cargo_fmt": "PASS",
+    "cargo_clippy_all_targets_all_features": "PASS",
+    "cargo_test_workspace_all_features": "PASS",
+    "doc_tests": "PASS"
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitest": "PASS_37",
+    "vitest_skipped": 1,
+    "build": "PASS"
+  },
+  "focused_v11_system_torch": {
+    "status": "PASS",
+    "tests_passed": 93,
+    "torch_version": "2.10.0",
+    "note": "The locked general development environment excludes optional PyTorch; the focused v11 suites were separately executed with the installed local CPU PyTorch runtime."
+  },
+  "replacement_attempt_remediation": {
+    "reason": "The first bounded remote call rejected a missing coordinator token before model load.",
+    "change": "Forward the already validated coordinator token through an ephemeral Modal Secret to the remote function.",
+    "targeted_tests": "PASS_27",
+    "py_compile": "PASS",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "full_make_check_after_change": "PASS"
+  },
+  "attempt_b_runtime_remediation": {
+    "reason": "The first real-state run failed closed because source allocation zero-queue notifications remained at restore preflight.",
+    "change": "After ownership snapshot and completed capture, consume exactly the 1,152 authenticated source block IDs under the sealed production EXPORT_CAPTURE binding; preserve the unchanged fresh-destination queue checks.",
+    "focused_tests": "PASS_80",
+    "post_fix_engine_sync_review": "PASS",
+    "post_fix_integrity_review": "PASS",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "full_make_check_after_change": "PASS"
+  },
+  "attempt_c_runtime_remediation": {
+    "reason": "The real restore emitted 4,080 first-subset plus 4,048 remaining-subset CUDA passes and exhausted the recorder's 4,096 unresolved-event bound before final resolution.",
+    "change": "Incrementally materialize completed CUDA-event records within a 3,840 normal lane, retain a nonborrowable 256-pass diagnostic scrub lane, bind restore subsets to exact preflight pass IDs by logical page, and assign one authoritative failure-scrub owner.",
+    "pending_cuda_event_bound": 4096,
+    "normal_pending_cuda_event_bound": 3840,
+    "diagnostic_emergency_reserve": 256,
+    "total_state_pass_bound": 65536,
+    "focused_tests": "PASS_93",
+    "post_fix_engine_sync_review": "PASS",
+    "post_fix_integrity_review": "PASS",
+    "post_fix_cuda_accounting_review": "PASS",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "full_make_check_after_change": "PASS"
+  },
+  "environment_recovery": {
+    "initial_failure_class": "ENOSPC_IN_PYTEST_TEMP_DIRECTORY",
+    "source_or_test_failure": false,
+    "recoverable_caches_removed": [
+      "/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/pytest-of-rishivinodkumar/pytest-11",
+      "/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/pytest-of-rishivinodkumar/pytest-12",
+      "/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/pytest-of-rishivinodkumar/pytest-13",
+      "/private/var/folders/6p/mx_9010d5t72qm6b08mznnq80000gn/T/pytest-of-rishivinodkumar/pytest-14",
+      "/Users/rishivinodkumar/sloforge/.mypy_cache"
+    ],
+    "rerun_from_clean_temp_root": "PASS"
+  },
+  "gpu_invoked": false,
+  "modal_invoked": false
+}

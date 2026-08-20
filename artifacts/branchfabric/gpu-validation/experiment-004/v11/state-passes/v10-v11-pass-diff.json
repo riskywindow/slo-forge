@@ -1,0 +1,96 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-v11-pass-diff/v1",
+  "status": "V10_V11_MEASURED",
+  "logical_state_bytes": 1056964608,
+  "v10": {
+    "full_physical_bytes": 61303947264,
+    "full_physical_amplification": 58.0,
+    "full_state_pass_count": 30,
+    "raw_segment_record_count": 270
+  },
+  "v11": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "full_state_pass_count": 10,
+    "raw_state_pass_record_count": 10454
+  },
+  "reduction": {
+    "physical_bytes_removed": 39106884224,
+    "physical_amplification_removed": 36.999237181648375,
+    "physical_bytes_reduction_percent": 63.79181449900818,
+    "full_state_passes_removed": 20,
+    "full_state_pass_count_reduction_percent": 66.66666666666667
+  },
+  "chain_reductions": [
+    {
+      "chain": "capture/publish",
+      "v10_measured_bytes": 22196256768,
+      "v10_measured_amplification": 21.0,
+      "v11_measured_bytes": 9512709120,
+      "v11_measured_amplification": 9.000026157924108,
+      "bytes_removed": 12683547648,
+      "amplification_removed": 11.999973842075892,
+      "reduction_percent": 57.14273258131377
+    },
+    {
+      "chain": "restore/native-write excluding destination raw-bit validation",
+      "v10_measured_bytes": 21139292160,
+      "v10_measured_amplification": 20.0,
+      "v11_measured_bytes": 10570424704,
+      "v11_measured_amplification": 10.000736660427517,
+      "bytes_removed": 10568867456,
+      "amplification_removed": 9.999263339572483,
+      "reduction_percent": 49.99631669786242
+    },
+    {
+      "chain": "destination validation",
+      "v10_measured_bytes": 17968398336,
+      "v10_measured_amplification": 17.0,
+      "v11_measured_bytes": 2113929216,
+      "v11_measured_amplification": 2.0,
+      "bytes_removed": 15854469120,
+      "amplification_removed": 15.0,
+      "reduction_percent": 88.23529411764706
+    }
+  ],
+  "v10_pass_dispositions": [
+    {"v10_pass": "capture-source-native-read:read", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "capture:index_select bounded native-page gather"},
+    {"v10_pass": "capture-native-axis-contiguous:repack", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "capture:index_select plus bounded copy_repack"},
+    {"v10_pass": "capture-unpage-valid-tokens:unpage", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "capture:copy_repack"},
+    {"v10_pass": "capture-stack-layers:repack", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "capture:copy_repack"},
+    {"v10_pass": "capture-concatenate-pages:transform", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "capture:copy_repack"},
+    {"v10_pass": "capture-d2h:d2h", "v10_physical_bytes": 3170893824, "disposition": "retained", "v11_mapping": "capture:d2h bounded chunks"},
+    {"v10_pass": "capture-pinned-transport-lifetime:allocate", "v10_physical_bytes": 0, "disposition": "replaced", "v11_mapping": "two bounded pinned slots; temporary allocation is not a state pass"},
+    {"v10_pass": "capture-integrity-manifest:checksum", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "capture:sha256_whole_and_pages"},
+    {"v10_pass": "capture-integrity-hash-reads:checksum", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "capture:sha256_whole_and_pages"},
+    {"v10_pass": "transport-publish-validation:validate", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "manifest commitment reused without full payload validation pass"},
+    {"v10_pass": "transport-publish-hash-reads:validate", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "manifest commitment reused without a second full hash-read family"},
+    {"v10_pass": "restore-transport-validation:validate", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "restore:sha256_whole_and_pages preflight"},
+    {"v10_pass": "restore-transport-hash-reads:validate", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "restore:sha256_whole_and_pages preflight"},
+    {"v10_pass": "restore-h2d:h2d", "v10_physical_bytes": 3170893824, "disposition": "retained", "v11_mapping": "restore:h2d bounded authenticated chunks"},
+    {"v10_pass": "restore-import-validation:validate", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "restore:owned_snapshot plus sha256_pages consumption authentication"},
+    {"v10_pass": "restore-import-hash-reads:validate", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "restore:sha256_pages consumption authentication"},
+    {"v10_pass": "restore-native-axis-contiguous:repack", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "direct scatter accepts bounded canonical chunks"},
+    {"v10_pass": "restore-zero-native-pages:allocate", "v10_physical_bytes": 1056964608, "disposition": "removed", "v11_mapping": "all pages are full; exact partial-tail proof eliminates full-page zero fill"},
+    {"v10_pass": "restore-overlay-valid-tokens:unpack", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "restore:index_copy direct native scatter"},
+    {"v10_pass": "restore-stack-native-pages:repage", "v10_physical_bytes": 2113929216, "disposition": "fused", "v11_mapping": "restore:index_copy direct native scatter"},
+    {"v10_pass": "restore-destination-native-write:write", "v10_physical_bytes": 2113929216, "disposition": "retained", "v11_mapping": "restore:index_copy direct native scatter"},
+    {"v10_pass": "validation-destination-native-read:read", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "restore:raw_bit_equal bounded native and expected views"},
+    {"v10_pass": "validation-native-axis-contiguous:repack", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "bounded raw-bit validation needs no full canonical recapture"},
+    {"v10_pass": "validation-unpage-valid-tokens:unpage", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "bounded raw-bit validation needs no full canonical recapture"},
+    {"v10_pass": "validation-stack-layers:repack", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "bounded raw-bit validation needs no full canonical recapture"},
+    {"v10_pass": "validation-concatenate-pages:transform", "v10_physical_bytes": 2113929216, "disposition": "removed", "v11_mapping": "bounded raw-bit validation needs no full canonical recapture"},
+    {"v10_pass": "validation-d2h:d2h", "v10_physical_bytes": 3170893824, "disposition": "removed", "v11_mapping": "no destination D2H recapture"},
+    {"v10_pass": "validation-recapture-host-lifetime:allocate", "v10_physical_bytes": 0, "disposition": "removed", "v11_mapping": "no destination host recapture allocation"},
+    {"v10_pass": "validation-expected-page-concatenation:repack", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "restore:raw_bit_equal bounded expected view"},
+    {"v10_pass": "validation-host-tensor-compare:validate", "v10_physical_bytes": 2113929216, "disposition": "replaced", "v11_mapping": "restore:raw_bit_equal on device"}
+  ],
+  "source_records": {
+    "v10": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/movement-accounting.json",
+    "v11": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "v11_sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "v11_selector": "$.state_passes[*]"
+  },
+  "accounting_note": "D2H and H2D pass contributions include source read, destination write, and external link payload. Fused v11 families are attributed only at chain level to avoid double-counting many-to-one replacements."
+}

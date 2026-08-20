@@ -1,0 +1,60 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-early-trigger/v1",
+  "generated_at_utc": "2026-08-20T02:26:51Z",
+  "status": "PASS",
+  "scope": "offline-only",
+  "gpu_or_cloud_invoked": false,
+  "normal_trigger": {
+    "outstanding_requests": 20,
+    "confirmation_window_seconds": 0.25,
+    "requires_positive_queue_slope": true,
+    "requires_offered_rate_above_completed_rate": true,
+    "eligible_depths": "20..63",
+    "single_use_emission": true,
+    "independent_monitor_survives_blocked_engine_step": true
+  },
+  "emergency_abort": {
+    "outstanding_requests": 64,
+    "comparison": ">=",
+    "independent_before_and_after_normal_trigger": true,
+    "ceiling_raised": false
+  },
+  "instrumented_events": [
+    "OVERLOAD_DETECTED",
+    "TRIGGER_PREDICATE_SATISFIED",
+    "RECLAIM_TRIGGER_EMITTED",
+    "ROLLOUT_ADMISSION_STOP",
+    "STATE_QUIESCENCE"
+  ],
+  "frozen_v10": {
+    "source_modified": false,
+    "source_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "tag_source_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "byte_identical_to_tag": true
+  },
+  "files": [
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+      "sha256": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "432f0906ced864e10e7be7552c02b5efb9d4b0dd4d358a5ce7788ea0a210d1ca"
+    },
+    {
+      "path": "tests/python/test_gpu_reclamation_integrated_trigger_v11.py",
+      "sha256": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d"
+    },
+    {
+      "path": "tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "5292a705779b6ccd5daec3e4b2743daad167e21e64a553c484f40d6c0e6deae9"
+    }
+  ],
+  "verification": {
+    "command": "uv run --locked pytest -q tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_experiment_004_v10_serving_protocol.py",
+    "result": "45 passed in 5.67s",
+    "exit_code": 0,
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS"
+  }
+}

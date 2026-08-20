@@ -1,0 +1,82 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-independent-review/v1",
+  "agent": 3,
+  "review": "production_engine_step_synchronization",
+  "reviewed_at_utc": "2026-08-19T00:34:57Z",
+  "status": "PASS",
+  "terminal_reason": "production_binding_and_runtime_callsites_fail_closed",
+  "gpu_invoked": false,
+  "modal_invoked": false,
+  "network_invoked": false,
+  "v10_modified": false,
+  "implementation_assessment": {
+    "exact_runtime_version_enforced": true,
+    "v1_inproc_object_graph_enforced": true,
+    "async_scheduling_rejected": true,
+    "bounded_reentrant_lock": true,
+    "lock_installed_on_production_mutation_instances": true,
+    "synthetic_boolean_probe_accepted": false,
+    "wrapper_displacement_rejected": true,
+    "stale_or_foreign_witness_rejected": true,
+    "export_cuda_requires_capture_witness": true,
+    "import_cuda_requires_admission_witness": true,
+    "admission_visibility_order_fail_closed": true
+  },
+  "race_surface_coverage": {
+    "kv_block_mutation": true,
+    "scheduler_reassignment": true,
+    "branch_append_or_admission": true,
+    "block_table_allocation_or_free": true,
+    "cache_publication": true,
+    "waiting_queue_mutation": true
+  },
+  "production_integration": {
+    "worker": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+    "binding_constructed_from_live_adapter_view": true,
+    "binding_constructed_before_rollout_state": true,
+    "export_capture_critical_section_lines": [498, 544],
+    "import_admission_critical_section_lines": [561, 617],
+    "export_scope": [
+      "live runtime capture inputs",
+      "pre-release ownership and allocator proof",
+      "optimized capture and completion fence",
+      "source release and post-free proof"
+    ],
+    "import_scope": [
+      "transport authentication",
+      "fresh request creation and detachment",
+      "complete block-table allocation",
+      "allocator epoch proof",
+      "native write and completion fence",
+      "raw-bit tail and mapping validation",
+      "single-use epoch consumption",
+      "serial scheduler enqueue"
+    ],
+    "callbacks_close_over_exact_import_witness": true,
+    "gate_loss_cleanup_or_typed_teardown": true,
+    "binding_evidence_required_by_micro_result": true,
+    "gate_passed": true
+  },
+  "offline_tests": {
+    "command": "PYTHONPATH=python python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_ownership.py",
+    "passed": 45,
+    "failed": 0,
+    "elapsed_seconds": 1.17,
+    "ruff_lint": "PASS",
+    "ruff_format": "PASS"
+  },
+  "hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "095384e5d892d6a1899a9dc1ddc9e2c2bea9d3dbcc3d8c87176c381aab2afbd0",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "f234ff79e9f3aacd3e0960ffb8838b61d4987ad4609615f6879cdc57074d490c",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "35daa70da4006bcd5cf412d870eb30bc0b921b0d0715b15dd2c44b8d3faf5ebc",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b",
+    "tests/python/test_vllm_reclamation_v11_ownership.py": "2e45a183923de79acf198db5f7ed153712ef9bf268ba23f4e308143ff32efe84"
+  },
+  "deferred_real_runtime_assertion": "binding.evidence().passed must be true in A100 micro-validation",
+  "repository": {
+    "head": "1c51853e10809686d4368037153927f25e834117",
+    "frozen_v10_execution": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39"
+  }
+}

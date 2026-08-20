@@ -55,6 +55,9 @@ from sloforge.continuum.adapters.sdk import (
     SnapshotConsistencyError,
     UnsupportedCapabilityError,
 )
+from sloforge.continuum.adapters.vllm_allocator_epochs import (
+    install_vllm_allocator_epoch_source,
+)
 from sloforge.continuum.adapters.vllm_live_trace import VllmLiveTraceRecorder
 from sloforge.continuum.adapters.vllm_metadata_0230 import (
     MetadataInstrumentationLevel,
@@ -540,6 +543,10 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
         self._released_experiment_block_ids: set[str] = set()
         self._observer = _ObserverState()
         self._closed = False
+        # The source is attached to the live KVCacheManager. Generations are
+        # issued only while its real allocate_slots interception is unwinding;
+        # Continuum import callers have no API for choosing an epoch.
+        self._allocator_epoch_source = install_vllm_allocator_epoch_source(self._view.manager)
         self._original_allocate_slots = self._view.manager.allocate_slots
         self._original_free = self._view.manager.free
         self._install_observers()
@@ -805,9 +812,18 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
                             and block.block_id not in observed_new_ids
                         ):
                             observed_new_ids.append(block.block_id)
-                for block_id in observed_new_ids:
-                    self._observer.allocation_epoch += 1
-                    self._observer.block_epochs[block_id] = self._observer.allocation_epoch
+                issued = self._allocator_epoch_source.issue_from_runtime_allocation(
+                    request,
+                    previous_block_ids=tuple(previous_ids),
+                    cached_block_ids=tuple(cached_id_set),
+                    allocator_returned_block_ids=tuple(observed_new_ids),
+                )
+                for record in issued:
+                    self._observer.allocation_epoch = max(
+                        self._observer.allocation_epoch,
+                        record.allocation_epoch,
+                    )
+                    self._observer.block_epochs[record.block_id] = record.allocation_epoch
                 self._observer.last_request_blocks[request_id] = tuple(
                     tuple(block.block_id for block in group) for group in groups
                 )
@@ -823,7 +839,16 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
             self._observer.released_request_blocks[request_id] = tuple(
                 tuple(block.block_id for block in group) for group in groups
             )
+            released = tuple(
+                block_id
+                for group in self._observer.released_request_blocks[request_id]
+                for block_id in group
+            )
             self._original_free(request)
+            self._allocator_epoch_source.observe_runtime_free(
+                request,
+                released_block_ids=released,
+            )
 
         self._view.manager.allocate_slots = observed_allocate
         self._view.manager.free = observed_free
@@ -2334,12 +2359,14 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
         root_block_ids = tuple(
             block_id for root_id in roots for block_id in self._roots[root_id].block_ids
         )
-        if roots and not self._view.manager.reset_prefix_cache():
-            raise SnapshotConsistencyError(
-                "vLLM refused final shared-root cache release",
-                operation="destroy_session",
-                session_id=session_id,
-            )
+        if roots:
+            if not self._view.manager.reset_prefix_cache():
+                raise SnapshotConsistencyError(
+                    "vLLM refused final shared-root cache release",
+                    operation="destroy_session",
+                    session_id=session_id,
+                )
+            self._allocator_epoch_source.observe_prefix_cache_reset()
         release_evidence = None
         release_ids = tuple(sorted(set(root_block_ids) | self._released_experiment_block_ids))
         if roots and release_ids:
@@ -2423,6 +2450,8 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
         try:
             if not self._view.manager.reset_prefix_cache():
                 failures.append(RuntimeError("vLLM refused prefix-cache cleanup"))
+            else:
+                self._allocator_epoch_source.observe_prefix_cache_reset()
         except BaseException as error:
             failures.append(error)
         try:
@@ -2447,6 +2476,7 @@ class VllmLiveStateAdapter(RealRuntimeStateAdapter):
         # so a subsequent comparison engine cannot inherit HBM from this one.
         del self._original_allocate_slots
         del self._original_free
+        del self._allocator_epoch_source
         del self._engine
         del self._view
         _check_deadline(deadline, "cleanup_runtime")

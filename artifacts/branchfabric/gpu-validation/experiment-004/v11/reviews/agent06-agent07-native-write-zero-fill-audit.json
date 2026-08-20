@@ -1,0 +1,306 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-native-write-zero-fill-review/v1",
+  "reviewed_at_utc": "2026-08-18T21:58:27Z",
+  "reviewer_roles": [
+    "zero-fill-and-tenant-isolation",
+    "vllm-0.23-native-page-write"
+  ],
+  "scope": "Offline inspection of the proposed v11 direct scatter against the frozen vLLM 0.23 adapter, restore stager, live-runtime observer, worker integration, raw v10 evidence, and local tests.",
+  "gpu_or_remote_compute_used": false,
+  "source_implementation_modified": false,
+  "result": "PASS_WITH_REQUIRED_V11_CORRECTIONS",
+  "gpu_launch_approval": false,
+  "implementation_status": "No separate v11 direct-scatter implementation was present at review time; this artifact is a pre-implementation safety contract, not evidence that the contract has passed.",
+  "evidence": {
+    "frozen_attempt": "exp004-v10-naive-s41-v7",
+    "runtime": "vllm==0.23.0",
+    "adapter": "python/sloforge/continuum/adapters/vllm_reclamation.py",
+    "live_runtime_observer": "python/sloforge/continuum/adapters/vllm_live.py",
+    "worker": "experiments/branchfabric/gpu_reclamation_worker.py",
+    "adapter_tests": "tests/python/test_vllm_reclamation_adapter.py",
+    "raw_rollout": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/result.json",
+    "measured_geometry": {
+      "block_size_tokens": 16,
+      "logical_pages": 1152,
+      "destination_pages": 1152,
+      "logical_state_bytes": 1056964608,
+      "physical_source_bytes": 1056964608,
+      "valid_token_extents_seen": [
+        16
+      ],
+      "all_measured_pages_full": true,
+      "page_bytes": 917504,
+      "padding_bytes": 0
+    }
+  },
+  "source_locations": {
+    "geometry_and_native_validation": "python/sloforge/continuum/adapters/vllm_reclamation.py:247,573",
+    "naive_restore_materialization": "python/sloforge/continuum/adapters/vllm_reclamation.py:777",
+    "native_index_copy": "python/sloforge/continuum/adapters/vllm_reclamation.py:833",
+    "restore_stager": "python/sloforge/continuum/adapters/vllm_reclamation.py:1036",
+    "allocation_zero_queue_checks": "python/sloforge/continuum/adapters/vllm_reclamation.py:1092",
+    "early_prefix_publication": "python/sloforge/continuum/adapters/vllm_reclamation.py:1235",
+    "exception_cleanup": "python/sloforge/continuum/adapters/vllm_reclamation.py:1258",
+    "stale_zero_queue_test": "tests/python/test_vllm_reclamation_adapter.py:462"
+  },
+  "offline_local_probes": [
+    {
+      "name": "block_axis_preflight_side_effect",
+      "environment": "CPU-only system PyTorch; no CUDA, Modal, GPU, or remote compute",
+      "method": "Construct dense rank-five BF16 pools for block axes 0 through 4, invoke write_native_pages_to_destination, then use geometry block_dimensions=(0,5) for two layers and compare both backing tensors before and after the raised exception.",
+      "result": {
+        "valid_axes_0_through_4_completed": true,
+        "out_of_range_exception": "IndexError: Dimension out of range (expected to be in range of [-5, 4], but got 5)",
+        "layer_0_mutated_before_exception": true,
+        "layer_1_unchanged": true
+      },
+      "conclusion": "The current validation/write split can fail after a prior layer has already been mutated. Complete dimension normalization and validation must occur before the first destination write."
+    },
+    {
+      "name": "bfloat16_numerical_equality_is_not_raw_integrity",
+      "environment": "CPU-only system PyTorch; no CUDA, Modal, GPU, or remote compute",
+      "result": {
+        "torch_equal_identical_nan_clone": false,
+        "torch_equal_negative_zero_positive_zero": true,
+        "raw_int16_negative_zero_positive_zero_equal": false
+      },
+      "conclusion": "Numerical BF16 equality both rejects some identical storage and accepts some different storage; v11 destination validation must operate on raw bytes or a cryptographic hash over raw bytes."
+    }
+  ],
+  "existing_v10_semantics_to_preserve": [
+    "The live adapter accepts exactly one synchronous in-process full-attention KV group and verifies CUDA-backed pool bytes against KVCacheConfig.",
+    "A block ID selects the corresponding block-axis slot across every layer tensor in the one validated KV group.",
+    "Restore requests are created through the ordinary frontend, then removed from waiting/skipped queues while still at num_computed_tokens == 0.",
+    "The first branch is forced to allocate the complete restored root plus its private pages; later branches may reuse only the newly validated root through vLLM's native prefix cache.",
+    "allocate_slots uses delay_cache_blocks=True and full_sequence_must_fit=True, and the scheduler must be idle with async scheduling disabled.",
+    "Every logical page maps to one destination block, shared pages map to one common block, and distinct logical pages may not alias.",
+    "Only after destination validation does the stager cache blocks, set computed-token watermarks, and enqueue restored requests.",
+    "Any exception removes the complete restore incarnation group rather than allowing a subset of branches to run."
+  ],
+  "native_layout_contract": {
+    "runtime_tensor_rank": 5,
+    "canonical_page_axes": [
+      "token",
+      "kv",
+      "head",
+      "dim"
+    ],
+    "native_axes_after_removing_block": [
+      "kv",
+      "token",
+      "head",
+      "dim"
+    ],
+    "kv_axis_extent": 2,
+    "required_dtype": "torch.bfloat16",
+    "required_element_size_bytes": 2,
+    "rules": [
+      "Normalize each layer's block dimension exactly once and reject values outside [-rank, rank-1] before any write; do not rely on modulo normalization followed by a raw out-of-range index_copy_ call.",
+      "The normalized block axis must be the unique axis whose extent equals num_blocks; geometry discovery must fail on ambiguity.",
+      "After removing the block axis, the remaining shape must exactly equal [2, block_size_tokens, kv_heads, head_size] in the declared semantic order.",
+      "All layer tensors must be CUDA tensors on the same logical destination device, bfloat16, and have byte size and per-block storage exactly matching the validated one-group KVCacheConfig.",
+      "Reject unsupported overlapping or irregular storage before writes. A dense contiguous pool with an arbitrary block-axis position is supported; a selected/permuted destination page may be a view.",
+      "The canonical-to-native permutation is computed per geometry, and the batch/page axis is moved into that layer's normalized block dimension before index_copy_.",
+      "Never use advanced-index assignment as the final write because it can target a temporary. Use index_copy_ for bounded complete-page batches or select/narrow views followed by copy_ and zero_ for individual partial pages.",
+      "Assert the exact destination tensor itself changed in local tests for leading, interior, trailing, and negative-equivalent block dimensions."
+    ]
+  },
+  "direct_scatter_algorithm": {
+    "complete_pages": [
+      "Group only pages with valid_tokens == block_size_tokens and a homogeneous canonical chunk shape.",
+      "Interpret each authenticated chunk as raw bfloat16 [page, layer, token, kv, head, dim] without numerical conversion.",
+      "For each layer, permute [page, token, kv, head, dim] to [page, kv, token, head, dim], then move the page axis to the normalized native block dimension.",
+      "index_copy_ the bounded source into the validated destination IDs. This overwrites every K byte and every V byte for every token/head/dimension in that physical page.",
+      "No zero operation is permitted or required for a complete page once exact full-byte coverage has been proved."
+    ],
+    "partial_pages": [
+      "Obtain a direct view of the actual destination block with select(normalized_block_dim, destination_id); permute that view to canonical [token, kv, head, dim] order.",
+      "copy_ authenticated valid bytes into [0:valid_tokens] and zero_ [valid_tokens:block_size_tokens] in the actual destination view.",
+      "Do not construct a full zero-filled page merely to overlay the valid prefix; the only zero work is the exact invalid tail.",
+      "Account valid-copy bytes and tail-zero bytes separately per page/layer."
+    ],
+    "mixed_extents": "Split bounded batches by valid_tokens or fall back to page-bounded direct views. Never pad a mixed chunk into a full-state intermediate.",
+    "raw_bit_semantics": "Copy and validate BF16 storage bits exactly. Numerical equality is insufficient because identical NaN payloads compare unequal and signed-zero or NaN canonicalization would weaken bitwise state identity."
+  },
+  "zero_fill_ruling": {
+    "measured_baseline": "SAFE_TO_REMOVE_FULL_PAGE_ZERO_PASS",
+    "basis": "Every one of the measured 1,152 pages has valid_tokens == block_size_tokens == 16, logical bytes equal physical page bytes, and direct scatter covers all layers, K and V, heads, and dimensions.",
+    "expected_tail_zero_bytes_for_measured_full_page_geometry": 0,
+    "general_partial_page_rule": "TAIL_ZERO_REQUIRED",
+    "tail_bytes_formula_per_page": "(block_size_tokens - valid_tokens) * layer_count * 2 * kv_heads * head_size * element_size_bytes",
+    "coverage_proof": [
+      "The valid written range is [0, valid_tokens) for all layer/KV/head/dim elements.",
+      "The zeroed range is [valid_tokens, block_size_tokens) for all layer/KV/head/dim elements.",
+      "The ranges are disjoint and their union equals the complete physical native page.",
+      "The destination page set equals the exact newly allocated/zero-queue-drained page set.",
+      "No scheduler, prefix lookup, request admission, engine step, or diagnostic reader can observe the page before both ranges and validation complete."
+    ],
+    "security_reason": "Unused KV tail bytes are outside the logical checkpoint but remain physical tenant state. Fresh allocation does not prove those bytes are zero; explicit tail zeroing is required unless a stronger runtime-wide unreadability and reuse proof is supplied.",
+    "zero_validation": "Validate tail bytes as raw uint8 zeros. BF16 comparison to numeric zero is not sufficient because negative-zero storage is numerically equal but is not a deterministic zeroed byte range."
+  },
+  "fresh_allocation_evidence": {
+    "required_before_first_write": [
+      "The destination scheduler is synchronous and idle, and the serving prefix cache reset completed successfully.",
+      "Every restore runtime request ID is fresh, nonempty, injective, and different from every logical branch ID/source runtime incarnation.",
+      "Every restore request is detached from waiting/skipped queues, absent from running, and has num_computed_tokens == 0.",
+      "There were no pending unrelated zero-queue block IDs before allocation. The v11 path should fail on any preexisting entry regardless of needs_kv_cache_zeroing, because exact allocation provenance cannot otherwise be established.",
+      "The full request table delta and take_new_block_ids result agree exactly on each newly allocated non-null block.",
+      "All destination IDs are in range and distinct for distinct logical pages; one shared logical page has one common destination across branch tables.",
+      "The union of newly allocated block IDs equals the complete destination logical-page map. Later local prefix-cache hits may reference only pages already allocated, written, and validated by this same restore group.",
+      "Each destination has a recorded GPU UUID and allocation epoch. The tuple (GPU UUID, block index, allocation epoch) must differ from every captured source allocation tuple; reuse of an index is allowed only at a newer observed epoch.",
+      "No destination block is owned by an unrelated request table or appears in an unrelated cached prefix."
+    ],
+    "required_before_success": [
+      "The zero queue is empty after all group allocations and no allocation occurred outside the recorded group.",
+      "Every branch's native block table has the same length/order as its logical page table.",
+      "The independently derived owner count agrees with native refcounts: shared root pages are owned by all eight restored branches and each private page by its one branch.",
+      "All allocation epochs and exact destination mappings are persisted as state-correctness evidence."
+    ]
+  },
+  "visibility_and_cuda_fences": {
+    "control_plane_gate": [
+      "The exclusive gate must cover both engine.step and request admission/addition, not only model execution. No unrelated request may consult the temporarily published root while the group is incomplete.",
+      "scheduler.running must remain empty and async_scheduling must remain false for the entire allocation/write/validate/cache/enqueue sequence.",
+      "The route cutover and serving drain must be complete before restore begins."
+    ],
+    "device_order": [
+      "Record a vLLM/default-stream completion event after the last serving work; every restore stream waits on it before touching the KV pool.",
+      "For each slot, the scatter stream waits on that slot's H2D-complete event.",
+      "Destination validation waits on the scatter/tail-zero completion event.",
+      "The host synchronizes only the bounded validation result/event needed to decide pass/fail; a slot is not reused until all H2D, scatter, and validation consumers finish.",
+      "Before cache_blocks or enqueue, all group validation events are complete and successful.",
+      "Record a final restore-complete event and make the vLLM/default execution stream wait on it so the first resumed engine step observes every native write.",
+      "Record every explicit event dependency and synchronization in StatePassRecord evidence."
+    ],
+    "prefix_publication": "The current stager publishes the validated first branch root so later branches can obtain native prefix hits. This is acceptable only inside an exclusive admission-plus-step gate. If that exclusivity cannot be proven, v11 must not use early cache publication and must instead provide an allocation mechanism that shares the validated root without exposing it to unrelated requests.",
+    "atomic_visibility_point": "The group becomes visible only after all writes, tail zeros, raw-bit validation, coverage checks, zero-queue checks, request-table checks, and CUDA events pass; only then set every computed-token watermark and enqueue the complete group."
+  },
+  "destination_validation": {
+    "minimum": [
+      "Read every valid destination byte back through the native logical layout.",
+      "Canonicalize only a bounded chunk and compare raw uint8 bytes exactly against the authenticated H2D chunk, or use an independently validated cryptographic device hash over the same raw logical domain.",
+      "Independently reduce every partial tail as raw bytes and require all zero.",
+      "Verify chunk/page coverage is complete, unique, ordered, and gap-free before returning success."
+    ],
+    "forbidden": [
+      "BF16 numerical torch.equal as the integrity oracle",
+      "sampled pages or sampled tokens",
+      "host-visible success before CUDA validation completion",
+      "full-state D2H recapture on the success path",
+      "silently falling back to the v10 recapture and calling the optimized attempt successful"
+    ]
+  },
+  "failure_cleanup_contract": {
+    "ordering": [
+      "Stop new admission and retain the exclusive engine gate.",
+      "Wait for or cancel all owned restore operations without reusing their buffers.",
+      "Persist the failing chunk/page, operation, allocation map, event state, and mismatch kind; diagnostic full recapture is optional and cannot reverse failure status.",
+      "Before freeing, zero every byte of every destination page touched by a failed direct scatter, synchronize the zero, and record the scrub result. This failure-only scrub prevents partially restored tenant state from reentering the free pool.",
+      "Remove all restore requests from waiting, skipped, and running collections, including siblings not reached before the error.",
+      "Free every restore request through KVCacheManager.free and remove its scheduler request record.",
+      "Reset the prefix cache and require a true success result.",
+      "Inspect every exact destination block: no request-table owner, refcount zero, block hash absent, zero queue empty, and allocator availability restored.",
+      "Only after the complete cleanup proof passes may the retained engine be reused. Otherwise mark the runtime contaminated, prohibit further engine steps, and force teardown."
+    ],
+    "current_v10_gap_not_to_copy": "The frozen stager suppresses individual free errors and does not check the boolean return from reset_prefix_cache on its exception path. That behavior remains frozen for v10 but is not strong enough for a new v11 fail-closed cleanup proof.",
+    "composite_error": "Preserve the original validation/write exception and all cleanup failures in one artifact; do not allow a cleanup exception to erase the corruption cause or a corruption exception to hide incomplete cleanup."
+  },
+  "state_pass_accounting_rules": [
+    "Record H2D source read, link transfer, and device chunk write separately from native scatter reads/writes.",
+    "Record complete-page scatter bytes as exactly physical page bytes read from the bounded chunk and written to native HBM.",
+    "Record partial valid-copy and tail-zero bytes separately; do not charge a removed full-page zero pass.",
+    "Record bounded permutation/contiguous materialization if PyTorch creates it; do not call a view free.",
+    "Record destination validation native reads, bounded canonical temporary writes/reads, compare/hash work, and scalar transfer/synchronization.",
+    "Do not multiply a single shared-root write by branch reference count. One logical shared page is written once and referenced eight times.",
+    "Temporary memory peak comes from allocation lifetimes/event overlap, not cumulative allocation bytes."
+  ],
+  "required_local_tests": [
+    {
+      "name": "all_block_axis_positions_write_actual_backing",
+      "requirement": "Use dense rank-five pools with the unique block dimension at positions 0 through 4 and valid negative equivalents; verify actual backing mutation and reject out-of-range/ambiguous axes before writes."
+    },
+    {
+      "name": "full_page_overwrite_without_zero",
+      "requirement": "Initialize destination pages to tenant-distinct nonzero raw sentinels, restore arbitrary BF16 bit patterns including NaNs/signed zero across all layers/K/V, prove exact raw equality, and prove zero-fill bytes are zero."
+    },
+    {
+      "name": "partial_page_tail_scrub",
+      "requirement": "Restore every valid_tokens extent from 1 through block_size-1; valid raw bytes match and every tail byte is raw zero while non-destination blocks remain unchanged."
+    },
+    {
+      "name": "heterogeneous_layer_block_dimensions",
+      "requirement": "Different layers may place the block axis differently; every layer maps to the same logical page and no layer is omitted or swapped."
+    },
+    {
+      "name": "fresh_epoch_and_alias_rejection",
+      "requirement": "Reject missing epochs, same source allocation generation, cross-page aliases, unrelated owners, duplicate zero-queue IDs, and out-of-range blocks; allow the same index only with a newer allocation epoch."
+    },
+    {
+      "name": "zero_queue_strictness",
+      "requirement": "Reject preexisting unrelated zero-queue entries for both values of needs_kv_cache_zeroing; post-allocation drained IDs exactly equal the new destination set and final queue is empty."
+    },
+    {
+      "name": "raw_bit_destination_validation",
+      "requirement": "Identical NaN bit patterns pass, one-bit mutations fail, negative-zero tail storage fails the zero contract, and no full D2H occurs on success."
+    },
+    {
+      "name": "cuda_event_visibility_model",
+      "requirement": "Mock streams/events to prove H2D-before-scatter, scatter-before-validate, validate-before-cache/enqueue, final-event-before-engine-step, and no slot reuse before its last consumer."
+    },
+    {
+      "name": "exclusive_admission_gate",
+      "requirement": "Inject unrelated add_request/engine.step attempts between first-root publication and group completion; the gate blocks them and no partial group becomes visible."
+    },
+    {
+      "name": "failure_matrix_and_scrub",
+      "requirement": "Inject failure at every allocation, chunk write, tail zero, validation, cache, watermark, and enqueue boundary; all touched pages are scrubbed, all requests removed/freed, hashes cleared, pool restored, and no sibling executes."
+    },
+    {
+      "name": "cleanup_failure_is_terminal",
+      "requirement": "Inject free failure, reset_prefix_cache false/exception, scrub failure, and residual owner/hash/refcount; the runtime is marked contaminated and cannot resume serving or rollout execution."
+    },
+    {
+      "name": "baseline_1152_page_coverage",
+      "requirement": "The measured full-page geometry writes each of 1,152 logical pages exactly once, creates 1,152 fresh destinations, writes 1,056,964,608 native bytes, and performs zero tail bytes."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "finding": "Asynchronous direct scatter is unsafe unless restore streams are fenced against prior vLLM work and the vLLM execution stream is fenced against later use.",
+      "required_action": "Implement and test explicit cross-stream events plus an exclusive admission/engine-step gate."
+    },
+    {
+      "severity": "high",
+      "finding": "The frozen failure path does not prove that every partially written destination page is scrubbed or that reset_prefix_cache returned success.",
+      "required_action": "The v11 path must scrub touched pages, verify complete free/reset/block cleanup, and make any cleanup failure terminal for the retained runtime."
+    },
+    {
+      "severity": "high",
+      "finding": "Destination equality over BF16 numerical values is not bitwise state equality and is incorrect for NaN payloads and signed zero.",
+      "required_action": "Compare/hash raw canonical bytes and test arbitrary BF16 bit patterns."
+    },
+    {
+      "severity": "high",
+      "finding": "NativeKvGeometry currently modulo-normalizes dimensions during validation but later operations receive the unnormalized raw value. The CPU-only probe proved a two-layer write with block_dimensions=(0,5) mutates layer 0 and then raises on layer 1.",
+      "required_action": "Normalize or reject every layer dimension during a complete side-effect-free v11 preflight and use only the validated normalized values for every subsequent operation."
+    },
+    {
+      "severity": "medium",
+      "finding": "The frozen stager intentionally ignores a stale pre-allocation zero queue when runtime zeroing is disabled, which weakens exact v11 allocation provenance.",
+      "required_action": "Require an empty pre-allocation queue in v11 regardless of the runtime flag and fail/teardown on contamination."
+    },
+    {
+      "severity": "medium",
+      "finding": "The first validated root is published before the complete group is restored so native prefix reuse can allocate later branches.",
+      "required_action": "Prove the exclusive gate covers unrelated admission as well as engine.step, or redesign allocation so internal root reuse does not create a partially observable prefix."
+    }
+  ],
+  "pre_gpu_gate": [
+    "All high findings and reasonable medium findings above are implemented in the separate v11 path.",
+    "Every required local test passes under the dependency image that will be baked before GPU allocation.",
+    "The frozen v10 adapter/stager remains runnable and unchanged.",
+    "StatePassRecord expectations explicitly include bounded layout materializations, tail zeroing, validation reads, and CUDA fences.",
+    "The separate budget/authorization gate passes."
+  ]
+}

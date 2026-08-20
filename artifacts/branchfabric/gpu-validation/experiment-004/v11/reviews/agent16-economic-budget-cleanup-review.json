@@ -1,0 +1,172 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent16-economic-budget-cleanup-review/v1",
+  "review_id": "agent16-economic-budget-cleanup-review",
+  "reviewer_task_path": "/root/integrated_budget_audit",
+  "reviewed_at_utc": "2026-08-19T05:28:41Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "attempt-B terminal scientific status, conservative settlement, cumulative actual/conservative economics, and post-return provider cleanup",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "attempt_b": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "reservation_id": "exp004-v11-integrated-s41-b-reservation",
+    "function_call_id": "fc-01M0C6WT7E5T43CV3HM4BE2GKD",
+    "app_id": "ap-DcCj9yzxl10RoHIdu8Wy1O",
+    "terminal_status": "FAILED",
+    "scientific_status": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+    "scientifically_valid_integrated_transaction": false,
+    "failure_stage": "PRE_RECLAIM_GPU0_OVERLOAD_BACKLOG_SAFETY_ABORT",
+    "failure_message": "calibrated v10 backlog exceeded its bounded safety ceiling during pre-reclaim",
+    "reclaim_trigger_reached": false,
+    "v11_export_started": false,
+    "v11_release_started": false,
+    "v11_import_started": false,
+    "retry_authorized": false,
+    "attempt_c_authorized": false
+  },
+  "evidence": {
+    "function_call_return": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/function-call-return.json",
+      "sha256": "78fd8545d369159d3c68945ebda4a56afe13ac21a40d7384982138ab73baba9b"
+    },
+    "postflight_cleanup_and_settlement": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180"
+    },
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/REMOTE_MANIFEST.json",
+      "sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+      "rows_verified": 460,
+      "rows_total": 460,
+      "manifest_bytes": 20098327,
+      "verification_pass": true
+    },
+    "remote_function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/function-completion.json",
+      "sha256": "4dbdec0121beed0bdb5ca7bc86667d8911a00b9128107686ac8544a39a9dde97"
+    },
+    "controller_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/controller-result.json",
+      "sha256": "26392f35aa4f0fbb5aa349f2e6ea7b799528702e32ccadf2dfb33865f649251b"
+    },
+    "bounded_backlog_abort": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/barriers/abort.json",
+      "sha256": "1b59141d3daf2e66fd439d3801641283952d9c18d435db4033f65ec81b949acb"
+    },
+    "partial_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/barriers/v10-gpu0-partial-failure.json",
+      "sha256": "15623fe28138f59b86d63aab60a26b1d09cc8f7389e7c92d0b82f819a3700c33"
+    },
+    "authoritative_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7"
+    }
+  },
+  "attempt_b_settlement": {
+    "status": "PASS",
+    "method": "CONSERVATIVE_FULL_BOUND_FAILURE_CHARGE",
+    "gpu_price_per_a100_hour_usd": 2.4984,
+    "gpu_count": 2,
+    "actual_provider_wall_seconds": 584.161194259,
+    "actual_provider_gpu_seconds": 1168.322388518,
+    "actual_provider_a100_hours": 0.32453399681055556,
+    "actual_provider_cost_usd": 0.810815737631492,
+    "charged_wall_seconds": 588.0,
+    "conservatively_charged_gpu_seconds": 1176.0,
+    "conservatively_charged_a100_hours": 0.32666666666666666,
+    "conservatively_charged_cost_usd": 0.816144,
+    "conservative_minus_actual_gpu_seconds": 7.677611482,
+    "conservative_minus_actual_a100_hours": 0.002132669856111111,
+    "conservative_minus_actual_cost_usd": 0.005328262368508,
+    "conservative_charge_factor_over_actual": 1.006571483656783,
+    "conservative_over_actual_percent": 0.657148365678322,
+    "measured_duration_rejected_for_canonical_settlement": true,
+    "full_bound_charge_is_fail_closed_and_budget_safe": true,
+    "ledger_sha256_before_settlement_with_active_reservation": "15f38709420714526a823e13161b0d8d1d74a6ab98a57cf85a52a0a6e45a4ca4",
+    "ledger_sha256_after_settlement": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7"
+  },
+  "ledger_audit": {
+    "status": "PASS",
+    "strict_schema_validation": "PASS",
+    "focused_budget_tests": "9 passed",
+    "hard_ceiling_gpu_seconds": 21600.0,
+    "settled_interval_gpu_seconds": 13236.513626085978,
+    "conservative_failure_charge_gpu_seconds": 2877.0,
+    "recomputed_consumed_gpu_seconds": 16113.513626085978,
+    "recorded_consumed_gpu_seconds": 16113.513626085978,
+    "arithmetic_closes": true,
+    "remaining_authorized_gpu_seconds": 5486.486373914022,
+    "remaining_authorized_a100_hours": 1.524023992753895,
+    "active_reservation_count": 0,
+    "hard_ceiling_pass": true
+  },
+  "provider_cleanup_audit": {
+    "post_return_provider_cleanup": "PASS",
+    "app_state": "stopped",
+    "app_tasks": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "active_apps": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "other_persistent_resources": [],
+    "modal_cleanup_status": "CLEAN",
+    "in_function_controller_cleanup_gate": "FAIL",
+    "in_function_cleanup_failure": "worker process groups survived SIGKILL: [9]",
+    "in_function_compute_processes_after": [],
+    "interpretation": "The external provider is clean after app stop, but this does not repair the failed in-function cleanup scientific gate."
+  },
+  "economics": {
+    "price_basis_usd_per_a100_hour": 2.4984,
+    "actual_total_definition": "Settled measured intervals plus measured provider durations for integrated attempts A and B. Micro attempt A has no measurable actual duration, so actual totals are reported as a bounded range rather than a fabricated point estimate.",
+    "experiment_004_through_attempt_b": {
+      "measured_actual_lower_bound_gpu_seconds": 14518.928888675978,
+      "measured_actual_lower_bound_a100_hours": 4.033035802409993,
+      "measured_actual_lower_bound_cost_usd": 10.076136648741128,
+      "bounded_actual_upper_gpu_seconds": 15043.928888675978,
+      "bounded_actual_upper_a100_hours": 4.178869135743327,
+      "bounded_actual_upper_cost_usd": 10.440486648741128,
+      "actual_range_unknown_component": "exp004-v11-micro-s41-a actual provider duration unavailable; bounded by its 525 GPU-second reservation",
+      "authoritative_conservative_gpu_seconds": 16113.513626085978,
+      "authoritative_conservative_a100_hours": 4.475976007246105,
+      "authoritative_conservative_cost_usd": 11.182778456503668,
+      "authorized_cumulative_a100_hours": 6.0,
+      "authorized_gpu_budget_usd": 40.0,
+      "remaining_gpu_seconds": 5486.486373914022,
+      "remaining_a100_hours": 1.524023992753895,
+      "remaining_gpu_time_value_at_measured_unit_price_usd": 3.807621543496332,
+      "remaining_money_authorization_usd": 28.817221543496332
+    },
+    "v11_phase_only": {
+      "measured_actual_lower_bound_gpu_seconds": 1962.10526259,
+      "measured_actual_lower_bound_a100_hours": 0.5450292396083333,
+      "measured_actual_lower_bound_cost_usd": 1.36170105223746,
+      "bounded_actual_upper_gpu_seconds": 2487.10526259,
+      "bounded_actual_upper_a100_hours": 0.6908625729416667,
+      "bounded_actual_upper_cost_usd": 1.72605105223746,
+      "authoritative_conservative_gpu_seconds": 3556.69,
+      "authoritative_conservative_a100_hours": 0.9879694444444445,
+      "authoritative_conservative_cost_usd": 2.46834286
+    }
+  },
+  "scientific_and_economic_conclusions": [
+    "Attempt B consumed real A100 time but is not a scientifically valid integrated v11 transaction; it stopped before reclaim, export, release, restore, or integrated v11 movement measurement.",
+    "No integrated v10-v11 latency comparison, preservation break-even fit, residual Amdahl fit, or hardware-interest conclusion may be derived from attempt B.",
+    "The bounded-backlog abort is a valid fail-closed scientific outcome and must not be relabeled as a successful reclamation transaction.",
+    "The full 1176 GPU-second charge is the authoritative budget value even though the provider return reports 1168.322388518 GPU-seconds.",
+    "Provider cleanup is complete, but the in-function cleanup scientific gate failed and remains part of the terminal invalid result.",
+    "No retry, attempt C, integrated replacement, or kill/recompute arm is authorized by this review."
+  ],
+  "terminal_decision": "SETTLED_CLEAN_NO_RETRY_SCIENTIFICALLY_INVALID",
+  "residual_findings": [],
+  "review_pass": true
+}

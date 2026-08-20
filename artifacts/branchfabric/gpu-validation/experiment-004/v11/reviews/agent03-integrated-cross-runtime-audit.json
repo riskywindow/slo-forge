@@ -1,0 +1,234 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent03-integrated-cross-runtime-audit/v1",
+  "review_id": "agent03-integrated-cross-runtime-audit",
+  "agent": 3,
+  "reviewer_task_path": "/root/review_engine_sync",
+  "reviewed_at_utc": "2026-08-19T04:57:49Z",
+  "status": "PASS",
+  "launch_admission": "PASS",
+  "recommendation": "ADMIT_EXACTLY_ONE_INTEGRATED_V11_TRANSACTION_SUBJECT_TO_DESIGNATED_COORDINATOR_RESERVATION_SETTLEMENT_AND_MODAL_POSTFLIGHT_CLEANUP",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "v10_modified_by_reviewer": false,
+  "scope": [
+    "integrated v11 controller to worker CLI and result contracts",
+    "retained-engine readiness, reset, handoff, and transaction barriers",
+    "sealed offline, micro-validation, post-micro-review, and budget evidence",
+    "operation, cleanup, and immutable-publication deadline partition",
+    "two-A100 Modal graph isolation and exact runtime pins",
+    "local ledger reservation reconstruction and remote authorization",
+    "worker result identity and nested scientific-evidence admission",
+    "process-group cleanup, postflight zero-compute check, and immutable result publication"
+  ],
+  "reviewed_sources": {
+    "integrated_controller": {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c4d1bc57873ac1c9293c168b80fe16ae974c362c1ca33294277cea5cb9f325fb"
+    },
+    "modal_launcher": {
+      "path": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "8dfb80dcb13e76f304b39b4a89705a216941871ce789f0d881a53aff4282abe5"
+    },
+    "integrated_worker_contract": {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "745adf4d9bc2c9b69e4e389fc0a309d511d8f89486a167a31fa7e94f353976f9"
+    },
+    "authoritative_methodology": {
+      "path": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+    }
+  },
+  "reviewed_tests": {
+    "integrated_controller": {
+      "path": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7887de417238c344556aec20ed6154d36bbe368fbd51d4c9ea0aaeb9fbbfed0"
+    },
+    "modal_launcher": {
+      "path": "tests/python/test_modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "7f6f6f0351ba96571541b523d8bbbeced97cee8857d01dd22af3fcae0bc81cda"
+    },
+    "integrated_worker": {
+      "path": "tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "41b89c674af122aa59e8f667d6f2d15f93fe70713e602d76877a43f925ec8072"
+    },
+    "methodology": {
+      "path": "tests/python/test_gpu_reclamation_v11_methodology.py",
+      "sha256": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d"
+    }
+  },
+  "sealed_prerequisites": {
+    "offline_attempt_d": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest-attempt-d.json",
+      "sha256": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a",
+      "four_gates_pass": true
+    },
+    "micro_attempt_d": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+      "integrated_v11_allowed": true
+    },
+    "post_micro_reviews": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+      "base_manifest_sha256_before_integrated_prelaunch_reseal": "3bc6ba4649db069e0d8b2c2329188fac4d0984e18255ff797e770acb7cd88dcd",
+      "agents": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "integrated_v11_admission": "APPROVED_EXACTLY_ONCE",
+      "final_manifest_must_bind_this_review_and_fresh_make_check": true,
+      "reverse_binding_intentionally_absent_to_keep_commitment_graph_acyclic": true
+    },
+    "budget_authorization": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+      "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+      "authorized_cumulative_gpu_seconds": 21600.0,
+      "authorized_gpu_budget_usd": 40.0
+    }
+  },
+  "contract_matrix": {
+    "strict_config_and_exact_v10_methodology_mapping": true,
+    "worker_cli_role_config_model_work_barrier_uuid_match": true,
+    "two_distinct_retained_engine_processes_and_gpu_uuids": true,
+    "readiness_reset_and_handoff_identity_continuity": true,
+    "exact_12_and_15_rps_three_second_sanity_guards": true,
+    "broad_capacity_recalibration_disabled": true,
+    "transaction_command_equals_expanded_runtime_config": true,
+    "offline_micro_post_micro_and_budget_hashes_fail_closed": true,
+    "post_micro_exactly_once_admission_required": true,
+    "integrated_prelaunch_exact_nine_label_set_required": true,
+    "integrated_prelaunch_exact_label_to_repository_path_map_required": true,
+    "integrated_prelaunch_missing_extra_duplicate_path_and_hash_tamper_fail_closed": true,
+    "integrated_prelaunch_make_check_status_and_command_fail_closed": true,
+    "replacement_nonoriginal_attempt_requires_explicit_authorization": true,
+    "replacement_identity_is_exactly_attempt_b_and_reservation_b": true,
+    "replacement_coordinated_attempt_c_spoof_is_rejected": true,
+    "replacement_pass_prefix_status_spoof_is_rejected": true,
+    "replacement_attempt_prior_attempt_null_status_and_ledger_are_exact": true,
+    "replacement_cleanup_packaging_and_budget_paths_are_exact": true,
+    "replacement_evidence_wrapper_and_embedded_payload_must_both_pass": true,
+    "replacement_cleanup_requires_exact_prior_attempt_zero_provider_state_and_ledger_hash": true,
+    "replacement_packaging_requires_exact_schema_destination_layout_and_prelaunch_hashes": true,
+    "replacement_budget_requires_exact_attempt_reservation_ledger_count_and_projection": true,
+    "replacement_embedded_fail_wrong_attempt_wrong_ledger_provider_nonzero_and_path_substitution_rejected": true,
+    "gpu0_nested_recovery_queue_slo_and_live_restore_activity_required": true,
+    "gpu1_exact_topology_gate_a_b_c_d_integrity_freshness_and_8_of_8_required": true,
+    "measured_state_pass_and_movement_evidence_required": true,
+    "worker_schema_role_pid_attempt_and_physical_uuid_required": true,
+    "deferred_compilation_observation_required_empty": true,
+    "operation_cleanup_publication_windows_non_overlapping": true,
+    "process_groups_signaled_concurrently_with_shared_cleanup_deadline": true,
+    "postflight_zero_compute_and_stable_inventory_required": true,
+    "modal_exact_two_a100_80gb_single_use_no_retry": true,
+    "modal_runtime_versions_pinned": true,
+    "modal_import_graph_has_no_unrelated_gpu_hydration": true,
+    "modal_image_contains_opt_sloforge_tests_for_exact_prelaunch_hash_validation": true,
+    "modal_image_contains_exact_prior_attempt_cleanup_evidence": true,
+    "modal_tests_directory_mount_is_copy_only_and_eleven_megabytes": true,
+    "offline_functional_image_layout_reconstructs_all_three_bound_test_paths": true,
+    "offline_functional_image_layout_validates_all_three_exact_hashes_with_production_validator": true,
+    "offline_functional_image_layout_validates_every_prelaunch_and_replacement_binding": true,
+    "modal_uses_only_preexisting_authorized_volumes": true,
+    "local_modal_sdk_version_checked_before_spawn": true,
+    "local_pre_reservation_ledger_hash_reconstructed_and_bound": true,
+    "remote_authorization_binds_config_token_reservation_and_1176_gpu_seconds": true,
+    "result_staging_manifest_rename_commit_and_no_overwrite": true,
+    "provider_cleanup_and_ledger_settlement_left_pending_not_claimed_complete": true,
+    "fpga_implementation_absent": true
+  },
+  "deadline_partition_seconds_from_function_entry": {
+    "controller_operation_deadline": 568,
+    "controller_cleanup_deadline": 578,
+    "modal_function_and_publication_deadline": 588,
+    "non_overlapping": true
+  },
+  "modal_graph": {
+    "gpu_request": "A100-80GB:2",
+    "gpu_count": 2,
+    "maximum_wall_seconds": 588,
+    "maximum_gpu_seconds": 1176,
+    "retries": 0,
+    "maximum_containers": 1,
+    "buffer_containers": 0,
+    "single_use_containers": true,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ],
+    "create_if_missing": false,
+    "endpoint_defined": false,
+    "direct_v10_timing_comparison_requires_two_observed_sxm4_names": true
+  },
+  "frozen_v10": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "gpu_reclamation_controller_sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9",
+    "gpu_reclamation_worker_sha256": "e6858e445ddbca912877fc67155dd9422c82d6f6fd4dcbf71871831dee15008a",
+    "gpu_reclamation_v10_serving_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "unchanged": true
+  },
+  "offline_tests": {
+    "focused_integrated_contract_suite": {
+      "passed": 92,
+      "failed": 0,
+      "warnings": 2
+    },
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "py_compile": "PASS",
+    "broader_runtime_suite_first_run": {
+      "passed": 164,
+      "failed": 1,
+      "failure": "pre-existing frozen-v10 synthetic live-protocol host arrival exceeded the 100ms scheduling-lateness bound"
+    },
+    "isolated_rerun_of_timing_sensitive_test": {
+      "passed": 1,
+      "failed": 0
+    },
+    "broader_runtime_suite_second_run": {
+      "passed": 166,
+      "failed": 1,
+      "failure": "same frozen-v10 synthetic live-protocol test observed a host scheduling burst under the full parallel-load suite"
+    },
+    "assessment": "The integrated controller, launcher, worker, and methodology suite is clean. The broader failure is a host-scheduler-sensitive frozen-v10 synthetic test that passes in isolation; no bound or frozen source was weakened. Root must still obtain the separately required full make-check PASS before paid launch."
+  },
+  "closed_blockers": [
+    "removed transitive modal_real_gpu_cow import and unrelated graph hydration",
+    "replaced create-on-import volumes with exactly two preexisting volumes",
+    "reconstructed and authenticated the pre-reservation ledger commitment",
+    "partitioned operation, cleanup, and publication into 568/578/588 second deadlines",
+    "made inventory and process checks obey remaining cleanup time",
+    "signals both worker process groups concurrently inside the shared cleanup window",
+    "strengthened result validation from identity-only to role-specific nested scientific evidence",
+    "added local Modal 1.5.3 preflight before spawn and retained remote recheck",
+    "sealed post-micro authorization as APPROVED_EXACTLY_ONCE"
+    ,
+    "required an exact nine-entry integrated-prelaunch label-to-path map and content hash for methodology, three runtime sources, three focused tests, this cross-runtime review, and the fresh make-check artifact",
+    "added adversarial rejection for missing, extra, duplicate, path-substituted, hash-tampered, and semantically failed integrated-prelaunch bindings"
+    ,
+    "closed the paid-attempt packaging defect by copying the repository tests tree to /opt/sloforge/tests before remote exact-path validation"
+    ,
+    "added a functional /opt/sloforge-equivalent layout test that copies and authenticates all three bound test artifacts with validate_bound_artifact"
+    ,
+    "added semantic replacement authorization that binds exact replacement/prior identities, null status, ledger continuity, exact evidence paths, and internal cleanup/packaging/budget decisions",
+    "added adversarial rejection for absent authorization, wrapper and embedded FAIL, wrong attempt, wrong ledger, nonzero provider state, path substitution, and hash tamper"
+    ,
+    "narrowed replacement identity to exactly attempt B and reservation B and rejected a coordinated attempt-C reseal",
+    "narrowed replacement status tokens to exact values and rejected PASS_REVOKED prefix spoofs",
+    "bundled the exact prior-attempt cleanup artifact and functionally validated every integrated-prelaunch and replacement-evidence path/hash in an /opt/sloforge-equivalent tree"
+  ],
+  "external_launch_conditions": [
+    "Only the designated root GPU coordinator may reserve and invoke the paid run.",
+    "The launch config and reservation must bind the current reviewed source/evidence hashes and current pre-reservation ledger hash.",
+    "A fresh full repository make check must be recorded PASS after these final source/test hashes and content-addressed at the controller's exact make-check-integrated-prelaunch path before allocation.",
+    "The final post-micro manifest must bind this review's final SHA-256 and the fresh make-check SHA-256; this review intentionally does not bind the subsequently generated manifest, preserving an acyclic commitment graph.",
+    "After function return the coordinator must settle actual and conservative GPU seconds and independently verify zero Modal apps, tasks, containers, endpoints, reservations, child processes, and profilers.",
+    "Direct v10 latency comparison is admissible only if both observed devices are exactly NVIDIA A100-SXM4-80GB; byte and amplification comparison remains admissible on A100-80GB PCIe."
+  ],
+  "residual_findings": [],
+  "passed": true
+}

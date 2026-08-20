@@ -1,0 +1,105 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-micro-scientific-outcome/v1",
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "status": "MICRO_VALIDATION_PASS",
+  "scientifically_admissible_measurement": true,
+  "integrated_v11_allowed": true,
+  "classification": "MEANINGFUL",
+  "go_no_go_rule": "correctness passes and measured full physical amplification is <=25x",
+  "physical_gpu": {
+    "name": "NVIDIA A100 80GB PCIe",
+    "uuid": "GPU-c3ba4108-e98e-a487-8301-b4a564146d5e"
+  },
+  "runtime": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "vllm": "0.23.0",
+    "torch": "2.11.0",
+    "dtype": "bfloat16"
+  },
+  "topology": {
+    "prefix_tokens": 16384,
+    "fanout": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "shared_blocks": 1024,
+    "private_blocks": 128,
+    "total_blocks": 1152,
+    "logical_state_bytes": 1056964608
+  },
+  "correctness": {
+    "allocator_epoch_pass": true,
+    "post_free_ownership_pass": true,
+    "fresh_destination_allocations_pass": true,
+    "destination_physical_id_overlap_count": 0,
+    "destination_lifetime_overlap_count": 0,
+    "destination_mapping_commitment_pass": true,
+    "integrity_pass": true,
+    "movement_accounting_pass": true,
+    "all_branches_resumed": true,
+    "minimum_continuation_tokens_per_branch": 8,
+    "first_resumed_token_exact_matches": 8,
+    "first_resumed_token_total": 8
+  },
+  "movement": {
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_bytes": 2114200960,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_physical_bytes": 12684381568,
+    "avoidable_amplification": 12.000762818351625,
+    "required_physical_bytes": 9512681472,
+    "full_state_pass_count": 10,
+    "raw_state_pass_record_count": 10454,
+    "d2h_bytes": 1056964608,
+    "h2d_bytes": 1056964608,
+    "gpu_intermediate_bytes": 7399019520,
+    "host_intermediate_bytes": 9512948736,
+    "native_endpoint_bytes": 3170893824,
+    "physical_bytes_by_tier": {
+      "GPU_HBM_NATIVE_POOL": 3170893824,
+      "GPU_HBM_TEMPORARY": 7399019520,
+      "HOST_PAGEABLE_METADATA": 267264,
+      "HOST_PINNED": 9512681472,
+      "LINK_CONTROL": 271744,
+      "LINK_D2H": 1056964608,
+      "LINK_H2D": 1056964608
+    }
+  },
+  "temporary_memory": {
+    "peak_pinned_host_temporary_bytes": 58720256,
+    "peak_pageable_host_temporary_bytes": 84832256,
+    "conservative_peak_total_host_temporary_bytes": 143552512,
+    "conservative_total_host_temporary_method": "sum of the measured pinned staging extent and the simultaneous restore process-RSS pageable delta",
+    "peak_gpu_temporary_bytes": 59769344,
+    "resident_checkpoint_host_bytes_excluded": 1056964608
+  },
+  "timings_seconds": {
+    "export_wall": 2.61309087,
+    "export_cuda": 0.133267776,
+    "restore_wall": 4.438193614,
+    "restore_cuda": 0.697858271,
+    "integrity": 3.505231979,
+    "synchronization": 0.521796759,
+    "restore_to_first_resumed_token": 0.083229142,
+    "restore_to_all_branches_resumed": 0.083229142,
+    "restore_to_continuation_complete": 0.205774608
+  },
+  "raw_provenance": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "state_pass_selector": "$.state_passes[*]",
+    "ownership_selector": "$.post_free_ownership.records[*]"
+  },
+  "settlement": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/gpu-settlement.json",
+    "sha256": "b8bbfc25a3343836a03b61383801a36ce03aafef028f18ab91fdefbbe167ad75",
+    "accounted_gpu_seconds": 262.89,
+    "remote_allocation_seconds": 200.363541149,
+    "cost_usd": 0.18244566
+  },
+  "postflight_cleanup": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/postflight-cleanup.json",
+    "sha256": "205713205b0f387ae7c7d913f1a10d7fd24c927207e21295aec34d48065026f6",
+    "status": "PASS"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-provider-preflight/v1",
+  "status": "PASS",
+  "observed_at_utc": "2026-08-20T03:02:00Z",
+  "modal_client_version": "1.5.3",
+  "active_apps": 0,
+  "running_tasks": 0,
+  "running_containers": 0,
+  "endpoints": 0,
+  "provider_reservations": 0,
+  "queues": 0,
+  "dicts": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "other_persistent_resources": [],
+  "ledger_active_reservations": 0,
+  "ledger_sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+  "gpu_or_cloud_compute_invoked": false,
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ]
+}

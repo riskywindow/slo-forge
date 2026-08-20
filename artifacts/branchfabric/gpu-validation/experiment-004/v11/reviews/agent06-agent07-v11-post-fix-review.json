@@ -1,0 +1,186 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-post-fix-native-integrity-review/v1",
+  "reviewed_at_utc": "2026-08-18T22:14:50Z",
+  "reviewer_roles": [
+    "vllm-0.23-native-page-write",
+    "zero-fill-and-tenant-isolation",
+    "integrity-and-fail-closed-correctness",
+    "cuda-visibility-methodology"
+  ],
+  "scope": "Read-only offline audit of the stable v11 fix batch. No source implementation was edited and no CUDA, GPU, Modal, remote compute, or paid resource was used.",
+  "snapshot": {
+    "source": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+    "source_sha256": "20694a115a718df64cce9b5b616181204272f1fb619be0c22d57fd0bed58097d",
+    "tests": "tests/python/test_vllm_reclamation_v11.py",
+    "tests_sha256": "f471b7bd3bb4c282a505084b3d89219d4fadc808d0cec65176b7deed2d2f43be",
+    "previous_safety_contract": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent06-agent07-native-write-zero-fill-audit.json"
+  },
+  "result": "LOCAL_GATE_FAIL",
+  "gpu_launch_approval": false,
+  "summary": "The stable fix batch repairs the previously demonstrated raw-BF16, block-axis, transport-TOCTOU, destination-failure-scrub, and stale-zero-queue defects. The current CPU suite is green. GPU launch remains blocked by allocator cleanup that can silently leak native tables, absent v11 worker/gate integration and CUDA visibility proof, and an incomplete mandatory property/failure matrix.",
+  "test_results": [
+    {
+      "command": "PYTHONPATH=python pytest -q tests/python/test_vllm_reclamation_v11.py",
+      "result": "13 passed in 0.78s"
+    },
+    {
+      "command": "PYTHONPATH=python pytest -q tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_adapter.py",
+      "result": "26 passed in 0.59s"
+    },
+    {
+      "command": "python -m py_compile python/sloforge/continuum/adapters/vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11.py",
+      "result": "passed"
+    }
+  ],
+  "approved_local_contracts": {
+    "raw_bfloat16_integrity": {
+      "status": "PASS",
+      "evidence": [
+        "Destination validation compares same-width int16 storage views rather than BF16 numerical values at source lines 224-232.",
+        "The committed raw-bit test includes a NaN payload, negative zero, positive zero, and ordinary BF16 storage.",
+        "Offline probe: identical NaN storage compared equal, negative zero differed from positive zero, and negative zero failed raw-zero validation.",
+        "The repaired corruption test mutates the actual backing page and proves detection followed by raw-zero scrub of every selected destination page."
+      ]
+    },
+    "transport_integrity_and_toctou": {
+      "status": "PASS",
+      "evidence": [
+        "The verified token binds tensor identity, data pointer, PyTorch mutation version, manifest commitment, payload digest, and page count.",
+        "Every consumed chunk is copied into an owned bounded snapshot and its page SHA-256 values are checked before H2D/scatter, covering NumPy-alias mutations that do not increment the tensor version.",
+        "Both ordinary in-place mutation and NumPy-alias mutation have independent passing fail-closed tests."
+      ]
+    },
+    "block_axis_preflight": {
+      "status": "PASS",
+      "evidence": [
+        "All native tensors are validated and all block dimensions normalized before any destination mutation at source line 212 and restore line 898.",
+        "Only the normalized tuple is passed into capture gather, direct scatter, and failure scrub.",
+        "Committed tests cover modulo-equivalent metadata; an additional offline probe exercised block-axis positions 0, 1, 2, 3, and 4 and all passed exact capture/restore."
+      ]
+    },
+    "zero_fill_safety": {
+      "status": "PASS",
+      "evidence": [
+        "Complete pages use index_copy_ over every layer/K/V/token/head/dimension byte and skip zero-fill.",
+        "Partial pages copy [0, valid_tokens), zero only [valid_tokens, block_size), and validate the tail over raw storage bits.",
+        "The randomized round trip contains full and partial pages, compares with the frozen naive reference, proves untouched blocks remain unchanged, and accounts logical plus tail bytes as the complete physical selected-page extent.",
+        "The measured v10 workload has 1,152 full 16-of-16 pages, so its optimized success path legitimately requires zero tail bytes."
+      ]
+    },
+    "write_failure_scrub": {
+      "status": "PASS_WITH_ALLOCATOR_CLEANUP_BLOCKER",
+      "evidence": [
+        "Any exception inside the bounded write/validate loop calls scrub_native_pages_v11 for the complete subset.",
+        "Scrub uses native backing index_fill_, synchronizes CUDA when applicable, verifies raw zeros, and returns a private sealed proof.",
+        "The repaired corruption test proves actual destination mutation is detected and every selected page is scrubbed."
+      ]
+    },
+    "strict_zero_queue_entry": {
+      "status": "PASS_WITH_MEDIUM_CAVEAT",
+      "evidence": [
+        "v11 now rejects any preexisting zero-queue page ID regardless of needs_kv_cache_zeroing.",
+        "Offline probe confirmed ID 99 is rejected before allocation."
+      ]
+    }
+  },
+  "high_findings": [
+    {
+      "id": "HIGH-ALLOCATOR-CLEANUP-NOT-FAIL-CLOSED",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1277",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1296",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1298"
+      ],
+      "finding": "The stager suppresses every manager.free failure, removes the scheduler request record anyway, ignores the boolean result of reset_prefix_cache, and performs no exact post-cleanup owner/refcount/hash/allocator inspection.",
+      "reproduction": "A CPU-only BrokenCleanupManager made free raise and reset_prefix_cache return false after a real sealed page scrub. import_group_v11 propagated only the original evidence error, scheduler.requests became empty, but manager.tables still contained branch.0@broken.",
+      "impact": "The runtime can appear cleaned while native allocations remain leaked or owned. This violates fail-closed allocator cleanup and makes subsequent reuse scientifically and tenant-isolation unsafe.",
+      "required_action": "Collect rather than suppress every queue/free/reset failure; require reset_prefix_cache() is callable and returns true; inspect every allocated destination block for zero owners/refcount, absent hash, allocator availability, and expected pool count; preserve the original error plus cleanup errors; mark the runtime terminal and prohibit further engine steps when any proof fails. Add free-error, reset-false, reset-error, residual-owner/hash/refcount, and pool-count tests."
+    },
+    {
+      "id": "HIGH-CUDA-VISIBILITY-AND-ATOMIC-ADMISSION-UNPROVEN",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:492",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:935",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:979",
+        "python/sloforge/continuum/adapters/vllm_reclamation.py:1039"
+      ],
+      "finding": "The module orders its copy stream against torch.cuda.current_stream and synchronizes before returning, but no current worker/live-runtime path imports vllm_reclamation_v11, no code proves prior vLLM work is fenced into the selected current stream, and the required exclusive gate over both engine.step and request admission is only a caller contract. No local event/gate test exists.",
+      "evidence": "Repository search found no v11 adapter symbol in experiments/branchfabric/gpu_reclamation_worker.py or vllm_live.py.",
+      "impact": "The standalone functions cannot yet prove that native pages are quiescent before scatter, that early root cache publication is invisible to unrelated requests, or that the first resumed vLLM step observes the completed group.",
+      "required_action": "Integrate the v11 path behind a separate flag; hold one explicit admission-plus-engine-step gate through allocation/write/validation/cache/enqueue; record or wait on the last vLLM/default-stream event before native access; prove the final fence before resume; add deterministic mock stream/event/slot-lifetime and unrelated-admission tests before any real GPU invocation."
+    },
+    {
+      "id": "HIGH-MANDATORY-LOCAL-PROPERTY-MATRIX-INCOMPLETE",
+      "source_locations": [
+        "tests/python/test_vllm_reclamation_v11.py"
+      ],
+      "finding": "The 13 green v11 cases are valuable but do not constitute the required extensive property/failure matrix. Fixtures keep num_blocks=48 and block_size=4, use three fixed seeds, and do not independently exercise randomized page order, multiple block counts/sizes, every partial extent, missing/duplicate/reordered consumed chunks, wrong branch/ancestry, zero-queue contamination cleanup, every failure boundary, allocator cleanup failure, or mocked CUDA event ordering.",
+      "impact": "The user-mandated local equivalence and changed-verification proof is incomplete even though the current targeted suite passes.",
+      "required_action": "Add deterministic seeded property tests spanning the required geometry/layout matrix and explicit fail-closed cases. Require all to pass in the baked dependency environment before GPU allocation."
+    },
+    {
+      "id": "HIGH-FRESH-NATIVE-ALLOCATION-EVIDENCE-NOT-INTEGRATED",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1200",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1238"
+      ],
+      "finding": "The stager proves block-table shape and drained IDs but its result contains no destination GPU UUID or allocation epoch, and no v11 worker integration currently compares destination allocation tuples with captured source tuples or persists exact owner/refcount/hash evidence.",
+      "impact": "The v11 path has not yet independently proved the required fresh destination native allocations or absence of stale ownership.",
+      "required_action": "Wire the existing live observer's GPU UUID/allocation epochs and block inspection into v11 pre-admission evidence; reject any missing epoch or identical source allocation tuple and persist the complete mapping."
+    }
+  ],
+  "medium_findings": [
+    {
+      "id": "MEDIUM-DEVICE-INDEX-PREFLIGHT",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:471",
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:900"
+      ],
+      "finding": "Capture and restore compare only tensor.device.type. Layers split across cuda:0 and cuda:1 would pass this preflight even though streams, bounded chunks, and native ownership are single-device operations.",
+      "required_action": "Require every tensor.device equals tensors[0].device and equals the explicit expected full device identity, not only the string type; reject before any write."
+    },
+    {
+      "id": "MEDIUM-STALE-ZERO-QUEUE-CHECK-DRAINS-EVIDENCE",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1190"
+      ],
+      "finding": "The strict entry check correctly rejects a stale queue but uses destructive take_new_block_ids before entering the cleanup try. The offline probe rejected ID 99 but left the queue empty.",
+      "required_action": "Either inspect without destructive drain, restore/quarantine the IDs, or classify this condition as terminal contamination and persist the drained IDs before raising."
+    },
+    {
+      "id": "MEDIUM-POSTLOOP-COVERAGE-FAILURE-NOT-SCRUBBED",
+      "source_locations": [
+        "python/sloforge/continuum/adapters/vllm_reclamation_v11.py:1022"
+      ],
+      "finding": "The try/scrub boundary ends before final logical-byte and full-coverage assertions. A regression or injected accounting failure after successful writes would raise without scrubbing this function's destination subset.",
+      "required_action": "Compute deterministic coverage before mutation where possible and keep every post-write validation/assertion inside the scrub-on-failure boundary."
+    }
+  ],
+  "explicit_local_gate_status": {
+    "raw_bit_bfloat16_integrity": "PASS",
+    "transport_alias_and_in_place_mutation": "PASS",
+    "normalized_block_dimensions_before_write": "PASS",
+    "all_rank_five_block_axis_positions": "PASS_BY_OFFLINE_PROBE",
+    "full_page_zero_fill_removal": "PASS",
+    "partial_page_raw_tail_zero": "PASS",
+    "destination_mismatch_detection_and_scrub": "PASS",
+    "allocator_free_reset_and_post_cleanup_proof": "FAIL",
+    "fresh_gpu_uuid_and_allocation_epoch_proof": "FAIL_NOT_INTEGRATED",
+    "cuda_stream_visibility_and_slot_lifetime": "FAIL_NOT_PROVEN_LOCALLY",
+    "exclusive_admission_and_engine_step_gate": "FAIL_NOT_INTEGRATED",
+    "required_property_and_failure_matrix": "FAIL_INCOMPLETE",
+    "frozen_v10_path_modified": false,
+    "overall": "FAIL_DO_NOT_ALLOCATE_GPU"
+  },
+  "go_no_go": {
+    "decision": "NO_GO",
+    "next_review_entry_conditions": [
+      "HIGH-ALLOCATOR-CLEANUP-NOT-FAIL-CLOSED is fixed and adversarially tested.",
+      "The v11 worker path and exclusive admission/engine-step gate are integrated behind a distinct implementation flag.",
+      "Mock CUDA event ordering and exact device-index preflight pass locally.",
+      "GPU UUID/allocation epoch plus post-cleanup native block evidence is wired and tested.",
+      "The mandatory deterministic property/failure matrix passes.",
+      "The separate GPU budget and authorization gate passes."
+    ]
+  }
+}

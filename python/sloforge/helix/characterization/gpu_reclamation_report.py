@@ -369,10 +369,9 @@ class Experiment004ReportEvidence(_StrictModel):
             if any(counts[mode] != expected[mode] for mode in ReclamationMode):
                 raise ValueError("outcome evidence trial counts differ from the report")
             decision = select_outcome(self.outcome_evidence)
-            placement_required = decision.outcome in {
-                Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST,
-                Experiment004Outcome.FABRIC_HARDWARE_INTEREST,
-            }
+            placement_required = (
+                decision.outcome is Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST
+            )
             if placement_required != (
                 self.placement_recommendation is not None and self.placement_provenance is not None
             ):
@@ -888,6 +887,7 @@ def derive_outcome_evidence(evidence: Experiment004ReportEvidence) -> OutcomeEvi
     )
     return OutcomeEvidence(
         valid_pilot=True,
+        integrated_v11_scientifically_valid=True,
         kill_trials=len(kill),
         naive_trials=len(naive),
         optimized_trials=len(optimized),
@@ -901,6 +901,10 @@ def derive_outcome_evidence(evidence: Experiment004ReportEvidence) -> OutcomeEvi
         optimized_path_measured_after_naive=True,
         optimized_path_semantics_match_naive=True,
         optimized_movement_fraction=operational_wall / full_wall,
+        integrated_residual_critical_path_measured=True,
+        amdahl_analysis_calculated=True,
+        economic_comparison_established=True,
+        gpu_methodology_valid=True,
         chain_gates=chain_gates,
     )
 
@@ -1467,14 +1471,15 @@ def _validate_real_provenance(evidence: Experiment004ReportEvidence) -> None:
 
 
 def decision_document_path(outcome: Experiment004Outcome) -> str:
-    if outcome is Experiment004Outcome.GPU_SOFTWARE_TARGET:
-        return "docs/branchfabric/GPU_SOFTWARE_TARGET.md"
-    if outcome in {
-        Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST,
-        Experiment004Outcome.FABRIC_HARDWARE_INTEREST,
-    }:
-        return "docs/branchfabric/STATE_PIPELINE_HARDWARE_INTEREST.md"
-    return "docs/branchfabric/MOVEMENT_CLOSED.md"
+    if outcome is Experiment004Outcome.GPU_SOFTWARE_WINS:
+        return "docs/branchfabric/GPU_STATE_PIPELINE_DIRECTION.md"
+    if outcome is Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST:
+        return "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE_FINAL.md"
+    if outcome is Experiment004Outcome.SOFTWARE_WINS:
+        return "docs/branchfabric/BRANCHFABRIC_SOFTWARE_CLOSURE_FINAL.md"
+    if outcome is Experiment004Outcome.PRESERVATION_NOT_ECONOMIC:
+        return "docs/branchfabric/PRESERVATION_POLICY.md"
+    return "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE_FINAL.md"
 
 
 def _report_payload(
@@ -1719,11 +1724,7 @@ def publish_experiment_004_report(
         )
         experiment_005_path = (
             destination_root / "docs/branchfabric/EXPERIMENT_005_PLAN.md"
-            if decision.outcome
-            in {
-                Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST,
-                Experiment004Outcome.FABRIC_HARDWARE_INTEREST,
-            }
+            if decision.outcome is Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST
             else None
         )
         manifest_path = (
@@ -1744,14 +1745,8 @@ def publish_experiment_004_report(
         plot_svg_paths.append(str(svg_path))
     if decision_path is not None:
         assert decision is not None
-        contract_note = (
-            "The contract requires this outcome to use the MOVEMENT_CLOSED document "
-            "filename; the measured conclusion remains PRESERVATION_NOT_ECONOMIC.\n\n"
-            if decision.outcome is Experiment004Outcome.PRESERVATION_NOT_ECONOMIC
-            else ""
-        )
         files[decision_path] = (
-            f"# {decision.outcome.value}\n\n{contract_note}{decision.rationale}\n\n"
+            f"# {decision.outcome.value}\n\n{decision.rationale}\n\n"
             f"Hardware-interest chains: {', '.join(decision.hardware_interest_chain_ids) or 'none'}\n"
         ).encode()
     if characterization_path is not None:
