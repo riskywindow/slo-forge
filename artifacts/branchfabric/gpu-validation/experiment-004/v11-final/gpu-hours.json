@@ -1,0 +1,22 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-gpu-hours-snapshot/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "authoritative_ledger": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "authoritative_ledger_sha256": "7a70b9295f7fac3f29e115cbb634b20bea3d3b7a96b401180c69a320fa4088f5",
+  "price_per_a100_hour_usd": 2.4984,
+  "measured_controller_and_analysis_seconds_per_gpu": 211.250036065,
+  "actual_provider_allocation_seconds_per_gpu": 218.029850356,
+  "actual_provider_allocation_seconds_status": "recovered-from-completed-function-call",
+  "actual_a100_seconds": 436.059700712,
+  "actual_a100_hours": 0.12112769464222221,
+  "actual_cost_usd": 0.302625432294128,
+  "conservative_charged_a100_seconds": 1176.0,
+  "conservative_charged_a100_hours": 0.32666666666666666,
+  "conservative_charged_cost_usd": 0.8161440000000001,
+  "cumulative_conservative_a100_seconds": 17289.51362608598,
+  "cumulative_conservative_a100_hours": 4.802642673912772,
+  "cumulative_conservative_cost_usd": 11.99892245650367,
+  "remaining_authorized_a100_seconds": 4310.48637391402,
+  "active_reservations": 0,
+  "accounting_note": "The completed FunctionCall supplied the exact actual allocation interval read-only after the coordinator defect was diagnosed. The authoritative ledger remains conservatively settled at the full reservation, as required by its terminal failure policy."
+}

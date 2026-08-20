@@ -337,7 +337,20 @@ def _exact_inventory(remote: Mapping[str, Any]) -> tuple[dict[str, Any], dict[st
     after = controller.get("inventory_after")
     if not isinstance(before, list) or not isinstance(after, list) or len(before) != GPU_COUNT:
         raise ValueError("integrated result omits exactly two GPU inventory rows")
-    if len(after) != GPU_COUNT or before != after:
+    stable_identity_fields = (
+        "index",
+        "uuid",
+        "name",
+        "driver_version",
+        "memory_total_mib",
+    )
+    if len(after) != GPU_COUNT or any(
+        not isinstance(before_row, dict)
+        or not isinstance(after_row, dict)
+        or tuple(before_row.get(field) for field in stable_identity_fields)
+        != tuple(after_row.get(field) for field in stable_identity_fields)
+        for before_row, after_row in zip(before, after, strict=True)
+    ):
         raise ValueError("integrated GPU identity changed during the invocation")
     rows: list[dict[str, Any]] = []
     for row in before:

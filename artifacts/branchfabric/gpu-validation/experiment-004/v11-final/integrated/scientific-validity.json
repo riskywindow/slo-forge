@@ -1,0 +1,87 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-final-scientific-validity/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "terminal_failure_stage": "source-allocation-zero-queue-verification",
+  "terminal_failure_type": "V11RuntimeTeardownRequired",
+  "terminal_failure_message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+  "hardware": {
+    "gpu_count": 2,
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "gpu_uuids": [
+      "GPU-c4530a66-a98b-a525-d2f6-5641c12d2e32",
+      "GPU-e44cc55c-11f8-bb1d-0120-201b7d4caf3d"
+    ],
+    "topology_label": "SXM4",
+    "direct_v10_model_name_comparable": true,
+    "interconnect_comparability_proven": false
+  },
+  "pre_transaction_gates": {
+    "exactly_two_eligible_gpus": true,
+    "engines_ready": true,
+    "sanity_12_rps": true,
+    "sanity_15_rps": true,
+    "normal_trigger_emitted": true,
+    "normal_trigger_depth": 21,
+    "normal_trigger_emergency_headroom": 43,
+    "trigger_reaction_latency_ns": 290080,
+    "rollout_admission_stop_latency_ns": 20103482
+  },
+  "transaction_gates": {
+    "authenticated_capture_plan_built": true,
+    "logical_state_bytes_validated": 1056964608,
+    "source_allocation_zero_queue_exact_match": false,
+    "source_state_released": false,
+    "hbm_reclaimed": false,
+    "gpu1_became_useful": false,
+    "queue_drained": false,
+    "slo_restored": false,
+    "restore_executed": false,
+    "branch_correctness_8_of_8": false,
+    "integrated_movement_accounted": false,
+    "non_overlapping_critical_paths_available": false
+  },
+  "emergency_abort": {
+    "occurred": true,
+    "depth": 64,
+    "reason": "GPU1 had already failed the source allocation identity gate, so useful capacity never arrived while GPU0 remained under offered load",
+    "normal_trigger_was_not_delayed_to_emergency_ceiling": true
+  },
+  "root_cause": "retained-engine readiness and calibration allocations were not epoch-separated or drained before the rollout capture; resetting prefix cache did not reset the production allocation zero-queue, so its longer allocation history differed from the current 1,152-block authenticated plan",
+  "cleanup": {
+    "in_function_cleanup_pass": true,
+    "provider_cleanup_pass": true,
+    "forced_kill_required": false
+  },
+  "policy_consequence": {
+    "freeze_v11": false,
+    "run_kill_and_recompute": false,
+    "fit_break_even": false,
+    "calculate_integrated_amdahl": false,
+    "classification": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "provenance": [
+    {
+      "artifact": "integrated/raw/REMOTE_MANIFEST.c.json",
+      "sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8"
+    },
+    {
+      "artifact": "integrated/raw/exp004-v11-integrated-s41-c/controller-result.json",
+      "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+    },
+    {
+      "artifact": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json",
+      "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+    },
+    {
+      "artifact": "integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json",
+      "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+    },
+    {
+      "artifact": "integrated/raw/exp004-v11-integrated-s41-c/in_function_cleanup.json",
+      "sha256": "901baea2d82de01d3dac49cbfcee90deff5e7059a30c99afd767431a91478d0c"
+    }
+  ]
+}

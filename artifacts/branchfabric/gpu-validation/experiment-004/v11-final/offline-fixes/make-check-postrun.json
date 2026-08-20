@@ -1,0 +1,26 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-make-check/v1",
+  "observed_at_utc": "2026-08-20T03:40:29Z",
+  "status": "PASS",
+  "command": "make check",
+  "python": {
+    "ruff_format": "PASS",
+    "ruff_check": "PASS",
+    "mypy": "PASS",
+    "pytest_passed": 1916,
+    "pytest_skipped": 8
+  },
+  "rust": {
+    "cargo_fmt": "PASS",
+    "cargo_clippy": "PASS",
+    "cargo_test": "PASS"
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "tests_passed": 37,
+    "tests_skipped": 1,
+    "build": "PASS"
+  },
+  "note": "A first postrun invocation observed one non-reproducible host-scheduling burst in the frozen v10 CPU live-driver fixture; its isolated rerun passed and this complete second invocation passed without source changes."
+}

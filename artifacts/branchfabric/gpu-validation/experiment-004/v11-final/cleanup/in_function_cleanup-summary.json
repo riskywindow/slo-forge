@@ -1,0 +1,43 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-cleanup-summary/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "status": "PASS",
+  "parent_pid": 2,
+  "parent_pgid": 2,
+  "parent_sid": 2,
+  "lifecycle": [
+    "RUNNING",
+    "QUIESCE",
+    "ENGINE_STOP",
+    "WORKER_STOP",
+    "CHILD_REAP",
+    "PGID_EMPTY",
+    "CUDA_RELEASED",
+    "FUNCTION_RETURN"
+  ],
+  "parent_reaped_all_owned_children": true,
+  "surviving_children": 0,
+  "surviving_process_groups": 0,
+  "serving_workers_after": 0,
+  "rollout_workers_after": 0,
+  "profiler_processes_after": 0,
+  "zombie_processes_after": 0,
+  "resource_tracker_processes_after": 0,
+  "leaked_ipc_resources": 0,
+  "leaked_threads": 0,
+  "cuda_compute_processes_after": 0,
+  "pipes_closed": true,
+  "cuda_released": true,
+  "forced_kill_required": false,
+  "forced_kills": [],
+  "termination_actions": [
+    {
+      "pid": 8,
+      "process_group": 8,
+      "signal": "SIGTERM",
+      "forced": false
+    }
+  ],
+  "raw_evidence": "../integrated/raw/exp004-v11-integrated-s41-c/in_function_cleanup.json",
+  "raw_evidence_sha256": "901baea2d82de01d3dac49cbfcee90deff5e7059a30c99afd767431a91478d0c"
+}

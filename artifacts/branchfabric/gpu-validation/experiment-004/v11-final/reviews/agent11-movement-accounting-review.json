@@ -1,0 +1,317 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-movement-accounting-review/v1",
+  "agent": 11,
+  "role": "movement-accounting-review",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "reviewed_at_utc": "2026-08-20T03:27:01Z",
+  "review_status": "PASS",
+  "scientific_validity": "FAIL",
+  "review_conclusion": "Attempt-c validated the exact 1,056,964,608-byte runtime topology and completed the frozen v11 source gather/repack/D2H capture in memory. That return also proves authoritative export StatePassRecord validation completed. The subsequent source-allocation zero-queue exception discarded the transient capture before a result or pass ledger was serialized, and no restore ran. Logical state bytes are reportable with this qualification; integrated physical movement, amplification, stage timings, and residual shares remain unavailable. The established v11 micro-validation values remain valid micro evidence but are explicitly ineligible as substitutes for those missing integrated measurements.",
+  "execution_constraints": {
+    "offline_only": true,
+    "gpu_invoked_by_reviewer": false,
+    "modal_invoked_by_reviewer": false,
+    "network_invoked_by_reviewer": false,
+    "source_modified": false
+  },
+  "bundle_audit": {
+    "remote_manifest_artifact_count": 465,
+    "triton_compilation_artifact_count": 408,
+    "non_triton_artifact_count": 57,
+    "non_triton_artifacts_present_locally": 57,
+    "non_triton_artifacts_hash_checked": 57,
+    "non_triton_hash_mismatch_count": 0,
+    "canonical_integrated_state_pass_collection_named_in_manifest": false,
+    "integrated_movement_summary_named_in_manifest": false,
+    "integrated_critical_path_or_waterfall_named_in_manifest": false,
+    "integrated_result_artifacts_named_in_manifest": [
+      "controller-result.json",
+      "sanity/12-rps/result.json",
+      "sanity/15-rps/result.json",
+      "sanity/sanity-result.json"
+    ],
+    "completed_rollout_or_serving_result_named_in_manifest": false
+  },
+  "terminal_failure": {
+    "controller_status": "failed",
+    "failed_role": "rollout",
+    "worker_return_code": 1,
+    "failure_stage": "source-allocation-zero-queue-verification",
+    "failure_type": "V11RuntimeTeardownRequired",
+    "failure_message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+    "authenticated_capture_plan_built": true,
+    "exact_runtime_topology_validated": true,
+    "source_ownership_proof_completed": true,
+    "source_export_capture_completed_transiently": true,
+    "source_export_state_passes_validated_transiently": true,
+    "source_allocation_zero_queue_exact_match": false,
+    "source_state_released": false,
+    "hbm_reclaimed": false,
+    "restore_executed": false
+  },
+  "integrated_state_pass_accounting": {
+    "status": "UNAVAILABLE",
+    "canonical_source_export_state_passes_completed_transiently": true,
+    "authoritative_export_pass_validation_completed_control_flow_proven": true,
+    "persisted_state_pass_records_present": false,
+    "completed_integrated_export_plus_restore_collection_present": false,
+    "raw_state_pass_record_count": null,
+    "unique_pass_id_count": null,
+    "full_state_pass_count": null,
+    "export_pass_count": null,
+    "restore_pass_count": null,
+    "tier_conservation_check": null,
+    "dependency_graph_check": null,
+    "cuda_event_evidence_check": null,
+    "reason": "capture_native_to_transport_v11 returned before consume_exact_source_allocation_queue_v11 raised. Returning requires recorder resolution and validate_authoritative_pass_records, so canonical export records existed transiently. The exception path serialized only failure metadata, not captured.state_passes, their count, or their timings; no restore records exist. The transient export therefore cannot be independently reduced or promoted as a completed integrated movement ledger."
+  },
+  "integrated_movement": {
+    "status": "UNAVAILABLE",
+    "configured_expected_logical_bytes": 1056964608,
+    "measured_logical_bytes": 1056964608,
+    "logical_state_bytes_reportable": true,
+    "logical_state_bytes_qualification": "Exact attempt-c runtime topology value proven by build_canonical_capture_plan followed by validate_exact_micro_topology before the successful source capture return; it is not evidence of a completed reclamation transaction.",
+    "full_physical_bytes": null,
+    "full_physical_amplification": null,
+    "external_movement_bytes": null,
+    "external_movement_amplification": null,
+    "avoidable_physical_bytes": null,
+    "avoidable_amplification": null,
+    "gpu_intermediate_bytes": null,
+    "host_intermediate_bytes": null,
+    "native_endpoint_bytes": null,
+    "link_bytes": null,
+    "temporary_host_peak_bytes": null,
+    "temporary_gpu_peak_bytes": null,
+    "logical_bytes_do_not_imply_reportable_physical_movement": true,
+    "v10_v11_integrated_movement_comparison_available": false,
+    "reason": "The exact runtime topology and transient source export establish 1,056,964,608 logical bytes. However, the exception discarded the export StatePassRecords before serialization and no restore ran, so physical bytes, per-tier totals, temporary peaks, and amplification cannot be independently reduced into a completed integrated result."
+  },
+  "critical_path_audit": {
+    "status": "UNAVAILABLE",
+    "available_pre_state_events": {
+      "overload_detected_ns": 203851888131,
+      "trigger_predicate_satisfied_ns": 204101888131,
+      "reclaim_trigger_emitted_ns": 204102178211,
+      "controller_reaction_latency_ns": 290080,
+      "rollout_admission_stop_ns": 204122281693,
+      "trigger_to_rollout_admission_stop_ns": 20103482
+    },
+    "reclamation_chain": {
+      "complete": false,
+      "state_quiescence_reached_control_flow_proven": true,
+      "state_quiescence_timestamp_available": false,
+      "source_authentication_status": "PASS_TRANSIENT",
+      "source_gather_repack_d2h_capture_status": "PASS_TRANSIENT",
+      "source_publish_status": "PASS_TRANSIENT",
+      "source_authentication_gather_repack_duration_seconds": null,
+      "d2h_duration_seconds": null,
+      "publish_duration_seconds": null,
+      "source_release_duration_seconds": null,
+      "hbm_reclaim_duration_seconds": null,
+      "gpu1_serving_ready_duration_seconds": null,
+      "non_overlapping_stage_sum_available": false
+    },
+    "restore_chain": {
+      "complete": false,
+      "restore_trigger_timestamp_available": false,
+      "checkpoint_authentication_duration_seconds": null,
+      "h2d_duration_seconds": null,
+      "direct_scatter_native_write_duration_seconds": null,
+      "raw_bit_hash_validation_duration_seconds": null,
+      "admission_duration_seconds": null,
+      "first_resumed_token_duration_seconds": null,
+      "non_overlapping_stage_sum_available": false
+    },
+    "integrated_residual_source_chain_time_seconds": null,
+    "integrated_residual_source_chain_share": null,
+    "integrated_residual_restore_chain_time_seconds": null,
+    "integrated_residual_restore_chain_share": null,
+    "time_to_hbm_reclamation_residual_fraction": null,
+    "time_to_useful_gpu1_capacity_residual_fraction": null,
+    "time_to_slo_restoration_residual_fraction": null,
+    "rollout_restore_residual_fraction": null,
+    "full_preservation_transaction_residual_fraction": null,
+    "reason": "Trigger-side timestamps were persisted, and source quiescence/authentication/gather/repack/D2H/publish were reached by control-flow proof, but their timestamps and pass records were lost on the exception path. Source release, HBM reclaim, serving-ready, and the entire restore chain were not executed. This cannot provide a complete, non-overlapping stage decomposition or any residual state-path fraction."
+  },
+  "reference_evidence_not_eligible_for_substitution": {
+    "frozen_v10": {
+      "scientifically_valid": true,
+      "logical_state_bytes": 1056964608,
+      "full_physical_bytes": 61303947264,
+      "full_physical_amplification": 58.0,
+      "external_movement_bytes": 3170893824,
+      "external_movement_amplification": 3.0,
+      "avoidable_physical_bytes": 32765902848,
+      "avoidable_amplification": 31.0,
+      "full_state_pass_count": 30,
+      "eligible_as_v10_baseline_only": true
+    },
+    "v11_micro_validation": {
+      "scientifically_admissible_micro_measurement": true,
+      "topology": "NVIDIA A100 80GB PCIe",
+      "logical_state_bytes": 1056964608,
+      "full_physical_bytes": 22197063040,
+      "full_physical_amplification": 21.000762818351625,
+      "external_movement_bytes": 2114200960,
+      "external_movement_amplification": 2.000257098485553,
+      "avoidable_physical_bytes": 12684381568,
+      "avoidable_amplification": 12.000762818351625,
+      "raw_state_pass_record_count": 10454,
+      "full_state_pass_count": 10,
+      "export_wall_seconds": 2.61309087,
+      "restore_wall_seconds": 4.438193614,
+      "eligible_as_integrated_v11_measurement": false,
+      "eligible_for_integrated_residual_share": false,
+      "eligible_for_integrated_amdahl": false,
+      "eligible_for_integrated_economics": false,
+      "scope_limit": "These values passed real-A100 micro-validation and admitted the one integrated retry. They do not describe attempt-c's interrupted integrated transaction and must not fill any null integrated field."
+    },
+    "micro_substitution_forbidden": true
+  },
+  "mandatory_evidence_consequences": {
+    "integrated_amdahl": {
+      "status": "UNAVAILABLE",
+      "reason": "Neither a measured residual-chain duration nor a completed important-path denominator exists.",
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null
+    },
+    "preservation_economics": {
+      "status": "UNAVAILABLE",
+      "valid_integrated_preserve_coefficients": false,
+      "kill_recompute_trial_run": false,
+      "measured_break_even_model_fitted": false,
+      "reason": "Attempt-c did not complete preservation and the precommitted validity gate correctly prevented the kill/recompute arm, leaving both sides of the measured economic comparison incomplete."
+    },
+    "hardware_numeric_gate": {
+      "regular_residual_chain_measured": false,
+      "integrated_fraction_at_least_0_15": null,
+      "realistic_speedup_at_least_1_20": null,
+      "bandwidth_dataflow_dominated": null,
+      "external_placement_advantage": null,
+      "passed": false
+    },
+    "classification": {
+      "required_terminal_state": "HARDWARE_GATE_NOT_REACHED",
+      "software_wins_supported": false,
+      "gpu_software_wins_supported": false,
+      "branchfabric_hardware_interest_supported": false,
+      "preservation_not_economic_supported": false,
+      "experiment_005_permitted": false,
+      "rationale": "Mandatory integrated movement, residual critical-path, Amdahl, and economic evidence is missing. Incomplete evidence cannot be converted into SOFTWARE_WINS or any other substantive technical/economic conclusion."
+    }
+  },
+  "review_gates": [
+    {
+      "gate": "attempt_c_non_triton_bundle_hashes_match_remote_manifest",
+      "status": "PASS"
+    },
+    {
+      "gate": "transient_source_export_and_pass_validation_reached",
+      "status": "PASS_CONTROL_FLOW_PROVEN"
+    },
+    {
+      "gate": "logical_state_bytes_reportable_from_validated_runtime_topology",
+      "status": "PASS",
+      "value": 1056964608
+    },
+    {
+      "gate": "persisted_complete_integrated_state_pass_collection_available",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "integrated_movement_amplification_available",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "complete_non_overlapping_reclamation_stages_available",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "complete_non_overlapping_restore_stages_available",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "micro_values_kept_out_of_integrated_fields",
+      "status": "PASS"
+    },
+    {
+      "gate": "mandatory_evidence_policy_applied",
+      "status": "PASS",
+      "classification": "HARDWARE_GATE_NOT_REACHED"
+    }
+  ],
+  "provenance": {
+    "bundle_root": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c",
+    "artifacts": [
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/REMOTE_MANIFEST.c.json",
+        "sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/controller-result.json",
+        "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json",
+        "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json",
+        "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/barriers/v11-rollout-admission-stop.json",
+        "sha256": "f87312088d181d1a0a6b48ffc183332bf8b0658c50d4b29eb30d8c6221be2e0c"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/scientific-validity.json",
+        "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/state-passes/status.json",
+        "sha256": "bbabbea46b18490581663eb3f4b4ea827bacb861906225efc2c6b9d3832f0483"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/movement/status.json",
+        "sha256": "5bb820ec22e4aa3c92a0b567823b416db0d17530af79fd6d3f4346a60e6d3286"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+        "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-measured-comparison-terminal-corrected.json",
+        "sha256": "c4c00e717240d23e66f296a62d9a9952808f248d7f02f24f1b1b0a4033df8711"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff-terminal-corrected.json",
+        "sha256": "c9289df2d654f9f4dbb4cb26edc9abd4c63e153ee26befb699a6ac260359c940"
+      },
+      {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+        "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+      }
+    ],
+    "source_bindings": [
+      {
+        "path": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+        "sha256": "1b967aaa7485c807393ae89756b537daabe5c1b0c82e2c2f5ea60fd56948aeb2",
+        "binding": "run_integrated_v11_gpu1 orders plan/topology validation, source ownership, capture_native_to_transport_v11, manifest commitment, then consume_exact_source_allocation_queue_v11"
+      },
+      {
+        "path": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+        "sha256": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30",
+        "binding": "validate_exact_micro_topology enforces the exact logical byte and block topology; the failing queue gate is after capture"
+      },
+      {
+        "path": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+        "sha256": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+        "binding": "capture_native_to_transport_v11 resolves and validates authoritative export pass records before returning V11CaptureResult"
+      }
+    ]
+  },
+  "terminal_statement": "PASS: movement-accounting review is complete. Attempt-c reportably validated 1,056,964,608 logical bytes and completed a transient source export, but its StatePassRecords and stage timings were not serialized before the queue-gate exception and no restore ran. Integrated physical movement, amplification, residual shares, Amdahl, and economics remain unavailable; micro values were not substituted, so HARDWARE_GATE_NOT_REACHED is mandatory."
+}

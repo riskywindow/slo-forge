@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-rollout-outcome/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "status": "FAILED_BEFORE_RECLAMATION",
+  "branch_count_prepared": 8,
+  "transaction_ready": true,
+  "failure_stage": "source-allocation-zero-queue-verification",
+  "failure_type": "V11RuntimeTeardownRequired",
+  "failure_message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+  "source_released": false,
+  "hbm_reclaimed": false,
+  "restore_executed": false,
+  "fresh_disjoint_allocations_proven": false,
+  "integrity_proven": false,
+  "branches_resumed": 0,
+  "expected_branches": 8,
+  "exact_first_token_matches": null,
+  "continuation_tokens_per_branch": null
+}

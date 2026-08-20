@@ -1,0 +1,128 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-gpu-cuda-adversary/v1",
+  "agent": 14,
+  "role": "gpu-cuda-adversary",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "reviewed_at_utc": "2026-08-20T03:26:31Z",
+  "review_status": "PASS",
+  "adversary_decision": "UNRESOLVED_MANDATORY_EVIDENCE_MISSING",
+  "summary": "The why-not-CUDA question cannot be decided from attempt c. The run failed before source release, integrated movement publication, restore, or any complete residual-chain trace. There is no measured integrated bottleneck for CUDA, Triton, CUDA graphs, copy-engine overlap, or external placement to compete over.",
+  "review_constraints": {
+    "local_evidence_only": true,
+    "modal_or_cloud_access": false,
+    "gpu_access": false,
+    "source_modified": false,
+    "implementation_proposal_made": false,
+    "performance_values_invented": false,
+    "micro_validation_not_promoted_to_integrated_evidence": true
+  },
+  "decisive_question": "Given the measured integrated v11 result and measured kill/recompute baseline, would I independently invest engineering time into a non-GPU state accelerator?",
+  "answer": "NO_DECISION_POSSIBLE",
+  "answer_reason": "There is no scientifically valid integrated v11 result and the precommitted validity dependency correctly prevented the kill/recompute arm. An investment decision for or against a non-GPU accelerator would therefore be unsupported.",
+  "candidate_chain_review": {
+    "source_authentication_gather_repack_d2h": {
+      "surviving_integrated_chain_measured": false,
+      "could_fused_cuda_remove_or_accelerate": "UNKNOWN",
+      "could_triton_remove_or_accelerate": "UNKNOWN",
+      "could_cuda_graphs_reduce_launch_control": "UNKNOWN",
+      "could_copy_engine_overlap_capture_headroom": "UNKNOWN",
+      "gpu_sm_time_measured": false,
+      "copy_engine_utilization_measured": false,
+      "host_or_pcie_bottleneck_measured": false,
+      "external_placement_resource_advantage_measured": false,
+      "reason": "Attempt c did not publish a completed integrated source-chain interval or its pass ledger."
+    },
+    "restore_authentication_h2d_scatter_validation": {
+      "surviving_integrated_chain_measured": false,
+      "could_fused_cuda_remove_or_accelerate": "UNKNOWN",
+      "could_triton_remove_or_accelerate": "UNKNOWN",
+      "could_cuda_graphs_reduce_launch_control": "UNKNOWN",
+      "could_copy_engine_overlap_capture_headroom": "UNKNOWN",
+      "gpu_sm_time_measured": false,
+      "copy_engine_utilization_measured": false,
+      "host_or_pcie_bottleneck_measured": false,
+      "external_placement_resource_advantage_measured": false,
+      "reason": "Restore did not execute."
+    }
+  },
+  "required_why_not_cuda_inputs": {
+    "integrated_chain_wall_time": null,
+    "integrated_chain_critical_path_share": null,
+    "canonical_integrated_pass_bytes": null,
+    "integrated_cuda_event_time": null,
+    "gpu_sm_cost": null,
+    "copy_engine_utilization": null,
+    "kernel_launch_count_and_overhead": null,
+    "achievable_copy_compute_overlap": null,
+    "host_bandwidth_under_serving_load": null,
+    "pcie_or_nvlink_path_bandwidth": null,
+    "external_placement_lower_bound": null,
+    "fused_cuda_or_triton_lower_bound": null,
+    "kill_recompute_comparison": null,
+    "status": "UNAVAILABLE"
+  },
+  "micro_reference_assessment": {
+    "micro_source_chain_measured": true,
+    "micro_restore_chain_measured": true,
+    "topology": "A100-80GB PCIe",
+    "sufficient_to_answer_why_not_cuda": false,
+    "reasons": [
+      "The micro source and restore walls are coarse state-path measurements rather than an integrated serving critical path.",
+      "Their wall, CUDA-event, synchronization, timing-owner, and integrity-owner views overlap and cannot be summed into isolated CUDA-removable work.",
+      "They do not provide integrated GPU SM occupancy, copy-engine utilization, launch overhead, or serving-interference cost.",
+      "They use PCIe A100 micro topology while attempt c used two A100-SXM4 devices, and exact interconnect comparability with v10 was not proven.",
+      "They cannot establish that external placement beats a fused CUDA/Triton path or that GPU software captures most remaining value."
+    ]
+  },
+  "adversarial_findings": {
+    "software_has_removed_obvious_redundant_movement_in_micro_validation": true,
+    "same_fact_proven_for_completed_integrated_transaction": false,
+    "regular_integrated_residual_chain_exists": null,
+    "integrated_residual_share_at_least_0_15": null,
+    "realistic_acceleration_at_least_1_20x": null,
+    "bandwidth_or_dataflow_dominance": null,
+    "cuda_or_triton_captures_most_headroom": null,
+    "external_placement_has_architectural_advantage": null,
+    "preservation_is_economically_relevant": null
+  },
+  "classification_consequence": {
+    "classification": "HARDWARE_GATE_NOT_REACHED",
+    "software_wins_supported": false,
+    "gpu_software_wins_supported": false,
+    "branchfabric_hardware_interest_supported": false,
+    "preservation_not_economic_supported": false,
+    "experiment_005_permitted": false,
+    "rationale": "The CUDA adversary is unresolved because its required integrated measurements are absent. Missing evidence cannot be interpreted as either a GPU-software victory or an external-hardware opportunity."
+  },
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/scientific-validity.json",
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/movement/status.json",
+      "sha256": "5bb820ec22e4aa3c92a0b567823b416db0d17530af79fd6d3f4346a60e6d3286"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/state-passes/status.json",
+      "sha256": "bbabbea46b18490581663eb3f4b4ea827bacb861906225efc2c6b9d3832f0483"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent11-movement-accounting-review.json",
+      "sha256": "89ad069532ce47b6f0aae68426375a4729113afe7350998fc304e200e93f2151"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/residual-chains.json",
+      "sha256": "b1db5c1545550dd04a846a8d7fd367709cdd1ef3ed28ce8dd8e25ef004b2c248"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/hardware-gate/final-classification.json",
+      "sha256": "bd5718d89b93ec1117e6c4d76a6ea97d71242c31b20720bc66afa2991f695c45"
+    }
+  ],
+  "terminal_statement": "PASS: the CUDA/Triton adversary fails closed. No integrated chain is available to assign to CUDA, Triton, graphs, copy engines, or external placement; neither GPU software nor BranchFabric hardware wins; HARDWARE_GATE_NOT_REACHED remains mandatory."
+}

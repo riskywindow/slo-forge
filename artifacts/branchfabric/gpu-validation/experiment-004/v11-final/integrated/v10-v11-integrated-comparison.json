@@ -1,0 +1,50 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-v11-integrated-comparison/v1",
+  "status": "V11_INTEGRATED_UNAVAILABLE",
+  "scientifically_valid_comparison": false,
+  "metrics": {
+    "hbm_reclamation_seconds": {
+      "v10": 5.222174431,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "first_useful_gpu1_capacity_seconds": {
+      "v10": 5.413681427,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "serving_slo_restoration_seconds": {
+      "v10": 11.373208336,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "rollout_first_resumed_token_seconds": {
+      "v10": 7.727983415,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "rollout_continuation_complete_seconds": {
+      "v10": 7.848228746,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "physical_amplification": {
+      "v10": 58.0,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    },
+    "peak_host_temporary_bytes": {
+      "v10": 2965372928,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null
+    }
+  },
+  "reason": "the integrated v11 transaction failed before source release; micro-validation measurements are not substituted"
+}

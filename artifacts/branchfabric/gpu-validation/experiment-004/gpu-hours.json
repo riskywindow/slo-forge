@@ -44,9 +44,24 @@
       "invocation_id": "exp004-v11-integrated-s41-b",
       "requested_gpu": "A100-80GB",
       "reservation_id": "exp004-v11-integrated-s41-b-reservation"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "600ebf1d092ff1e3df980135b0e8bd8a737d6fb70e4706b53cf5814e0c50d499",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-c-conservative-charge.json",
+        "artifact_sha256": "6f7ed477cfb6398c6ac57da46e707feb91aa4c0db3a9a9d9a36f21be7894a80d",
+        "sample_selector": "$"
+      },
+      "failure_stage": "result-validation",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-c",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-c-e827001537117354f89b"
     }
   ],
-  "consumed_additional_gpu_seconds": 16113.513626085978,
+  "consumed_additional_gpu_seconds": 17289.51362608598,
   "hard_additional_gpu_seconds": 21600.0,
   "historical_through_experiment_003_gpu_hours": 1.669146,
   "intervals": [

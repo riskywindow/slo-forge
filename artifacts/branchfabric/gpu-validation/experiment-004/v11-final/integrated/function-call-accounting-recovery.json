@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-function-call-recovery/v1",
+  "recovered_at_utc": "2026-08-20T03:26:54Z",
+  "recovery_operation": "read-only Modal FunctionCall.from_id(...).get",
+  "gpu_resources_consumed_by_recovery": false,
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "function_call_id": "fc-01M0EJ6RTT2VNE1B69GR2DY8Z8",
+  "status": "failed",
+  "scientific_status": "invalid",
+  "gpu_allocation_seconds_per_gpu": 218.029850356,
+  "gpu_count": 2,
+  "actual_a100_seconds": 436.059700712,
+  "actual_a100_hours": 0.12112769464222221,
+  "price_per_a100_hour_usd": 2.4984,
+  "actual_cost_usd": 0.302625432294128,
+  "remote_manifest_sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8",
+  "ledger_settlement_unchanged": true,
+  "conservative_charge_a100_seconds": 1176.0
+}

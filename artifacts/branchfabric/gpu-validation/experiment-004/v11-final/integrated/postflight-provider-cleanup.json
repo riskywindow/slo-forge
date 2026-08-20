@@ -1,0 +1,34 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-provider-cleanup/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "observed_at_utc": "2026-08-20T03:20:08Z",
+  "provider": "Modal",
+  "app_id": "ap-be2vkrA2su66rJKOTmqb92",
+  "app_state": "stopped",
+  "active_apps": 0,
+  "active_tasks": 0,
+  "running_containers": 0,
+  "running_endpoints": 0,
+  "queues": 0,
+  "dicts": 0,
+  "active_gpu_ledger_reservations": 0,
+  "owned_child_processes": 0,
+  "profiler_processes": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "unexpected_persistent_volumes": [],
+  "recently_stopped_app_records": 1,
+  "cleanup_pass": true,
+  "status": "PASS",
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "interpretation": "Modal app list includes recently stopped records; zero active apps means no running or deployed app, while the immutable stopped attempt record remains visible with zero tasks."
+}

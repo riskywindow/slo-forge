@@ -323,6 +323,20 @@ def test_exact_result_manifest_and_measured_settlement(tmp_path: Path) -> None:
     assert settled.intervals[-1].function_call_id == "fc-test-v11-c"
 
 
+def test_gpu_identity_allows_dynamic_utilization_and_memory_samples() -> None:
+    module = _module()
+    before = [_inventory(0), _inventory(1)]
+    after = [dict(row) for row in before]
+    after[0].update({"memory_used_mib": 4096, "utilization_percent": 14})
+    after[1].update({"memory_used_mib": 61440, "utilization_percent": 100})
+
+    inventory = module._exact_inventory(
+        {"controller": {"inventory_before": before, "inventory_after": after}}
+    )
+
+    assert [row["uuid"] for row in inventory] == [row["uuid"] for row in before]
+
+
 def test_download_uses_exact_immutable_modal_prefix(tmp_path: Path) -> None:
     module = _module()
     local_root = tmp_path / "raw" / module.ATTEMPT_ID
