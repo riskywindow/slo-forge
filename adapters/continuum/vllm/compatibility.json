@@ -4,6 +4,7 @@
   "runtime": "vllm",
   "supported_versions": ">=0.9.0,<0.24.0",
   "source_version_examined": "0.23.0",
+  "source_commit_examined": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
   "normal_ci_status": "implemented_but_unexercised",
   "portable_scope": ["kv_transfer_configuration", "kv_connector_v1_validation"],
   "prohibited_claims": [
@@ -11,10 +12,65 @@
     "token_ownership_transfer",
     "semantic_compatibility_decision"
   ],
+  "live_experiment_scope": {
+    "version_pin": "==0.23.0",
+    "same_runtime_only": true,
+    "same_policy_only": true,
+    "same_process_or_adapter_scope": "one V1 synchronous InprocClient/EngineCore process",
+    "cross_runtime_portable": false,
+    "runtime_patch_required": false,
+    "required_environment": {
+      "VLLM_ENABLE_V1_MULTIPROCESSING": "0"
+    },
+    "required_shape": [
+      "tp_size=1",
+      "pp_size=1",
+      "one_cuda_device",
+      "one_full_attention_kv_cache_group",
+      "prefix_caching_enabled_for_shared_path",
+      "no_speculative_decoding_lora_sliding_hybrid_mamba_pd_or_offload"
+    ],
+    "internal_interfaces": [
+      "vllm.v1.engine.core_client.InprocClient.engine_core",
+      "vllm.v1.engine.core.EngineCore.scheduler",
+      "vllm.v1.core.sched.scheduler.Scheduler.requests",
+      "vllm.v1.core.sched.scheduler.Scheduler.running",
+      "vllm.v1.core.sched.scheduler.Scheduler.kv_cache_manager",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.coordinator",
+      "vllm.v1.core.kv_cache_coordinator.KVCacheCoordinator.single_type_managers",
+      "vllm.v1.core.single_type_kv_cache_manager.SingleTypeKVCacheManager.req_to_blocks",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.get_computed_blocks",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.allocate_slots",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.get_blocks",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.get_block_ids",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.free",
+      "vllm.v1.core.kv_cache_manager.KVCacheManager.reset_prefix_cache",
+      "vllm.v1.core.block_pool.BlockPool.blocks",
+      "vllm.v1.core.block_pool.BlockPool.get_num_free_blocks",
+      "vllm.v1.core.kv_cache_utils.KVCacheBlock.block_id/ref_cnt/block_hash/is_null",
+      "vllm.v1.kv_cache_interface.KVCacheConfig.kv_cache_groups",
+      "vllm.v1.kv_cache_interface.KVCacheGroupSpec.kv_cache_spec/layer_names",
+      "vllm.v1.worker.gpu_model_runner.GPUModelRunner.kv_caches/kv_cache_config/device"
+    ],
+    "prohibited_claims": [
+      "generic_gpu_virtual_memory_copy_on_write",
+      "manual_block_pool_refcount_pin_as_runtime_semantics",
+      "cross_process_block_identity",
+      "cross_runtime_portability",
+      "portable_sampler_or_scheduler_state"
+    ]
+  },
   "source_lock": [
     "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/config/kv_transfer.py",
     "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/core/kv_cache_manager.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/core/kv_cache_coordinator.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/core/single_type_kv_cache_manager.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/core/block_pool.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/core/kv_cache_utils.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/kv_cache_interface.py",
+    "https://github.com/vllm-project/vllm/blob/v0.23.0/vllm/v1/worker/gpu_model_runner.py",
     "https://docs.vllm.ai/en/latest/api/vllm/distributed/kv_transfer/kv_connector/v1/base.html"
   ],
-  "inspected_on": "2026-08-02"
+  "inspected_on": "2026-08-10"
 }

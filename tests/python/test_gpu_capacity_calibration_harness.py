@@ -51,6 +51,7 @@ CALIBRATION_OUTCOME = CONFIG.parent / "calibration-outcome.json"
 CONVERSION_PROVENANCE_CORRECTION = (
     CONFIG.parent / "logs/capacity-failure-charge-conversion-provenance-correction.json"
 )
+BUDGET_AUTHORIZATION_V10 = CONFIG.parents[1] / "budget-authorization-v10.json"
 
 
 def _load(path: Path, name: str) -> ModuleType:
@@ -211,6 +212,346 @@ def test_controller_rejects_nonzero_worker_exit_after_success_result(
         )
 
 
+def _readiness_payload(*, device: str, uuid: str) -> dict:
+    memory = {
+        "observed_at_monotonic_ns": 5,
+        "nvml_device_used_bytes": 20_000_000_000,
+        "torch_allocated_bytes": 19_000_000_000,
+        "torch_reserved_bytes": 19_500_000_000,
+        "kv_pool_reserved_bytes": 10_000_000_000,
+        "kv_assigned_bytes": 0,
+    }
+    return {
+        "schema_version": "sloforge.branchfabric.engine-readiness-evidence/v1",
+        "device": device,
+        "pid": 100,
+        "physical_gpu_uuid": uuid,
+        "engine_started_ns": 1,
+        "model_ready_ns": 2,
+        "compile_warmup_started_ns": 3,
+        "compile_warmup_ended_ns": 4,
+        "required_cudagraph_batch_sizes": [1, 2, 4, 8, 16],
+        "observed_cudagraph_capture_sizes": [1, 2, 4, 8, 16, 24, 32],
+        "cudagraph_coverage_pass": True,
+        "warmup_request_count": 31,
+        "warmup_output_target_verified": True,
+        "warmup_batches": [],
+        "verification_request_count": 31,
+        "verification_output_target_verified": True,
+        "verification_batches": [],
+        "compilation_observation": {
+            "engine_initialization_completed_before_warmup": True,
+            "measured_probe_compilation_events": [],
+            "no_active_compilation_event": True,
+        },
+        "probe": {
+            "requested_output_tokens": 64,
+            "emitted_output_tokens": 64,
+            "output_target_verified": True,
+            "ttft_sane": True,
+            "ttft_seconds": 0.02,
+            "request_throughput_rps": 10.0,
+            "output_token_throughput_tps": 640.0,
+        },
+        "hbm": {
+            "samples": [memory, memory, memory],
+            "nvml_stability_tolerance_bytes": 16 * 1024 * 1024,
+            "stable": True,
+        },
+        "runtime_state": {
+            "request_count": 0,
+            "running_requests": 0,
+            "waiting_requests": 0,
+            "skipped_waiting_requests": 0,
+            "queue_depth": 0,
+            "prefix_cache_reset": True,
+            "health": "healthy",
+            "metrics_available": True,
+        },
+        "queue_empty_pass": True,
+        "passed": True,
+        "runtime_evidence": {
+            "packages": {"vllm": "0.23.0", "torch": "2.11.0"},
+            "torch_cuda": "13.0",
+            "gpu_name": "NVIDIA A100-SXM4-80GB",
+        },
+    }
+
+
+def test_both_engine_readiness_gate_requires_complete_independent_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend(str(CONTROLLER.parent))
+    controller = _load(CONTROLLER, "capacity_controller_readiness_gate")
+    payloads = (
+        _readiness_payload(device="gpu0", uuid="GPU-0"),
+        _readiness_payload(device="gpu1", uuid="GPU-1"),
+    )
+
+    assert (
+        controller._validate_readiness_payloads(
+            payloads=payloads,
+            expected_inventory=({"uuid": "GPU-0"}, {"uuid": "GPU-1"}),
+        )
+        == payloads
+    )
+
+    compiling = json.loads(json.dumps(payloads[1]))
+    compiling["compilation_observation"]["measured_probe_compilation_events"] = [
+        "Triton kernel JIT compilation during inference"
+    ]
+    compiling["compilation_observation"]["no_active_compilation_event"] = False
+    with pytest.raises(RuntimeError, match="observed compilation"):
+        controller._validate_readiness_payloads(
+            payloads=(payloads[0], compiling),
+            expected_inventory=({"uuid": "GPU-0"}, {"uuid": "GPU-1"}),
+        )
+
+
+def test_both_engine_readiness_gate_recomputes_hbm_and_rejects_busy_engine(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend(str(CONTROLLER.parent))
+    controller = _load(CONTROLLER, "capacity_controller_readiness_hbm")
+    first = _readiness_payload(device="gpu0", uuid="GPU-0")
+    second = _readiness_payload(device="gpu1", uuid="GPU-1")
+    second["hbm"]["samples"][2] = {
+        **second["hbm"]["samples"][2],
+        "torch_reserved_bytes": 19_500_000_001,
+    }
+    with pytest.raises(RuntimeError, match="HBM stability"):
+        controller._validate_readiness_payloads(
+            payloads=(first, second),
+            expected_inventory=({"uuid": "GPU-0"}, {"uuid": "GPU-1"}),
+        )
+
+    second = _readiness_payload(device="gpu1", uuid="GPU-1")
+    second["runtime_state"]["running_requests"] = 1
+    with pytest.raises(RuntimeError, match="idle/health/metrics"):
+        controller._validate_readiness_payloads(
+            payloads=(first, second),
+            expected_inventory=({"uuid": "GPU-0"}, {"uuid": "GPU-1"}),
+        )
+
+
+def test_worker_readiness_warms_graph_shapes_and_proves_idle_stable_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worker = _load(WORKER, "capacity_worker_readiness_fixture")
+    fake_reclamation = ModuleType("gpu_reclamation_worker")
+    fake_reclamation._sampling_params = lambda **_kwargs: object()  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "gpu_reclamation_worker", fake_reclamation)
+    fake_torch = ModuleType("torch")
+    fake_torch.cuda = SimpleNamespace(synchronize=lambda: None)  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+
+    scheduler = SimpleNamespace(requests={}, running=[], waiting=[], skipped_waiting=[])
+
+    class Engine:
+        log_stats = True
+
+        def __init__(self) -> None:
+            self.logger_manager = object()
+            self.submitted_batch_sizes: list[int] = []
+            self._pending: list[str] = []
+            self.metrics_reads = 0
+            self.stats_flushes = 0
+
+        def check_health(self) -> None:
+            return None
+
+        def get_metrics(self) -> list[object]:
+            self.metrics_reads += 1
+            return [object()]
+
+        def do_log_stats(self) -> None:
+            self.stats_flushes += 1
+
+        def add_request(self, request_id: str, _prompt: object, _params: object) -> None:
+            scheduler.requests[request_id] = object()
+            scheduler.running.append(request_id)
+            self._pending.append(request_id)
+
+        def step(self):  # type: ignore[no-untyped-def]
+            pending, self._pending = self._pending, []
+            self.submitted_batch_sizes.append(len(pending))
+            scheduler.requests.clear()
+            scheduler.running.clear()
+            return tuple(
+                SimpleNamespace(
+                    request_id=request_id,
+                    outputs=(SimpleNamespace(token_ids=tuple(range(64))),),
+                    finished=True,
+                )
+                for request_id in pending
+            )
+
+        def abort_request(self, request_ids: list[str]) -> None:
+            for request_id in request_ids:
+                scheduler.requests.pop(request_id, None)
+            scheduler.running[:] = [
+                request_id for request_id in scheduler.running if request_id not in request_ids
+            ]
+
+    engine = Engine()
+    manager = SimpleNamespace(reset_prefix_cache=lambda: True)
+    view = SimpleNamespace(
+        llm_engine=engine,
+        scheduler=scheduler,
+        manager=manager,
+        engine_core_client=SimpleNamespace(),
+        engine_core=SimpleNamespace(),
+        vllm_config=SimpleNamespace(
+            compilation_config=SimpleNamespace(cudagraph_capture_sizes=[1, 2, 4, 8, 16, 24, 32])
+        ),
+    )
+
+    class Adapter:
+        _view = view
+
+        @staticmethod
+        def inspect_gpu_memory_state(*, timeout_s: float) -> SimpleNamespace:
+            assert timeout_s == 2.0
+            return SimpleNamespace(
+                observed_at_monotonic_ns=time.monotonic_ns(),
+                nvml_device_used_bytes=20_000_000_000,
+                torch_allocated_bytes=19_000_000_000,
+                torch_reserved_bytes=19_500_000_000,
+                kv_pool_reserved_bytes=10_000_000_000,
+                kv_assigned_bytes=0,
+            )
+
+    now = time.monotonic_ns()
+    evidence = worker._collect_engine_readiness(
+        Adapter(),
+        device="gpu0",
+        physical_gpu_uuid="GPU-fixture-0",
+        prefix=tuple(range(256)),
+        output_tokens=64,
+        seed=41,
+        engine_started_ns=now - 2,
+        model_ready_ns=now - 1,
+        timeout_seconds=1.0,
+        hbm_sample_interval_seconds=0.0,
+    )
+
+    assert evidence["passed"] is True
+    assert evidence["warmup_request_count"] == 31
+    assert evidence["verification_request_count"] == 31
+    assert engine.submitted_batch_sizes == [1, 2, 4, 8, 16, 1, 2, 4, 8, 16]
+    assert evidence["probe"]["emitted_output_tokens"] == 64
+    assert evidence["runtime_state"]["request_count"] == 0
+    assert evidence["runtime_state"]["metrics_available"] is True
+    assert evidence["runtime_state"]["metrics_source"] == (
+        "vllm-0.23.llm_engine.get_metrics+logger_manager"
+    )
+    assert engine.metrics_reads == 1
+    assert engine.stats_flushes == 1
+    assert evidence["hbm"]["stable"] is True
+
+
+def test_request_state_reset_is_idle_and_never_reloads_engine(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worker = _load(WORKER, "capacity_worker_reset_fixture")
+    scheduler = SimpleNamespace(requests={}, running=[], waiting=[], skipped_waiting=[])
+    adapter = SimpleNamespace(
+        _view=SimpleNamespace(
+            scheduler=scheduler,
+            manager=SimpleNamespace(reset_prefix_cache=lambda: True),
+        ),
+        inspect_gpu_memory_state=lambda **_kwargs: SimpleNamespace(
+            observed_at_monotonic_ns=time.monotonic_ns(),
+            nvml_device_used_bytes=1,
+            torch_allocated_bytes=1,
+            torch_reserved_bytes=1,
+            kv_pool_reserved_bytes=1,
+            kv_assigned_bytes=0,
+        ),
+    )
+
+    evidence = worker._reset_probe_state(adapter, probe_id="capacity-probe-00")
+
+    assert evidence["passed"] is True
+    assert evidence["engine_reloaded"] is False
+    assert evidence["state_before"] == evidence["state_after"]
+    assert all(value == 0 for value in evidence["state_after"].values())
+
+
+@pytest.mark.parametrize(
+    ("engine", "expected_source"),
+    (
+        (
+            SimpleNamespace(log_stats=False, logger_manager=object(), get_metrics=lambda: []),
+            "log_stats-disabled-or-unavailable",
+        ),
+        (
+            SimpleNamespace(log_stats=True, logger_manager=None, get_metrics=lambda: []),
+            "logger_manager-unavailable",
+        ),
+        (
+            SimpleNamespace(log_stats=True, logger_manager=object(), get_metrics=True),
+            "get_metrics-unavailable",
+        ),
+        (
+            SimpleNamespace(
+                log_stats=True,
+                logger_manager=object(),
+                get_metrics=lambda: {"not": "the vLLM 0.23 metric list"},
+            ),
+            "get_metrics-invalid-result",
+        ),
+    ),
+)
+def test_vllm_023_metrics_gate_fails_closed_on_api_drift(
+    engine: SimpleNamespace, expected_source: str
+) -> None:
+    worker = _load(WORKER, f"capacity_worker_metrics_{expected_source}")
+    passed, source = worker._runtime_metrics(
+        SimpleNamespace(_view=SimpleNamespace(llm_engine=engine))
+    )
+    assert passed is False
+    assert expected_source in source
+
+
+def _vllm_023_inproc_health_fixture(*, unfinished: object = False):
+    inproc_type = type("InprocClient", (), {})
+    inproc_type.__module__ = "vllm.v1.engine.core_client"
+    core_type = type("EngineCore", (), {})
+    core_type.__module__ = "vllm.v1.engine.core"
+    core = core_type()
+    client = inproc_type()
+    client.engine_core = core
+    engine = SimpleNamespace(
+        engine_core=client,
+        has_unfinished_requests=lambda: unfinished,
+    )
+    return SimpleNamespace(
+        _view=SimpleNamespace(
+            llm_engine=engine,
+            engine_core_client=client,
+            engine_core=core,
+        )
+    )
+
+
+def test_vllm_023_inproc_health_fallback_requires_idle_exact_structure() -> None:
+    worker = _load(WORKER, "capacity_worker_inproc_health")
+    passed, source = worker._runtime_health(_vllm_023_inproc_health_fixture())
+    assert passed is True
+    assert source == "vllm-0.23.inproc-structure+has_unfinished_requests"
+
+    passed, source = worker._runtime_health(_vllm_023_inproc_health_fixture(unfinished=True))
+    assert passed is False
+    assert source.endswith("has_unfinished_requests-nonidle")
+
+    drifted = _vllm_023_inproc_health_fixture()
+    drifted._view.engine_core_client = SimpleNamespace(engine_core=drifted._view.engine_core)
+    passed, source = worker._runtime_health(drifted)
+    assert passed is False
+    assert source.endswith("inproc-structural-health-unavailable")
+
+
 def test_persistent_worker_executes_only_its_global_route(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -273,6 +614,41 @@ def test_persistent_worker_executes_only_its_global_route(
         row["scheduled_arrival_ns"] <= row["offered_ns"] <= row["enqueued_ns"]
         for row in result["observations"]
     )
+
+
+def test_idle_worker_waits_until_the_real_probe_tail(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worker = _load(WORKER, "capacity_worker_idle_route_fixture")
+    fake_reclamation = ModuleType("gpu_reclamation_worker")
+    fake_reclamation._sampling_params = lambda **_kwargs: object()  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "gpu_reclamation_worker", fake_reclamation)
+    monkeypatch.setenv("SLOFORGE_EXP004_PHYSICAL_GPU_UUID", "GPU-fixture-1")
+    plan = build_probe_plan(
+        probe_id="capacity-idle-fixture",
+        seed=41,
+        topology=ProbeTopology.GPU0_ONLY,
+        configured_rate_rps=10.0,
+        start_ns=time.monotonic_ns() + 10_000_000,
+        warmup_seconds=0.01,
+        measurement_seconds=0.02,
+    )
+
+    result = worker._execute_probe(
+        object(),
+        plan_payload=plan.model_dump(mode="json"),
+        device="gpu1",
+        prefix=(1, 2, 3),
+        output_tokens=64,
+        seed=41,
+        probe_timeout_seconds=1.0,
+        tail_drain_seconds=0.01,
+        producer_queue_capacity=8,
+    )
+
+    assert result["observations"] == ()
+    assert result["probe_end_ns"] >= result["tail_drain_end_ns"]
+    assert result["completed_at_monotonic_ns"] == result["probe_end_ns"]
 
 
 class _FakeVolume:
@@ -502,6 +878,7 @@ def test_terminal_calibration_blocker_and_conversion_provenance_are_bound() -> N
     blocker = json.loads(CALIBRATION_BLOCKER.read_text())
     outcome = json.loads(CALIBRATION_OUTCOME.read_text())
     correction = json.loads(CONVERSION_PROVENANCE_CORRECTION.read_text())
+    authorization = json.loads(BUDGET_AUTHORIZATION_V10.read_text())
     ledger_path = CONFIG.parents[1] / "gpu-hours.json"
     ledger = Experiment004GpuHourLedger.model_validate_json(ledger_path.read_text(), strict=True)
 
@@ -513,9 +890,18 @@ def test_terminal_calibration_blocker_and_conversion_provenance_are_bound() -> N
     assert blocker["v10_launch_permitted"] is False
     assert blocker["budget"]["budget_terminal"] is True
     assert ledger.reservations == ()
-    assert ledger.consumed_additional_gpu_seconds == pytest.approx(6431.795790917997)
-    assert ledger.intervals[-1].invocation_id == "exp004-capacity-s41-v2"
-    assert ledger.intervals[-1].accounted_wall_seconds == 212.0
+    assert authorization["consumed_gpu_seconds_at_authorization"] == pytest.approx(
+        6431.795790917997
+    )
+    capacity_v2 = next(
+        item for item in ledger.intervals if item.invocation_id == "exp004-capacity-s41-v2"
+    )
+    assert capacity_v2.accounted_wall_seconds == 212.0
+    assert (
+        ledger.consumed_additional_gpu_seconds
+        >= authorization["consumed_gpu_seconds_at_authorization"]
+    )
+    assert ledger.consumed_additional_gpu_seconds <= ledger.hard_additional_gpu_seconds
 
     for row, config_path in zip(correction["records"], (CONFIG, CONFIG_V2), strict=True):
         assert row["config_file_sha256"] == hashlib.sha256(config_path.read_bytes()).hexdigest()
@@ -539,9 +925,11 @@ def test_terminal_calibration_blocker_and_conversion_provenance_are_bound() -> N
         outcome["provenance_correction"]["artifact_sha256"]
         == hashlib.sha256(CONVERSION_PROVENANCE_CORRECTION.read_bytes()).hexdigest()
     )
-    assert (
-        outcome["ledger"]["artifact_sha256"] == hashlib.sha256(ledger_path.read_bytes()).hexdigest()
-    )
+    assert outcome["ledger"]["artifact_sha256"] == authorization["previous_ledger_sha256"]
+    assert len(authorization["authorized_ledger_sha256"]) == 64
+    assert authorization["authorized_gpu_budget_usd"] == 40.0
+    assert authorization["authorized_cumulative_a100_hours"] == 3.0
+    assert authorization["ledger_mutation"]["settled_intervals_changed"] is False
 
 
 def test_capacity_launcher_requires_budget_before_any_modal_or_ledger_write(
