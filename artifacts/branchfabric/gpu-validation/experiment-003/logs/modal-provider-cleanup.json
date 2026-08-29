@@ -1,0 +1,32 @@
+{
+  "apps": [
+    {
+      "app_id": "ap-T9ptcXdNAJ86Ew4JSX3bsU",
+      "description": "sloforge-branchfabric-metadata-characterization-003",
+      "state": "stopped",
+      "tasks": "0"
+    },
+    {
+      "app_id": "ap-H0N7ROhWPJ54CKFPndFq6z",
+      "description": "sloforge-branchfabric-metadata-characterization-003",
+      "state": "stopped",
+      "tasks": "0"
+    }
+  ],
+  "authorized_volume_names": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "containers": [],
+  "inventory_commands": [
+    ".venv/bin/modal app list --json",
+    ".venv/bin/modal container list --json",
+    ".venv/bin/modal volume list --json"
+  ],
+  "observed_at_utc": "2026-08-11T23:44:48Z",
+  "schema_version": "sloforge.branchfabric.modal-provider-cleanup/v1",
+  "volume_names": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ]
+}

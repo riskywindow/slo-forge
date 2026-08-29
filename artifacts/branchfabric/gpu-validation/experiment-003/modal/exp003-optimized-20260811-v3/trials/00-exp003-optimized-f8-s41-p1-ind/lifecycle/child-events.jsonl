@@ -1,0 +1,10 @@
+{"child_pgid":40,"child_pid":40,"child_sid":40,"event":"child_process_started","observed_at_monotonic_ns":24920396625,"observed_at_utc":"2026-08-11T22:33:37.054602+00:00","parent_pid":2,"schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"cuda_runtime_import_started","observed_at_monotonic_ns":24921353106,"observed_at_utc":"2026-08-11T22:33:37.055555+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"cuda_runtime_import_completed","observed_at_monotonic_ns":29051138055,"observed_at_utc":"2026-08-11T22:33:41.185331+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","torch_version":"2.11.0+cu130"}
+{"event":"model_load_started","observed_at_monotonic_ns":48739668902,"observed_at_utc":"2026-08-11T22:34:00.873864+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"model_load_completed","observed_at_monotonic_ns":184364929254,"observed_at_utc":"2026-08-11T22:36:16.499117+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"kv_pool_allocated","observed_at_monotonic_ns":184365972796,"observed_at_utc":"2026-08-11T22:36:16.500160+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"benchmark_started","observed_at_monotonic_ns":184366702467,"observed_at_utc":"2026-08-11T22:36:16.500892+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","trial_path":"independent_prefill"}
+{"event":"branch_teardown_and_vllm_shutdown_completed","observed_at_monotonic_ns":210086902563,"observed_at_utc":"2026-08-11T22:36:42.221082+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"benchmark_completed","observed_at_monotonic_ns":210087129707,"observed_at_utc":"2026-08-11T22:36:42.221336+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","trial_path":"independent_prefill"}
+{"event":"child_manifest_flushed_exit_imminent","observed_at_monotonic_ns":211541316950,"observed_at_utc":"2026-08-11T22:36:43.675510+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","status":"succeeded"}
