@@ -101,11 +101,10 @@ def test_exact_micro_topology_accepts_only_16k_fanout8_layout() -> None:
         )
 
 
-def test_source_allocation_queue_is_consumed_only_on_exact_capture_match(
+def test_source_allocation_queue_is_history_retirement_not_semantic_identity(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     worker = _worker_module()
-    expected = tuple(range(worker.EXPECTED_TOTAL_BLOCKS))
     commitments = {
         "source_allocation_lifetime_sha256": "1" * 64,
         "ownership_snapshot_sha256": "2" * 64,
@@ -123,116 +122,107 @@ def test_source_allocation_queue_is_consumed_only_on_exact_capture_match(
         needs_kv_cache_zeroing = False
 
     class Manager:
-        def __init__(self, queued: tuple[object, ...]) -> None:
-            self.queued = list(queued)
+        def __init__(self, *batches: tuple[object, ...]) -> None:
+            self.batches = [list(batch) for batch in batches]
             self.take_count = 0
 
         def take_new_block_ids(self) -> list[object]:
             self.take_count += 1
-            result = self.queued
-            self.queued = []
-            return result
+            return self.batches.pop(0) if self.batches else []
 
-    manager = Manager(tuple(reversed(expected)))
-    evidence = worker.consume_exact_source_allocation_queue_v11(
-        Scheduler(),
-        manager,
-        expected_block_ids=expected,
-        export_gate="sealed-export-gate",
-        **commitments,
-    )
-    assert evidence["observed_count"] == 1_152
-    assert (
-        evidence["observed_block_ids_sha256"]
-        == "5919b50143dc9e0be494a1001577588e039a428906d9ab9ea02a3137abcec8de"
-    )
-    assert evidence["needs_kv_cache_zeroing"] is False
-    assert evidence["source_allocation_lifetime_sha256"] == "1" * 64
-    assert evidence["ownership_snapshot_sha256"] == "2" * 64
-    assert evidence["capture_manifest_sha256"] == "3" * 64
-    assert evidence["exact_capture_plan_match"] is True
-    assert evidence["consumed_under_export_capture"] is True
-    assert evidence["passed"] is True
-    assert manager.queued == []
-    assert manager.take_count == 1
-    assert gate_checks == ["sealed-export-gate", "sealed-export-gate"]
+    # Empty, partial, duplicate, out-of-order, and foreign historical event
+    # sets are all legal.  This epoch-free queue is not allocation identity.
+    histories = ((), (4,), (3, 1, 3, 2), (2_000, *range(12)))
+    for history in histories:
+        manager = Manager(history, ())
+        evidence = worker.retire_source_allocation_history_v11(
+            Scheduler(),
+            manager,
+            export_gate="sealed-export-gate",
+            **commitments,
+        )
+        assert evidence["observed_count"] == len(history)
+        assert evidence["history_event_count"] == len(history)
+        assert evidence["unique_block_count"] == len(set(history))
+        assert evidence["duplicate_event_count"] == len(history) - len(set(history))
+        assert tuple(evidence["history_block_ids"]) == history
+        assert len(evidence["history_block_ids_sha256"]) == 64
+        assert evidence["needs_kv_cache_zeroing"] is False
+        assert evidence["source_allocation_lifetime_sha256"] == "1" * 64
+        assert evidence["ownership_snapshot_sha256"] == "2" * 64
+        assert evidence["capture_manifest_sha256"] == "3" * 64
+        assert evidence["semantic_identity_claimed"] is False
+        assert evidence["queue_empty_after_retirement"] is True
+        assert evidence["retired_under_export_capture"] is True
+        assert evidence["passed"] is True
+        assert manager.take_count == 2
+    assert gate_checks == ["sealed-export-gate", "sealed-export-gate"] * len(histories)
 
-    for bad_queue in (
-        (),
-        expected[:-1],
-        (*expected[:-1], expected[-2]),
-        (*expected[:-1], 2_000),
-        (*expected, 2_000),
-    ):
-        with pytest.raises(RuntimeError, match="authenticated capture plan"):
-            worker.consume_exact_source_allocation_queue_v11(
+    with pytest.raises(RuntimeError, match="notification queue"):
+        worker.retire_source_allocation_history_v11(
+            Scheduler(), object(), export_gate=object(), **commitments
+        )
+
+    for malformed in ((True,), ("0",), (-1,)):
+        with pytest.raises(RuntimeError, match="invalid block IDs"):
+            worker.retire_source_allocation_history_v11(
                 Scheduler(),
-                Manager(tuple(bad_queue)),
-                expected_block_ids=expected,
+                Manager(malformed),
                 export_gate=object(),
                 **commitments,
             )
 
-    with pytest.raises(RuntimeError, match="1,152 unique"):
-        worker.consume_exact_source_allocation_queue_v11(
+    malformed_commitments = commitments | {"capture_manifest_sha256": "not-a-sha"}
+    malformed_manager = Manager((1,), ())
+    with pytest.raises(RuntimeError, match="commitments are missing or malformed"):
+        worker.retire_source_allocation_history_v11(
             Scheduler(),
-            Manager(expected),
-            expected_block_ids=expected[:-1],
+            malformed_manager,
             export_gate=object(),
-            **commitments,
+            **malformed_commitments,
         )
-    with pytest.raises(RuntimeError, match="exposes no allocation"):
-        worker.consume_exact_source_allocation_queue_v11(
-            Scheduler(),
-            object(),
-            expected_block_ids=expected,
-            export_gate=object(),
-            **commitments,
-        )
-
-    for malformed in ((True, *expected[1:]), ("0", *expected[1:]), (-1, *expected[1:])):
-        with pytest.raises(RuntimeError, match=r"strict integers|1,152 unique"):
-            worker.consume_exact_source_allocation_queue_v11(
-                Scheduler(),
-                Manager(expected),
-                expected_block_ids=malformed,
-                export_gate=object(),
-                **commitments,
-            )
-    with pytest.raises(RuntimeError, match="non-integer"):
-        worker.consume_exact_source_allocation_queue_v11(
-            Scheduler(),
-            Manager(("0", *expected[1:])),
-            expected_block_ids=expected,
-            export_gate=object(),
-            **commitments,
-        )
+    assert malformed_manager.take_count == 0
 
     class RaisingManager(Manager):
         def take_new_block_ids(self) -> list[object]:
             raise RuntimeError("injected allocator observation failure")
 
-    with pytest.raises(RuntimeError, match="zero-queue drain failed"):
-        worker.consume_exact_source_allocation_queue_v11(
+    with pytest.raises(RuntimeError, match="history retirement failed"):
+        worker.retire_source_allocation_history_v11(
             Scheduler(),
-            RaisingManager(expected),
-            expected_block_ids=expected,
+            RaisingManager((1,)),
             export_gate=object(),
             **commitments,
         )
+
+    with pytest.raises(RuntimeError, match="mutation appeared after SourceCaptureCommit") as error:
+        worker.retire_source_allocation_history_v11(
+            Scheduler(),
+            Manager((1, 1, 2), (19,)),
+            export_gate=object(),
+            **commitments,
+        )
+    assert error.value.affected_block_ids == (19,)
+    assert error.value.teardown_evidence["post_commit_event_count"] == 1
+    assert error.value.teardown_evidence["post_commit_block_ids"] == (19,)
+    assert error.value.teardown_evidence["queue_empty_after_retirement"] is False
+    assert error.value.teardown_evidence["semantic_identity_claimed"] is False
+    assert error.value.teardown_evidence["passed"] is False
+
     zeroing_scheduler = Scheduler()
     zeroing_scheduler.needs_kv_cache_zeroing = True
+    zeroing_manager = Manager((1,), ())
     with pytest.raises(RuntimeError, match="attention-only"):
-        worker.consume_exact_source_allocation_queue_v11(
+        worker.retire_source_allocation_history_v11(
             zeroing_scheduler,
-            Manager(expected),
-            expected_block_ids=expected,
+            zeroing_manager,
             export_gate=object(),
             **commitments,
         )
+    assert zeroing_manager.take_count == 0
 
 
-def test_source_queue_drain_order_is_inside_export_after_capture_before_release() -> None:
+def test_source_history_retirement_is_inside_export_after_capture_before_release() -> None:
     worker_path = EXPERIMENTS / "gpu_reclamation_worker_v11.py"
     source_text = worker_path.read_text()
     tree = ast.parse(source_text)
@@ -249,11 +239,11 @@ def test_source_queue_drain_order_is_inside_export_after_capture_before_release(
     epochs = source.index("_source_epoch_map", topology)
     ownership = source.index("capture_source_ownership_v11", epochs)
     capture = source.index("capture_native_to_transport_v11", ownership)
-    drain = source.index("consume_exact_source_allocation_queue_v11", capture)
-    release = source.index("release_source_and_prove_v11", drain)
+    retirement = source.index("retire_source_allocation_history_v11", capture)
+    release = source.index("release_source_and_prove_v11", retirement)
     gate_end = source.index("export_ended_ns", release)
-    assert gate < topology < epochs < ownership < capture < drain < release < gate_end
-    assert ".step(" not in source[drain:release]
+    assert gate < topology < epochs < ownership < capture < retirement < release < gate_end
+    assert ".step(" not in source[retirement:release]
 
 
 def test_typed_source_queue_failure_is_persisted_without_success(
@@ -272,12 +262,12 @@ def test_typed_source_queue_failure_is_persisted_without_success(
 
     def fail(*_args: object, **_kwargs: object) -> dict[str, object]:
         raise V11RuntimeTeardownRequired(
-            "typed destructive source queue mismatch",
+            "typed post-commit allocation mutation",
             affected_block_ids=(11, 7, 11),
             teardown_evidence={
-                "expected_count": 1_152,
-                "observed_count": 1_151,
-                "missing_block_ids": [19],
+                "post_commit_event_count": 1,
+                "post_commit_block_ids": [19],
+                "queue_empty_after_retirement": False,
                 "passed": False,
             },
         )
@@ -303,9 +293,9 @@ def test_typed_source_queue_failure_is_persisted_without_success(
     assert failure["error_type"] == "V11RuntimeTeardownRequired"
     assert failure["affected_block_ids"] == [7, 11]
     assert failure["teardown_evidence"] == {
-        "expected_count": 1_152,
-        "observed_count": 1_151,
-        "missing_block_ids": [19],
+        "post_commit_event_count": 1,
+        "post_commit_block_ids": [19],
+        "queue_empty_after_retirement": False,
         "passed": False,
     }
     assert "succeeded" not in failure.values()

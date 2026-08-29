@@ -142,8 +142,8 @@ def test_budget_authorization_preserves_and_supersedes_historical_blocker_digest
     blocker = json.loads((experiment_root / "calibration/calibration-blocker.json").read_text())
 
     assert authorization["authorized_gpu_budget_usd"] == 40.0
-    assert authorization["authorized_cumulative_a100_hours"] == 3.0
-    assert authorization["authorized_cumulative_gpu_seconds"] == 10_800.0
+    assert authorization["authorized_cumulative_a100_hours"] == 3.75
+    assert authorization["authorized_cumulative_gpu_seconds"] == 13_500.0
     authorized_interval_count = authorization["ledger_mutation"]["settled_interval_count_after"]
     authorized_intervals = ledger["intervals"][:authorized_interval_count]
     authorized_intervals_digest = hashlib.sha256(
@@ -152,8 +152,14 @@ def test_budget_authorization_preserves_and_supersedes_historical_blocker_digest
     assert authorization["authorized_settled_intervals_sha256"] == authorized_intervals_digest
     if len(ledger["intervals"]) == authorized_interval_count and not ledger["reservations"]:
         assert authorization["authorized_ledger_sha256"] == _sha(ledger_path)
-    assert authorization["previous_ledger_sha256"] == outcome["ledger"]["artifact_sha256"]
-    assert authorization["previous_ledger_sha256"] == blocker["budget"]["ledger"]["artifact_sha256"]
+    original_authorization = json.loads(
+        (experiment_root / "analysis/budget-authorization-v10-3.0h-superseded.json").read_text()
+    )
+    assert original_authorization["previous_ledger_sha256"] == outcome["ledger"]["artifact_sha256"]
+    assert (
+        original_authorization["previous_ledger_sha256"]
+        == blocker["budget"]["ledger"]["artifact_sha256"]
+    )
     assert authorization["ledger_mutation"]["settled_intervals_changed"] is False
 
 

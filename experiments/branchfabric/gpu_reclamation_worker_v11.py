@@ -321,25 +321,22 @@ def require_production_export_gate_v11(gate: Any, *, scheduler: Any, manager: An
     )
 
 
-def consume_exact_source_allocation_queue_v11(
+def retire_source_allocation_history_v11(
     scheduler: Any,
     manager: Any,
     *,
-    expected_block_ids: Sequence[int],
     export_gate: Any,
     source_allocation_lifetime_sha256: str,
     ownership_snapshot_sha256: str,
-    capture_manifest_sha256: str,
+    capture_manifest_sha256: str | None = None,
 ) -> dict[str, Any]:
-    """Consume only the source lifetime's exact allocator zero-queue evidence.
+    """Retire vLLM's allocation-notification history under the export gate.
 
-    vLLM's production KV manager reports newly allocated native blocks through
-    ``take_new_block_ids``.  Source construction legitimately populates that
-    queue before export.  The restore stager must begin with an empty queue so
-    that every subsequently drained ID is attributable to a fresh destination
-    allocation.  Bind the one source-side drain to the already authenticated
-    1,152-block capture plan and fail closed on any missing, duplicate, or
-    unrelated ID.
+    ``take_new_block_ids`` is a destructive, epoch-free notification queue.  It
+    can contain retained-engine readiness and serving history, so it is never a
+    source allocation identity.  The SourceCaptureCommit is authoritative.  We
+    drain this history only to establish an empty baseline for later destination
+    attribution, and immediately prove that no post-commit event appeared.
     """
 
     from sloforge.continuum.adapters.vllm_reclamation_v11 import (
@@ -348,13 +345,11 @@ def consume_exact_source_allocation_queue_v11(
 
     zeroing_flag = getattr(scheduler, "needs_kv_cache_zeroing", None)
     context: dict[str, Any] = {
-        "schema_version": "sloforge.branchfabric.v11-source-allocation-queue/v1",
+        "schema_version": "sloforge.branchfabric.v11-allocation-history-retirement/v1",
         "gate_id": getattr(export_gate, "gate_id", None),
         "gate_binding_id": getattr(export_gate, "binding_id", None),
         "gate_operation": getattr(export_gate, "operation", None),
         "needs_kv_cache_zeroing": zeroing_flag,
-        "expected_count": len(expected_block_ids),
-        "expected_block_ids_sha256": None,
         "source_allocation_lifetime_sha256": source_allocation_lifetime_sha256,
         "ownership_snapshot_sha256": ownership_snapshot_sha256,
         "capture_manifest_sha256": capture_manifest_sha256,
@@ -377,101 +372,179 @@ def consume_exact_source_allocation_queue_v11(
     )
     if zeroing_flag is not False:
         raise teardown(
-            "source allocation queue drain requires production attention-only zeroing mode",
+            "allocation history retirement requires production attention-only zeroing mode",
             affected_block_ids=(),
         )
-    commitments = (
+    commitments = tuple(
+        value
+        for value in (
         source_allocation_lifetime_sha256,
         ownership_snapshot_sha256,
         capture_manifest_sha256,
+        )
+        if value is not None
     )
+    if len(commitments) < 2:
+        raise teardown(
+            "allocation history retirement requires source and ownership commitments",
+            affected_block_ids=(),
+        )
     if any(re.fullmatch(r"[0-9a-f]{64}", value) is None for value in commitments):
         raise teardown(
             "source allocation queue commitments are missing or malformed",
             affected_block_ids=(),
         )
-    if any(
-        isinstance(block_id, bool) or not isinstance(block_id, int)
-        for block_id in expected_block_ids
-    ):
-        raise teardown(
-            "source allocation queue expected IDs are not strict integers",
-            affected_block_ids=(),
-        )
-    expected = tuple(expected_block_ids)
-    context["expected_block_ids_sha256"] = hashlib.sha256(
-        _canonical_bytes(tuple(sorted(expected)))
-    ).hexdigest()
-    if (
-        len(expected) != EXPECTED_TOTAL_BLOCKS
-        or len(set(expected)) != len(expected)
-        or any(block_id < 0 for block_id in expected)
-    ):
-        raise teardown(
-            "source allocation queue requires 1,152 unique block IDs",
-            affected_block_ids=expected,
-        )
     take_new_block_ids = getattr(manager, "take_new_block_ids", None)
     if not callable(take_new_block_ids):
         raise teardown(
-            "production KV manager exposes no allocation zero-queue",
+            "production KV manager exposes no allocation notification queue",
             affected_block_ids=(),
         )
     try:
         raw_observed = tuple(take_new_block_ids())
     except BaseException as error:
         raise teardown(
-            "production source allocation zero-queue drain failed", affected_block_ids=()
+            "production allocation history retirement failed", affected_block_ids=()
         ) from error
     context["destructive_drain_performed"] = True
     context["observed_count"] = len(raw_observed)
     if any(
-        isinstance(block_id, bool) or not isinstance(block_id, int) for block_id in raw_observed
+        isinstance(block_id, bool) or not isinstance(block_id, int) or block_id < 0
+        for block_id in raw_observed
     ):
         raise teardown(
-            "source allocation zero-queue returned non-integer block IDs",
+            "allocation history returned invalid block IDs",
             affected_block_ids=(),
         )
     observed = raw_observed
-    context["observed_block_ids_sha256"] = hashlib.sha256(
-        _canonical_bytes(tuple(sorted(observed)))
-    ).hexdigest()
-    missing = tuple(sorted(set(expected) - set(observed)))
-    unexpected = tuple(sorted(set(observed) - set(expected)))
-    duplicates = tuple(
-        sorted(block_id for block_id in set(observed) if observed.count(block_id) > 1)
-    )
+    unique_ids = tuple(sorted(set(observed)))
     context.update(
         {
-            "missing_block_ids": missing,
-            "unexpected_block_ids": unexpected,
-            "duplicate_block_ids": duplicates,
+            "history_event_count": len(observed),
+            "unique_block_count": len(unique_ids),
+            "duplicate_event_count": len(observed) - len(unique_ids),
+            "history_block_ids": observed,
+            "history_block_ids_sha256": hashlib.sha256(
+                _canonical_bytes(observed)
+            ).hexdigest(),
+            "semantic_identity_claimed": False,
         }
     )
-    if (
-        len(observed) != len(expected)
-        or len(set(observed)) != len(observed)
-        or set(observed) != set(expected)
+    try:
+        post_commit = tuple(take_new_block_ids())
+    except BaseException as error:
+        raise teardown(
+            "production allocation history empty-baseline check failed",
+            affected_block_ids=observed,
+        ) from error
+    if any(
+        isinstance(block_id, bool) or not isinstance(block_id, int) or block_id < 0
+        for block_id in post_commit
     ):
         raise teardown(
-            "source allocation zero-queue differs from the authenticated capture plan; "
-            "runtime teardown required",
-            affected_block_ids=observed,
+            "post-commit allocation history returned invalid block IDs",
+            affected_block_ids=post_commit,
+            extra={"post_commit_event_count": len(post_commit)},
+        )
+    if post_commit:
+        raise teardown(
+            "allocator mutation appeared after SourceCaptureCommit",
+            affected_block_ids=post_commit,
+            extra={
+                "post_commit_event_count": len(post_commit),
+                "post_commit_block_ids": tuple(sorted(post_commit)),
+                "queue_empty_after_retirement": False,
+            },
         )
     require_production_export_gate_v11(
         export_gate,
         scheduler=scheduler,
         manager=manager,
     )
-    ordered = tuple(sorted(observed))
     return {
         **context,
-        "observed_count": len(ordered),
-        "observed_block_ids_sha256": hashlib.sha256(_canonical_bytes(ordered)).hexdigest(),
-        "exact_capture_plan_match": True,
-        "consumed_under_export_capture": True,
+        "post_commit_event_count": 0,
+        "queue_empty_after_retirement": True,
+        "retired_under_export_capture": True,
         "passed": True,
     }
+
+
+# Backwards-compatible import name for older callers.  The implementation and
+# evidence schema explicitly make no source-identity claim.
+consume_exact_source_allocation_queue_v11 = retire_source_allocation_history_v11
+
+
+def require_allocator_notification_queue_empty_v11(
+    scheduler: Any,
+    manager: Any,
+    *,
+    export_gate: Any,
+    source_capture_commit_sha256: str,
+    phase: str,
+) -> dict[str, Any]:
+    """Reject an allocator notification after the pre-commit history baseline."""
+
+    from sloforge.continuum.adapters.vllm_reclamation_v11 import (
+        V11RuntimeTeardownRequired,
+    )
+
+    require_production_export_gate_v11(
+        export_gate,
+        scheduler=scheduler,
+        manager=manager,
+    )
+    if (
+        getattr(scheduler, "needs_kv_cache_zeroing", None) is not False
+        or re.fullmatch(r"[0-9a-f]{64}", source_capture_commit_sha256) is None
+        or not phase
+    ):
+        raise V11RuntimeTeardownRequired(
+            "post-commit allocator notification gate lacks valid production context",
+            affected_block_ids=(),
+            teardown_evidence={
+                "schema_version": (
+                    "sloforge.branchfabric.v11-post-commit-allocation-notification/v1"
+                ),
+                "phase": phase,
+                "source_capture_commit_sha256": source_capture_commit_sha256,
+                "passed": False,
+            },
+        )
+    take = getattr(manager, "take_new_block_ids", None)
+    if not callable(take):
+        raise V11RuntimeTeardownRequired(
+            "production allocator notification queue disappeared after commit",
+            affected_block_ids=(),
+            teardown_evidence={"phase": phase, "passed": False},
+        )
+    observed = tuple(take())
+    malformed = any(
+        isinstance(block_id, bool) or not isinstance(block_id, int) or block_id < 0
+        for block_id in observed
+    )
+    evidence = {
+        "schema_version": "sloforge.branchfabric.v11-post-commit-allocation-notification/v1",
+        "phase": phase,
+        "source_capture_commit_sha256": source_capture_commit_sha256,
+        "observed_event_count": len(observed),
+        "observed_block_ids": tuple(sorted(observed)) if not malformed else (),
+        "queue_empty": not observed,
+        "semantic_identity_claimed": False,
+        "passed": not observed and not malformed,
+    }
+    if not evidence["passed"]:
+        raise V11RuntimeTeardownRequired(
+            "allocator mutation notification appeared after SourceCaptureCommit",
+            affected_block_ids=observed if not malformed else (),
+            teardown_evidence=evidence,
+        )
+    require_production_export_gate_v11(
+        export_gate,
+        scheduler=scheduler,
+        manager=manager,
+    )
+    return evidence
 
 
 def _run_continuation(
@@ -710,10 +783,9 @@ def run_micro_validation(
             capture_manifest_sha256 = hashlib.sha256(
                 captured.state.manifest.canonical_bytes()
             ).hexdigest()
-            source_allocation_queue = consume_exact_source_allocation_queue_v11(
+            source_allocation_queue = retire_source_allocation_history_v11(
                 adapter._view.scheduler,
                 adapter._view.manager,
-                expected_block_ids=tuple(source_epochs),
                 export_gate=export_gate,
                 source_allocation_lifetime_sha256=source_allocation_lifetime_sha256,
                 ownership_snapshot_sha256=ownership_snapshot_sha256,
@@ -965,7 +1037,7 @@ def run_micro_validation(
                 "count": len(source_lifetimes),
                 "allocation_lifetime_sha256": source_allocation_lifetime_sha256,
                 "pre_release_ownership_snapshot_sha256": ownership_snapshot_sha256,
-                "allocation_zero_queue": source_allocation_queue,
+                "allocation_history_retirement": source_allocation_queue,
             },
             "destination_allocations": {
                 "count": len(destination_lifetimes),

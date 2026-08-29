@@ -28,6 +28,7 @@ EXPECTED_PRIVATE_BLOCKS = 128
 FROZEN_V10_EXECUTION_COMMIT = "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39"
 FROZEN_V10_ANALYSIS_COMMIT = "1c51853e10809686d4368037153927f25e834117"
 FROZEN_V10_TAG = "branchfabric-exp004-naive-baseline-v10"
+_V11_POST_J_SANITY_PROBE_COUNT = 3
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -49,6 +50,186 @@ def _write_new(path: Path, value: Any) -> None:
         os.link(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+_V11_TRANSACTION_COMMAND_COMMON_FIELDS = frozenset(
+    {
+        "schema_version",
+        "effective_config",
+        "selection_sha256",
+        "authorization_artifact_hash",
+        "sanity_result_sha256",
+        "issued_at_monotonic_ns",
+    }
+)
+_V11_TARGETED_TRANSACTION_SAFETY = {
+    "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+    "full_export_authorized": False,
+    "source_release_authorized": False,
+}
+_V11_TRANSACTION_ENVELOPES = {
+    "integrated-reclamation-v11": (
+        "sloforge.branchfabric.experiment-004-v11-integrated-config/v1",
+        "sloforge.branchfabric.integrated-transaction-command/v1",
+        False,
+    ),
+    "targeted-source-identity-v11": (
+        "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-config/v1",
+        "sloforge.branchfabric.targeted-source-identity-command/v1",
+        True,
+    ),
+}
+
+
+def _validate_v11_transaction_command(
+    *,
+    base_config: dict[str, Any],
+    command: dict[str, Any],
+    selected_load_sha256: str,
+    frozen_validator: Any,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Validate the typed v11 envelope before delegating frozen common checks."""
+
+    mode = base_config.get("execution_mode")
+    envelope = _V11_TRANSACTION_ENVELOPES.get(mode)
+    if envelope is None:
+        raise ValueError("v11 transaction execution mode is missing or unsupported")
+    expected_base_schema, expected_command_schema, targeted = envelope
+    if base_config.get("schema_version") != expected_base_schema:
+        raise ValueError("v11 transaction base schema differs from its execution mode")
+    expected_fields = set(_V11_TRANSACTION_COMMAND_COMMON_FIELDS)
+    if targeted:
+        expected_fields.update(_V11_TARGETED_TRANSACTION_SAFETY)
+    if set(command) != expected_fields:
+        raise ValueError("v11 transaction command fields differ from its typed envelope")
+    if command.get("schema_version") != expected_command_schema:
+        raise ValueError("v11 transaction command schema differs from its execution mode")
+    if targeted:
+        effective_config = command.get("effective_config")
+        if not isinstance(effective_config, dict):
+            raise ValueError("targeted transaction command lacks effective config")
+        for field, expected in _V11_TARGETED_TRANSACTION_SAFETY.items():
+            command_value = command.get(field)
+            base_value = base_config.get(field)
+            effective_value = effective_config.get(field)
+            if (
+                type(command_value) is not type(expected)
+                or command_value != expected
+                or type(base_value) is not type(expected)
+                or base_value != expected
+                or type(effective_value) is not type(expected)
+                or effective_value != expected
+            ):
+                raise ValueError(f"targeted transaction command changed safety field {field}")
+
+    delegated = dict(command)
+    if targeted:
+        delegated["schema_version"] = "sloforge.branchfabric.integrated-transaction-command/v1"
+        for field in _V11_TARGETED_TRANSACTION_SAFETY:
+            del delegated[field]
+    return frozen_validator(
+        base_config=base_config,
+        command=delegated,
+        selected_load_sha256=selected_load_sha256,
+    )
+
+
+def _run_v11_integrated_calibration_phase(
+    *,
+    frozen_worker: Any,
+    adapter: Any,
+    config: dict[str, Any],
+    inputs: dict[str, Any],
+    role: str,
+    physical_gpu_uuid: str,
+    barrier_root: Path,
+    model_load_started_ns: int,
+    model_ready_ns: int,
+) -> tuple[dict[str, Any], Any, dict[str, Any]]:
+    """Run frozen calibration with one process-local, typed-v11 validator binding."""
+
+    original = frozen_worker._validate_integrated_transaction_command
+    original_probe_count = frozen_worker._V10_SANITY_GUARD_COUNT
+    if original_probe_count != 2:
+        raise RuntimeError("frozen v10 sanity probe count drifted from two")
+
+    def validate_bound_command(**kwargs: Any) -> tuple[dict[str, Any], dict[str, str]]:
+        return _validate_v11_transaction_command(
+            **kwargs,
+            frozen_validator=original,
+        )
+
+    frozen_worker._validate_integrated_transaction_command = validate_bound_command
+    frozen_worker._V10_SANITY_GUARD_COUNT = _V11_POST_J_SANITY_PROBE_COUNT
+    try:
+        return frozen_worker._run_integrated_calibration_phase(
+            adapter=adapter,
+            config=config,
+            inputs=inputs,
+            role=role,
+            physical_gpu_uuid=physical_gpu_uuid,
+            barrier_root=barrier_root,
+            model_load_started_ns=model_load_started_ns,
+            model_ready_ns=model_ready_ns,
+        )
+    finally:
+        frozen_worker._validate_integrated_transaction_command = original
+        frozen_worker._V10_SANITY_GUARD_COUNT = original_probe_count
+
+
+def _source_allocator_lifecycle_evidence(
+    adapter: Any,
+    source_commit: Any,
+    *,
+    start_sequence: int,
+    rollout_ready_sequence: int,
+) -> dict[str, Any]:
+    """Bind the bounded native allocator journal to committed logical pages."""
+
+    events = adapter._allocator_epoch_source.lifecycle_events()
+    if not 0 <= start_sequence <= rollout_ready_sequence <= len(events):
+        raise RuntimeError("allocator lifecycle phase boundaries are invalid")
+    logical_page_by_lifetime = {
+        (item.physical_block_id, item.allocation_epoch): item.logical_page_id
+        for item in source_commit.allocations
+    }
+    rows = []
+    for event in events[start_sequence:]:
+        rows.append(
+            {
+                "sequence": event.sequence,
+                "observed_at_monotonic_ns": event.observed_at_monotonic_ns,
+                "event": event.event,
+                "block_id": event.block_id,
+                "allocation_epoch": event.allocation_epoch,
+                "logical_page_id": logical_page_by_lifetime.get(
+                    (event.block_id, event.allocation_epoch)
+                ),
+                "runtime_request_id": event.runtime_request_id,
+                "old_state": event.old_state,
+                "new_state": event.new_state,
+                "caller_label": event.caller_label,
+                "process_id": event.process_id,
+                "thread_id": event.thread_id,
+                "phase": (
+                    "ROLLOUT_CREATE_TO_READY"
+                    if event.sequence < rollout_ready_sequence
+                    else "ROLLOUT_READY_TO_SOURCE_CAPTURE_COMMIT"
+                ),
+            }
+        )
+    payload = {
+        "schema_version": "sloforge.branchfabric.v11-allocator-lifecycle-journal/v1",
+        "bounded_maximum_event_count": 262_144,
+        "start_sequence": start_sequence,
+        "rollout_ready_sequence": rollout_ready_sequence,
+        "capture_commit_sequence": len(events),
+        "event_count": len(rows),
+        "source_lifetime_event_count": sum(row["logical_page_id"] is not None for row in rows),
+        "events": rows,
+    }
+    payload["sha256"] = hashlib.sha256(_canonical_bytes(payload)).hexdigest()
+    return payload
 
 
 def frozen_v10_methodology_identity() -> dict[str, Any]:
@@ -237,37 +418,100 @@ def _control_interval_evidence(
     expected_rate_rps: float,
     expected_duration_seconds: float,
     slo_ttft_seconds: float,
+    warmup_seconds: float = 1.0,
+    evaluation_seconds: float = 1.0,
+    minimum_completion_fraction: float = 0.90,
 ) -> dict[str, Any]:
-    start_ns = result.get("start_ns")
+    full_start_ns = result.get("start_ns")
     end_ns = result.get("spike_start_ns")
     requests = result.get("requests")
     if (
-        isinstance(start_ns, bool)
-        or not isinstance(start_ns, int)
+        isinstance(full_start_ns, bool)
+        or not isinstance(full_start_ns, int)
         or isinstance(end_ns, bool)
         or not isinstance(end_ns, int)
-        or end_ns <= start_ns
+        or end_ns <= full_start_ns
         or not isinstance(requests, (tuple, list))
     ):
         raise RuntimeError("integrated v11 lacks a bounded control interval")
-    duration_seconds = (end_ns - start_ns) / 1e9
-    if abs(duration_seconds - expected_duration_seconds) > 1e-9:
+    full_duration_seconds = (end_ns - full_start_ns) / 1e9
+    if abs(full_duration_seconds - expected_duration_seconds) > 1e-9:
         raise RuntimeError("integrated v11 control interval duration drifted")
-    rows = tuple(
+    if (
+        not 0.0 < warmup_seconds < expected_duration_seconds
+        or evaluation_seconds <= 0.0
+        or not 0.0 < minimum_completion_fraction <= 1.0
+    ):
+        raise RuntimeError("integrated v11 control assessment parameters are invalid")
+
+    start_ns = full_start_ns + round(warmup_seconds * 1e9)
+    duration_seconds = (end_ns - start_ns) / 1e9
+    if abs(duration_seconds - (expected_duration_seconds - warmup_seconds)) > 1e-9:
+        raise RuntimeError("integrated v11 control assessment duration drifted")
+    timestamped_rows = tuple(
         row
         for row in requests
         if isinstance(row, dict)
-        and row.get("phase") == "control"
         and isinstance(row.get("scheduled_arrival_ns"), int)
         and not isinstance(row.get("scheduled_arrival_ns"), bool)
-        and start_ns <= int(row["scheduled_arrival_ns"]) < end_ns
     )
-    expected_arrivals = round(expected_rate_rps * expected_duration_seconds)
-    completed_by_end = sum(
+    full_control_rows = tuple(
+        row
+        for row in timestamped_rows
+        if row.get("phase") == "control"
+        and full_start_ns <= int(row["scheduled_arrival_ns"]) < end_ns
+    )
+    rows = tuple(
+        row for row in full_control_rows if start_ns <= int(row["scheduled_arrival_ns"]) < end_ns
+    )
+    expected_full_arrivals = round(expected_rate_rps * expected_duration_seconds)
+    expected_arrivals = round(expected_rate_rps * duration_seconds)
+    completions_in_interval = sum(
         isinstance(row.get("completed_ns"), int)
         and not isinstance(row.get("completed_ns"), bool)
-        and int(row["completed_ns"]) <= end_ns
+        and start_ns <= int(row["completed_ns"]) < end_ns
+        for row in full_control_rows
+    )
+    completed_full_cohort = sum(
+        isinstance(row.get("completed_ns"), int) and not isinstance(row.get("completed_ns"), bool)
+        for row in full_control_rows
+    )
+    completed_cohort = sum(
+        isinstance(row.get("completed_ns"), int) and not isinstance(row.get("completed_ns"), bool)
         for row in rows
+    )
+    request_ids = tuple(row.get("request_id") for row in full_control_rows)
+    unique_control_request_ids = bool(
+        all(isinstance(request_id, str) and request_id for request_id in request_ids)
+        and len(set(request_ids)) == len(request_ids)
+    )
+    ordered_control_rows = tuple(
+        sorted(full_control_rows, key=lambda row: int(row["scheduled_arrival_ns"]))
+    )
+    scheduled_arrivals = tuple(int(row["scheduled_arrival_ns"]) for row in ordered_control_rows)
+    unique_scheduled_arrivals = len(set(scheduled_arrivals)) == len(scheduled_arrivals)
+    expected_scheduled_arrivals = tuple(
+        full_start_ns + int(index * 1e9 / expected_rate_rps)
+        for index in range(expected_full_arrivals)
+    )
+    scheduled_arrival_cadence_exact = scheduled_arrivals == expected_scheduled_arrivals
+    monotonic_control_timestamps = all(
+        isinstance(row.get("service_start_ns"), int)
+        and not isinstance(row.get("service_start_ns"), bool)
+        and isinstance(row.get("first_token_ns"), int)
+        and not isinstance(row.get("first_token_ns"), bool)
+        and isinstance(row.get("completed_ns"), int)
+        and not isinstance(row.get("completed_ns"), bool)
+        and int(row["scheduled_arrival_ns"])
+        <= int(row["service_start_ns"])
+        <= int(row["first_token_ns"])
+        <= int(row["completed_ns"])
+        for row in full_control_rows
+    )
+    full_output_tokens_exact = all(
+        isinstance(row.get("output_token_ids"), (tuple, list))
+        and len(row["output_token_ids"]) == 64
+        for row in full_control_rows
     )
     ttfts = tuple(
         int(row["first_token_ns"]) - int(row["scheduled_arrival_ns"])
@@ -275,20 +519,12 @@ def _control_interval_evidence(
         if isinstance(row.get("first_token_ns"), int)
         and not isinstance(row.get("first_token_ns"), bool)
     )
-    timestamps = sorted(
-        {
-            start_ns,
-            end_ns,
-            *(int(row["scheduled_arrival_ns"]) for row in rows),
-            *(
-                int(row["completed_ns"])
-                for row in rows
-                if isinstance(row.get("completed_ns"), int)
-                and not isinstance(row.get("completed_ns"), bool)
-                and int(row["completed_ns"]) <= end_ns
-            ),
-        }
-    )
+    evaluation_ns = round(evaluation_seconds * 1e9)
+    timestamps = list(range(start_ns, end_ns, evaluation_ns))
+    if not timestamps or timestamps[-1] != end_ns:
+        timestamps.append(end_ns)
+    if len(timestamps) < 3:
+        raise RuntimeError("integrated v11 control queue trend lacks boundary samples")
     depths = tuple(
         sum(
             int(row["scheduled_arrival_ns"]) <= timestamp
@@ -297,46 +533,128 @@ def _control_interval_evidence(
                 or isinstance(row.get("completed_ns"), bool)
                 or int(row["completed_ns"]) > timestamp
             )
-            for row in rows
+            for row in full_control_rows
         )
         for timestamp in timestamps
     )
+    seconds = tuple((timestamp - timestamps[0]) / 1e9 for timestamp in timestamps)
+    mean_x = sum(seconds) / len(seconds)
+    mean_y = sum(depths) / len(depths)
+    denominator = sum((value - mean_x) ** 2 for value in seconds)
+    slope = (
+        sum(
+            (x_value - mean_x) * (y_value - mean_y)
+            for x_value, y_value in zip(seconds, depths, strict=True)
+        )
+        / denominator
+    )
+    midpoint = len(depths) // 2
+    first_half_mean = sum(depths[:midpoint]) / len(depths[:midpoint])
+    second_half_mean = sum(depths[midpoint:]) / len(depths[midpoint:])
+    sustained_positive = bool(
+        slope > 0.0 and depths[-1] > depths[0] and second_half_mean > first_half_mean
+    )
+
+    queue_changes: dict[int, int] = {}
+    for row in full_control_rows:
+        arrival_ns = int(row["scheduled_arrival_ns"])
+        leaves_queue_ns = row.get("service_start_ns")
+        if isinstance(leaves_queue_ns, bool) or not isinstance(leaves_queue_ns, int):
+            leaves_queue_ns = row.get("completed_ns")
+        if isinstance(leaves_queue_ns, bool) or not isinstance(leaves_queue_ns, int):
+            continue
+        queue_changes[arrival_ns] = queue_changes.get(arrival_ns, 0) + 1
+        queue_changes[leaves_queue_ns] = queue_changes.get(leaves_queue_ns, 0) - 1
+    waiting_depth = sum(delta for timestamp, delta in queue_changes.items() if timestamp < start_ns)
+    maximum_waiting_depth = waiting_depth
+    for timestamp in sorted(
+        timestamp for timestamp in queue_changes if start_ns <= timestamp < end_ns
+    ):
+        waiting_depth += queue_changes[timestamp]
+        if waiting_depth < 0:
+            raise RuntimeError("integrated v11 control waiting-queue accounting is negative")
+        maximum_waiting_depth = max(maximum_waiting_depth, waiting_depth)
+
     offered_rate = len(rows) / duration_seconds
-    completed_rate = completed_by_end / duration_seconds
+    completed_rate = completions_in_interval / duration_seconds
     p95 = _p95_ns(ttfts)
     terminal_depth = depths[-1] if depths else expected_arrivals
     maximum_depth = max(depths, default=expected_arrivals)
+    offered_rate_matches = abs(offered_rate - expected_rate_rps) <= 1e-12
+    completion_tracks_offer = completed_rate >= offered_rate * minimum_completion_fraction
+    complete_full_request_accounting = completed_full_cohort == len(full_control_rows)
+    complete_request_accounting = len(ttfts) == len(rows) and completed_cohort == len(rows)
+    queue_stable = not sustained_positive
+    waiting_queue_bounded = maximum_waiting_depth < 20
+    total_outstanding_bounded = maximum_depth < 20
     passed = bool(
-        len(rows) == expected_arrivals
-        and len(ttfts) == len(rows)
-        and abs(offered_rate - expected_rate_rps) <= 1e-12
-        and completed_rate >= 0.90 * offered_rate
+        len(full_control_rows) == expected_full_arrivals
+        and len(rows) == expected_arrivals
+        and unique_control_request_ids
+        and unique_scheduled_arrivals
+        and scheduled_arrival_cadence_exact
+        and monotonic_control_timestamps
+        and full_output_tokens_exact
+        and complete_full_request_accounting
+        and complete_request_accounting
+        and offered_rate_matches
+        and completion_tracks_offer
         and p95 is not None
-        and p95 < slo_ttft_seconds * 1e9
-        and terminal_depth <= 4
-        and maximum_depth < 20
+        and p95 <= slo_ttft_seconds * 1e9
+        and queue_stable
+        and waiting_queue_bounded
+        and total_outstanding_bounded
     )
     evidence = {
-        "schema_version": "sloforge.branchfabric.v11-control-interval/v1",
+        "schema_version": "sloforge.branchfabric.v11-control-interval/v2",
+        "full_start_ns": full_start_ns,
         "start_ns": start_ns,
         "end_ns": end_ns,
+        "full_duration_seconds": full_duration_seconds,
+        "warmup_seconds": warmup_seconds,
         "duration_seconds": duration_seconds,
+        "expected_full_arrivals": expected_full_arrivals,
+        "full_arrivals": len(full_control_rows),
         "expected_arrivals": expected_arrivals,
         "arrivals": len(rows),
-        "completed_by_interval_end": completed_by_end,
+        "eventual_full_cohort_completions": completed_full_cohort,
+        "eventual_cohort_completions": completed_cohort,
+        "completions_in_interval": completions_in_interval,
         "offered_rate_per_second": offered_rate,
         "completed_rate_per_second": completed_rate,
+        "minimum_completion_fraction": minimum_completion_fraction,
         "p95_ttft_ns": p95,
-        "maximum_total_outstanding": maximum_depth,
-        "terminal_total_outstanding": terminal_depth,
-        "completion_tracks_offer": completed_rate >= 0.90 * offered_rate,
-        "p95_ttft_below_slo": p95 is not None and p95 < slo_ttft_seconds * 1e9,
-        "queue_bounded_below_normal_trigger": maximum_depth < 20,
-        "terminal_queue_at_recovery_threshold": terminal_depth <= 4,
+        "unique_control_request_ids": unique_control_request_ids,
+        "unique_scheduled_arrivals": unique_scheduled_arrivals,
+        "scheduled_arrival_cadence_exact": scheduled_arrival_cadence_exact,
+        "monotonic_control_timestamps": monotonic_control_timestamps,
+        "full_cohort_output_tokens_exact": full_output_tokens_exact,
+        "complete_full_request_accounting": complete_full_request_accounting,
+        "complete_request_accounting": complete_request_accounting,
+        "offered_rate_matches_config": offered_rate_matches,
+        "completion_tracks_offer": completion_tracks_offer,
+        "p95_ttft_below_slo": p95 is not None and p95 <= slo_ttft_seconds * 1e9,
+        "waiting_queue_maximum_depth": maximum_waiting_depth,
+        "waiting_queue_bounded_below_normal_trigger": waiting_queue_bounded,
+        "total_outstanding_diagnostic": {
+            "sample_interval_ns": evaluation_ns,
+            "samples": [
+                {"timestamp_ns": timestamp, "total_outstanding": depth}
+                for timestamp, depth in zip(timestamps, depths, strict=True)
+            ],
+            "initial_depth": depths[0],
+            "final_depth": terminal_depth,
+            "maximum_depth": maximum_depth,
+            "first_half_mean_depth": first_half_mean,
+            "second_half_mean_depth": second_half_mean,
+            "slope_requests_per_second": slope,
+            "sustained_positive": sustained_positive,
+        },
+        "total_outstanding_bounded_below_normal_trigger": total_outstanding_bounded,
+        "outstanding_queue_non_positive_trend": queue_stable,
+        "in_service_requests_not_treated_as_waiting_queue": True,
         "passed": passed,
     }
-    if not passed:
-        raise RuntimeError("integrated v11 9-rps control interval was not stable")
     return evidence
 
 
@@ -391,6 +709,8 @@ def _validate_gpu0_result(
     expected_control_seconds: float = 5.0,
     expected_restore_rate_rps: float = 9.0,
     slo_ttft_seconds: float = 2.0,
+    warmup_seconds: float = 1.0,
+    control_interval: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     recovery = result.get("serving_recovery_evidence")
     trigger = result.get("reclamation_trigger_evidence")
@@ -425,12 +745,19 @@ def _validate_gpu0_result(
         or trigger.get("offered_rate_exceeds_completed_rate") is not True
     ):
         raise RuntimeError("integrated v11 normal trigger was not emitted at backlog 20..30")
-    control = _control_interval_evidence(
-        result,
-        expected_rate_rps=expected_control_rate_rps,
-        expected_duration_seconds=expected_control_seconds,
-        slo_ttft_seconds=slo_ttft_seconds,
+    control = dict(
+        control_interval
+        if control_interval is not None
+        else _control_interval_evidence(
+            result,
+            expected_rate_rps=expected_control_rate_rps,
+            expected_duration_seconds=expected_control_seconds,
+            slo_ttft_seconds=slo_ttft_seconds,
+            warmup_seconds=warmup_seconds,
+        )
     )
+    if control.get("passed") is not True:
+        raise RuntimeError("integrated v11 9-rps control interval was not stable")
     restore_rows = tuple(row for row in requests if row.get("phase") == "restore-interference")
     if not restore_rows or any(
         row.get("completed_ns") is None
@@ -460,9 +787,7 @@ def _validate_gpu0_result(
     interval_rows = tuple(
         row
         for row in restore_rows
-        if restore_interval_start_ns
-        <= int(row["scheduled_arrival_ns"])
-        < restore_interval_end_ns
+        if restore_interval_start_ns <= int(row["scheduled_arrival_ns"]) < restore_interval_end_ns
     )
     interval_completions = sum(
         isinstance(row.get("completed_ns"), int)
@@ -481,13 +806,10 @@ def _validate_gpu0_result(
         for item in runtime_queue_samples
         if isinstance(item.get("observed_ns"), int)
         and not isinstance(item.get("observed_ns"), bool)
-        and restore_interval_start_ns
-        <= int(item["observed_ns"])
-        <= restore_interval_end_ns
+        and restore_interval_start_ns <= int(item["observed_ns"]) <= restore_interval_end_ns
     )
     interval_ttfts = tuple(
-        int(row["first_token_ns"]) - int(row["scheduled_arrival_ns"])
-        for row in interval_rows
+        int(row["first_token_ns"]) - int(row["scheduled_arrival_ns"]) for row in interval_rows
     )
     interval_seconds = (restore_interval_end_ns - restore_interval_start_ns) / 1e9
     interval = {
@@ -611,6 +933,15 @@ def run_integrated_v11_gpu0(
         write_new=_write_new,
         runtime_queue_state=runtime_queue_state,
     )
+    _write_new(barriers / "v11-gpu0-serving-prevalidation.json", serving)
+    control = _control_interval_evidence(
+        serving,
+        expected_rate_rps=config.control_request_rate_rps,
+        expected_duration_seconds=config.baseline_seconds,
+        slo_ttft_seconds=config.serving_slo_ttft_seconds,
+        warmup_seconds=config.warmup_seconds,
+    )
+    _write_new(barriers / "v11-gpu0-control-interval.json", control)
     restore_complete_path = barriers / "rollout-restore-complete.json"
     if not restore_complete_path.is_file():
         raise RuntimeError("integrated v11 GPU0 lacks rollout restore completion evidence")
@@ -625,6 +956,8 @@ def run_integrated_v11_gpu0(
         expected_control_seconds=config.baseline_seconds,
         expected_restore_rate_rps=config.restore_request_rate_rps,
         slo_ttft_seconds=config.serving_slo_ttft_seconds,
+        warmup_seconds=config.warmup_seconds,
+        control_interval=control,
     )
     if not runtime_queue_samples:
         raise RuntimeError("GPU0 restore lacks live vLLM scheduler queue samples")
@@ -647,6 +980,69 @@ def run_integrated_v11_gpu0(
             "slo_stability_pass": True,
             "gpu0_active_during_restore_pass": True,
         },
+    }
+
+
+def run_targeted_source_identity_v11_gpu0(
+    engine: Any,
+    *,
+    adapter: Any,
+    inputs: Mapping[str, Any],
+    config: Any,
+    start_ns: int,
+    barriers: Path,
+) -> dict[str, Any]:
+    """Run real control/overload traffic and stop at GPU1's identity barrier."""
+
+    from gpu_capacity_calibration_worker import _runtime_queue_state
+    from gpu_reclamation_integrated_trigger_v11 import (
+        run_v11_gpu0_until_source_identity_gate,
+    )
+    from gpu_reclamation_worker import _sampling_params
+
+    raw = run_v11_gpu0_until_source_identity_gate(
+        engine,
+        prefix=tuple(
+            int(item) for item in inputs["prefix_token_ids"][: config.serving_prompt_tokens]
+        ),
+        params=_sampling_params(max_tokens=config.serving_output_tokens, seed=config.seed),
+        config=build_live_v10_config(config),
+        start_ns=start_ns,
+        barriers=barriers,
+        write_new=_write_new,
+        runtime_queue_state=lambda: _runtime_queue_state(adapter),
+        expected_source_allocation_count=config.expected_total_blocks,
+    )
+    queue_drain = raw.get("queue_drain")
+    runtime_state = (
+        queue_drain.get("runtime_queue_state") if isinstance(queue_drain, dict) else None
+    )
+    if (
+        raw.get("passed") is not True
+        or not isinstance(runtime_state, dict)
+        or any(int(value) != 0 for value in runtime_state.values())
+    ):
+        raise RuntimeError("targeted GPU0 did not reach a real queue-zero terminal state")
+    return {
+        "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-gpu0-result/v1",
+        "status": "succeeded",
+        "attempt_id": config.attempt_id,
+        "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+        "reclamation_trigger_evidence": raw["reclamation_trigger_evidence"],
+        "source_identity_terminal": raw["source_identity_gate"],
+        "trigger_backlog_requests": raw["trigger_backlog_requests"],
+        "maximum_outstanding_requests": raw["maximum_outstanding_requests"],
+        "trigger_emergency_ceiling_headroom_requests": raw[
+            "trigger_emergency_ceiling_headroom_requests"
+        ],
+        "minimum_emergency_ceiling_headroom_requests": raw[
+            "minimum_emergency_ceiling_headroom_requests"
+        ],
+        "producer_stopped": raw["arrival_stopped_ns"] >= raw["arrival_stop_requested_ns"],
+        "final_runtime_queue_state": runtime_state,
+        "targeted_serving_trace": raw,
+        "optimized_export_started": False,
+        "transaction_source_release_started": False,
     }
 
 
@@ -712,6 +1108,212 @@ def _drain_released_serving_allocation_queue(
     }
 
 
+def run_targeted_source_identity_v11_gpu1(
+    *,
+    adapter: Any,
+    prepared: Mapping[str, Any],
+    config: Any,
+    physical_gpu_uuid: str,
+    barriers: Path,
+) -> dict[str, Any]:
+    """Exercise the integrated allocator lifecycle and stop before state export."""
+
+    from gpu_reclamation_worker import _geometry, _runtime_capture_inputs, _wait_for
+    from gpu_reclamation_worker_v11 import (
+        _public_value,
+        _source_epoch_map,
+        require_allocator_notification_queue_empty_v11,
+        retire_source_allocation_history_v11,
+        validate_exact_micro_topology,
+    )
+
+    from sloforge.continuum.adapters.vllm_reclamation import build_canonical_capture_plan
+    from sloforge.continuum.adapters.vllm_reclamation_v11 import Vllm0230EngineStepBinding
+    from sloforge.continuum.adapters.vllm_reclamation_v11_ownership import (
+        capture_source_ownership_v11,
+        create_source_capture_commit_v11,
+        validate_source_capture_commit_v11,
+    )
+
+    if (
+        getattr(config, "execution_mode", None) != "targeted-source-identity-v11"
+        or getattr(config, "full_export_authorized", None) is not False
+        or getattr(config, "source_release_authorized", None) is not False
+    ):
+        raise RuntimeError("targeted source identity received an export-capable config")
+    trigger = _wait_for(
+        barriers / "v10-reclaim-trigger.json", timeout_s=config.maximum_wall_seconds
+    )
+    trigger_ns = int(trigger["triggered_ns"])
+    rollout_admission_stop_ns = time.monotonic_ns()
+    _write_new(
+        barriers / "v11-rollout-admission-stop.json",
+        {
+            "schema_version": "sloforge.branchfabric.v11-rollout-admission-stop/v1",
+            "event": "ROLLOUT_ADMISSION_STOP",
+            "reclaim_trigger_emitted_ns": trigger_ns,
+            "observed_ns": rollout_admission_stop_ns,
+        },
+    )
+    branches = tuple(str(item) for item in prepared["branches"])
+    _tensors, geometry = _geometry(adapter)
+    binding = Vllm0230EngineStepBinding(adapter._view, acquire_timeout_seconds=30.0)
+    try:
+        with binding.critical_section(
+            "EXPORT_CAPTURE", gate_id=f"{config.attempt_id}:targeted-source-identity"
+        ) as export_gate:
+            state_quiescence_ns = time.monotonic_ns()
+            runtime_inputs = _runtime_capture_inputs(
+                adapter,
+                branches,
+                parent_logical_branch_id=str(prepared["root_id"]),
+            )
+            plan = build_canonical_capture_plan(
+                branches=runtime_inputs,
+                block_size_tokens=geometry.block_size_tokens,
+                logical_token_bytes=geometry.logical_token_bytes,
+                physical_page_bytes=geometry.physical_page_bytes,
+                gpu_uuid=physical_gpu_uuid,
+                allocation_epoch_by_block=dict(adapter._observer.block_epochs),
+            )
+            topology = validate_exact_micro_topology(
+                page_order=plan.page_order,
+                branch_count=len(plan.branch_tables),
+                logical_state_bytes=plan.logical_state_bytes,
+            )
+            source_epochs = _source_epoch_map(plan)
+            ownership = capture_source_ownership_v11(
+                adapter,
+                root_session_id=str(prepared["root_id"]),
+                branch_session_ids=branches,
+                expected_allocation_epochs=source_epochs,
+                expected_source_block_count=config.expected_total_blocks,
+                admission_gate=export_gate,
+                timeout_s=60.0,
+            )
+            source_lifetime_sha = hashlib.sha256(
+                _canonical_bytes(sorted(source_epochs.items()))
+            ).hexdigest()
+            ownership_sha = hashlib.sha256(_canonical_bytes(_public_value(ownership))).hexdigest()
+            allocation_history = retire_source_allocation_history_v11(
+                adapter._view.scheduler,
+                adapter._view.manager,
+                export_gate=export_gate,
+                source_allocation_lifetime_sha256=source_lifetime_sha,
+                ownership_snapshot_sha256=ownership_sha,
+            )
+            commit_started_ns = time.monotonic_ns()
+            source_commit = create_source_capture_commit_v11(
+                adapter,
+                plan,
+                ownership,
+                block_size_tokens=geometry.block_size_tokens,
+                admission_gate=export_gate,
+            )
+            commit_ended_ns = time.monotonic_ns()
+            validation = validate_source_capture_commit_v11(
+                adapter,
+                source_commit,
+                plan,
+                block_size_tokens=geometry.block_size_tokens,
+                admission_gate=export_gate,
+                timeout_s=60.0,
+            )
+            post_commit_notifications = require_allocator_notification_queue_empty_v11(
+                adapter._view.scheduler,
+                adapter._view.manager,
+                export_gate=export_gate,
+                source_capture_commit_sha256=source_commit.semantic_sha256,
+                phase="TARGETED_IDENTITY_GATE",
+            )
+            validation_public = _public_value(validation)
+            validation_sha = hashlib.sha256(_canonical_bytes(validation_public)).hexdigest()
+            commit_public = _public_value(source_commit)
+            allocator_lifecycle = _source_allocator_lifecycle_evidence(
+                adapter,
+                source_commit,
+                start_sequence=int(prepared["allocator_lifecycle_start_sequence"]),
+                rollout_ready_sequence=int(prepared["allocator_rollout_ready_sequence"]),
+            )
+            _write_new(
+                barriers / "v11-source-capture-commit.json",
+                {
+                    "schema_version": "sloforge.branchfabric.v11-source-capture-commit/v1",
+                    "event": "CAPTURE_COMMIT_END",
+                    "commit": commit_public,
+                    "identity_validation": validation_public,
+                    "pre_commit_allocation_history": allocation_history,
+                    "post_commit_allocation_notifications": post_commit_notifications,
+                    "allocator_lifecycle": allocator_lifecycle,
+                    "passed": True,
+                },
+            )
+            identity_gate = {
+                "schema_version": "sloforge.branchfabric.v11-source-identity-gate/v1",
+                "event": "SOURCE_ALLOCATION_IDENTITY_GATE",
+                "attempt_id": config.attempt_id,
+                "observed_at_monotonic_ns": time.monotonic_ns(),
+                "source_capture_commit_sha256": source_commit.semantic_sha256,
+                "source_identity_validation_sha256": validation_sha,
+                "allocation_history_sha256": allocation_history["history_block_ids_sha256"],
+                "expected_allocation_count": config.expected_total_blocks,
+                "observed_allocation_count": validation.allocation_count,
+                "exact_logical_mapping": validation.exact_logical_mapping,
+                "exact_block_epoch_identity": validation.exact_block_epoch_identity,
+                "exact_owner_sets": validation.exact_owner_sets,
+                "exact_refcounts": validation.exact_refcounts,
+                "all_allocations_live": validation.all_allocations_live,
+                "device_identity_pass": source_commit.device == ownership.device,
+                "post_commit_allocation_event_count": post_commit_notifications[
+                    "observed_event_count"
+                ],
+                "no_post_commit_mutation": validation.no_post_commit_mutation,
+                "optimized_export_started": False,
+                "transaction_source_release_started": False,
+                "passed": validation.passed
+                and validation.allocation_count == config.expected_total_blocks
+                and source_commit.device == ownership.device
+                and post_commit_notifications["queue_empty"] is True,
+            }
+            if identity_gate["passed"] is not True:
+                raise RuntimeError("targeted source identity gate failed closed")
+            trigger_timeline = validate_reclaim_trigger_timeline(
+                trigger,
+                rollout_admission_stop_ns=rollout_admission_stop_ns,
+                state_quiescence_ns=state_quiescence_ns,
+            )
+            _write_new(barriers / "v11-source-identity-pre-export-pass.json", identity_gate)
+        return {
+            "schema_version": ("sloforge.branchfabric.experiment-004-v11-targeted-gpu1-result/v1"),
+            "status": "succeeded",
+            "attempt_id": config.attempt_id,
+            "physical_gpu_uuid": physical_gpu_uuid,
+            "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+            "topology": topology,
+            "trigger_timeline": trigger_timeline,
+            "source_capture_commit": commit_public,
+            "source_identity_validation": validation_public,
+            "source_identity_gate": identity_gate,
+            "allocation_history_retirement": allocation_history,
+            "post_commit_allocation_notifications": post_commit_notifications,
+            "allocator_lifecycle": allocator_lifecycle,
+            "engine_step_binding": _public_value(binding.evidence()),
+            "optimized_export_started": False,
+            "transaction_source_release_started": False,
+            "cleanup_release_only": True,
+            "timings": {
+                "reclaim_trigger_ns": trigger_ns,
+                "rollout_admission_stop_ns": rollout_admission_stop_ns,
+                "allocator_quiescent_ns": state_quiescence_ns,
+                "capture_commit_started_ns": commit_started_ns,
+                "capture_commit_ended_ns": commit_ended_ns,
+                "identity_gate_passed_ns": identity_gate["observed_at_monotonic_ns"],
+            },
+        }
+    finally:
+        binding.close()
+
+
 def run_integrated_v11_gpu1(
     serving_engine: Any,
     *,
@@ -741,7 +1343,8 @@ def run_integrated_v11_gpu1(
         _run_continuation,
         _run_independent_oracle,
         _source_epoch_map,
-        consume_exact_source_allocation_queue_v11,
+        require_allocator_notification_queue_empty_v11,
+        retire_source_allocation_history_v11,
         summarize_state_passes,
         validate_exact_micro_topology,
     )
@@ -764,7 +1367,9 @@ def run_integrated_v11_gpu1(
     )
     from sloforge.continuum.adapters.vllm_reclamation_v11_ownership import (
         capture_source_ownership_v11,
+        create_source_capture_commit_v11,
         release_source_and_prove_v11,
+        validate_source_capture_commit_v11,
     )
 
     trigger = _wait_for(
@@ -840,6 +1445,90 @@ def run_integrated_v11_gpu1(
                 timeout_s=60.0,
             )
             source_authentication_ended_ns = time.monotonic_ns()
+            source_lifetime_sha = hashlib.sha256(
+                _canonical_bytes(sorted(source_epochs.items()))
+            ).hexdigest()
+            ownership_snapshot_sha = hashlib.sha256(
+                _canonical_bytes(_public_value(ownership_before))
+            ).hexdigest()
+            source_queue = retire_source_allocation_history_v11(
+                adapter._view.scheduler,
+                adapter._view.manager,
+                export_gate=export_gate,
+                source_allocation_lifetime_sha256=source_lifetime_sha,
+                ownership_snapshot_sha256=ownership_snapshot_sha,
+            )
+            allocation_history_retired_ns = time.monotonic_ns()
+            capture_commit_started_ns = allocation_history_retired_ns
+            source_commit = create_source_capture_commit_v11(
+                adapter,
+                plan,
+                ownership_before,
+                block_size_tokens=geometry.block_size_tokens,
+                admission_gate=export_gate,
+            )
+            capture_commit_ended_ns = time.monotonic_ns()
+            identity_before_export = validate_source_capture_commit_v11(
+                adapter,
+                source_commit,
+                plan,
+                block_size_tokens=geometry.block_size_tokens,
+                admission_gate=export_gate,
+                timeout_s=60.0,
+            )
+            post_commit_notifications = require_allocator_notification_queue_empty_v11(
+                adapter._view.scheduler,
+                adapter._view.manager,
+                export_gate=export_gate,
+                source_capture_commit_sha256=source_commit.semantic_sha256,
+                phase="PRE_EXPORT_READ",
+            )
+            allocator_lifecycle = _source_allocator_lifecycle_evidence(
+                adapter,
+                source_commit,
+                start_sequence=int(prepared["allocator_lifecycle_start_sequence"]),
+                rollout_ready_sequence=int(prepared["allocator_rollout_ready_sequence"]),
+            )
+            _write_new(
+                barriers / "v11-source-capture-commit.json",
+                {
+                    "schema_version": "sloforge.branchfabric.v11-source-capture-commit/v1",
+                    "event": "CAPTURE_COMMIT_END",
+                    "commit": _public_value(source_commit),
+                    "pre_export_identity": _public_value(identity_before_export),
+                    "pre_commit_allocation_history": source_queue,
+                    "post_commit_allocation_notifications": post_commit_notifications,
+                    "allocator_lifecycle": allocator_lifecycle,
+                    "passed": True,
+                },
+            )
+            _write_new(
+                barriers / "v11-source-identity-pre-export-pass.json",
+                {
+                    "schema_version": "sloforge.branchfabric.v11-source-identity-gate/v1",
+                    "event": "SOURCE_ALLOCATION_IDENTITY_GATE",
+                    "attempt_id": config.attempt_id,
+                    "observed_at_monotonic_ns": time.monotonic_ns(),
+                    "source_capture_commit_sha256": source_commit.semantic_sha256,
+                    "expected_allocation_count": config.expected_total_blocks,
+                    "observed_allocation_count": identity_before_export.allocation_count,
+                    "exact_logical_mapping": identity_before_export.exact_logical_mapping,
+                    "exact_block_epoch_identity": (
+                        identity_before_export.exact_block_epoch_identity
+                    ),
+                    "exact_owner_sets": identity_before_export.exact_owner_sets,
+                    "exact_refcounts": identity_before_export.exact_refcounts,
+                    "all_allocations_live": identity_before_export.all_allocations_live,
+                    "post_commit_allocation_event_count": (
+                        post_commit_notifications["observed_event_count"]
+                    ),
+                    "no_post_commit_mutation": True,
+                    "optimized_export_started": False,
+                    "transaction_source_release_started": False,
+                    "passed": True,
+                },
+            )
+            pre_export_identity_ended_ns = time.monotonic_ns()
             captured = capture_native_to_transport_v11(
                 tensors,
                 geometry,
@@ -850,22 +1539,52 @@ def run_integrated_v11_gpu1(
                 engine_step_gate=export_gate,
             )
             source_pipeline_ended_ns = time.monotonic_ns()
-            source_lifetime_sha = hashlib.sha256(
-                _canonical_bytes(sorted(source_epochs.items()))
-            ).hexdigest()
-            ownership_snapshot_sha = hashlib.sha256(
-                _canonical_bytes(_public_value(ownership_before))
-            ).hexdigest()
+            post_runtime_inputs = _runtime_capture_inputs(
+                adapter,
+                branches,
+                parent_logical_branch_id=str(prepared["root_id"]),
+            )
+            post_capture_plan = build_canonical_capture_plan(
+                branches=post_runtime_inputs,
+                block_size_tokens=geometry.block_size_tokens,
+                logical_token_bytes=geometry.logical_token_bytes,
+                physical_page_bytes=geometry.physical_page_bytes,
+                gpu_uuid=physical_gpu_uuid,
+                allocation_epoch_by_block=dict(adapter._observer.block_epochs),
+            )
+            identity_after_export_read = validate_source_capture_commit_v11(
+                adapter,
+                source_commit,
+                post_capture_plan,
+                block_size_tokens=geometry.block_size_tokens,
+                admission_gate=export_gate,
+                timeout_s=60.0,
+            )
+            post_export_identity_ended_ns = time.monotonic_ns()
             manifest_sha = hashlib.sha256(captured.state.manifest.canonical_bytes()).hexdigest()
-            state_publish_ended_ns = time.monotonic_ns()
-            source_queue = consume_exact_source_allocation_queue_v11(
+            post_export_notifications = require_allocator_notification_queue_empty_v11(
                 adapter._view.scheduler,
                 adapter._view.manager,
-                expected_block_ids=tuple(source_epochs),
                 export_gate=export_gate,
-                source_allocation_lifetime_sha256=source_lifetime_sha,
-                ownership_snapshot_sha256=ownership_snapshot_sha,
-                capture_manifest_sha256=manifest_sha,
+                source_capture_commit_sha256=source_commit.semantic_sha256,
+                phase="POST_EXPORT_READ",
+            )
+            state_publish_ended_ns = time.monotonic_ns()
+            _write_new(
+                barriers / "v11-source-identity-post-export-pass.json",
+                {
+                    "schema_version": "sloforge.branchfabric.v11-source-identity-gate/v1",
+                    "event": "POST_EXPORT_READ_IDENTITY_GATE",
+                    "source_capture_commit_sha256": source_commit.semantic_sha256,
+                    "allocation_count": len(source_commit.allocations),
+                    "identity_before_export": _public_value(identity_before_export),
+                    "identity_after_export_read": _public_value(identity_after_export_read),
+                    "allocation_history_retirement": source_queue,
+                    "post_commit_allocation_notifications": post_commit_notifications,
+                    "post_export_allocation_notifications": post_export_notifications,
+                    "zero_post_commit_semantic_mutations": True,
+                    "passed": True,
+                },
             )
             ownership_after = release_source_and_prove_v11(
                 adapter, ownership_before, admission_gate=export_gate, timeout_s=60.0
@@ -909,6 +1628,7 @@ def run_integrated_v11_gpu1(
                     "passed": False,
                 },
             )
+        adapter._allocator_epoch_source.observe_prefix_cache_reset()
         restore_trigger = _wait_for(
             barriers / "v10-restore-start.json", timeout_s=config.maximum_wall_seconds
         )
@@ -1041,6 +1761,7 @@ def run_integrated_v11_gpu1(
                     "passed": False,
                 },
             )
+        adapter._allocator_epoch_source.observe_prefix_cache_reset()
         expected_first = _run_independent_oracle(
             adapter._view.llm_engine,
             branch_tables=captured.state.manifest.branches,
@@ -1071,13 +1792,33 @@ def run_integrated_v11_gpu1(
                     source_authentication_ended_ns,
                 ),
                 (
-                    "fused_gather_repack_d2h",
+                    "pre_commit_allocation_history_retirement",
                     source_authentication_ended_ns,
+                    allocation_history_retired_ns,
+                ),
+                (
+                    "source_capture_commit",
+                    allocation_history_retired_ns,
+                    capture_commit_ended_ns,
+                ),
+                (
+                    "pre_export_identity_validation_and_commit_publish",
+                    capture_commit_ended_ns,
+                    pre_export_identity_ended_ns,
+                ),
+                (
+                    "fused_gather_repack_d2h",
+                    pre_export_identity_ended_ns,
                     source_pipeline_ended_ns,
                 ),
                 (
-                    "publish_and_release_preconditions",
+                    "post_export_read_identity_validation",
                     source_pipeline_ended_ns,
+                    post_export_identity_ended_ns,
+                ),
+                (
+                    "state_publish_and_allocation_history_retirement",
+                    post_export_identity_ended_ns,
                     state_publish_ended_ns,
                 ),
                 ("source_release", state_publish_ended_ns, source_release_ended_ns),
@@ -1132,6 +1873,19 @@ def run_integrated_v11_gpu1(
         )
         correctness = {
             "allocator_epoch_pass": all(item.allocator_issued for item in validation_evidence),
+            "source_capture_commit_pass": source_commit.semantic_sha256
+            == identity_before_export.semantic_sha256,
+            "source_identity_1152_of_1152_pass": (
+                identity_before_export.passed
+                and identity_after_export_read.passed
+                and identity_after_export_read.allocation_count == config.expected_total_blocks
+            ),
+            "zero_post_commit_source_mutations_pass": (
+                identity_after_export_read.no_post_commit_mutation
+                and source_queue["queue_empty_after_retirement"] is True
+                and post_commit_notifications["queue_empty"] is True
+                and post_export_notifications["queue_empty"] is True
+            ),
             "ownership_release_pass": ownership_after.passed,
             "engine_step_binding_pass": binding.evidence().passed,
             "integrity_pass": all(item.passed for item in validation_evidence),
@@ -1169,7 +1923,12 @@ def run_integrated_v11_gpu1(
                 "rollout_admission_stop_ns": rollout_admission_stop_ns,
                 "state_quiescence_ns": state_quiescence_ns,
                 "source_authentication_ended_ns": source_authentication_ended_ns,
+                "allocation_history_retired_ns": allocation_history_retired_ns,
+                "capture_commit_started_ns": capture_commit_started_ns,
+                "capture_commit_ended_ns": capture_commit_ended_ns,
+                "pre_export_identity_ended_ns": pre_export_identity_ended_ns,
                 "source_pipeline_ended_ns": source_pipeline_ended_ns,
+                "post_export_identity_ended_ns": post_export_identity_ended_ns,
                 "state_publish_ended_ns": state_publish_ended_ns,
                 "source_release_ended_ns": source_release_ended_ns,
                 "export_started_ns": export_started_ns,
@@ -1178,9 +1937,7 @@ def run_integrated_v11_gpu1(
                 "gpu1_serving_ready_ns": gpu1_serving_ready_ns,
                 "restore_trigger_ns": restore_trigger_ns,
                 "restore_started_ns": restore_started_ns,
-                "checkpoint_authentication_started_ns": (
-                    checkpoint_authentication_started_ns
-                ),
+                "checkpoint_authentication_started_ns": (checkpoint_authentication_started_ns),
                 "checkpoint_authentication_ended_ns": checkpoint_authentication_ended_ns,
                 "destination_staging_ended_ns": destination_staging_ended_ns,
                 "native_restore_pipeline_ended_ns": native_restore_pipeline_ended_ns,
@@ -1204,9 +1961,7 @@ def run_integrated_v11_gpu1(
             "critical_paths": {
                 "reclamation": reclaim_critical_path,
                 "restore": restore_critical_path,
-                "residual_source_chain_ns": (
-                    source_pipeline_ended_ns - state_quiescence_ns
-                ),
+                "residual_source_chain_ns": (source_pipeline_ended_ns - state_quiescence_ns),
                 "residual_restore_chain_ns": restore_ended_ns - restore_started_ns,
                 "stage_overlap_policy": (
                     "streaming gather/repack/D2H and H2D/scatter/validation remain fused "
@@ -1246,7 +2001,13 @@ def run_integrated_v11_gpu1(
                 "count": len(source_lifetimes),
                 "allocation_lifetime_sha256": source_lifetime_sha,
                 "pre_release_ownership_snapshot_sha256": ownership_snapshot_sha,
-                "allocation_zero_queue": source_queue,
+                "source_capture_commit": _public_value(source_commit),
+                "identity_before_export": _public_value(identity_before_export),
+                "identity_after_export_read": _public_value(identity_after_export_read),
+                "allocation_history_retirement": source_queue,
+                "post_commit_allocation_notifications": post_commit_notifications,
+                "post_export_allocation_notifications": post_export_notifications,
+                "allocator_lifecycle": allocator_lifecycle,
             },
             "temporary_serving_allocation_zero_queue": serving_queue,
             "destination_allocations": {
@@ -1310,10 +2071,17 @@ def run_worker(
 
     from sloforge.helix.characterization.gpu_reclamation_v11_methodology import (
         Experiment004V11IntegratedConfig,
+        Experiment004V11TargetedSourceIdentityConfig,
         validate_bound_artifact,
     )
 
-    config = Experiment004V11IntegratedConfig.model_validate(config_payload)
+    if (
+        config_payload.get("schema_version")
+        == "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-config/v1"
+    ):
+        config = Experiment004V11TargetedSourceIdentityConfig.model_validate(config_payload)
+    else:
+        config = Experiment004V11IntegratedConfig.model_validate(config_payload)
     repository_root = Path(__file__).resolve().parents[2]
     for reference, expected in (
         (config.offline_gate_manifest, config.offline_gate_manifest_sha256),
@@ -1335,11 +2103,11 @@ def run_worker(
     (work_root / "triton").mkdir(parents=True, exist_ok=True)
     _validate_runtime(config, physical_gpu_uuid=physical_gpu_uuid)
     inputs = json.loads((model_snapshot / "BRANCHFABRIC_INPUTS.json").read_text())
+    import gpu_reclamation_worker as frozen_worker
     from gpu_capacity_calibration_worker import _CompilationLogCapture
     from gpu_reclamation_worker import (
         _create_adapter,
         _prepare_rollouts,
-        _run_integrated_calibration_phase,
         _run_measured_v10_transaction,
         _transaction_ready_path,
         _wait_for,
@@ -1363,7 +2131,8 @@ def run_worker(
             expanded_runtime_config(config), model_snapshot, physical_gpu_uuid
         )
         model_ready_ns = time.monotonic_ns()
-        effective, serving_engine, handoff = _run_integrated_calibration_phase(
+        effective, serving_engine, handoff = _run_v11_integrated_calibration_phase(
+            frozen_worker=frozen_worker,
             adapter=adapter,
             config=expanded_runtime_config(config),
             inputs=inputs,
@@ -1375,7 +2144,15 @@ def run_worker(
         )
         if effective != expanded_runtime_config(config):
             raise RuntimeError("integrated v11 handoff changed its sealed effective config")
+        allocator_lifecycle_start_sequence = (
+            len(adapter._allocator_epoch_source.lifecycle_events()) if role == "rollout" else None
+        )
         prepared = _prepare_rollouts(adapter, effective, inputs) if role == "rollout" else None
+        if prepared is not None:
+            prepared["allocator_lifecycle_start_sequence"] = allocator_lifecycle_start_sequence
+            prepared["allocator_rollout_ready_sequence"] = len(
+                adapter._allocator_epoch_source.lifecycle_events()
+            )
         _write_new(
             _transaction_ready_path(barrier_root, role),
             {
@@ -1390,7 +2167,17 @@ def run_worker(
         common_start_ns = int(start["start_monotonic_ns"])
 
         def operation() -> dict[str, Any]:
+            targeted = config.execution_mode == "targeted-source-identity-v11"
             if role == "serving":
+                if targeted:
+                    return run_targeted_source_identity_v11_gpu0(
+                        serving_engine,
+                        adapter=adapter,
+                        inputs=inputs,
+                        config=config,
+                        start_ns=common_start_ns,
+                        barriers=barrier_root,
+                    )
                 return run_integrated_v11_gpu0(
                     serving_engine,
                     adapter=adapter,
@@ -1400,6 +2187,14 @@ def run_worker(
                     barriers=barrier_root,
                 )
             assert prepared is not None
+            if targeted:
+                return run_targeted_source_identity_v11_gpu1(
+                    adapter=adapter,
+                    prepared=prepared,
+                    config=config,
+                    physical_gpu_uuid=physical_gpu_uuid,
+                    barriers=barrier_root,
+                )
             return run_integrated_v11_gpu1(
                 serving_engine,
                 adapter=adapter,
@@ -1479,6 +2274,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             "traceback": traceback.format_exc(),
             "observed_ns": time.monotonic_ns(),
         }
+        affected_block_ids = getattr(error, "affected_block_ids", None)
+        if affected_block_ids is not None:
+            failure["affected_block_ids"] = [int(item) for item in affected_block_ids]
+        teardown_evidence = getattr(error, "teardown_evidence", None)
+        if teardown_evidence is not None:
+            from gpu_reclamation_worker_v11 import _public_value
+
+            failure["teardown_evidence"] = _public_value(teardown_evidence)
         try:
             _write_new(args.work_root / "failure.json", failure)
             _write_new(args.barrier_root / "abort.json", failure)

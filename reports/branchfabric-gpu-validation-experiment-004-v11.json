@@ -1,0 +1,103 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-report/v1",
+  "status": "BUDGET_BLOCKER",
+  "scientifically_valid_v11": null,
+  "v10_frozen_baseline": {
+    "status": "PASS",
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "tag": "branchfabric-exp004-naive-baseline-v10",
+    "tag_dereferenced_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39"
+  },
+  "main_sources_of_58x": {
+    "capture_and_publish_amplification": 21.0,
+    "restore_through_native_write_amplification": 20.0,
+    "destination_recapture_and_compare_amplification": 17.0,
+    "gpu_intermediate_amplification": 29.0,
+    "host_intermediate_amplification": 23.0,
+    "native_endpoint_amplification": 3.0,
+    "link_amplification": 3.0
+  },
+  "v11_software": {
+    "status": "LOCAL_IMPLEMENTATION_GPU_UNVALIDATED",
+    "implementation": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+    "direct_bounded_source_conversion": true,
+    "pinned_double_buffering": true,
+    "async_copy_overlap": true,
+    "direct_bounded_native_restore": true,
+    "streamed_sha256": true,
+    "full_destination_d2h_recapture_removed": true,
+    "full_page_zero_fill_removed_for_complete_overwrite": true,
+    "partial_tail_zeroing_retained": true,
+    "raw_bit_destination_validation": true,
+    "local_targeted_tests": "47 passed",
+    "remaining_local_integration_gates": [
+      "single-use allocator-issued epoch rather than caller-reusable string",
+      "post-free allocator/refcount ownership proof",
+      "controller-owned engine-step lock integration",
+      "canonical measured per-chunk GPU StatePassRecords"
+    ]
+  },
+  "comparison": {
+    "v10_full_physical_amplification_measured": 58.0,
+    "v11_full_physical_amplification_measured": null,
+    "v11_full_physical_amplification_algorithm_projection": 21.0,
+    "v10_external_movement_amplification_measured": 3.0,
+    "v11_external_movement_amplification_measured": null,
+    "v11_external_movement_amplification_algorithm_projection": 2.0,
+    "v10_avoidable_amplification_measured": 31.0,
+    "v11_avoidable_amplification_measured": null,
+    "v10_full_state_pass_count_measured": 30,
+    "v11_full_state_pass_count_measured": null,
+    "v11_algorithm_stage_count_projection": 9,
+    "v10_peak_host_temporary_bytes_measured": 2965372928,
+    "v11_peak_host_temporary_bytes_measured": null,
+    "v11_peak_host_temporary_bytes_algorithm_bound": 58720256,
+    "v10_peak_gpu_temporary_bytes_measured": null,
+    "v11_peak_gpu_temporary_bytes_measured": null
+  },
+  "latencies_seconds": {
+    "v10_time_to_hbm_reclamation": 5.222174431,
+    "v11_time_to_hbm_reclamation": null,
+    "v10_first_useful_gpu1_capacity": 5.413681427,
+    "v11_first_useful_gpu1_capacity": null,
+    "v10_serving_slo_restoration": 11.373208336,
+    "v11_serving_slo_restoration": null,
+    "v10_rollout_restore": 7.727983415,
+    "v11_rollout_restore": null
+  },
+  "gpu0_serving_interference": {
+    "v10": "71 arrivals, 71 completions, 4507 tokens, approximately 9.05 completions/s and 574.27 tokens/s during restore",
+    "v11": null
+  },
+  "three_way": {
+    "kill_and_recompute": null,
+    "naive_preserve": "FROZEN_V10_MEASURED",
+    "optimized_preserve": null,
+    "break_even": "ANALYTICAL_FORM_ONLY",
+    "independent_recompute_tokens_for_frozen_workload": 133120
+  },
+  "residual_dominant_state_chain": null,
+  "residual_amdahl_headroom": null,
+  "final_classification": null,
+  "classification_status": "NOT_REACHED_BUDGET_BLOCKER",
+  "hardware_gate": "NOT_REACHED",
+  "experiment_005": "NOT_GENERATED",
+  "gpu_budget": {
+    "v11_actual_a100_seconds": 0.0,
+    "v11_actual_gpu_hours": 0.0,
+    "v11_actual_cost_usd": 0.0,
+    "ledger_remaining_a100_seconds": 943.176373914022,
+    "primary_required_with_margin_a100_seconds": 3474.15,
+    "primary_shortfall_a100_seconds": 2530.973626085978,
+    "authorization_excludes_v11": true,
+    "SLOFORGE_GPU_BUDGET_USD_configured": false
+  },
+  "modal_cleanup": {
+    "status": "PASS",
+    "active_apps": 0,
+    "containers": 0,
+    "endpoints": 0,
+    "reservations": 0
+  }
+}

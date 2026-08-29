@@ -9,12 +9,15 @@ accepted as release proof on its own.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import time
 from dataclasses import dataclass, field
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from sloforge.continuum.adapters.real_runtime import GpuMemoryState
 from sloforge.continuum.adapters.vllm_allocator_epochs import (
+    VllmAllocatorEpochError,
     VllmAllocatorEpochProof,
     VllmAllocatorIssuedEpoch,
     require_vllm_allocator_epoch_source,
@@ -28,8 +31,14 @@ from sloforge.continuum.adapters.vllm_reclamation_v11_sync import (
     require_production_gate_v11,
 )
 
+if TYPE_CHECKING:
+    from sloforge.continuum.adapters.vllm_reclamation import CanonicalCapturePlan
+
 V11_OWNERSHIP_PROOF_SCHEMA_VERSION = "sloforge.continuum.vllm-v11-post-free-ownership-proof/v1"
+V11_SOURCE_CAPTURE_COMMIT_SCHEMA_VERSION = "sloforge.continuum.vllm-v11-source-capture-commit/v1"
+V11_ALLOCATOR_QUIESCENCE_SCHEMA_VERSION = "sloforge.continuum.vllm-v11-allocator-quiescence/v1"
 _V11_SOURCE_OWNERSHIP_SNAPSHOT_SEAL = object()
+_V11_SOURCE_CAPTURE_COMMIT_SEAL = object()
 _V11_POST_FREE_OWNERSHIP_PROOF_SEAL = object()
 
 
@@ -67,6 +76,98 @@ class V11SourceOwnershipSnapshot:
     _adapter_object_id: int = field(repr=False, compare=False)
     _allocator_epoch_proof: VllmAllocatorEpochProof = field(repr=False, compare=False)
     _proof_seal: object = field(repr=False, compare=False)
+
+
+@dataclass(frozen=True, slots=True)
+class V11AllocatorQuiescenceEvidence:
+    schema_version: str
+    observed_at_monotonic_ns: int
+    branch_session_ids: tuple[str, ...]
+    runtime_request_ids: tuple[str, ...]
+    paused_branch_count: int
+    scheduler_request_ids: tuple[str, ...]
+    native_request_table_ids: tuple[str, ...]
+    scheduler_running_request_ids: tuple[str, ...]
+    scheduler_waiting_count: int
+    scheduler_skipped_waiting_count: int
+    asynchronous_scheduling: bool
+    gate_binding_id: str
+    gate_acquisition_generation: int
+    engine_step_excluded: bool
+    allocator_mutations_excluded: bool
+    passed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class V11SourceSemanticAllocation:
+    logical_page_id: str
+    block_table_slot: int
+    logical_token_start: int
+    logical_token_end: int
+    valid_tokens: int
+    physical_block_id: int
+    allocation_epoch: int
+    logical_owner_set: tuple[str, ...]
+    runtime_owner_set: tuple[str, ...]
+    expected_refcount: int
+    shared: bool
+    physical_bytes: int
+
+
+@dataclass(frozen=True, slots=True)
+class V11SourceCaptureBranch:
+    logical_branch_id: str
+    parent_logical_branch_id: str
+    runtime_request_id: str
+    computed_tokens: int
+    token_history_sha256: str
+    logical_page_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class SourceCaptureCommit:
+    """Sealed snapshot-time semantic identity for one source branch group.
+
+    The semantic digest deliberately excludes timestamps, allocator notification
+    history, inspection counters, and diagnostic generations.  Those values are
+    useful provenance, but they are not a live allocation identity.
+    """
+
+    schema_version: str
+    committed_at_monotonic_ns: int
+    semantic_sha256: str
+    runtime_instance_id: str
+    runtime_model_identity: tuple[tuple[str, str], ...]
+    runtime_model_identity_sha256: str
+    device: str
+    root_session_id: str
+    branch_group: tuple[str, ...]
+    branches: tuple[V11SourceCaptureBranch, ...]
+    allocations: tuple[V11SourceSemanticAllocation, ...]
+    logical_state_bytes: int
+    physical_source_bytes: int
+    gate_binding_id: str
+    gate_acquisition_generation: int
+    allocator_quiescence: V11AllocatorQuiescenceEvidence
+    _adapter_object_id: int = field(repr=False, compare=False)
+    _ownership_snapshot: V11SourceOwnershipSnapshot = field(repr=False, compare=False)
+    _proof_seal: object = field(repr=False, compare=False)
+
+
+@dataclass(frozen=True, slots=True)
+class V11SourceIdentityValidation:
+    schema_version: str
+    validated_at_monotonic_ns: int
+    semantic_sha256: str
+    allocation_count: int
+    same_engine_step_witness: bool
+    exact_logical_mapping: bool
+    exact_block_epoch_identity: bool
+    exact_owner_sets: bool
+    exact_refcounts: bool
+    all_allocations_live: bool
+    no_post_commit_mutation: bool
+    passed: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,6 +357,433 @@ def _memory_tuple(memory: GpuMemoryState) -> tuple[int, int, int]:
     )
 
 
+def _canonical_bytes(value: Any) -> bytes:
+    return (
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+
+
+def expected_owner_set(
+    plan: CanonicalCapturePlan,
+    logical_page_id: str,
+) -> tuple[str, ...]:
+    """Return the declared logical owners for one canonical source page."""
+
+    page_rows = tuple(item for item in plan.page_order if item[0] == logical_page_id)
+    if len(page_rows) != 1:
+        raise V11OwnershipProofError(
+            f"canonical source plan does not define logical page {logical_page_id!r} exactly once"
+        )
+    owners = tuple(
+        sorted(
+            str(branch.logical_branch_id)
+            for branch in plan.branch_tables
+            if logical_page_id in branch.logical_page_ids
+        )
+    )
+    if not owners or len(owners) != len(set(owners)):
+        raise V11OwnershipProofError("canonical source page has an invalid expected owner set")
+    return owners
+
+
+def expected_refcount(plan: CanonicalCapturePlan, logical_page_id: str) -> int:
+    """Derive native refcount from the canonical owner relationship."""
+
+    return len(expected_owner_set(plan, logical_page_id))
+
+
+def _queue_size(queue: Any, *, label: str) -> int:
+    try:
+        size = len(queue)
+    except TypeError:
+        for name in ("rows", "requests", "request_ids"):
+            rows = getattr(queue, name, None)
+            if isinstance(rows, (list, tuple, dict, set, frozenset)):
+                size = len(rows)
+                break
+        else:
+            raise V11OwnershipProofError(f"cannot inspect scheduler {label} queue")
+    if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+        raise V11OwnershipProofError(f"scheduler {label} queue size is invalid")
+    return size
+
+
+def _request_ids(rows: Any, *, label: str) -> tuple[str, ...]:
+    if not isinstance(rows, (list, tuple)):
+        raise V11OwnershipProofError(f"scheduler {label} request list is unavailable")
+    result: list[str] = []
+    for request in rows:
+        request_id = getattr(request, "request_id", None)
+        if not isinstance(request_id, str) or not request_id:
+            raise V11OwnershipProofError(f"scheduler {label} contains an invalid request")
+        result.append(request_id)
+    if len(result) != len(set(result)):
+        raise V11OwnershipProofError(f"scheduler {label} aliases a runtime request")
+    return tuple(sorted(result))
+
+
+def prove_allocator_quiescence_v11(
+    adapter: VllmLiveStateAdapter,
+    *,
+    branch_session_ids: tuple[str, ...],
+    admission_gate: V11AdmissionGateWitness,
+) -> V11AllocatorQuiescenceEvidence:
+    """Prove the source allocator is stable while its live tables stay installed.
+
+    Queue-empty alone is deliberately insufficient.  The live source requests
+    remain in ``scheduler.running`` and in the native request tables; quiescence
+    means they are paused at a committed token boundary while the production
+    engine-step gate excludes every source-affecting mutation surface.
+    """
+
+    _require_production_adapter(adapter)
+    view = adapter._view
+    require_production_gate_v11(
+        admission_gate,
+        view.scheduler,
+        view.manager,
+        operation="EXPORT_CAPTURE",
+    )
+    runtime_ids_by_session = _runtime_request_ids(adapter, branch_session_ids)
+    expected_runtime_ids = tuple(sorted(runtime_ids_by_session.values()))
+    not_paused = tuple(
+        session_id
+        for session_id in branch_session_ids
+        if adapter._sessions[session_id].phase.value != "paused"
+    )
+    if not_paused:
+        raise V11OwnershipProofError(
+            "allocator quiescence requires every source branch to be paused: "
+            + ", ".join(not_paused)
+        )
+    scheduler_requests = getattr(view.scheduler, "requests", None)
+    if not isinstance(scheduler_requests, dict):
+        raise V11OwnershipProofError("allocator quiescence cannot inspect scheduler requests")
+    scheduler_request_ids = tuple(sorted(scheduler_requests))
+    native_request_ids = tuple(sorted(_native_request_table_keys(adapter)))
+    running_request_ids = _request_ids(getattr(view.scheduler, "running", None), label="running")
+    waiting_count = _queue_size(getattr(view.scheduler, "waiting", None), label="waiting")
+    skipped_count = _queue_size(
+        getattr(view.scheduler, "skipped_waiting", None), label="skipped-waiting"
+    )
+    runtime_config = getattr(view.vllm_config, "scheduler_config", None)
+    internal_config = getattr(view.scheduler, "scheduler_config", runtime_config)
+    asynchronous = bool(getattr(runtime_config, "async_scheduling", False)) or bool(
+        getattr(internal_config, "async_scheduling", False)
+    )
+    passed = bool(
+        not asynchronous
+        and waiting_count == 0
+        and skipped_count == 0
+        and scheduler_request_ids == expected_runtime_ids
+        and native_request_ids == expected_runtime_ids
+        and running_request_ids == expected_runtime_ids
+    )
+    if not passed:
+        raise V11OwnershipProofError(
+            "allocator quiescence requires exact live source request tables and empty pending queues"
+        )
+    require_production_gate_v11(
+        admission_gate,
+        view.scheduler,
+        view.manager,
+        operation="EXPORT_CAPTURE",
+    )
+    return V11AllocatorQuiescenceEvidence(
+        schema_version=V11_ALLOCATOR_QUIESCENCE_SCHEMA_VERSION,
+        observed_at_monotonic_ns=time.monotonic_ns(),
+        branch_session_ids=tuple(sorted(branch_session_ids)),
+        runtime_request_ids=expected_runtime_ids,
+        paused_branch_count=len(branch_session_ids),
+        scheduler_request_ids=scheduler_request_ids,
+        native_request_table_ids=native_request_ids,
+        scheduler_running_request_ids=running_request_ids,
+        scheduler_waiting_count=waiting_count,
+        scheduler_skipped_waiting_count=skipped_count,
+        asynchronous_scheduling=asynchronous,
+        gate_binding_id=admission_gate.binding_id,
+        gate_acquisition_generation=admission_gate.acquisition_generation,
+        engine_step_excluded=True,
+        allocator_mutations_excluded=True,
+        passed=True,
+    )
+
+
+def _source_commit_semantic_payload(
+    *,
+    runtime_instance_id: str,
+    runtime_model_identity: tuple[tuple[str, str], ...],
+    device: str,
+    root_session_id: str,
+    branch_group: tuple[str, ...],
+    branches: tuple[V11SourceCaptureBranch, ...],
+    allocations: tuple[V11SourceSemanticAllocation, ...],
+    logical_state_bytes: int,
+    physical_source_bytes: int,
+    gate_binding_id: str,
+    gate_acquisition_generation: int,
+) -> dict[str, Any]:
+    return {
+        "schema_version": V11_SOURCE_CAPTURE_COMMIT_SCHEMA_VERSION,
+        "runtime_instance_id": runtime_instance_id,
+        "runtime_model_identity": runtime_model_identity,
+        "device": device,
+        "root_session_id": root_session_id,
+        "branch_group": branch_group,
+        "branches": tuple(
+            (
+                branch.logical_branch_id,
+                branch.parent_logical_branch_id,
+                branch.runtime_request_id,
+                branch.computed_tokens,
+                branch.token_history_sha256,
+                branch.logical_page_ids,
+            )
+            for branch in branches
+        ),
+        "allocations": tuple(
+            (
+                allocation.logical_page_id,
+                allocation.block_table_slot,
+                allocation.logical_token_start,
+                allocation.logical_token_end,
+                allocation.valid_tokens,
+                allocation.physical_block_id,
+                allocation.allocation_epoch,
+                allocation.logical_owner_set,
+                allocation.runtime_owner_set,
+                allocation.expected_refcount,
+                allocation.shared,
+                allocation.physical_bytes,
+            )
+            for allocation in allocations
+        ),
+        "logical_state_bytes": logical_state_bytes,
+        "physical_source_bytes": physical_source_bytes,
+        "gate_binding_id": gate_binding_id,
+        "gate_acquisition_generation": gate_acquisition_generation,
+    }
+
+
+def create_source_capture_commit_v11(
+    adapter: VllmLiveStateAdapter,
+    plan: CanonicalCapturePlan,
+    ownership_snapshot: V11SourceOwnershipSnapshot,
+    *,
+    block_size_tokens: int,
+    admission_gate: V11AdmissionGateWitness,
+) -> SourceCaptureCommit:
+    """Seal the current quiesced logical-to-physical source allocation map."""
+
+    _require_production_adapter(adapter)
+    if block_size_tokens <= 0:
+        raise ValueError("source capture commit block size must be positive")
+    if (
+        not isinstance(ownership_snapshot, V11SourceOwnershipSnapshot)
+        or ownership_snapshot._proof_seal is not _V11_SOURCE_OWNERSHIP_SNAPSHOT_SEAL
+        or ownership_snapshot._adapter_object_id != id(adapter)
+    ):
+        raise V11OwnershipProofError("source capture commit received a forged ownership snapshot")
+    view = adapter._view
+    require_production_gate_v11(
+        admission_gate,
+        view.scheduler,
+        view.manager,
+        operation="EXPORT_CAPTURE",
+    )
+    quiescence = prove_allocator_quiescence_v11(
+        adapter,
+        branch_session_ids=ownership_snapshot.branch_session_ids,
+        admission_gate=admission_gate,
+    )
+    branch_group = tuple(sorted(branch.logical_branch_id for branch in plan.branch_tables))
+    if branch_group != tuple(sorted(ownership_snapshot.branch_session_ids)):
+        raise V11OwnershipProofError("capture plan branch group differs from live source ownership")
+    runtime_id_by_branch = dict(ownership_snapshot.runtime_request_ids)
+    ownership_by_block = {record.block_id: record for record in ownership_snapshot.blocks}
+    binding_by_page = {
+        binding.logical_page_id: binding for binding in plan.capture_evidence.bindings
+    }
+    slots_by_page: dict[str, set[int]] = {}
+    for branch in plan.branch_tables:
+        for slot, logical_page_id in enumerate(branch.logical_page_ids):
+            slots_by_page.setdefault(logical_page_id, set()).add(slot)
+    allocations: list[V11SourceSemanticAllocation] = []
+    for logical_page_id, block_id, valid_tokens, _owners in plan.page_order:
+        owners = expected_owner_set(plan, logical_page_id)
+        slots = slots_by_page.get(logical_page_id, set())
+        if len(slots) != 1:
+            raise V11OwnershipProofError(
+                f"logical page {logical_page_id!r} does not occupy one canonical block-table slot"
+            )
+        slot = next(iter(slots))
+        binding = binding_by_page.get(logical_page_id)
+        before = ownership_by_block.get(int(block_id))
+        if binding is None or before is None:
+            raise V11OwnershipProofError("source commit lacks allocation or ownership evidence")
+        runtime_owners = tuple(sorted(runtime_id_by_branch[owner] for owner in owners))
+        refcount = expected_refcount(plan, logical_page_id)
+        if (
+            int(binding.source.block_index) != int(block_id)
+            or int(binding.source.allocation_epoch) != before.allocation_epoch
+            or before.pre_release_owner != owners
+            or before.pre_release_runtime_owner != runtime_owners
+            or before.pre_release_refcount != refcount
+        ):
+            raise V11OwnershipProofError(
+                f"semantic owner/refcount/block/epoch mismatch for {logical_page_id!r}"
+            )
+        token_start = slot * block_size_tokens
+        allocations.append(
+            V11SourceSemanticAllocation(
+                logical_page_id=logical_page_id,
+                block_table_slot=slot,
+                logical_token_start=token_start,
+                logical_token_end=token_start + int(valid_tokens),
+                valid_tokens=int(valid_tokens),
+                physical_block_id=int(block_id),
+                allocation_epoch=before.allocation_epoch,
+                logical_owner_set=owners,
+                runtime_owner_set=runtime_owners,
+                expected_refcount=refcount,
+                shared=len(owners) > 1,
+                physical_bytes=before.physical_bytes,
+            )
+        )
+    ordered_allocations = tuple(sorted(allocations, key=lambda item: item.logical_page_id))
+    if len(ordered_allocations) != len(ownership_snapshot.blocks):
+        raise V11OwnershipProofError("source commit does not cover every live source allocation")
+    branches = tuple(
+        sorted(
+            (
+                V11SourceCaptureBranch(
+                    logical_branch_id=branch.logical_branch_id,
+                    parent_logical_branch_id=branch.parent_logical_branch_id,
+                    runtime_request_id=runtime_id_by_branch[branch.logical_branch_id],
+                    computed_tokens=int(branch.computed_tokens),
+                    token_history_sha256=str(branch.token_history_sha256),
+                    logical_page_ids=tuple(branch.logical_page_ids),
+                )
+                for branch in plan.branch_tables
+            ),
+            key=lambda item: item.logical_branch_id,
+        )
+    )
+    identity_payload = adapter._identity.model_dump(mode="json")
+    if any(
+        not isinstance(key, str) or not isinstance(value, str)
+        for key, value in identity_payload.items()
+    ):
+        raise V11OwnershipProofError("runtime model identity is not canonical string data")
+    runtime_model_identity = tuple(sorted(identity_payload.items()))
+    identity_sha = hashlib.sha256(_canonical_bytes(runtime_model_identity)).hexdigest()
+    runtime_instance_id = (
+        f"adapter:{id(adapter)}:scheduler:{id(view.scheduler)}:manager:{id(view.manager)}"
+    )
+    semantic_payload = _source_commit_semantic_payload(
+        runtime_instance_id=runtime_instance_id,
+        runtime_model_identity=runtime_model_identity,
+        device=ownership_snapshot.device,
+        root_session_id=ownership_snapshot.root_session_id,
+        branch_group=branch_group,
+        branches=branches,
+        allocations=ordered_allocations,
+        logical_state_bytes=int(plan.logical_state_bytes),
+        physical_source_bytes=int(plan.physical_source_bytes),
+        gate_binding_id=admission_gate.binding_id,
+        gate_acquisition_generation=admission_gate.acquisition_generation,
+    )
+    semantic_sha = hashlib.sha256(_canonical_bytes(semantic_payload)).hexdigest()
+    require_production_gate_v11(
+        admission_gate,
+        view.scheduler,
+        view.manager,
+        operation="EXPORT_CAPTURE",
+    )
+    return SourceCaptureCommit(
+        schema_version=V11_SOURCE_CAPTURE_COMMIT_SCHEMA_VERSION,
+        committed_at_monotonic_ns=time.monotonic_ns(),
+        semantic_sha256=semantic_sha,
+        runtime_instance_id=runtime_instance_id,
+        runtime_model_identity=runtime_model_identity,
+        runtime_model_identity_sha256=identity_sha,
+        device=ownership_snapshot.device,
+        root_session_id=ownership_snapshot.root_session_id,
+        branch_group=branch_group,
+        branches=branches,
+        allocations=ordered_allocations,
+        logical_state_bytes=int(plan.logical_state_bytes),
+        physical_source_bytes=int(plan.physical_source_bytes),
+        gate_binding_id=admission_gate.binding_id,
+        gate_acquisition_generation=admission_gate.acquisition_generation,
+        allocator_quiescence=quiescence,
+        _adapter_object_id=id(adapter),
+        _ownership_snapshot=ownership_snapshot,
+        _proof_seal=_V11_SOURCE_CAPTURE_COMMIT_SEAL,
+    )
+
+
+def validate_source_capture_commit_v11(
+    adapter: VllmLiveStateAdapter,
+    commit: SourceCaptureCommit,
+    current_plan: CanonicalCapturePlan,
+    *,
+    block_size_tokens: int,
+    admission_gate: V11AdmissionGateWitness,
+    timeout_s: float,
+) -> V11SourceIdentityValidation:
+    """Re-prove a commit and reject any post-commit semantic mutation."""
+
+    _require_production_adapter(adapter)
+    if (
+        not isinstance(commit, SourceCaptureCommit)
+        or commit._proof_seal is not _V11_SOURCE_CAPTURE_COMMIT_SEAL
+        or commit._adapter_object_id != id(adapter)
+    ):
+        raise V11OwnershipProofError("source capture commit is forged or foreign")
+    if (
+        admission_gate.binding_id != commit.gate_binding_id
+        or admission_gate.acquisition_generation != commit.gate_acquisition_generation
+    ):
+        raise V11OwnershipProofError("source capture commit witness is stale or foreign")
+    expected_epochs = {
+        allocation.physical_block_id: allocation.allocation_epoch
+        for allocation in commit.allocations
+    }
+    current_ownership = capture_source_ownership_v11(
+        adapter,
+        root_session_id=commit.root_session_id,
+        branch_session_ids=commit.branch_group,
+        expected_allocation_epochs=expected_epochs,
+        expected_source_block_count=len(commit.allocations),
+        admission_gate=admission_gate,
+        timeout_s=timeout_s,
+    )
+    candidate = create_source_capture_commit_v11(
+        adapter,
+        current_plan,
+        current_ownership,
+        block_size_tokens=block_size_tokens,
+        admission_gate=admission_gate,
+    )
+    if candidate.semantic_sha256 != commit.semantic_sha256:
+        raise V11OwnershipProofError("source allocation identity changed after SourceCaptureCommit")
+    return V11SourceIdentityValidation(
+        schema_version="sloforge.continuum.vllm-v11-source-identity-validation/v1",
+        validated_at_monotonic_ns=time.monotonic_ns(),
+        semantic_sha256=commit.semantic_sha256,
+        allocation_count=len(commit.allocations),
+        same_engine_step_witness=True,
+        exact_logical_mapping=True,
+        exact_block_epoch_identity=True,
+        exact_owner_sets=True,
+        exact_refcounts=True,
+        all_allocations_live=True,
+        no_post_commit_mutation=True,
+        passed=True,
+    )
+
+
 def capture_source_ownership_v11(
     adapter: VllmLiveStateAdapter,
     *,
@@ -331,11 +859,14 @@ def capture_source_ownership_v11(
 
     epoch_source = require_vllm_allocator_epoch_source(view.manager)
     ordered_block_ids = tuple(sorted(by_block_id))
-    allocator_proof = epoch_source.proof_for_live_blocks(
-        ordered_block_ids,
-        owner_request_ids=tuple(runtime_ids.values()),
-    )
-    epoch_source.require_current(allocator_proof, expected_block_ids=ordered_block_ids)
+    try:
+        allocator_proof = epoch_source.proof_for_live_blocks(
+            ordered_block_ids,
+            owner_request_ids=tuple(runtime_ids.values()),
+        )
+        epoch_source.require_current(allocator_proof, expected_block_ids=ordered_block_ids)
+    except VllmAllocatorEpochError as error:
+        raise V11OwnershipProofError("pre-release allocator epoch proof is stale") from error
     issued_by_block = {record.block_id: record for record in allocator_proof.records}
     global_referrers = _live_referrers_by_block(adapter)
     records: list[V11PreReleaseBlockOwnership] = []
@@ -618,12 +1149,24 @@ def release_source_and_prove_v11(
 
 
 __all__ = [
+    "V11_ALLOCATOR_QUIESCENCE_SCHEMA_VERSION",
     "V11_OWNERSHIP_PROOF_SCHEMA_VERSION",
+    "V11_SOURCE_CAPTURE_COMMIT_SCHEMA_VERSION",
+    "SourceCaptureCommit",
+    "V11AllocatorQuiescenceEvidence",
     "V11BlockOwnershipTransition",
     "V11OwnershipProofError",
     "V11PostFreeOwnershipProof",
     "V11PreReleaseBlockOwnership",
+    "V11SourceCaptureBranch",
+    "V11SourceIdentityValidation",
     "V11SourceOwnershipSnapshot",
+    "V11SourceSemanticAllocation",
     "capture_source_ownership_v11",
+    "create_source_capture_commit_v11",
+    "expected_owner_set",
+    "expected_refcount",
+    "prove_allocator_quiescence_v11",
     "release_source_and_prove_v11",
+    "validate_source_capture_commit_v11",
 ]

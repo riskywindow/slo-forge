@@ -30,6 +30,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from sloforge.helix.characterization.gpu_reclamation_v11_methodology import (
     Experiment004V11IntegratedConfig,
+    Experiment004V11TargetedSourceIdentityConfig,
     validate_bound_artifact,
 )
 
@@ -38,9 +39,11 @@ APP_NAME = "sloforge-branchfabric-gpu-reclamation-004-v11-integrated"
 GPU_REQUEST = "A100-80GB:2"
 GPU_COUNT = 2
 GPU_FUNCTION_TIMEOUT_SECONDS = 588
+TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS = 300
 GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS = 180
 POST_CONTROLLER_RESERVE_SECONDS = 10.0
 MAXIMUM_GPU_SECONDS = GPU_COUNT * GPU_FUNCTION_TIMEOUT_SECONDS
+TARGETED_MAXIMUM_GPU_SECONDS = GPU_COUNT * TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS
 MODEL_VOLUME_NAME = "sloforge-model-cache"
 RESULTS_VOLUME_NAME = "sloforge-branchfabric-results"
 REMOTE_EXPERIMENT_PREFIX = "experiment-004/v11/integrated/modal"
@@ -62,6 +65,23 @@ PROCESS_LIFECYCLE_PHASES = (
     "PGID_EMPTY",
     "CUDA_RELEASED",
     "FUNCTION_RETURN",
+)
+FROZEN_V10_CONTROL_REPLAY_IMAGE_BINDINGS = (
+    (
+        "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/"
+        "exp004-v10-naive-s41-v7/REMOTE_MANIFEST.json",
+        "ada4d36309500d9e02d13cb1f31ce741248fdf54edddfc801155d13a3175ae04",
+    ),
+    (
+        "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/"
+        "exp004-v10-naive-s41-v7/serving/result.json",
+        "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
+    ),
+    (
+        "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/"
+        "exp004-v10-naive-s41-v7/analysis/scientific-validity.json",
+        "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+    ),
 )
 
 _SOURCE = Path(__file__).resolve()
@@ -110,6 +130,28 @@ class IntegratedV11RemoteAuthorization(_StrictModel):
     budget_usd: float = Field(gt=0.0, allow_inf_nan=False)
 
 
+def _parse_config(
+    payload: dict[str, Any],
+) -> Experiment004V11IntegratedConfig | Experiment004V11TargetedSourceIdentityConfig:
+    if (
+        payload.get("schema_version")
+        == "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-config/v1"
+    ):
+        return Experiment004V11TargetedSourceIdentityConfig.model_validate(payload)
+    return Experiment004V11IntegratedConfig.model_validate(payload)
+
+
+def _authorized_wall_seconds(config: Any) -> float:
+    expected = (
+        TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS
+        if config.execution_mode == "targeted-source-identity-v11"
+        else GPU_FUNCTION_TIMEOUT_SECONDS
+    )
+    if not math.isclose(float(config.maximum_wall_seconds), float(expected), abs_tol=1e-9):
+        raise RuntimeError("v11 config wall bound differs from its execution mode")
+    return float(expected)
+
+
 def _canonical_bytes(value: BaseModel | dict[str, Any]) -> bytes:
     payload = value.model_dump(mode="json") if isinstance(value, BaseModel) else value
     return (
@@ -140,6 +182,16 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _require_image_file_binding(source: Path, *, expected_sha256: str) -> Path:
+    """Fail before image hydration if one exact immutable input is absent or drifts."""
+
+    if not source.is_file() or source.is_symlink():
+        raise FileNotFoundError(f"required Modal image input is absent or symlinked: {source}")
+    if _sha256(source) != expected_sha256:
+        raise RuntimeError(f"required Modal image input hash mismatch: {source}")
+    return source
+
+
 def _positive_budget(raw: str | None) -> float:
     try:
         value = float(raw) if raw is not None else math.nan
@@ -156,7 +208,7 @@ def _require_modal_sdk_version() -> None:
 
 
 def _validate_config_artifacts(
-    config: Experiment004V11IntegratedConfig,
+    config: Experiment004V11IntegratedConfig | Experiment004V11TargetedSourceIdentityConfig,
     *,
     repository_root: Path,
 ) -> dict[str, Any]:
@@ -189,14 +241,14 @@ def _validate_config_artifacts(
         or float(authorized_usd) <= 0.0
         or isinstance(authorized_seconds, bool)
         or not isinstance(authorized_seconds, (int, float))
-        or float(authorized_seconds) < MAXIMUM_GPU_SECONDS
+        or float(authorized_seconds) < GPU_COUNT * _authorized_wall_seconds(config)
     ):
         raise RuntimeError("integrated v11 budget authorization is insufficient")
     return payload
 
 
 def _validate_authorization(
-    config: Experiment004V11IntegratedConfig,
+    config: Experiment004V11IntegratedConfig | Experiment004V11TargetedSourceIdentityConfig,
     payload: dict[str, Any],
     *,
     authorized_budget_usd: float,
@@ -206,25 +258,28 @@ def _validate_authorization(
         raise RuntimeError("integrated v11 authorization does not bind the immutable config")
     if authorization.preflight_token_sha256 != hashlib.sha256(_LAUNCH_TOKEN.encode()).hexdigest():
         raise RuntimeError("integrated v11 authorization does not bind the preflight token")
+    wall_seconds = _authorized_wall_seconds(config)
     if not math.isclose(
         authorization.maximum_wall_seconds,
-        float(GPU_FUNCTION_TIMEOUT_SECONDS),
+        wall_seconds,
         rel_tol=0.0,
         abs_tol=1e-9,
     ) or not math.isclose(
         authorization.maximum_gpu_seconds,
-        float(MAXIMUM_GPU_SECONDS),
+        GPU_COUNT * wall_seconds,
         rel_tol=0.0,
         abs_tol=1e-9,
     ):
-        raise RuntimeError("integrated v11 authorization must reserve 2xA100 for exactly 588s")
+        raise RuntimeError(
+            f"v11 authorization must reserve 2xA100 for exactly {int(wall_seconds)}s"
+        )
     if authorization.budget_usd > authorized_budget_usd:
         raise RuntimeError("integrated v11 launch budget exceeds the bound authorization")
     return authorization
 
 
 def _validate_local_reservation(
-    config: Experiment004V11IntegratedConfig,
+    config: Experiment004V11IntegratedConfig | Experiment004V11TargetedSourceIdentityConfig,
     reservation_id: str,
 ) -> str:
     from sloforge.helix.characterization.gpu_reclamation_methodology import (
@@ -239,6 +294,7 @@ def _validate_local_reservation(
     if len(matches) != 1 or len(ledger.reservations) != 1:
         raise RuntimeError("integrated v11 sole-coordinator reservation is absent or duplicated")
     reservation = matches[0]
+    wall_seconds = _authorized_wall_seconds(config)
     if (
         reservation.invocation_id != config.attempt_id
         or reservation.config_sha256 != hashlib.sha256(_canonical_bytes(config)).hexdigest()
@@ -246,7 +302,7 @@ def _validate_local_reservation(
         or reservation.requested_gpu != "A100-80GB"
         or not math.isclose(
             reservation.maximum_wall_seconds,
-            float(GPU_FUNCTION_TIMEOUT_SECONDS),
+            wall_seconds,
             rel_tol=0.0,
             abs_tol=1e-9,
         )
@@ -374,6 +430,12 @@ def _require_in_function_cleanup(controller: dict[str, Any], *, work_root: Path)
     cleanup = controller.get("in_function_cleanup")
     if not isinstance(cleanup, dict):
         raise RuntimeError("integrated v11 controller omitted in-function cleanup evidence")
+    try:
+        cleanup = json.loads(_canonical_bytes(cleanup))
+    except (TypeError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError(
+            "integrated v11 controller cleanup evidence is not canonical JSON"
+        ) from error
     artifact = work_root / "in_function_cleanup.json"
     if not artifact.is_file():
         raise RuntimeError("integrated v11 controller omitted in_function_cleanup.json")
@@ -420,6 +482,7 @@ def _require_in_function_cleanup(controller: dict[str, Any], *, work_root: Path)
     worker_pids = controller.get("worker_pids")
     worker_process_groups = controller.get("worker_process_groups")
     worker_session_ids = controller.get("worker_session_ids")
+    pre_worker_scope = controller.get("cleanup_scope") == "PRE_WORKER_PREFLIGHT"
     owned_pids = (
         {item.get("pid") for item in owned_children}
         if isinstance(owned_children, list)
@@ -480,6 +543,46 @@ def _require_in_function_cleanup(controller: dict[str, Any], *, work_root: Path)
             for role in worker_pids
         )
     )
+    pre_worker_error = controller.get("controller_error")
+    pre_worker_cuda_audits = controller.get("cuda_clean_import_audits")
+    pre_worker_ownership_complete = bool(
+        pre_worker_scope
+        and controller.get("status") == "failed"
+        and controller.get("failure_stage")
+        in {
+            "SEALED_EVIDENCE",
+            "LIVE_CONTRACT",
+            "CPU_CONTROL_IMPORTS",
+            "PRE_WORKER_ARTIFACT_INITIALIZATION",
+            "PRE_INVENTORY_CUDA_CLEAN_AUDIT",
+            "GPU_INVENTORY_BEFORE_WORKERS",
+            "ZERO_COMPUTE_BEFORE_WORKERS",
+        }
+        and isinstance(pre_worker_error, dict)
+        and set(pre_worker_error) == {"type", "message"}
+        and all(isinstance(value, str) and value for value in pre_worker_error.values())
+        and controller.get("cleanup_error") is None
+        and controller.get("cleanup_actions") == []
+        and controller.get("sealed_evidence") is None
+        and controller.get("inventory_before") == []
+        and controller.get("inventory_after") == []
+        and controller.get("stable_physical_gpu_identity") is False
+        and worker_pids == {}
+        and worker_process_groups == {}
+        and worker_session_ids == {}
+        and controller.get("worker_returncodes") == {}
+        and controller.get("engine_start_evidence") == []
+        and controller.get("readiness_evidence") == []
+        and controller.get("readiness_deadline_ns") is None
+        and controller.get("sanity_guard_pair") is None
+        and controller.get("worker_results") == []
+        and isinstance(pre_worker_cuda_audits, list)
+        and len(pre_worker_cuda_audits) == 1
+        and isinstance(pre_worker_cuda_audits[0], dict)
+        and pre_worker_cuda_audits[0].get("cuda_clean") is True
+        and owned_children == []
+        and termination_actions == []
+    )
     subreaper = cleanup.get("child_subreaper")
     subreaper_complete = bool(
         isinstance(subreaper, dict)
@@ -487,6 +590,7 @@ def _require_in_function_cleanup(controller: dict[str, Any], *, work_root: Path)
         and subreaper.get("restored_before_return") is True
         and (subreaper.get("supported") is False or subreaper.get("enabled_for_experiment") is True)
     )
+    controller_compute_processes = controller.get("compute_processes_after")
     if (
         cleanup.get("schema_version") != "sloforge.branchfabric.in-function-cleanup/v1"
         or cleanup.get("status") != "PASS"
@@ -508,9 +612,11 @@ def _require_in_function_cleanup(controller: dict[str, Any], *, work_root: Path)
         or any(cleanup.get(field) is not True for field in affirmative_evidence)
         or not child_rows_complete
         or not actions_complete
-        or not worker_ownership_complete
+        or not (pre_worker_ownership_complete if pre_worker_scope else worker_ownership_complete)
+        or (not pre_worker_scope and controller.get("cleanup_scope") is not None)
         or not subreaper_complete
-        or controller.get("compute_processes_after") != cleanup.get("compute_processes_after")
+        or not isinstance(controller_compute_processes, (list, tuple))
+        or list(controller_compute_processes) != cleanup.get("compute_processes_after")
     ):
         raise RuntimeError("integrated v11 in-function cleanup evidence is not PASS-complete")
     return cleanup
@@ -600,11 +706,19 @@ if _LOCAL_REPOSITORY_AVAILABLE and hasattr(gpu_image, "add_local_dir"):
             copy=True,
         )
         .add_local_dir(LOCAL_REPOSITORY_ROOT / "tests", "/opt/sloforge/tests", copy=True)
+        .add_local_file(
+            LOCAL_REPOSITORY_ROOT / "tools/branchfabric-experiment-004-v11-final.py",
+            "/opt/sloforge/tools/branchfabric-experiment-004-v11-final.py",
+            copy=True,
+        )
     )
     bundled = "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004"
     gate_root = LOCAL_EXPERIMENT_ROOT / "v11/integration-gates"
     review_root = LOCAL_EXPERIMENT_ROOT / "v11/reviews"
     final_gate_root = LOCAL_EXPERIMENT_ROOT / "v11-final"
+    bundled_ledger_snapshot = (
+        final_gate_root / "integrated/authorization/ledger-snapshot-before-attempt-f.json"
+    )
     if gate_root.is_dir():
         gpu_image = gpu_image.add_local_dir(
             gate_root, f"{bundled}/v11/integration-gates", copy=True
@@ -612,9 +726,9 @@ if _LOCAL_REPOSITORY_AVAILABLE and hasattr(gpu_image, "add_local_dir"):
     if review_root.is_dir():
         gpu_image = gpu_image.add_local_dir(review_root, f"{bundled}/v11/reviews", copy=True)
     if final_gate_root.is_dir():
-        gpu_image = gpu_image.add_local_dir(
-            final_gate_root, f"{bundled}/v11-final", copy=True
-        )
+        if not bundled_ledger_snapshot.is_file():
+            raise FileNotFoundError("Attempt-F immutable ledger snapshot is absent")
+        gpu_image = gpu_image.add_local_dir(final_gate_root, f"{bundled}/v11-final", copy=True)
     for source, destination in (
         (
             LOCAL_EXPERIMENT_ROOT
@@ -637,9 +751,23 @@ if _LOCAL_REPOSITORY_AVAILABLE and hasattr(gpu_image, "add_local_dir"):
             LOCAL_EXPERIMENT_ROOT / "budget-authorization-v11.json",
             f"{bundled}/budget-authorization-v11.json",
         ),
+        (
+            LOCAL_EXPERIMENT_ROOT / "budget-authorization-v11-continuation.json",
+            f"{bundled}/budget-authorization-v11-continuation.json",
+        ),
     ):
         if source.is_file():
             gpu_image = gpu_image.add_local_file(source, destination, copy=True)
+    for reference, expected_sha256 in FROZEN_V10_CONTROL_REPLAY_IMAGE_BINDINGS:
+        source = _require_image_file_binding(
+            LOCAL_REPOSITORY_ROOT / reference,
+            expected_sha256=expected_sha256,
+        )
+        gpu_image = gpu_image.add_local_file(
+            source,
+            f"/opt/sloforge/{reference}",
+            copy=True,
+        )
 gpu_image = gpu_image.env(
     {
         "PYTHONPATH": (
@@ -664,6 +792,7 @@ app = modal.App(
     tags={"project": "sloforge", "experiment": "branchfabric-gpu-validation-004-v11"},
 )
 _run_integrated_function: Any = None
+_run_targeted_identity_function: Any = None
 _launch_token_secret: Any = None
 
 
@@ -671,7 +800,8 @@ def run_integrated(
     config_payload: dict[str, Any], authorization_payload: dict[str, Any]
 ) -> dict[str, Any]:
     entry_ns = time.monotonic_ns()
-    config = Experiment004V11IntegratedConfig.model_validate(config_payload)
+    config = _parse_config(config_payload)
+    wall_seconds = _authorized_wall_seconds(config)
     bound_budget = _validate_config_artifacts(config, repository_root=Path("/opt/sloforge"))
     authorization = _validate_authorization(
         config,
@@ -688,7 +818,7 @@ def run_integrated(
     config_path.parent.mkdir(parents=True, exist_ok=True)
     _write_new(config_path, config)
     controller_deadline_ns = entry_ns + round(
-        (GPU_FUNCTION_TIMEOUT_SECONDS - POST_CONTROLLER_RESERVE_SECONDS) * 1e9
+        (wall_seconds - POST_CONTROLLER_RESERVE_SECONDS) * 1e9
     )
     controller: dict[str, Any] = {
         "schema_version": (
@@ -764,11 +894,20 @@ def run_integrated(
         )
 
     controller_and_analysis_seconds = (time.monotonic_ns() - entry_ns) / 1e9
+    targeted = config.execution_mode == "targeted-source-identity-v11"
     completion = {
-        "schema_version": ("sloforge.branchfabric.experiment-004-v11-integrated-completion/v1"),
+        "schema_version": (
+            "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-completion/v1"
+            if targeted
+            else "sloforge.branchfabric.experiment-004-v11-integrated-completion/v1"
+        ),
         "status": "provisional" if run_error is None else "failed",
         "scientific_status": (
-            "pending-local-budget-settlement-and-provider-cleanup"
+            (
+                "targeted-identity-pass-pending-cleanup"
+                if targeted
+                else "pending-local-budget-settlement-and-provider-cleanup"
+            )
             if run_error is None
             else "invalid"
         ),
@@ -795,8 +934,7 @@ def run_integrated(
         "absolute_deadlines": {
             "function_entry_monotonic_ns": entry_ns,
             "controller_deadline_monotonic_ns": controller_deadline_ns,
-            "function_deadline_monotonic_ns": entry_ns
-            + GPU_FUNCTION_TIMEOUT_SECONDS * 1_000_000_000,
+            "function_deadline_monotonic_ns": entry_ns + round(wall_seconds * 1_000_000_000),
             "post_controller_reserve_seconds": POST_CONTROLLER_RESERVE_SECONDS,
         },
         "controller": controller,
@@ -836,7 +974,8 @@ def _materialize(attempt_id: str) -> dict[str, str]:
 
 def main(*, config_path: str) -> None:
     _require_modal_sdk_version()
-    config = Experiment004V11IntegratedConfig.model_validate_json(Path(config_path).read_text())
+    config = _parse_config(json.loads(Path(config_path).read_text()))
+    wall_seconds = _authorized_wall_seconds(config)
     budget_artifact = _validate_config_artifacts(config, repository_root=LOCAL_REPOSITORY_ROOT)
     budget = _positive_budget(os.getenv("SLOFORGE_GPU_BUDGET_USD"))
     if budget > float(budget_artifact["authorized_gpu_budget_usd"]):
@@ -850,14 +989,19 @@ def main(*, config_path: str) -> None:
         reservation_commitment_sha256=reservation_commitment,
         config_sha256=hashlib.sha256(_canonical_bytes(config)).hexdigest(),
         preflight_token_sha256=hashlib.sha256(_LAUNCH_TOKEN.encode()).hexdigest(),
-        maximum_wall_seconds=float(GPU_FUNCTION_TIMEOUT_SECONDS),
-        maximum_gpu_seconds=float(MAXIMUM_GPU_SECONDS),
+        maximum_wall_seconds=wall_seconds,
+        maximum_gpu_seconds=GPU_COUNT * wall_seconds,
         budget_usd=budget,
     )
-    call = _run_integrated_function.spawn(
+    remote_function = (
+        _run_targeted_identity_function
+        if config.execution_mode == "targeted-source-identity-v11"
+        else _run_integrated_function
+    )
+    call = remote_function.spawn(
         config.model_dump(mode="json"), authorization.model_dump(mode="json")
     )
-    result = call.get(timeout=GPU_FUNCTION_TIMEOUT_SECONDS + GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS)
+    result = call.get(timeout=wall_seconds + GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS)
     print(
         _canonical_bytes(
             {"result": result, "materialized": _materialize(config.attempt_id)}
@@ -869,6 +1013,7 @@ def main(*, config_path: str) -> None:
 if _CLOUD_GRAPH_ENABLED:
     _launch_token_secret = modal.Secret.from_dict({"SLOFORGE_MODAL_PREFLIGHT_TOKEN": _LAUNCH_TOKEN})
     _run_integrated_function = app.function(
+        name="run-integrated-v11",
         image=gpu_image,
         gpu=GPU_REQUEST,
         secrets=[_launch_token_secret],
@@ -879,6 +1024,24 @@ if _CLOUD_GRAPH_ENABLED:
         cpu=16.0,
         memory=64 * 1024,
         timeout=GPU_FUNCTION_TIMEOUT_SECONDS,
+        startup_timeout=GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS,
+        retries=0,
+        max_containers=1,
+        buffer_containers=0,
+        single_use_containers=True,
+    )(run_integrated)
+    _run_targeted_identity_function = app.function(
+        name="run-targeted-source-identity-v11",
+        image=gpu_image,
+        gpu=GPU_REQUEST,
+        secrets=[_launch_token_secret],
+        volumes={
+            str(MODEL_MOUNT): model_volume.with_mount_options(read_only=True),
+            str(RESULTS_MOUNT): results_volume,
+        },
+        cpu=16.0,
+        memory=64 * 1024,
+        timeout=TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS,
         startup_timeout=GPU_FUNCTION_STARTUP_TIMEOUT_SECONDS,
         retries=0,
         max_containers=1,

@@ -61,6 +61,10 @@ INTEGRATED_CONFIG_V6 = (
     ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
     "exp004-v10-naive-s41-v6-config.json"
 )
+INTEGRATED_CONFIG_V7 = (
+    ROOT / "artifacts/branchfabric/gpu-validation/experiment-004/raw/"
+    "exp004-v10-naive-s41-v7-config.json"
+)
 
 
 def _load(path: Path, name: str) -> ModuleType:
@@ -477,8 +481,8 @@ def test_integrated_json_config_uses_only_the_evidence_derived_v10_reservation(
 ) -> None:
     launcher = _load(LAUNCHER, "exp004_integrated_launcher_config")
     monkeypatch.setattr(launcher, "_verify_authorized_code_commit", lambda *_args: None)
-    payload = launcher._validate_config(INTEGRATED_CONFIG_V6)
-    assert payload["attempt_id"] == "exp004-v10-naive-s41-v6"
+    payload = launcher._validate_config(INTEGRATED_CONFIG_V7)
+    assert payload["attempt_id"] == "exp004-v10-naive-s41-v7"
     assert payload["execution_mode"] == "integrated-calibration-v10"
     assert payload["serving_spike_request_rate_per_second"] == 15.0
     assert launcher._reservation_wall_seconds(payload) == 588.0

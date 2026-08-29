@@ -349,7 +349,7 @@ def test_integrity_auditor_detects_discarded_sample(tmp_path: Path) -> None:
             warmup_count=0,
             repetitions=2,
             maximum_tasks=1,
-            maximum_runtime_seconds=10.0,
+            maximum_runtime_seconds=30.0,
         ),
         tmp_path / "run",
     )

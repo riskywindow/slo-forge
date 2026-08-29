@@ -1,0 +1,198 @@
+{
+  "schema_version": "sloforge.branchfabric.gpu-validation-report/v1",
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "status": "blocked_pre_gpu_launch_cleanup_verified",
+  "experiment_question_answered": false,
+  "result_classification": "runtime_integration_blocker_not_a_gpu_result",
+  "repository": {
+    "local_commit": "ab86d7600234f22f38fb71ae1d3a9d98bc048175",
+    "remote_commit": "ab86d7600234f22f38fb71ae1d3a9d98bc048175",
+    "tracked_local_diff": []
+  },
+  "machine": {
+    "host": "mew0",
+    "remote_user": "rishivin",
+    "driver_version": "580.178.04",
+    "nvidia_smi_driver_supported_cuda_version": "13.0",
+    "cuda_toolkit_installed": false,
+    "nvcc_available": false,
+    "gpus_detected": [
+      {
+        "index": 0,
+        "uuid": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19",
+        "name": "NVIDIA A100 80GB PCIe",
+        "memory_total_mib": 81920,
+        "memory_used_mib_at_preflight": 0,
+        "utilization_percent_at_preflight": 0
+      },
+      {
+        "index": 1,
+        "uuid": "GPU-a473e021-97fb-64b8-74ba-471825808bed",
+        "name": "NVIDIA A100 80GB PCIe",
+        "memory_total_mib": 81920,
+        "memory_used_mib_at_preflight": 0,
+        "utilization_percent_at_preflight": 0
+      }
+    ],
+    "conditionally_selected_gpu_index": 0,
+    "gpus_used": 0
+  },
+  "model": {
+    "identifier": null,
+    "revision": null,
+    "tokenizer": null,
+    "dtype": null,
+    "quantization": null,
+    "loaded": false,
+    "download_started": false
+  },
+  "runtime": {
+    "used": null,
+    "version": null,
+    "strongest_candidate": "vllm",
+    "candidate_installed_on_remote": false,
+    "valid_existing_adapter_available": false,
+    "primary_blocker": "No existing adapter connects live GPU state to exact Helix BranchPoint capture, physical Continuum shared-root COW, concurrent descendant decode, and StateOperationTrace emission.",
+    "package_absence_secondary": true
+  },
+  "requested_configuration": {
+    "context_tokens": 16384,
+    "continuation_tokens": 256,
+    "fanouts": [1, 8, 32],
+    "seeds": [41],
+    "same_model_policy_for_all_branches": true,
+    "gpu_hour_limit": 4.0
+  },
+  "executed_configuration": {
+    "context_tokens": [],
+    "fanouts": [],
+    "seeds": [],
+    "runs": 0,
+    "gpu_active_intervals": 0,
+    "actual_gpu_hours": 0.0
+  },
+  "baselines": {
+    "independent_prefill": {
+      "executed": false,
+      "metrics": null
+    },
+    "optimized_shared_root_cow": {
+      "executed": false,
+      "metrics": null
+    },
+    "cow_during_concurrent_decode": {
+      "executed": false,
+      "metrics": null
+    }
+  },
+  "branch_readiness": {
+    "definition": "A branch is ready only when exact runtime state ownership and private capacity permit continuation without incompatible recomputation.",
+    "p50_ms": null,
+    "p95_ms": null,
+    "p99_ms": null,
+    "all_branches_ready_ms": null,
+    "first_decode_token_start_ms": null,
+    "first_decode_token_emitted_ms": null,
+    "status": "not_collected"
+  },
+  "hbm_and_state_sharing": {
+    "experimental_hbm_samples": null,
+    "logical_kv_bytes": null,
+    "physical_kv_bytes": null,
+    "private_state_bytes": null,
+    "allocator_overhead_bytes": null,
+    "physical_memory_growth_per_branch_bytes": null,
+    "sharing_efficiency": null,
+    "physical_amplification": null,
+    "memory_saved_versus_independent_bytes": null,
+    "status": "not_collected"
+  },
+  "state_movement": {
+    "gpu_memory_copied_bytes": null,
+    "gpu_to_host_bytes": null,
+    "host_to_gpu_bytes": null,
+    "gpu_to_gpu_bytes": null,
+    "copy_operations": null,
+    "copy_size_distribution": null,
+    "status": "not_collected"
+  },
+  "cow": {
+    "events": null,
+    "bytes_materialized": null,
+    "first_private_allocation_time_ms": null,
+    "bytes_allocated_per_branch": null,
+    "shared_root_lifetime_ms": null,
+    "peak_root_refcount": null,
+    "status": "not_collected"
+  },
+  "gpu_interference": {
+    "single_branch_decode_tokens_per_second": null,
+    "during_branch_creation_tokens_per_second": null,
+    "during_early_divergence_tokens_per_second": null,
+    "steady_concurrent_decode_tokens_per_second": null,
+    "decode_interference_fraction": null,
+    "sm_utilization": null,
+    "hbm_bandwidth": null,
+    "copy_engine_utilization": null,
+    "power": null,
+    "clocks": null,
+    "status": "not_collected"
+  },
+  "derived_metrics": {
+    "branch_readiness_overhead": null,
+    "state_management_fraction": null,
+    "prefill_compute_avoided": null,
+    "physical_bytes_avoided": null,
+    "marginal_hbm_per_additional_branch": null,
+    "marginal_readiness_latency_per_additional_branch": null,
+    "status": "not_calculable"
+  },
+  "tracing": {
+    "branch_workload_trace": null,
+    "state_operation_trace": null,
+    "disabled_control_executed": false,
+    "dropped_events": null,
+    "buffer_overflow": null,
+    "overhead": null,
+    "status": "not_started"
+  },
+  "early_stop": {
+    "triggered": true,
+    "condition": "runtime_or_model_incompatibility_makes_measurement_invalid",
+    "decision": "stop_before_model_download_or_gpu_launch",
+    "rationale": "The requested real-runtime measurement command is intentionally absent in this commit; available adapters explicitly lack complete live execution-state export. A stock prefix-cache run or CPU reference fork would change the system under test."
+  },
+  "branchfabric_interest_conditions": {
+    "evaluable": false,
+    "triggered": null,
+    "reason": "No optimized software COW measurement exists."
+  },
+  "unexpected_findings": [
+    "Hardware availability was not the blocker: both A100 GPUs were idle at preflight.",
+    "The required semantic runtime integration is absent from the completed commit.",
+    "Remote Python runtime packages were also absent, but isolated installation alone would not resolve semantic validity.",
+    "Ephemeral SSH, rsync, and audit shell PIDs were not comprehensively recorded; no long-running or GPU-active experiment process was launched and exact cleanup scans found none."
+  ],
+  "plots": {
+    "generated": 0,
+    "required_plot_status": "not_generated_no_valid_datapoints",
+    "fabricated_zero_series_used": false,
+    "status_artifact": "artifacts/branchfabric/gpu-validation/experiment-001/plots/plot-status.json"
+  },
+  "next_recommended_experiment": "Do not launch another GPU run until a bounded, feature-flagged vLLM or SGLang adapter demonstrates exact live-state capture, runtime-native GPU KV block sharing, first-write materialization, per-branch readiness, concurrent descendant decode, and StateOperationTrace emission. Then rerun the 16K fanout-1 control followed by one fanout-8 trial.",
+  "cleanup": {
+    "verified": true,
+    "remote_root_removed": true,
+    "remaining_experiment_owned_artifacts": [],
+    "independent_review": "pass",
+    "final_fresh_ssh_audit_at_utc": "2026-08-10T22:59:21Z",
+    "docker_visibility": "permission_denied_but_containers_not_used",
+    "receipt": "artifacts/branchfabric/gpu-validation/experiment-001/REMOTE_CLEANUP_RECEIPT.json"
+  },
+  "limitations": [
+    "No real model was selected, downloaded, or loaded.",
+    "No runtime was started and no GPU-active interval occurred.",
+    "No experimental baseline, trace, hardware performance sample, or derived metric exists.",
+    "This report does not answer the BranchFabric experiment question and does not justify FPGA work."
+  ]
+}

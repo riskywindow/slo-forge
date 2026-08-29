@@ -1,0 +1,20 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-real-gpu-cow-config/v1",
+  "attempt_id": "modal-16k-f8-independent-s41-v1",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "runtime": "vllm",
+  "runtime_version": "0.23.0",
+  "fanout": 8,
+  "prefix_length": 16384,
+  "suffix_length": 256,
+  "seed": 41,
+  "baseline_mode": "independent",
+  "tracing_level": "full",
+  "maximum_wall_seconds": 3600,
+  "initialization_timeout_seconds": 1200,
+  "cleanup_timeout_seconds": 60,
+  "gpu_memory_utilization": 0.8,
+  "gpu_sample_interval_seconds": 0.25
+}

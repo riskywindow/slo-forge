@@ -10,6 +10,8 @@ block ID can be admitted, and is consumed at most once by a restore.
 
 from __future__ import annotations
 
+import os
+import threading
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -50,6 +52,21 @@ class VllmAllocatorEpochProof:
         return {record.block_id: record.allocation_epoch for record in self.records}
 
 
+@dataclass(frozen=True, slots=True)
+class VllmAllocatorLifecycleEvent:
+    sequence: int
+    observed_at_monotonic_ns: int
+    event: str
+    block_id: int | None
+    allocation_epoch: int | None
+    runtime_request_id: str | None
+    old_state: str
+    new_state: str
+    caller_label: str
+    process_id: int
+    thread_id: int
+
+
 class Vllm0230AllocatorEpochSource:
     """Monotonic, allocator-bound generation source attached to one manager."""
 
@@ -62,7 +79,38 @@ class Vllm0230AllocatorEpochSource:
         self._live: set[tuple[int, int]] = set()
         self._consumed: set[tuple[int, int]] = set()
         self._request_blocks: dict[str, tuple[int, ...]] = {}
+        self._events: list[VllmAllocatorLifecycleEvent] = []
+        self._maximum_events = 262_144
         setattr(manager, _ALLOCATOR_EPOCH_SOURCE_ATTRIBUTE, self)
+
+    def _record_event(
+        self,
+        *,
+        event: str,
+        block_id: int | None,
+        allocation_epoch: int | None,
+        runtime_request_id: str | None,
+        old_state: str,
+        new_state: str,
+        caller_label: str,
+    ) -> None:
+        if len(self._events) >= self._maximum_events:
+            raise VllmAllocatorEpochError("bounded allocator lifecycle journal is full")
+        self._events.append(
+            VllmAllocatorLifecycleEvent(
+                sequence=len(self._events),
+                observed_at_monotonic_ns=time.monotonic_ns(),
+                event=event,
+                block_id=block_id,
+                allocation_epoch=allocation_epoch,
+                runtime_request_id=runtime_request_id,
+                old_state=old_state,
+                new_state=new_state,
+                caller_label=caller_label,
+                process_id=os.getpid(),
+                thread_id=threading.get_ident(),
+            )
+        )
 
     @staticmethod
     def _request_id(request: Any) -> str:
@@ -135,6 +183,50 @@ class Vllm0230AllocatorEpochSource:
             self._records[block_id] = record
             self._live.add((block_id, record.allocation_epoch))
             issued.append(record)
+            self._record_event(
+                event="EPOCH_ISSUE",
+                block_id=block_id,
+                allocation_epoch=record.allocation_epoch,
+                runtime_request_id=request_id,
+                old_state=(
+                    "NEVER_ALLOCATED"
+                    if prior is None
+                    else f"RETIRED_EPOCH:{prior.allocation_epoch}"
+                ),
+                new_state="LIVE",
+                caller_label="KVCacheManager.allocate_slots",
+            )
+            self._record_event(
+                event="ALLOC",
+                block_id=block_id,
+                allocation_epoch=record.allocation_epoch,
+                runtime_request_id=request_id,
+                old_state="ALLOCATOR_AVAILABLE",
+                new_state="LIVE",
+                caller_label="KVCacheManager.allocate_slots",
+            )
+        for slot, block_id in enumerate(table):
+            if block_id in previous:
+                continue
+            bound_record = self._records.get(block_id)
+            if bound_record is None:
+                raise VllmAllocatorEpochError(
+                    f"bound block {block_id} has no allocator-issued allocation epoch"
+                )
+            for event, old_state, new_state in (
+                ("BIND_BLOCK_TABLE", "UNBOUND", f"BOUND_SLOT:{slot}"),
+                ("OWNER_ADD", "OWNER_ABSENT", "OWNER_PRESENT"),
+                ("INC_REF", "REFERENCE_ABSENT", "REFERENCE_PRESENT"),
+            ):
+                self._record_event(
+                    event=event,
+                    block_id=block_id,
+                    allocation_epoch=bound_record.allocation_epoch,
+                    runtime_request_id=request_id,
+                    old_state=old_state,
+                    new_state=new_state,
+                    caller_label="KVCacheManager.allocate_slots",
+                )
         self._request_blocks[request_id] = table
         return tuple(issued)
 
@@ -154,7 +246,23 @@ class Vllm0230AllocatorEpochSource:
         pool_blocks = getattr(getattr(self._manager, "block_pool", None), "blocks", ())
         for block_id in released_block_ids:
             record = self._records.get(int(block_id))
-            if record is None or block_id in still_owned:
+            if record is None:
+                continue
+            for event, old_state, new_state in (
+                ("UNBIND_BLOCK_TABLE", "BOUND", "UNBOUND"),
+                ("OWNER_REMOVE", "OWNER_PRESENT", "OWNER_ABSENT"),
+                ("DEC_REF", "REFERENCE_PRESENT", "REFERENCE_REMOVED"),
+            ):
+                self._record_event(
+                    event=event,
+                    block_id=int(block_id),
+                    allocation_epoch=record.allocation_epoch,
+                    runtime_request_id=request_id,
+                    old_state=old_state,
+                    new_state=new_state,
+                    caller_label="KVCacheManager.free",
+                )
+            if block_id in still_owned:
                 continue
             retained_by_cache = False
             try:
@@ -165,6 +273,29 @@ class Vllm0230AllocatorEpochSource:
                 native_refcount = 0
             if native_refcount <= 0 and not retained_by_cache:
                 self._live.discard((record.block_id, record.allocation_epoch))
+                new_state = "FREED"
+            elif retained_by_cache:
+                new_state = "CACHE_RETAINED"
+            else:
+                new_state = "LIVE_REFERENCED"
+            self._record_event(
+                event="FREE" if new_state == "FREED" else "CACHE_RELEASE_PENDING",
+                block_id=int(block_id),
+                allocation_epoch=record.allocation_epoch,
+                runtime_request_id=request_id,
+                old_state="LIVE",
+                new_state=new_state,
+                caller_label="KVCacheManager.free",
+            )
+        self._record_event(
+            event="REQUEST_FINISH",
+            block_id=None,
+            allocation_epoch=None,
+            runtime_request_id=request_id,
+            old_state="REQUEST_LIVE",
+            new_state="REQUEST_FINISHED",
+            caller_label="KVCacheManager.free",
+        )
 
     def observe_prefix_cache_reset(self) -> None:
         """Tombstone every generation made allocator-available by cache reset."""
@@ -181,7 +312,19 @@ class Vllm0230AllocatorEpochSource:
             except (IndexError, TypeError, ValueError):
                 available = False
             if available:
-                self._live.discard((block_id, record.allocation_epoch))
+                key = (block_id, record.allocation_epoch)
+                was_live = key in self._live
+                self._live.discard(key)
+                if was_live:
+                    self._record_event(
+                        event="CACHE_RELEASE",
+                        block_id=block_id,
+                        allocation_epoch=record.allocation_epoch,
+                        runtime_request_id=None,
+                        old_state="CACHE_RETAINED",
+                        new_state="FREED",
+                        caller_label="BlockPool.reset_prefix_cache",
+                    )
 
     def records_for_blocks(self, block_ids: Sequence[int]) -> tuple[VllmAllocatorIssuedEpoch, ...]:
         result: list[VllmAllocatorIssuedEpoch] = []
@@ -303,6 +446,11 @@ class Vllm0230AllocatorEpochSource:
     def epoch_by_block(self) -> Mapping[int, int]:
         return {block_id: record.allocation_epoch for block_id, record in self._records.items()}
 
+    def lifecycle_events(self) -> tuple[VllmAllocatorLifecycleEvent, ...]:
+        """Return the bounded append-only allocator mutation journal."""
+
+        return tuple(self._events)
+
 
 def install_vllm_allocator_epoch_source(manager: Any) -> Vllm0230AllocatorEpochSource:
     existing = getattr(manager, _ALLOCATOR_EPOCH_SOURCE_ATTRIBUTE, None)
@@ -327,6 +475,7 @@ __all__ = [
     "VllmAllocatorEpochError",
     "VllmAllocatorEpochProof",
     "VllmAllocatorIssuedEpoch",
+    "VllmAllocatorLifecycleEvent",
     "install_vllm_allocator_epoch_source",
     "require_vllm_allocator_epoch_source",
 ]

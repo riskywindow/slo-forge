@@ -17,6 +17,7 @@ from sloforge.helix.characterization.gpu_reclamation_methodology import (
 )
 from sloforge.helix.characterization.gpu_reclamation_v11_methodology import (
     Experiment004V11IntegratedConfig,
+    Experiment004V11TargetedSourceIdentityConfig,
     validate_bound_artifact,
 )
 
@@ -55,6 +56,25 @@ def _config(**updates: object) -> Experiment004V11IntegratedConfig:
     }
     payload.update(updates)
     return Experiment004V11IntegratedConfig.model_validate(payload)
+
+
+def _targeted_config(**updates: object) -> Experiment004V11TargetedSourceIdentityConfig:
+    payload = _config().model_dump(mode="json")
+    payload.update(
+        {
+            "schema_version": (
+                "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-config/v1"
+            ),
+            "execution_mode": "targeted-source-identity-v11",
+            "attempt_id": "exp004-v11-targeted-identity-s41-a",
+            "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+            "full_export_authorized": False,
+            "source_release_authorized": False,
+            "maximum_wall_seconds": 300.0,
+        }
+    )
+    payload.update(updates)
+    return Experiment004V11TargetedSourceIdentityConfig.model_validate(payload)
 
 
 def _row(
@@ -112,7 +132,10 @@ def test_modal_surface_is_exact_two_a100_588s_and_preflight_gated() -> None:
         in source
     )
     assert 'final_gate_root = LOCAL_EXPERIMENT_ROOT / "v11-final"' in source
+    assert '"integrated/authorization/ledger-snapshot-before-attempt-f.json"' in source
+    assert 'raise FileNotFoundError("Attempt-F immutable ledger snapshot is absent")' in source
     assert 'f"{bundled}/v11-final"' in source
+    assert '.add_local_file(LOCAL_EXPERIMENT_ROOT / "gpu-hours.json"' not in source
     assert "exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json" in source
     assert "exp004-v11-integrated-s41-a/postflight-cleanup-and-settlement.json" not in source
     assert source.count("create_if_missing=False") == 2
@@ -129,6 +152,65 @@ def test_modal_surface_is_exact_two_a100_588s_and_preflight_gated() -> None:
         "budget_authorization",
     ):
         assert f"config.{field}" in source
+
+
+def test_targeted_modal_surface_is_distinct_bounded_and_single_use() -> None:
+    module = _module()
+    config = _targeted_config()
+    assert module._authorized_wall_seconds(config) == 300.0
+    source = LAUNCHER.read_text()
+    assert "TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS = 300" in source
+    assert "_run_targeted_identity_function = app.function(" in source
+    targeted_definition = source[source.index("_run_targeted_identity_function = app.function(") :]
+    assert "timeout=TARGETED_GPU_FUNCTION_TIMEOUT_SECONDS" in targeted_definition
+    assert "retries=0" in targeted_definition
+    assert "max_containers=1" in targeted_definition
+    assert "single_use_containers=True" in targeted_definition
+
+
+def test_targeted_remote_authorization_and_ledger_reservation_are_exact_600_gpu_seconds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = _module()
+    base_ledger = Experiment004GpuHourLedger(
+        hard_additional_gpu_seconds=21_600.0,
+        consumed_additional_gpu_seconds=0.0,
+    )
+    pre_reservation_bytes = module._ledger_file_bytes(base_ledger)
+    config = _targeted_config(ledger_sha256_before_reservation=_sha_bytes(pre_reservation_bytes))
+    config_sha256 = _sha_bytes(module._canonical_bytes(config))
+    ledger, _preflight = reserve_gpu_invocation(
+        base_ledger,
+        reservation_id="exp004-v11-targeted-reservation",
+        invocation_id=config.attempt_id,
+        maximum_wall_seconds=300.0,
+        config_sha256=config_sha256,
+        gpu_count=2,
+    )
+    experiment_root = tmp_path / "experiment-004"
+    experiment_root.mkdir()
+    (experiment_root / "gpu-hours.json").write_bytes(module._ledger_file_bytes(ledger))
+    monkeypatch.setattr(module, "LOCAL_EXPERIMENT_ROOT", experiment_root)
+    assert len(module._validate_local_reservation(config, "exp004-v11-targeted-reservation")) == 64
+    payload = {
+        "reservation_id": "exp004-v11-targeted-reservation",
+        "reservation_commitment_sha256": "a" * 64,
+        "config_sha256": config_sha256,
+        "preflight_token_sha256": _sha_bytes(module._LAUNCH_TOKEN.encode()),
+        "requested_gpu": "A100-80GB",
+        "gpu_count": 2,
+        "maximum_wall_seconds": 300.0,
+        "maximum_gpu_seconds": 600.0,
+        "budget_usd": 40.0,
+    }
+    authorization = module._validate_authorization(config, payload, authorized_budget_usd=40.0)
+    assert authorization.maximum_gpu_seconds == 600.0
+    with pytest.raises(RuntimeError, match="exactly 300s"):
+        module._validate_authorization(
+            config,
+            payload | {"maximum_gpu_seconds": 1_176.0},
+            authorized_budget_usd=40.0,
+        )
 
 
 def test_image_layout_materializes_all_content_addressed_test_bindings(
@@ -190,6 +272,64 @@ def test_image_layout_materializes_all_replacement_evidence_bindings(
             reference=reference,
             expected_sha256=expected,
         ) == remote.resolve(strict=True)
+
+
+def test_image_layout_bundles_exact_frozen_v10_control_replay_closure(
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    sys.path.insert(0, str(EXPERIMENTS))
+    try:
+        import gpu_reclamation_integrated_controller_v11 as controller
+    finally:
+        sys.path.remove(str(EXPERIMENTS))
+
+    expected = tuple(controller.CONTROL_GATE_FROZEN_V10_BINDINGS.values())
+    assert expected == module.FROZEN_V10_CONTROL_REPLAY_IMAGE_BINDINGS
+    assert len(expected) == 3
+    source = LAUNCHER.read_text()
+    assert "for reference, expected_sha256 in FROZEN_V10_CONTROL_REPLAY_IMAGE_BINDINGS" in source
+    assert 'f"/opt/sloforge/{reference}"' in source
+
+    for reference, expected_sha256 in expected:
+        local = ROOT / reference
+        assert (
+            module._require_image_file_binding(
+                local,
+                expected_sha256=expected_sha256,
+            )
+            == local
+        )
+        remote = tmp_path / "opt/sloforge" / reference
+        remote.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(local, remote)
+        assert validate_bound_artifact(
+            tmp_path / "opt/sloforge",
+            reference=reference,
+            expected_sha256=expected_sha256,
+        ) == remote.resolve(strict=True)
+
+
+def test_image_binding_fails_closed_on_absence_symlink_and_hash_drift(
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    missing = tmp_path / "missing.json"
+    with pytest.raises(FileNotFoundError, match="absent or symlinked"):
+        module._require_image_file_binding(missing, expected_sha256="0" * 64)
+
+    artifact = tmp_path / "artifact.json"
+    artifact.write_text("{}\n")
+    with pytest.raises(RuntimeError, match="hash mismatch"):
+        module._require_image_file_binding(artifact, expected_sha256="0" * 64)
+
+    link = tmp_path / "link.json"
+    link.symlink_to(artifact)
+    with pytest.raises(FileNotFoundError, match="absent or symlinked"):
+        module._require_image_file_binding(
+            link,
+            expected_sha256=_sha_bytes(artifact.read_bytes()),
+        )
 
 
 def test_remote_authorization_binds_config_token_and_full_device_seconds() -> None:
@@ -389,6 +529,35 @@ def _controller_with_cleanup(cleanup: dict[str, object]) -> dict[str, object]:
     }
 
 
+def _pre_worker_controller_with_cleanup(
+    cleanup: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "status": "failed",
+        "cleanup_scope": "PRE_WORKER_PREFLIGHT",
+        "failure_stage": "SEALED_EVIDENCE",
+        "sealed_evidence": None,
+        "inventory_before": [],
+        "inventory_after": [],
+        "stable_physical_gpu_identity": False,
+        "worker_pids": {},
+        "worker_process_groups": {},
+        "worker_session_ids": {},
+        "worker_returncodes": {},
+        "engine_start_evidence": [],
+        "readiness_evidence": [],
+        "readiness_deadline_ns": None,
+        "sanity_guard_pair": None,
+        "worker_results": [],
+        "controller_error": {"type": "FileNotFoundError", "message": "missing snapshot"},
+        "cleanup_error": None,
+        "cleanup_actions": [],
+        "cuda_clean_import_audits": [{"cuda_clean": True}],
+        "compute_processes_after": [],
+        "in_function_cleanup": cleanup,
+    }
+
+
 def test_launcher_requires_matching_pass_complete_in_function_cleanup(
     tmp_path: Path,
 ) -> None:
@@ -426,11 +595,69 @@ def test_launcher_requires_matching_pass_complete_in_function_cleanup(
         ("worker_process_groups", {"serving": 11, "rollout": 99}),
         ("worker_session_ids", {"serving": 99, "rollout": 12}),
         ("compute_processes_after", [{"pid": 13}]),
+        ("cleanup_scope", "PRE_WORKER_PREFLIGHT"),
+        ("cleanup_scope", "UNKNOWN"),
     ):
         controller = _controller_with_cleanup(cleanup)
         controller[field] = invalid
         with pytest.raises(RuntimeError, match="not PASS-complete"):
             module._require_in_function_cleanup(controller, work_root=tmp_path)
+
+
+def test_launcher_accepts_only_exact_pre_worker_cleanup_scope(tmp_path: Path) -> None:
+    module = _module()
+    cleanup = _cleanup_evidence(module)
+    cleanup["owned_children"] = []
+    artifact = tmp_path / "in_function_cleanup.json"
+    artifact.write_text(json.dumps(cleanup))
+    controller = _pre_worker_controller_with_cleanup(cleanup)
+
+    assert module._require_in_function_cleanup(controller, work_root=tmp_path) == cleanup
+
+    mutations = (
+        lambda value: value.update(worker_pids={"serving": 11}),
+        lambda value: value.update(inventory_before=[{"uuid": "GPU-unexpected"}]),
+        lambda value: value.update(engine_start_evidence=[{"pid": 11}]),
+        lambda value: value.update(cleanup_scope="UNKNOWN"),
+        lambda value: value.update(controller_error=None),
+    )
+    for mutate in mutations:
+        rejected_controller = _pre_worker_controller_with_cleanup(cleanup)
+        mutate(rejected_controller)
+        with pytest.raises(RuntimeError, match="not PASS-complete"):
+            module._require_in_function_cleanup(
+                rejected_controller,
+                work_root=tmp_path,
+            )
+
+    rejected_cleanup = {**cleanup, "owned_children": [{"pid": 99}]}
+    artifact.write_text(json.dumps(rejected_cleanup))
+    rejected_controller = _pre_worker_controller_with_cleanup(rejected_cleanup)
+    with pytest.raises(RuntimeError, match="not PASS-complete"):
+        module._require_in_function_cleanup(rejected_controller, work_root=tmp_path)
+
+
+def test_launcher_canonicalizes_tuple_cleanup_evidence_before_comparison(
+    tmp_path: Path,
+) -> None:
+    module = _module()
+    cleanup = _cleanup_evidence(module)
+    cleanup["required_lifecycle"] = tuple(module.PROCESS_LIFECYCLE_PHASES)
+    cleanup["termination_actions"] = ()
+    cleanup["forced_kills"] = ()
+    cleanup["surviving_children"] = ()
+    artifact = tmp_path / "in_function_cleanup.json"
+    artifact.write_text(json.dumps(cleanup))
+    controller = _controller_with_cleanup(cleanup)
+    controller["compute_processes_after"] = ()
+
+    observed = module._require_in_function_cleanup(
+        controller,
+        work_root=tmp_path,
+    )
+
+    assert observed["required_lifecycle"] == list(module.PROCESS_LIFECYCLE_PHASES)
+    assert observed["termination_actions"] == []
 
 
 def test_launcher_rejects_missing_or_contradictory_cleanup_artifact(tmp_path: Path) -> None:
@@ -564,3 +791,9 @@ def test_modal_sdk_version_is_checked_before_local_spawn(
         if isinstance(node, ast.FunctionDef) and node.name == "main"
     )
     assert "_require_modal_sdk_version()" in ast.get_source_segment(source, main)
+
+
+def test_integrated_and_targeted_gpu_functions_have_distinct_modal_tags() -> None:
+    source = LAUNCHER.read_text()
+    assert 'name="run-integrated-v11"' in source
+    assert 'name="run-targeted-source-identity-v11"' in source

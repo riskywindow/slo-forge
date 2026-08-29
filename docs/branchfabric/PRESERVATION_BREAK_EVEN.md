@@ -1,25 +1,28 @@
-# Preservation Break-Even
+# BranchFabric preservation break-even
 
-Status: **not fitted**.
+Status: `NOT_MEASURED`
 
-The only integrated v11 preservation transaction failed before source release.
-The protocol required that transaction to pass before executing kill/recompute,
-so there is no measured recompute arm. A numerical break-even surface would
-therefore be fabricated and is intentionally absent.
+A measured break-even cannot be fit. The corrected targeted identity gate passed
+1,152/1,152, but the one full integrated optimized-preserve retry failed during
+Modal image build before the remote function entered. The precommitted experiment
+ordering therefore forbids running `KILL_AND_RECOMPUTE`. The measured export/restore fixed
+costs, integrated state-movement throughput, actual recomputed token count,
+prefill throughput, recompute GPU-seconds, and interruption latency are absent.
 
-The retained symbolic model is:
+The intended interpretable model remains:
 
 ```text
-recompute work tokens = B(P + A)
-preserved state bytes = q(P + BA)
+recompute_tokens = B(P + A)
+state_bytes      = q(P + BA)
 
-T_recompute = B(P + A) / measured_prefill_throughput + measured_fixed_recompute_overhead
-T_preserve  = measured_state_movement_term + measured_fixed_preservation_overhead
+T_preserve = C_preserve + state_bytes / BW_state
+T_recompute = C_recompute + recompute_tokens / R_prefill
 ```
 
-Here `P` is shared-prefix tokens, `B` is branch count, `A` is branch-private age,
-and `q` is unique logical state bytes per token. None of the required integrated
-preservation coefficients or kill/recompute coefficients is available from the
-failed transaction. The analytical 133,120-token expectation is not promoted as
-a measurement, and the successful micro-validation export/restore timings are
-not substituted for integrated coefficients.
+where `P` is prefix length, `B` branch count, `A` private trajectory age,
+`q` bytes per preserved token-equivalent, `BW_state` measured integrated state
+throughput, and `R_prefill` measured recompute throughput. No coefficient or
+break-even frontier is reported until both real arms exist. The analytical
+133,120-token expectation is not labeled measured.
+
+Evidence: [break-even status](../../artifacts/branchfabric/gpu-validation/experiment-004/v11-final/break-even/status.json).

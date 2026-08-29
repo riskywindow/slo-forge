@@ -891,7 +891,7 @@ def test_terminal_calibration_blocker_and_conversion_provenance_are_bound() -> N
     assert blocker["budget"]["budget_terminal"] is True
     assert ledger.reservations == ()
     assert authorization["consumed_gpu_seconds_at_authorization"] == pytest.approx(
-        6431.795790917997
+        11798.636304585969
     )
     capacity_v2 = next(
         item for item in ledger.intervals if item.invocation_id == "exp004-capacity-s41-v2"
@@ -925,10 +925,13 @@ def test_terminal_calibration_blocker_and_conversion_provenance_are_bound() -> N
         outcome["provenance_correction"]["artifact_sha256"]
         == hashlib.sha256(CONVERSION_PROVENANCE_CORRECTION.read_bytes()).hexdigest()
     )
-    assert outcome["ledger"]["artifact_sha256"] == authorization["previous_ledger_sha256"]
+    original_authorization = json.loads(
+        (CONFIG.parents[1] / "analysis/budget-authorization-v10-3.0h-superseded.json").read_text()
+    )
+    assert outcome["ledger"]["artifact_sha256"] == original_authorization["previous_ledger_sha256"]
     assert len(authorization["authorized_ledger_sha256"]) == 64
     assert authorization["authorized_gpu_budget_usd"] == 40.0
-    assert authorization["authorized_cumulative_a100_hours"] == 3.0
+    assert authorization["authorized_cumulative_a100_hours"] == 3.75
     assert authorization["ledger_mutation"]["settled_intervals_changed"] is False
 
 

@@ -349,6 +349,9 @@ def _reset_probe_state(adapter: Any, *, probe_id: str) -> dict[str, Any]:
         raise RuntimeError(f"probe {probe_id} retained live request state before reset")
     if not adapter._view.manager.reset_prefix_cache():
         raise RuntimeError(f"probe {probe_id} prefix cache did not reset")
+    allocator_epoch_source = getattr(adapter, "_allocator_epoch_source", None)
+    if allocator_epoch_source is not None:
+        allocator_epoch_source.observe_prefix_cache_reset()
     state_after = _runtime_queue_state(adapter)
     if any(state_after.values()):
         raise RuntimeError(f"probe {probe_id} retained request state after reset")
@@ -434,6 +437,9 @@ def _collect_engine_readiness(
     probe = verification_rows[0]
     if not adapter._view.manager.reset_prefix_cache():
         raise RuntimeError("readiness prefix cache did not reset after warmup/probe")
+    allocator_epoch_source = getattr(adapter, "_allocator_epoch_source", None)
+    if allocator_epoch_source is not None:
+        allocator_epoch_source.observe_prefix_cache_reset()
     queue_after = _runtime_queue_state(adapter)
     health_pass, health_source = _runtime_health(adapter)
     metrics_pass, metrics_source = _runtime_metrics(adapter)

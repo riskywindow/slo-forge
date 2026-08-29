@@ -66,6 +66,38 @@ def test_valid_allocator_allocation_is_runtime_issued_and_consumed_once() -> Non
         allocator.epochs.consume_once(proof, expected_block_ids=(2, 3))
 
 
+def test_allocator_lifecycle_journal_records_native_mutation_order() -> None:
+    allocator = _Allocator()
+    request = allocator.allocate("rollout.branch.0", (1,))
+
+    allocation_events = allocator.epochs.lifecycle_events()
+    assert tuple(item.sequence for item in allocation_events) == tuple(
+        range(len(allocation_events))
+    )
+    assert tuple(item.event for item in allocation_events) == (
+        "EPOCH_ISSUE",
+        "ALLOC",
+        "BIND_BLOCK_TABLE",
+        "OWNER_ADD",
+        "INC_REF",
+    )
+    assert {item.runtime_request_id for item in allocation_events} == {"rollout.branch.0"}
+    assert len({item.allocation_epoch for item in allocation_events}) == 1
+
+    allocator.free(request)
+
+    completed_events = allocator.epochs.lifecycle_events()
+    assert tuple(item.event for item in completed_events[-5:]) == (
+        "UNBIND_BLOCK_TABLE",
+        "OWNER_REMOVE",
+        "DEC_REF",
+        "FREE",
+        "REQUEST_FINISH",
+    )
+    assert completed_events[-1].block_id is None
+    assert completed_events[-1].allocation_epoch is None
+
+
 def test_freed_allocation_and_stale_proof_fail_closed() -> None:
     allocator = _Allocator()
     request = allocator.allocate("restore.freed", (4,))

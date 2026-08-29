@@ -1,24 +1,30 @@
-# BranchFabric Hardware Gate Final
+# BranchFabric hardware gate final
 
-Final classification: **`HARDWARE_GATE_NOT_REACHED`**.
+Final classification: `HARDWARE_GATE_NOT_REACHED`
 
-This is the only classification supported by the available evidence. The single
-integrated v11 attempt failed the exact source-allocation identity gate before
-source release and HBM reclamation. It therefore produced no valid integrated
-movement amplification, residual source/restore chain, critical-path share,
-Amdahl headroom, realistic accelerator lower bound, or end-to-end CUDA/Triton
-comparison. The gated kill/recompute baseline was not run.
+The allocator gate is repaired and the exact real targeted transition passed
+1,152/1,152 identities with zero post-commit mutation. The one full integrated
+retry then failed during Modal image build, before the remote function or GPU
+runtime started. Thus corrected integrated v11, kill/recompute, integrated
+residual shares, Amdahl headroom, a streaming-accelerator lower bound, and the
+CUDA/Triton adversary are unavailable.
 
-The early trigger and cleanup fixes did pass. Those successes establish that the
-normal trigger no longer waits for the emergency ceiling and that the Function
-tears down its own process hierarchy, but they do not establish the v11
-preservation transaction or its economics.
+No software, GPU-software, preservation-economic, or hardware-interest result
+is inferred from missing measurements. In particular, the successful real-A100
+micro result does not substitute for integrated evidence, and the failed
+attempt-C queue growth after transaction abort does not characterize v11
+serving recovery.
 
-The missing mandatory evidence prevents all four substantive decisions:
+The numeric hardware-interest gates remain unevaluated:
 
-- `SOFTWARE_WINS` cannot be claimed because residual integrated headroom is not measured.
-- `GPU_SOFTWARE_WINS` cannot be claimed because no integrated residual chain exists for a CUDA/Triton placement comparison.
-- `BRANCHFABRIC_HARDWARE_INTEREST` cannot be claimed from micro-validation alone.
-- `PRESERVATION_NOT_ECONOMIC` cannot be claimed without the measured kill/recompute arm.
+- integrated residual chain share at least 15%: unavailable;
+- realistic important-path speedup at least 1.20x: unavailable;
+- measured bandwidth/dataflow dominance: unavailable;
+- kill/recompute preservation relevance: unavailable;
+- CUDA/Triton inability to capture most value: unavailable; and
+- plausible external-placement advantage: unavailable.
 
-v11 was not frozen. Experiment 005 was not generated, and no FPGA work began.
+Experiment 005 is not generated. No FPGA implementation or hardware work was
+started.
+
+Evidence: [post-fix classification](../../artifacts/branchfabric/gpu-validation/experiment-004/v11-final/hardware-gate/final-classification-post-fix.json), [targeted PASS](../../artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/status-attempt-b.json), and [integrated failure](../../artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-d.json).
