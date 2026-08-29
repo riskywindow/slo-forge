@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-a-capacity-methodology-2b459e9-retry2",
+  "reviewer_role": "capacity_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T16:07:19Z",
+  "authorization_subject_sha256": "e695743187ec7aed0a544a7e9faeccf0883b26a0a1e127408e2aadd3533b2bde",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "Independent repository-contract canonicalization of the prescribed subject fields as UTF-8 canonical JSON with a trailing LF reproduces e695743187ec7aed0a544a7e9faeccf0883b26a0a1e127408e2aadd3533b2bde; rebuilding the subject at repository HEAD 2b459e92d721b279eb62aadd253de7e7b7d67f64 produces byte-identical content.",
+    "All 11 role-ordered source calibration artifacts are regular repository files and their bytewise SHA-256 digests exactly match the authorization subject.",
+    "The raw 12-rps one-GPU evidence independently yields 120 measurement-cohort offers and 119 completion events during the 10-second measurement interval, or 11.9 completions/s; scheduled-arrival p95 TTFT is 44.20256505 ms, queue depth is 11 to 12, all 120 cohort requests complete, and persistent positive drift is false.",
+    "The raw 15-rps one-GPU evidence independently yields 150 measurement-cohort offers and 144 completion events during the 10-second measurement interval, or 14.4 completions/s; scheduled-arrival p95 TTFT is 402.28929905 ms, queue depth is 15 to 21, fitted queue slope is +0.5818181818181818 requests/s, three cohort requests abort, and persistent positive drift is true.",
+    "The raw 20-rps two-GPU evidence independently yields 200 measurement-cohort offers and 199 completion events during the 10-second measurement interval, or 19.9 completions/s; scheduled-arrival p95 TTFT is 42.4444484 ms, queue depth is 18 to 19, persistent positive drift is false, all 200 cohort requests complete, and completions split exactly 100/100 across GPU0/GPU1.",
+    "The selected 15-rps spike is exactly 25 percent above lambda_1=12 rps, exactly 25 percent below lambda_2=20 rps, and leaves 5 rps nominal two-GPU drain headroom.",
+    "The v5-to-v6 execution-config behavioral change raises only the hard queue safety abort from 25 to 64 requests; the precommitted reclamation trigger remains 20 requests inside the immutable preferred 10-to-25 trigger range, and the 12/15/20 load design is unchanged. The associated compilation-log capture change affects readiness observability, not capacity selection.",
+    "The focused authorization and capacity-calibration suites pass 55 of 55 checks. The subject forbids remote review exchange and asynchronous approval waits on the live GPU path. Capacity-methodology decision: APPROVED."
+  ]
+}

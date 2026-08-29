@@ -1,0 +1,97 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-residual-chains/v1",
+  "status": "MICRO_MEASURED_INTEGRATED_PATHS_NOT_REACHED",
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "authoritative_sources": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+      "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+      "selectors": [
+        "$.state_passes[*]",
+        "$.measurements",
+        "$.correctness"
+      ]
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent18-terminal-amdahl-break-even-methodology-review.json",
+      "sha256": "532253c6c9ffa08afd6b1932e8d010024e52d9ade86bdc4be0e6e1d28f7030e1",
+      "selector": "$.micro_residual_stage_observations"
+    }
+  ],
+  "non_overlapping_micro_state_path_seconds": 7.051284484,
+  "chains": {
+    "source_export": {
+      "chain": "native page read -> bounded gather/repack -> hash -> D2H",
+      "logical_bytes": 1056964608,
+      "physical_bytes": 9512709120,
+      "wall_seconds": 2.61309087,
+      "cuda_seconds": 0.133267776,
+      "cpu_seconds": null,
+      "cpu_seconds_status": "NOT_SEPARATELY_IDENTIFIABLE_OVERLAPPING_TIMING_VIEWS",
+      "timing_owner_wall_union_seconds": 1.501838905,
+      "integrity_owner_wall_seconds": 1.390905234,
+      "synchronization_seconds": 0.005271845,
+      "fraction_of_micro_export_stage": 1.0,
+      "fraction_of_micro_restore_stage": 0.0,
+      "fraction_of_micro_full_preservation_state_path": 0.3705836682563778,
+      "fraction_of_integrated_reclamation": null,
+      "fraction_of_integrated_restore": null,
+      "fraction_of_integrated_full_preservation_transaction": null,
+      "integrated_fraction_status": "NOT_REACHED_PRE_RECLAIM"
+    },
+    "destination_restore": {
+      "chain": "authentication -> H2D -> direct scatter/native write -> raw-bit/hash validation",
+      "logical_bytes": 1056964608,
+      "physical_bytes": 12684353920,
+      "wall_seconds": 4.438193614,
+      "cuda_seconds": 0.697858271,
+      "cpu_seconds": null,
+      "cpu_seconds_status": "NOT_SEPARATELY_IDENTIFIABLE_OVERLAPPING_TIMING_VIEWS",
+      "timing_owner_wall_union_seconds": 2.928762252,
+      "integrity_owner_wall_seconds": 2.114326745,
+      "synchronization_seconds": 0.516524914,
+      "fraction_of_micro_export_stage": 0.0,
+      "fraction_of_micro_restore_stage": 1.0,
+      "fraction_of_micro_full_preservation_state_path": 0.6294163317436222,
+      "fraction_of_integrated_reclamation": null,
+      "fraction_of_integrated_restore": null,
+      "fraction_of_integrated_full_preservation_transaction": null,
+      "integrated_fraction_status": "NOT_REACHED_PRE_RECLAIM"
+    }
+  },
+  "dominant_measured_micro_chain": "destination_restore",
+  "micro_stage_sensitivity": {
+    "source_export": {
+      "2x": {"projected_seconds": 5.744739049, "speedup": 1.2274333827621697},
+      "5x": {"projected_seconds": 4.960811788, "speedup": 1.4213973005500367},
+      "10x": {"projected_seconds": 4.699502701, "speedup": 1.5004320526296473},
+      "effectively_free": {"projected_seconds": 4.438193614, "speedup": 1.5887735185227547}
+    },
+    "destination_restore": {
+      "2x": {"projected_seconds": 4.832187677, "speedup": 1.459232330226399},
+      "5x": {"projected_seconds": 3.5007295928, "speedup": 2.0142328326365098},
+      "10x": {"projected_seconds": 3.0569102314, "speedup": 2.3066704450691904},
+      "effectively_free": {"projected_seconds": 2.61309087, "speedup": 2.6984459533931173}
+    }
+  },
+  "required_integrated_path_matrix": {
+    "source_export": {
+      "time_to_hbm_reclamation": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "time_to_useful_gpu1_capacity": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "time_to_serving_slo_restoration": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "rollout_restore_latency": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "full_preservation_transaction": {"2x": null, "5x": null, "10x": null, "effectively_free": null}
+    },
+    "destination_restore": {
+      "time_to_hbm_reclamation": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "time_to_useful_gpu1_capacity": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "time_to_serving_slo_restoration": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "rollout_restore_latency": {"2x": null, "5x": null, "10x": null, "effectively_free": null},
+      "full_preservation_transaction": {"2x": null, "5x": null, "10x": null, "effectively_free": null}
+    },
+    "status": "NOT_REACHED_PRE_RECLAIM",
+    "reason": "The sole integrated v11 attempt failed before the reclaim trigger. It emitted no integrated state-pass interval, so none of the five required integrated denominators exists."
+  },
+  "timing_non_additivity_rule": "Wall, CUDA-event, synchronization, integrity-owner, and timing-owner-union values are overlapping views and are not summed.",
+  "micro_sensitivity_is_not_integrated_or_hardware_headroom": true
+}

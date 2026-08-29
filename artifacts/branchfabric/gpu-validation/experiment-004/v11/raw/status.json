@@ -1,0 +1,22 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-raw-status/v1",
+  "status": "MICRO_MEASURED_INTEGRATED_TERMINAL_INVALID_PRE_RECLAIM",
+  "micro_validation": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "status": "PASS",
+    "worker_result": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "worker_result_sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "canonical_state_pass_records": 10454
+  },
+  "integrated_v11": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "status": "FAILED_INVALID_PRE_RECLAIM",
+    "remote_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+    "manifest_rows_verified": 460,
+    "manifest_rows_total": 460,
+    "state_pipeline_executed": false
+  },
+  "kill_and_recompute": "NOT_RUN_PREREQUISITE_INTEGRATED_V11_FAILED",
+  "not_reached_values_are_not_measurements": true
+}

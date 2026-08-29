@@ -1,0 +1,303 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v5",
+  "reviewer": "agent11-agent14-combined-serving-gpu-performance-reviewer",
+  "scope": "serving methodology, failure localization, engine readiness, sanity guards, transaction phase reach, and GPU-performance evidence validity",
+  "decided_at_utc": "2026-08-13T15:58:31Z",
+  "repository_commit_at_review": "f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4",
+  "verdict": "REJECT_ATTEMPT_AS_SCIENTIFIC_BASELINE_LOCAL_BACKLOG_BOUND_MISMATCH",
+  "artifact_sha256": "9970fbb81e6d5ad66593e1e6bf3e33702c553414b45f01f4f868fa77fe4e7da0",
+  "artifact_sha256_scope": "sha256 of RFC-8785-equivalent compact key-sorted JSON after deleting the top-level artifact_sha256 field",
+  "failure_localization": {
+    "worker": "serving",
+    "worker_returncode": 1,
+    "exception_type": "RuntimeError",
+    "exception_message": "calibrated v10 backlog exceeded its bounded safety ceiling during post-reclaim-pre-gpu1",
+    "exception_source": "gpu_reclamation_v10_serving.py:_enforce_pre_gpu1_queue_abort",
+    "transaction_began": true,
+    "control_start_ns": 199213557038,
+    "reclaim_trigger_ns": 207242140456,
+    "serving_worker_failure_end_ns": 212121741979,
+    "gpu1_serving_ready_ns": 213116435753,
+    "trigger_from_control_start_seconds": 8.028583418,
+    "serving_failure_from_trigger_seconds": 4.879601523,
+    "gpu1_serving_ready_from_trigger_seconds": 5.874295297,
+    "gpu1_serving_ready_after_serving_failure_seconds": 0.994693774,
+    "trigger_queue_depth": 20,
+    "queue_abort_ceiling": 25,
+    "headroom_requests": 5,
+    "observed_trigger_window_queue_slope_requests_per_second": 3.3333333333333335,
+    "headroom_duration_at_observed_slope_seconds": 1.5,
+    "projected_queue_depth_at_gpu1_ready_at_observed_slope": 39.58098432333333,
+    "serving_enable_ack_present": false,
+    "gpu1_first_useful_present": false,
+    "two_gpu_recovery_present": false,
+    "restore_started": false,
+    "interpretation": "The serving worker correctly failed closed before GPU1 could acknowledge routing. The GPU1-serving-ready barrier was emitted only after the serving worker had already failed and is not evidence of a useful GPU1 serving request."
+  },
+  "phase_reach": {
+    "authorization_verified": true,
+    "exact_two_a100_80gb_verified": true,
+    "both_engines_ready": true,
+    "sanity_12rps_completed": true,
+    "sanity_15rps_completed": true,
+    "final_request_state_reset_passed": true,
+    "eight_rollout_branches_transaction_ready": true,
+    "measured_transaction_started": true,
+    "control_interval_started": true,
+    "control_metrics_persisted": false,
+    "reclaim_trigger_persisted": true,
+    "naive_preservation_and_release_reached_gpu1_serving_ready_callsite": true,
+    "rollout_result_persisted": false,
+    "state_pass_graph_persisted": false,
+    "gpu1_routing_acknowledged": false,
+    "gpu1_useful_request_observed": false,
+    "queue_drain_measured": false,
+    "slo_restoration_measured": false,
+    "restore_measured": false,
+    "basis": "run_v10_gpu1 writes v10-gpu1-serving-ready.json only after preservation, publication, rollout-state release, exact source-release validation, zero assigned-KV validation, stable KV-pool validation, and GPU1_HBM_RECLAIM_CONFIRMED. Because the rollout worker was terminated before returning a result, those internal phases have no durable per-pass timing or accounting artifact and cannot satisfy their scientific gates."
+  },
+  "readiness_assessment": {
+    "accepted_as_engine_readiness": true,
+    "gpu0": {
+      "uuid": "GPU-3619eff2-dcf1-011e-18b9-bcee430a981e",
+      "name": "NVIDIA A100-SXM4-80GB",
+      "probe_ttft_seconds": 0.04423038,
+      "probe_request_throughput_rps": 1.2719996570078367,
+      "probe_output_token_throughput_tps": 81.40797804850155,
+      "hbm_stable": true,
+      "engine_reloaded": false,
+      "runtime_healthy_and_empty": true
+    },
+    "gpu1": {
+      "uuid": "GPU-7401256e-b015-014d-4ece-7f7f6d5a883e",
+      "name": "NVIDIA A100-SXM4-80GB",
+      "probe_ttft_seconds": 0.049771293,
+      "probe_request_throughput_rps": 1.2878002435760834,
+      "probe_output_token_throughput_tps": 82.41921558886933,
+      "hbm_stable": true,
+      "engine_reloaded": false,
+      "runtime_healthy_and_empty": true
+    },
+    "runtime": {
+      "vllm": "0.23.0",
+      "torch": "2.11.0",
+      "torch_cuda": "13.0",
+      "driver": "580.95.05",
+      "peer_access_bidirectional": true
+    },
+    "qualification": "Readiness supports that the engines and topology were healthy. It does not independently prove the full measured transaction was compilation-free because the compilation observer has an open provenance defect documented below."
+  },
+  "sanity_assessment": {
+    "broad_recalibration_performed": false,
+    "twelve_rps": {
+      "passed_as_short_stale_calibration_guard": true,
+      "measurement_seconds": 3.0,
+      "offered_rate_rps": 12.0,
+      "completed_rate_rps": 11.666666666666666,
+      "p95_ttft_seconds": 0.045403158750000006,
+      "queue_depth_start": 12,
+      "queue_depth_end": 13,
+      "maximum_queue_depth": 13,
+      "queue_slope_requests_per_second": 0.3,
+      "capacity_estimate_valid": false,
+      "qualification": "Valid for the predeclared three-second guard only; the underlying probe verdict is inconclusive and must not be promoted to a fresh capacity estimate."
+    },
+    "fifteen_rps": {
+      "passed_as_short_overload_guard": true,
+      "measurement_seconds": 3.0,
+      "offered_rate_rps": 15.0,
+      "completed_rate_rps": 13.666666666666666,
+      "p95_ttft_seconds": 0.279515603,
+      "queue_depth_start": 15,
+      "queue_depth_end": 19,
+      "maximum_queue_depth": 19,
+      "queue_slope_requests_per_second": 1.3,
+      "capacity_estimate_valid": false,
+      "overload_signals": [
+        "completed_rate_below_offered",
+        "positive_queue_slope",
+        "TTFT degradation relative to 12-rps guard"
+      ],
+      "qualification": "Valid for overload confirmation only; the underlying probe verdict is inconclusive and is not a new calibration point."
+    }
+  },
+  "measured_overload_evidence": {
+    "valid": true,
+    "scope": "reclaim-trigger window only",
+    "offered_rate_rps": 15.0,
+    "completed_rate_rps": 11.666666666666666,
+    "queue_depth_start": 10,
+    "queue_depth_end": 20,
+    "queue_slope_requests_per_second": 3.3333333333333335,
+    "p95_ttft_seconds": 0.1675673938,
+    "trigger_rule_satisfied": true
+  },
+  "gpu_performance_evidence_assessment": {
+    "scientific_transaction_metrics_valid": false,
+    "gpu0_resource_telemetry": {
+      "sample_count": 244,
+      "sample_span_seconds": 38.993238591,
+      "gpu_utilization_percent_min": 0,
+      "gpu_utilization_percent_mean": 59.48770491803279,
+      "gpu_utilization_percent_max": 97,
+      "hbm_used_bytes_min": 61484367872,
+      "hbm_used_bytes_max": 62222565376,
+      "pcie_rx_bytes_per_second_max": 406499328,
+      "pcie_tx_bytes_per_second_max": 51499008,
+      "causal_or_phase_comparative_use_permitted": false,
+      "reason": "The telemetry spans readiness, sanity, control, and overload work, stops before the serving failure and GPU1-ready barrier, and has no persisted successful transaction result with phase selectors."
+    },
+    "gpu1_resource_telemetry_present": false,
+    "partial_gpu0_compilation_observation": {
+      "interval_start_ns": 198223576019,
+      "interval_end_ns": 210149777400,
+      "events_recorded": 0,
+      "artifact_passed": true,
+      "scientific_claim_permitted": false,
+      "reason": "The interval ends at the serving-side exception and the same capture mechanism failed to record a raw vLLM JIT warning during readiness warmup. The controller correctly reports measured_transaction_compilation_free=false because complete per-role evidence is absent."
+    },
+    "valid_primary_metrics": [],
+    "invalid_or_unavailable_primary_metrics": [
+      "control p95 TTFT",
+      "time to HBM reclamation",
+      "time to useful reclaimed capacity",
+      "two-GPU excess service",
+      "queue drain",
+      "SLO restoration",
+      "GPU0 restore activity",
+      "restore latency",
+      "serving interference"
+    ]
+  },
+  "findings": [
+    {
+      "id": "V5-SERVING-001",
+      "severity": "high",
+      "status": "OPEN",
+      "actionable": true,
+      "finding": "The pre-GPU1 abort headroom was mathematically inconsistent with the declared trigger and the observed/historical reclamation delay.",
+      "evidence": "The trigger fired at depth 20 with abort depth 25 and observed queue growth 3.333 requests/s, leaving about 1.5 s of headroom. GPU1 serving-ready arrived 5.874 s after trigger. GPU0 therefore failed closed at 4.880 s, 0.995 s before GPU1 readiness.",
+      "required_action": "Before any rerun, derive trigger and abort bounds from the already measured service deficit and preservation-to-ready upper bound, prove offline that the configured bound covers that interval with safety margin, and add a deterministic test for that inequality. Keep the backlog bounded and do not alter load or optimize the state path."
+    },
+    {
+      "id": "V5-SERVING-002",
+      "severity": "high",
+      "status": "OPEN",
+      "actionable": true,
+      "finding": "The bounded Python root-logger compilation observer is not demonstrably observing vLLM JIT warnings.",
+      "evidence": "Both raw worker stdout logs contain 'Triton kernel JIT compilation during inference: _compute_slot_mapping_kernel' during the readiness warmup, while both readiness objects record warmup_compilation_events as empty. The same observer class produced the partial measured-transaction no-event assertion.",
+      "required_action": "Capture the actual vLLM logger/handler or an equivalent durable JIT event source, add a local test that injects a vLLM-namespaced non-propagating warning and proves capture, and fail closed until both role-complete measured intervals are present."
+    },
+    {
+      "id": "V5-SERVING-003",
+      "severity": "medium",
+      "status": "OPEN",
+      "actionable": true,
+      "finding": "The fail-closed backlog exception does not persist the instantaneous abort depth, maximum observed depth, or partial request observations.",
+      "evidence": "The exception proves instantaneous depth exceeded 25, but serving/failure.json contains only the generic message and traceback. The successful-return-only raw result was lost, so exact maximum backlog and control metrics are unavailable.",
+      "required_action": "Persist a bounded failure snapshot containing current depth, maximum depth, trigger evidence hash, offer/completion counters, and partial request rows before raising; preserve result-finalization semantics for failed attempts without treating diagnostics as valid scientific results."
+    }
+  ],
+  "accepted_results": [
+    "exactly two bidirectionally peer-accessible NVIDIA A100-SXM4-80GB devices were allocated",
+    "both retained vLLM engines passed readiness and were not reloaded",
+    "the 12-rps stale-calibration guard passed",
+    "the 15-rps overload stale-calibration guard passed",
+    "eight rollout branches were prepared before the transaction",
+    "the integrated measured transaction began",
+    "the live 15-rps overload trigger fired at bounded depth 20",
+    "the serving worker failed closed when pre-GPU1 backlog exceeded 25"
+  ],
+  "rejected_claims": [
+    "scientifically valid v10 baseline",
+    "control stability",
+    "complete compilation-free measured transaction",
+    "durably validated HBM reclamation timing",
+    "useful GPU1 serving capacity",
+    "two-GPU service above offered load",
+    "queue drain",
+    "SLO restoration",
+    "GPU0 activity during restore",
+    "branch restore correctness",
+    "movement amplification",
+    "serving interference"
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/controller-result.json",
+      "artifact_sha256": "ca5f8072d7932c67198aaef9ff5871e31ccecbb16d5aef9d32030c5139103461"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/function-completion.json",
+      "artifact_sha256": "07c6fd0f6fca594c542af29375fe83a3942dbf94f02d321fb82a1f3a58a0f089"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/serving/failure.json",
+      "artifact_sha256": "6ef8af2fb3213ffdf62e27e6fe8905774896baa36cff7aea504424a8afff4fa5"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/serving/result.json",
+      "artifact_sha256": "0ca4cdb12a8e683b16ffbbfb9964846896c8a28d4abd858ba1bdb2ef66c9534f"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/readiness/both-engines-ready.json",
+      "artifact_sha256": "1b4634892235567b4b53488ee84de4e134ccec30162e6597ffe82f0387877644"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/sanity/sanity-result.json",
+      "artifact_sha256": "47aeeb92ec36421cd7def4f4c5e8e6c91f938ad79085ca2b50e6dc5c7c154207"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/sanity/12-rps/assessment.json",
+      "artifact_sha256": "586cbcc955afb7fdfe5c431dc28c92817a10109fd0a07e6eb28a91eb3d81b499"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/sanity/15-rps/assessment.json",
+      "artifact_sha256": "17ac466a2a0dfc6645ce1e7747ec09d31f9c94057e353027185c621cddeb893a"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/barriers/start.json",
+      "artifact_sha256": "848fe1f6519f6bd723f54153c3f43b2b74444729e394bd33152d749b87bff807"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/barriers/transaction.command.json",
+      "artifact_sha256": "1ced5327425f030b6fce5ad06401452b2a73c1af8c9e4724bc0d5b39cc9c81c5"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/barriers/v10-reclaim-trigger.json",
+      "artifact_sha256": "228fccd2cb1b9e5948b0fa26267ce296100f8a3fb4270c4a3d6c4f915e35d8cb"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/barriers/v10-gpu1-serving-ready.json",
+      "artifact_sha256": "915067ef11f17a7ec57f5d846e61624ad18f8859fd32e9ed673354657c4c96cb"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/serving/telemetry/measured-transaction-compilation.json",
+      "artifact_sha256": "d6313d15f8b415faca6a98cf1bbd35874dc7585c73837e80d35b0046bdf4d679"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/serving/telemetry/resource-sampling.json",
+      "artifact_sha256": "b53aeeafaafcb84046af0f276d1302da906e9d37498dd08ca43a907f28be4f41"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/logs/serving.stdout.log",
+      "artifact_sha256": "4e783f21e1ccb60122ed32f00fbbf9cc800072f532df169aa3578013f8a5ec33"
+    },
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v5/logs/rollout.stdout.log",
+      "artifact_sha256": "7a45346e245f2c8c372b39547a4b16cdd02bf821d540eee7691d829ff5b2b445"
+    }
+  ],
+  "review_summary": {
+    "open_high_findings": 2,
+    "open_medium_findings": 1,
+    "scientifically_valid": false,
+    "engine_regression": false,
+    "sanity_regression": false,
+    "transaction_attempted": true,
+    "transaction_completed": false,
+    "gpu_used_by_reviewer": false,
+    "source_edited_by_reviewer": false
+  }
+}

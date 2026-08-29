@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-a-capacity-methodology-c5fa2f1-retry3",
+  "reviewer_role": "capacity_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T16:49:13Z",
+  "authorization_subject_sha256": "0ea76343bac6290eae2e643e1fee211da9576f087b61b821417427203d898c49",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "Independent repository-contract canonicalization of the prescribed subject fields as UTF-8 canonical JSON with a trailing LF reproduces 0ea76343bac6290eae2e643e1fee211da9576f087b61b821417427203d898c49; rebuilding the subject at repository HEAD c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39 produces byte-identical content.",
+    "All 11 role-ordered source calibration artifacts are regular repository files and their bytewise SHA-256 digests exactly match the final retry3 authorization subject.",
+    "The raw 12-rps one-GPU evidence independently yields 120 measurement-cohort offers and 119 completion events during the 10-second interval, or 11.9 completions/s; scheduled-arrival p95 TTFT is 44.20256505 ms, queue depth is 11 to 12, all 120 cohort requests complete, and persistent positive drift is false.",
+    "The raw 15-rps one-GPU evidence independently yields 150 measurement-cohort offers and 144 completion events during the 10-second interval, or 14.4 completions/s; scheduled-arrival p95 TTFT is 402.28929905 ms, queue depth is 15 to 21, fitted queue slope is +0.5818181818181818 requests/s, three cohort requests abort after producing first-token evidence, and persistent positive drift is true.",
+    "The raw 20-rps two-GPU evidence independently yields 200 measurement-cohort offers and 199 completion events during the 10-second interval, or 19.9 completions/s; scheduled-arrival p95 TTFT is 42.4444484 ms, queue depth is 18 to 19, persistent positive drift is false, all 200 cohort requests complete, and completions split exactly 100/100 across GPU0/GPU1.",
+    "The selected 15-rps spike is exactly 25 percent above lambda_1=12 rps, exactly 25 percent below lambda_2=20 rps, and leaves 5 rps nominal two-GPU drain headroom.",
+    "The committed retry3 changes are confined to recovery-controller correctness and its deterministic offline evidence: waiting backlog is separated from active in-service work, GPU1 telemetry becomes incremental, the hard total-outstanding bound remains live during recovery, GPU1 is gated by the global offer watermark and producer stop/error state, and partial GPU0 evidence is persisted on failure. The deterministic spike clock, alternating recovery routing, 20-request reclamation trigger, and configured 12/15/20 load selection are unchanged; the v7 config retains 9-rps control, 15-rps spike, and 9-rps restore traffic.",
+    "The final c5fa2f1 commit changes only formatting relative to the reviewed 7f430ec recovery implementation. The focused authorization, capacity-selection, live serving-protocol, live-driver, and v6 replay suites pass 51 of 51 checks. Capacity-methodology decision: APPROVED."
+  ]
+}

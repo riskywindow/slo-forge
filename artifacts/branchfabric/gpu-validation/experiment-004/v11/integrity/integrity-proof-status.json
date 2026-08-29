@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrity-proof/v1",
+  "status": "MICRO_GPU_PASS_INTEGRATED_NOT_REACHED",
+  "algorithm": "SHA-256",
+  "logical_domain": true,
+  "manifest_identity_fields": [
+    "model_id",
+    "model_revision",
+    "tokenizer_id",
+    "tokenizer_revision",
+    "dtype",
+    "policy_epoch",
+    "branch ancestry",
+    "token history",
+    "logical page ordering and ownership"
+  ],
+  "destination_evidence_binds": [
+    "manifest commitment",
+    "payload digest",
+    "ordered page-to-block mapping",
+    "destination tensor data pointers and geometry",
+    "exact CUDA device index and GPU UUID",
+    "allocation epoch",
+    "logical, tail, and physical byte totals"
+  ],
+  "failure_policy": "fail closed, scrub touched pages, and require runtime teardown on uncertain cleanup",
+  "local_fault_tests": "PASS",
+  "micro_gpu_validation": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "allocator_epoch_pass": true,
+    "ownership_release_pass": true,
+    "fresh_destination_allocations_pass": true,
+    "destination_mapping_commitment_pass": true,
+    "whole_state_sha256_pass": true,
+    "per_page_sha256_pass": true,
+    "raw_bit_bf16_pass": true,
+    "branch_resume_exact_first_token_matches": "8/8"
+  },
+  "integrated_v11": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "state_pipeline_executed": false,
+    "integrity_pass": null,
+    "reason": "The reclaim trigger was not reached; integrated import and admission did not execute."
+  },
+  "gpu_fault_tests": "PASS_MICRO_FAILURE_PATHS",
+  "not_reached_values_are_not_measurements": true
+}

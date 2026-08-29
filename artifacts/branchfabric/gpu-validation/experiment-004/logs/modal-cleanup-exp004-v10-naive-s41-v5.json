@@ -1,0 +1,26 @@
+{
+  "allowed_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "app": {
+    "app_id": "ap-MmDDRI7feSuGAPCDG9yEWX",
+    "description": "sloforge-branchfabric-gpu-reclamation-004",
+    "state": "stopped",
+    "tasks": 0
+  },
+  "attempt_id": "exp004-v10-naive-s41-v5",
+  "evidence_method": "postflight Modal CLI JSON queries",
+  "observed_at_utc": "2026-08-13T15:58:00Z",
+  "processes": [],
+  "profilers": [],
+  "reservations": [],
+  "running_containers": [],
+  "running_endpoints": [],
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup/v1",
+  "status": "PASS",
+  "volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ]
+}

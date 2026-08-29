@@ -1,0 +1,181 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-budget-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewer": {
+    "agent": "Agent 15",
+    "identity": "postrun_budget_reviewer",
+    "task_path": "/root/postrun_budget_reviewer",
+    "independence": "post-run accounting audit; no Modal invocation, GPU allocation, ceiling mutation, or ledger mutation"
+  },
+  "reviewed_at_utc": "2026-08-13T06:28:19Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "BUDGET_BLOCKER",
+  "rerun_authorized": false,
+  "configured_ceiling_changed_by_review": false,
+  "settlement_audit": {
+    "status": "PASS",
+    "gpu_count": 2,
+    "gpu_price_per_A100_hour_usd": 2.4984,
+    "provider_actual": {
+      "remote_allocation_wall_seconds": 183.573779477,
+      "actual_A100_seconds": 367.147558954,
+      "actual_A100_hours": 0.10198543304277778,
+      "actual_cost_usd": 0.254800405914076,
+      "arithmetic": "183.573779477 wall seconds * 2 A100s = 367.147558954 A100-seconds"
+    },
+    "client_conservative": {
+      "client_elapsed_wall_seconds": 337.8481057499994,
+      "charged_A100_seconds": 675.6962114999988,
+      "charged_A100_hours": 0.187693392083333,
+      "charged_cost_usd": 0.46893317078099916,
+      "arithmetic": "max(337.8481057499994 client seconds, 183.573779477 provider seconds) * 2 A100s = 675.6962114999988 A100-seconds"
+    },
+    "conservative_minus_actual": {
+      "A100_seconds": 308.5486525459988,
+      "A100_hours": 0.08570795904055522,
+      "cost_usd": 0.2141327648669232
+    },
+    "reservation_cleared": true,
+    "function_call_id": "fc-01KZWWB1FVX6S5RXMHSVMCJFK0",
+    "accounting_conclusion": "The ledger correctly charged the larger client-visible interval, did not relabel it as provider-measured GPU time, and cleared the attempt reservation."
+  },
+  "current_ledger": {
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "configured_hard_ceiling_A100_hours": 3.0,
+    "configured_cost_ceiling_usd": 40.0,
+    "settled_interval_count": 15,
+    "current_conservative_usage_A100_seconds": 10298.167208919993,
+    "current_conservative_usage_A100_hours": 2.860602002477776,
+    "current_conservative_cost_usd": 7.146928042990475,
+    "remaining_A100_seconds": 501.83279108000715,
+    "remaining_A100_hours": 0.1393979975222242,
+    "remaining_cost_authorization_usd": 32.85307195700953,
+    "active_reservations": 0,
+    "duplicate_invocation_ids": [],
+    "duplicate_function_call_ids": [],
+    "ledger_sum_matches_consumed_field": true,
+    "binding_constraint": "configured cumulative A100-time ceiling"
+  },
+  "narrow_rerun_budget": {
+    "status": "EVIDENCE_DERIVED_POSTRUN_ESTIMATE",
+    "current_phase_budget_reusable_without_revision": false,
+    "reason_current_budget_requires_revision": "The v4 client-visible startup plus in-function import/start proxy exceeded the existing 135-second modal_function_startup upper bound before either worker emitted readiness.",
+    "observed_startup_import": {
+      "client_elapsed_minus_remote_allocation_seconds": 154.27432627299935,
+      "first_vllm_log_timestamp_utc": "2026-08-13T06:20:46Z",
+      "function_completion_timestamp_utc": "2026-08-13T06:22:36.461269Z",
+      "first_vllm_log_offset_from_remote_allocation_start_seconds": 73.112510477,
+      "combined_client_visible_startup_import_proxy_seconds": 227.38683674999935,
+      "timestamp_resolution_seconds": 1.0,
+      "derivation": "(client_elapsed - remote_allocation) + (remote_allocation - (function_completion_utc - first_vllm_log_utc))",
+      "interpretation": "The first vLLM log occurs after worker process launch and Python/runtime imports; using it as the boundary conservatively includes the missing startup/import interval."
+    },
+    "selected_modal_function_startup_upper_bound_seconds": 230.0,
+    "historical_two_engine_readiness_upper_bound_seconds": 160.0,
+    "other_existing_phase_upper_bounds_seconds": 80.05,
+    "revised_phase_upper_bound_subtotal_wall_seconds": 470.05,
+    "transaction_wide_safety_margin_fraction": 0.25,
+    "transaction_wide_safety_margin_seconds": 117.5125,
+    "SDK_integer_timeout_rounding_margin_seconds": 0.4375,
+    "predicted_wall_clock_seconds": 588.0,
+    "required_A100_seconds": 1176.0,
+    "required_A100_hours": 0.32666666666666666,
+    "maximum_attempt_cost_usd": 0.816144,
+    "formula": "required_A100_seconds = 2 * ceil((230.0 + 160.0 + 80.05) * 1.25) = 1176.0",
+    "minimum_configured_ceiling_for_rerun_A100_seconds": 11474.167208919993,
+    "minimum_configured_ceiling_for_rerun_A100_hours": 3.1872686691444425,
+    "shortfall_at_current_ceiling_A100_seconds": 674.1672089199929,
+    "shortfall_at_current_ceiling_A100_hours": 0.18726866914444247,
+    "projected_cumulative_cost_usd": 7.9630720429904755,
+    "gate_condition": "10298.167208919993 + 1176.0 <= 10800.0",
+    "gate_result": false,
+    "robustness_check": {
+      "superseded_pre_v4_requirement_A100_seconds": 938.0,
+      "condition": "10298.167208919993 + 938.0 <= 10800.0",
+      "result": false,
+      "conclusion": "The blocker holds even before applying the v4-observed startup/import correction."
+    }
+  },
+  "cleanup_audit": {
+    "status": "PASS",
+    "observed_after_function_call_id": "fc-01KZWWB1FVX6S5RXMHSVMCJFK0",
+    "provider_app_state": "stopped",
+    "active_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "ledger_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "transient_exchange_verified_absent": true,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ],
+    "review_method": "read-only inspection of the post-function provider-query evidence; this reviewer did not invoke Modal"
+  },
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "e25b2730b9d51374aefc8db07e1d2fbe1022687ced6f76d6ad0ce584b3762478"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v10.json",
+      "artifact_sha256": "4aa9b35130bcd43967dd35ca6f54cd487da2c970256b1feb3e762e80051a9fca"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/budget-settlement.json",
+      "artifact_sha256": "6edda6c72154fb778ec27fa74803dd0254990ab545912928cc05b81c218b054f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/failed-run-settlement.json",
+      "artifact_sha256": "123952d53e25a22ae078c17e33cd2ba2d078bfeb290bb14423f2125e9598e760"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/serving.stdout.log",
+      "artifact_sha256": "41c42801c16dc81f8dbfd93e50f0e8746c04c11541cc1bbf48b04841b1c7a63f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/rollout.stdout.log",
+      "artifact_sha256": "dc8275a4b59bde23fdbf639e5277e19f28e448775af80cd70b70abb0f0ccb3ab"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v4.json",
+      "artifact_sha256": "132cf17e792e818cea1e27adb2d38594e3796a3c66954f4e33a3f6904cc0be79"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Remote actual and client-conservative v4 accounting are arithmetically consistent, separately labelled, costed at the recorded A100 rate, and uniquely settled."
+    },
+    {
+      "severity": "high",
+      "status": "OPEN_BLOCKER",
+      "finding": "Only 501.83279108000715 A100-seconds remain under the unchanged 10,800-second ceiling, less than both the superseded 938-second envelope and the v4-adjusted 1,176-second envelope."
+    },
+    {
+      "severity": "high",
+      "status": "MUST_FIX_BEFORE_ANY_FUTURE_ALLOCATION",
+      "finding": "A future attempt may not reuse the 135-second startup bound: the v4-observed client startup/import proxy is 227.38683674999935 seconds. The phase budget and immutable config must be revised, hash-bound, and independently reviewed before allocation."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The v4 reservation is cleared, cleanup evidence is bound to the v4 function call, the app is stopped, all transient resources are zero, and only the two authorized persistent volumes remain."
+    }
+  ],
+  "required_action": "Return BUDGET_BLOCKER. Do not launch a retry and do not change the configured ceiling without new explicit user authorization."
+}

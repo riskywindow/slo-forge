@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-a-capacity-methodology-5b296ac",
+  "reviewer_role": "capacity_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T06:04:10Z",
+  "authorization_subject_sha256": "67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "Independent canonical-JSON recomputation, excluding only the top-level authorization_subject_sha256 field, produced 67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409.",
+    "All 11 source calibration artifacts are regular files and their bytewise SHA-256 digests exactly match the subject's role-ordered references.",
+    "The raw 12-rps one-GPU evidence independently yields 120 offers and 119 completions in the 10-second measurement interval (11.9 completions/s), 44.20256505-ms p95 TTFT, queue depth 11 to 12, +0.0454545 requests/s fitted queue slope, all 120 measurement-cohort requests completed, and no persistent positive drift; 12 rps is a valid sustainable guard point.",
+    "The raw 15-rps one-GPU evidence independently yields 150 offers and 144 completions in the 10-second measurement interval (14.4 completions/s), 402.28929905-ms p95 TTFT, queue depth 15 to 21, +0.581818 requests/s fitted queue slope, and three aborted measurement-cohort requests; positive persistent drift and service below offered load establish overload while the maximum queue remains 21.",
+    "The raw 20-rps two-GPU evidence independently yields 200 offers and 199 completions in the 10-second measurement interval (19.9 completions/s), 42.4444484-ms p95 TTFT, queue depth 18 to 19, +0.0454545 requests/s fitted queue slope, no persistent positive drift, all 200 measurement-cohort requests completed, and an exact 100/100 completion split across GPU0/GPU1.",
+    "The selected 15-rps spike is exactly 25 percent above the 12-rps one-GPU point, exactly 25 percent below the 20-rps two-GPU point, and leaves 5 rps nominal two-GPU drain headroom.",
+    "The referenced full commit 5b296ac8e4fdb6dd88f45103317606c3e7248370 exists and is the repository HEAD reviewed for this authorization subject; the subject also forbids live or asynchronous review exchange on the GPU path."
+  ]
+}

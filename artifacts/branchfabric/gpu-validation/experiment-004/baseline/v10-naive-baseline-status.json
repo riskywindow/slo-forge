@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-naive-baseline-status/v1",
+  "attempt_id": "exp004-v10-naive-s41-v7",
+  "status": "FROZEN",
+  "immutable_baseline_created": true,
+  "git_tag_created": false,
+  "recommended_tag_reserved": "branchfabric-exp004-naive-baseline-v10",
+  "reason": "scientific_validity is true and the immutable naive-preservation baseline record was created",
+  "immutable_baseline_reference": {
+    "artifact_reference": "baseline/branchfabric-exp004-naive-baseline-v10.json",
+    "artifact_sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+  },
+  "scientific_validity_reference": {
+    "artifact_reference": "scientific-validity.json",
+    "artifact_sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8"
+  }
+}

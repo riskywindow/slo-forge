@@ -1,0 +1,30 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-baseline-freeze-verification/v1",
+  "verified_at_utc": "2026-08-18T22:24:44Z",
+  "status": "PASS",
+  "immutable": true,
+  "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+  "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+  "local_annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+  "tag_object": "6bbaa1fa0df5f8d8366f5b876a574aeefb30191c",
+  "tag_dereferenced_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+  "baseline_manifest": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+    "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+    "self_hash_verified": true
+  },
+  "frozen_v10_adapter": {
+    "path": "python/sloforge/continuum/adapters/vllm_reclamation.py",
+    "sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f"
+  },
+  "exact_dag": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-analysis/naive-pass-graph.json",
+    "file_sha256": "df5a9247ef88e0e659ee0af817ef34c6f2995fda52b5ff835a0e8d651a86c10d",
+    "dag_sha256": "11f44adad52898d8deeceaac0a93bb16f1aac416f001d4e2094fff6b551655c2",
+    "aggregate_full_state_passes": 30,
+    "execution_nodes": 44,
+    "edges": 46,
+    "physical_touch_bytes": 61303947264,
+    "physical_touch_amplification": 58.0
+  }
+}

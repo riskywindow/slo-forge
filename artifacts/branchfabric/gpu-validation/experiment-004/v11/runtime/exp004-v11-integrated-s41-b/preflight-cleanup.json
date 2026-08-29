@@ -1,0 +1,33 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-modal-cleanup/v1",
+  "attempt_id": "exp004-v11-integrated-s41-b",
+  "stage": "replacement-preflight-before-reservation",
+  "status": "PASS",
+  "observed_at_utc": "2026-08-19T05:04:52Z",
+  "modal_sdk_version": "1.5.3",
+  "active_apps": 0,
+  "stopped_prior_apps": 0,
+  "observed_stopped_apps": 1,
+  "running_tasks": 0,
+  "running_containers": 0,
+  "endpoints": 0,
+  "provider_reservations": 0,
+  "owned_child_processes": 0,
+  "profilers": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "other_persistent_resources": [],
+  "sealed_config_raw_sha256": "3e7a45d51e9d3a83ab6a8b6bda7bdd180c52907be975d181123e5ed1f197801f",
+  "sealed_config_canonical_sha256": "a4dd7976681fddaada89af0e6c302754669a7b1093479f8648bf6b309cb961c1",
+  "post_micro_review_manifest_sha256": "b4f045dcc0d1a2b7da87572c4a88019989cc1bca232f34f871a9038ba44c9d76",
+  "make_check_sha256": "da7be6b3defde97d495135687a9f93a8e308da37b07e74669d13fbde021e8da6",
+  "production_sealed_evidence_verifier": "PASS",
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal volume list --json"
+  ],
+  "cleanup_pass": true
+}

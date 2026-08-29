@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-cuda-pass-summary/v1",
+  "status": "MICRO_MEASURED_INTEGRATED_NOT_REACHED",
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "source": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "selector": "$.state_passes[*]"
+  },
+  "canonical_state_pass_records": 10454,
+  "cuda_records": 10216,
+  "cpu_fence_records": 238,
+  "unique_start_cuda_events": 10216,
+  "unique_end_cuda_events": 10216,
+  "full_state_pass_families": 10,
+  "movement_accounting_complete": true,
+  "dependency_dag_closed_and_acyclic": true,
+  "operation_record_counts": {
+    "copy_repack": 1008,
+    "cuda_event_synchronize": 36,
+    "cuda_stream_synchronize": 2,
+    "d2h": 36,
+    "h2d": 64,
+    "index_copy": 1792,
+    "index_select": 1008,
+    "index_upload": 1828,
+    "owned_snapshot": 64,
+    "raw_bit_equal": 4480,
+    "sha256_pages": 64,
+    "sha256_whole_and_pages": 72
+  },
+  "canonical_accounting": {
+    "logical_state_bytes": 1056964608,
+    "full_physical_bytes": 22197063040,
+    "external_movement_bytes": 2114200960,
+    "avoidable_physical_bytes": 12684381568,
+    "cuda_time_ns": 831126047,
+    "synchronization_time_ns": 521796759
+  },
+  "integrated_v11": {
+    "status": "NOT_REACHED_PRE_RECLAIM",
+    "state_pass_records": null,
+    "reason": "The sole integrated transaction failed before the reclaim-trigger barrier, so no integrated CUDA state passes were emitted."
+  },
+  "no_profiler_double_counting": true,
+  "not_reached_values_are_not_measurements": true
+}

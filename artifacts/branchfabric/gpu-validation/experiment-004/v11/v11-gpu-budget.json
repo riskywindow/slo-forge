@@ -1,0 +1,78 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-gpu-budget/v1",
+  "created_at_utc": "2026-08-18T23:46:39Z",
+  "status": "TERMINAL_SETTLED_NO_RETRY_AUTHORIZED",
+  "authorized_coordinator": "/root",
+  "ledger": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+    "hard_ceiling_a100_seconds": 21600.0,
+    "consumed_a100_seconds": 16113.513626085978,
+    "active_reservations": 0,
+    "remaining_a100_seconds": 5486.486373914022,
+    "remaining_a100_hours": 1.524023992753895,
+    "price_usd_per_a100_hour": 2.4984,
+    "remaining_cost_usd": 3.8076215965036676
+  },
+  "authorization": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "scope": "future bounded v11 validation and three-way comparison within the cumulative ceiling",
+    "optimized_preservation_authorized": true,
+    "kill_and_recompute_authorized": true,
+    "experiment_005_authorized": false
+  },
+  "authorized_launch_budget_usd": 40.0,
+  "future_launch_environment": "SLOFORGE_GPU_BUDGET_USD=40.0",
+  "estimates": [
+    {
+      "priority": 1,
+      "stage": "v11_state_micro_validation",
+      "gpu_count": 1,
+      "conservative_wall_seconds": 525.0,
+      "conservative_a100_seconds": 525.0,
+      "conservative_cost_usd": 0.36435
+    },
+    {
+      "priority": 2,
+      "stage": "v11_integrated_reclamation",
+      "gpu_count": 2,
+      "conservative_wall_seconds": 588.0,
+      "conservative_a100_seconds": 1176.0,
+      "conservative_cost_usd": 0.816144
+    },
+    {
+      "priority": 3,
+      "stage": "kill_and_recompute",
+      "gpu_count": 2,
+      "conservative_wall_seconds": 660.0,
+      "conservative_a100_seconds": 1320.0,
+      "conservative_cost_usd": 0.91608
+    },
+    {
+      "priority": 4,
+      "stage": "optional_paired_v10",
+      "gpu_count": 2,
+      "conservative_wall_seconds": 588.0,
+      "conservative_a100_seconds": 1176.0,
+      "conservative_cost_usd": 0.816144
+    }
+  ],
+  "v11_known_actual_a100_seconds_lower_bound": 1962.10526259,
+  "v11_known_actual_cost_usd_lower_bound": 1.36170105223746,
+  "v11_conservative_a100_seconds": 3556.69,
+  "v11_conservative_a100_hours": 0.9879694444444445,
+  "v11_conservative_cost_usd": 2.46834286,
+  "campaign_conservative_a100_hours": 4.475976007246105,
+  "campaign_conservative_cost_usd": 11.18277845650367,
+  "campaign_actual_a100_hours_range": [
+    4.03303580241,
+    4.178869135743
+  ],
+  "active_reservations": 0,
+  "blockers": [
+    "The sole integrated replacement failed before reclamation and no retry is authorized.",
+    "KILL_AND_RECOMPUTE is forbidden because integrated v11 was not scientifically valid."
+  ],
+  "decision": "Terminal. The ledger is settled and no further GPU invocation is authorized for Experiment 004 v11."
+}

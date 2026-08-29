@@ -1,0 +1,22 @@
+{
+  "accounted_wall_seconds": 261.63,
+  "actual_accounted_cost_usd": 0.18157122000000003,
+  "actual_accounted_gpu_hours": 0.072675,
+  "actual_accounted_gpu_seconds": 261.63,
+  "actual_gpu_model": "NVIDIA A100 80GB PCIe",
+  "attempt_id": "exp004-v11-micro-s41-c",
+  "client_elapsed_seconds": 261.63,
+  "function_call_id": "fc-01M0BTWT8SGRP4RZE2BCW0JENP",
+  "gpu_count": 1,
+  "gpu_price_per_hour_usd": 2.4984,
+  "gpu_uuid": "GPU-1e6c7820-d630-b189-22e2-33df3863b7be",
+  "ledger_sha256_after": "0ccb9bdda15fd5d36204f1363dcfe73af0409cc7c9d283dad826ee276ae10cdb",
+  "ledger_sha256_before": "4733f5e457be70fe5b2cc2ef440b393f1d9007c76ae83d29f1473b382a9f3db6",
+  "remote_manifest_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-manifest-download.json",
+  "remote_manifest_sha256": "c05c9586d55526b2c86ec9c2ef6717f1dd3dd0772a975c09d92bf2aa76bac00f",
+  "remote_observed_gpu_allocation_seconds": 203.662525028,
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-gpu-settlement/v1",
+  "scientific_failure": "V11RuntimeTeardownRequired: pending CUDA pass bound exceeded during restore",
+  "settled_at_utc": "2026-08-19T01:46:41.635231+00:00",
+  "status": "SETTLED_FAILED_SCIENTIFIC_RUN"
+}

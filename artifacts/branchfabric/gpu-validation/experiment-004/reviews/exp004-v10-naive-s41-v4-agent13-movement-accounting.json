@@ -1,0 +1,195 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-movement-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewer": {
+    "agent": "Agent 13",
+    "identity": "postrun_movement_accounting_reviewer",
+    "task_path": "/root/postrun_movement_reviewer",
+    "independence": "post-run read-only movement audit; no Modal invocation, GPU allocation, state-pipeline edit, source edit, or ledger mutation"
+  },
+  "reviewed_at_utc": "2026-08-13T06:36:12Z",
+  "decision": "REJECT_AS_V10_MOVEMENT_BASELINE",
+  "scientifically_valid": false,
+  "movement_accounting_pass": false,
+  "summary": "Attempt v4 terminated at the integrated strict-readiness timeout before either readiness barrier, probe, sanity guard, rollout-state preparation, reclamation trigger, preservation, restoration, or branch continuation. No v10 state transaction or state-pass graph exists, so every v10 movement byte count, amplification, dominant-chain claim, state-size claim, and serving-interference result is NOT_MEASURED. The minimal raw movement artifact correctly records status=invalid with an explicit failure reason and contains no fabricated numeric fields.",
+  "failure_boundary": {
+    "controller_status": "failed",
+    "controller_error_type": "TimeoutError",
+    "controller_error": "timed out waiting for integrated strict readiness",
+    "serving_readiness_barrier_published": false,
+    "rollout_readiness_barrier_published": false,
+    "probe_count": 0,
+    "sanity_guard_count": 0,
+    "rollout_state_prepared": false,
+    "reclaim_trigger_observed": false,
+    "state_capture_observed": false,
+    "d2h_state_transfer_observed": false,
+    "h2d_state_transfer_observed": false,
+    "destination_native_write_observed": false,
+    "destination_validation_observed": false,
+    "branch_continuation_observed": false,
+    "dependent_phases_stopped": true
+  },
+  "artifact_presence_audit": {
+    "raw_movement_failure_artifact_present": true,
+    "raw_movement_failure_artifact_status": "invalid",
+    "raw_movement_failure_reason_present": true,
+    "raw_movement_numeric_fields_present": false,
+    "serving_result_present": false,
+    "rollout_result_present": false,
+    "rollout_cuda_and_host_operation_telemetry_present": false,
+    "state_pass_records_present": false,
+    "state_pass_graph_present": false,
+    "state_transaction_timeline_present": false,
+    "movement_success_plots_permissible": false,
+    "conclusion": "The v4 bundle contains initialization, topology, failure, settlement, and cleanup diagnostics only. Triton compiler-cache artifacts and model-load logs are not state-transaction pass evidence and cannot be converted into Experiment 004 movement accounting."
+  },
+  "v10_measurement_result": {
+    "measurement_status": "NOT_MEASURED",
+    "logical_state_bytes": null,
+    "physical_state_bytes": null,
+    "source_gpu_read_bytes": null,
+    "source_gpu_write_bytes": null,
+    "unique_real_d2h_bytes": null,
+    "host_intermediate_read_bytes": null,
+    "host_intermediate_write_bytes": null,
+    "unique_real_h2d_bytes": null,
+    "destination_gpu_read_bytes": null,
+    "destination_gpu_write_bytes": null,
+    "integrity_read_bytes": null,
+    "temporary_bytes": null,
+    "full_physical_touch_amplification": null,
+    "external_movement_amplification": null,
+    "avoidable_movement_amplification": null,
+    "critical_path_movement_amplification": null,
+    "dominant_state_pass_chain": null,
+    "serving_interference": null,
+    "accounting_duplicate_bytes": null,
+    "reason": "The controller aborted before the v10 rollout state and before every preservation/restoration state pass. There is no positive logical-state denominator and no physical-pass numerator for this attempt."
+  },
+  "failure_artifact_audit": {
+    "status": "PASS",
+    "artifact_schema_version": "sloforge.branchfabric.experiment-004-v10-movement-accounting/v1",
+    "artifact_status": "invalid",
+    "explicit_invalid_reason": true,
+    "numeric_amplifications_omitted": true,
+    "scientific_validity_movement_object": null,
+    "scientific_validity_movement_accounting_pass": false,
+    "scientific_validity_scientifically_valid": false,
+    "publication_fail_closed": true,
+    "assessment": "The v4 movement failure artifact is scientifically safe: it neither reports zero movement nor imports a historical value, and the validity object requires movement_accounting_pass=false. Zero would be an incorrect measured value; null plus NOT_MEASURED is required."
+  },
+  "historical_v9_separation": {
+    "v9_artifact_attempt_id": "exp004-pilot-naive-s41-v9",
+    "v9_artifact_is_distinct_attempt": true,
+    "v9_values_are_immutable_historical_inputs_only": true,
+    "v9_values_may_fill_v10_result_fields": false,
+    "v9_logical_state_bytes": 1056964608,
+    "v9_external_movement_amplification": 3.0,
+    "v9_full_physical_touch_amplification": 58.0,
+    "v9_avoidable_lower_bound_amplification": 31.0,
+    "v9_critical_path_amplification": 58.0,
+    "review_rule": "Do not copy, impute, inherit, or relabel any v9 byte count, amplification, or dominant chain as v10. If historical context is retained elsewhere, identify it as v9 diagnostic evidence and keep every v10 result field null."
+  },
+  "required_final_report_contract": {
+    "json": {
+      "real_rollout_state_bytes": null,
+      "external_movement_amplification": null,
+      "full_physical_movement_amplification": null,
+      "avoidable_movement_amplification": null,
+      "dominant_state_pass_chain": null,
+      "serving_interference": null,
+      "movement_measurement_status": "NOT_MEASURED",
+      "movement_accounting_pass": false,
+      "historical_v9_values_reused": false,
+      "reason": "v4 ended before rollout-state preparation and before any v10 preservation/restoration state pass"
+    },
+    "text": {
+      "item_9_real_rollout_state_size": "NOT_MEASURED — v4 ended before real rollout state was prepared; JSON value null.",
+      "item_18_external_movement_amplification": "NOT_MEASURED — no v10 D2H/H2D state transaction occurred; JSON value null.",
+      "item_19_full_physical_movement_amplification": "NOT_MEASURED — no v10 physical state-pass graph exists; JSON value null.",
+      "item_20_avoidable_movement_amplification": "NOT_MEASURED — no v10 pass graph exists from which an avoidable lower bound can be derived; JSON value null.",
+      "item_21_dominant_state_pass_chain": "NOT_MEASURED — v10 emitted no state-pass records; do not substitute the historical v9 chain; JSON value null.",
+      "item_22_serving_interference": "NOT_MEASURED — no control, preserve, restore, import, or validation serving windows executed; JSON value null."
+    },
+    "prohibited_representations": [
+      "0x movement amplification",
+      "3x v10 external movement amplification",
+      "58x v10 full physical movement amplification",
+      "31x v10 avoidable movement amplification",
+      "1,056,964,608-byte v10 rollout state",
+      "the v9 dominant chain presented without an explicit v9-only label",
+      "any state-movement or serving-interference plot presented as a v10 result"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The raw v4 movement artifact and v4 validity object fail closed without fabricated movement measurements."
+    },
+    {
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "No v10 movement transaction or state-pass graph exists. The final result must keep all v10 movement and rollout-state fields null and render them as NOT_MEASURED."
+    },
+    {
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The existing non-final reports/branchfabric-gpu-validation-experiment-004-v10.{json,md} describe the earlier v3 live-review timeout and fixed 1,800-A100-second blocker. They are stale for v4 and must not be delivered as the terminal v4 report. Preserve them as prior evidence or supersede them with a hash-bound v4 failure report."
+    },
+    {
+      "severity": "high",
+      "status": "PROHIBITED_SUBSTITUTION",
+      "finding": "The audited v9 3x external, 58x full-physical, approximately 31x avoidable, and 58x critical-path values must not be copied into v10 result fields."
+    },
+    {
+      "severity": "medium",
+      "status": "REQUIRED_FINAL_MANIFEST_BINDING",
+      "finding": "Bind the v4 invalid movement artifact, canonical v4 validity artifact, settlements, cleanup evidence, and post-run reviews in the terminal diagnostic manifest; do not create a frozen baseline record or success-only movement plots."
+    }
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/movement-accounting.json",
+      "artifact_sha256": "4256c019ea7c0e805d6c8da4af33026539359d30367ba94413c618cad6a82512"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/scientific-validity.json",
+      "artifact_sha256": "44b3c3240ea1d7260b97904ee649f29f8d398ff03fa4663f193fa4385114da0d"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+      "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/serving.stdout.log",
+      "artifact_sha256": "41c42801c16dc81f8dbfd93e50f0e8746c04c11541cc1bbf48b04841b1c7a63f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/rollout.stdout.log",
+      "artifact_sha256": "dc8275a4b59bde23fdbf639e5277e19f28e448775af80cd70b70abb0f0ccb3ab"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/analysis/v9-movement-audit.json",
+      "artifact_sha256": "58916d341a2abfb58b9d65292974fadabb031255fda742bfbf5d9ee74d9e59de"
+    },
+    {
+      "artifact_reference": "reports/branchfabric-gpu-validation-experiment-004-v10-final.json",
+      "artifact_sha256": "efd4eeab51d90c597b1e5aea954c79bc7427ca82dd311ac289984cca989ae666"
+    },
+    {
+      "artifact_reference": "reports/branchfabric-gpu-validation-experiment-004-v10-final.md",
+      "artifact_sha256": "21a644832f11471d1815f30080c17ecdcab248b90e4f470af2c08541a70cd82d"
+    }
+  ],
+  "required_action": "Report v10 movement, state size, dominant chain, and serving interference as NOT_MEASURED with null machine values; preserve but never substitute v9 diagnostics; do not freeze a v10 naive baseline."
+}

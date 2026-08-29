@@ -1,0 +1,36 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-capacity-review-set/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "selected_load_sha256": "4d4d6fd93558e18665b50d9b69b41d94a85ee6d7670ae3f6cd1f1ee700d186a1",
+  "lambda_1_rps": 12.0,
+  "lambda_2_rps": 20.0,
+  "lambda_spike_rps": 15.0,
+  "reviews": [
+    {
+      "reviewer": "agent11",
+      "verdict": "approved",
+      "artifact_reference": "reviews/exp004-v10-integrated-s41-v3-inflight/agent11-review.json",
+      "artifact_sha256": "5bbbccf7850cff7215fc32fd78d98f5f57868d1dad1cbfb7573b4ac8299b87c8"
+    },
+    {
+      "reviewer": "agent12",
+      "verdict": "approved",
+      "artifact_reference": "reviews/exp004-v10-integrated-s41-v3-inflight/agent12-review.json",
+      "artifact_sha256": "4b64fc3a5b9b7bee2227b81fa6da0fc031ea8051e739bc10906021b9c13175b8"
+    },
+    {
+      "reviewer": "agent13",
+      "verdict": "approved",
+      "artifact_reference": "reviews/exp004-v10-integrated-s41-v3-inflight/agent13-review.json",
+      "artifact_sha256": "144249d86f0096130a4b7f7d5433da5581b2d57bf6937f3e782c549503fa73bc"
+    }
+  ],
+  "all_reviews_approved": true,
+  "review_request_artifact": {
+    "artifact_reference": "reviews/exp004-v10-integrated-s41-v3-inflight/exp004-v10-integrated-s41-v3.inflight/REVIEW_REQUEST.json",
+    "artifact_sha256": "cabc9f8aacaf712c1c6e4669fb9c378b3f02f9e4d6b66e480220003494633fc9"
+  },
+  "accepted_by_remote_gate": false,
+  "remote_gate_result": "The 180-second gate timed out before the review files were visible; the local review files were materialized at 2026-08-13T01:32:52.774Z, after function completion at 2026-08-13T01:32:38.025662Z.",
+  "transaction_authorized": false
+}

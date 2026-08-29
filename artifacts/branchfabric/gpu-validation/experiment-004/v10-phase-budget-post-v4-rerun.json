@@ -1,0 +1,62 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-phase-budget/v1",
+  "attempt_id_source": "exp004-v10-naive-s41-v4",
+  "status": "BUDGET_BLOCKER",
+  "authorized_for_gpu_allocation": false,
+  "configured_hard_ceiling_A100_seconds": 10800.0,
+  "current_conservative_usage_A100_seconds": 10298.167208919993,
+  "remaining_A100_seconds": 501.83279108000715,
+  "phases": {
+    "modal_function_startup": {
+      "source_measurement": "v4 client-visible startup/import proxy",
+      "observed_value_seconds": 227.38683674999935,
+      "selected_upper_bound_seconds": 230.0,
+      "margin_seconds": 2.61316325000065,
+      "reasoning": "Includes client overhead and the missing worker import interval through the first vLLM log; it supersedes the insufficient 135-second startup bound for any future attempt."
+    },
+    "two_engine_readiness_sanity_check": {
+      "source_measurement": "historical v3 dual-engine readiness from worker engine_started_ns",
+      "observed_value_seconds": 125.269794674,
+      "selected_upper_bound_seconds": 160.0,
+      "multiplier": 1.277243252584,
+      "reasoning": "Retained after fixing the controller clock to use the same worker model-load origin."
+    },
+    "all_other_existing_phases": {
+      "source_measurement": "v10-phase-budget.json unchanged phase bounds excluding startup and readiness",
+      "selected_upper_bound_seconds": 80.05,
+      "reasoning": "The readiness fix does not change the transaction or state-movement phases."
+    },
+    "safety_margin": {
+      "phase_subtotal_wall_seconds": 470.05,
+      "fraction": 0.25,
+      "selected_upper_bound_seconds": 117.5125,
+      "reasoning": "Preserves the settled 25-percent transaction-wide safety margin."
+    },
+    "Modal_SDK_integer_timeout_rounding": {
+      "selected_upper_bound_seconds": 0.4375,
+      "reasoning": "Rounds the complete wall bound upward to the Modal SDK integer timeout."
+    }
+  },
+  "predicted_wall_clock_seconds": 588.0,
+  "required_A100_seconds": 1176.0,
+  "required_A100_hours": 0.32666666666666666,
+  "maximum_attempt_GPU_cost_usd": 0.816144,
+  "projected_conservative_usage_A100_seconds": 11474.167208919993,
+  "shortfall_A100_seconds": 674.1672089199929,
+  "gate_expression": "10298.167208919993 + 1176.0 <= 10800.0",
+  "budget_pass": false,
+  "source_artifacts": [
+    {
+      "artifact_reference": "raw/modal/exp004-v10-naive-s41-v4/analysis/budget-settlement.json",
+      "artifact_sha256": "6edda6c72154fb778ec27fa74803dd0254990ab545912928cc05b81c218b054f"
+    },
+    {
+      "artifact_reference": "reviews/exp004-v10-naive-s41-v4-agent11-serving-methodology.json",
+      "artifact_sha256": "3f2047f705e257a7befb8363a2db281603b8754273fd955654132220c7c0e326"
+    },
+    {
+      "artifact_reference": "reviews/exp004-v10-naive-s41-v4-agent15-budget.json",
+      "artifact_sha256": "9a8b7202d4d48396d3bff0cbbbb24941b1f7ecf0da4f120286baee5bd8c53b16"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-local-launch-failure/v1",
+  "attempt_id": "exp004-v11-integrated-s41-a",
+  "status": "SCIENTIFICALLY_NULL_BEFORE_MODAL_APP_OR_GPU_ALLOCATION",
+  "observed_at_utc": "2026-08-19T04:31:31Z",
+  "failure_stage": "LOCAL_MODAL_CLI_MODULE_IMPORT",
+  "failure_type": "ModuleNotFoundError",
+  "failure_message": "No module named 'sloforge'",
+  "cause": "The coordinator child environment omitted the repository-local PYTHONPATH required by the launcher import.",
+  "cause_aligned_remediation": "Set PYTHONPATH=python:experiments/branchfabric only in the coordinator child environment; do not change source, config, reservation, or remote retry policy.",
+  "client_elapsed_seconds": 0.8148895000012999,
+  "exit_code": 1,
+  "modal_app_created": false,
+  "modal_function_call_created": false,
+  "gpu_allocated": false,
+  "model_loaded": false,
+  "runtime_state_created": false,
+  "measurement_started": false,
+  "post_failure_active_apps": 0,
+  "post_failure_running_containers": 0,
+  "ledger_sha256_unchanged": "7a76715dfad8f09f02401b75df126a4b0d4f6b05e378c23672d5bdbcf021f927",
+  "reservation_remains_active": true
+}

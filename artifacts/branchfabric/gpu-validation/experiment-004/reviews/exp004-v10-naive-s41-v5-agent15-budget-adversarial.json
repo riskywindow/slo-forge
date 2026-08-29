@@ -1,0 +1,205 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-budget-adversarial-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v5",
+  "reviewed_at_utc": "2026-08-13T15:58:34Z",
+  "repository_commit": "f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4",
+  "reviewer": {
+    "agents": [
+      "Agent 15",
+      "Agent 16"
+    ],
+    "identity": "postrun_budget_cleanup_and_adversarial_reviewer",
+    "task_path": "/root/v5_budget_adversarial_review",
+    "independence": "post-run CPU-only accounting, cleanup, and adversarial review; no Modal invocation, GPU allocation, ceiling mutation, ledger mutation, or source edit"
+  },
+  "budget_decision": "PASS_SETTLED_WITHIN_CEILING",
+  "cleanup_decision": "PASS",
+  "scientific_baseline_decision": "REJECT",
+  "scientifically_valid": false,
+  "adversarial_question": "Would I accept this as a valid capacity-reclamation baseline if I did not know the team wanted to build an FPGA?",
+  "adversarial_answer": "No.",
+  "adversarial_reasoning": "The v5 call reached readiness, both stale-calibration sanity guards, and a bounded reclamation trigger, but the serving worker exited with status 1 immediately after that trigger. The controller safely aborted before a complete naive preservation, useful GPU1 capacity, queue recovery, restore, branch continuation, or v10 movement-accounting result existed. This is useful failure evidence, not a capacity-reclamation baseline.",
+  "settlement_audit": {
+    "status": "PASS",
+    "function_call_id": "fc-01KZXX3DX3FRNC0HFF5B7V388Q",
+    "gpu_count": 2,
+    "gpu_price_per_A100_hour_usd": 2.4984,
+    "provider_actual": {
+      "remote_allocation_wall_seconds": 214.203266917,
+      "actual_A100_seconds": 428.406533834,
+      "actual_A100_hours": 0.11900181495388888,
+      "actual_cost_usd": 0.297314134480796,
+      "arithmetic": "214.203266917 provider-observed wall seconds * 2 A100s = 428.406533834 A100-seconds"
+    },
+    "client_conservative": {
+      "client_elapsed_wall_seconds": 347.4518743749941,
+      "charged_A100_seconds": 694.9037487499882,
+      "charged_A100_hours": 0.19302881909721892,
+      "charged_cost_usd": 0.48226320163249176,
+      "arithmetic": "max(347.4518743749941 client seconds, 214.203266917 provider seconds) * 2 A100s = 694.9037487499882 A100-seconds"
+    },
+    "conservative_minus_actual": {
+      "A100_seconds": 266.4972149159882,
+      "A100_hours": 0.07402700414333006,
+      "cost_usd": 0.1849490671516958
+    },
+    "reservation_cleared": true,
+    "duplicate_settlement_observed": false,
+    "accounting_conclusion": "The ledger charged the larger client-visible interval, kept actual and conservative consumption distinct, costed both at the recorded A100 rate, and cleared the v5 reservation."
+  },
+  "current_ledger": {
+    "configured_hard_ceiling_A100_seconds": 12600.0,
+    "configured_hard_ceiling_A100_hours": 3.5,
+    "configured_cost_ceiling_usd": 40.0,
+    "settled_interval_count": 16,
+    "current_conservative_usage_A100_seconds": 10993.070957669981,
+    "current_conservative_usage_A100_hours": 3.0536308215749948,
+    "current_conservative_cost_usd": 7.629191244622968,
+    "remaining_A100_seconds": 1606.929042330019,
+    "remaining_A100_hours": 0.4463691784250053,
+    "remaining_time_at_recorded_rate_usd": 1.1152087553770332,
+    "remaining_cost_authorization_usd": 32.370808755377035,
+    "active_reservations": 0,
+    "ledger_sum_matches_consumed_field": true,
+    "hard_ceiling_respected": true,
+    "cost_ceiling_respected": true
+  },
+  "further_retry_assessment": {
+    "evidence_derived_required_A100_seconds": 1176.0,
+    "evidence_derived_required_A100_hours": 0.32666666666666666,
+    "maximum_attempt_cost_usd": 0.816144,
+    "gate_condition": "10993.070957669981 + 1176.0 <= 12600.0",
+    "budget_gate_result": true,
+    "projected_conservative_usage_A100_seconds": 12169.070957669981,
+    "projected_conservative_usage_A100_hours": 3.3802974882416615,
+    "projected_conservative_cost_usd": 8.445335244622967,
+    "remaining_after_full_envelope_A100_seconds": 430.929042330019,
+    "remaining_after_full_envelope_A100_hours": 0.11970251175833861,
+    "ceiling_capacity_conclusion": "The current 12,600-A100-second ceiling can mathematically admit one additional 1,176-A100-second envelope and cannot admit two.",
+    "automatic_execution_authorized": false,
+    "authorization_reason": "The v5 allocation was already the one narrowly justified retry following the v4 local control-plane failure. Remaining budget is necessary but not sufficient authority for a second retry; a new GPU allocation would require fresh explicit retry authorization plus a specific locally validated hypothesis for the serving-worker exit.",
+    "recommended_action": "Do not allocate again under the existing one-retry execution authorization. Preserve v5 diagnostics, identify the serving-worker failure locally, and request fresh authority only if another paid retry is desired."
+  },
+  "cleanup_audit": {
+    "status": "PASS",
+    "observed_at_utc": "2026-08-13T15:58:00Z",
+    "provider_app_id": "ap-MmDDRI7feSuGAPCDG9yEWX",
+    "provider_app_state": "stopped",
+    "active_tasks": 0,
+    "running_containers": 0,
+    "running_endpoints": 0,
+    "provider_reservations": 0,
+    "ledger_reservations": 0,
+    "owned_child_processes": 0,
+    "compute_processes_after_controller_cleanup": 0,
+    "profilers": 0,
+    "persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "only_authorized_volumes_remain": true,
+    "evidence_method": "read-only inspection of v5 controller cleanup state and postflight Modal CLI JSON evidence produced by the sole GPU coordinator; this reviewer did not invoke Modal"
+  },
+  "failure_boundary": {
+    "authorization_verified": true,
+    "two_engine_readiness_artifact_present": true,
+    "sanity_12rps_passed": true,
+    "sanity_15rps_passed": true,
+    "bounded_reclaim_trigger_observed": true,
+    "serving_worker_returncode": 1,
+    "rollout_worker_terminated_by_controller_signal": -15,
+    "controller_status": "failed",
+    "scientific_status": "invalid",
+    "safe_abort_verified": true,
+    "dependent_scientific_gates_completed": false,
+    "state_preservation_completed": false,
+    "gpu1_useful_capacity_demonstrated": false,
+    "queue_drain_demonstrated": false,
+    "rollout_restore_completed": false,
+    "branch_correctness_completed": false,
+    "v10_movement_accounting_completed": false
+  },
+  "findings": [
+    {
+      "id": "BUDGET-V5-P1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The v5 actual and conservative accounting are arithmetically consistent, separately labelled, uniquely settled, and below both the cumulative A100-time and USD ceilings."
+    },
+    {
+      "id": "CLEANUP-V5-P1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The v5 app is stopped; tasks, containers, endpoints, provider and ledger reservations, child processes, compute processes, and profilers are zero; only the two authorized volumes remain."
+    },
+    {
+      "id": "ADV-V5-H1",
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The integrated transaction failed after the reclaim trigger and before the required preservation, recovered-capacity, queue-drain, restore, correctness, and movement gates. No v10 naive capacity-reclamation baseline may be frozen or tagged from v5.",
+      "required_resolution": "Report scientific validity as false and all uncompleted transaction metrics as NOT MEASURED. Preserve the diagnostic artifacts without substituting historical v9 values."
+    },
+    {
+      "id": "ADV-V5-H2",
+      "severity": "high",
+      "status": "OPEN_RETRY_AUTHORIZATION_GATE",
+      "finding": "Although one 1,176-A100-second envelope fits beneath the current ceiling, the already-consumed one-retry execution authorization does not automatically authorize another paid allocation.",
+      "required_resolution": "Require fresh explicit retry authority and a specific locally tested serving-worker failure hypothesis before any further Modal launch."
+    }
+  ],
+  "accepted_claims": [
+    "The v5 invocation consumed 428.406533834 actual and 694.9037487499882 conservative A100-seconds.",
+    "Cumulative conservative Experiment 004 usage is 10993.070957669981 of 12600 A100-seconds, leaving 1606.929042330019 A100-seconds.",
+    "The v5 reservation was cleared and postflight Modal cleanup passed.",
+    "The current ceiling can mathematically fit one additional evidence-budgeted 1176-A100-second envelope.",
+    "The v5 attempt is scientifically invalid and does not establish a capacity-reclamation baseline."
+  ],
+  "prohibited_claims": [
+    "v10 scientifically passed",
+    "v5 completed naive state preservation",
+    "v5 demonstrated useful reclaimed GPU1 serving capacity",
+    "v5 demonstrated queue drain or serving-SLO restoration",
+    "v5 restored and validated 8 of 8 rollout branches",
+    "v5 measured independent v10 movement amplification",
+    "a frozen v10 naive baseline exists",
+    "remaining budget alone authorizes another GPU allocation"
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/analysis/budget-settlement.json",
+      "artifact_sha256": "fdc3df89c9818e0b4cdeaabb7065a9bf7903efcdf4c363ee631c5fd0a43817a9"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/analysis/failed-run-settlement.json",
+      "artifact_sha256": "a86cf662a1b613b714ed9b67aab1b5ec99dd24dd2ac85db246d3df6c5a48ffd2"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "c23ed8a2b9ce0a3be5e0dabbca87e515ace55a23a7c4d80b96ac8a5b70ba2e6d"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "9fc20b3399b8051bbc13e196c9ad563e0040a612efd6475769f85d325f1630e0"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/function-completion.json",
+      "artifact_sha256": "07c6fd0f6fca594c542af29375fe83a3942dbf94f02d321fb82a1f3a58a0f089"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/controller-result.json",
+      "artifact_sha256": "ca5f8072d7932c67198aaef9ff5871e31ccecbb16d5aef9d32030c5139103461"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/analysis/scientific-validity.json",
+      "artifact_sha256": "2c27a6ba2c74c650cb1ebbc0b3a29e9b537baa92b240fb64a0cc8e2e8ae0152c"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/REMOTE_MANIFEST.json",
+      "artifact_sha256": "0f0a3d377c994558b1c3bf4945df1e8a42b8ab45fb01c2d2419a931dfb84c9aa"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v5.json",
+      "artifact_sha256": "b0df8a977782b700e8685e2ad687d601dfa7288c451f9c85483f41d7a67413e0"
+    }
+  ]
+}

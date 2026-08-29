@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-status/v1",
+  "status": "NOT_RUN_PREREQUISITE_INTEGRATED_V11_FAILED",
+  "authorized": false,
+  "reason": "The protocol permits KILL_AND_RECOMPUTE only after a scientifically valid integrated v11 preservation transaction. Attempt B failed before reclamation and no retry is authorized.",
+  "analytical_tokens": 133120,
+  "measured_recompute_tokens": null,
+  "gpu_seconds_recompute": null,
+  "lost_rollout_gpu_seconds": null,
+  "time_to_hbm_reclamation_seconds": null,
+  "time_to_first_useful_gpu1_seconds": null,
+  "time_to_serving_slo_restoration_seconds": null,
+  "time_to_first_resumed_token_seconds": null,
+  "time_to_all_branches_resumed_seconds": null,
+  "total_rollout_interruption_seconds": null,
+  "no_analytical_value_presented_as_measured": true
+}

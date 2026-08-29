@@ -1,0 +1,268 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-state-movement-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v5",
+  "reviewer": {
+    "agents": [
+      "Agent 12",
+      "Agent 13"
+    ],
+    "identity": "combined-continuum-state-correctness-and-movement-accounting-reviewer",
+    "task_path": "/root/v5_state_movement_review",
+    "independence": "post-run CPU-only review of the v5 raw artifact bundle; no Modal invocation, GPU allocation, source edit, state-path edit, or measurement mutation"
+  },
+  "reviewed_at_utc": "2026-08-13T15:59:02Z",
+  "authorized_repository_commit": "f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4",
+  "decision": "REJECT_AS_V10_STATE_CORRECTNESS_AND_MOVEMENT_BASELINE",
+  "scientifically_valid_state_baseline": false,
+  "state_correctness_pass": false,
+  "movement_accounting_pass": false,
+  "summary": "The integrated v5 attempt prepared an eight-branch rollout workload and reached a post-reclamation GPU1-serving-ready coordination barrier. The GPU0 serving worker had already failed the bounded-backlog gate before that barrier became visible, so no useful GPU1 serving, recovery, restore, destination validation, branch continuation, or 8/8 recomputation comparison occurred. The controller then terminated the rollout worker before it emitted rollout/result.json, a state-event timeline, state-pass records, or exact byte accounting. The partial handoff is useful diagnostic evidence, but it cannot validate preservation correctness, HBM reclamation, restoration correctness, or any v10 movement amplification.",
+  "raw_bundle_integrity": {
+    "status": "PASS",
+    "remote_manifest_entries": 469,
+    "remote_manifest_missing_entries": 0,
+    "remote_manifest_hash_mismatches": 0,
+    "remote_manifest_sha256": "0f0a3d377c994558b1c3bf4945df1e8a42b8ab45fb01c2d2419a931dfb84c9aa"
+  },
+  "execution_boundary": {
+    "two_engine_readiness_published": true,
+    "rollout_transaction_ready_published": true,
+    "rollout_transaction_ready_passed": true,
+    "rollout_state_preparation": {
+      "status": "OBSERVED",
+      "branch_count": 8,
+      "rollouts_ready": true,
+      "physical_gpu_uuid": "GPU-7401256e-b015-014d-4ece-7f7f6d5a883e",
+      "engine_reloaded": false,
+      "evidence": "barriers/rollout.transaction-ready.json"
+    },
+    "configured_state_shape": {
+      "fanout": 8,
+      "prefix_tokens": 16384,
+      "divergent_suffix_tokens": 256,
+      "interpretation": "Configuration plus the passed rollout transaction-ready barrier establishes the intended eight-branch preparation boundary, but the terminated worker emitted no branch-ID, token-position, shared-block, private-block, logical-byte, or physical-byte inventory."
+    },
+    "reclaim_trigger": {
+      "observed": true,
+      "triggered_ns": 207242140456,
+      "queue_depth": 20,
+      "queue_abort_ceiling": 25,
+      "evidence": "barriers/v10-reclaim-trigger.json"
+    },
+    "naive_preservation_and_release": {
+      "status": "INDIRECT_COORDINATION_EVIDENCE_ONLY",
+      "gpu1_serving_ready_observed_ns": 213116435753,
+      "diagnostic_trigger_to_ready_seconds": 5.874295297,
+      "interpretation": "The rollout worker published v10-gpu1-serving-ready after the reclaim trigger, which demonstrates that its reclamation-side control flow reached the serving-eligibility handoff. The barrier contains no capture, transform, integrity, D2H, publish, release, or HBM samples, so it is not sufficient to certify those individual gates or their byte counts."
+    },
+    "serving_failure_preceded_gpu1_ready": {
+      "serving_worker_ended_ns": 212121741979,
+      "gpu1_serving_ready_observed_ns": 213116435753,
+      "delta_seconds": 0.994693774,
+      "failure": "calibrated v10 backlog exceeded its bounded safety ceiling during post-reclaim-pre-gpu1"
+    },
+    "gpu1_first_useful_serving_request_observed": false,
+    "gpu1_hbm_reclaim_confirmed": false,
+    "restore_trigger_observed": false,
+    "h2d_restore_observed": false,
+    "state_import_observed": false,
+    "destination_native_write_observed": false,
+    "destination_validation_observed": false,
+    "branch_resume_observed": false,
+    "branch_continuation_observed": false,
+    "rollout_result_present": false,
+    "rollout_resource_telemetry_present": false,
+    "state_event_timeline_present": false,
+    "state_pass_records_present": false,
+    "state_pass_graph_present": false,
+    "branch_resume_validation_present": false,
+    "terminal_boundary": "The serving worker failed before it could route a useful request to GPU1. The controller issued abort at monotonic_ns=215647833198 and terminated the rollout worker with SIGTERM, so later recovery and restore-dependent phases were correctly not entered."
+  },
+  "required_state_event_audit": {
+    "required_event_occurrences_in_v5_raw_bundle": 0,
+    "events_not_durably_emitted": [
+      "RECLAIM_TRIGGER",
+      "ROLLOUT_ADMISSION_STOP",
+      "BRANCH_QUIESCE_BEGIN",
+      "BRANCH_QUIESCE_END",
+      "STATE_CAPTURE_BEGIN",
+      "STATE_CAPTURE_END",
+      "STATE_TRANSFORM_BEGIN",
+      "STATE_TRANSFORM_END",
+      "INTEGRITY_BEGIN",
+      "INTEGRITY_END",
+      "D2H_BEGIN",
+      "D2H_END",
+      "STATE_PUBLISH",
+      "GPU1_STATE_RELEASE_BEGIN",
+      "GPU1_STATE_RELEASE_END",
+      "GPU1_HBM_RECLAIM_CONFIRMED",
+      "GPU1_SERVING_ENABLE",
+      "GPU1_FIRST_USEFUL_SERVING_REQUEST",
+      "RESTORE_TRIGGER",
+      "H2D_BEGIN",
+      "H2D_END",
+      "STATE_IMPORT_BEGIN",
+      "STATE_IMPORT_END",
+      "DESTINATION_NATIVE_WRITE_BEGIN",
+      "DESTINATION_NATIVE_WRITE_END",
+      "STATE_VALIDATE_BEGIN",
+      "STATE_VALIDATE_END",
+      "BRANCH_RESUME_BEGIN",
+      "FIRST_RESUMED_TOKEN",
+      "ALL_BRANCHES_RESUMED",
+      "ROLLOUT_CONTINUATION_COMPLETE"
+    ],
+    "note": "The v10-reclaim-trigger and v10-gpu1-serving-ready barrier files are coordination evidence, not substitutes for the required state-pass events."
+  },
+  "state_correctness_result": {
+    "measurement_status": "NOT_EVALUATED",
+    "logical_state_bytes": null,
+    "physical_state_bytes": null,
+    "shared_root_blocks": null,
+    "private_blocks": null,
+    "branch_ids": null,
+    "branch_token_positions": null,
+    "source_allocations_released": null,
+    "fresh_destination_allocations": null,
+    "transport_integrity_valid": null,
+    "destination_integrity_valid": null,
+    "branches_resumed": 0,
+    "minimum_continuation_tokens_per_branch": null,
+    "first_resumed_token_exact_matches": null,
+    "first_resumed_token_comparisons": null,
+    "reason": "No restore phase, destination validation, continuation, or independent recomputation comparison occurred, and the terminated rollout worker emitted no result artifact."
+  },
+  "movement_result": {
+    "measurement_status": "NOT_MEASURED",
+    "logical_state_bytes": null,
+    "source_gpu_read_bytes": null,
+    "source_gpu_write_bytes": null,
+    "unique_real_d2h_bytes": null,
+    "host_intermediate_read_bytes": null,
+    "host_intermediate_write_bytes": null,
+    "unique_real_h2d_bytes": null,
+    "destination_gpu_read_bytes": null,
+    "destination_gpu_write_bytes": null,
+    "integrity_read_bytes": null,
+    "temporary_bytes": null,
+    "full_physical_touch_amplification": null,
+    "external_movement_amplification": null,
+    "avoidable_movement_amplification": null,
+    "critical_path_movement_amplification": null,
+    "dominant_state_pass_chain": null,
+    "duplicate_bytes": null,
+    "reason": "The v5 bundle contains no rollout operation telemetry, state-pass records, complete capture/restore transaction, or positive logical-state denominator. The invalid movement artifact intentionally contains no numeric movement fields."
+  },
+  "v9_substitution_audit": {
+    "status": "PASS",
+    "historical_v9_values_reused_as_v5_measurements": false,
+    "v5_raw_bundle_contains_historical_v9_byte_or_amplification_values": false,
+    "rule": "Do not copy, impute, inherit, or relabel any v9 logical-state byte count, external amplification, full-physical amplification, avoidable amplification, critical-path amplification, or dominant pass chain as a v10 result."
+  },
+  "reportable_v5_state_claims": [
+    "A real GPU1 vLLM worker published a passed rollout transaction-ready barrier for eight prepared branches under the configured 16,384-token prefix and 256-token suffix workload.",
+    "A bounded reclaim trigger occurred at queue depth 20.",
+    "The rollout worker published its GPU1-serving-ready coordination barrier 5.874295297 seconds after the reclaim trigger.",
+    "The serving worker had already failed the bounded-backlog gate 0.994693774 seconds before the GPU1-ready barrier, so no useful reclaimed serving capacity was demonstrated.",
+    "Restore, destination validation, branch continuation, exact-token correctness, state-pass accounting, and movement amplification were not measured."
+  ],
+  "prohibited_v5_claims": [
+    "The exact v10 rollout state byte size was measured.",
+    "Every required capture, transform, D2H, integrity, release, and HBM-reclaim gate passed.",
+    "GPU1 served a useful request after reclamation.",
+    "The rollout restore path executed.",
+    "Eight branches resumed or matched independent recomputation.",
+    "Any v10 external, full-physical, avoidable, or critical-path movement amplification was measured.",
+    "The historical v9 dominant state-pass chain is the observed v10 chain.",
+    "A scientifically valid naive v10 baseline can be frozen from v5."
+  ],
+  "findings": [
+    {
+      "id": "STATE-MOVE-V5-H1",
+      "severity": "high",
+      "status": "TERMINAL_ATTEMPT_FAILURE",
+      "finding": "The bounded-backlog gate failed before GPU1 became useful, and the controller terminated the rollout worker before restoration and correctness validation.",
+      "required_resolution": "Keep state_correctness_pass=false and branch_resume_pass=false. Report restore latency and all branch-correctness outputs as NOT_MEASURED/null."
+    },
+    {
+      "id": "STATE-MOVE-V5-H2",
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "No rollout result, required state-event timeline, or state-pass graph survived the abort, so neither preservation correctness nor movement amplification is independently auditable.",
+      "required_resolution": "Keep movement_accounting_pass=false and every v10 movement byte/amplification field null. The GPU1-ready barrier may be reported only as a diagnostic coordination milestone."
+    },
+    {
+      "id": "STATE-MOVE-V5-H3",
+      "severity": "high",
+      "status": "PROHIBITED_SUBSTITUTION",
+      "finding": "The v5 bundle supplies no basis for importing historical v9 state-size, pass-chain, or amplification values.",
+      "required_resolution": "Do not copy any v9 number or chain into v10 result fields or plots."
+    },
+    {
+      "id": "STATE-MOVE-V5-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The raw v5 movement and scientific-validity artifacts fail closed: movement status is invalid, movement_accounting_pass is false, state_correctness_pass is false, branch_resume_pass is false, and scientifically_valid is false."
+    },
+    {
+      "id": "STATE-MOVE-V5-N2",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "All 469 remote-manifest entries exist and match their recorded SHA-256 hashes."
+    }
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/REMOTE_MANIFEST.json",
+      "artifact_sha256": "0f0a3d377c994558b1c3bf4945df1e8a42b8ab45fb01c2d2419a931dfb84c9aa",
+      "sample_selector": "$.artifacts"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/controller-result.json",
+      "artifact_sha256": "ca5f8072d7932c67198aaef9ff5871e31ccecbb16d5aef9d32030c5139103461",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/function-completion.json",
+      "artifact_sha256": "07c6fd0f6fca594c542af29375fe83a3942dbf94f02d321fb82a1f3a58a0f089",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/barriers/rollout.transaction-ready.json",
+      "artifact_sha256": "74485b12d3c5c75b94fdd4564b07349520024822581e84f4ab6b65aeaf7dfd1f",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/barriers/v10-reclaim-trigger.json",
+      "artifact_sha256": "228fccd2cb1b9e5948b0fa26267ce296100f8a3fb4270c4a3d6c4f915e35d8cb",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/barriers/v10-gpu1-serving-ready.json",
+      "artifact_sha256": "915067ef11f17a7ec57f5d846e61624ad18f8859fd32e9ed673354657c4c96cb",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/barriers/abort.json",
+      "artifact_sha256": "caca0805e044868bfd24a90dab0b1a2646504a9ad6fb6fbb56552c6d81e0ed66",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/serving/result.json",
+      "artifact_sha256": "0ca4cdb12a8e683b16ffbbfb9964846896c8a28d4abd858ba1bdb2ef66c9534f",
+      "sample_selector": "$.status,$.ended_ns,$.error"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/analysis/movement-accounting.json",
+      "artifact_sha256": "3f7a7a7300dc854a788739983ebdfaf9ffcf1d9cc001adc75c77ce5279f72758",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/analysis/scientific-validity.json",
+      "artifact_sha256": "2c27a6ba2c74c650cb1ebbc0b3a29e9b537baa92b240fb64a0cc8e2e8ae0152c",
+      "sample_selector": "$"
+    }
+  ],
+  "required_action": "Reject v5 as a state-correctness or movement baseline. Preserve the partial GPU1-ready milestone as diagnostic evidence only; keep restore, branch correctness, state size, state passes, movement bytes, amplifications, and dominant-chain outputs NOT_MEASURED/null; do not freeze or tag a naive v10 baseline."
+}

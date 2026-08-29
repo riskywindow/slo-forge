@@ -1,0 +1,304 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-state-movement-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v7",
+  "reviewed_at_utc": "2026-08-13T17:17:02Z",
+  "reviewer": {
+    "agents": [
+      "Agent 12",
+      "Agent 13"
+    ],
+    "identity": "combined-continuum-state-correctness-and-movement-accounting-reviewer",
+    "task_path": "/root/v6_queue_reviewer",
+    "independence": "post-run CPU-only review of the immutable v7 raw artifact bundle; no Modal invocation, GPU allocation, source edit, state-path edit, or measurement mutation"
+  },
+  "decision": "APPROVE_V10_STATE_CORRECTNESS_AND_MOVEMENT_BASELINE",
+  "state_correctness_pass": true,
+  "branch_resume_pass": true,
+  "movement_accounting_pass": true,
+  "scientifically_valid_state_baseline": true,
+  "scientifically_valid_state_baseline_reason": "The raw v7 state transaction and independently recomputed movement graph pass. Both local postprocessing defects were corrected without changing raw measurements, the CPU-only finalizer replay completed, every scientific-validity gate is true, invalid_reasons is empty, and the publisher froze the canonical baseline.",
+  "raw_bundle_integrity": {
+    "remote_manifest_entries": 500,
+    "missing_entries": 0,
+    "hash_or_size_mismatches": 0,
+    "passed": true
+  },
+  "reviewed_artifacts": [
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/rollout/result.json",
+      "sha256": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
+      "bytes": 2685563
+    },
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/rollout/telemetry/cuda-and-host-operations.json",
+      "sha256": "edf6958f6ad95009693223cc451eddc4abb75d2c91054b9ba2fd265c347875c7",
+      "bytes": 10837
+    },
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
+      "bytes": 704273
+    },
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/effective-config.json",
+      "sha256": "a4cdc32358757ec0e2952d47475a4005bca5b1ce176e16385756e68e40eab172"
+    },
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/integrated-run-manifest.json",
+      "sha256": "dc137b44ebc37895b29336a807296f97d5d1a8bb053ddbc3e6d8e04c84f065cf"
+    },
+    {
+      "path": "raw/modal/exp004-v10-naive-s41-v7/function-completion.json",
+      "sha256": "dd463e8842f87449bbfbe61e5f7ae7f6e5ab813530e00e103c801ff55fd07156"
+    }
+  ],
+  "canonical_outputs": {
+    "scientific_validity": {
+      "path": "scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+      "scientifically_valid": true,
+      "invalid_reasons": []
+    },
+    "movement_accounting": {
+      "path": "movement-accounting.json",
+      "sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3"
+    },
+    "branch_resume_validation": {
+      "path": "branch-resume-validation.json",
+      "sha256": "20f14ee8a11534d03be41d0b62c26e265acac2b6c396edd8587839b012bb9226",
+      "passed": true
+    },
+    "state_pass_graph": {
+      "path": "state-passes/v10-state-pass-graph.json",
+      "sha256": "a70d1f554201bab696084e055310bbbb6a85745740845def93a4cd8a87e52dfa",
+      "node_count": 30,
+      "edge_count": 29
+    },
+    "frozen_baseline": {
+      "path": "baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+      "embedded_artifact_hash": "f58dfaab2301ab8f449efa38ba634ada80a41acc70ba97d73bcb151ab1b1d2fd",
+      "embedded_artifact_hash_recomputed": true,
+      "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+      "status": "FROZEN",
+      "immutable": true,
+      "git_tag_created": false,
+      "recommended_git_tag": "branchfabric-exp004-naive-baseline-v10"
+    }
+  },
+  "state_correctness_result": {
+    "rollout_worker_status": "succeeded",
+    "branch_count": 8,
+    "shared_prefix_tokens": 16384,
+    "divergent_suffix_tokens_per_branch": 256,
+    "computed_token_boundary_per_branch": 16640,
+    "logical_state_bytes": 1056964608,
+    "physical_source_bytes": 1056964608,
+    "shared_bytes": 939524096,
+    "private_bytes": 117440512,
+    "shared_blocks": 1024,
+    "private_blocks": 128,
+    "source_block_count": 1152,
+    "destination_block_count": 1152,
+    "source_destination_block_id_intersection_count": 0,
+    "transport_integrity_valid": true,
+    "transport_payload_sha256": "8e1eb5c1ad1f731b6e9d1c613ed0d01bbc8b711e9f342d55572294c7995a632f",
+    "source_blocks_released": true,
+    "source_native_refcounts_zero": true,
+    "full_source_free_pool_recovered": true,
+    "fresh_destination_allocations": true,
+    "runtime_incarnations_fresh": true,
+    "restored_runtime_identity_injective": true,
+    "token_boundaries_valid": true,
+    "sampling_semantics_preserved": true,
+    "first_resumed_token_matches": 8,
+    "first_resumed_token_total": 8,
+    "minimum_continuation_tokens_per_branch": 8,
+    "continuation_token_counts": {
+      "branch.0": 8,
+      "branch.1": 8,
+      "branch.2": 8,
+      "branch.3": 8,
+      "branch.4": 8,
+      "branch.5": 8,
+      "branch.6": 8,
+      "branch.7": 8
+    },
+    "expected_first_tokens": {
+      "branch.0": 15772,
+      "branch.1": 20204,
+      "branch.2": 11,
+      "branch.3": 21930,
+      "branch.4": 11,
+      "branch.5": 429,
+      "branch.6": 7445,
+      "branch.7": 13
+    },
+    "observed_first_tokens": {
+      "branch.0": 15772,
+      "branch.1": 20204,
+      "branch.2": 11,
+      "branch.3": 21930,
+      "branch.4": 11,
+      "branch.5": 429,
+      "branch.6": 7445,
+      "branch.7": 13
+    },
+    "reclaim_trigger_ns": 225303944634,
+    "gpu1_hbm_reclaim_confirmed_ns": 230526119065,
+    "gpu1_first_useful_serving_request_ns": 230717626061,
+    "restore_trigger_ns": 246020228885,
+    "first_resumed_token_ns": 253748212300,
+    "all_branches_resumed_ns": 253748212300,
+    "rollout_continuation_complete_ns": 253868457631,
+    "time_to_hbm_reclamation_seconds": 5.222174431,
+    "time_to_first_useful_gpu1_seconds": 5.413681427,
+    "rollout_restore_latency_seconds": 7.727983415,
+    "all_branches_resume_latency_seconds": 7.727983415,
+    "rollout_continuation_completion_seconds": 7.848228746
+  },
+  "required_state_event_audit": {
+    "event_row_count": 33,
+    "unique_required_phase_count": 31,
+    "missing_required_phases": [],
+    "duplicate_aggregate_phase_markers": {
+      "STATE_VALIDATE_BEGIN": 2,
+      "STATE_VALIDATE_END": 2
+    },
+    "phase_events_canonical_sha256": "304f2159fb3e88982826fa1d69934570de2017d25b0f9f7ccb44b5d5abc3e6fb",
+    "timestamp_causality": "The two restore subsets each perform native write before validation. Aggregate validation is represented by the first STATE_VALIDATE_BEGIN and last STATE_VALIDATE_END and encloses DESTINATION_NATIVE_WRITE_END. Array insertion order is not timestamp order; timestamps and state-pass records are authoritative.",
+    "state_protocol_order_pass": true
+  },
+  "movement_result": {
+    "movement_report_canonical_sha256": "2d8df148dbefcd632ca61cc76d556f894a42e5d7e3bc07df92d7814924c61522",
+    "transport_manifest_canonical_sha256": "59e63038459985fdd67ace2848b944f12e898c5b326df4031a84b531dcaaeeca",
+    "logical_segment_count": 9,
+    "shared_segment_count": 1,
+    "private_segment_count": 8,
+    "state_pass_record_count": 270,
+    "movement_edge_count": 522,
+    "independently_derived_edge_count": 522,
+    "physical_event_id_count": 477,
+    "operation_label_count": 30,
+    "every_label_covers_logical_state_bytes": true,
+    "raw_report_equals_rebuild_from_passes": true,
+    "independent_cuda_and_host_telemetry_validation_pass": true,
+    "accounting_duplicate_bytes": 0,
+    "logical_state_bytes": 1056964608,
+    "source_gpu_read_bytes": 1056964608,
+    "source_gpu_write_bytes": 0,
+    "unique_real_d2h_bytes": 2113929216,
+    "host_intermediate_read_bytes": 16911433728,
+    "host_intermediate_write_bytes": 7398752256,
+    "unique_real_h2d_bytes": 1056964608,
+    "destination_gpu_read_bytes": 1056964608,
+    "destination_gpu_write_bytes": 1056964608,
+    "integrity_read_bytes": 8455716864,
+    "gpu_intermediate_read_write_bytes": 30651973632,
+    "host_temporary_allocation_bytes": 7398752256,
+    "gpu_temporary_allocation_bytes": 14797504512,
+    "peak_host_temporary_allocation_bytes": 2965372928,
+    "peak_gpu_temporary_allocation_bytes": 3170893824,
+    "peak_gpu_temporary_allocation_bytes_available": false,
+    "full_physical_touch_bytes": 61303947264,
+    "external_movement_bytes": 3170893824,
+    "avoidable_movement_bytes": 32765902848,
+    "required_movement_bytes": 28538044416,
+    "critical_path_movement_bytes": 61303947264,
+    "full_physical_touch_amplification": 58.0,
+    "external_movement_amplification": 3.0,
+    "avoidable_movement_amplification": 31.0,
+    "critical_path_movement_amplification": 58.0,
+    "cuda_copy_count": 4,
+    "d2h_copy_count": 3,
+    "h2d_copy_count": 1,
+    "d2h_copy_sizes_bytes": [
+      102760448,
+      954204160,
+      1056964608
+    ],
+    "h2d_copy_sizes_bytes": [
+      1056964608
+    ],
+    "dominant_state_pass_chain": [
+      "source-native-read",
+      "native-axis-contiguous",
+      "unpage-valid-tokens",
+      "stack-layers",
+      "concatenate-pages",
+      "D2H",
+      "integrity-and-publish-validation",
+      "H2D",
+      "import-validation",
+      "zero-native-pages",
+      "overlay-valid-tokens",
+      "native-axis-contiguous",
+      "stack-native-pages",
+      "destination-native-write",
+      "destination-native-read",
+      "validation-transform",
+      "validation-D2H",
+      "expected-page-concatenation",
+      "host-tensor-compare"
+    ]
+  },
+  "causal_timeline_diagnosis": {
+    "remote_failure": "V10Timeline validation rejected the integrated postprocessing timeline.",
+    "actual_gpu1_first_useful_and_slo_recovery_begin_ns": 230717626061,
+    "actual_fixed_sample_queue_drain_begin_ns": 231677152970,
+    "queue_sample_lag_ns": 959526909,
+    "root_cause": "The committed CAUSAL_V10_TIMELINE required SERVING_QUEUE_DRAIN_BEGIN before SERVING_SLO_RECOVERY_BEGIN, but SLO recovery begins at the first useful GPU1 token and the sustained queue-drain series begins at the next fixed telemetry boundary. The contract inverted these real causal events.",
+    "state_timeline_implicated": false,
+    "measurement_implicated": false,
+    "resolution": "Reorder SERVING_SLO_RECOVERY_BEGIN before SERVING_QUEUE_DRAIN_BEGIN, retain all original timestamps, and replay postprocessing locally without GPU use."
+  },
+  "findings": [
+    {
+      "id": "STATE-MOVE-V7-H1",
+      "severity": "high",
+      "status": "RESOLVED_LOCAL_POSTPROCESS_FIX",
+      "finding": "The finalizer's committed causal contract inversely ordered the first-useful/SLO-recovery event and the later fixed-boundary queue-drain sample. The 959,526,909 ns difference is expected sampling lag, not a state transaction or serving causality violation.",
+      "required_resolution": "Completed: SERVING_SLO_RECOVERY_BEGIN now precedes the next fixed-boundary SERVING_QUEUE_DRAIN_BEGIN in the causal contract; immutable raw timestamps were retained and CPU-only replay passes."
+    },
+    {
+      "id": "STATE-MOVE-V7-H2",
+      "severity": "high",
+      "status": "RESOLVED_LOCAL_JSON_BOUNDARY_FIX",
+      "finding": "After the causal fix, JSON-directory replay is guaranteed to fail at strict Python-mode parsing: StateMovementReport.model_validate receives JSON lists and enum strings and produces 2,325 validation errors; CanonicalKvTransportManifest.model_validate similarly rejects JSON arrays for three tuple fields. JSON-mode validation succeeds for both, and the movement report then rebuilds exactly.",
+      "required_resolution": "Completed: StateMovementReport and CanonicalKvTransportManifest re-enter through strict JSON-mode validation, and complete CPU-only directory replay generated the canonical artifacts."
+    },
+    {
+      "id": "STATE-MOVE-V7-M1",
+      "severity": "medium",
+      "status": "RESOLVED_BY_CANONICAL_TIMELINE",
+      "finding": "The raw phase_events array contains two STATE_VALIDATE_BEGIN/END pairs and is appended in operation-group order rather than timestamp order. The timestamps correctly encode two disjoint restore subsets, and the pass graph is authoritative, but consumers must use first-begin/last-end aggregation and timestamp sorting.",
+      "required_resolution": "Completed: both real subset markers remain preserved, while the canonical timeline explicitly cites STATE_VALIDATE_BEGIN:first and STATE_VALIDATE_END:last and the state-pass graph retains all 270 pass records."
+    },
+    {
+      "id": "STATE-MOVE-V7-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The real state transaction passed transport integrity, released every source block, restored into 1,152 fresh disjoint destination allocations, preserved all branch identities/token boundaries/policies, and produced 8/8 exact independently recomputed first tokens with eight continuation tokens per branch."
+    },
+    {
+      "id": "STATE-MOVE-V7-N2",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Independent reconstruction from 270 raw pass records exactly reproduces the 522-edge movement graph and accounting: 1,056,964,608 logical bytes, 3,170,893,824 external bytes, 61,303,947,264 full physical bytes, and 32,765,902,848 avoidable bytes, with zero duplicate accounting."
+    },
+    {
+      "id": "STATE-MOVE-V7-N3",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "All 500 artifacts listed in the v7 remote manifest exist and match their recorded SHA-256 hashes and byte sizes."
+    }
+  ],
+  "verification": {
+    "independent_raw_movement_rebuild": "PASS",
+    "canonical_artifact_hash_binding": "PASS",
+    "baseline_self_hash_recomputation": "PASS",
+    "focused_test_command": "PYTHONPATH=python pytest -q tests/python/test_gpu_reclamation_v10_validity.py tests/python/test_experiment_004_v10_finalizer.py",
+    "focused_test_result": "25 passed in 0.50s"
+  },
+  "required_action": "None for state correctness or movement accounting. Preserve the frozen naive baseline and do not optimize the state path in v10. The recommended Git tag remains uncreated by policy."
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-config/v1",
+  "pipeline_version": "v11",
+  "mode": "PRESERVE_OPTIMIZED",
+  "execution_mode": "integrated-reclamation-v11",
+  "attempt_id": "exp004-v11-integrated-s41-a",
+  "seed": 41,
+  "offline_gate_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest-attempt-d.json",
+  "offline_gate_manifest_sha256": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a",
+  "micro_validation_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+  "micro_validation_sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+  "post_micro_review_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+  "post_micro_review_manifest_sha256": "e7b48588923919928e5b2178b93ea1f55e6e94f233609e6fec564b5156b82d67",
+  "budget_authorization": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+  "budget_authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+  "ledger_sha256_before_reservation": "be29bc61ffd9c6df62e8c0dc9236308674d0c4c0f6d40bb746202ebff272988f"
+}

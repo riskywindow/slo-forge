@@ -1,0 +1,23 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-modal-cleanup-evidence/v1",
+  "attempt_id": "exp004-v11-micro-s41-a",
+  "stage": "POST_FAILED_INVOCATION",
+  "observed_at_utc": "2026-08-19T00:52:57Z",
+  "modal_app": {
+    "app_id": "ap-9tG2MqyxSwsSvIdnEBfwtL",
+    "state": "stopped",
+    "tasks": 0
+  },
+  "active_apps": [],
+  "running_tasks": [],
+  "running_containers": [],
+  "active_endpoints": [],
+  "active_reservations": [],
+  "owned_child_processes": [],
+  "profilers": [],
+  "authorized_persistent_resources": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "clean": true
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-a-capacity-methodology-f6e9f8f-retry",
+  "reviewer_role": "capacity_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T15:39:23Z",
+  "authorization_subject_sha256": "4c80a284ca73889c8896b0be34c4db5a6e45927563b6f8ca6012d27805f7f7e4",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "Independent repository-contract canonicalization of the prescribed authorization subject fields, using UTF-8 canonical JSON with a trailing LF, reproduces 4c80a284ca73889c8896b0be34c4db5a6e45927563b6f8ca6012d27805f7f7e4.",
+    "All 11 role-ordered source calibration artifacts are regular repository files and their bytewise SHA-256 digests exactly match the authorization subject.",
+    "The raw 12-rps one-GPU evidence independently yields 120 offers and 119 completion events in the 10-second measurement interval, or 11.9 completions/s; scheduled-cohort p95 TTFT is 44.20256505 ms, queue depth is 11 to 12, all 120 cohort requests complete, and persistent positive drift is false.",
+    "The raw 15-rps one-GPU evidence independently yields 150 offers and 144 completion events in the 10-second measurement interval, or 14.4 completions/s; scheduled-cohort p95 TTFT is 402.28929905 ms, queue depth is 15 to 21, fitted queue slope is +0.581818 requests/s, three cohort requests abort, and persistent positive drift is true.",
+    "The raw 20-rps two-GPU evidence independently yields 200 offers and 199 completion events in the 10-second measurement interval, or 19.9 completions/s; scheduled-cohort p95 TTFT is 42.4444484 ms, queue depth is 18 to 19, persistent positive drift is false, all 200 cohort requests complete, and completions split exactly 100/100 across GPU0/GPU1.",
+    "The selected 15-rps spike is exactly 25 percent above lambda_1=12 rps, exactly 25 percent below lambda_2=20 rps, and leaves 5 rps nominal two-GPU drain headroom.",
+    "The subject binds existing repository HEAD f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4 and forbids remote or asynchronous review exchange on the live GPU path. Capacity-methodology decision: APPROVED."
+  ]
+}

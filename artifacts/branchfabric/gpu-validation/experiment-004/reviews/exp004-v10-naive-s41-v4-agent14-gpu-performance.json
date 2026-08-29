@@ -1,0 +1,249 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-gpu-performance-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewer": {
+    "agent": "Agent 14",
+    "identity": "postrun_gpuperf_reviewer",
+    "task_path": "/root/postrun_gpuperf_reviewer",
+    "independence": "post-run read-only GPU-performance audit; no Modal invocation, GPU allocation, source edit, budget mutation, or cleanup action"
+  },
+  "reviewed_at_utc": "2026-08-13T06:36:23Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "REJECT_GPU_PERFORMANCE_BASELINE_ATTEMPT_STOPPED_BEFORE_READINESS",
+  "scientifically_valid": false,
+  "gpu_inventory": {
+    "status": "PASS",
+    "requested_gpu": "A100-80GB:2",
+    "observed_device_count": 2,
+    "devices": [
+      {
+        "logical_index": 0,
+        "uuid": "GPU-58c47e32-ef98-4a87-070d-f74111769328",
+        "name": "NVIDIA A100-SXM4-80GB",
+        "memory_total_mib": 81920,
+        "compute_capability": "8.0"
+      },
+      {
+        "logical_index": 1,
+        "uuid": "GPU-61c07e9a-bfb2-2e06-0b68-37f6ccca55d9",
+        "name": "NVIDIA A100-SXM4-80GB",
+        "memory_total_mib": 81920,
+        "compute_capability": "8.0"
+      }
+    ],
+    "driver_version": "580.95.05",
+    "torch_cuda_userspace_version": "13.0",
+    "runtime_pins": {
+      "vllm": "0.23.0",
+      "pytorch": "2.11.0",
+      "dtype": "bfloat16",
+      "model_architecture": "Qwen2ForCausalLM",
+      "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "seed": 41,
+      "verification": "Both workers progressed into real vLLM model construction after the commit-bound fail-fast guard requiring vLLM 0.23.0, PyTorch 2.11.0, CUDA 13.0, one visible CUDA device, and compute capability 8.0 per worker; the vLLM logs independently identify engine v0.23.0 and bf16."
+    }
+  },
+  "topology": {
+    "status": "PARTIAL_BUT_DEVICE_CONNECTIVITY_VERIFIED",
+    "cuda_visible_devices_order": [
+      "GPU-58c47e32-ef98-4a87-070d-f74111769328",
+      "GPU-61c07e9a-bfb2-2e06-0b68-37f6ccca55d9"
+    ],
+    "cuda_peer_access_bidirectional": true,
+    "nvidia_smi_peer_read": "OK in both directions",
+    "nvidia_smi_peer_write": "OK in both directions",
+    "nvlink_status": "12 links per GPU reported active at 25 GB/s per link",
+    "topology_matrix_command_status": "nonzero_exit",
+    "topology_matrix_returncode": 255,
+    "topology_matrix_stdout": "Failed to run topology matrix",
+    "pci_bus_id_status": "unavailable: nvidia-smi inventory returned [Unknown Error]",
+    "conclusion": "Exact device identity, ordering, A100 class, and bidirectional peer connectivity are established. The full nvidia-smi topology/affinity matrix was not available in this container, so no stronger CPU/NUMA or link-routing claim is permitted."
+  },
+  "readiness_progress": {
+    "status": "NOT_READY_CONTROLLER_TIMEOUT",
+    "controller_elapsed_seconds": 160.761016182,
+    "authorization_to_abort_seconds": 159.955714955,
+    "controller_error": "timed out waiting for integrated strict readiness barriers for serving and rollout",
+    "serving_worker": {
+      "model_load_memory_gib": 14.29,
+      "model_load_seconds": 7.093885,
+      "torch_compile_seconds": 47.9,
+      "initial_profiling_warmup_seconds": 1.09,
+      "triton_artifact_files": 177,
+      "triton_cubin_files": 22,
+      "ready_barrier_published": false,
+      "probe_completed": false,
+      "returncode": -15
+    },
+    "rollout_worker": {
+      "model_load_memory_gib": 14.29,
+      "model_load_seconds": 7.426811,
+      "torch_compile_seconds": 48.52,
+      "initial_profiling_warmup_seconds": 1.11,
+      "triton_artifact_files": 174,
+      "triton_cubin_files": 21,
+      "ready_barrier_published": false,
+      "probe_completed": false,
+      "returncode": -15
+    },
+    "probe_count": 0,
+    "sanity_guard_count": 0,
+    "stable_hbm_verified": false,
+    "relevant_shapes_warmed_verified": false,
+    "cuda_graph_capture_complete_verified": false,
+    "both_engine_ready": false,
+    "engine_failure_demonstrated": false,
+    "interpretation": "Both processes were alive and making ordinary vLLM initialization progress through real model load, Torch compilation, and initial profiling/warmup. They were then terminated by controller-issued SIGTERM. There is no CUDA fault, Python exception, engine-core failure, failed probe, or readiness artifact proving an engine regression. Conversely, Torch compile completion alone does not satisfy the stricter readiness gate because CUDA-graph completion, shape warmup, stable HBM, queue idleness, runtime health, and probe success were never published."
+  },
+  "measured_transaction": {
+    "started": false,
+    "compilation_free_verified": false,
+    "controller_field_measured_transaction_compilation_by_role": {},
+    "controller_field_measured_transaction_compilation_free": false,
+    "interpretation": "The fail-closed false value does not mean compilation was observed during a measured transaction; no measured transaction existed. The only compilation evidence belongs to engine initialization before readiness."
+  },
+  "performance_metrics_validity": {
+    "status": "NO_REQUEST_BEARING_PHASE_EXECUTED",
+    "two_engine_readiness": "NOT_MEASURED_TO_COMPLETION",
+    "sanity_12_rps": "NOT_MEASURED",
+    "sanity_15_rps": "NOT_MEASURED",
+    "control_p95_ttft": "NOT_MEASURED",
+    "overload_queue_ttft_service": "NOT_MEASURED",
+    "time_to_hbm_reclamation": "NOT_MEASURED",
+    "time_to_first_useful_gpu1_request": "NOT_MEASURED",
+    "two_gpu_completion_rate": "NOT_MEASURED",
+    "queue_drain": "NOT_MEASURED",
+    "time_to_slo_restoration": "NOT_MEASURED",
+    "gpu0_restore_activity": "NOT_MEASURED",
+    "rollout_restore_latency": "NOT_MEASURED",
+    "serving_interference": "NOT_MEASURED",
+    "reasoning": [
+      "Neither worker published its readiness barrier, and probe_count and sanity_guard_count are both zero.",
+      "The remote manifest contains no non-Triton sanity, serving-sample, telemetry, transaction-event, state-pass, or restore artifacts.",
+      "Control, preserve, H2D restore, import, and validation intervals therefore do not exist, so there are no matched active-serving samples from which throughput interference, TTFT increase, or token-rate interference could be computed.",
+      "The inventory_after utilization values of 100% and 56% are isolated initialization/termination snapshots, not serving samples and not causal interference evidence.",
+      "The vLLM load and compile durations are startup diagnostics only and must not be reported as transaction critical-path timings."
+    ]
+  },
+  "timing_and_cost": {
+    "status": "PASS",
+    "function_call_id": "fc-01KZWWB1FVX6S5RXMHSVMCJFK0",
+    "remote_gpu_allocation_wall_seconds": 183.573779477,
+    "gpu_count": 2,
+    "actual_A100_seconds": 367.147558954,
+    "actual_A100_hours": 0.10198543304277778,
+    "gpu_price_per_A100_hour_usd": 2.4984,
+    "actual_cost_usd": 0.254800405914076,
+    "client_elapsed_wall_seconds": 337.8481057499994,
+    "conservative_A100_seconds": 675.6962114999988,
+    "conservative_A100_hours": 0.187693392083333,
+    "conservative_cost_usd": 0.46893317078099916,
+    "cumulative_conservative_A100_seconds": 10298.167208919993,
+    "cumulative_conservative_A100_hours": 2.860602002477776,
+    "cumulative_conservative_cost_usd": 7.146928042990475,
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "remaining_A100_seconds": 501.83279108000715,
+    "arithmetic_verified": true,
+    "accounting_conclusion": "Provider-observed actual time and the larger client-elapsed conservative charge are distinctly labeled and arithmetically consistent."
+  },
+  "safe_abort_and_cleanup": {
+    "status": "PASS",
+    "controller_cleanup_error": null,
+    "worker_termination": "controller issued SIGTERM to both worker process groups",
+    "compute_processes_after": [],
+    "inventory_after_memory_used_mib": [
+      4,
+      4
+    ],
+    "provider_app_state": "stopped",
+    "active_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "transient_exchange_verified_absent": true,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "No request-bearing v10 phase ran, so no serving performance, capacity reclamation, restore activity, or serving-interference metric is scientifically reportable.",
+      "required_resolution": "Report all transaction and interference metrics as NOT MEASURED and keep scientifically_valid false. Do not substitute established calibration or v9 diagnostic values."
+    },
+    {
+      "severity": "medium",
+      "status": "DIAGNOSTIC_LIMITATION",
+      "finding": "nvidia-smi topo -m failed and PCI bus IDs were unavailable, although CUDA peer access, nvidia-smi P2P read/write, and NVLink status establish bidirectional device connectivity.",
+      "required_resolution": "Limit the v4 topology claim to the evidence recorded here; require a usable full matrix or an equivalently explicit topology artifact for any future successful baseline."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Both workers passed exact runtime/device guards and made normal initialization progress, but the evidence neither proves readiness nor demonstrates engine unhealthiness."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Actual and conservative timing/cost accounting is correct, the reservation is cleared, all transient Modal/process resources are zero, and only the two authorized persistent volumes remain."
+    }
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+      "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-failure.json",
+      "artifact_sha256": "cff9ac2e2c606e7fc3c47a9f4c76f8dbe2f0cff2a0d703aa6d7bfecfa5fb85fa"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/topology/topology-commands.json",
+      "artifact_sha256": "5b42e83a06aff2dd3d85944dc43bb2c977672c2918cfe6c9cae01c5a76defa41"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/topology/cuda-peer-access.json",
+      "artifact_sha256": "06a0a2aed910621355cb40aab21128f9bb3df0d470a0b34a769482b2f05d632c"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/serving.stdout.log",
+      "artifact_sha256": "41c42801c16dc81f8dbfd93e50f0e8746c04c11541cc1bbf48b04841b1c7a63f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/rollout.stdout.log",
+      "artifact_sha256": "dc8275a4b59bde23fdbf639e5277e19f28e448775af80cd70b70abb0f0ccb3ab"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/budget-settlement.json",
+      "artifact_sha256": "6edda6c72154fb778ec27fa74803dd0254990ab545912928cc05b81c218b054f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/failed-run-settlement.json",
+      "artifact_sha256": "123952d53e25a22ae078c17e33cd2ba2d078bfeb290bb14423f2125e9598e760"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/scientific-validity.json",
+      "artifact_sha256": "44b3c3240ea1d7260b97904ee649f29f8d398ff03fa4663f193fa4385114da0d"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v4.json",
+      "artifact_sha256": "132cf17e792e818cea1e27adb2d38594e3796a3c66954f4e33a3f6904cc0be79"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "e25b2730b9d51374aefc8db07e1d2fbe1022687ced6f76d6ad0ce584b3762478"
+    }
+  ]
+}

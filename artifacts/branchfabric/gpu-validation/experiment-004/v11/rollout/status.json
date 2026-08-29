@@ -1,0 +1,25 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-rollout-status/v1",
+  "status": "MICRO_PASS_INTEGRATED_RESTORE_NOT_REACHED",
+  "micro_validation": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "branches": 8,
+    "continuation_tokens_per_branch_minimum": 8,
+    "exact_first_token_matches": "8/8",
+    "first_resumed_token_after_continuation_start_seconds": 0.083229142,
+    "all_branches_resumed_after_continuation_start_seconds": 0.083229142,
+    "continuation_complete_after_continuation_start_seconds": 0.205774608
+  },
+  "integrated_v11": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "restore_trigger_reached": false,
+    "fresh_destination_allocations_pass": false,
+    "integrity_pass": false,
+    "branch_resume_pass": false,
+    "first_resumed_token_seconds": null,
+    "all_branches_resumed_seconds": null,
+    "continuation_complete_seconds": null,
+    "exact_first_token_matches": null,
+    "not_reached_fields_are_not_measurements": true
+  }
+}

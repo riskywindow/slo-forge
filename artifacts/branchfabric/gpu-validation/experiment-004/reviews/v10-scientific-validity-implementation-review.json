@@ -1,0 +1,73 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-implementation-review/v1",
+  "reviewer_id": "agent-8-scientific-validity-auditor",
+  "reviewer_role": "scientific_validity_object",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "scope": "Pre-GPU audit of the fail-closed Experiment 004 v10 scientific-validity schema, raw-evidence bindings, and postprocessor construction.",
+  "artifact_bindings": [
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_validity.py",
+      "artifact_sha256": "1e3212ecd411c5d08cae5bfba70c87bfafe3576555175061afa5b21404637c60"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_postprocess.py",
+      "artifact_sha256": "56b6eaa29cd3691c558644c82723f965f23628d9ac731820dde2fa51b3165cea"
+    },
+    {
+      "artifact_reference": "tests/python/test_gpu_reclamation_v10_validity.py",
+      "artifact_sha256": "9957408a32f3637007feb9ee2bddaa1d94f4c16087155f12c3b7004ab3b53ff2"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_v10_scientific_contract.py",
+      "artifact_sha256": "5d88971b8d0c29b3f8ea35a8d8435ff524548c0f7f7ec5cd52923467ace57738"
+    }
+  ],
+  "required_boolean_fields": [
+    "authorization_alid",
+    "phase_budget_valid",
+    "two_engine_ready",
+    "sanity_12rps_stable",
+    "sanity_15rps_overload",
+    "control_stable",
+    "gpu0_overload_pass",
+    "bounded_backlog_pass",
+    "state_correctness_pass",
+    "gpu1_state_release_pass",
+    "gpu1_hbm_reclaim_pass",
+    "gpu1_useful_capacity_pass",
+    "two_gpu_service_gt_offered_pass",
+    "queue_drain_pass",
+    "slo_restoration_pass",
+    "slo_stability_pass",
+    "restore_load_reduced_pass",
+    "gpu1_serving_drained_pass",
+    "gpu0_active_during_restore_pass",
+    "branch_resume_pass",
+    "movement_accounting_pass",
+    "budget_pass",
+    "cleanup_pass"
+  ],
+  "findings": [
+    "The v2 object exposes exactly the 23 booleans mandated by section 27; no legacy boolean alias can silently enter the conjunction.",
+    "scientifically_valid is accepted only as the conjunction of all 23 evidence-bound booleans, a complete causal timeline, and an empty invalid-reason set; a missing or null boolean fails strict validation.",
+    "Authorization, phase budget, two-engine readiness, both short sanity guards, settlement, and cleanup are bound through seven content-addressed prerequisite references.",
+    "GPU1 state release and allocator-visible HBM capacity reclamation are distinct gates. HBM reclamation requires an unchanged KV-pool reservation, exact assigned-to-unassigned byte conversion, and release before serving enable.",
+    "Bounded backlog is recomputed from the complete offered/observed request bijection from spike start through GPU1 first useful service, and is bound to the precommitted trigger and abort depths.",
+    "SLO restoration and the full five-second stability window remain separate required booleans, and GPU0 restore activity is measured across H2D, import, native write, validation, and branch resume.",
+    "The fail-closed constructor emits every required boolean as false and never treats absent evidence as approval."
+  ],
+  "test_evidence": [
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_gpu_reclamation_v10_validity.py tests/python/test_experiment_004_v10_scientific_contract.py tests/python/test_experiment_004_v10_serving_protocol.py",
+      "result": "29 passed in 4.12s"
+    },
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_accounting.py tests/python/test_gpu_reclamation_v10_validity.py tests/python/test_experiment_004_v10_scientific_contract.py tests/python/test_experiment_004_gpu_harness.py -k 'movement or scientific or v10 or accounting or fail_closed'",
+      "result": "32 passed, 17 deselected in 0.35s"
+    }
+  ],
+  "unresolved_high_severity_findings": [],
+  "unresolved_medium_severity_findings": []
+}

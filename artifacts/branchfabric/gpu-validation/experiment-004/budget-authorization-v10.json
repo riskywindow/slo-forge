@@ -1,0 +1,49 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-budget-authorization/v1",
+  "experiment": "branchfabric-gpu-validation-experiment-004",
+  "authorized_at_utc": "2026-08-13T16:24:10Z",
+  "authorization_source": "explicit-user-instruction-current-thread",
+  "authorization_text": "jack up the budget to whatever it needs and actually run it this time",
+  "authorized_gpu_budget_usd": 40.0,
+  "authorized_cumulative_a100_hours": 3.75,
+  "authorized_cumulative_gpu_seconds": 13500.0,
+  "ceiling_semantics": "cumulative Experiment 004 A100 device-hours across settled intervals and reservations",
+  "consumed_gpu_seconds_at_authorization": 11798.636304585969,
+  "remaining_gpu_seconds_at_authorization": 1701.363695414031,
+  "active_reservations_at_authorization": 0,
+  "ledger_path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "previous_ledger_sha256": "5bd30e549df01e185d82ead547c83b6aeda03c60c2fe4c22a844d58620e698a9",
+  "authorized_ledger_sha256": "c898a2a5a844d77fc1f9cadbb0c4813e4c6f4aeef617f34d0c1bb44d1ba028bf",
+  "authorized_settled_intervals_sha256": "69fd62ec75a53f0a206e4a7bd1b45d036b27bc3ce22cd1c07668b21e7c460068",
+  "ledger_mutation": {
+    "hard_additional_gpu_seconds_before": 12600.0,
+    "hard_additional_gpu_seconds_after": 13500.0,
+    "settled_interval_count_before": 17,
+    "settled_interval_count_after": 17,
+    "settled_intervals_changed": false,
+    "reservation_count_before": 0,
+    "reservation_count_after": 0,
+    "serialization_normalized_to_indented_json": false
+  },
+  "local_fix_hypothesis": {
+    "failed_attempt": "exp004-v10-naive-s41-v6",
+    "classification": "local-serving-control-plane-defects",
+    "replay_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/analysis/v6-serving-controller-replay-audit.json",
+    "replay_artifact_sha256": "b2594f24e23f0cdc69463402ef0db637735e87409957d7f01d6d7eb38d66211f",
+    "fix_scope": [
+      "separate producer transport capacity from scientific backlog ceiling",
+      "use scheduler-waiting backlog for the low-backlog recovery threshold",
+      "consume bounded incremental GPU1 telemetry",
+      "retain the total-outstanding hard ceiling through recovery",
+      "gate GPU1 admissions on the global offered-work watermark"
+    ]
+  },
+  "authorized_action": "one bounded two-A100 v10 naive-preservation retry after commit-bound reviews and final preflight",
+  "does_not_authorize": [
+    "broad capacity recalibration",
+    "Experiment 005",
+    "optimized-preservation",
+    "kill-and-recompute",
+    "BranchFabric hardware implementation"
+  ]
+}

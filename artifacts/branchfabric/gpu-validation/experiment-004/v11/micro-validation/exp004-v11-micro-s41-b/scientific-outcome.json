@@ -1,0 +1,39 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-micro-scientific-outcome/v1",
+  "attempt_id": "exp004-v11-micro-s41-b",
+  "status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT",
+  "scientifically_admissible_measurement": false,
+  "real_a100_state_created": true,
+  "model_loaded": true,
+  "exact_workload_attempted": true,
+  "failure_type": "V11RuntimeTeardownRequired",
+  "failure_message": "v11 restore consumed preexisting zero-queue evidence; runtime teardown required",
+  "root_cause": "vLLM 0.23 retained source allocation notifications when needs_kv_cache_zeroing was false; restore correctly rejected the non-empty attribution queue.",
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-manifest-download.json",
+    "sha256": "58af1fca605452dbdeddaed05410ba77ebb093e424b18ace131f711f7f2e25a6"
+  },
+  "worker_failure": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-download/worker/failure.json",
+    "sha256": "17871ec58c1664d5b9e146e94ff50b97219e01ec0bbff417b25c77a5d72a3007"
+  },
+  "settlement": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/gpu-settlement.json",
+    "sha256": "a18bf302a4d16894b3ed392e5b590fa619415534ab0738d74fbaf7c1a4274c14",
+    "accounted_gpu_seconds": 155.17
+  },
+  "postflight_cleanup": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/postflight-cleanup.json",
+    "status": "PASS"
+  },
+  "remediation": {
+    "scope": "micro worker source-allocation lifecycle only",
+    "source_ids_required": 1152,
+    "zeroing_flag_required": false,
+    "engine_step_gate": "EXPORT_CAPTURE",
+    "destination_restore_checks_weakened": false,
+    "state_pass_accounting_changed": false
+  },
+  "integrated_v11_allowed_from_this_attempt": false,
+  "amplification_reportable_from_this_attempt": false
+}

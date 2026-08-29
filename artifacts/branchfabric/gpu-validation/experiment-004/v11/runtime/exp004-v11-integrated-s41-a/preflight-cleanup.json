@@ -1,0 +1,26 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-modal-cleanup/v1",
+  "attempt_id": "exp004-v11-integrated-s41-a",
+  "stage": "preflight-before-reservation",
+  "status": "PASS",
+  "observed_at_utc": "2026-08-19T04:27:51Z",
+  "modal_sdk_version": "1.5.3",
+  "active_apps": 0,
+  "running_tasks": 0,
+  "running_containers": 0,
+  "endpoints": 0,
+  "provider_reservations": 0,
+  "owned_child_processes": 0,
+  "profilers": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "other_persistent_resources": [],
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal volume list --json"
+  ],
+  "cleanup_pass": true
+}

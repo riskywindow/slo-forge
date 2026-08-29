@@ -1,0 +1,1003 @@
+{
+  "absolute_deadlines": {
+    "controller_deadline_monotonic_ns": 580109441856,
+    "function_deadline_monotonic_ns": 590109441856,
+    "function_entry_monotonic_ns": 2109441856,
+    "post_controller_reserve_seconds": 10.0
+  },
+  "attempt_id": "exp004-v11-integrated-s41-b",
+  "bound_artifacts": {
+    "budget_authorization": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "budget_authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "micro_validation_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+    "micro_validation_sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+    "offline_gate_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest-attempt-d.json",
+    "offline_gate_manifest_sha256": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a",
+    "post_micro_review_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+    "post_micro_review_manifest_sha256": "b4f045dcc0d1a2b7da87572c4a88019989cc1bca232f34f871a9038ba44c9d76"
+  },
+  "completed_at_utc": "2026-08-19T05:21:08.372999+00:00",
+  "config_sha256": "a4dd7976681fddaada89af0e6c302754669a7b1093479f8648bf6b309cb961c1",
+  "controller": {
+    "absolute_wall_seconds": 588.0,
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "cleanup_actions": [
+      {
+        "at_utc": "2026-08-19T05:15:11.127368+00:00",
+        "pid": 9,
+        "process_group": 9,
+        "signal": "SIGTERM"
+      },
+      {
+        "at_utc": "2026-08-19T05:15:16.139155+00:00",
+        "pid": 9,
+        "process_group": 9,
+        "signal": "SIGKILL"
+      }
+    ],
+    "cleanup_deadline_ns": 580109441856,
+    "cleanup_error": {
+      "message": "worker process groups survived SIGKILL: [9]",
+      "type": "RuntimeError"
+    },
+    "compute_processes_after": [],
+    "controller_error": {
+      "message": "an integrated v11 worker failed: [('serving', 1)]",
+      "type": "RuntimeError"
+    },
+    "controller_pid": 2,
+    "cuda_clean_import_audits": [
+      {
+        "cuda_clean": true,
+        "loaded_forbidden_modules": [],
+        "observed_at_monotonic_ns": 24525663713,
+        "observed_at_utc": "2026-08-19T05:11:52.778528+00:00",
+        "pid": 2,
+        "schema_version": "sloforge.branchfabric.cuda-clean-import-audit/v1",
+        "stage": "v11-integrated-before-inventory"
+      },
+      {
+        "cuda_clean": true,
+        "loaded_forbidden_modules": [],
+        "observed_at_monotonic_ns": 580116244603,
+        "observed_at_utc": "2026-08-19T05:21:08.369109+00:00",
+        "pid": 2,
+        "schema_version": "sloforge.branchfabric.cuda-clean-import-audit/v1",
+        "stage": "v11-integrated-after-worker-cleanup"
+      }
+    ],
+    "ended_ns": 580116305101,
+    "engine_start_evidence": [
+      {
+        "device": "gpu0",
+        "engine_started_ns": 29488264268,
+        "physical_gpu_uuid": "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59",
+        "pid": 8,
+        "role": "serving",
+        "schema_version": "sloforge.branchfabric.retained-engine-start/v1"
+      },
+      {
+        "device": "gpu1",
+        "engine_started_ns": 29491750971,
+        "physical_gpu_uuid": "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb",
+        "pid": 9,
+        "role": "rollout",
+        "schema_version": "sloforge.branchfabric.retained-engine-start/v1"
+      }
+    ],
+    "inventory_after": [],
+    "inventory_before": [
+      {
+        "driver_version": "580.95.05",
+        "index": 0,
+        "memory_total_mib": 81920,
+        "memory_used_mib": 4,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "utilization_percent": 0,
+        "uuid": "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59"
+      },
+      {
+        "driver_version": "580.95.05",
+        "index": 1,
+        "memory_total_mib": 81920,
+        "memory_used_mib": 4,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "utilization_percent": 0,
+        "uuid": "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb"
+      }
+    ],
+    "operation_deadline_ns": 570109441856,
+    "readiness_deadline_ns": 189488264268,
+    "readiness_evidence": [
+      {
+        "adapter_object_identity": 47339553181424,
+        "compilation_observation": {
+          "engine_initialization_completed_before_warmup": true,
+          "fail_closed_limitation": "vLLM 0.23.0 exposes no public compile-in-progress flag; any deferred JIT/graph-compilation log event during the measured probe fails readiness",
+          "measured_probe_compilation_events": [],
+          "no_active_compilation_event": true,
+          "source": "vllm-init-return+bounded-python-logging-handler",
+          "warmup_compilation_events": [
+            "Triton kernel JIT compilation during inference: _compute_slot_mapping_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+          ]
+        },
+        "compile_warmup_ended_ns": 180714592085,
+        "compile_warmup_started_ns": 175009873968,
+        "cudagraph_coverage_pass": true,
+        "device": "gpu0",
+        "engine_nonce": "338622f76ef8646ef8eec26053795c499752d82b4c3708c9e5e5d2487e482af8",
+        "engine_object_identity": 47339953172368,
+        "engine_reloaded": false,
+        "engine_started_ns": 29488264268,
+        "hbm": {
+          "nvml_stability_tolerance_bytes": 16777216,
+          "samples": [
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 184885862607,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            },
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 184942431857,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            },
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 184998903685,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            }
+          ],
+          "stable": true
+        },
+        "model_ready_ns": 175009591611,
+        "observed_cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          24,
+          32
+        ],
+        "passed": true,
+        "physical_gpu_uuid": "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59",
+        "pid": 8,
+        "probe": {
+          "completed_ns": 181503428512,
+          "emitted_output_tokens": 64,
+          "first_token_ns": 180777771684,
+          "output_target_verified": true,
+          "output_token_throughput_tps": 81.21249658458625,
+          "request_throughput_rps": 1.2689452591341601,
+          "requested_output_tokens": 64,
+          "started_ns": 180715372453,
+          "ttft_sane": true,
+          "ttft_seconds": 0.062399231
+        },
+        "queue_empty_pass": true,
+        "required_cudagraph_batch_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "role": "serving",
+        "rollouts_ready": false,
+        "runtime_evidence": {
+          "gpu_name": "NVIDIA A100-SXM4-80GB",
+          "packages": {
+            "torch": "2.11.0",
+            "transformers": "5.14.1",
+            "vllm": "0.23.0"
+          },
+          "torch_cuda": "13.0"
+        },
+        "runtime_state": {
+          "health": "healthy",
+          "health_source": "vllm-0.23.inproc-structure+has_unfinished_requests",
+          "metrics_available": true,
+          "metrics_source": "vllm-0.23.llm_engine.get_metrics+logger_manager",
+          "prefix_cache_reset": true,
+          "queue_depth": 0,
+          "request_count": 0,
+          "running_requests": 0,
+          "skipped_waiting_requests": 0,
+          "waiting_requests": 0
+        },
+        "schema_version": "sloforge.branchfabric.engine-readiness-evidence/v1",
+        "verification_batches": [
+          {
+            "batch_size": 1,
+            "completed_ns": 181503428512,
+            "first_token_ns": 180777771684,
+            "output_lengths": [
+              64
+            ],
+            "output_token_throughput_tps": 81.21249658458625,
+            "request_ids": [
+              "readiness-gpu0-00031"
+            ],
+            "request_throughput_rps": 1.2689452591341601,
+            "started_ns": 180715372453,
+            "ttft_seconds": 0.062399231
+          },
+          {
+            "batch_size": 2,
+            "completed_ns": 182276040691,
+            "first_token_ns": 181558957828,
+            "output_lengths": [
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 165.67498088566973,
+            "request_ids": [
+              "readiness-gpu0-00032",
+              "readiness-gpu0-00033"
+            ],
+            "request_throughput_rps": 2.5886715763385895,
+            "started_ns": 181503443650,
+            "ttft_seconds": 0.055514178
+          },
+          {
+            "batch_size": 4,
+            "completed_ns": 183061439602,
+            "first_token_ns": 182346953372,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 325.9568301042564,
+            "request_ids": [
+              "readiness-gpu0-00034",
+              "readiness-gpu0-00035",
+              "readiness-gpu0-00036",
+              "readiness-gpu0-00037"
+            ],
+            "request_throughput_rps": 5.093075470379007,
+            "started_ns": 182276059526,
+            "ttft_seconds": 0.070893846
+          },
+          {
+            "batch_size": 8,
+            "completed_ns": 183955958669,
+            "first_token_ns": 183186990473,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 572.3843139697531,
+            "request_ids": [
+              "readiness-gpu0-00038",
+              "readiness-gpu0-00039",
+              "readiness-gpu0-00040",
+              "readiness-gpu0-00041",
+              "readiness-gpu0-00042",
+              "readiness-gpu0-00043",
+              "readiness-gpu0-00044",
+              "readiness-gpu0-00045"
+            ],
+            "request_throughput_rps": 8.943504905777392,
+            "started_ns": 183061454771,
+            "ttft_seconds": 0.125535702
+          },
+          {
+            "batch_size": 16,
+            "completed_ns": 184869160922,
+            "first_token_ns": 184044786301,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 1121.3552522614957,
+            "request_ids": [
+              "readiness-gpu0-00046",
+              "readiness-gpu0-00047",
+              "readiness-gpu0-00048",
+              "readiness-gpu0-00049",
+              "readiness-gpu0-00050",
+              "readiness-gpu0-00051",
+              "readiness-gpu0-00052",
+              "readiness-gpu0-00053",
+              "readiness-gpu0-00054",
+              "readiness-gpu0-00055",
+              "readiness-gpu0-00056",
+              "readiness-gpu0-00057",
+              "readiness-gpu0-00058",
+              "readiness-gpu0-00059",
+              "readiness-gpu0-00060",
+              "readiness-gpu0-00061"
+            ],
+            "request_throughput_rps": 17.52117581658587,
+            "started_ns": 183955980199,
+            "ttft_seconds": 0.088806102
+          }
+        ],
+        "verification_output_target_verified": true,
+        "verification_request_count": 31,
+        "warmup_batches": [
+          {
+            "batch_size": 1,
+            "completed_ns": 177084574082,
+            "first_token_ns": 175759943899,
+            "output_lengths": [
+              64
+            ],
+            "output_token_throughput_tps": 30.862076432859357,
+            "request_ids": [
+              "readiness-gpu0-00000"
+            ],
+            "request_throughput_rps": 0.48221994426342746,
+            "started_ns": 175010831567,
+            "ttft_seconds": 0.749112332
+          },
+          {
+            "batch_size": 2,
+            "completed_ns": 178022582361,
+            "first_token_ns": 177142723669,
+            "output_lengths": [
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 136.46182631742803,
+            "request_ids": [
+              "readiness-gpu0-00001",
+              "readiness-gpu0-00002"
+            ],
+            "request_throughput_rps": 2.132216036209813,
+            "started_ns": 177084591104,
+            "ttft_seconds": 0.058132565
+          },
+          {
+            "batch_size": 4,
+            "completed_ns": 178807311792,
+            "first_token_ns": 178094901479,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 326.2334185939275,
+            "request_ids": [
+              "readiness-gpu0-00003",
+              "readiness-gpu0-00004",
+              "readiness-gpu0-00005",
+              "readiness-gpu0-00006"
+            ],
+            "request_throughput_rps": 5.097397165530118,
+            "started_ns": 178022597580,
+            "ttft_seconds": 0.072303899
+          },
+          {
+            "batch_size": 8,
+            "completed_ns": 179681566744,
+            "first_token_ns": 178932153610,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 585.6512928226553,
+            "request_ids": [
+              "readiness-gpu0-00007",
+              "readiness-gpu0-00008",
+              "readiness-gpu0-00009",
+              "readiness-gpu0-00010",
+              "readiness-gpu0-00011",
+              "readiness-gpu0-00012",
+              "readiness-gpu0-00013",
+              "readiness-gpu0-00014"
+            ],
+            "request_throughput_rps": 9.150801450353988,
+            "started_ns": 178807326379,
+            "ttft_seconds": 0.124827231
+          },
+          {
+            "batch_size": 16,
+            "completed_ns": 180714439300,
+            "first_token_ns": 179926712652,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 991.4271929630295,
+            "request_ids": [
+              "readiness-gpu0-00015",
+              "readiness-gpu0-00016",
+              "readiness-gpu0-00017",
+              "readiness-gpu0-00018",
+              "readiness-gpu0-00019",
+              "readiness-gpu0-00020",
+              "readiness-gpu0-00021",
+              "readiness-gpu0-00022",
+              "readiness-gpu0-00023",
+              "readiness-gpu0-00024",
+              "readiness-gpu0-00025",
+              "readiness-gpu0-00026",
+              "readiness-gpu0-00027",
+              "readiness-gpu0-00028",
+              "readiness-gpu0-00029",
+              "readiness-gpu0-00030"
+            ],
+            "request_throughput_rps": 15.491049890047336,
+            "started_ns": 179681584838,
+            "ttft_seconds": 0.245127814
+          }
+        ],
+        "warmup_output_target_verified": true,
+        "warmup_request_count": 31
+      },
+      {
+        "adapter_object_identity": 47106032686560,
+        "compilation_observation": {
+          "engine_initialization_completed_before_warmup": true,
+          "fail_closed_limitation": "vLLM 0.23.0 exposes no public compile-in-progress flag; any deferred JIT/graph-compilation log event during the measured probe fails readiness",
+          "measured_probe_compilation_events": [],
+          "no_active_compilation_event": true,
+          "source": "vllm-init-return+bounded-python-logging-handler",
+          "warmup_compilation_events": [
+            "Triton kernel JIT compilation during inference: _compute_slot_mapping_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+          ]
+        },
+        "compile_warmup_ended_ns": 182294316353,
+        "compile_warmup_started_ns": 176621930121,
+        "cudagraph_coverage_pass": true,
+        "device": "gpu1",
+        "engine_nonce": "66a48c4731fb9a4e33d41dcf109a34ef76fc13b4d9a7502771c99b69d2c23fa2",
+        "engine_object_identity": 47106040448688,
+        "engine_reloaded": false,
+        "engine_started_ns": 29491750971,
+        "hbm": {
+          "nvml_stability_tolerance_bytes": 16777216,
+          "samples": [
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 186377841216,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            },
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 186435036445,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            },
+            {
+              "kv_assigned_bytes": 0,
+              "kv_pool_reserved_bytes": 44476923904,
+              "nvml_device_used_bytes": 62222565376,
+              "observed_at_monotonic_ns": 186492468521,
+              "torch_allocated_bytes": 59917953024,
+              "torch_reserved_bytes": 60798533632
+            }
+          ],
+          "stable": true
+        },
+        "model_ready_ns": 176621292816,
+        "observed_cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          24,
+          32
+        ],
+        "passed": true,
+        "physical_gpu_uuid": "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb",
+        "pid": 9,
+        "probe": {
+          "completed_ns": 183059383190,
+          "emitted_output_tokens": 64,
+          "first_token_ns": 182348142558,
+          "output_target_verified": true,
+          "output_token_throughput_tps": 83.73972242433081,
+          "request_throughput_rps": 1.3084331628801689,
+          "requested_output_tokens": 64,
+          "started_ns": 182295110296,
+          "ttft_sane": true,
+          "ttft_seconds": 0.053032262
+        },
+        "queue_empty_pass": true,
+        "required_cudagraph_batch_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "role": "rollout",
+        "rollouts_ready": false,
+        "runtime_evidence": {
+          "gpu_name": "NVIDIA A100-SXM4-80GB",
+          "packages": {
+            "torch": "2.11.0",
+            "transformers": "5.14.1",
+            "vllm": "0.23.0"
+          },
+          "torch_cuda": "13.0"
+        },
+        "runtime_state": {
+          "health": "healthy",
+          "health_source": "vllm-0.23.inproc-structure+has_unfinished_requests",
+          "metrics_available": true,
+          "metrics_source": "vllm-0.23.llm_engine.get_metrics+logger_manager",
+          "prefix_cache_reset": true,
+          "queue_depth": 0,
+          "request_count": 0,
+          "running_requests": 0,
+          "skipped_waiting_requests": 0,
+          "waiting_requests": 0
+        },
+        "schema_version": "sloforge.branchfabric.engine-readiness-evidence/v1",
+        "verification_batches": [
+          {
+            "batch_size": 1,
+            "completed_ns": 183059383190,
+            "first_token_ns": 182348142558,
+            "output_lengths": [
+              64
+            ],
+            "output_token_throughput_tps": 83.73972242433081,
+            "request_ids": [
+              "readiness-gpu1-00031"
+            ],
+            "request_throughput_rps": 1.3084331628801689,
+            "started_ns": 182295110296,
+            "ttft_seconds": 0.053032262
+          },
+          {
+            "batch_size": 2,
+            "completed_ns": 183830347785,
+            "first_token_ns": 183114563800,
+            "output_lengths": [
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 166.0285611851651,
+            "request_ids": [
+              "readiness-gpu1-00032",
+              "readiness-gpu1-00033"
+            ],
+            "request_throughput_rps": 2.5941962685182047,
+            "started_ns": 183059396094,
+            "ttft_seconds": 0.055167706
+          },
+          {
+            "batch_size": 4,
+            "completed_ns": 184614318133,
+            "first_token_ns": 183901427973,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 326.54973123184055,
+            "request_ids": [
+              "readiness-gpu1-00034",
+              "readiness-gpu1-00035",
+              "readiness-gpu1-00036",
+              "readiness-gpu1-00037"
+            ],
+            "request_throughput_rps": 5.102339550497509,
+            "started_ns": 183830364035,
+            "ttft_seconds": 0.071063938
+          },
+          {
+            "batch_size": 8,
+            "completed_ns": 185483988473,
+            "first_token_ns": 184740805224,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 588.7380313482189,
+            "request_ids": [
+              "readiness-gpu1-00038",
+              "readiness-gpu1-00039",
+              "readiness-gpu1-00040",
+              "readiness-gpu1-00041",
+              "readiness-gpu1-00042",
+              "readiness-gpu1-00043",
+              "readiness-gpu1-00044",
+              "readiness-gpu1-00045"
+            ],
+            "request_throughput_rps": 9.19903173981592,
+            "started_ns": 184614331728,
+            "ttft_seconds": 0.126473496
+          },
+          {
+            "batch_size": 16,
+            "completed_ns": 186363588760,
+            "first_token_ns": 185573410993,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 1164.1922945618244,
+            "request_ids": [
+              "readiness-gpu1-00046",
+              "readiness-gpu1-00047",
+              "readiness-gpu1-00048",
+              "readiness-gpu1-00049",
+              "readiness-gpu1-00050",
+              "readiness-gpu1-00051",
+              "readiness-gpu1-00052",
+              "readiness-gpu1-00053",
+              "readiness-gpu1-00054",
+              "readiness-gpu1-00055",
+              "readiness-gpu1-00056",
+              "readiness-gpu1-00057",
+              "readiness-gpu1-00058",
+              "readiness-gpu1-00059",
+              "readiness-gpu1-00060",
+              "readiness-gpu1-00061"
+            ],
+            "request_throughput_rps": 18.190504602528506,
+            "started_ns": 185484008982,
+            "ttft_seconds": 0.089402011
+          }
+        ],
+        "verification_output_target_verified": true,
+        "verification_request_count": 31,
+        "warmup_batches": [
+          {
+            "batch_size": 1,
+            "completed_ns": 178648361837,
+            "first_token_ns": 177335294656,
+            "output_lengths": [
+              64
+            ],
+            "output_token_throughput_tps": 31.60174760310892,
+            "request_ids": [
+              "readiness-gpu1-00000"
+            ],
+            "request_throughput_rps": 0.49377730629857686,
+            "started_ns": 176623157383,
+            "ttft_seconds": 0.712137273
+          },
+          {
+            "batch_size": 2,
+            "completed_ns": 179581297174,
+            "first_token_ns": 178703890231,
+            "output_lengths": [
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 137.20406686617474,
+            "request_ids": [
+              "readiness-gpu1-00001",
+              "readiness-gpu1-00002"
+            ],
+            "request_throughput_rps": 2.1438135447839803,
+            "started_ns": 178648380221,
+            "ttft_seconds": 0.05551001
+          },
+          {
+            "batch_size": 4,
+            "completed_ns": 180374681696,
+            "first_token_ns": 179655284389,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 322.674967006264,
+            "request_ids": [
+              "readiness-gpu1-00003",
+              "readiness-gpu1-00004",
+              "readiness-gpu1-00005",
+              "readiness-gpu1-00006"
+            ],
+            "request_throughput_rps": 5.041796359472875,
+            "started_ns": 179581313675,
+            "ttft_seconds": 0.073970714
+          },
+          {
+            "batch_size": 8,
+            "completed_ns": 181262494986,
+            "first_token_ns": 180501200758,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 576.707354061343,
+            "request_ids": [
+              "readiness-gpu1-00007",
+              "readiness-gpu1-00008",
+              "readiness-gpu1-00009",
+              "readiness-gpu1-00010",
+              "readiness-gpu1-00011",
+              "readiness-gpu1-00012",
+              "readiness-gpu1-00013",
+              "readiness-gpu1-00014"
+            ],
+            "request_throughput_rps": 9.011052407208485,
+            "started_ns": 180374696354,
+            "ttft_seconds": 0.126504404
+          },
+          {
+            "batch_size": 16,
+            "completed_ns": 182294152707,
+            "first_token_ns": 181508565344,
+            "output_lengths": [
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64
+            ],
+            "output_token_throughput_tps": 992.5960919820731,
+            "request_ids": [
+              "readiness-gpu1-00015",
+              "readiness-gpu1-00016",
+              "readiness-gpu1-00017",
+              "readiness-gpu1-00018",
+              "readiness-gpu1-00019",
+              "readiness-gpu1-00020",
+              "readiness-gpu1-00021",
+              "readiness-gpu1-00022",
+              "readiness-gpu1-00023",
+              "readiness-gpu1-00024",
+              "readiness-gpu1-00025",
+              "readiness-gpu1-00026",
+              "readiness-gpu1-00027",
+              "readiness-gpu1-00028",
+              "readiness-gpu1-00029",
+              "readiness-gpu1-00030"
+            ],
+            "request_throughput_rps": 15.509313937219892,
+            "started_ns": 181262514553,
+            "ttft_seconds": 0.246050791
+          }
+        ],
+        "warmup_output_target_verified": true,
+        "warmup_request_count": 31
+      }
+    ],
+    "sanity_guard_pair": {
+      "assessments": [
+        {
+          "expected_rate_rps": 12.0,
+          "guard": "sanity_12rps_stable",
+          "measurement_seconds": 3.0,
+          "metrics": {
+            "completed_rate_rps": 12.0,
+            "maximum_queue_depth": 12,
+            "observed_offered_rate_rps": 12.0,
+            "p95_ttft_seconds": 0.046882928750000004,
+            "queue_depth_end": 12,
+            "queue_depth_start": 12,
+            "queue_slope_requests_per_second": 0.0
+          },
+          "passed": true,
+          "reason_result_verdict_ignored": "three-second stale-calibration guard is intentionally not a capacity campaign",
+          "result_verdict_ignored": "inconclusive",
+          "schema_version": "sloforge.branchfabric.v10-sanity-guard-assessment/v1",
+          "signals": {
+            "bounded_backlog": true,
+            "completion_tracks_offer": true,
+            "no_persistent_positive_drift": true,
+            "p95_ttft_below_two_seconds": true
+          }
+        },
+        {
+          "expected_rate_rps": 15.0,
+          "guard": "sanity_15rps_overload",
+          "measurement_seconds": 3.0,
+          "metrics": {
+            "completed_rate_rps": 13.666666666666666,
+            "maximum_queue_depth": 19,
+            "observed_offered_rate_rps": 15.0,
+            "p95_ttft_seconds": 0.2678379936,
+            "queue_depth_end": 19,
+            "queue_depth_start": 15,
+            "queue_slope_requests_per_second": 1.3
+          },
+          "passed": true,
+          "reason_result_verdict_ignored": "three-second stale-calibration guard is intentionally not a capacity campaign",
+          "result_verdict_ignored": "inconclusive",
+          "schema_version": "sloforge.branchfabric.v10-sanity-guard-assessment/v1",
+          "signals": {
+            "bounded_backlog": true,
+            "completed_rate_below_offered": true,
+            "positive_queue_slope": true,
+            "ttft_degradation": true
+          }
+        }
+      ],
+      "broad_capacity_calibration_performed": false,
+      "passed": true,
+      "schema_version": "sloforge.branchfabric.v11-sanity-guard-pair/v1",
+      "sha256": "3997f2263617524a1c63e9a142125909d38eadf3fa0a1e76b2b83ec0edd24c2f"
+    },
+    "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-controller/v1",
+    "sealed_evidence": {
+      "artifacts": {
+        "budget": {
+          "reference": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+          "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300"
+        },
+        "micro": {
+          "reference": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+          "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494"
+        },
+        "offline": {
+          "reference": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest-attempt-d.json",
+          "sha256": "543aa451413357b8fbef7365d5af529d4c02138f42027c715c030a458a8b5b9a"
+        },
+        "post_micro": {
+          "reference": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/post-micro-review-manifest.json",
+          "sha256": "b4f045dcc0d1a2b7da87572c4a88019989cc1bca232f34f871a9038ba44c9d76"
+        }
+      },
+      "config_attempt_id": "exp004-v11-integrated-s41-b",
+      "integrated_prelaunch_labels": [
+        "controller",
+        "controller_test",
+        "cross_runtime_review",
+        "launcher",
+        "launcher_test",
+        "make_check",
+        "methodology",
+        "worker",
+        "worker_test"
+      ],
+      "ledger_sha256_before_reservation": "84175458f5e0b2f54fdc7c1e2c37c7d9b855f4b3771127299bcbeb4ad827f603",
+      "micro_attempt_id": "exp004-v11-micro-s41-d",
+      "micro_exact_first_token_matches": 8,
+      "micro_full_physical_amplification": 21.000762818351625,
+      "replacement_authorization_verified": true,
+      "review_agents": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "schema_version": "sloforge.branchfabric.exp004-v11-sealed-evidence-verification/v1",
+      "status": "PASS",
+      "verified_at_monotonic_ns": 24451725257
+    },
+    "stable_physical_gpu_identity": false,
+    "started_ns": 24432696351,
+    "status": "failed",
+    "worker_pids": {
+      "rollout": 9,
+      "serving": 8
+    },
+    "worker_process_groups": {
+      "rollout": 9,
+      "serving": 8
+    },
+    "worker_results": [],
+    "worker_returncodes": {
+      "rollout": null,
+      "serving": 1
+    }
+  },
+  "controller_and_analysis_interval_seconds": 578.010638127,
+  "function_call_id": "fc-01M0C6WT7E5T43CV3HM4BE2GKD",
+  "gpu_allocation_seconds": 584.161194259,
+  "gpu_allocation_seconds_status": "pending-final-function-return",
+  "gpu_count": 2,
+  "gpu_hours": 0.32453399681055556,
+  "gpu_seconds": 1168.322388518,
+  "hardware_comparability": {
+    "byte_and_amplification_comparable": false,
+    "direct_v10_timing_comparable": false,
+    "frozen_v10_gpu_name": "NVIDIA A100-SXM4-80GB",
+    "modal_interconnect_selection_available": false,
+    "modal_request": "A100-80GB:2",
+    "observed_gpu_names": [],
+    "observed_gpu_uuids": [],
+    "timing_comparability_reason": "controller did not produce validated inventory"
+  },
+  "remote_manifest_sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+  "remote_prefix": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-b",
+  "requested_gpu": "A100-80GB:2",
+  "reservation_commitment_sha256": "054fbd1159474a6acd9f2f8d84e7080e7c3b0246bc2b6f1c84d1c2f17fecef93",
+  "reservation_id": "exp004-v11-integrated-s41-b-reservation",
+  "run_error": {
+    "message": "integrated v11 controller failed closed",
+    "traceback": "Traceback (most recent call last):\n  File \"/root/modal_gpu_reclamation_integrated_v11.py\", line 562, in run_integrated\n    raise RuntimeError(\"integrated v11 controller failed closed\")\nRuntimeError: integrated v11 controller failed closed\n",
+    "type": "RuntimeError"
+  },
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-completion/v1",
+  "scientific_status": "invalid",
+  "status": "failed"
+}

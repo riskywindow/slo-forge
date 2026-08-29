@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-b-queue-drain-methodology-2b459e9-retry2",
+  "reviewer_role": "queue_drain_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T16:07:41Z",
+  "authorization_subject_sha256": "e695743187ec7aed0a544a7e9faeccf0883b26a0a1e127408e2aadd3533b2bde",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The canonical authorization subject independently recomputes to SHA-256 e695743187ec7aed0a544a7e9faeccf0883b26a0a1e127408e2aadd3533b2bde and binds the reviewed paid path to repository commit 2b459e92d721b279eb62aadd253de7e7b7d67f64.",
+    "All 11 referenced calibration artifacts independently recompute to their declared SHA-256 hashes. The immutable results support 12 rps as sustainable on one GPU, 15 rps as one-GPU overload, and 20 rps as sustainable on two GPUs with approximately 5 rps nominal drain headroom over the unchanged 15-rps stream.",
+    "The reclamation trigger remains preselected at depth 20, inside the preferred 10-to-25-request range, and additionally requires positive measured queue slope. The hard safety abort is separately fixed at 64 and is enforced fail-closed both before and after the trigger until GPU1 completes its first useful serving request.",
+    "The v5 measured failure supports this separation: the former depth-25 abort terminated 4.879601523 seconds after the depth-20 trigger, while GPU1 became serving-ready 5.874295297 seconds after the trigger. Therefore the former abort could not permit the measured naive preservation path to reach useful reclaimed capacity.",
+    "Scientific postprocessing independently reconstructs trigger depth, maximum pre-useful backlog, and depth at the first useful GPU1 request from complete offered/completed request evidence. It permits maximum depth above the preferred trigger range only when it remains at or below the configured hard abort, and rejects a maximum depth of 65 for the configured depth-64 ceiling.",
+    "The hard ceiling remains materially bounded relative to the invalid v9 backlog of 154 requests. Raising the post-trigger abort does not change the fixed trigger, offered rate, recovery criterion, or queue-drain gate, and does not authorize continuation when the maximum backlog exceeds 64.",
+    "After GPU1 joins, the producer retains one deterministic 15-rps global stream. Recovery still requires measured aggregate completion rate greater than offered rate, a sustained negative queue trend, material drain, and a complete five-second SLO-stability window before restore eligibility.",
+    "The focused authorization, serving-protocol, scientific-validity, and integrated-harness suites pass 59 of 59 tests against the frozen commit. No live reviewer exchange or asynchronous approval wait is present in the reviewed queue path."
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-reviewed-selected-load/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "seed": 41,
+  "lambda_1_rps": 12.0,
+  "lambda_1_evidence": {
+    "probe_id": "capacity-04-gpu0-only",
+    "offered_rate_rps": 12.0,
+    "completed_rate_rps": 11.9,
+    "p95_ttft_seconds": 0.04420256505,
+    "queue_depth_start": 11,
+    "queue_depth_end": 12,
+    "queue_slope_requests_per_second": 0.045454545454545456,
+    "persistent_positive_drift": false,
+    "all_120_measurement_requests_completed": true
+  },
+  "one_gpu_unstable_evidence": {
+    "probe_id": "capacity-02-gpu0-only",
+    "offered_rate_rps": 15.0,
+    "completed_rate_rps": 14.4,
+    "p95_ttft_seconds": 0.40228929905,
+    "queue_depth_start": 15,
+    "queue_depth_end": 21,
+    "queue_slope_requests_per_second": 0.5818181818181818,
+    "persistent_positive_drift": true
+  },
+  "lambda_2_rps": 20.0,
+  "lambda_2_evidence": {
+    "probe_id": "capacity-05-two-gpu-round-robin",
+    "offered_rate_rps": 20.0,
+    "completed_rate_rps": 19.9,
+    "p95_ttft_seconds": 0.0424444484,
+    "queue_depth_start": 18,
+    "queue_depth_end": 19,
+    "queue_slope_requests_per_second": 0.045454545454545456,
+    "persistent_positive_drift": false,
+    "all_200_measurement_requests_completed": true,
+    "gpu0_measurement_completions": 100,
+    "gpu1_measurement_completions": 100
+  },
+  "lambda_spike_rps": 15.0,
+  "one_gpu_overload_margin_rps": 3.0,
+  "one_gpu_overload_margin_fraction": 0.25,
+  "two_gpu_reserve_margin_rps": 5.0,
+  "two_gpu_reserve_margin_fraction": 0.25,
+  "expected_drain_capacity_rps": 5.0,
+  "selection_artifact": {
+    "artifact_reference": "raw/modal/exp004-v10-integrated-s41-v3/calibration/selected-load.json",
+    "artifact_sha256": "4d4d6fd93558e18665b50d9b69b41d94a85ee6d7670ae3f6cd1f1ee700d186a1"
+  },
+  "reviewer_approval": {
+    "agent11": "approved",
+    "agent12": "approved",
+    "agent13": "approved",
+    "all_approved": true,
+    "review_set_reference": "reviews/exp004-v10-integrated-s41-v3-review-set.json",
+    "review_set_sha256": "d3e51396571158c485975042d4881cd5e49ef769d9d3091c404242a6dfd0a909"
+  },
+  "accepted_by_remote_transaction_gate": false,
+  "transaction_launch_permitted": false,
+  "reason": "The reviews were completed after the remote 180-second barrier expired; this load remains measured and independently reviewed but was never used for a v10 transaction."
+}

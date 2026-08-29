@@ -1,0 +1,30 @@
+{
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "authorized_cumulative_gpu_seconds": 21600.0,
+  "config_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/config.json",
+  "config_canonical_sha256": "a42be446718e9195ab28b29042a7758d2c07e2e5ce6fb64f893423f8d8eeb283",
+  "config_file_sha256": "f46564187068afec753dc02d9a47abbd674b491e7043d3161df79a20e913b39d",
+  "ledger_sha256_after_reservation": "37fd73c5121e674ced21e7481acca740b7401c7fee442db0f30272cfbbe76aa7",
+  "ledger_sha256_before_reservation": "0ccb9bdda15fd5d36204f1363dcfe73af0409cc7c9d283dad826ee276ae10cdb",
+  "planning_margin_fraction": 0.15,
+  "preflight": {
+    "committed_before_gpu_seconds": 13498.623626085977,
+    "consumed_before_gpu_seconds": 13498.623626085977,
+    "gpu_count": 1,
+    "hard_limit_passed": true,
+    "invocation_id": "exp004-v11-micro-s41-d",
+    "maximum_wall_seconds": 525.0,
+    "projected_committed_gpu_seconds": 14023.623626085977,
+    "proposed_maximum_gpu_seconds": 525.0,
+    "remaining_hard_budget_after_gpu_seconds": 7576.376373914023,
+    "requested_gpu": "A100-80GB",
+    "target_exceeded_if_fully_consumed": true
+  },
+  "projected_cumulative_with_margin_gpu_seconds": 14102.373626085977,
+  "projected_remaining_after_margin_gpu_seconds": 7497.626373914023,
+  "projected_with_planning_margin_gpu_seconds": 603.75,
+  "reservation_id": "exp004-v11-micro-s41-d-reservation",
+  "reserved_at_utc": "2026-08-19T02:12:12.914335+00:00",
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-budget-reservation/v1",
+  "sole_gpu_coordinator": "/root"
+}

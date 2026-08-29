@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "reviewer": "agent18",
+  "scope": "adversarial-branchfabric",
+  "question": "Would I accept this as evidence of real capacity reclamation if I did not know the project wanted to build an FPGA?",
+  "answer": "no",
+  "verdict": "reject-capacity-reclamation-evidence",
+  "high_severity_findings": [
+    "No capacity-reclamation transaction occurred."
+  ],
+  "budget_blocker": {
+    "consumed_gpu_seconds": 9622.470997419994,
+    "hard_ceiling_gpu_seconds": 10800.0,
+    "remaining_gpu_seconds": 1177.529002580006,
+    "required_next_reservation_gpu_seconds": 1800.0,
+    "another_launch_authorized": false
+  },
+  "cleanup_recheck_required": false,
+  "reason": "V3 completed calibration and then stopped at the review barrier. The review approvals arrived after function completion and cannot retroactively create reclamation evidence. A contemporaneous cleanup snapshot now proves zero active Modal resources."
+}

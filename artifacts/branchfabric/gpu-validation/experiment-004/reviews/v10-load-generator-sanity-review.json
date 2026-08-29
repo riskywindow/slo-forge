@@ -1,0 +1,132 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-pre-gpu-review/v1",
+  "review_id": "v10-load-generator-sanity-review",
+  "reviewer_identity": "agent-5-load-generator-sanity-auditor",
+  "review_scope": "current v4 paid-path load-generator sanity guards and retained-engine handoff",
+  "reviewed_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "APPROVED",
+  "gpu_or_modal_invoked": false,
+  "paid_path_config": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+    "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843",
+    "attempt_id": "exp004-v10-naive-s41-v4",
+    "seed": 41,
+    "sanity_guard_measurement_seconds": 3.0,
+    "reclaim_trigger_queue_depth": 20,
+    "scientific_abort_queue_depth": 25
+  },
+  "phase_budget_binding": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+    "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d",
+    "overload_interval_upper_bound_seconds": 22.0,
+    "phase_upper_bound_subtotal_wall_seconds": 375.05,
+    "safety_margin_fraction": 0.25,
+    "modal_integer_timeout_rounding_margin_seconds": 0.1875,
+    "predicted_wall_clock_seconds": 469.0,
+    "required_A100_seconds": 938.0,
+    "controller_deadline_seconds": 459.0
+  },
+  "requirements": {
+    "authorization_verified_before_worker_spawn": true,
+    "exact_guard_order_12_then_15_rps": true,
+    "exact_guard_count_two": true,
+    "gpu0_only_guard_routing": true,
+    "gpu1_guard_observations_required_empty": true,
+    "adaptive_capacity_search_absent": true,
+    "two_gpu_capacity_probe_absent": true,
+    "explicit_deterministic_seed": true,
+    "fixed_one_second_warmup": true,
+    "fixed_three_second_measurement": true,
+    "bounded_one_second_tail_drain": true,
+    "bounded_producer_queue": true,
+    "maximum_guard_backlog_25": true,
+    "fixed_reclaim_trigger_depth_20": true,
+    "scientific_abort_depth_25": true,
+    "overload_budget_upper_bound_22_seconds": true,
+    "cadence_routing_timeline_output_and_queue_flow_validated": true,
+    "12_rps_completion_tracks_offer": true,
+    "12_rps_no_persistent_queue_growth": true,
+    "12_rps_p95_ttft_below_two_seconds": true,
+    "15_rps_overload_disjunction_predeclared": true,
+    "request_state_reset_after_each_guard": true,
+    "final_request_state_reset_before_rollout_preparation": true,
+    "running_waiting_and_queue_zero_after_reset": true,
+    "prefix_cache_only_reset_without_engine_reload": true,
+    "engine_process_object_and_nonce_continuity_checked": true,
+    "same_engine_pair_used_for_readiness_guards_and_transaction": true,
+    "gpu1_drain_requires_exact_live_scheduler_state": true,
+    "live_review_exchange_absent": true
+  },
+  "findings": [
+    "The controller emits one fixed GPU0-only 12-rps guard followed by one fixed GPU0-only 15-rps guard; it contains neither an adaptive probe selector nor a two-GPU capacity probe.",
+    "The generic capacity verdict is deliberately ignored for the three-second stale-calibration guards, while cadence, routing, monotonic timestamps, output accounting, queue-flow conservation, TTFT, completion rate, queue slope, and maximum backlog remain fail-closed.",
+    "Both workers emit and the controller validates reset evidence after each guard. A second reset is required before the immutable transaction command; worker-side object identity checks prove that this does not reload either engine.",
+    "The 15-rps guard accepts only a predeclared overload signal (queue slope above 0.10 requests/s, completed rate below offered rate, or p95 TTFT above 100 ms) and rejects any maximum backlog above 25 requests.",
+    "The transaction trigger is fixed at queue depth 20 with positive queue slope, and the pre-GPU config and Modal model both pin a hard scientific abort at depth 25. The overload phase now has a 22-second evidence-derived upper bound without weakening either threshold.",
+    "GPU1 restore eligibility is not inferred from the Python driver alone: the paid worker supplies the live vLLM scheduler state, and the serving path requires the exact five-field state to report zero requests, running, waiting, skipped-waiting, and queue depth.",
+    "The v4 config is locally validated against the sealed authorization and hash-bound phase budget, fixes seed 41, fixes each measurement window to three seconds, binds the established 12/15/20-rps load points, and reserves exactly 469 wall seconds or 938 A100-seconds before Modal allocation."
+  ],
+  "high_severity_findings": [],
+  "unresolved_medium_severity_findings": [],
+  "code_and_test_hashes": [
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_controller.py",
+      "artifact_sha256": "ecc949b566d174e17a5dc127857da838b57736114e9164e57cb3185d2afe8f8e"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "artifact_sha256": "cb0077e59d47ca5e81709f548b82dcc3afe3c3b83e423b6763e9bc4ea18529a5"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_capacity_calibration_worker.py",
+      "artifact_sha256": "3ce3ac67b7d59b281e2c544bf8363745843dcbd6f1d9d3dc04aee60e6bc1ebea"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_capacity_calibration.py",
+      "artifact_sha256": "7ffb993004fbc9b595cc3c5fc2e503ffd9dd2370befdeb8714d017badc4e0b3d"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/modal_gpu_reclamation.py",
+      "artifact_sha256": "832696dfcf7f14cd6271053c28e9e4e9341573273a6b4553ac05a97809abe763"
+    },
+    {
+      "artifact_reference": "tools/branchfabric-experiment-004-launch.py",
+      "artifact_sha256": "6816992e30c4addc2d98e3e631c4a3498bc45d8a569a478c6db06b0fa6b52590"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+      "artifact_sha256": "0c37383b36ecbcbfc5a03ec9a669eec2aa6a18a1b135771a46209641bbfde74b"
+    },
+    {
+      "artifact_reference": "tools/branchfabric-experiment-004-live-driver-gate.py",
+      "artifact_sha256": "d47e94aaa25914df817108c4b2e5c8f8a710b5018d227dd21e243999d31c35bb"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_v10_sanity_path.py",
+      "artifact_sha256": "38ca88480bc9de5d0ef84f0c9807563a96a63dc44a49fd1cf65346706376ec7d"
+    },
+    {
+      "artifact_reference": "tests/python/test_gpu_reclamation_worker_integrated.py",
+      "artifact_sha256": "c03f5f4615e82cc604f2aef27288986e4378f9e7347c3718a12eec6260e16670"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_v10_serving_protocol.py",
+      "artifact_sha256": "1099b14457bc07d156a58c1df8c5d0d0a0eb8eab9de5ced240550dcf23ec337f"
+    }
+  ],
+  "test_evidence": {
+    "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_v10_sanity_path.py tests/python/test_gpu_reclamation_worker_integrated.py tests/python/test_gpu_capacity_calibration.py tests/python/test_gpu_capacity_calibration_harness.py tests/python/test_experiment_004_local_loadgen_gate.py tests/python/test_experiment_004_v10_live_driver_gate.py tests/python/test_experiment_004_v10_serving_protocol.py tests/python/test_experiment_004_gpu_harness.py tests/python/test_gpu_reclamation_v10_budget.py",
+    "exit_code": 0,
+    "result": "91 passed in 8.80s",
+    "focused_sanity_result": "4 passed",
+    "retained_worker_protocol_result": "4 passed"
+  },
+  "manual_validation": {
+    "launcher_config_validation": "PASS: exp004-v10-naive-s41-v4, 469.0 wall seconds, 938.0 A100-seconds, 459.0-second controller deadline, 3.0-second guards, seed 41, trigger 20, abort 25, v10-global-capacity",
+    "modal_config_validation": "PASS: strict Experiment004PilotConfig accepted the exact v4 JSON, pins the 469-second integer Function timeout, and produced a 459-second controller deadline plus a 10-second cleanup reserve",
+    "forbidden_paid_path_symbols_search": "PASS: no external_review, recommend_next_probe, maximum_probes, rate_grid_rps, or 10-second capacity-measurement fields occur in the current v4 controller/worker/Modal/config paid path"
+  },
+  "historical_scope_note": "The superseded v1/v2/v3 artifacts remain immutable historical evidence; all review hashes, tests, and budget statements in this decision bind only the current exp004-v10-naive-s41-v4 paid path.",
+  "approval_statement": "The current v4 load-generator sanity path is suitable for one preauthorized integrated v10 transaction. This approval does not authorize broad calibration, additional seeds, GPU retries, or any live reviewer wait."
+}

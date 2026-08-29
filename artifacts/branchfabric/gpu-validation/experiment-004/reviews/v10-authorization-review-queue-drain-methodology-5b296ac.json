@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-b-queue-drain-methodology-5b296ac",
+  "reviewer_role": "queue_drain_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T06:04:58Z",
+  "authorization_subject_sha256": "67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The canonical authorization subject SHA-256 independently recomputes to 67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409, and all 11 referenced source calibration files independently recompute to their declared SHA-256 hashes.",
+    "The immutable measurements support the settled load points: 12 rps is sustainable at 11.9 completions/s with 44.203 ms p95 TTFT and no persistent positive queue drift; 15 rps is one-GPU overload at 14.4 completions/s with queue 15 to 21 and +0.582 requests/s drift; 20 rps is two-GPU sustainable at 19.9 completions/s with 100 measurement completions on each GPU.",
+    "The selected 15-rps spike is exactly 25 percent above lambda_1 and 25 percent below lambda_2, while the 20-rps reference capacity supplies approximately 5 rps of nominal queue-drain headroom without requiring the v10 recovery interval to reproduce 20 rps.",
+    "The frozen commit binds integrated v10 to a preselected trigger depth of 20 requests and a fail-closed abort above 25; the live trigger additionally requires measured positive queue slope, so the reclamation trigger lies within the declared bounded 10-to-25-request methodology and does not wait for catastrophic TTFT.",
+    "After GPU1 joins, the global producer keeps one deterministic 15-rps spike stream and round-robins only that stream across both engines; the recovery gate requires measured aggregate completed rate greater than the measured offered rate, not equality to the historical 20-rps capacity point.",
+    "Queue recovery is fail-closed: a complete five-second trend is sampled at exact one-second boundaries and must have negative least-squares slope, lower final depth, lower second-half mean depth, and completed rate above offered rate; endpoint decrease alone cannot pass.",
+    "Restore eligibility additionally requires five consecutive one-second SLO windows with complete TTFT cohorts, p95 TTFT at or below 2 seconds, queue depth at or below the recovery threshold, and a final low-backlog check, preventing a transient percentile window from authorizing restore.",
+    "The focused queue-serving and scientific-validity test suites pass 27 of 27 checks against the frozen commit. No live reviewer exchange or approval wait is present in the reviewed queue path."
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-plot-status/v1",
+  "status": "GENERATED_WITH_EXPLICIT_NOT_REACHED_PANELS",
+  "plot_count": 14,
+  "manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/plot-manifest.json",
+  "manifest_sha256": "99b0b9ab759fb91ac117ab953c80d6429c99e866cfc593776e5a069205753a44",
+  "measured_numeric_comparisons": [
+    "v10 vs v11 micro physical amplification",
+    "physical bytes by tier",
+    "full-state pass count",
+    "temporary host memory"
+  ],
+  "not_reached_panels": [
+    "integrated v11 HBM reclamation",
+    "integrated v11 useful GPU1 capacity",
+    "integrated v11 SLO restoration",
+    "integrated v11 rollout restore",
+    "integrated v11 GPU0 restore interference",
+    "kill/recompute"
+  ],
+  "symbolic_only_plots": [
+    "preservation break-even by prefix length",
+    "preservation break-even by branch count"
+  ],
+  "micro_only_diagnostic": "residual Amdahl headroom",
+  "visual_contract": {
+    "export_reclamation": "measured-scope timeline waterfall with integrated v11 NOT_REACHED lane",
+    "restore": "sequential measured-scope waterfall with integrated v11 NOT_REACHED lane",
+    "movement": "two conserving Sankey flow diagrams whose widths encode measured physical bytes"
+  },
+  "no_projected_value_presented_as_measured": true
+}

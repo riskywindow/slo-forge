@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-b-queue-drain-methodology",
+  "reviewer_role": "queue_drain_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T04:35:58Z",
+  "authorization_subject_sha256": "63810b6ca42ba5c09efb305cebe004ab42ed43e971b382f2fdc9b6c3613b1acd",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "All 11 source calibration artifact hashes were independently recomputed and match the immutable authorization subject; its embedded canonical subject digest also recomputes exactly.",
+    "The raw 15-rps one-GPU evidence establishes overload without a catastrophic backlog: 14.4 completions/s, queue depth 15 to 21, and +0.582 requests/s persistent positive drift.",
+    "The raw 20-rps two-GPU evidence establishes usable drain capacity: 19.9 completions/s with balanced measurement completions, bounded queue behavior, and approximately 5 rps nominal headroom above the unchanged 15-rps offered stream.",
+    "The authorization methodology correctly keeps one global offered stream at exactly 15 rps after GPU1 joins and requires observed aggregate completed service greater than offered load; it does not require the system to reproduce the 20-rps calibration rate.",
+    "The queue-drain gate is appropriately fail-closed: a trigger backlog in the declared 10-to-25-request range must materially drain with sustained negative slope, and restore cannot begin until a complete five-second SLO-stability window passes.",
+    "This approval binds only the immutable authorization subject and its source evidence; live load-generator/controller conformance remains an independent pre-GPU implementation gate.",
+    "Required before launch: the live trigger must honor the fixed 20-request trigger inside the preferred 10-to-25 range using the already-approved overload evidence. The current conjunction can defer until p95 TTFT exceeds 2 seconds or service deficit reaches 10 percent, which a local regression probe demonstrated can reject depth 21 despite positive +0.667 requests/s drift and accept only after depth 31.",
+    "Required before launch: the control/overload boundary must be the producer's actual spike-start timestamp, not the start of a later rolling trigger window, so 15-rps arrivals cannot contaminate the control interval.",
+    "Required before launch: queue-drain timeline and assessment-window boundaries must use the same measured full-window endpoints; current candidate-window reconstruction can disagree with the fail-closed exact-boundary validator.",
+    "Required before launch: execute only the prescribed short 12-rps and 15-rps stale-calibration sanity guards from the immutable selection; the prior integrated broad calibration and live asynchronous reviewer handoff are not acceptable v10 launch paths."
+  ]
+}

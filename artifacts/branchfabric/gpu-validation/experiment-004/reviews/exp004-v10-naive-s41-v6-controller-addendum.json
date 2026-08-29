@@ -1,0 +1,50 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-controller-addendum/v1",
+  "review_id": "exp004-v10-naive-s41-v6-controller-addendum",
+  "reviewer_identity": "reviewer-c-scientific-budget-final-launch-2b459e9-retry2",
+  "reviewer_task_path": "/root/v6_science_budget_reviewer",
+  "reviewed_at_utc": "2026-08-13T16:24:59Z",
+  "attempt_id": "exp004-v10-naive-s41-v6",
+  "gpu_or_modal_invoked_by_reviewer": false,
+  "supersedes_queue_fix_sufficiency_in": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/exp004-v10-naive-s41-v6-budget-adversarial.json",
+  "decision": "DO_NOT_RESEAL_QUEUE_FIX_ALONE",
+  "authorized_to_launch_now": false,
+  "findings": [
+    {
+      "severity": "high",
+      "finding": "The recovery gate counts every offered-but-not-completed request across both GPUs, including naturally in-service work. GPU1 alone sustained 7.5 rps with 1.1359 to 1.1714 seconds mean completion latency, implying approximately 8.50 to 8.79 natural in-flight requests. The configured aggregate recovery threshold of four is therefore impossible at 15 rps.",
+      "required_fix": "Use reviewed low-backlog semantics or a reviewed threshold above the measured steady-state in-flight floor while retaining sustained negative queue slope, completed service greater than offered, and the full five-second SLO window."
+    },
+    {
+      "severity": "high",
+      "finding": "The depth-64 hard safety abort is disabled immediately after the first useful GPU1 request because _enforce_pre_gpu1_queue_abort only raises while gpu1_first_useful is absent.",
+      "required_fix": "Keep the hard backlog ceiling active throughout two-GPU recovery and fail safely if the bounded backlog is exceeded."
+    },
+    {
+      "severity": "high",
+      "finding": "The impossible recovery prolonged v6 while cumulative GPU1 telemetry grew to 1,091,744 bytes and 734 request rows. GPU0 globs, reads, and reparses the latest cumulative snapshot on every engine-step iteration; local parsing of the final snapshot averaged 4.68 ms. This is a measured-path controller feedback mechanism consistent with the observed late GPU0 service-rate decay.",
+      "required_fix": "Cache or incrementally consume each GPU1 telemetry snapshot so unchanged cumulative JSON is never synchronously reparsed on each GPU0 engine step; cover the behavior with a deterministic replay test."
+    },
+    {
+      "severity": "medium",
+      "finding": "GPU1 continued reconstructing scheduled work briefly after the serving producer failed, so post-failure GPU1 completions cannot be treated as globally offered traffic.",
+      "required_fix": "Ensure abort/failure propagation prevents post-producer admissions or explicitly excludes them from all diagnostic service accounting."
+    }
+  ],
+  "compilation_implication": {
+    "serving_transaction_capture_present": true,
+    "serving_capture_passed": true,
+    "serving_events": [],
+    "rollout_transaction_capture_present": false,
+    "transaction_wide_compilation_free_proven": false,
+    "scientific_result": "v6 remains invalid; the serving-only clean observation cannot substitute for complete two-engine evidence"
+  },
+  "retry_budget_if_all_fixes_pass": {
+    "current_conservative_A100_seconds": 11798.636304585969,
+    "required_A100_seconds": 1176.0,
+    "recommended_ceiling_A100_seconds": 13500.0,
+    "projected_A100_seconds": 12974.636304585969,
+    "remaining_A100_seconds": 525.3636954140311,
+    "condition": "Budget recommendation is conditional on all high-severity controller fixes, focused replay tests, make check, a clean committed paid path, refreshed phase-budget snapshot, fresh three-review authorization seal, unique v7 config, and a final zero-reservation read-only preflight."
+  }
+}

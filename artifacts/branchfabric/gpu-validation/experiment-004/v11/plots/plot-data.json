@@ -1,0 +1,95 @@
+{
+  "break_even_plots": {
+    "status": "SYMBOLIC_ONLY_NOT_IDENTIFIABLE",
+    "reason": "The kill/recompute arm was forbidden after integrated v11 failed; measured theta and delta_k do not exist, and one preserve point cannot separate beta from delta_p.",
+    "numeric_curve_present": false
+  },
+  "integrated_v11": {
+    "metrics_not_reached": [
+      "hbm_reclamation",
+      "useful_gpu1",
+      "slo_restoration",
+      "restore",
+      "gpu0_restore_interference"
+    ],
+    "status": "INVALID_PRE_RECLAIM"
+  },
+  "kill_recompute": {
+    "status": "NOT_RUN"
+  },
+  "measured": {
+    "v10": {
+      "full_amp": 58.0,
+      "full_bytes": 61303947264,
+      "hbm": 5.222174431,
+      "host_temp": 2965372928,
+      "passes": 30,
+      "restore_first": 7.727983415,
+      "slo": 11.373208336,
+      "useful": 5.413681427
+    },
+    "v10_tier_bytes": {
+      "GPU intermediates": 30651973632,
+      "Host intermediates": 24310185984,
+      "Links": 3170893824,
+      "Native endpoints": 3170893824
+    },
+    "v11_micro": {
+      "continue_done": 0.205774608,
+      "continue_first": 0.083229142,
+      "export": 2.61309087,
+      "full_amp": 21.000762818351625,
+      "full_bytes": 22197063040,
+      "host_temp": 143552512,
+      "passes": 10,
+      "restore": 4.438193614
+    },
+    "v11_tier_bytes": {
+      "GPU intermediates": 7399019520,
+      "Host intermediates": 9512948736,
+      "Links": 2114200960,
+      "Native endpoints": 3170893824
+    }
+  },
+  "provenance": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+      "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+      "selectors": [
+        "$.movement",
+        "$.export_movement",
+        "$.restore_movement",
+        "$.temporary_memory",
+        "$.timings",
+        "$.continuation"
+      ]
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/controller-result.json",
+      "sha256": "26392f35aa4f0fbb5aa349f2e6ea7b799528702e32ccadf2dfb33865f649251b",
+      "selectors": [
+        "$.status",
+        "$.scientifically_valid",
+        "$.failure",
+        "$.reclaim_trigger_reached"
+      ]
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+      "selectors": [
+        "$.movement",
+        "$.latencies_seconds",
+        "$.gpu0_restore_activity"
+      ]
+    }
+  ],
+  "timing_scope": {
+    "plot_05": "v10 integrated trigger-to-HBM-reclamation versus v11 PCIe micro export; v11 integrated is NOT_REACHED",
+    "plot_06": "v10 integrated restore versus v11 PCIe micro restore/continuation; v11 integrated is NOT_REACHED",
+    "plot_13": "independent measured physical-work conservation flows by memory tier"
+  },
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-plot-data/v1",
+  "seed": 41,
+  "status": "PASS_WITH_NOT_REACHED_PANELS"
+}

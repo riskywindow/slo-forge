@@ -1,0 +1,108 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-gpu-budget-controller-review/v1",
+  "reviewer": {
+    "agent": "Agent 10",
+    "identity": "gpu_budget_controller_auditor",
+    "task_path": "/root/gpu_budget_controller_auditor",
+    "independence": "pre-GPU audit; no Modal invocation and no GPU consumption"
+  },
+  "reviewed_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "APPROVED",
+  "approved_for_pre_gpu_gate": true,
+  "mandatory_corrections": [],
+  "budget": {
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "current_conservative_usage_A100_seconds": 9622.470997419994,
+    "required_wall_seconds": 469.0,
+    "required_A100_seconds": 938.0,
+    "required_A100_hours": 0.26055555555555554,
+    "projected_conservative_usage_A100_seconds": 10560.470997419994,
+    "remaining_A100_seconds_after_reservation": 239.529002580006,
+    "maximum_authorized_attempt_cost_usd": 0.81590992,
+    "decision": "AUTHORIZE_V10",
+    "condition": "9622.470997419994 + 938.0 <= 10800.0"
+  },
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+      "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "d85de03e136807d652f94af85074ed026f9f88571bb72410831c51d1feff983f"
+    },
+    {
+      "artifact_reference": "tools/branchfabric-experiment-004-launch.py",
+      "artifact_sha256": "6816992e30c4addc2d98e3e631c4a3498bc45d8a569a478c6db06b0fa6b52590"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/modal_gpu_reclamation.py",
+      "artifact_sha256": "832696dfcf7f14cd6271053c28e9e4e9341573273a6b4553ac05a97809abe763"
+    },
+    {
+      "artifact_reference": "tools/branchfabric-experiment-004-finalize-v10.py",
+      "artifact_sha256": "55ebcda54990640a906bcfb9d86b8181897f7543e98deeb4b74dfa496e6f94f0"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+      "artifact_sha256": "197df8fb4b0432d030158e55ccdbad0cc6c267bc5e54ff8ed3701529676839d6"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_budget.py",
+      "artifact_sha256": "fc4ee32e303187ffd19cf6ca9ec42c7da02c1a12f8c50d439d7c929849f2039c"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "The historical unconditional 1,800-A100-second reservation was not evidence-derived.",
+      "resolution": "The sole coordinator hash-verifies the phase budget before reservation and reserves exactly 469 wall seconds or 938 A100-seconds. No live path constant reserves 1,800 A100-seconds."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "Modal SDK requires an integer Function timeout, while the pre-rounding budget was 468.8125 seconds.",
+      "resolution": "The budget records a distinct 0.1875-second SDK-granularity margin after its 25 percent safety margin. Reservation, provider timeout, call.get timeout, and outer coordinator timeout are exactly 469 seconds."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "An abnormal launcher or settlement failure retained an active reservation indefinitely.",
+      "resolution": "Failure handling now clears the reservation into a distinct full-bound conservative failure charge, preserves actual GPU seconds as unavailable instead of fabricating a measurement, records cost and remaining budget, and prevents duplicate reservation or invocation identities."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "The ledger rejected an explicitly configured larger ceiling by requiring compile-time equality with 10,800 A100-seconds.",
+      "resolution": "The persisted finite positive ledger ceiling is authoritative. Current v10 remains unchanged at the explicitly authorized 10,800 A100-seconds; no code silently raises it."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "Whole-invocation settlement did not expose actual, conservative, cost, remaining-budget, and phase before/after accounting together.",
+      "resolution": "Settlement now records client elapsed, actual and conservative GPU-seconds/hours/cost, cumulative cost, and remaining ceiling. The fail-closed finalizer emits all 20 phase-budget rows with before/after timestamps and envelope-relative accounting; provider startup is conservative-only and explicitly not presented as a measured GPU interval."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The live gate evaluates current committed conservative usage plus the exact derived requirement against the unchanged configured ceiling before any Modal invocation."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Successful settlement uses max(client elapsed, remote observed allocation), validates exact two-A100 identities, clears the reservation, persists cost, and refuses any duration above the preflight bound."
+    }
+  ],
+  "validation": {
+    "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_v10_finalizer.py tests/python/test_gpu_reclamation_v10_budget.py tests/python/test_gpu_reclamation_methodology.py tests/python/test_experiment_004_gpu_harness.py",
+    "result": "43 passed in 0.72s",
+    "ruff": "All checks passed",
+    "gpu_invoked": false
+  }
+}

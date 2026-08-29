@@ -1,0 +1,22 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-trace-status/v1",
+  "status": "MICRO_TRACE_PASS_INTEGRATED_STATE_TRACE_NOT_REACHED",
+  "micro_validation": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "canonical_state_pass_records": 10454,
+    "full_state_pass_families": 10,
+    "cuda_records": 10216,
+    "cpu_records": 238,
+    "dependency_dag_closed_and_acyclic": true,
+    "movement_accounting_complete": true
+  },
+  "integrated_v11": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "reclaim_trigger_reached": false,
+    "state_pass_records": null,
+    "movement_trace": null,
+    "reason": "The serving worker failed at the bounded backlog ceiling before the reclaim-trigger barrier."
+  },
+  "heavy_profiler_used_for_canonical_wall_time": false,
+  "not_reached_values_are_not_measurements": true
+}

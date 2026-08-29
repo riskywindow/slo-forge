@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-b-queue-drain-methodology-c5fa2f1-retry3",
+  "reviewer_role": "queue_drain_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T16:52:42Z",
+  "authorization_subject_sha256": "0ea76343bac6290eae2e643e1fee211da9576f087b61b821417427203d898c49",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The canonical authorization subject independently recomputes to SHA-256 0ea76343bac6290eae2e643e1fee211da9576f087b61b821417427203d898c49 and binds the reviewed paid path to repository commit c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39.",
+    "All 11 referenced calibration artifacts independently recompute to their declared SHA-256 hashes. The immutable evidence continues to support 12 rps as sustainable on one GPU, 15 rps as one-GPU overload, and 20 rps as sustainable on two GPUs with approximately 5 rps nominal drain headroom.",
+    "The reclamation trigger remains fixed at depth 20 inside the preferred 10-to-25-request range and requires positive measured queue slope. The separate total-outstanding hard bound remains fixed at 64 and is enforced before reclamation, during preservation, throughout two-GPU recovery, and through restore handoff.",
+    "The recovery low-backlog threshold now uses the summed live vLLM scheduler waiting queues on GPU0 and GPU1, excluding healthy in-service work. Scientific material drain remains independently based on all globally offered but not completed requests, with a complete five-second least-squares queue trend and aggregate completion rate strictly greater than offered rate.",
+    "The global producer transport queue is explicitly bounded at 256 entries and is independent from the 64-request active-admission and scientific hard bounds. This fixes the v6 aliasing defect without weakening any scientific backlog gate.",
+    "GPU1 telemetry is compact and incremental: each completion appears in one delta, samples carry provenance hashes, sequence and watermark order are fail-closed, active requests cannot disappear without a completion delta, and GPU0 consumes at most one exact-sequence sample per recovery evaluation. Full final request rows remain available for postprocessing.",
+    "GPU1 admission is bounded by an atomically replaced global-offer watermark and fails closed on malformed, stale, stopped, or errored producer state; it cannot reconstruct and admit requests beyond the global producer after a GPU0 failure.",
+    "The GPU0 source path persists partial failure evidence before propagating an exception, including global offered requests, GPU0 request rows, external and scheduler queue state, total outstanding work, global offer state, and the original error.",
+    "The focused authorization, queue protocol, failure replay, scientific-validity, and live-driver suites pass 51 of 51 tests; Ruff and focused mypy pass. A broader 64-test invocation has one expected artifact-sequencing failure because the stale v6 launch fixture still binds the superseded phase-budget hash. Rebinding the v7 launch config and its harness assertion to the final sealed authorization is a mandatory pre-launch gate and is outside this immutable subject approval.",
+    "No live reviewer exchange, asynchronous approval wait, Modal invocation, or GPU use occurred during this review."
+  ]
+}
