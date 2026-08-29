@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-g-serving-methodology-review/v1",
+  "status": "PASS",
+  "agent": 13,
+  "role": "independent-scientific-methodology-reviewer",
+  "attempt_id": "exp004-v11-integrated-s41-g",
+  "function_call_id": "fc-01M10ESWY3XPGP145XTYNMEJT5",
+  "attempt_g_scientifically_valid": false,
+  "failure_classification": "INVALID_POST_RESTORE_CONTROL_GATE_BUG",
+  "preservation_transaction_evidence_complete": true,
+  "gate_bug_proven": true,
+  "frozen_v10_replay": {
+    "serving_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477"
+    },
+    "scientific_validity": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8"
+    },
+    "full_arrivals": 45,
+    "completions_by_boundary": 37,
+    "eventual_completions": 45,
+    "terminal_outstanding": 8,
+    "scientifically_valid": true
+  },
+  "fix_bindings": {
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "fbf9ae25a0f80bf3d108e936420c66c9f2a2762d1661ee34b68b7d89bd02f600"
+    },
+    "worker_test": {
+      "artifact": "tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "3a9492840d70b1bbf53f53f9b19dcf140e1c67cbaffa21c354bc76a413d4e9b8"
+    }
+  },
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS"
+  },
+  "evidence_bindings": [
+    {
+      "label": "attempt_g_status",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-g.json",
+      "sha256": "c322bf734297cf623e6b0828cf738477f5121b28695fff2bc315376ac89ec4ef"
+    },
+    {
+      "label": "attempt_g_provider_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-g.json",
+      "sha256": "6983acd188e961ee2194f9157ff80b7eb9f031035f79a4aa6b77eff4faaf2604"
+    },
+    {
+      "label": "attempt_g_remote_manifest",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/REMOTE_MANIFEST.json",
+      "sha256": "295d7acb987edc0d450a5ed6004663ecf541e1277d467516669ecc706cc56541"
+    },
+    {
+      "label": "attempt_g_controller_result",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/controller-result.json",
+      "sha256": "42fbc59f8aa579b53f22d7455b32a6604b541a61dbe7df28af77fb5d0745004d"
+    },
+    {
+      "label": "attempt_g_serving_failure",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/serving/failure.json",
+      "sha256": "9f3d074020145814c3a8838a686bb9634fbdb45401cefa391c4b4d5dd9b69d9f"
+    },
+    {
+      "label": "attempt_g_rollout_result",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/rollout/result.json",
+      "sha256": "eba8eb44644b40ffaf1075771f62e1e1f0479f4e30bed9aa029800cb86e17807"
+    },
+    {
+      "label": "attempt_g_reclaim_trigger",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-reclaim-trigger.json",
+      "sha256": "6a13fa69d2e32118eb537a28d5dca419385fa7851cfd1ac299fcfcae873a8398"
+    },
+    {
+      "label": "attempt_g_source_capture_commit",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-capture-commit.json",
+      "sha256": "e80792a648f29e1d2d38e5b06426cb842b4fa80fb373370981d6b0ea2f804db3"
+    },
+    {
+      "label": "attempt_g_source_identity_pre_export",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-identity-pre-export-pass.json",
+      "sha256": "8a8575965aa52ba89c87416a1179a55f781b2ef8169b2dec4ebcc0277c34f71e"
+    },
+    {
+      "label": "attempt_g_source_identity_post_export",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-identity-post-export-pass.json",
+      "sha256": "b099a28798922264b0c4ce6d8b4051bd437eece6c1e807dd5036586e86411c53"
+    },
+    {
+      "label": "attempt_g_serving_recovery",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-serving-recovery.json",
+      "sha256": "6bb8ee4da1384487225743e543cb7a27c4f50f12b60e826f4fb0533539c5fb89"
+    },
+    {
+      "label": "attempt_g_restore_complete",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/rollout-restore-complete.json",
+      "sha256": "4680b54a7fd2ce6ff0e96021eaa5f042f47d7201680f6b262cf96b5694bc32e3"
+    },
+    {
+      "label": "attempt_g_in_function_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/in_function_cleanup.json",
+      "sha256": "508a342ae6bd6a790f42b45a64dc110e07d5d254c6af9c9c3b1dee9b0fb3571c"
+    },
+    {
+      "label": "attempt_g_settled_gpu_ledger",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "4259181994cde63bb783fc42e6533ea79fc6f88cb7f1ebbc555baee40d2f8bf4"
+    }
+  ],
+  "recommendation": "AUTHORIZE_EXACTLY_ONE_INTEGRATED_RETRY_H",
+  "kill_and_recompute_authorized": false
+}

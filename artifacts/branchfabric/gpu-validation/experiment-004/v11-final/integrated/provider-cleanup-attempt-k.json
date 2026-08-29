@@ -1,0 +1,129 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-27T22:04:51Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-k",
+  "function_call_id": "fc-01M12KKRS1HYFEKAA8KQ2ZS0XR",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "app_stop_result": "post-return stop reported the app already stopped; the subsequent listing contained only stopped apps with zero tasks",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 4,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "listed_app_observations": [
+      {
+        "app_id_prefix": "ap-oYT",
+        "state": "stopped",
+        "tasks": "0"
+      },
+      {
+        "app_id_prefix": "ap-9Qs",
+        "state": "stopped",
+        "tasks": "0"
+      },
+      {
+        "app_id_prefix": "ap-SeI",
+        "state": "stopped",
+        "tasks": "0"
+      },
+      {
+        "app_id_prefix": "ap-2Di",
+        "state": "stopped",
+        "tasks": "0"
+      }
+    ],
+    "container_list": [],
+    "endpoint_list": [],
+    "queue_list": [],
+    "dict_list": [],
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-k/in_function_cleanup.json",
+    "sha256": "0289cfee04e1163380e3e78effd48e715d0f47d4c3c3daf5d4598f4d6a3c6513",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "required_lifecycle": [
+      "RUNNING",
+      "QUIESCE",
+      "ENGINE_STOP",
+      "WORKER_STOP",
+      "CHILD_REAP",
+      "PGID_EMPTY",
+      "CUDA_RELEASED",
+      "FUNCTION_RETURN"
+    ],
+    "owned_children": 31,
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "resource_trackers": 0,
+    "leaked_threads": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": [],
+    "cuda_released": true
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-k/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "e4571c830bf695cca56e2e9880852204a045be237ae76e668368268ec28a025d",
+    "remote_manifest_artifact_count": 507,
+    "remote_tree_file_count_including_manifest": 508,
+    "remote_manifest_integrity": "PASS",
+    "exact_manifest_set_equality": true,
+    "symlinks": 0,
+    "extras": 0,
+    "missing": 0,
+    "hash_or_size_mismatches": 0,
+    "controller_result": "raw/exp004-v11-integrated-s41-k/controller-result.json",
+    "controller_result_sha256": "39b7742c7c6a5d5443e1d34e586603cf4be2dac978677a35873d303316a37ca7",
+    "function_completion": "raw/exp004-v11-integrated-s41-k/function-completion.json",
+    "function_completion_sha256": "1711ff1c3ef1ac6944c67545c70004e39abdcb9be8d6216cdcd33c70c7bc9f32",
+    "function_finally_cleanup": "raw/exp004-v11-integrated-s41-k/function-finally-cleanup.json",
+    "function_finally_cleanup_sha256": "487119c918f5a857bec15bd7c8e6a9af15778d56386cc4ba5778e53a483136fc",
+    "serving_result": "raw/exp004-v11-integrated-s41-k/serving/result.json",
+    "serving_result_sha256": "e48f21a6eeb84c93917b51079f194ce552325235947a8fca840e2e420b740769",
+    "rollout_result": "raw/exp004-v11-integrated-s41-k/rollout/result.json",
+    "rollout_result_sha256": "afd139ed3a1758005704058212f06044e0ee79bb4e48f8085c942c5d42c6952c"
+  },
+  "commands": [
+    "modal app stop sloforge-branchfabric-gpu-reclamation-004-v11-integrated -y",
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "ledger": {
+    "artifact": "../../gpu-hours.json",
+    "sha256_after_settlement": "e9b3b521da9f0a6eb3ac2e69030b7ce5560e4f5de11504644cf8f707237d8a16",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 24323.41499012398,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 18876.58500987602,
+    "attempt_accounted_wall_seconds": 245.017688591,
+    "attempt_gpu_count": 2,
+    "attempt_accounted_gpu_seconds": 490.035377182,
+    "attempt_accounted_gpu_hours": 0.1361209381061111,
+    "attempt_gpu_cost_usd": 0.340084551764308,
+    "attempt_accounting_basis": "measured remote Function entry through immutable publication"
+  },
+  "provenance": {
+    "provider_observation": "Designated sole GPU coordinator direct post-return Modal CLI observation.",
+    "provider_and_in_function_independent": true,
+    "raw_bundle_preserved": true,
+    "interpretation": "Provider resources returned to exact zero: all listed apps were stopped with zero tasks, no containers/endpoints/queues/dicts/reservations remained, and the two authorized persistent volumes were the only retained provider resources."
+  }
+}

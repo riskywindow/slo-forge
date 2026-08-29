@@ -1,0 +1,13 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-cuda-adversary-status/v1",
+  "observed_at_utc": "2026-08-20T16:15:42Z",
+  "status": "NOT_REACHED",
+  "result": "UNCLEAR",
+  "reason": "No scientifically valid integrated v11 residual chain exists to adversarially attribute to CUDA, Triton, copy engines, graphs, CPU synchronization, or external placement.",
+  "missing_evidence": [
+    "targeted_source_identity_pass",
+    "integrated_v11_pass",
+    "non_overlapping_integrated_residual_stages",
+    "integrated_byte_rate_burst_latency_and_overlap"
+  ]
+}

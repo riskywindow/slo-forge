@@ -1,0 +1,101 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-optimized-preserve-v11-freeze/v1",
+  "status": "FROZEN",
+  "freeze_name": "branchfabric-exp004-optimized-preserve-v11",
+  "attempt_id": "exp004-v11-integrated-s41-k",
+  "function_call_id": "fc-01M12KKRS1HYFEKAA8KQ2ZS0XR",
+  "frozen_at_evidence_closure_utc": "2026-08-27T22:04:51Z",
+  "execution_repository_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "analysis_repository_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "dirty_source_policy": "The exact runtime was launched from a content-addressed source closure. The repository commit is provenance only; every executable runtime source below is authoritative by full-file SHA-256.",
+  "allocation_invariant_version": "sloforge.continuum.vllm-v11-source-capture-commit/v1",
+  "source_capture_commit_schema": "sloforge.continuum.vllm-v11-source-capture-commit/v1",
+  "source_capture_commit_envelope_schema": "sloforge.branchfabric.v11-source-capture-commit/v1",
+  "runtime_source_closure": {
+    "integrated_controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7c07ea0444874a100aa6d6da273058edd4f8cee03548e2c08c62bca5ecae2fc"
+    },
+    "integrated_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "a9312a017116ffc86ac311b578da67f2afb97198815f30369c8ee3e0159c2002"
+    },
+    "early_trigger_overlay": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+      "sha256": "9e81ab90ed6d7cb8f7f77e9fd63f2a0b7f3001422c53bcef84eb01344c83d2cc"
+    },
+    "optimized_v11_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+      "sha256": "08449e5af89759847add7433054b2383eb9b1659785fb7e1184f25dc5e02de11"
+    },
+    "v11_pipeline": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+      "sha256": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458"
+    },
+    "source_identity_and_ownership": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py",
+      "sha256": "0ca553fbe21b431bc315553e792b7b4de523da3c44f84f36e95ff469ba3e6de0"
+    },
+    "engine_step_binding": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py",
+      "sha256": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820"
+    }
+  },
+  "hardware": {
+    "gpu_count": 2,
+    "gpu_model": "A100-SXM4-80GB",
+    "serving_gpu_uuid": "GPU-8b5961d5-4def-d8ce-0c65-13b3f1001352",
+    "rollout_gpu_uuid": "GPU-7d5d3a5f-548e-c688-fbed-5d6b4ba6188b"
+  },
+  "model_and_runtime": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "runtime": "vllm",
+    "runtime_version": "0.23.0",
+    "dtype": "bfloat16",
+    "prefix_length": 16384,
+    "fanout": 8,
+    "private_suffix_length": 256,
+    "continuation_tokens": 8
+  },
+  "scientific_validity": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-k.json",
+    "sha256": "6036621e56cea813278307b4957212509dffc38aa4e5fd679430896e289d7b30",
+    "scientifically_valid": true
+  },
+  "immutable_run_evidence": {
+    "remote_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-k/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "e4571c830bf695cca56e2e9880852204a045be237ae76e668368268ec28a025d",
+    "verified_entries": 507,
+    "expected_entries": 507,
+    "controller_result_sha256": "39b7742c7c6a5d5443e1d34e586603cf4be2dac978677a35873d303316a37ca7",
+    "serving_result_sha256": "e48f21a6eeb84c93917b51079f194ce552325235947a8fca840e2e420b740769",
+    "rollout_result_sha256": "afd139ed3a1758005704058212f06044e0ee79bb4e48f8085c942c5d42c6952c",
+    "provider_cleanup_sha256": "5a946827a594010051a39bbd1feb0becf02e0b027325cdd2da7d8dd175499d33",
+    "settled_ledger_sha256": "e9b3b521da9f0a6eb3ac2e69030b7ce5560e4f5de11504644cf8f707237d8a16"
+  },
+  "movement_graph": {
+    "canonical_projection_sha256": "b6540b6a489266d6f02155420839dd91af5ce1aed8f9ed9d5ad3d75379a9147d",
+    "logical_state_bytes": 1056964608,
+    "full_state_pass_families": 10,
+    "canonical_state_pass_records": 10454
+  },
+  "state_manifest_sha256": "88ad6cc85b3070d58e79925661cd1e03eb6f38835a2db344d5c10306ab32d75f",
+  "frozen_properties": {
+    "optimized_movement_algorithm": true,
+    "source_identity_invariant": true,
+    "allocator_epoch_semantics": true,
+    "ownership_and_refcount_semantics": true,
+    "serving_methodology": true,
+    "post_freeze_mutation_permitted": false
+  },
+  "kill_and_recompute_authorization": {
+    "authorized": true,
+    "maximum_invocations": 1,
+    "requires_fresh_attempt_id": true,
+    "maximum_wall_seconds": 660.0,
+    "maximum_gpu_seconds": 1320.0,
+    "must_bind_this_freeze_record_sha256": true
+  }
+}

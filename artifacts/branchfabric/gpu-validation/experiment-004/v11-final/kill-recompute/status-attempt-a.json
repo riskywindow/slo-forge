@@ -1,0 +1,45 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-pre-reservation-status/v1",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-kill-recompute-s41-a",
+  "failure_classification": "INVALID_PRE_RESERVATION_MISSING_PREFIX_PARSER_ASSUMPTION",
+  "failure_stage": "REMOTE_PREFIX_FRESHNESS_BEFORE_PREBUILD",
+  "scientific_work_started": false,
+  "prebuild_started": false,
+  "reservation_created": false,
+  "function_invoked": false,
+  "gpu_invoked": false,
+  "controller_started": false,
+  "source_state_discarded": false,
+  "recompute_started": false,
+  "cleanup": {
+    "in_function": "NOT_APPLICABLE_FUNCTION_NOT_INVOKED",
+    "provider": "NOT_APPLICABLE_NO_PROVIDER_RESOURCE_CREATED",
+    "ledger_unchanged": true
+  },
+  "evidence_bindings": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-a-config.json",
+      "sha256": "368061d9057c371310646d3df72aa4fe358e27ec58d168b4dc2463ffb133846f"
+    },
+    "seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-a.json",
+      "sha256": "2c8c718d20d8d1f128e066f0ed390d2f8cb42882e41688ff6c1fba955ab2b817"
+    },
+    "make_check": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-a.json",
+      "sha256": "047a769c75c06fbf0e2a7bb1c89d753ca13e082dd9584447ef22f784dc84acf6"
+    },
+    "cli_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/preflight/attempt-a-remote-prefix-inventory-failure.json",
+      "sha256": "fd0ad21bfd9df293cdbd9fbbf180a5617cd77786aeff94a00de858c15b6dce1b"
+    },
+    "ledger_before_and_after": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "e9b3b521da9f0a6eb3ac2e69030b7ce5560e4f5de11504644cf8f707237d8a16"
+    }
+  },
+  "retry_disposition": "AUTHORIZE_ONE_FRESH_ATTEMPT_B_ONLY_AFTER_HIERARCHICAL_PREFIX_INVENTORY_FIX_AND_NEW_SOURCE_TO_MAKE_CHECK_TO_SEAL_CYCLE",
+  "kill_and_recompute_measurement_available": false
+}

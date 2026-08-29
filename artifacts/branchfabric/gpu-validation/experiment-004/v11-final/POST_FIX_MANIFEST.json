@@ -1,0 +1,129 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-post-fix-manifest/v1",
+  "observed_at_utc": "2026-08-20T16:15:42Z",
+  "failed_execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "failed_terminal_analysis_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "working_tree_base_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "root_cause": "GATE_BUG",
+  "offline_fix_status": "PASS",
+  "targeted_reproduction_status": "NOT_RUN_AUTHORIZATION_BLOCKER",
+  "integrated_retry_status": "NOT_RUN_BY_PRECOMMITTED_GATE",
+  "final_classification": "HARDWARE_GATE_NOT_REACHED",
+  "v11_frozen": false,
+  "kill_recompute_run": false,
+  "experiment_005_generated": false,
+  "authoritative_gpu_ledger": {
+    "path": "../gpu-hours.json",
+    "sha256": "7a70b9295f7fac3f29e115cbb634b20bea3d3b7a96b401180c69a320fa4088f5"
+  },
+  "source_artifacts": [
+    {
+      "path": "allocation-forensics/failed-run-manifest.json",
+      "sha256": "a8c3016ac41b9da52bbba2c741599e6301cd8cb484ed6ba4b5aa3cc13d9d1b7c"
+    },
+    {
+      "path": "allocation-forensics/first-allocation-divergence.json",
+      "sha256": "caf68ab9a16ef50c05299b34b5e759480181a6bb2e2be96b72eb2ee899620d48"
+    },
+    {
+      "path": "allocation-lifecycle/source-allocation-lifecycles.json",
+      "sha256": "5c18a45c67c1e1aab0f3294b6babc1f4daa46bc0c93b520d0610021d7f6d1f7b"
+    },
+    {
+      "path": "root-cause/classification.json",
+      "sha256": "63eddd3c7d12c8d5ccd64cbc12f266c03004a166a64d13ee53b1b9582de22adf"
+    },
+    {
+      "path": "source-identity/local-tests.json",
+      "sha256": "14ba7045c950c51a53588a67cfcadfd769a5a4e508dafb999e522265291a42eb"
+    },
+    {
+      "path": "targeted-repro/status.json",
+      "sha256": "17258fd4155541fe59ce92d0e36a9d813efe68c72e1b707c1da8b6995d2c6fed"
+    },
+    {
+      "path": "integrated-retry/status.json",
+      "sha256": "3dcfbe37b03d8c92ac6c521e36d8b6392a44806486e96ba1ddfdd8d1f2ae9c42"
+    },
+    {
+      "path": "cleanup/current-provider-audit.json",
+      "sha256": "45e553e62662a551e13ca016f6ab9baf594df259983a39a95ed993520c052065"
+    },
+    {
+      "path": "hardware-gate/final-classification-post-fix.json",
+      "sha256": "6cb5dbad98e43dd815e881ace492df3bf974c683e146cf2c1e197dbe0a3884c5"
+    },
+    {
+      "path": "cuda-adversary/status.json",
+      "sha256": "f942260a5430a407d288b3d8c4f3c8d4d61a4dd0bd1f4ccd8f226e551deb678c"
+    },
+    {
+      "path": "plots/forensic-plot-manifest.json",
+      "sha256": "2aaefd98e95f92895c4880cf77beae2fc07a58f4c59bca8f5d507409533a449b"
+    },
+    {
+      "path": "plots/forensic-plot-data.json",
+      "sha256": "3a15deece193e03433ff780705fe5b8f1651b44cf65028b36421f35d4e7b6a7d"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/branchfabric/V11_SOURCE_ALLOCATION_ROOT_CAUSE.md",
+      "sha256": "9a688e73e2e4199a53b78f8ce0c52b78c360aa551ddb451b03904b5ef7205c03"
+    },
+    {
+      "path": "docs/branchfabric/V11_SOURCE_IDENTITY_INVARIANT.md",
+      "sha256": "73398dfac75572a1a0149bd29c33b87d20da3360803b006cac729460119155f9"
+    },
+    {
+      "path": "docs/branchfabric/V11_INTEGRATED_RESULT_FINAL.md",
+      "sha256": "324aa69ea1801f43c4cc63ac075b83adfa808f67eb07d6061bcb6167e419762e"
+    },
+    {
+      "path": "docs/branchfabric/PRESERVATION_BREAK_EVEN.md",
+      "sha256": "c4225ef8859f276190bda23459def44ca076a1c39f838a150d46e15b21fb4e11"
+    },
+    {
+      "path": "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE_FINAL.md",
+      "sha256": "8820d92d345a714257f7a31b7de907dcb8b29ab52d08ca0ca2095ed9fbc6cf35"
+    }
+  ],
+  "runtime_sources": [
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_allocator_epochs.py",
+      "sha256": "db543a8c4e7c2c7628e78f7dd0c4b04bcab60a4234bc2829787cca21214e35ce"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py",
+      "sha256": "0ca553fbe21b431bc315553e792b7b4de523da3c44f84f36e95ff469ba3e6de0"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+      "sha256": "08449e5af89759847add7433054b2383eb9b1659785fb7e1184f25dc5e02de11"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "6c102b11887e318fddf95305143d893631abb80b6736dd5ad0622b2e4e50847e"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+      "sha256": "592360a3c12fbc3f8aae7171ba3ba07208bded4c6b558c9caa58977c44ba9bfa"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "7d2d65a0590db791ab7f71bc390ee85a1b66e3cec2c7f2605df97e7c0be775c9"
+    },
+    {
+      "path": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "bb7a32a51919a4f33acd998bc8331969603f0000e6eeac0811fdfc2349dfc2c1"
+    },
+    {
+      "path": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "4d6c2f00d5f97b6d245bceee1942a30e312dd85cf7d5a26a07153316590ae3c3"
+    },
+    {
+      "path": "experiments/branchfabric/render_v11_source_allocation_forensics.py",
+      "sha256": "c78ff8677c2b9444f0ed49af9ecafa0afb29cabf981c540729b73b85566848ec"
+    }
+  ]
+}

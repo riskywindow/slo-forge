@@ -1,0 +1,31 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-current-provider-audit/v1",
+  "observed_at_utc": "2026-08-23T01:24:45Z",
+  "provider": "Modal",
+  "status": "PASS",
+  "active_apps": 0,
+  "active_tasks": 0,
+  "running_containers": 0,
+  "running_endpoints": 0,
+  "queues": 0,
+  "dicts": 0,
+  "active_gpu_ledger_reservations": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "unexpected_persistent_volumes": [],
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "ledger_sha256": "e9064b98e8563f2494d26435cf28040149832b9924253d4c2b15a51b669ee35d",
+  "most_recent_attempt_id": "exp004-v11-targeted-identity-s41-a",
+  "new_gpu_invocation_in_this_run": true,
+  "in_function_cleanup_for_targeted_repro": "PASS",
+  "targeted_repro_scientific_status": "FAIL_PRE_IDENTITY_COMMAND_SCHEMA"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "sloforge.branchfabric.v11-source-allocation-root-cause/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "classification": "GATE_BUG",
+  "primary_question_answer": "The observed identity differed because attempt C compared an unscoped retained-engine allocation-event queue, already populated by readiness allocations, with the current source capture-plan block set. Prefix-cache and request-state resets did not drain or epoch-scope that queue.",
+  "old_invariant": "len(take_new_block_ids()) == 1152 AND all IDs unique AND set(take_new_block_ids()) == set(current capture-plan block IDs)",
+  "corrected_invariant": "At allocator quiescence under the production engine-step gate, every committed logical page must resolve to the same live (block_id, allocator_epoch), token range, branch group, exact expected owner set/refcount, device, runtime instance, and model/policy identity; the native request table and HBM assignment must agree. Revalidate before export read and invalidate/retry on any post-commit mutation.",
+  "allocator_quiescence": "Rollout admission is stopped, branch engine stepping/appends are stopped, scheduler running/waiting/request tables contain exactly the retained source requests, deferred request teardown/cache/refcount work affecting source pages is complete, the production engine-step mutation lock is held, and a stable allocator mutation generation brackets SourceCaptureCommit through export read. Queue depth zero alone is insufficient.",
+  "allocation_event_queue_policy": "Drain or phase-tag manager.take_new_block_ids at a proven post-readiness allocator-quiescent baseline and use it only for zero-queue hygiene/provenance. Never use the unversioned block-ID queue as semantic source identity.",
+  "epoch_requirement": "(block_id X, epoch A) is never equal to (block_id X, epoch B). A freed, tombstoned, or reused generation must fail.",
+  "evidence_limit": "Exact attempt-C page/block/epoch and failed-queue differences are unrecoverable due failure serialization loss; targeted reproduction must persist these before evaluating the gate.",
+  "lifecycle_artifact": "allocation-lifecycle/source-allocation-lifecycles.json",
+  "divergence_artifact": "allocation-forensics/first-allocation-divergence.json"
+}

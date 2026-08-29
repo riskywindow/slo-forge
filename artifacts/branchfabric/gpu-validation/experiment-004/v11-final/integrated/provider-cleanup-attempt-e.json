@@ -1,0 +1,55 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-26T23:05:23Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-e",
+  "function_call_id": "fc-01M104ZGT6J8YPBJ50BN0BMT9H",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 2,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "FAIL_MISSING_PRE_CONTROLLER_CLEANUP_EVIDENCE",
+    "artifact": null,
+    "reason": "The function entered but sealed-evidence validation failed before the controller constructed its cleanup record. Provider state independently returned to zero."
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-e/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "9d8890e16b75e2b612861a85deaebf81874d782f97d1bdd8dd366891a3e46747",
+    "function_completion_sha256": "219f62c577d27fdb599ea55a5f8abbfadff8b473da6d0037f437ba4f7a7d1c8b"
+  },
+  "failure_evidence": {
+    "artifact": "failures/exp004-v11-integrated-s41-e-conservative-charge.json",
+    "sha256": "3efbc040ee92364e93606bc550fe93c37fac57ee3c1950e30196d1e96b1d2bc7",
+    "stage": "result-validation",
+    "remote_reported_gpu_seconds": 57.214335304,
+    "conservative_charged_gpu_seconds": 1176.0
+  },
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json"
+  ],
+  "ledger": {
+    "active_reservations": 0,
+    "sha256_after_settlement": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4",
+    "conservative_consumed_gpu_seconds": 20573.975013231975,
+    "remaining_gpu_seconds": 22626.024986768025
+  },
+  "provenance": "Immutable downloaded remote bundle, coordinator conservative-failure evidence, direct post-return Modal CLI observations, and authoritative ledger settlement."
+}

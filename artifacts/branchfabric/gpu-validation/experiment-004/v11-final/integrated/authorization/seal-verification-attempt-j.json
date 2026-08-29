@@ -1,0 +1,80 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integrated-seal-verification/v1",
+  "status": "PASS",
+  "verified_at_utc": "2026-08-27T20:06:16Z",
+  "attempt_id": "exp004-v11-integrated-s41-j",
+  "execution_mode": "integrated-reclamation-v11",
+  "maximum_wall_seconds": 588.0,
+  "maximum_gpu_seconds": 1176.0,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-j-config.json",
+    "sha256": "60f720956901b839d6485fc5d3a5c9d5e6b20f1ba27e7db42472b8b18549fc5e"
+  },
+  "authorization_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-j-post-remote-prefix-parser-pre-gpu-manifest.json",
+    "sha256": "1762fa7d2a5e659b43e2b0f44e1e306834a56bece7b53afdf93903371bad406f"
+  },
+  "immutable_ledger_snapshot": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/ledger-snapshot-before-attempt-j.json",
+    "sha256": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c",
+    "byte_identical_to_authoritative_pre_reservation_ledger": true
+  },
+  "expanded_budget_authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11-continuation.json",
+    "sha256": "cf71d63d6427a58003f25dd87922cc19406a1c720e4b03dbb250094d2d9e02d6",
+    "authorized_gpu_budget_usd": 80.0,
+    "authorized_cumulative_gpu_seconds": 43200.0
+  },
+  "ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c",
+    "active_reservations": 0,
+    "conservative_consumed_gpu_seconds": 22657.37961294198,
+    "remaining_gpu_seconds": 20542.62038705802,
+    "remaining_after_maximum_gpu_seconds": 19366.62038705802
+  },
+  "verification": {
+    "real_coordinator_loader": "PASS",
+    "controller_sealed_evidence": "PASS",
+    "prelaunch_bindings_verified": 24,
+    "attempt_i_prior_evidence_bindings_verified": 5,
+    "remote_prefix_parser_fix_bindings_verified": 2,
+    "unchanged_scientific_runtime_bindings_verified": 8,
+    "target_b_identity_bindings_verified": 6,
+    "prior_attempt_id": "exp004-v11-integrated-s41-i",
+    "attempt_i_scientifically_valid": false,
+    "attempt_i_failure_stage": "REMOTE_PREFIX_FRESHNESS",
+    "attempt_i_image_prebuild_started": false,
+    "attempt_i_gpu_reservation_created": false,
+    "attempt_i_gpu_function_invoked": false,
+    "attempt_i_in_function_cleanup": "NOT_APPLICABLE_GPU_FUNCTION_NOT_INVOKED",
+    "attempt_i_provider_cleanup": "NOT_APPLICABLE_PREBUILD_NOT_STARTED_AND_APP_NOT_CREATED",
+    "target_b_source_identity_passed": 1152,
+    "target_b_source_capture_commit_semantic_sha256": "28168c11daf69cdc89e1ddf369a8c828fc274315d37c234c480ba63c5ab67086",
+    "target_b_zero_post_commit_events": true,
+    "immutable_ledger_snapshot_verified": true,
+    "expanded_budget_verified": true,
+    "successful_integrated_contract_verified": true,
+    "persistent_remote_prefix_freshness_guard_bound_before_prebuild": true,
+    "make_check": "PASS; 2260 Python passed, 8 skipped, 6 warnings; mypy/Rust/UI PASS"
+  },
+  "collision_preflight": {
+    "status": "PASS_LOCAL_ALL_FRESH_REMOTE_CHECK_BOUND_BEFORE_PREBUILD",
+    "checked_local_outputs": [
+      "v11-final/integrated/raw/exp004-v11-integrated-s41-j",
+      "v11-final/integrated/provider-cleanup-audit-inputs-exp004-v11-integrated-s41-j.json",
+      "v11-final/integrated/failures/exp004-v11-integrated-s41-j-conservative-charge.json",
+      "v11-final/integrated/status-attempt-j.json",
+      "v11-final/integrated/provider-cleanup-attempt-j.json",
+      "v11-image-prebuild/exp004-v11-integrated-s41-j.json"
+    ],
+    "remote_paths_checked_by_paid_coordinator_before_prebuild_and_reservation": [
+      "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-j",
+      "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-j.staging",
+      "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-j.inflight"
+    ],
+    "remote_observation_performed_during_cpu_only_seal": false
+  },
+  "paid_resources_invoked": false,
+  "provenance": "Real local coordinator _load_sealed_config and controller verify_sealed_evidence; exact Attempt-I pre-reservation failure, Target-B source identity, immutable ledger, and local collision verification; no fabricated measurement and no Modal/GPU invocation. Persistent-volume freshness is fail-closed in the sole coordinator immediately before image prebuild and reservation."
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integrated-seal-verification/v1",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-d",
+  "execution_mode": "integrated-reclamation-v11",
+  "maximum_wall_seconds": 588.0,
+  "maximum_gpu_seconds": 1176.0,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-d-config.json",
+    "sha256": "2228709ee1719d0cd7ab7ddfa39395a01e5aa20b72174f378022e0e58b414036"
+  },
+  "authorization_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-d-post-target-pre-gpu-manifest.json",
+    "sha256": "4dfa87328919e87f5d39c0754b43f35d5efb7c277ec41303e3eb078f349e57ad"
+  },
+  "ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "d02df172dff078cedee9da8bb57ed1c811b63b7854ad988a8873d62867672a8b",
+    "active_reservations": 0,
+    "conservative_consumed_gpu_seconds": 18221.975013231975,
+    "remaining_gpu_seconds": 3378.024986768025,
+    "remaining_after_maximum_gpu_seconds": 2202.024986768025
+  },
+  "verification": {
+    "real_coordinator_loader": "PASS",
+    "controller_sealed_evidence": "PASS",
+    "prelaunch_bindings_verified": 24,
+    "targeted_evidence_bindings_verified": 11,
+    "target_reviews_verified": 3,
+    "post_target_authorization_verified": true,
+    "make_check": "PASS; 2047 Python passed, 8 skipped; Rust/UI PASS",
+    "focused_tests": "PASS; 181 passed",
+    "adversarial_launch_audit": "PASS"
+  },
+  "paid_resources_invoked": false,
+  "provenance": "Real local coordinator _load_sealed_config and controller verify_sealed_evidence output; no fabricated measurement and no Modal/GPU invocation."
+}

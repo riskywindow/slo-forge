@@ -1,0 +1,157 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-status/v1",
+  "observed_at_utc": "2026-08-27T17:06:16Z",
+  "status": "INVALID_PRE_WORKER_MISSING_FROZEN_V10_REPLAY_IMAGE_CLOSURE",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-integrated-s41-h",
+  "execution_mode": "integrated-reclamation-v11",
+  "failure_stage": "SEALED_EVIDENCE",
+  "cleanup_scope": "PRE_WORKER_PREFLIGHT",
+  "function_entered": true,
+  "function_call_id": "fc-01M122M4JYMDD27K30ZJSR1P56",
+  "gpu_allocation_observed": true,
+  "controller_python_invoked": true,
+  "controller_transaction_started": false,
+  "worker_processes_started": false,
+  "gpu_inventory_observed": false,
+  "source_identity_gate_reached": false,
+  "source_capture_commit_created": false,
+  "optimized_export_started": false,
+  "source_release_started": false,
+  "hbm_reclaimed": false,
+  "gpu1_serving_enabled": false,
+  "restore_started": false,
+  "branch_continuation_started": false,
+  "blocker": {
+    "code": "FROZEN_V10_CONTROL_REPLAY_FILES_ABSENT_FROM_MODAL_IMAGE",
+    "raw_controller_error_type": "FileNotFoundError",
+    "raw_controller_error_message": "[Errno 2] No such file or directory: '/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw'",
+    "primary_failure": "The H authorization required three frozen-v10 replay artifacts below experiment-004/raw, but the Modal image bundled no experiment-004/raw closure. Exact sealed-evidence validation therefore failed before inventory or workers.",
+    "secondary_local_failure": "The coordinator rejected the exact PRE_WORKER failure envelope because it unconditionally required two GPU inventory rows before immutable download.",
+    "secondary_local_error": "integrated result omits exactly two GPU inventory rows",
+    "separate_from_allocator_lifecycle": true,
+    "separate_from_movement_pipeline": true,
+    "allocator_conclusion": "NONE_FROM_ATTEMPT_H"
+  },
+  "remote_failure_envelope": {
+    "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-completion/v1",
+    "status": "failed",
+    "scientific_status": "invalid",
+    "function_call_id": "fc-01M122M4JYMDD27K30ZJSR1P56",
+    "cleanup_scope": "PRE_WORKER_PREFLIGHT",
+    "failure_stage": "SEALED_EVIDENCE",
+    "inventory_before": [],
+    "inventory_after": [],
+    "worker_pids": {},
+    "worker_results": [],
+    "sealed_evidence": null,
+    "readiness_evidence": [],
+    "sanity_guard_pair": null,
+    "stable_physical_gpu_identity": false,
+    "gpu_allocation_seconds": 27.264601306,
+    "gpu_seconds": 54.529202612,
+    "gpu_hours": 0.015147000725555556,
+    "controller_and_analysis_interval_seconds": 25.684643322,
+    "stdout_envelope_line_sha256": "d20a0a6d5b55d8a4cf00331628caa7eb4c21ccedd420acd2872afed957f4b453",
+    "stdout_tail_sha256": "3210085a731fa47cd8d9dcd7826f27c98e4828fb23e26d8da365cfb5a944e0d8"
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-h/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "07abf45fb974d9e73b881fea990de98aeb1bef5ea4818c3c9672eb918336dcfb",
+    "remote_manifest_artifact_count": 5,
+    "remote_tree_file_count_including_manifest": 6,
+    "remote_manifest_integrity": "PASS",
+    "exact_manifest_set_equality": true,
+    "symlinks": 0,
+    "extras": 0,
+    "missing": 0,
+    "artifacts": [
+      {
+        "relative_path": "controller-result.json",
+        "bytes": 3767,
+        "sha256": "92a668d364ff62dfa7f803f24abdc3fc2c2109c2b3679cca87a1abbd4f76c5b3"
+      },
+      {
+        "relative_path": "function-completion.json",
+        "bytes": 8787,
+        "sha256": "80355ea6f71b96d3ff62cfc2a817bee54374549f61c06ad76e8061cc91c75a41"
+      },
+      {
+        "relative_path": "function-failure.json",
+        "bytes": 338,
+        "sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437"
+      },
+      {
+        "relative_path": "function-finally-cleanup.json",
+        "bytes": 505,
+        "sha256": "4fc275276efb40fcab584d5823ac3ece736e7d8d8ed3c0ac998e85f91f9239e9"
+      },
+      {
+        "relative_path": "in_function_cleanup.json",
+        "bytes": 2407,
+        "sha256": "18c60202722a2dfbb4f55ec2cf25e9c7bec74187422d4311d6de76974d5e6f8f"
+      }
+    ]
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-h/in_function_cleanup.json",
+    "sha256": "18c60202722a2dfbb4f55ec2cf25e9c7bec74187422d4311d6de76974d5e6f8f",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "cleanup_scope": "PRE_WORKER_PREFLIGHT",
+    "owned_children": 0,
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": []
+  },
+  "provider_cleanup": {
+    "status": "PASS",
+    "artifact": "provider-cleanup-attempt-h.json",
+    "sha256": "44ac116033e8f9e10bed74ff195b24dc3a43c074759a3a99b865227ff11c649f",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes_only": true
+  },
+  "accounting": {
+    "ledger": "../../gpu-hours.json",
+    "ledger_sha256": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 22657.37961294198,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 20542.62038705802,
+    "attempt_accounting_basis": "conservative-full-reservation-bound",
+    "attempt_charged_wall_seconds": 588.0,
+    "attempt_charged_gpu_seconds": 1176.0,
+    "remote_reported_allocation_seconds_diagnostic_only": 27.264601306,
+    "remote_reported_gpu_seconds_diagnostic_only": 54.529202612,
+    "failure_charge_artifact": "failures/exp004-v11-integrated-s41-h-conservative-charge.json",
+    "failure_charge_sha256": "77bd380d72a4afe2d9e644262545e1313ed89a5830615fa7120adb4840fc7394"
+  },
+  "launch_inputs": {
+    "config": "exp004-v11-integrated-s41-h-config.json",
+    "config_file_sha256": "89f3db25c2cfc2ed1a222da75cdad0aba3dc2a2c44c8befac5ba5b8aba27b97d",
+    "config_canonical_sha256": "0a68902e3f503692ec5f6b3a5609890326cba19e8290c5b954f4085f353aa005",
+    "authorization_manifest": "authorization/attempt-h-post-control-gate-pre-gpu-manifest.json",
+    "authorization_manifest_sha256": "84de6be77b13ebacec0019441a63fad2ffe7f87971ed2c4f0aa83083c5a9826d",
+    "seal_report": "authorization/seal-verification-attempt-h.json",
+    "seal_report_sha256": "6a8a1ec407e8d01fde3fdaaa5e77065f0b86fee1e74aa1d35fc95ce0847ecb83",
+    "image_prebuild": "../../v11-image-prebuild/exp004-v11-integrated-s41-h.json",
+    "image_prebuild_sha256": "ffe7db3d3a0106ea092d1b3cd357c0494cea0e38fb91774be6ff8f4c37a30d5f"
+  },
+  "terminal_decision": {
+    "v11_frozen": false,
+    "kill_and_recompute_authorized": false,
+    "experiment_005_generated": false,
+    "classification": "HARDWARE_GATE_NOT_REACHED",
+    "retry_status": "NOT_AUTHORIZED_BY_THIS_ARTIFACT"
+  }
+}

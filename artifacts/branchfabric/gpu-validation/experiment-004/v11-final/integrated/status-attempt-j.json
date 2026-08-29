@@ -1,0 +1,231 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-status/v1",
+  "observed_at_utc": null,
+  "status": "INVALID_PRE_TRANSACTION_12RPS_SANITY_GUARD",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-integrated-s41-j",
+  "execution_mode": "integrated-reclamation-v11",
+  "failure_stage": "SANITY_GUARD_12RPS",
+  "function_entered": true,
+  "function_call_id": "fc-01M12DKVVFHJ8S6G1QPRQXDY97",
+  "gpu_allocation_observed": true,
+  "controller_python_invoked": true,
+  "worker_processes_started": true,
+  "gpu_inventory_observed": true,
+  "both_engines_ready": true,
+  "sanity_12rps_started": true,
+  "sanity_12rps_passed": false,
+  "sanity_15rps_started": false,
+  "integrated_transaction_command_published": false,
+  "live_rollouts_created": false,
+  "source_identity_gate_reached": false,
+  "source_capture_commit_created": false,
+  "optimized_export_started": false,
+  "source_release_started": false,
+  "hbm_reclaimed": false,
+  "gpu1_serving_enabled": false,
+  "restore_started": false,
+  "branch_continuation_started": false,
+  "blocker": {
+    "code": "GPU0_ONLY_12RPS_SHORT_SANITY_GUARD_FAILED",
+    "raw_controller_error_type": "RuntimeError",
+    "primary_failure": "After both retained engines passed readiness, the first GPU0-only 12-rps sanity probe failed the predeclared stability guard. The controller aborted before publishing any integrated transaction command.",
+    "guard_semantics": "This three-second check is a stale-calibration guard, not a capacity campaign. Attempt J alone proves the guard failed on this invocation; it does not distinguish sustained capacity loss from a short-window or transient effect.",
+    "signals": {
+      "completion_tracks_offer": false,
+      "no_persistent_positive_drift": false,
+      "p95_ttft_below_two_seconds": true,
+      "bounded_backlog": false
+    },
+    "metrics": {
+      "configured_rate_rps": 12.0,
+      "observed_offered_rate_rps": 12.0,
+      "measurement_seconds": 3.0,
+      "warmup_arrivals": 12,
+      "measurement_arrivals": 36,
+      "total_arrivals": 48,
+      "measurement_window_completions": 20,
+      "completed_rate_rps": 6.666666666666667,
+      "p95_ttft_seconds": 1.3116521781000001,
+      "queue_depth_start": 12,
+      "queue_depth_end": 28,
+      "maximum_queue_depth": 28,
+      "queue_slope_requests_per_second": 4.6,
+      "tail_drain_seconds": 1.0,
+      "terminal_completed_requests": 31,
+      "terminal_aborted_requests": 17
+    },
+    "separate_from_source_allocator_lifecycle": true,
+    "separate_from_optimized_movement_pipeline": true,
+    "allocator_conclusion": "NONE_FROM_ATTEMPT_J_SOURCE_IDENTITY_NOT_REACHED"
+  },
+  "engine_readiness": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-j/readiness/both-engines-ready.json",
+    "sha256": "e304f2317d30d067d912866c8deff75873729202867829012f597989857e051b",
+    "observed_at_monotonic_ns": 177753689457,
+    "engines": [
+      {
+        "device": "gpu0",
+        "role": "serving",
+        "pid": 8,
+        "physical_gpu_uuid": "GPU-f4ad0e4f-b573-16b3-ea8e-077084cf87d2",
+        "readiness_passed": true,
+        "queue_empty_passed": true,
+        "hbm_stable": true
+      },
+      {
+        "device": "gpu1",
+        "role": "rollout",
+        "pid": 9,
+        "physical_gpu_uuid": "GPU-70bcc816-575a-2dcd-ff95-233b464d5d60",
+        "readiness_passed": true,
+        "queue_empty_passed": true,
+        "hbm_stable": true
+      }
+    ]
+  },
+  "remote_failure_envelope": {
+    "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-completion/v1",
+    "status": "failed",
+    "scientific_status": "invalid",
+    "function_call_id": "fc-01M12DKVVFHJ8S6G1QPRQXDY97",
+    "controller_and_analysis_interval_seconds": 181.508681288,
+    "gpu_allocation_seconds": null,
+    "gpu_seconds": null,
+    "gpu_allocation_seconds_status": "pending-final-function-return",
+    "verified_remote_reported_allocation_seconds_diagnostic_only": 185.658284549,
+    "verified_remote_reported_gpu_seconds_diagnostic_only": 371.316569098,
+    "worker_pids": {
+      "serving": 8,
+      "rollout": 9
+    },
+    "worker_returncodes": {
+      "serving": -15,
+      "rollout": -15
+    },
+    "worker_results": [],
+    "run_error": {
+      "type": "RuntimeError",
+      "message": "integrated v11 controller failed closed"
+    }
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-j/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "5167a6542aa250e7f1de3b6009603cb17acdb43312507be2e25fc370cd4f10de",
+    "remote_manifest_artifact_count": 430,
+    "remote_tree_file_count_including_manifest": 431,
+    "remote_manifest_integrity": "PASS",
+    "exact_manifest_set_equality": true,
+    "symlinks": 0,
+    "extras": 0,
+    "missing": 0,
+    "hash_or_size_mismatches": 0,
+    "artifacts": [
+      {
+        "relative_path": "controller-result.json",
+        "bytes": 58068,
+        "sha256": "015e6350dbe25ecb1a97c072c5c6259bebe0f8cd8b63b878e409c8975a02ed0e"
+      },
+      {
+        "relative_path": "function-completion.json",
+        "bytes": 91598,
+        "sha256": "5b3c8f088625d1e8c790108bd165616a6e44b110ede4a97d66a202cfbf135826"
+      },
+      {
+        "relative_path": "function-failure.json",
+        "bytes": 338,
+        "sha256": "8aad1a23ece1287ec95a9a86a001da3742e9f57986cb7d7c4f035e7107a70f5f"
+      },
+      {
+        "relative_path": "function-finally-cleanup.json",
+        "bytes": 505,
+        "sha256": "4340731863e6271574e4dd00faac1a86dc8659f946ffc31a4b20cf7f4c192140"
+      },
+      {
+        "relative_path": "in_function_cleanup.json",
+        "bytes": 30908,
+        "sha256": "9243ce948af5875057e3af836a2df82662c73720fd576e11f1ac0834e4c9fb57"
+      },
+      {
+        "relative_path": "barriers/capacity/probe-00.command.json",
+        "bytes": 6277,
+        "sha256": "1070bbd9ff14b8ae74be57929c5f1ca8ae527fb4faec23395f64e84c87f871e7"
+      },
+      {
+        "relative_path": "barriers/capacity/probe-00.gpu0.raw.json",
+        "bytes": 18442,
+        "sha256": "5c3e1da4ffee429bc724cd61aafee8f30e05024c82b417355571f695c50d9c0e"
+      },
+      {
+        "relative_path": "barriers/abort.json",
+        "bytes": 124,
+        "sha256": "b023474637bee6f7e64abe5e86c2f75629be75e847cdfe658c689fbb5e07d2de"
+      }
+    ]
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-j/in_function_cleanup.json",
+    "sha256": "9243ce948af5875057e3af836a2df82662c73720fd576e11f1ac0834e4c9fb57",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "owned_children": 38,
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "resource_trackers": 0,
+    "leaked_threads": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": []
+  },
+  "provider_cleanup": {
+    "status": "PASS",
+    "artifact": "provider-cleanup-attempt-j.json",
+    "sha256": "67cdf01cdd33aff305d126bc1481dfefe9d038292dfc0a1ec5487d6e5ce7b56c",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes_only": true
+  },
+  "accounting": {
+    "ledger": "../../gpu-hours.json",
+    "ledger_sha256": "a6209f1cd59e8471f342dccae5bf467b65e78ce17dd21d74165cb4c3ee845670",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 23833.37961294198,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 19366.62038705802,
+    "attempt_accounting_basis": "conservative-full-reservation-bound",
+    "attempt_charged_wall_seconds": 588.0,
+    "attempt_charged_gpu_seconds": 1176.0,
+    "attempt_charged_cost_usd": 0.8161440000000001,
+    "remote_reported_allocation_seconds_diagnostic_only": 185.658284549,
+    "remote_reported_gpu_seconds_diagnostic_only": 371.316569098,
+    "remote_reported_cost_usd_diagnostic_only": 0.257693698954012,
+    "failure_charge_artifact": "failures/exp004-v11-integrated-s41-j-conservative-charge.json",
+    "failure_charge_sha256": "cf6ca51e3a3dddf1a892f0383f622abee50598aaf89e1f75b5c9497a7f39dc49"
+  },
+  "launch_inputs": {
+    "config": "exp004-v11-integrated-s41-j-config.json",
+    "config_file_sha256": "60f720956901b839d6485fc5d3a5c9d5e6b20f1ba27e7db42472b8b18549fc5e",
+    "authorization_manifest": "authorization/attempt-j-post-remote-prefix-parser-pre-gpu-manifest.json",
+    "authorization_manifest_sha256": "1762fa7d2a5e659b43e2b0f44e1e306834a56bece7b53afdf93903371bad406f",
+    "seal_report": "authorization/seal-verification-attempt-j.json",
+    "seal_report_sha256": "88996f8be6156feffc77f015c674bc066f9a826b8bfbd9ac9d017427006b5e62",
+    "image_prebuild": "../../v11-image-prebuild/exp004-v11-integrated-s41-j.json",
+    "image_prebuild_sha256": "602600f93696e31162096f19a00438eee23a7af6fd2092dd4c13c54ee2b73625"
+  },
+  "terminal_decision": {
+    "v11_frozen": false,
+    "kill_and_recompute_authorized": false,
+    "experiment_005_generated": false,
+    "classification": "HARDWARE_GATE_NOT_REACHED",
+    "retry_status": "NOT_AUTHORIZED_BY_THIS_ARTIFACT"
+  },
+  "provenance": "Independent CPU-only verification of all 430 REMOTE_MANIFEST entries, controller and sanity artifacts, cleanup, provider observations, and settled ledger. No Modal or GPU invocation was made during this audit; observed_at_utc is null because no exact audit timestamp was supplied."
+}

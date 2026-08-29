@@ -1,0 +1,76 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-remote-prefix-inventory/v1",
+  "status": "PASS_NO_ATTEMPT_PREFIX",
+  "attempt_id": "exp004-v11-integrated-s41-i",
+  "command": [
+    "modal",
+    "volume",
+    "ls",
+    "sloforge-branchfabric-results",
+    "experiment-004/v11/integrated/modal",
+    "--json"
+  ],
+  "returncode": 0,
+  "stdout_rows": [
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-a",
+      "type": "dir",
+      "created_modified": "2026-08-18 23:35 CDT",
+      "size": "94 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-b",
+      "type": "dir",
+      "created_modified": "2026-08-19 00:21 CDT",
+      "size": "218 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-c",
+      "type": "dir",
+      "created_modified": "2026-08-19 22:11 CDT",
+      "size": "242 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-targeted-identity-s41-a",
+      "type": "dir",
+      "created_modified": "2026-08-22 20:23 CDT",
+      "size": "242 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-targeted-identity-s41-b",
+      "type": "dir",
+      "created_modified": "2026-08-23 20:28 CDT",
+      "size": "247 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-e",
+      "type": "dir",
+      "created_modified": "2026-08-26 18:03 CDT",
+      "size": "94 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-f",
+      "type": "dir",
+      "created_modified": "2026-08-26 19:51 CDT",
+      "size": "242 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-g",
+      "type": "dir",
+      "created_modified": "2026-08-26 20:58 CDT",
+      "size": "242 B"
+    },
+    {
+      "filename": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-h",
+      "type": "dir",
+      "created_modified": "2026-08-27 12:00 CDT",
+      "size": "140 B"
+    }
+  ],
+  "stderr": "",
+  "attempt_prefix_present": false,
+  "attempt_staging_prefix_present": false,
+  "attempt_inflight_prefix_present": false,
+  "observed_at_utc": null,
+  "provenance": "Exact second read-only live CLI capture supplied by the sole coordinator in the current session; no timestamp was recorded and none is invented."
+}

@@ -1,0 +1,353 @@
+{
+  "schema_version": "sloforge.branchfabric.v11-failed-run-forensic-manifest/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "terminal_analysis_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "preservation_policy": {
+    "original_evidence_modified": false,
+    "copied_or_overwritten_original_evidence": false,
+    "manifest_is_additive": true,
+    "raw_artifact_inventory_scope": "all 57 non-Triton attempt-C files plus the remote manifest and terminal scientific-validity artifact",
+    "raw_artifact_count": 59
+  },
+  "terminal_failure": {
+    "status": "INVALID",
+    "stage": "SOURCE_ALLOCATION_ZERO_QUEUE_IDENTITY_GATE",
+    "failure_type": "V11RuntimeTeardownRequired",
+    "message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+    "source_release_started": false,
+    "classification_before_forensics": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "forensic_conclusion": {
+    "root_cause_class": "GATE_BUG",
+    "benign_history_trigger": "retained-engine GPU1 readiness allocations legitimately populated the production new-block event queue before source rollout construction",
+    "real_source_lifecycle_bug_proven": false,
+    "exact_failed_queue_difference_recoverable": false
+  },
+  "evidence_limit": {
+    "status": "PARTIAL_EVIDENCE_ONLY",
+    "reason": "The integrated worker failure serializer persisted only exception type, message, traceback, and failure time. It did not persist V11RuntimeTeardownRequired.affected_block_ids or teardown_evidence.",
+    "unrecoverable_fields": [
+      "failed-run source logical-page to physical-block mapping",
+      "failed-run allocator epochs for the 1,152 live source blocks",
+      "raw take_new_block_ids result",
+      "expected and observed block-ID commitments from the failed gate",
+      "missing, unexpected, and duplicate block-ID lists",
+      "per-mutation allocator timestamps, call sites, engine steps, and threads",
+      "runtime request IDs for the eight source branches",
+      "pre-release ownership snapshot records",
+      "capture manifest and per-page state hashes"
+    ],
+    "anti_fabrication_rule": "Micro-validation identities and deterministic logical topology are not substituted for missing attempt-C physical identities."
+  },
+  "required_artifact_presence": {
+    "controller_result": true,
+    "scientific_validity": true,
+    "allocator_traces": false,
+    "request_traces": "PARTIAL_SERVING_ONLY",
+    "queue_traces": "SERVING_QUEUE_ONLY",
+    "block_tables": false,
+    "branch_manifests": false,
+    "epoch_evidence": "TRANSIENT_NOT_SERIALIZED",
+    "ownership_evidence": "TRANSIENT_NOT_SERIALIZED",
+    "process_lifecycle_evidence": true,
+    "state_commitments": "TRANSIENT_NOT_SERIALIZED"
+  },
+  "artifacts": [
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/authorization/sealed-evidence.json",
+      "bytes": 3898,
+      "sha256": "0e0b625d8cb6c3651828cdfa02aa3c4c9bf7c1eb0544a31599483539f87555c4"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/abort.json",
+      "bytes": 1679,
+      "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/final-reset.command.json",
+      "bytes": 302,
+      "sha256": "b40534b9ca9c2a6fc9b40f3c9040fd38855a282906d08f0713d6c83396a3612f"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/final-reset.gpu0.json",
+      "bytes": 1680,
+      "sha256": "b48cace88a8ec6acef6c815baec18d01c87dec4aed1415833919b461b58e36ca"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/final-reset.gpu1.json",
+      "bytes": 1675,
+      "sha256": "a3ef0ead4670f8076e3449892ba732e96fbbd859b6c9a533d2813aa7622173da"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-00.command.json",
+      "bytes": 6277,
+      "sha256": "0045452881a3ef3eec0a233277deb07961c91d54ee214d2931d16f2d279b0e57"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-00.gpu0.raw.json",
+      "bytes": 18635,
+      "sha256": "b903c7067c9bf59b794b9f362e976ab5c4765f0c860b05ebdfe9be6eed79aab1"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-00.gpu0.reset.json",
+      "bytes": 993,
+      "sha256": "54166c685bc472bd001376b2fd3fa10df8991869f40d819748bea38256cefb0a"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-00.gpu1.raw.json",
+      "bytes": 1459,
+      "sha256": "2466b614a204ff71035a706b8da0a0f44d2220ab6131648f4b957c4e2bc5ac8d"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-00.gpu1.reset.json",
+      "bytes": 993,
+      "sha256": "92cd1d8245c5064ec1f132949b8b6c1b5719e5b87bb6200a4b1383e81a9a83bf"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-01.command.json",
+      "bytes": 7741,
+      "sha256": "13c2c186b4c9f56b511d5656f89e4c64b98946c36adc37480016f4354e0b0dce"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-01.gpu0.raw.json",
+      "bytes": 22934,
+      "sha256": "3658c9485b1d10cea8ece222bbbc39e0268207a96702eae5906d9b35c42e816c"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-01.gpu0.reset.json",
+      "bytes": 993,
+      "sha256": "4a26fe991c8f99da7b9bfacce711d6d426d73272255a667d81637a10b707743d"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-01.gpu1.raw.json",
+      "bytes": 1459,
+      "sha256": "ac827bdd001d1a432e16cf44e0beefc152844cb89ac1dda4227bbae370bcbcf0"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/capacity/probe-01.gpu1.reset.json",
+      "bytes": 993,
+      "sha256": "43aa9da94d32d17de26592dfae3b866276c9a380dd7066bc11d85ba21bb6c091"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.engine-started.json",
+      "bytes": 204,
+      "sha256": "5ce9270284f8d9ec736b3e446d91090bc2b3ce9c0d4638b9f0b15506ed74368a"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.ready.json",
+      "bytes": 7106,
+      "sha256": "32b8edb99ce20fb0e9de3b46031421188af218d3e24c660597cb54c8f93c7f54"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.transaction-ready.json",
+      "bytes": 1503,
+      "sha256": "21814b13a03b0446abfe7cc972141bd892d1cd4a7327ebcbd0bced90d4b3ab3c"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/serving.engine-started.json",
+      "bytes": 204,
+      "sha256": "da8b4385fd3363c19d64e9f6acf1719f903031db164e2e64eaafacc5d7568c9a"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/serving.ready.json",
+      "bytes": 7109,
+      "sha256": "2625e22cffb3ed5adb3ee0275eaf26857ca3c05df94f9bdf7df9d4e92c5ee663"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/serving.transaction-ready.json",
+      "bytes": 1510,
+      "sha256": "788cbe36112d52862d6617a08c160fc374eb653cf96b65d31da4164b4f016481"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/start.json",
+      "bytes": 190,
+      "sha256": "05e4b1a56cbcdfdc8f197a42068acdb39a525217da9b918f3b07784eda6bc169"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/transaction.command.json",
+      "bytes": 3618,
+      "sha256": "b16758a699cf82658f3b9eed7f9a7958844d5c58a3129ef4d7e2e4bfa2602b8c"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-global-offer-state.json",
+      "bytes": 358,
+      "sha256": "2afcc797167f07c7d357f03b784ee29ecd5fe8dd0db0a26ba1516ee6b1115a0e"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-gpu0-partial-failure.json",
+      "bytes": 200718,
+      "sha256": "b2a4505216ce5dfdbd451e70bb190a46197498976a5d4d8926a6047d825dc5cb"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json",
+      "bytes": 1334,
+      "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v11-rollout-admission-stop.json",
+      "bytes": 175,
+      "sha256": "f87312088d181d1a0a6b48ffc183332bf8b0658c50d4b29eb30d8c6221be2e0c"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/base-config.json",
+      "bytes": 2651,
+      "sha256": "600ebf1d092ff1e3df980135b0e8bd8a737d6fb70e4706b53cf5814e0c50d499"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/calibration/selected-load.json",
+      "bytes": 277,
+      "sha256": "5170d7690bb51d6146dad2990c7e39afed1979dae6e21b8fb00438e6463ae431"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/controller-result.json",
+      "bytes": 50638,
+      "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/effective-config.json",
+      "bytes": 3211,
+      "sha256": "11ebdde2d42b4336306d899f5c1cbec996b33055c602d4a52d01ae39a737c455"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/function-completion.json",
+      "bytes": 81634,
+      "sha256": "a66e08dbb7f5dbc41a7fbada1ecdfdc2c6b162c23db401a404d3c59682c3e99d"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/function-failure.json",
+      "bytes": 581,
+      "sha256": "eaf4a8f34a488e1b31b128ac5c4293668e62a9a2b3815b76f6fa22c1d4e8fc75"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/function-finally-cleanup.json",
+      "bytes": 505,
+      "sha256": "53846e9b24509bf59021a28d030298f271054da927816110e17bcfe3696adef1"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/in_function_cleanup.json",
+      "bytes": 28181,
+      "sha256": "901baea2d82de01d3dac49cbfcee90deff5e7059a30c99afd767431a91478d0c"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/logs/rollout.stderr.log",
+      "bytes": 1734,
+      "sha256": "a6ebcf4ced44b9d97d676ffd054c127a70beaf190f94bed9ca3a2d1e74e6848b"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/logs/rollout.stdout.log",
+      "bytes": 9882,
+      "sha256": "334ceeac6e4c8489f6445c2b570df5fdaa231ff51df9f7c1de3cab31c6832ff6"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/logs/serving.stderr.log",
+      "bytes": 1851,
+      "sha256": "c1c5f81bb7618f0478110c5e2dab22cceb02269070016e7820728f3053ab1388"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/logs/serving.stdout.log",
+      "bytes": 10541,
+      "sha256": "f889ee00059181c09744e65e586fdb97678c6bdfaa247245f586bc4fd1c55503"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/readiness/both-engines-ready.json",
+      "bytes": 14409,
+      "sha256": "0bdcbad994d4e2600bb75029ada42768e00e708762c16c5740dd68edd8897faa"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json",
+      "bytes": 1679,
+      "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/rollout/telemetry/measured-transaction-compilation.json",
+      "bytes": 305,
+      "sha256": "1ceec2f8e1dccb160e93c074d360af31c97b6e077c9da224557a052112f60810"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/assessment.json",
+      "bytes": 680,
+      "sha256": "1162fbbfc5d1c1a718f1c3f923bfa381d6c133c6596ab1d002639753b9c32c48"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/plan.json",
+      "bytes": 6135,
+      "sha256": "a26d8dbb05807fc80e8ee08bae6f86e246d4c31d5fe82ffe5fc6840ec24606d4"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/raw.json",
+      "bytes": 23545,
+      "sha256": "4b2d96859535ecd685518ddd9e0cc75083fb76488cc7e75a540f1586f09d9372"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/request-state-reset.json",
+      "bytes": 1988,
+      "sha256": "ae62a7ef23fb168db07b6282d4819df73d31f47f29779feba108ecc5ea105a5f"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/result.json",
+      "bytes": 1796,
+      "sha256": "44b07cb40f8f31045bd95b9d653c1ef9f7e0918ccf265efbdc534485a2c75ef8"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/12-rps/worker-shards.json",
+      "bytes": 20096,
+      "sha256": "b656b5c88b5571110e7fddf7cdbe7febb69b666ec523ae9f48f0bc52d424c61a"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/assessment.json",
+      "bytes": 656,
+      "sha256": "d436c1958e7e019dfc6e3984ddf0f4728fb059b7c75f075150fc137af41469e5"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/plan.json",
+      "bytes": 7599,
+      "sha256": "a87f691dc2e1436c18c92fe2c6aa01b3218d361b2ab733d182ad4b5b0094fa4b"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/raw.json",
+      "bytes": 29305,
+      "sha256": "d954cf7a0560c823ae62f036f39a5105c8a2353e5a9458d90e85d6ab4712d025"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/request-state-reset.json",
+      "bytes": 1988,
+      "sha256": "25ad3bb1ce9dd05eafc0923a38e9cf2862313c56c62f4ad918c3c079acd5896e"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/result.json",
+      "bytes": 1828,
+      "sha256": "c396fe8f4d6e8ff933ddfd872ef805df6a3cf7b9579928014d24a5b01a340c51"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/15-rps/worker-shards.json",
+      "bytes": 24395,
+      "sha256": "0a35a29f8bf19bf490cede8c520ac3d6ec9eef0f02b4c0b53287c2c1ecb06c09"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/sanity/sanity-result.json",
+      "bytes": 1555,
+      "sha256": "120b53b5cd78db0edb31c4e2fa09113ec04a34a8cd421d4a054438f48df4b4db"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/serving/failure.json",
+      "bytes": 2380,
+      "sha256": "755ea87ef7e3cd122a8aff62b63eba2082387553babb28996c898c93ca2c6056"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/serving/telemetry/measured-transaction-compilation.json",
+      "bytes": 305,
+      "sha256": "f2e64b2d848df98fe6fa09391818765d1f7e4cf4e485ee086e54c1722c8eef1c"
+    },
+    {
+      "path": "integrated/raw/REMOTE_MANIFEST.c.json",
+      "bytes": 94096,
+      "sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8"
+    },
+    {
+      "path": "integrated/scientific-validity.json",
+      "bytes": 3574,
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    }
+  ]
+}

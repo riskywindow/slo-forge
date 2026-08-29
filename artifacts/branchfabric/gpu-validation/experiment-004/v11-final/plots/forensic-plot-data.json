@@ -1,0 +1,154 @@
+{
+  "anti_fabrication_notice": "Every null physical or runtime field is unavailable because attempt C did not serialize its process-local capture plan, ownership snapshot, allocator epoch records, or failed queue contents. No micro-run value was substituted.",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "classification": "GATE_BUG",
+  "first_causal_event": {
+    "code_path": [
+      "gpu_capacity_calibration_worker._run_readiness_batch",
+      "LLMEngine.add_request",
+      "LLMEngine.step",
+      "KVCacheManager.allocate_slots",
+      "VllmLiveStateAdapter.observed_allocate",
+      "Vllm0230AllocatorEpochSource.issue_from_runtime_allocation"
+    ],
+    "engine_step": null,
+    "event": "ALLOC",
+    "lifecycle_phase": "PRE_ROLLOUT_READINESS",
+    "logical_pages": [],
+    "process": {
+      "physical_gpu_uuid": "GPU-e44cc55c-11f8-bb1d-0120-201b7d4caf3d",
+      "pid": 9,
+      "role": "rollout"
+    },
+    "requested_phase_set_relation": "The production allocation-event queue was already contaminated when ROLLOUT_CREATED began.",
+    "responsible_followup": "readiness reset_prefix_cache and all later request-state resets omitted manager.take_new_block_ids, leaving historical allocation events in the queue",
+    "runtime_request_id": "readiness-gpu1-00000",
+    "runtime_session_id": null,
+    "scheduler_state": {
+      "batch_size": 1,
+      "request_state": "first readiness batch admitted then stepped"
+    },
+    "thread": null,
+    "timestamp": {
+      "exact_monotonic_ns": null,
+      "exactness": "UNRECOVERABLE",
+      "explanation": "The readiness batch records its pre-add_request start and first-token observation, but the allocator hook's issued_at_monotonic_ns record was never serialized.",
+      "lower_bound_inclusive_ns": 170168081065,
+      "upper_bound_inclusive_ns": 170771993885
+    }
+  },
+  "phase_timeline": [
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "_prepare_rollouts ran after the final retained-engine reset and before transaction-ready; no per-page or phase timestamp was emitted.",
+      "observed_at_monotonic_ns": null,
+      "phase": "ROLLOUT_CREATED"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 197163491939,
+      "phase": "ROLLOUT_READY",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.transaction-ready.json"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 198184942149,
+      "phase": "CONTROL_BEGIN",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/start.json"
+    },
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "The serving trace persists request observations, but no immutable SPIKE_BEGIN allocator snapshot exists.",
+      "observed_at_monotonic_ns": null,
+      "phase": "SPIKE_BEGIN"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 203851888131,
+      "phase": "OVERLOAD_DETECTED",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 204101888131,
+      "phase": "TRIGGER_PREDICATE_SATISFIED",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 204102178211,
+      "phase": "RECLAIM_TRIGGER",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json"
+    },
+    {
+      "evidence_status": "BOUNDARY_PROXY",
+      "note": "Admission-stop observation is the earliest persisted quiescence boundary; the exact critical-section acquisition timestamp was not written.",
+      "observed_at_monotonic_ns": 204122281693,
+      "phase": "QUIESCE_BEGIN",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v11-rollout-admission-stop.json"
+    },
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "state_quiescence_ns existed only in worker memory.",
+      "observed_at_monotonic_ns": null,
+      "phase": "QUIESCE_END"
+    },
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "No allocator-quiescent snapshot was emitted; queue-empty and allocator-quiescent were not separately evidenced.",
+      "observed_at_monotonic_ns": null,
+      "phase": "SERVING_QUEUE_ZERO"
+    },
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "No formal SourceCaptureCommit existed in attempt C.",
+      "observed_at_monotonic_ns": null,
+      "phase": "CAPTURE_COMMIT_BEGIN"
+    },
+    {
+      "evidence_status": "NOT_PERSISTED",
+      "note": "The source plan, ownership snapshot, and manifest commitments remained process-local.",
+      "observed_at_monotonic_ns": null,
+      "phase": "CAPTURE_COMMIT_END"
+    },
+    {
+      "evidence_status": "ORDERING_PROVEN_TIMESTAMP_NOT_PERSISTED",
+      "note": "The traceback and execution code prove this gate ran after semantic ownership/capture checks and before source release.",
+      "observed_at_monotonic_ns": null,
+      "phase": "PRE_EXPORT_IDENTITY_GATE"
+    },
+    {
+      "evidence_status": "DIRECT",
+      "observed_at_monotonic_ns": 208607194053,
+      "phase": "FAILURE",
+      "provenance_path": "integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json"
+    }
+  ],
+  "provenance": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/allocation-lifecycle/source-allocation-lifecycles.json",
+      "sha256": "5c18a45c67c1e1aab0f3294b6babc1f4daa46bc0c93b520d0610021d7f6d1f7b"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/allocation-forensics/first-allocation-divergence.json",
+      "sha256": "caf68ab9a16ef50c05299b34b5e759480181a6bb2e2be96b72eb2ee899620d48"
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.v11-allocation-forensics-plot-data/v1",
+  "seed": 41,
+  "topology": {
+    "block_size_tokens": 16,
+    "branch_count": 8,
+    "kv_components": [
+      "K",
+      "V"
+    ],
+    "logical_state_bytes": 1056964608,
+    "native_layers": 28,
+    "physical_page_bytes": 917504,
+    "physical_source_page_count": 1152,
+    "private_page_count": 128,
+    "shared_page_count": 1024,
+    "suffix_pages_per_branch": 16
+  }
+}

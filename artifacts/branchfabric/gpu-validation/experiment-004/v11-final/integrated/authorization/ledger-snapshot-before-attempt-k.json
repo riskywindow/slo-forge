@@ -1,0 +1,651 @@
+{
+  "conservative_failure_charges": [
+    {
+      "charged_wall_seconds": 525.0,
+      "config_sha256": "0ef031c32910ceab292affd374dc9a6f657955f48978a7de223c597d47730373",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/invocation-failure.json",
+        "artifact_sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+        "sample_selector": "$"
+      },
+      "failure_stage": "REMOTE_AUTHORIZATION_BEFORE_MODEL_LOAD",
+      "gpu_count": 1,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-micro-s41-a",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-micro-s41-a-reservation"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/remote-download-dir/function-completion.json",
+        "artifact_sha256": "3e86d67ba59711529df2f94c8b9ef63012b5c051306f20bf321a3d631d9332c6",
+        "sample_selector": "$"
+      },
+      "failure_stage": "REMOTE_SEALED_EVIDENCE_BEFORE_GPU_INVENTORY_OR_MODEL_LOAD",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-a",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-integrated-s41-a-reservation"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "a4dd7976681fddaada89af0e6c302754669a7b1093479f8648bf6b309cb961c1",
+      "failure_evidence": {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/function-completion.json",
+        "artifact_sha256": "4dbdec0121beed0bdb5ca7bc86667d8911a00b9128107686ac8544a39a9dde97",
+        "sample_selector": "entire artifact; controller.status=failed; serving worker returncode=1; pre-reclaim bounded backlog abort"
+      },
+      "failure_stage": "INTEGRATED_V11_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT_AND_CONTROLLER_CLEANUP_FAILURE",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-b",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-integrated-s41-b-reservation"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "600ebf1d092ff1e3df980135b0e8bd8a737d6fb70e4706b53cf5814e0c50d499",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-c-conservative-charge.json",
+        "artifact_sha256": "6f7ed477cfb6398c6ac57da46e707feb91aa4c0db3a9a9d9a36f21be7894a80d",
+        "sample_selector": "$"
+      },
+      "failure_stage": "result-validation",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-c",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-c-e827001537117354f89b"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "589965c2974dac8cf58d24043720629861f3121212dd7b09f8849936e451dec6",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-d-conservative-charge.json",
+        "artifact_sha256": "a3a3b9e3304fecb057d799209ead5dc80b5a6917ca5ba73b623e50c88e536986",
+        "sample_selector": "$"
+      },
+      "failure_stage": "modal-launch",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-d",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-d-e5f0055b22bc1b76d729"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "f70232bdd6af527a87e633ae5777c355073bd54bb0d6d83adf0c97aaa8cd40cc",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-e-conservative-charge.json",
+        "artifact_sha256": "3efbc040ee92364e93606bc550fe93c37fac57ee3c1950e30196d1e96b1d2bc7",
+        "sample_selector": "$"
+      },
+      "failure_stage": "result-validation",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-e",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-e-28c798cbedbf2232eee7"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "0a68902e3f503692ec5f6b3a5609890326cba19e8290c5b954f4085f353aa005",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-h-conservative-charge.json",
+        "artifact_sha256": "77bd380d72a4afe2d9e644262545e1313ed89a5830615fa7120adb4840fc7394",
+        "sample_selector": "$"
+      },
+      "failure_stage": "result-validation",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-h",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-h-472a983a456d43de2e46"
+    },
+    {
+      "charged_wall_seconds": 588.0,
+      "config_sha256": "f9a0d4313ba4b947eb22d90e807ef1014deee960c60f886fd0ecb73802d2bebd",
+      "failure_evidence": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-j-conservative-charge.json",
+        "artifact_sha256": "cf6ca51e3a3dddf1a892f0383f622abee50598aaf89e1f75b5c9497a7f39dc49",
+        "sample_selector": "$"
+      },
+      "failure_stage": "verified-post-worker-failure-conservative-settlement",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "invocation_id": "exp004-v11-integrated-s41-j",
+      "requested_gpu": "A100-80GB",
+      "reservation_id": "exp004-v11-j-2bcd825097d814831e73"
+    }
+  ],
+  "consumed_additional_gpu_seconds": 23833.37961294198,
+  "hard_additional_gpu_seconds": 43200.0,
+  "historical_through_experiment_003_gpu_hours": 1.669146,
+  "intervals": [
+    {
+      "accounted_wall_seconds": 70.0,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZSZ1CHEVZ3B8MQQNYCBX8YG",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-f0fa27c3-8577-e590-da71-5035a5cab661",
+        "GPU-581a1055-7334-85be-9c9b-b9d678951e88"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v1",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v1/REMOTE_MANIFEST.json",
+        "artifact_sha256": "31b78e9d85550a0f06e21e1b4445ae3b3a62f6f05ec89f750d0fe6b8d357c03c",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 612.8873223339906,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZSZD26X8DHV49TH4S53AD4Z",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-81e8b26e-f810-8db0-e6d5-97b44fd85667",
+        "GPU-84be5636-9bf9-f915-cf6d-413492a31bcd"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v2",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v2/REMOTE_MANIFEST.json",
+        "artifact_sha256": "3368cb6705d2be693297b43cc436551680f7eb04207d948deb3cde2105eadcf4",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 335.0706248750066,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT02JMJ56MKMQC9E34HR2CE",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-fdb6ca9d-bafc-8a63-2503-a62cc59be814",
+        "GPU-67038c71-9bd7-2842-5a79-da24a840b5bc"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v3",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v3/REMOTE_MANIFEST.json",
+        "artifact_sha256": "da858c870070288937833937eed10a5860bd9fd9c81addfb2e4dab63d2e2cae3",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 245.22243075000006,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT0KPTF5YC3GD1N71X60994",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-fdb6ca9d-bafc-8a63-2503-a62cc59be814",
+        "GPU-67038c71-9bd7-2842-5a79-da24a840b5bc"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v4",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v4/REMOTE_MANIFEST.json",
+        "artifact_sha256": "8a6856a82ff00bfb31e319adce06686538f8168398edc5364e6d9455e392364d",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 567.1752007089963,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT11BRF2WAW8ZPF8BVRA5NM",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-65bd9064-2d60-131f-def9-43646e2617d4",
+        "GPU-1693795b-c22b-747d-9952-4c6398a6ea79"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v5",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v5/REMOTE_MANIFEST.json",
+        "artifact_sha256": "c6760cf2ebbde68d26e3e70530d26d2c29821498e2792dc203e1b8736dbe9919",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 263.7051192079962,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT1Q150G6JTFRMMQH858EB2",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-cc2cf3bb-c46b-fb73-9502-d90935ad0e4b",
+        "GPU-f24aaa8e-7ef8-9924-60e0-1cccea954ceb"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v6",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v6/REMOTE_MANIFEST.json",
+        "artifact_sha256": "1b46cb6a7f9fa44e261e63d51a61cd260ca0b7d88605758e25ccd859adb70f98",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 259.1717442079971,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT2X14YEB8PTEKSS95XPTT6",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-8e5e5061-bb25-0b8b-be6d-2abb4b3d83e6",
+        "GPU-4442f879-608f-9949-eb95-85d307465a4c"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v7",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v7/REMOTE_MANIFEST.json",
+        "artifact_sha256": "231cdf42d099132dc384ed0e5b819f715c2c28e2c514b2dfe5c50aab9f0a4eb2",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 190.8736647080077,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZT381F1ZC0292Y8RQPKP52J",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-9dad8ab7-456d-bda2-21bd-9abcb96a8aa1",
+        "GPU-9840f02a-8507-738c-2715-78034ead867e"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v8",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v8/REMOTE_MANIFEST.json",
+        "artifact_sha256": "5d1c730875d989b147f8f36cde99a4389d8ebcbe1d2421d526db8a1dbebe559b",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 247.79178866700386,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZV7QFD6D1N0PRZWZA02RTPE",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-605e4386-e14d-f403-d922-4813e9f4514d",
+        "GPU-1827daae-b6d4-1a43-b956-471f878282a3"
+      ],
+      "invocation_id": "exp004-pilot-naive-s41-v9",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v9/REMOTE_MANIFEST.json",
+        "artifact_sha256": "9ecfb80002ac0b2ec8ccd23ff1f4d4559ca676d81fcfe35197a4776f85361a11",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 212.0,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZVP7S0E823VKE1BKXER2B8N",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-764b0206-97b2-5744-7c9d-274cb48383f9",
+        "GPU-fa4c3276-50b0-34eb-16b5-8b3720d7370e"
+      ],
+      "invocation_id": "exp004-capacity-s41-v1",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/calibration/raw/modal/exp004-capacity-s41-v1/REMOTE_MANIFEST.json",
+        "artifact_sha256": "05a19e609e3368351a327752e9099bbb16e2bb78fa0769604e2d87fd98c918f2",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 212.0,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZVPV1V8K5GGJV55GW4XNNRN",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-16326b72-5c3c-d74d-9564-0c8b19207494",
+        "GPU-96a93af2-17a6-ee47-f31d-b39312416a94"
+      ],
+      "invocation_id": "exp004-capacity-s41-v2",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/calibration/raw/modal/exp004-capacity-s41-v2/REMOTE_MANIFEST.json",
+        "artifact_sha256": "a3a397da61ca02391be99e331f92092f65b08df342aeec85f87b0d79ef6994bb",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 862.8657579169994,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZW9AW8REH9VA2MG6PD2TF0J",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-e0935d92-3e9d-3f64-8231-5bb29ea5b00d",
+        "GPU-e02b4048-40cd-c3df-64fd-c30dd97f4d48"
+      ],
+      "invocation_id": "exp004-v10-integrated-s41-v1",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v1/REMOTE_MANIFEST.json",
+        "artifact_sha256": "afa0578cb1febbbf58c39f9fb8a1593ac5172534173add7488918c82773b7cab",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 278.8081976249996,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZWAFNR2QG6J7G450YK09ZKF",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-ba5f9780-5412-639e-44e2-961b93d6d6f9",
+        "GPU-581a1055-7334-85be-9c9b-b9d678951e88"
+      ],
+      "invocation_id": "exp004-v10-integrated-s41-v2",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v2/REMOTE_MANIFEST.json",
+        "artifact_sha256": "694b3eda9a60a29cf5ade506cc319e0a9f4ad3571de9b5e9c6f6c3b3d821c3df",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 453.66364770899963,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZWBK6BD7H8AH11K7PTK4S36",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-07a2efd9-b61e-4af2-4806-4c71150a34e5",
+        "GPU-19175238-2115-1c1a-e719-39853dd031fe"
+      ],
+      "invocation_id": "exp004-v10-integrated-s41-v3",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v3/REMOTE_MANIFEST.json",
+        "artifact_sha256": "97ae5afeaeef8eac2cc9384d0968c78e8e167f0e02cf38113d1e78bdef43ae20",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 337.8481057499994,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZWWB1FVX6S5RXMHSVMCJFK0",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-58c47e32-ef98-4a87-070d-f74111769328",
+        "GPU-61c07e9a-bfb2-2e06-0b68-37f6ccca55d9"
+      ],
+      "invocation_id": "exp004-v10-naive-s41-v4",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+        "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 347.4518743749941,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZXX3DX3FRNC0HFF5B7V388Q",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-3619eff2-dcf1-011e-18b9-bcee430a981e",
+        "GPU-7401256e-b015-014d-4ece-7f7f6d5a883e"
+      ],
+      "invocation_id": "exp004-v10-naive-s41-v5",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v5/REMOTE_MANIFEST.json",
+        "artifact_sha256": "0f0a3d377c994558b1c3bf4945df1e8a42b8ab45fb01c2d2419a931dfb84c9aa",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 402.78267345799395,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZXYHYABY5J604Y51N87AABG",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-4ba41120-dfde-3dc2-7a07-2fd32e983257",
+        "GPU-572fa04f-6565-f68b-b52b-aee0c308d300"
+      ],
+      "invocation_id": "exp004-v10-naive-s41-v6",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v6/REMOTE_MANIFEST.json",
+        "artifact_sha256": "efec2e8042c54be1ec5db3c9d502e067a02d7f845467ded15dbc1b6dcc814302",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 379.09366075000435,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01KZY0W1B3MVWN74T5DT86BRNB",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-bbe0bff9-a390-b09a-249d-3591cb340037",
+        "GPU-bf6f9372-3dbc-5e2c-76d4-c35b89fdc11f"
+      ],
+      "invocation_id": "exp004-v10-naive-s41-v7",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/REMOTE_MANIFEST.json",
+        "artifact_sha256": "ada4d36309500d9e02d13cb1f31ce741248fdf54edddfc801155d13a3175ae04",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 155.17,
+      "actual_gpu_models": [
+        "NVIDIA A100 80GB PCIe"
+      ],
+      "function_call_id": "fc-01M0BS1T25WGWJQ9V6HBNTSEWW",
+      "gpu_count": 1,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-334a2fbd-ab80-41d0-e3e3-c1807b002df4"
+      ],
+      "invocation_id": "exp004-v11-micro-s41-b",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-manifest-download.json",
+        "artifact_sha256": "58af1fca605452dbdeddaed05410ba77ebb093e424b18ace131f711f7f2e25a6",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 261.63,
+      "actual_gpu_models": [
+        "NVIDIA A100 80GB PCIe"
+      ],
+      "function_call_id": "fc-01M0BTWT8SGRP4RZE2BCW0JENP",
+      "gpu_count": 1,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-1e6c7820-d630-b189-22e2-33df3863b7be"
+      ],
+      "invocation_id": "exp004-v11-micro-s41-c",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-manifest-download.json",
+        "artifact_sha256": "c05c9586d55526b2c86ec9c2ef6717f1dd3dd0772a975c09d92bf2aa76bac00f",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 262.89,
+      "actual_gpu_models": [
+        "NVIDIA A100 80GB PCIe"
+      ],
+      "function_call_id": "fc-01M0BWPMMQS4F6PYDW039B80Z4",
+      "gpu_count": 1,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-c3ba4108-e98e-a487-8301-b4a564146d5e"
+      ],
+      "invocation_id": "exp004-v11-micro-s41-d",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-manifest-download.json",
+        "artifact_sha256": "f3b48d25ad14947acd0347ecad2397f768da8dd02d3e928d188dcc3be0008ab6",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 242.212505126,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01M0P37PBZRCAC4R92S9D5HV7E",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-1a82b090-a2cd-fd06-4606-e2a3466cea10",
+        "GPU-65bd9064-2d60-131f-def9-43646e2617d4"
+      ],
+      "invocation_id": "exp004-v11-targeted-identity-s41-a",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/raw/exp004-v11-targeted-identity-s41-a/REMOTE_MANIFEST.json",
+        "artifact_sha256": "94babc8a0c42c6e56679403a373ae8b85433feb2100c14e699316d40b44a6cee",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 224.018188447,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01M0RNWPEBZ2R9M4YWXSAGRPA4",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-ad7510ef-5d1c-1b0f-7eb2-46b254ab72f3",
+        "GPU-d22a3e39-57a8-9237-0ff5-dee882bf9d84"
+      ],
+      "invocation_id": "exp004-v11-targeted-identity-s41-b",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/raw/exp004-v11-targeted-identity-s41-b/REMOTE_MANIFEST.json",
+        "artifact_sha256": "ba4ebb51909a6bb6f640920771dff40c6418b3252d4cf5d7cb6b9a01ad0418e1",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 211.485226717,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01M10B0TF4F8T8M300EA972H9M",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-9dd9d2fd-b7da-91cb-7f87-fe1376300384",
+        "GPU-f2d1295d-3d0f-aac9-3165-8fe5f841b6b0"
+      ],
+      "invocation_id": "exp004-v11-integrated-s41-f",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/REMOTE_MANIFEST.json",
+        "artifact_sha256": "994bd867e8b93dcc78cdba12355a1da9971e5460a5bfc18eb5f60ab40dbd6dfe",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    },
+    {
+      "accounted_wall_seconds": 242.217073138,
+      "actual_gpu_models": [
+        "NVIDIA A100-SXM4-80GB",
+        "NVIDIA A100-SXM4-80GB"
+      ],
+      "function_call_id": "fc-01M10ESWY3XPGP145XTYNMEJT5",
+      "gpu_count": 2,
+      "gpu_price_per_hour_usd": 2.4984,
+      "gpu_uuids": [
+        "GPU-115e15c3-0dcd-d295-e8c7-1c0879231175",
+        "GPU-c9fc335e-7122-729f-0f06-1bc0ca9e93ec"
+      ],
+      "invocation_id": "exp004-v11-integrated-s41-g",
+      "raw_manifest": {
+        "artifact_reference": "/Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/REMOTE_MANIFEST.json",
+        "artifact_sha256": "295d7acb987edc0d450a5ed6004663ecf541e1277d467516669ecc706cc56541",
+        "sample_selector": "$"
+      },
+      "requested_gpu": "A100-80GB"
+    }
+  ],
+  "reservations": [],
+  "schema_version": "sloforge.branchfabric.experiment-004-gpu-hours/v1",
+  "target_additional_gpu_seconds": 3600.0
+}

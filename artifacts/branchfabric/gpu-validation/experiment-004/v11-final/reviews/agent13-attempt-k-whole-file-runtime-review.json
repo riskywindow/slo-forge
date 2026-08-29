@@ -1,0 +1,88 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-k-whole-file-runtime-review/v1",
+  "status": "PASS",
+  "agent": 13,
+  "role": "independent-scientific-methodology-reviewer",
+  "review_mode": "CPU_ONLY_WHOLE_FILE_SOURCE_INTEGRITY_REVIEW",
+  "attempt_id": "exp004-v11-integrated-s41-k",
+  "prior_attempt_id": "exp004-v11-integrated-s41-j",
+  "gpu_or_modal_invoked_by_reviewer": false,
+  "prelaunch_source_integrity_only": true,
+  "scientific_validity_claimed": false,
+  "runtime_performance_claimed": false,
+  "gpu_launch_authorized_by_this_review": false,
+  "approved_runtime_projection": {
+    "algorithm": "python-ast-dump-no-attributes/v1",
+    "schema_version": "sloforge.branchfabric.v11-retained-capacity-runtime-projection/v1",
+    "sha256": "24192ca447520179284e62767448144ca90e096627d9a674141d8e961cffcb65"
+  },
+  "whole_file_source_bindings": [
+    {
+      "label": "integrated_controller",
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7c07ea0444874a100aa6d6da273058edd4f8cee03548e2c08c62bca5ecae2fc"
+    },
+    {
+      "label": "integrated_worker",
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "a9312a017116ffc86ac311b578da67f2afb97198815f30369c8ee3e0159c2002"
+    },
+    {
+      "label": "frozen_sanity_assessor",
+      "artifact": "experiments/branchfabric/gpu_reclamation_controller.py",
+      "sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9"
+    },
+    {
+      "label": "capacity_controller",
+      "artifact": "experiments/branchfabric/gpu_capacity_calibration_controller.py",
+      "sha256": "31fb70855e49d3f59493592de84120fc82f6a950e5b5edd0e775d5ba47978aa2"
+    },
+    {
+      "label": "capacity_worker",
+      "artifact": "experiments/branchfabric/gpu_capacity_calibration_worker.py",
+      "sha256": "2c41499a847879b813ce01470a7e32625d772fc07233753404296125c4afc225"
+    },
+    {
+      "label": "capacity_model",
+      "artifact": "python/sloforge/helix/characterization/gpu_capacity_calibration.py",
+      "sha256": "7ffb993004fbc9b595cc3c5fc2e503ffd9dd2370befdeb8714d017badc4e0b3d"
+    },
+    {
+      "label": "integrated_controller_tests",
+      "artifact": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "f590cda67a7fc6b094a876f3b0657e8ed82b684ecb7f80aab23a06f33641562a"
+    },
+    {
+      "label": "same_allocation_reproduction_tests",
+      "artifact": "tests/python/test_gpu_reclamation_integrated_sanity_reproduction_v11.py",
+      "sha256": "18d086cd5f204aeca66a0c2894a9ce5dc5f20e61715579058777a6eadc648abe"
+    }
+  ],
+  "prior_review_bindings": [
+    {
+      "agent": 12,
+      "role": "agent12-runtime-synchronization-and-capacity-reviewer",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent12-attempt-j-runtime-capacity-review.json",
+      "sha256": "f5bef536dfe3fc3174158eb592c6c66da6635b19ca4f80ed49c359f111befa05",
+      "status": "PASS"
+    },
+    {
+      "agent": 13,
+      "role": "independent-scientific-methodology-reviewer",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent13-attempt-j-scientific-methodology-review.json",
+      "sha256": "18d74a7495fa346e4e8ad6ef174b8f86c5febb6b792c9f6f7e2a2d49eb5e1cfa",
+      "status": "PASS"
+    }
+  ],
+  "source_integrity_validation": {
+    "whole_file_hashes_recomputed": true,
+    "whole_file_binding_count": 8,
+    "projection_recomputed_from_frozen_sources": true,
+    "prior_review_hashes_recomputed": true,
+    "controller_review_hash_cycle_present": false,
+    "upstream_reported_cpu_tests": "405_PASS",
+    "upstream_reported_ruff_format": "PASS"
+  },
+  "conclusion": "The Attempt-K retained-capacity runtime, imported sanity and capacity dependencies, and direct tests are bound as eight immutable whole files. This closes the selected-AST rebinding gap but is only prelaunch source-integrity evidence; it does not establish runtime capacity, integrated scientific validity, or authorize GPU execution by itself.",
+  "recommendation": "ELIGIBLE_FOR_COORDINATOR_CONTENT_ADDRESSED_BINDING_BEFORE_CONTROLLER_IMPORT"
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integrated-seal-verification/v1",
+  "status": "PASS",
+  "verified_at_utc": "2026-08-27T00:43:05Z",
+  "attempt_id": "exp004-v11-integrated-s41-f",
+  "execution_mode": "integrated-reclamation-v11",
+  "maximum_wall_seconds": 588.0,
+  "maximum_gpu_seconds": 1176.0,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-f-config.json",
+    "sha256": "981fb1dd1ae9fdcd4ee7e449323caa67b6d7314289c0aa2793c85fb3f42885f3"
+  },
+  "authorization_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-f-post-remote-precontroller-pre-gpu-manifest.json",
+    "sha256": "fc61fdc0efe87c2f0fae5cce165ddbc68c2b01ddbed8fd4344195694fbd7bbb9"
+  },
+  "immutable_ledger_snapshot": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/ledger-snapshot-before-attempt-f.json",
+    "sha256": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4",
+    "byte_identical_to_authoritative_pre_reservation_ledger": true
+  },
+  "expanded_budget_authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11-continuation.json",
+    "sha256": "cf71d63d6427a58003f25dd87922cc19406a1c720e4b03dbb250094d2d9e02d6",
+    "authorized_gpu_budget_usd": 80.0,
+    "authorized_cumulative_gpu_seconds": 43200.0
+  },
+  "ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4",
+    "active_reservations": 0,
+    "conservative_consumed_gpu_seconds": 20573.975013231975,
+    "remaining_gpu_seconds": 22626.024986768025,
+    "remaining_after_maximum_gpu_seconds": 21450.024986768025
+  },
+  "verification": {
+    "real_coordinator_loader": "PASS",
+    "controller_sealed_evidence": "PASS",
+    "prelaunch_bindings_verified": 24,
+    "prior_attempt_evidence_bindings_verified": 11,
+    "prior_attempt_id": "exp004-v11-integrated-s41-e",
+    "prior_controller_transaction_started": false,
+    "prior_in_function_cleanup": "FAIL_MISSING_PRE_CONTROLLER_CLEANUP_EVIDENCE",
+    "prior_provider_cleanup": "PASS",
+    "immutable_ledger_snapshot_verified": true,
+    "unchanged_target_b_verified": true,
+    "target_b_identity_gate_passed": 1152,
+    "expanded_budget_verified": true,
+    "successful_integrated_contract_verified": true,
+    "pre_worker_cleanup_contract_verified": true,
+    "make_check": "PASS; 2109 Python passed, 8 skipped, 6 warnings; mypy/Rust/UI PASS"
+  },
+  "collision_preflight": {
+    "status": "PASS_ALL_FRESH",
+    "checked_outputs": [
+      "v11-final/integrated/raw/exp004-v11-integrated-s41-f",
+      "v11-final/integrated/provider-cleanup-audit-inputs-exp004-v11-integrated-s41-f.json",
+      "v11-final/integrated/status-attempt-f.json",
+      "v11-final/integrated/provider-cleanup-attempt-f.json",
+      "v11-final/integrated/failures/exp004-v11-integrated-s41-f-conservative-charge.json",
+      "v11-image-prebuild/exp004-v11-integrated-s41-f.json"
+    ]
+  },
+  "paid_resources_invoked": false,
+  "provenance": "Real local coordinator _load_sealed_config, controller verify_sealed_evidence, and read-only collision preflight output; no fabricated measurement and no Modal/GPU invocation."
+}

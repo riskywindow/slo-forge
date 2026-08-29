@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": null,
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-j",
+  "function_call_id": "fc-01M12DKVVFHJ8S6G1QPRQXDY97",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "app_stop_result": "post-return listing reported both app rows stopped",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 2,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "listed_app_observations": [
+      {
+        "app_id_prefix": "ap-SeI",
+        "state": "stopped",
+        "tasks": "0"
+      },
+      {
+        "app_id_prefix": "ap-2Di",
+        "state": "stopped",
+        "tasks": "0"
+      }
+    ],
+    "container_list": [],
+    "endpoint_list": [],
+    "queue_list": [],
+    "dict_list": [],
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-j/in_function_cleanup.json",
+    "sha256": "9243ce948af5875057e3af836a2df82662c73720fd576e11f1ac0834e4c9fb57",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "required_lifecycle": [
+      "RUNNING",
+      "QUIESCE",
+      "ENGINE_STOP",
+      "WORKER_STOP",
+      "CHILD_REAP",
+      "PGID_EMPTY",
+      "CUDA_RELEASED",
+      "FUNCTION_RETURN"
+    ],
+    "owned_children": 38,
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "resource_trackers": 0,
+    "leaked_threads": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": []
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-j/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "5167a6542aa250e7f1de3b6009603cb17acdb43312507be2e25fc370cd4f10de",
+    "remote_manifest_artifact_count": 430,
+    "remote_tree_file_count_including_manifest": 431,
+    "remote_manifest_integrity": "PASS",
+    "exact_manifest_set_equality": true,
+    "symlinks": 0,
+    "extras": 0,
+    "missing": 0,
+    "hash_or_size_mismatches": 0,
+    "controller_result": "raw/exp004-v11-integrated-s41-j/controller-result.json",
+    "controller_result_sha256": "015e6350dbe25ecb1a97c072c5c6259bebe0f8cd8b63b878e409c8975a02ed0e",
+    "function_completion": "raw/exp004-v11-integrated-s41-j/function-completion.json",
+    "function_completion_sha256": "5b3c8f088625d1e8c790108bd165616a6e44b110ede4a97d66a202cfbf135826",
+    "function_failure": "raw/exp004-v11-integrated-s41-j/function-failure.json",
+    "function_failure_sha256": "8aad1a23ece1287ec95a9a86a001da3742e9f57986cb7d7c4f035e7107a70f5f",
+    "function_finally_cleanup": "raw/exp004-v11-integrated-s41-j/function-finally-cleanup.json",
+    "function_finally_cleanup_sha256": "4340731863e6271574e4dd00faac1a86dc8659f946ffc31a4b20cf7f4c192140"
+  },
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "ledger": {
+    "artifact": "../../gpu-hours.json",
+    "sha256_after_charge": "a6209f1cd59e8471f342dccae5bf467b65e78ce17dd21d74165cb4c3ee845670",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 23833.37961294198,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 19366.62038705802,
+    "attempt_charged_wall_seconds": 588.0,
+    "attempt_gpu_count": 2,
+    "attempt_charged_gpu_seconds": 1176.0,
+    "attempt_accounting_basis": "conservative-full-reservation-bound",
+    "remote_reported_allocation_seconds_diagnostic_only": 185.658284549,
+    "remote_reported_gpu_seconds_diagnostic_only": 371.316569098
+  },
+  "provenance": {
+    "provider_observation": "Designated GPU coordinator direct post-return Modal CLI observation; no observation timestamp was supplied, so observed_at_utc remains null.",
+    "provider_and_in_function_independent": true,
+    "raw_bundle_preserved": true,
+    "interpretation": "Provider resources returned to exact zero: both listed app rows were stopped with zero tasks, no containers/endpoints/queues/dicts/reservations remained, and the two authorized persistent volumes were the only retained provider resources."
+  }
+}

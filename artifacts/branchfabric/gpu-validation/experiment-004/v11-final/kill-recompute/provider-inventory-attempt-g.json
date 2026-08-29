@@ -1,0 +1,293 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-provider-inventory-capture/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-g",
+  "observed_at_utc": "2026-08-29T00:41:04.098989Z",
+  "modal_client_version": "1.5.3",
+  "commands": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "modal client version: 1.5.3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "app",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"app_id\": \"ap-Abbr6ctxtJMvKTPudmUzNn\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 19:31:27-05:00\",\n    \"stopped_at\": \"2026-08-28 19:36:53-05:00\"\n  },\n  {\n    \"app_id\": \"ap-336JH1N6vef5xquLqDxNyv\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 19:29:11-05:00\",\n    \"stopped_at\": \"2026-08-28 19:31:23-05:00\"\n  },\n  {\n    \"app_id\": \"ap-pAywJ5QYg3BmZ0abZxdzhO\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 17:58:57-05:00\",\n    \"stopped_at\": \"2026-08-28 18:12:57-05:00\"\n  },\n  {\n    \"app_id\": \"ap-rjdwfRRFAldeVCQJhbpuCb\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 17:56:50-05:00\",\n    \"stopped_at\": \"2026-08-28 17:58:53-05:00\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "app_id": "ap-Abbr6ctxtJMvKTPudmUzNn",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 19:31:27-05:00",
+          "stopped_at": "2026-08-28 19:36:53-05:00"
+        },
+        {
+          "app_id": "ap-336JH1N6vef5xquLqDxNyv",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 19:29:11-05:00",
+          "stopped_at": "2026-08-28 19:31:23-05:00"
+        },
+        {
+          "app_id": "ap-pAywJ5QYg3BmZ0abZxdzhO",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 17:58:57-05:00",
+          "stopped_at": "2026-08-28 18:12:57-05:00"
+        },
+        {
+          "app_id": "ap-rjdwfRRFAldeVCQJhbpuCb",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 17:56:50-05:00",
+          "stopped_at": "2026-08-28 17:58:53-05:00"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "container",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "endpoint",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "queue",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "dict",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "volume",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"name\": \"sloforge-branchfabric-results\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  },\n  {\n    \"name\": \"sloforge-model-cache\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "name": "sloforge-branchfabric-results",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        },
+        {
+          "name": "sloforge-model-cache",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "volume",
+        "ls",
+        "sloforge-branchfabric-results",
+        "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/serving\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"26 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/sanity\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"84 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/rollout\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"26 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/readiness\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"57 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/logs\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:32 CDT\",\n    \"size\": \"72 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/kill-no-preservation-output-artifacts.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"544 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/kill-controller-result.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"2.9 MiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/integrated-run-manifest.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"5.2 KiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/in_function_cleanup.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"32.2 KiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/function-finally-cleanup.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"416 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/function-completion.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"2.9 MiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/effective-config.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"5.2 KiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/controller-result.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"2.9 MiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/calibration\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"18 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/base-config.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:32 CDT\",\n    \"size\": \"4.7 KiB\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/barriers\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:35 CDT\",\n    \"size\": \"558 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/authorization\",\n    \"type\": \"dir\",\n    \"created_modified\": \"2026-08-28 19:32 CDT\",\n    \"size\": \"20 B\"\n  },\n  {\n    \"filename\": \"experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json\",\n    \"type\": \"file\",\n    \"created_modified\": \"2026-08-28 19:36 CDT\",\n    \"size\": \"98.1 KiB\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/serving",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "26 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/sanity",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "84 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/rollout",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "26 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/readiness",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "57 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/logs",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:32 CDT",
+          "size": "72 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/kill-no-preservation-output-artifacts.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "544 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/kill-controller-result.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "2.9 MiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/integrated-run-manifest.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "5.2 KiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/in_function_cleanup.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "32.2 KiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/function-finally-cleanup.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "416 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/function-completion.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "2.9 MiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/effective-config.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "5.2 KiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/controller-result.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "2.9 MiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/calibration",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "18 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/base-config.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:32 CDT",
+          "size": "4.7 KiB"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/barriers",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:35 CDT",
+          "size": "558 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/authorization",
+          "type": "dir",
+          "created_modified": "2026-08-28 19:32 CDT",
+          "size": "20 B"
+        },
+        {
+          "filename": "experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json",
+          "type": "file",
+          "created_modified": "2026-08-28 19:36 CDT",
+          "size": "98.1 KiB"
+        }
+      ]
+    }
+  ],
+  "ledger_reservations": [],
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json",
+    "sha256": "db9d56c305faddca5f24cb411b45d8ec3b57496b1bd56f9f66db544505b43361",
+    "verified_artifact_count": 507
+  },
+  "claim": "fresh read-only post-return provider inventory with exact captured provider rows and the materialized G remote-prefix root listing",
+  "provenance": {
+    "observation_source": "live read-only Modal CLI commands executed after the coordinator returned",
+    "all_commands_returncode_zero": true,
+    "all_command_stderr_empty": true,
+    "claim_scope": "provider resource absence, authorized persistent-volume inventory, and G remote-prefix presence only"
+  }
+}

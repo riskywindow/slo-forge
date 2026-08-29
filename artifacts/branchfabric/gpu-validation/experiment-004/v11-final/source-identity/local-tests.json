@@ -1,0 +1,50 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-source-identity-local-tests/v1",
+  "observed_at_utc": "2026-08-20T16:15:42Z",
+  "status": "PASS",
+  "focused_command": "PYTHONPATH=python pytest -q tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_gpu_reclamation_integrated_controller_v11.py tests/python/test_gpu_capacity_calibration_harness.py tests/python/test_experiment_004_gpu_harness.py tests/python/test_gpu_reclamation_v10_budget.py",
+  "focused_passed": 214,
+  "focused_failed": 0,
+  "make_check": {
+    "command": "make check",
+    "status": "PASS",
+    "python_passed": 1950,
+    "python_skipped": 8,
+    "python_failed": 0,
+    "ruff_format": "PASS",
+    "ruff_check": "PASS",
+    "mypy": "PASS",
+    "cargo_fmt": "PASS",
+    "cargo_clippy": "PASS",
+    "cargo_test": "PASS",
+    "ui_typecheck": "PASS",
+    "ui_lint": "PASS",
+    "ui_passed": 37,
+    "ui_skipped": 1,
+    "ui_build": "PASS"
+  },
+  "prior_attempt_provenance": {
+    "status": "NONTERMINAL_TIMING_SENSITIVE_FAILURE",
+    "failed_test": "tests/python/test_warmpath.py::test_planner_uses_measurements_and_defers_noncritical_artifacts",
+    "relationship_to_v11_change": "unrelated local wall-clock profiling decision",
+    "isolated_rerun": "1 passed",
+    "complete_rerun": "PASS"
+  },
+  "matrix": {
+    "same_block_same_epoch_stable_mapping": "PASS",
+    "same_block_new_epoch": "REJECTED",
+    "unauthorized_physical_remap": "REJECTED",
+    "expected_shared_owner_refcount_change": "PASS_ONLY_WITH_NEW_QUIESCED_PLAN",
+    "unexpected_foreign_owner": "REJECTED",
+    "freed_source_block": "REJECTED",
+    "reused_source_block": "REJECTED",
+    "post_commit_semantic_mutation": "REJECTED",
+    "benign_diagnostic_history_change": "PASS",
+    "canonical_record_reorder": "PASS",
+    "block_table_slot_reorder": "REJECTED",
+    "stale_creation_manifest": "REJECTED",
+    "quiesced_capture_manifest": "PASS",
+    "queue_empty_without_allocator_quiescence": "REJECTED",
+    "post_commit_allocation_notification": "REJECTED"
+  }
+}

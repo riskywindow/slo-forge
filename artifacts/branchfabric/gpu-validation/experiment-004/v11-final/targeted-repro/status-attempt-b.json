@@ -1,0 +1,76 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-status/v1",
+  "observed_at_utc": "2026-08-24T01:30:07Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-targeted-identity-s41-b",
+  "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+  "execution_mode": "targeted-source-identity-v11",
+  "expected_allocation_count": 1152,
+  "observed_allocation_count": 1152,
+  "source_identity_gate_passed": true,
+  "source_identity_gate_reached": true,
+  "exact_logical_mapping": true,
+  "exact_block_epoch_identity": true,
+  "exact_owner_sets": true,
+  "exact_refcounts": true,
+  "device_identity_pass": true,
+  "all_allocations_live": true,
+  "no_post_commit_mutation": true,
+  "post_commit_allocation_event_count": 0,
+  "optimized_export_started": false,
+  "transaction_source_release_started": false,
+  "optimized_export_authorized": false,
+  "source_release_authorized": false,
+  "trigger_backlog_requests": 21,
+  "maximum_outstanding_requests": 29,
+  "minimum_emergency_ceiling_headroom_requests": 35,
+  "source_capture_commit_sha256": "28168c11daf69cdc89e1ddf369a8c828fc274315d37c234c480ba63c5ab67086",
+  "source_identity_validation_sha256": "a2225d62ef90e6dd11460b8b62f3cfe0a6ed14aa1e1fecf008cbefe7e976eefe",
+  "immutable_artifacts": {
+    "remote_manifest": {
+      "artifact": "raw/exp004-v11-targeted-identity-s41-b/REMOTE_MANIFEST.json",
+      "sha256": "ba4ebb51909a6bb6f640920771dff40c6418b3252d4cf5d7cb6b9a01ad0418e1"
+    },
+    "identity_gate": {
+      "artifact": "raw/exp004-v11-targeted-identity-s41-b/barriers/v11-source-identity-pre-export-pass.json",
+      "sha256": "da83a650b404cb9048990f6e16ed491ac2d1672d95ed5b686100dfb9da9ec9c0"
+    },
+    "source_capture_commit": {
+      "artifact": "raw/exp004-v11-targeted-identity-s41-b/barriers/v11-source-capture-commit.json",
+      "sha256": "2a643c6010fb5754e9cb87fe8196734210045b16614b2c21b9cad2c8e9b8715e"
+    },
+    "controller": {
+      "artifact": "raw/exp004-v11-targeted-identity-s41-b/controller-result.json",
+      "sha256": "c098ec221f59f6f7219df270d885505cfd41301566ef621201937c6be2069df4"
+    }
+  },
+  "ledger": {
+    "authoritative_reference": "../../gpu-hours.json",
+    "authoritative_sha256": "d02df172dff078cedee9da8bb57ed1c811b63b7854ad988a8873d62867672a8b",
+    "hard_gpu_seconds": 21600.0,
+    "conservative_consumed_gpu_seconds": 18221.975013231975,
+    "remaining_gpu_seconds": 3378.024986768025,
+    "active_reservations": 0,
+    "integrated_reservation_gpu_seconds": 1176.0,
+    "integrated_budget_sufficient": true
+  },
+  "measured_invocation": {
+    "provider_wall_seconds": 224.018188447,
+    "gpu_count": 2,
+    "gpu_seconds": 448.036376894,
+    "gpu_hours": 0.12445454913722222,
+    "gpu_only_cost_usd": 0.310937245564436,
+    "function_call_id": "fc-01M0RNWPEBZ2R9M4YWXSAGRPA4"
+  },
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS",
+    "provider_artifact": "provider-cleanup-attempt-b.json",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0
+  },
+  "integrated_v11_retry_authorized": true
+}

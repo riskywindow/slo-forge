@@ -1,0 +1,29 @@
+{
+  "integrated_only_plots_generated": false,
+  "plot_count": 3,
+  "plot_data": {
+    "bytes": 6302,
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/plots/forensic-plot-data.json",
+    "sha256": "3a15deece193e03433ff780705fe5b8f1651b44cf65028b36421f35d4e7b6a7d"
+  },
+  "plots": [
+    {
+      "bytes": 101155,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/plots/01-source-allocation-lifecycle-timeline.png",
+      "sha256": "bfc0ba4723c80ac002c95c31620bd102e898d85becc9c4e4cb904b27b3923cd4"
+    },
+    {
+      "bytes": 105324,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/plots/02-first-allocation-divergence.png",
+      "sha256": "d1cac0e9f2bbd7a846b1a850414d3c86830ce7f9e6a5e648b368f14dcfcccc76"
+    },
+    {
+      "bytes": 159690,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/plots/03-allocation-identity-fields-by-phase.png",
+      "sha256": "2535582766acc00c875f260ebc5eeb62ca8faf763924fdea684dd46805a5737b"
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.v11-allocation-forensics-plot-manifest/v1",
+  "seed": 41,
+  "status": "PASS"
+}

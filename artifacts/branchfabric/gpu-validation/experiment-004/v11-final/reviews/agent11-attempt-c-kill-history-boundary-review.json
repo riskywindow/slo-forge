@@ -1,0 +1,201 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-c-kill-history-boundary-review/v1",
+  "status": "PASS",
+  "reviewer": "agent11",
+  "attempt_id": "exp004-v11-kill-recompute-s41-c",
+  "classification": "KILL_HISTORY_GATE_FIELD_CONFLATION_BUG",
+  "scientific_validity": false,
+  "evidence_scope": {
+    "raw_attempt_c_measurement": "Attempt C records the failed history gate and no per-branch token-history lengths or computed-token values.",
+    "source_runtime_proof": "The exact live-history shape is derived from frozen request/capture semantics and the eight-branch K SourceCaptureCommit; it is not relabeled as a raw Attempt-C measurement.",
+    "allocator_or_state_corruption_observed": false,
+    "destructive_discard_reached": false,
+    "recompute_reached": false
+  },
+  "attempt_c_evidence": {
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-c/REMOTE_MANIFEST.json",
+      "sha256": "d4dca87d9f7f5899a463c118def8bfdcd5f5a5acfab6ccf7492afaadda245cc6",
+      "declared_artifact_count": 478,
+      "verified_artifact_count": 478,
+      "hash_size_or_set_mismatches": 0,
+      "symlink_count": 0
+    },
+    "rollout_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-c/rollout/failure.json",
+      "sha256": "f5d23c42efba46a68c491301e42328540928a9c0a457d6b5f71f10693b3e8e5c",
+      "error_type": "RuntimeError",
+      "error_message": "kill/recompute branch history differs from its live KV boundary"
+    },
+    "executed_config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-c-config.json",
+      "sha256": "eed1ee78b38b23420ff48a089402a18e698b4460d8adf22c7f0f7f3e942a7f25"
+    },
+    "executed_seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-c.json",
+      "sha256": "d5e873bd59a28354e963a179231c31c80cc9b1c1c0a27c85ebd47fa06af9fb5f"
+    },
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-c.json",
+      "sha256": "9a916eb596edcca599c7461939521a14e6b8b7da74911d2d6091eb7bfe761bfb"
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-c.json",
+      "sha256": "736a05801aba8c5e5cef5375574d7ec4c32de6c79645767283f55036dd991818"
+    },
+    "provider_inventory_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-c.json",
+      "sha256": "feb2e0d4ea2a73a7ad9c2788b6324ef9c41fe7651d45380626ba1e92acbab423"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c",
+      "attempt_c_measured_intervals": 0,
+      "attempt_c_conservative_failure_charges": 1,
+      "attempt_c_reservations": 0,
+      "charged_gpu_seconds": 1320.0
+    }
+  },
+  "executed_c_frozen_source_bindings": {
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "abc8053e631120d36e75a5f4ab33ef6751c608400a1d7ff2e75ff485a7708faf"
+    },
+    "controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_controller_v11.py",
+      "sha256": "83b6249dce3ba4b69e244da559253c5c63c6a154c8f0beee44b11bb88fb112a0"
+    },
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py",
+      "sha256": "3b2b31b9be1bffd163f13a072cb9380a19e1a7c7741b40d0ff99f12eb75ea1d5"
+    },
+    "modal": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "9883d3a5057fd8a608c114f72ee5321a40616e65f1e6ac2713c64faa91cccf07"
+    },
+    "coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-kill-recompute.py",
+      "sha256": "1f1b6d0e2ab9e14b9dd0b8fab16e4a7949f1911e74967b5c09c89fee8aba2f33"
+    },
+    "tests": {
+      "artifact": "tests/python/test_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "a0bb51d01746cbbe3112c5c898d5a18c29559b4bbc27272bf400c4002aff9291"
+    }
+  },
+  "source_runtime_proof_bindings": {
+    "capture_model": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation.py",
+      "sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+      "proof": "RuntimeBranchCaptureInput treats computed_tokens as the authoritative KV boundary; CanonicalBranchTable permits at most one retained token beyond that boundary."
+    },
+    "live_vllm_adapter": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_live.py",
+      "sha256": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4",
+      "proof": "run_concurrent_branches submits maximum_new_tokens + 1 and stops after every branch exposes maximum_new_tokens, retaining one sampled lookahead while preserving the live request."
+    },
+    "runtime_capture_reader": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "sha256": "e6858e445ddbca912877fc67155dd9422c82d6f6fd4dcbf71871831dee15008a",
+      "proof": "_runtime_capture_inputs reads request.all_token_ids and request.num_computed_tokens separately from the exact live runtime request identity."
+    },
+    "integrated_k_source_capture_commit": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-k/barriers/v11-source-capture-commit.json",
+      "sha256": "5c1e8e1983040e4c07a1ba12c18bbfb9194dc280a142d0449550de244acc6ad5",
+      "proof": "The committed source topology contains exactly branch.0 through branch.7 and records computed_tokens=16640 for every branch."
+    }
+  },
+  "semantic_derivation": {
+    "branch_ids": [
+      "branch.0",
+      "branch.1",
+      "branch.2",
+      "branch.3",
+      "branch.4",
+      "branch.5",
+      "branch.6",
+      "branch.7"
+    ],
+    "branch_count": 8,
+    "shared_prefix_tokens_per_branch": 16384,
+    "computed_private_tokens_per_branch": 256,
+    "computed_tokens_per_branch": 16640,
+    "uncomputed_sampled_tail_tokens_per_branch": 1,
+    "live_history_tokens_per_branch": 16641,
+    "computed_boundary_tokens_across_branches": 133120,
+    "full_live_history_tokens_across_branches": 133128,
+    "computed_unique_topology_tokens": 18432,
+    "full_unique_live_history_tokens": 18440,
+    "lost_computed_private_rollout_work_tokens": 2048,
+    "attempt_c_recompute_tokens_actually_submitted": 0,
+    "derivation": [
+      "The frozen run creates exactly eight branches with a 16384-token shared prefix and asks each live request for a 256-token divergent checkpoint.",
+      "The live adapter submits 257 generation tokens, stops at the 256-token checkpoint, and intentionally retains the final sampled token so the runtime request and block table remain live.",
+      "The authoritative computed boundary is therefore 16384 + 256 = 16640 tokens while the full replayable live history is 16640 + 1 = 16641 tokens per branch.",
+      "The integrated K SourceCaptureCommit independently fixes the branch set and the 16640 computed-token boundary for all eight branches.",
+      "Attempt C's raw evidence records only the old gate failure before discard; the exact numeric history shape is a source/runtime proof, not a raw C per-branch measurement."
+    ]
+  },
+  "root_cause": {
+    "old_invariant": "The kill history gate required len(token_ids) == computed_tokens == prefix_length + suffix_length.",
+    "why_it_failed": "The gate conflated replayable token history with the authoritative computed-KV boundary and rejected vLLM 0.23.0's legal one-token sampled lookahead.",
+    "semantic_consequence": "No allocation, ownership, block table, or live KV corruption is demonstrated. The transaction failed closed before ownership capture, state discard, source release, HBM reclamation, or recompute.",
+    "root_cause_class": "GATE_BUG",
+    "not_allocator_or_lifecycle_corruption": true
+  },
+  "corrected_invariant": {
+    "required_branch_set": "exactly branch.0 through branch.7",
+    "required_computed_tokens_per_branch": 16640,
+    "required_uncomputed_tail_tokens_per_branch": 1,
+    "required_full_history_tokens_per_branch": 16641,
+    "replay_input": "Preserve and submit the full 16641-token live history for each branch, including the sampled uncomputed tail.",
+    "computed_state_accounting": "Keep 16640 tokens per branch and 133120 across branches as the computed-KV boundary/analytical independent-branch topology.",
+    "submitted_history_accounting": "Report 16641 tokens per branch and 133128 across branches as the full replay submission; never relabel 133120 as measured submitted tokens.",
+    "rejections": [
+      "wrong computed-token boundary",
+      "zero retained lookahead tokens",
+      "more than one retained lookahead token",
+      "missing or duplicate logical branches",
+      "non-integer or negative token IDs",
+      "non-shared prefix",
+      "history/hash inconsistency"
+    ]
+  },
+  "final_fix_bindings": {
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py",
+      "sha256": "38bc1a074655da0c0d9a24ed0c06700f787c5e263d3ec6349785ee16bfb930d3"
+    },
+    "controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_controller_v11.py",
+      "sha256": "e6d6f414b8c20d7f1beb814665c77294cc79fae1a859adfb4546b542c76d5ea1"
+    },
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "23b8c3b2b6521c0dea1982c903f1a32c62a3e96d72712b7d35b08c82b20d1368"
+    },
+    "coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-kill-recompute.py",
+      "sha256": "e1255e998e25b3f4bd2018a3bcaa7807b360f806ac9e8f95559832b75a669caa"
+    },
+    "tests": {
+      "artifact": "tests/python/test_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "f8026fc2e5190d98403bbc81d380514c42507ea478220673f18ebc5b5a1786b8"
+    }
+  },
+  "fix_review": {
+    "history_schema_version": "sloforge.branchfabric.kill-recompute-history/v2",
+    "full_live_history_preserved": true,
+    "computed_and_submitted_token_counts_distinct": true,
+    "failed_postworker_envelope_preserved": true,
+    "cleanup_exit_and_action_joins_fail_closed": true,
+    "engine_readiness_identity_queue_and_compilation_joins_fail_closed": true,
+    "allocator_movement_or_preservation_pipeline_changed": false,
+    "focused_kill_tests": "PASS; 110 passed",
+    "selected_history_and_failure_envelope_tests": "PASS; 34 passed",
+    "combined_kill_methodology_and_integrated_controller_tests": "PASS; 492 passed",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "gpu_or_cloud_invoked": false
+  },
+  "authorization_recommendation": "The history-boundary root cause and fix are sufficient evidence for an exact fresh-ID D seal after a fresh repository-wide make check, current-ledger/budget review, immutable C evidence binding, and ordinary collision checks. This review does not itself authorize or launch a GPU invocation."
+}

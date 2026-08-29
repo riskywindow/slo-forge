@@ -1,0 +1,70 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-status/v1",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-kill-recompute-s41-b",
+  "failure_classification": "INVALID_PAID_INFRASTRUCTURE_REMOTE_MODULE_IMPORT_ROOT_RESOLUTION",
+  "failure_stage": "REMOTE_MODULE_IMPORT_BEFORE_FUNCTION_ENTRY",
+  "root_cause": "The Modal-mounted module path was /root/modal_gpu_reclamation_kill_recompute_v11.py, so unconditional Path(__file__).resolve().parents[2] raised IndexError before the function body or controller could start.",
+  "scientific_work_started": false,
+  "paid_function_invocation_submitted": true,
+  "function_entry_reached": false,
+  "handler_started": false,
+  "controller_started": false,
+  "model_loaded": false,
+  "source_state_discarded": false,
+  "recompute_started": false,
+  "kill_recompute_measurement_available": false,
+  "raw_attempt_prefix_present": false,
+  "gpu_allocation_status": "UNKNOWN_PROVIDER_MAY_HAVE_ALLOCATED",
+  "gpu_accounting": {
+    "policy": "CONSERVATIVE_FULL_AUTHORIZED_BOUND_NO_FABRICATED_ACTUAL",
+    "measured_gpu_seconds": null,
+    "charged_gpu_seconds": 1320,
+    "charged_wall_seconds": 660
+  },
+  "cleanup": {
+    "in_function": "UNAVAILABLE_MODULE_IMPORT_FAILED_BEFORE_HANDLER",
+    "provider": "PASS",
+    "provider_resources_remaining": 0,
+    "authorized_volumes_only": true,
+    "ledger_reservation_released": true
+  },
+  "evidence_bindings": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-b-config.json",
+      "sha256": "a75e054d5c06026abdaa26ad296e53eb4e47e527d15f8f1eed4607ad30100b56"
+    },
+    "seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-b.json",
+      "sha256": "6467467203d35e24207fea849f38de4af4bd2634d122b4103622326a0ae831fd"
+    },
+    "make_check": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-b.json",
+      "sha256": "4951bdf257f9fa2ef2532cfddaf1f7290dbcd20b7adde842ebf9869a0f01de12"
+    },
+    "conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-b-conservative-charge.json",
+      "sha256": "523d078decd6c31b3b6107957331084166063083812b7d970ddb7194b19a8a1c"
+    },
+    "prebuild": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-b.json",
+      "sha256": "936025a11299cec392c92e04a92c2d8097f98df694d55695567f272909771a47"
+    },
+    "post_prebuild_freshness": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-b-pre-reservation-freshness.json",
+      "sha256": "eb25b0cf262cbbf60462e21dfc914b31f580acce6bb3b9800fe8970b1ef70c90"
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-b.json",
+      "sha256": "8fd8d7f3a929a41bf8ebb86f936735b2790fedda024bf65cb5f4d2b3f84d9b34"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "7ebbe3e61f13124ca04d2c288ac7665961807d5d62a116530f5334155f5abc30"
+    }
+  },
+  "reservation_id": "exp004-v11-kill-b-b2ed62946125171fbd29",
+  "canonical_config_sha256": "afdd02aa5783e1c1387460cf7c594bdb22a0c6bbbbf8fee792902411e124e467",
+  "retry_disposition": "AUTHORIZE_ONE_FRESH_ATTEMPT_C_ONLY_AFTER_SHALLOW_REMOTE_IMPORT_FIX_SOURCE_REVIEW_AND_NEW_SOURCE_TO_MAKE_CHECK_TO_SEAL_CYCLE"
+}

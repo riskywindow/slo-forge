@@ -3,18 +3,18 @@
   "status": "PASS",
   "command": "make check",
   "gpu_or_cloud_invoked": false,
-  "completed_at_utc": "2026-08-20T03:01:27Z",
+  "completed_at_utc": "2026-08-27T21:44:40Z",
   "exit_code": 0,
   "python": {
-    "ruff_format_check": "PASS; 712 files already formatted",
+    "ruff_format_check": "PASS",
     "ruff_check": "PASS",
     "mypy": "PASS; 484 source files",
-    "pytest": "PASS; 1915 passed, 8 skipped, 6 warnings"
+    "pytest": "PASS; 2363 passed, 8 skipped, 6 warnings"
   },
   "rust": {
     "cargo_fmt": "PASS",
     "cargo_clippy_all_targets_all_features": "PASS",
-    "cargo_test_workspace_all_features": "PASS"
+    "cargo_test_workspace_all_features": "PASS; doc tests PASS"
   },
   "ui": {
     "typecheck": "PASS",

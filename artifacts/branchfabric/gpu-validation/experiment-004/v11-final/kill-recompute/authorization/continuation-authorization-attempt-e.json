@@ -1,0 +1,89 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-continuation-authorization/v3",
+  "status": "AUTHORIZED",
+  "authorized_attempt_id": "exp004-v11-kill-recompute-s41-e",
+  "maximum_fresh_invocations": 1,
+  "maximum_wall_seconds": 660.0,
+  "maximum_gpu_seconds": 1320.0,
+  "source": "USER_COMPLETION_CONTRACT_CONTINUE_AFTER_FAIL_CLOSED_HISTORICAL_PREFIX_POLICY_BUG",
+  "rationale": [
+    "The user requires one completed real KILL_AND_RECOMPUTE arm after integrated v11 passes.",
+    "Attempts A and D ended before prebuild or reservation, Attempt B ended before the remote handler, and Attempt C failed before destructive discard or recompute.",
+    "Attempt D was rejected only because the freshness policy treated the exact content-bound historical Attempt-C directory as a collision with a distinct fresh namespace.",
+    "The corrected policy requires exactly the C directory bound to its locally verified 478-file manifest, still rejects missing hierarchy, C staging/inflight, and every A, B, D, or fresh E final/staging/inflight namespace, and authorizes only a fresh-ID E seal after ordinary repository and budget gates."
+  ],
+  "valid_kill_recompute_measurements_before_e": 0,
+  "prior_attempts": {
+    "a": {
+      "status": "INVALID_PRE_RESERVATION",
+      "charged_gpu_seconds": 0.0
+    },
+    "b": {
+      "status": "INVALID_INFRASTRUCTURE_BEFORE_HANDLER",
+      "charged_gpu_seconds": 1320.0,
+      "scientific_arm_executed": false
+    },
+    "c": {
+      "status": "INVALID_PRE_DISCARD_HISTORY_GATE_BUG",
+      "charged_gpu_seconds": 1320.0,
+      "destructive_discard_reached": false,
+      "valid_measurement_materialized": false
+    },
+    "d": {
+      "status": "INVALID_PRE_RESERVATION_HISTORICAL_PREFIX_POLICY_BUG",
+      "charged_gpu_seconds": 0.0,
+      "prebuild_started": false,
+      "reservation_created": false,
+      "gpu_or_function_invoked": false
+    }
+  },
+  "budget": {
+    "settled_ledger_sha256": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c",
+    "remaining_gpu_seconds": 16236.58500987602,
+    "required_gpu_seconds_with_15_percent_margin": 1518.0,
+    "margin_gate_pass": true
+  },
+  "evidence_bindings": {
+    "attempt_c_status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-c.json",
+      "sha256": "9a916eb596edcca599c7461939521a14e6b8b7da74911d2d6091eb7bfe761bfb"
+    },
+    "attempt_c_provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-c.json",
+      "sha256": "736a05801aba8c5e5cef5375574d7ec4c32de6c79645767283f55036dd991818"
+    },
+    "attempt_c_provider_inventory": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-c.json",
+      "sha256": "feb2e0d4ea2a73a7ad9c2788b6324ef9c41fe7651d45380626ba1e92acbab423"
+    },
+    "attempt_c_remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-c/REMOTE_MANIFEST.json",
+      "sha256": "d4dca87d9f7f5899a463c118def8bfdcd5f5a5acfab6ccf7492afaadda245cc6"
+    },
+    "attempt_c_conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-c-conservative-charge.json",
+      "sha256": "08c9b0c3cd50b58b81b170d8de5ec47141b3c3d3b4c8e1d7315c862ba6e68bb0"
+    },
+    "attempt_c_forensic_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent11-attempt-c-kill-history-boundary-review.json",
+      "sha256": "3e367aeaa3418531c59f38ff77eaac2b7c6d3c036d9d226171aab15d11a82f20"
+    },
+    "attempt_d_status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-d.json",
+      "sha256": "c82e72ea97933ee983e3610f12bdb6af9237f0f01f7d3e09447fc9143488ac63"
+    },
+    "attempt_d_terminal_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/preflight/attempt-d-terminal-prefix-policy-failure.json",
+      "sha256": "a33859db2c4d6ec9153dd0e54516934c24c7c4dee2bb941928aed909ccd3078a"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c"
+    }
+  },
+  "restrictions": [
+    "No Modal or GPU invocation before a fresh post-fix make check and content-addressed Attempt-E seal pass independent review.",
+    "No change to frozen integrated K, allocator, movement, serving, trigger, discard, recompute, or correctness gates beyond the reviewed C history-boundary, failed-envelope, and D historical-prefix policy fixes.",
+    "No invocation after Attempt E under this authorization."
+  ]
+}

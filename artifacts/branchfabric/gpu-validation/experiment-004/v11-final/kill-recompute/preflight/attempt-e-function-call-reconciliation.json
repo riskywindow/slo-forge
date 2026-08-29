@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.kill-recompute-function-call-reconciliation/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-e",
+  "function_call_id": "fc-01M152JAGCBMQSBQ1TD55Y9HXV",
+  "operation": "modal.FunctionCall.from_id(function_call_id).get(timeout=0)",
+  "result_status": "REMOTE_ERROR",
+  "exception": {
+    "type": "modal.exception.RemoteError",
+    "args": [""],
+    "message": ""
+  },
+  "result_retrieved": false,
+  "timeout_observed": false,
+  "observed_at_utc": null,
+  "observed_at_status": "UNAVAILABLE_FROM_OPERATOR_CAPTURE",
+  "claim": "post-return reconciliation of the exact FunctionCall ID; this does not reconstruct the result envelope or a measured allocation duration"
+}
