@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "forgeci-intentional-regression-b15b65e0c737-8cb8e96f88",
+  "case_id": "forgeci-intentional-regression",
+  "revision": "b15b65e0c7371ffca24c72e074df6c3fc0532db6",
+  "started_at": "2026-08-04T03:56:32.296574Z",
+  "completed_at": "2026-08-04T03:56:32.540317Z",
+  "success": true,
+  "warmups": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.020391833000758197,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.28303957675942
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.71775927619069
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/warmup-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/warmup-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.019441458000073908,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.1467666484547
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.85344844035764
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/warmup-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/warmup-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "trials": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.020523333998426097,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.28303957675942
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.71775927619069
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.03825620800125762,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.1467666484547
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.85344844035764
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 2,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2028,
+      "status": "succeeded",
+      "duration_seconds": 0.020062250001501525,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 99.98714714601066
+        },
+        {
+          "name": "throughput_rps",
+          "value": 100.01285450616025
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0002-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0002-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 3,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2029,
+      "status": "succeeded",
+      "duration_seconds": 0.018155957997805672,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.39936095779635
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.60222758991044
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0003-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0003-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 4,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2030,
+      "status": "succeeded",
+      "duration_seconds": 0.04061854199972004,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 99.79800902413137
+        },
+        {
+          "name": "throughput_rps",
+          "value": 100.20239980521032
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0004-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0004-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 5,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2031,
+      "status": "succeeded",
+      "duration_seconds": 0.03976962499655201,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 99.8063421011459
+        },
+        {
+          "name": "throughput_rps",
+          "value": 100.19403366036383
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0005-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0005-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 6,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2032,
+      "status": "succeeded",
+      "duration_seconds": 0.018254582999361446,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.35781095330287
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.64346476880672
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0006-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88/trials/measurement-0006-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "summaries": [
+    {
+      "name": "p99_ttft_ms",
+      "unit": "ms",
+      "sample_count": 7,
+      "median": 100.1467666484547,
+      "median_absolute_deviation": 0.21104430484817271,
+      "p95": 100.38689595644831,
+      "confidence_level": 0.95,
+      "median_ci_low": 99.8063421011459,
+      "median_ci_high": 100.35781095330287,
+      "raw_samples": [
+        100.28303957675942,
+        100.1467666484547,
+        99.98714714601066,
+        100.39936095779635,
+        99.79800902413137,
+        99.8063421011459,
+        100.35781095330287
+      ]
+    },
+    {
+      "name": "throughput_rps",
+      "unit": "request/s",
+      "sample_count": 7,
+      "median": 99.85344844035764,
+      "median_absolute_deviation": 0.20998367155091557,
+      "p95": 100.19988996175638,
+      "confidence_level": 0.95,
+      "median_ci_low": 99.64346476880672,
+      "median_ci_high": 100.19403366036383,
+      "raw_samples": [
+        99.71775927619069,
+        99.85344844035764,
+        100.01285450616025,
+        99.60222758991044,
+        100.20239980521032,
+        100.19403366036383,
+        99.64346476880672
+      ]
+    }
+  ],
+  "environment_manifest": {
+    "platform": "macOS-15.6.1-arm64-i386-64bit",
+    "python_version": "3.12.7",
+    "machine": "arm64",
+    "processor": "i386",
+    "git_commit": "b15b65e0c7371ffca24c72e074df6c3fc0532db6",
+    "environment": [],
+    "hardware_fingerprint": "56be35305c2f48eb794affefc402d278c73f90130675b3d746d822a915b50d1b"
+  },
+  "artifact_directory": "artifacts/helix/baseline/forgeci-demo/bisect/runs/forgeci-intentional-regression-b15b65e0c737-8cb8e96f88",
+  "artifact_hash": "3c09cae3f36863ec00ffa2c780317d2bfc21b6f5c962b9d4ac50687d07f31c31",
+  "warnings": []
+}

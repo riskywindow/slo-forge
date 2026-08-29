@@ -1,0 +1,628 @@
+{
+  "status": "failed",
+  "candidate": {
+    "candidate_id": "qstate-u1-branches-cached",
+    "operator_schema": {
+      "schema_version": "sloforge.genesis.kernel-lab/v1",
+      "operator_id": "quantized-state-update",
+      "symbol": "quantized_recurrent_state_update",
+      "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+      "inputs": [
+        {
+          "name": "previous_state",
+          "dtype": "int8",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": true
+        },
+        {
+          "name": "activation",
+          "dtype": "float64",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": false
+        }
+      ],
+      "output": {
+        "name": "updated_state",
+        "dtype": "int8",
+        "shape": [
+          {
+            "name": "batch",
+            "minimum": 1,
+            "maximum": 128,
+            "multiple_of": 1
+          }
+        ],
+        "allowed_strides": [
+          1,
+          2,
+          3
+        ],
+        "contiguous_required": false,
+        "mutable": true
+      },
+      "aliasing": {
+        "output_may_alias": [
+          "previous_state"
+        ],
+        "activation_alias_forbidden": true,
+        "exact_index_mapping_required": true
+      },
+      "numerical": {
+        "exact": true,
+        "rounding": "nearest_ties_to_even",
+        "saturation_minimum": -127,
+        "saturation_maximum": 127,
+        "maximum_absolute_error": 0.0,
+        "maximum_relative_error": 0.0,
+        "nan_behavior": "reject",
+        "infinity_behavior": "reject",
+        "deterministic": true
+      },
+      "architecture": {
+        "backend": "python_cpu",
+        "architectures": [
+          "cpu-generic"
+        ],
+        "minimum_python": "3.11",
+        "requires_gpu": false,
+        "hidden_fallback_forbidden": true
+      },
+      "stateful": true,
+      "atomicity": "per_token"
+    },
+    "backend": "python_cpu",
+    "target_architecture": "cpu-generic",
+    "parameters": {
+      "unroll_factor": 1,
+      "clamp_style": "branches",
+      "cache_coefficients": true
+    },
+    "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+    "deterministic_seed": 73129,
+    "fallback_symbol": "reference_quantized_state_update"
+  },
+  "deterministic_seed": 73129,
+  "benchmark_config": {
+    "deterministic_seed": 73129,
+    "warmup_count": 1,
+    "repetitions": 7,
+    "micro_iterations": 8,
+    "token_loop_iterations": 2,
+    "token_steps": 3,
+    "bootstrap_rounds": 100,
+    "confidence": 0.95,
+    "practical_significance_percent": 1.0,
+    "noise_floor_percent": 0.5,
+    "wall_time_seconds": 10.0
+  },
+  "hardware_fingerprint": "cpu:ee68aafe6d11b580a3eeb90dbf6635fea06e296c4d9351ceaeb868f2aca2e6a1",
+  "software_manifest": [
+    "python=3.12.7",
+    "implementation=CPython",
+    "machine=arm64",
+    "system=Darwin",
+    "executable=/Users/rishivinodkumar/sloforge/.venv/bin/python3",
+    "logical_cpu_count=12",
+    "cpu_affinity=unavailable",
+    "timer=perf_counter_ns"
+  ],
+  "workload_fingerprint": "d5e196e5116f43131b67921d8cbb32ac89d069b8e3a5145e238bb4d7e03a5978",
+  "raw_samples": [
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 0,
+      "trial_index": 0,
+      "iterations": 8,
+      "duration_ns": 5750
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 1,
+      "trial_index": 0,
+      "iterations": 8,
+      "duration_ns": 5333
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 2,
+      "trial_index": 1,
+      "iterations": 8,
+      "duration_ns": 4625
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 3,
+      "trial_index": 1,
+      "iterations": 8,
+      "duration_ns": 4500
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 4,
+      "trial_index": 2,
+      "iterations": 8,
+      "duration_ns": 4500
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 5,
+      "trial_index": 3,
+      "iterations": 8,
+      "duration_ns": 4709
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 6,
+      "trial_index": 4,
+      "iterations": 8,
+      "duration_ns": 4541
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 7,
+      "trial_index": 2,
+      "iterations": 8,
+      "duration_ns": 4334
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 8,
+      "trial_index": 5,
+      "iterations": 8,
+      "duration_ns": 4542
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 9,
+      "trial_index": 3,
+      "iterations": 8,
+      "duration_ns": 4417
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 10,
+      "trial_index": 4,
+      "iterations": 8,
+      "duration_ns": 4292
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 11,
+      "trial_index": 5,
+      "iterations": 8,
+      "duration_ns": 4250
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "candidate",
+      "order_index": 12,
+      "trial_index": 6,
+      "iterations": 8,
+      "duration_ns": 4583
+    },
+    {
+      "regime": "micro_batch_1",
+      "alternative": "reference",
+      "order_index": 13,
+      "trial_index": 6,
+      "iterations": 8,
+      "duration_ns": 4375
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 0,
+      "trial_index": 0,
+      "iterations": 8,
+      "duration_ns": 16916
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 1,
+      "trial_index": 1,
+      "iterations": 8,
+      "duration_ns": 13458
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 2,
+      "trial_index": 0,
+      "iterations": 8,
+      "duration_ns": 15584
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 3,
+      "trial_index": 2,
+      "iterations": 8,
+      "duration_ns": 12917
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 4,
+      "trial_index": 3,
+      "iterations": 8,
+      "duration_ns": 13000
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 5,
+      "trial_index": 1,
+      "iterations": 8,
+      "duration_ns": 14667
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 6,
+      "trial_index": 4,
+      "iterations": 8,
+      "duration_ns": 13375
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 7,
+      "trial_index": 2,
+      "iterations": 8,
+      "duration_ns": 14625
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 8,
+      "trial_index": 5,
+      "iterations": 8,
+      "duration_ns": 13250
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 9,
+      "trial_index": 3,
+      "iterations": 8,
+      "duration_ns": 14792
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "candidate",
+      "order_index": 10,
+      "trial_index": 6,
+      "iterations": 8,
+      "duration_ns": 13125
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 11,
+      "trial_index": 4,
+      "iterations": 8,
+      "duration_ns": 14625
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 12,
+      "trial_index": 5,
+      "iterations": 8,
+      "duration_ns": 14583
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "alternative": "reference",
+      "order_index": 13,
+      "trial_index": 6,
+      "iterations": 8,
+      "duration_ns": 14083
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 0,
+      "trial_index": 0,
+      "iterations": 2,
+      "duration_ns": 93375
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 1,
+      "trial_index": 0,
+      "iterations": 2,
+      "duration_ns": 72583
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 2,
+      "trial_index": 1,
+      "iterations": 2,
+      "duration_ns": 86834
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 3,
+      "trial_index": 1,
+      "iterations": 2,
+      "duration_ns": 71458
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 4,
+      "trial_index": 2,
+      "iterations": 2,
+      "duration_ns": 71125
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 5,
+      "trial_index": 3,
+      "iterations": 2,
+      "duration_ns": 76500
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 6,
+      "trial_index": 2,
+      "iterations": 2,
+      "duration_ns": 80875
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 7,
+      "trial_index": 3,
+      "iterations": 2,
+      "duration_ns": 83750
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 8,
+      "trial_index": 4,
+      "iterations": 2,
+      "duration_ns": 71084
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 9,
+      "trial_index": 5,
+      "iterations": 2,
+      "duration_ns": 70583
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "candidate",
+      "order_index": 10,
+      "trial_index": 6,
+      "iterations": 2,
+      "duration_ns": 70667
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 11,
+      "trial_index": 4,
+      "iterations": 2,
+      "duration_ns": 84250
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 12,
+      "trial_index": 5,
+      "iterations": 2,
+      "duration_ns": 83542
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "alternative": "reference",
+      "order_index": 13,
+      "trial_index": 6,
+      "iterations": 2,
+      "duration_ns": 80791
+    }
+  ],
+  "raw_samples_sha256": "f6a9a93262f96e4260bf0b48ef19856da2c80bcd15bd82eac8a4756d4fccfbf8",
+  "measurement_provenance": "sandboxed_cpu_wall_clock",
+  "measurement_scope": "isolated_operator_only_not_end_to_end_serving",
+  "regimes": [
+    {
+      "regime": "micro_batch_1",
+      "measurement_scope": "isolated_operator_microbenchmark",
+      "status": "failed",
+      "warmup_count": 1,
+      "repetitions": 7,
+      "iterations": 8,
+      "run_order": [
+        "candidate",
+        "reference",
+        "candidate",
+        "reference",
+        "candidate",
+        "candidate",
+        "candidate",
+        "reference",
+        "candidate",
+        "reference",
+        "reference",
+        "reference",
+        "candidate",
+        "reference"
+      ],
+      "reference_samples_ns": [
+        5333.0,
+        4500.0,
+        4334.0,
+        4417.0,
+        4292.0,
+        4250.0,
+        4375.0
+      ],
+      "candidate_samples_ns": [
+        5750.0,
+        4625.0,
+        4500.0,
+        4709.0,
+        4541.0,
+        4542.0,
+        4583.0
+      ],
+      "reference_median_ns": 4375.0,
+      "candidate_median_ns": 4583.0,
+      "improvement_percent": -4.7542857142857144,
+      "confidence_interval_low_percent": -8.652514997692663,
+      "confidence_interval_high_percent": -1.8444444444444443,
+      "effect_size": -0.7346938775510203,
+      "rationale": "confidence interval establishes a practically significant regression"
+    },
+    {
+      "regime": "micro_noncontiguous",
+      "measurement_scope": "isolated_operator_microbenchmark",
+      "status": "passed",
+      "warmup_count": 1,
+      "repetitions": 7,
+      "iterations": 8,
+      "run_order": [
+        "candidate",
+        "candidate",
+        "reference",
+        "candidate",
+        "candidate",
+        "reference",
+        "candidate",
+        "reference",
+        "candidate",
+        "reference",
+        "candidate",
+        "reference",
+        "reference",
+        "reference"
+      ],
+      "reference_samples_ns": [
+        15584.0,
+        14667.0,
+        14625.0,
+        14792.0,
+        14625.0,
+        14583.0,
+        14083.0
+      ],
+      "candidate_samples_ns": [
+        16916.0,
+        13458.0,
+        12917.0,
+        13000.0,
+        13375.0,
+        13250.0,
+        13125.0
+      ],
+      "reference_median_ns": 14625.0,
+      "candidate_median_ns": 13250.0,
+      "improvement_percent": 9.401709401709402,
+      "confidence_interval_low_percent": 7.84034898380095,
+      "confidence_interval_high_percent": 11.662746301220423,
+      "effect_size": 0.7142857142857142,
+      "rationale": "confidence interval exceeds practical and measured noise thresholds"
+    },
+    {
+      "regime": "operator_loop_batch_32",
+      "measurement_scope": "repeated_operator_loop_not_serving_end_to_end",
+      "status": "passed",
+      "warmup_count": 1,
+      "repetitions": 7,
+      "iterations": 2,
+      "run_order": [
+        "reference",
+        "candidate",
+        "reference",
+        "candidate",
+        "candidate",
+        "candidate",
+        "reference",
+        "reference",
+        "candidate",
+        "candidate",
+        "candidate",
+        "reference",
+        "reference",
+        "reference"
+      ],
+      "reference_samples_ns": [
+        93375.0,
+        86834.0,
+        80875.0,
+        83750.0,
+        84250.0,
+        83542.0,
+        80791.0
+      ],
+      "candidate_samples_ns": [
+        72583.0,
+        71458.0,
+        71125.0,
+        76500.0,
+        71084.0,
+        70583.0,
+        70667.0
+      ],
+      "reference_median_ns": 83750.0,
+      "candidate_median_ns": 71125.0,
+      "improvement_percent": 15.074626865671641,
+      "confidence_interval_low_percent": 10.252859350850077,
+      "confidence_interval_high_percent": 17.293283736785117,
+      "effect_size": 1.0,
+      "rationale": "confidence interval exceeds practical and measured noise thresholds"
+    }
+  ],
+  "sandbox_termination": "success",
+  "sandbox_backend": "macos_sandbox_exec"
+}

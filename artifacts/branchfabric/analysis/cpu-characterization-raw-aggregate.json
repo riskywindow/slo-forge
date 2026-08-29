@@ -1,0 +1,191 @@
+{
+  "evidence_policy": "Values are copied without filtering; workload is SYNTHETIC and host timings are HARDWARE_BACKED_REAL unless series name says simulated.",
+  "schema_version": "sloforge.branchfabric.cpu-characterization-raw-aggregate/v1",
+  "series": {
+    "branch_lifetime_ns": [
+      384966333,
+      384151000,
+      384575541,
+      385363041,
+      408915042,
+      407984083,
+      408458833,
+      409369417,
+      406131750,
+      405154667,
+      405694625,
+      406589584
+    ],
+    "continuum_commit_latency_ns": [
+      106625,
+      84917,
+      79292
+    ],
+    "continuum_cow_bytes": [
+      512,
+      512,
+      512
+    ],
+    "continuum_cow_latency_ns": [
+      20916,
+      19375,
+      15167
+    ],
+    "continuum_delta_bytes": [
+      1130,
+      1131,
+      1134
+    ],
+    "continuum_delta_latency_ns": [
+      518750,
+      633042,
+      545250
+    ],
+    "continuum_fork_latency_ns": [
+      32842750,
+      32699958,
+      41890750
+    ],
+    "continuum_reclaim_latency_ns": [
+      21208,
+      19375,
+      18500
+    ],
+    "continuum_reshard_latency_ns": [
+      1779125,
+      1281667,
+      1281417
+    ],
+    "environment_checkpoint_private_dirty_bytes": [
+      1303,
+      1303,
+      1303
+    ],
+    "environment_live_workspace_physical_bytes": [
+      2376,
+      2376,
+      2376
+    ],
+    "fork_to_first_private_ns": [
+      170519709,
+      5690292,
+      88801750,
+      253466584,
+      181859584,
+      6167917,
+      95080792,
+      269221417,
+      182765291,
+      6522666,
+      95365333,
+      265686791
+    ],
+    "helix_cpu_time_ns": [
+      1903949000,
+      2028647000,
+      2062528000
+    ],
+    "helix_wall_time_ns": [
+      10764844291,
+      11444778583,
+      11486239750
+    ],
+    "host_inprocess_send_bytes": [
+      3434,
+      3435,
+      3438
+    ],
+    "host_inprocess_send_latency_ns": [
+      431416,
+      359250,
+      470791
+    ],
+    "model_physical_allocated_bytes": [
+      2660,
+      2661,
+      2662
+    ],
+    "model_shared_logical_bytes": [
+      8844,
+      8848,
+      8848
+    ],
+    "model_sharing_efficiency": [
+      0.75,
+      0.75,
+      0.75
+    ],
+    "simulated_migration_send_bytes": [
+      4653,
+      4655,
+      4656
+    ],
+    "simulated_migration_transfer_time_ns": [
+      2470000,
+      2471000,
+      2470000
+    ]
+  },
+  "source_artifacts": [
+    {
+      "path": "artifacts/branchfabric/analysis/workload/helix-coding-agent-seed-113.json",
+      "seed": 113,
+      "sha256": "2a938f89e7f648bb62c57cc493084aa3d62f8e0509d159813dd92545944ff2a6"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/workload/helix-coding-agent-seed-41.json",
+      "seed": 41,
+      "sha256": "4833fe3851aee3be931c75f57dcfcf350f52d34d637f41136bf7ec52f34ca8fa"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/workload/helix-coding-agent-seed-73.json",
+      "seed": 73,
+      "sha256": "6c9f726a9d6bdfe084af049bca8131b71dbf6b294e385a4a11c18746b1396199"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-113/sharing-analysis.json",
+      "seed": 113,
+      "sha256": "512e650e6d354b60e03a7be997223ed4437dcde8e9d50806f8063ab37942d2b8"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-113/vertical-run.json",
+      "seed": 113,
+      "sha256": "79add1a1235ce223a4906220d442b34a3d0ebc38e3ef1852bcc044dde01c1de0"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-41-final/sharing-analysis.json",
+      "seed": 41,
+      "sha256": "9e5a038c103c98bc9765a8aa2819792560f9e40305bdf34909177f3047180427"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-41-final/vertical-run.json",
+      "seed": 41,
+      "sha256": "e43392dae25da8acf073303bf2af13ba11aacfb75fb869074bbbd817656aec33"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-73/sharing-analysis.json",
+      "seed": 73,
+      "sha256": "56521055bf888a12a0bf9fe6f25f66668bd8b5682ec208f61816ae453c3c35fa"
+    },
+    {
+      "path": "artifacts/branchfabric/characterization/vertical-seed-73/vertical-run.json",
+      "seed": 73,
+      "sha256": "cc46596f5d073c1b7bf39bbce81ba899bcba6febde88fedba473bf8d7ed25ae0"
+    },
+    {
+      "path": "artifacts/branchfabric/continuum/seed-113/state-operation-trace-v1.jsonl",
+      "seed": 113,
+      "sha256": "385c7f397e501056e367b8e8432ed0a213a65862c44c2aa48abf33a4c3da3ec5"
+    },
+    {
+      "path": "artifacts/branchfabric/continuum/seed-41/state-operation-trace-v1.jsonl",
+      "seed": 41,
+      "sha256": "4ca24d07c08a0335f42457820246c7de891985aebe5d2c8b436ad326a3f48acc"
+    },
+    {
+      "path": "artifacts/branchfabric/continuum/seed-73/state-operation-trace-v1.jsonl",
+      "seed": 73,
+      "sha256": "569e8505dc448bb7eb10b56cb0b9d6553df23e55ce14da5f8fb887b506129cbc"
+    }
+  ]
+}

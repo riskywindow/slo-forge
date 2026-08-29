@@ -1,0 +1,73 @@
+{
+  "artifacts": [
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/branch-workload-trace-v1.jsonl",
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/state-operation-trace-v1.jsonl",
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-lifecycle.perfetto.json",
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/raw-lifecycle-events.json",
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/resource-trace-v1.json",
+    "artifacts/branchfabric/characterization/vertical-seed-41-final/sharing-analysis.json"
+  ],
+  "attempted_events": 78,
+  "branch_event_count": 61,
+  "cpu_time_ns": 1903949000,
+  "dropped_events": 0,
+  "filtered_events": 0,
+  "limitations": [
+    "The exercised coding-agent workload is a deterministic synthetic CPU fixture.",
+    "Model state sizes are simulated; no GPU HBM, PCIe, or GPU kernel timing is claimed.",
+    "The reference environment fork eagerly restores files; live filesystem COW is absent.",
+    "This demo does not migrate a post-fork branch; migration is measured separately."
+  ],
+  "migration_observed": false,
+  "output": "artifacts/branchfabric/characterization/vertical-seed-41-final",
+  "parquet_status": "unavailable",
+  "resource_sample_count": 108,
+  "resource_samples_dropped": 0,
+  "schema_version": "sloforge.branchfabric.vertical-trace-run/v1",
+  "seed": 41,
+  "semantic_digest": "47e6e72fba917d3ba33f913ab7e8b91c12d9816e8a0de496d14d110a9b94947f",
+  "sharing_analysis": {
+    "branch_count": 4,
+    "copy_on_write": {
+      "bytes_written": 1303,
+      "events": 4,
+      "old_bytes_replaced": 668,
+      "page_fault_measurement_available": false,
+      "page_faults_observed": 0
+    },
+    "environment_state": {
+      "base_logical_bytes": 594,
+      "checkpoint_implementation": "content_addressed_incremental_capsule",
+      "checkpoint_incremental_cas_bytes": 1303,
+      "checkpoint_private_dirty_bytes": 1303,
+      "live_workspace_physical_bytes": 2376,
+      "naive_live_workspace_bytes": 2376,
+      "workspace_implementation": "eager_restore_then_atomic_replace"
+    },
+    "limitations": [
+      "The reference environment backend eagerly materializes branch workspaces; filesystem page sharing is not claimed.",
+      "CAS byte counts describe application-level content deduplication, not filesystem block allocation."
+    ],
+    "measurement_source": "SYNTHETIC",
+    "model_state": {
+      "incremental_cas_physical_bytes": 0,
+      "logical_branch_bytes": 10640,
+      "logical_unique_content_bytes": 2660,
+      "naive_independent_bytes": 10640,
+      "physical_allocated_bytes": 2660,
+      "physical_amplification": 1.0,
+      "shared_logical_bytes": 8844,
+      "sharing_efficiency": 0.75,
+      "source_cas_physical_bytes": 2660
+    },
+    "timing_measurement_class": "HARDWARE_BACKED_REAL",
+    "workload_evidence_class": "SYNTHETIC"
+  },
+  "simulated_gpu_state": true,
+  "state_event_count": 17,
+  "timing_measurement_class": "HARDWARE_BACKED_REAL",
+  "trace_corpus_hash": "8017c4ad3108b75f20bc6c7038fbdf2a609b154ac5ec894884012a9cf1084929",
+  "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+  "wall_time_ns": 10764844291,
+  "workload_evidence_class": "SYNTHETIC"
+}

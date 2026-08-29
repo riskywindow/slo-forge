@@ -1,0 +1,2573 @@
+{
+  "schema_version": "sloforge.genesis.kernel-lab/v1",
+  "evidence": {
+    "evidence_id": "cpu-trace-profile-hybrid-quantized-state",
+    "source": "cpu_profile_measured",
+    "attribution_scope": "measured_reference_workload_trace_profile",
+    "causal_attribution": false,
+    "operator_id": "quantized-state-update",
+    "genome_region": "state.quantized_state",
+    "observed_fraction": 0.14020264677860358,
+    "sample_count": 7,
+    "deterministic_seed": 73131,
+    "raw_evidence_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/raw-bottleneck.json",
+    "raw_evidence_sha256": "12cb9d504e5b36219e881b233786ab1b6d59956cd272e54c6df5af8df1a68564",
+    "hardware_fingerprint": "cpu-612f7bc5b885",
+    "workload_fingerprint": "c76171923beccd53f684316aa14ee24a9b1ab971966a9087648b55b0af789248",
+    "synthetic": false
+  },
+  "operator_schema": {
+    "schema_version": "sloforge.genesis.kernel-lab/v1",
+    "operator_id": "quantized-state-update",
+    "symbol": "quantized_recurrent_state_update",
+    "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+    "inputs": [
+      {
+        "name": "previous_state",
+        "dtype": "int8",
+        "shape": [
+          {
+            "name": "batch",
+            "minimum": 1,
+            "maximum": 128,
+            "multiple_of": 1
+          }
+        ],
+        "allowed_strides": [
+          1,
+          2,
+          3
+        ],
+        "contiguous_required": false,
+        "mutable": true
+      },
+      {
+        "name": "activation",
+        "dtype": "float64",
+        "shape": [
+          {
+            "name": "batch",
+            "minimum": 1,
+            "maximum": 128,
+            "multiple_of": 1
+          }
+        ],
+        "allowed_strides": [
+          1,
+          2,
+          3
+        ],
+        "contiguous_required": false,
+        "mutable": false
+      }
+    ],
+    "output": {
+      "name": "updated_state",
+      "dtype": "int8",
+      "shape": [
+        {
+          "name": "batch",
+          "minimum": 1,
+          "maximum": 128,
+          "multiple_of": 1
+        }
+      ],
+      "allowed_strides": [
+        1,
+        2,
+        3
+      ],
+      "contiguous_required": false,
+      "mutable": true
+    },
+    "aliasing": {
+      "output_may_alias": [
+        "previous_state"
+      ],
+      "activation_alias_forbidden": true,
+      "exact_index_mapping_required": true
+    },
+    "numerical": {
+      "exact": true,
+      "rounding": "nearest_ties_to_even",
+      "saturation_minimum": -127,
+      "saturation_maximum": 127,
+      "maximum_absolute_error": 0.0,
+      "maximum_relative_error": 0.0,
+      "nan_behavior": "reject",
+      "infinity_behavior": "reject",
+      "deterministic": true
+    },
+    "architecture": {
+      "backend": "python_cpu",
+      "architectures": [
+        "cpu-generic"
+      ],
+      "minimum_python": "3.11",
+      "requires_gpu": false,
+      "hidden_fallback_forbidden": true
+    },
+    "stateful": true,
+    "atomicity": "per_token"
+  },
+  "candidates": [
+    {
+      "candidate_id": "qstate-u1-branches-cached",
+      "operator_schema": {
+        "schema_version": "sloforge.genesis.kernel-lab/v1",
+        "operator_id": "quantized-state-update",
+        "symbol": "quantized_recurrent_state_update",
+        "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+        "inputs": [
+          {
+            "name": "previous_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          {
+            "name": "activation",
+            "dtype": "float64",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": false
+          }
+        ],
+        "output": {
+          "name": "updated_state",
+          "dtype": "int8",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": true
+        },
+        "aliasing": {
+          "output_may_alias": [
+            "previous_state"
+          ],
+          "activation_alias_forbidden": true,
+          "exact_index_mapping_required": true
+        },
+        "numerical": {
+          "exact": true,
+          "rounding": "nearest_ties_to_even",
+          "saturation_minimum": -127,
+          "saturation_maximum": 127,
+          "maximum_absolute_error": 0.0,
+          "maximum_relative_error": 0.0,
+          "nan_behavior": "reject",
+          "infinity_behavior": "reject",
+          "deterministic": true
+        },
+        "architecture": {
+          "backend": "python_cpu",
+          "architectures": [
+            "cpu-generic"
+          ],
+          "minimum_python": "3.11",
+          "requires_gpu": false,
+          "hidden_fallback_forbidden": true
+        },
+        "stateful": true,
+        "atomicity": "per_token"
+      },
+      "backend": "python_cpu",
+      "target_architecture": "cpu-generic",
+      "parameters": {
+        "unroll_factor": 1,
+        "clamp_style": "branches",
+        "cache_coefficients": true
+      },
+      "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+      "deterministic_seed": 73131,
+      "fallback_symbol": "reference_quantized_state_update"
+    },
+    {
+      "candidate_id": "qstate-u1-branches-literal",
+      "operator_schema": {
+        "schema_version": "sloforge.genesis.kernel-lab/v1",
+        "operator_id": "quantized-state-update",
+        "symbol": "quantized_recurrent_state_update",
+        "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+        "inputs": [
+          {
+            "name": "previous_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          {
+            "name": "activation",
+            "dtype": "float64",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": false
+          }
+        ],
+        "output": {
+          "name": "updated_state",
+          "dtype": "int8",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": true
+        },
+        "aliasing": {
+          "output_may_alias": [
+            "previous_state"
+          ],
+          "activation_alias_forbidden": true,
+          "exact_index_mapping_required": true
+        },
+        "numerical": {
+          "exact": true,
+          "rounding": "nearest_ties_to_even",
+          "saturation_minimum": -127,
+          "saturation_maximum": 127,
+          "maximum_absolute_error": 0.0,
+          "maximum_relative_error": 0.0,
+          "nan_behavior": "reject",
+          "infinity_behavior": "reject",
+          "deterministic": true
+        },
+        "architecture": {
+          "backend": "python_cpu",
+          "architectures": [
+            "cpu-generic"
+          ],
+          "minimum_python": "3.11",
+          "requires_gpu": false,
+          "hidden_fallback_forbidden": true
+        },
+        "stateful": true,
+        "atomicity": "per_token"
+      },
+      "backend": "python_cpu",
+      "target_architecture": "cpu-generic",
+      "parameters": {
+        "unroll_factor": 1,
+        "clamp_style": "branches",
+        "cache_coefficients": false
+      },
+      "source_sha256": "e8ed8434acf4bac379c41803e046f56ce3c75389377d8dea2bb3ae64b94e7e89",
+      "deterministic_seed": 73131,
+      "fallback_symbol": "reference_quantized_state_update"
+    }
+  ],
+  "correctness": [
+    {
+      "status": "passed",
+      "candidate": {
+        "candidate_id": "qstate-u1-branches-cached",
+        "operator_schema": {
+          "schema_version": "sloforge.genesis.kernel-lab/v1",
+          "operator_id": "quantized-state-update",
+          "symbol": "quantized_recurrent_state_update",
+          "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+          "inputs": [
+            {
+              "name": "previous_state",
+              "dtype": "int8",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": true
+            },
+            {
+              "name": "activation",
+              "dtype": "float64",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": false
+            }
+          ],
+          "output": {
+            "name": "updated_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          "aliasing": {
+            "output_may_alias": [
+              "previous_state"
+            ],
+            "activation_alias_forbidden": true,
+            "exact_index_mapping_required": true
+          },
+          "numerical": {
+            "exact": true,
+            "rounding": "nearest_ties_to_even",
+            "saturation_minimum": -127,
+            "saturation_maximum": 127,
+            "maximum_absolute_error": 0.0,
+            "maximum_relative_error": 0.0,
+            "nan_behavior": "reject",
+            "infinity_behavior": "reject",
+            "deterministic": true
+          },
+          "architecture": {
+            "backend": "python_cpu",
+            "architectures": [
+              "cpu-generic"
+            ],
+            "minimum_python": "3.11",
+            "requires_gpu": false,
+            "hidden_fallback_forbidden": true
+          },
+          "stateful": true,
+          "atomicity": "per_token"
+        },
+        "backend": "python_cpu",
+        "target_architecture": "cpu-generic",
+        "parameters": {
+          "unroll_factor": 1,
+          "clamp_style": "branches",
+          "cache_coefficients": true
+        },
+        "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+        "deterministic_seed": 73131,
+        "fallback_symbol": "reference_quantized_state_update"
+      },
+      "deterministic_seed": 73131,
+      "source_allowlist_valid": true,
+      "cases_executed": 36,
+      "edge_cases": 6,
+      "randomized_cases": 24,
+      "stride_cases": 2,
+      "noncontiguous_cases": 1,
+      "nonfinite_cases": 3,
+      "alias_cases": 2,
+      "mismatches": [],
+      "sandbox_termination": "success",
+      "sandbox_backend": "macos_sandbox_exec",
+      "assumptions": [
+        "every symmetric int8 previous-state value is enumerated at zero activation",
+        "randomized values are search data and not a universal proof",
+        "generated source executes only in the fail-closed local sandbox"
+      ],
+      "candidate_source_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/candidate.py",
+      "candidate_source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+      "cases_config_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/config.json",
+      "cases_config_sha256": "b890ab232015b75bc128bb0e80beb08fb4e217874371ffe7fd49f8419a4d1fa4",
+      "runner_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/sandbox_runner.py",
+      "runner_sha256": "cc0e3aa76f2bec5c2b1571e7969c01751733cd2c6a1b1124081a86917d1dec4c",
+      "runner_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/artifacts/runner-output.json",
+      "runner_output_sha256": "5dd157af75909b733e118de83115b6c7ec4ff24b3df3dce94e7c7c1e1405029b"
+    },
+    {
+      "status": "passed",
+      "candidate": {
+        "candidate_id": "qstate-u1-branches-literal",
+        "operator_schema": {
+          "schema_version": "sloforge.genesis.kernel-lab/v1",
+          "operator_id": "quantized-state-update",
+          "symbol": "quantized_recurrent_state_update",
+          "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+          "inputs": [
+            {
+              "name": "previous_state",
+              "dtype": "int8",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": true
+            },
+            {
+              "name": "activation",
+              "dtype": "float64",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": false
+            }
+          ],
+          "output": {
+            "name": "updated_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          "aliasing": {
+            "output_may_alias": [
+              "previous_state"
+            ],
+            "activation_alias_forbidden": true,
+            "exact_index_mapping_required": true
+          },
+          "numerical": {
+            "exact": true,
+            "rounding": "nearest_ties_to_even",
+            "saturation_minimum": -127,
+            "saturation_maximum": 127,
+            "maximum_absolute_error": 0.0,
+            "maximum_relative_error": 0.0,
+            "nan_behavior": "reject",
+            "infinity_behavior": "reject",
+            "deterministic": true
+          },
+          "architecture": {
+            "backend": "python_cpu",
+            "architectures": [
+              "cpu-generic"
+            ],
+            "minimum_python": "3.11",
+            "requires_gpu": false,
+            "hidden_fallback_forbidden": true
+          },
+          "stateful": true,
+          "atomicity": "per_token"
+        },
+        "backend": "python_cpu",
+        "target_architecture": "cpu-generic",
+        "parameters": {
+          "unroll_factor": 1,
+          "clamp_style": "branches",
+          "cache_coefficients": false
+        },
+        "source_sha256": "e8ed8434acf4bac379c41803e046f56ce3c75389377d8dea2bb3ae64b94e7e89",
+        "deterministic_seed": 73131,
+        "fallback_symbol": "reference_quantized_state_update"
+      },
+      "deterministic_seed": 73131,
+      "source_allowlist_valid": true,
+      "cases_executed": 36,
+      "edge_cases": 6,
+      "randomized_cases": 24,
+      "stride_cases": 2,
+      "noncontiguous_cases": 1,
+      "nonfinite_cases": 3,
+      "alias_cases": 2,
+      "mismatches": [],
+      "sandbox_termination": "success",
+      "sandbox_backend": "macos_sandbox_exec",
+      "assumptions": [
+        "every symmetric int8 previous-state value is enumerated at zero activation",
+        "randomized values are search data and not a universal proof",
+        "generated source executes only in the fail-closed local sandbox"
+      ],
+      "candidate_source_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-literal/correctness/source/candidate.py",
+      "candidate_source_sha256": "e8ed8434acf4bac379c41803e046f56ce3c75389377d8dea2bb3ae64b94e7e89",
+      "cases_config_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-literal/correctness/source/config.json",
+      "cases_config_sha256": "b890ab232015b75bc128bb0e80beb08fb4e217874371ffe7fd49f8419a4d1fa4",
+      "runner_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-literal/correctness/source/sandbox_runner.py",
+      "runner_sha256": "cc0e3aa76f2bec5c2b1571e7969c01751733cd2c6a1b1124081a86917d1dec4c",
+      "runner_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-literal/correctness/artifacts/runner-output.json",
+      "runner_output_sha256": "5dd157af75909b733e118de83115b6c7ec4ff24b3df3dce94e7c7c1e1405029b"
+    }
+  ],
+  "benchmarks": [
+    {
+      "status": "inconclusive",
+      "candidate": {
+        "candidate_id": "qstate-u1-branches-cached",
+        "operator_schema": {
+          "schema_version": "sloforge.genesis.kernel-lab/v1",
+          "operator_id": "quantized-state-update",
+          "symbol": "quantized_recurrent_state_update",
+          "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+          "inputs": [
+            {
+              "name": "previous_state",
+              "dtype": "int8",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": true
+            },
+            {
+              "name": "activation",
+              "dtype": "float64",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": false
+            }
+          ],
+          "output": {
+            "name": "updated_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          "aliasing": {
+            "output_may_alias": [
+              "previous_state"
+            ],
+            "activation_alias_forbidden": true,
+            "exact_index_mapping_required": true
+          },
+          "numerical": {
+            "exact": true,
+            "rounding": "nearest_ties_to_even",
+            "saturation_minimum": -127,
+            "saturation_maximum": 127,
+            "maximum_absolute_error": 0.0,
+            "maximum_relative_error": 0.0,
+            "nan_behavior": "reject",
+            "infinity_behavior": "reject",
+            "deterministic": true
+          },
+          "architecture": {
+            "backend": "python_cpu",
+            "architectures": [
+              "cpu-generic"
+            ],
+            "minimum_python": "3.11",
+            "requires_gpu": false,
+            "hidden_fallback_forbidden": true
+          },
+          "stateful": true,
+          "atomicity": "per_token"
+        },
+        "backend": "python_cpu",
+        "target_architecture": "cpu-generic",
+        "parameters": {
+          "unroll_factor": 1,
+          "clamp_style": "branches",
+          "cache_coefficients": true
+        },
+        "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+        "deterministic_seed": 73131,
+        "fallback_symbol": "reference_quantized_state_update"
+      },
+      "deterministic_seed": 73131,
+      "benchmark_config": {
+        "deterministic_seed": 73131,
+        "warmup_count": 1,
+        "repetitions": 7,
+        "micro_iterations": 8,
+        "token_loop_iterations": 2,
+        "token_steps": 3,
+        "bootstrap_rounds": 100,
+        "confidence": 0.95,
+        "practical_significance_percent": 1.0,
+        "noise_floor_percent": 0.5,
+        "wall_time_seconds": 10.0
+      },
+      "hardware_fingerprint": "cpu:ee68aafe6d11b580a3eeb90dbf6635fea06e296c4d9351ceaeb868f2aca2e6a1",
+      "software_manifest": [
+        "python=3.12.7",
+        "implementation=CPython",
+        "machine=arm64",
+        "system=Darwin",
+        "executable=/Users/rishivinodkumar/sloforge/.venv/bin/python3",
+        "logical_cpu_count=12",
+        "cpu_affinity=unavailable",
+        "timer=perf_counter_ns"
+      ],
+      "workload_fingerprint": "1eb9bb544c8a385979a8241b6ab17e75f42842f6866ad014dcc744ed6cca7802",
+      "raw_samples": [
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 5959
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 5750
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 2,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 5125
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 5250
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 4,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 5166
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 5,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 5125
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 5084
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 4875
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 5083
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 5209
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 10,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 5083
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 11,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 5083
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 12,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 4875
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 4875
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 14375
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 12417
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 2,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 11750
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 11458
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 4,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 11750
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 5,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 13250
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 14042
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 14584
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 14667
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 13166
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 10,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 14750
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 11,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 12833
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 12,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 12959
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 14542
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 2,
+          "duration_ns": 76333
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 1,
+          "iterations": 2,
+          "duration_ns": 68292
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 2,
+          "trial_index": 0,
+          "iterations": 2,
+          "duration_ns": 83500
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 2,
+          "iterations": 2,
+          "duration_ns": 70958
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 4,
+          "trial_index": 1,
+          "iterations": 2,
+          "duration_ns": 85542
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 5,
+          "trial_index": 3,
+          "iterations": 2,
+          "duration_ns": 70709
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 2,
+          "duration_ns": 85750
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 2,
+          "duration_ns": 84375
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 2,
+          "duration_ns": 70875
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 5,
+          "iterations": 2,
+          "duration_ns": 70459
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 10,
+          "trial_index": 4,
+          "iterations": 2,
+          "duration_ns": 86041
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 11,
+          "trial_index": 6,
+          "iterations": 2,
+          "duration_ns": 70417
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 12,
+          "trial_index": 5,
+          "iterations": 2,
+          "duration_ns": 85917
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 2,
+          "duration_ns": 85125
+        }
+      ],
+      "raw_samples_sha256": "4edd1940ddb0ba9d4faa486f44ffcecf24129b312fe693b54ed1fb8f2c0a94f1",
+      "measurement_provenance": "sandboxed_cpu_wall_clock",
+      "measurement_scope": "isolated_operator_only_not_end_to_end_serving",
+      "regimes": [
+        {
+          "regime": "micro_batch_1",
+          "measurement_scope": "isolated_operator_microbenchmark",
+          "status": "inconclusive",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 8,
+          "run_order": [
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            5959.0,
+            5125.0,
+            5084.0,
+            4875.0,
+            5083.0,
+            4875.0,
+            4875.0
+          ],
+          "candidate_samples_ns": [
+            5750.0,
+            5250.0,
+            5166.0,
+            5125.0,
+            5083.0,
+            5209.0,
+            5083.0
+          ],
+          "reference_median_ns": 5083.0,
+          "candidate_median_ns": 5166.0,
+          "improvement_percent": -1.6328939602596892,
+          "confidence_interval_low_percent": -7.6923076923076925,
+          "confidence_interval_high_percent": 0.01966955153422502,
+          "effect_size": -0.4897959183673469,
+          "rationale": "confidence interval overlaps the practical or noise threshold"
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "measurement_scope": "isolated_operator_microbenchmark",
+          "status": "passed",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 8,
+          "run_order": [
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "reference",
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "candidate",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            14375.0,
+            13250.0,
+            14042.0,
+            14584.0,
+            14667.0,
+            14750.0,
+            14542.0
+          ],
+          "candidate_samples_ns": [
+            12417.0,
+            11750.0,
+            11458.0,
+            11750.0,
+            13166.0,
+            12833.0,
+            12959.0
+          ],
+          "reference_median_ns": 14542.0,
+          "candidate_median_ns": 12417.0,
+          "improvement_percent": 14.612845550818317,
+          "confidence_interval_low_percent": 9.850434782608696,
+          "confidence_interval_high_percent": 19.671617688325362,
+          "effect_size": 1.0,
+          "rationale": "confidence interval exceeds practical and measured noise thresholds"
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "measurement_scope": "repeated_operator_loop_not_serving_end_to_end",
+          "status": "passed",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 2,
+          "run_order": [
+            "candidate",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "reference",
+            "candidate",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            83500.0,
+            85542.0,
+            85750.0,
+            84375.0,
+            86041.0,
+            85917.0,
+            85125.0
+          ],
+          "candidate_samples_ns": [
+            76333.0,
+            68292.0,
+            70958.0,
+            70709.0,
+            70875.0,
+            70459.0,
+            70417.0
+          ],
+          "reference_median_ns": 85542.0,
+          "candidate_median_ns": 70709.0,
+          "improvement_percent": 17.3400201070819,
+          "confidence_interval_low_percent": 16.0,
+          "confidence_interval_high_percent": 18.077051583494608,
+          "effect_size": 1.0,
+          "rationale": "confidence interval exceeds practical and measured noise thresholds"
+        }
+      ],
+      "sandbox_termination": "success",
+      "sandbox_backend": "macos_sandbox_exec"
+    },
+    {
+      "status": "inconclusive",
+      "candidate": {
+        "candidate_id": "qstate-u1-branches-literal",
+        "operator_schema": {
+          "schema_version": "sloforge.genesis.kernel-lab/v1",
+          "operator_id": "quantized-state-update",
+          "symbol": "quantized_recurrent_state_update",
+          "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+          "inputs": [
+            {
+              "name": "previous_state",
+              "dtype": "int8",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": true
+            },
+            {
+              "name": "activation",
+              "dtype": "float64",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": false
+            }
+          ],
+          "output": {
+            "name": "updated_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          "aliasing": {
+            "output_may_alias": [
+              "previous_state"
+            ],
+            "activation_alias_forbidden": true,
+            "exact_index_mapping_required": true
+          },
+          "numerical": {
+            "exact": true,
+            "rounding": "nearest_ties_to_even",
+            "saturation_minimum": -127,
+            "saturation_maximum": 127,
+            "maximum_absolute_error": 0.0,
+            "maximum_relative_error": 0.0,
+            "nan_behavior": "reject",
+            "infinity_behavior": "reject",
+            "deterministic": true
+          },
+          "architecture": {
+            "backend": "python_cpu",
+            "architectures": [
+              "cpu-generic"
+            ],
+            "minimum_python": "3.11",
+            "requires_gpu": false,
+            "hidden_fallback_forbidden": true
+          },
+          "stateful": true,
+          "atomicity": "per_token"
+        },
+        "backend": "python_cpu",
+        "target_architecture": "cpu-generic",
+        "parameters": {
+          "unroll_factor": 1,
+          "clamp_style": "branches",
+          "cache_coefficients": false
+        },
+        "source_sha256": "e8ed8434acf4bac379c41803e046f56ce3c75389377d8dea2bb3ae64b94e7e89",
+        "deterministic_seed": 73131,
+        "fallback_symbol": "reference_quantized_state_update"
+      },
+      "deterministic_seed": 73131,
+      "benchmark_config": {
+        "deterministic_seed": 73131,
+        "warmup_count": 1,
+        "repetitions": 7,
+        "micro_iterations": 8,
+        "token_loop_iterations": 2,
+        "token_steps": 3,
+        "bootstrap_rounds": 100,
+        "confidence": 0.95,
+        "practical_significance_percent": 1.0,
+        "noise_floor_percent": 0.5,
+        "wall_time_seconds": 10.0
+      },
+      "hardware_fingerprint": "cpu:ee68aafe6d11b580a3eeb90dbf6635fea06e296c4d9351ceaeb868f2aca2e6a1",
+      "software_manifest": [
+        "python=3.12.7",
+        "implementation=CPython",
+        "machine=arm64",
+        "system=Darwin",
+        "executable=/Users/rishivinodkumar/sloforge/.venv/bin/python3",
+        "logical_cpu_count=12",
+        "cpu_affinity=unavailable",
+        "timer=perf_counter_ns"
+      ],
+      "workload_fingerprint": "1eb9bb544c8a385979a8241b6ab17e75f42842f6866ad014dcc744ed6cca7802",
+      "raw_samples": [
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 5792
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 5792
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 2,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 5250
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 5292
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 4,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 5083
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 5,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 5125
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 5167
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 4875
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 5125
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 5208
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "candidate",
+          "order_index": 10,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 5042
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 11,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 5041
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 12,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 5042
+        },
+        {
+          "regime": "micro_batch_1",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 4916
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 15542
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 0,
+          "iterations": 8,
+          "duration_ns": 13333
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 2,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 13334
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 12958
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 4,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 13125
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 5,
+          "trial_index": 1,
+          "iterations": 8,
+          "duration_ns": 14958
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 8,
+          "duration_ns": 14833
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 8,
+          "duration_ns": 14542
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 14875
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 4,
+          "iterations": 8,
+          "duration_ns": 13291
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 10,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 14917
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 11,
+          "trial_index": 5,
+          "iterations": 8,
+          "duration_ns": 12833
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "candidate",
+          "order_index": 12,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 13125
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 8,
+          "duration_ns": 14750
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 0,
+          "trial_index": 0,
+          "iterations": 2,
+          "duration_ns": 73125
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 1,
+          "trial_index": 1,
+          "iterations": 2,
+          "duration_ns": 71583
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 2,
+          "trial_index": 0,
+          "iterations": 2,
+          "duration_ns": 86625
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 3,
+          "trial_index": 2,
+          "iterations": 2,
+          "duration_ns": 70750
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 4,
+          "trial_index": 1,
+          "iterations": 2,
+          "duration_ns": 85917
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 5,
+          "trial_index": 3,
+          "iterations": 2,
+          "duration_ns": 71000
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 6,
+          "trial_index": 2,
+          "iterations": 2,
+          "duration_ns": 86041
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 7,
+          "trial_index": 3,
+          "iterations": 2,
+          "duration_ns": 85500
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 8,
+          "trial_index": 4,
+          "iterations": 2,
+          "duration_ns": 71459
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 9,
+          "trial_index": 5,
+          "iterations": 2,
+          "duration_ns": 71042
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 10,
+          "trial_index": 4,
+          "iterations": 2,
+          "duration_ns": 85583
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "candidate",
+          "order_index": 11,
+          "trial_index": 6,
+          "iterations": 2,
+          "duration_ns": 70917
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 12,
+          "trial_index": 5,
+          "iterations": 2,
+          "duration_ns": 86334
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "alternative": "reference",
+          "order_index": 13,
+          "trial_index": 6,
+          "iterations": 2,
+          "duration_ns": 85417
+        }
+      ],
+      "raw_samples_sha256": "7bfbdaf22820236f496fe06ce33a358107d0a5a118fd873167f9bb75390c631f",
+      "measurement_provenance": "sandboxed_cpu_wall_clock",
+      "measurement_scope": "isolated_operator_only_not_end_to_end_serving",
+      "regimes": [
+        {
+          "regime": "micro_batch_1",
+          "measurement_scope": "isolated_operator_microbenchmark",
+          "status": "inconclusive",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 8,
+          "run_order": [
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            5792.0,
+            5250.0,
+            5167.0,
+            4875.0,
+            5041.0,
+            5042.0,
+            4916.0
+          ],
+          "candidate_samples_ns": [
+            5792.0,
+            5292.0,
+            5083.0,
+            5125.0,
+            5125.0,
+            5208.0,
+            5042.0
+          ],
+          "reference_median_ns": 5042.0,
+          "candidate_median_ns": 5125.0,
+          "improvement_percent": -1.6461721539071796,
+          "confidence_interval_low_percent": -5.4834950638289195,
+          "confidence_interval_high_percent": 2.0222082446293723,
+          "effect_size": -0.34693877551020413,
+          "rationale": "confidence interval overlaps the practical or noise threshold"
+        },
+        {
+          "regime": "micro_noncontiguous",
+          "measurement_scope": "isolated_operator_microbenchmark",
+          "status": "passed",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 8,
+          "run_order": [
+            "reference",
+            "candidate",
+            "candidate",
+            "candidate",
+            "candidate",
+            "reference",
+            "reference",
+            "reference",
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "candidate",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            15542.0,
+            14958.0,
+            14833.0,
+            14542.0,
+            14875.0,
+            14917.0,
+            14750.0
+          ],
+          "candidate_samples_ns": [
+            13333.0,
+            13334.0,
+            12958.0,
+            13125.0,
+            13291.0,
+            12833.0,
+            13125.0
+          ],
+          "reference_median_ns": 14875.0,
+          "candidate_median_ns": 13125.0,
+          "improvement_percent": 11.76470588235294,
+          "confidence_interval_low_percent": 9.996529577316727,
+          "confidence_interval_high_percent": 13.370771493515177,
+          "effect_size": 1.0,
+          "rationale": "confidence interval exceeds practical and measured noise thresholds"
+        },
+        {
+          "regime": "operator_loop_batch_32",
+          "measurement_scope": "repeated_operator_loop_not_serving_end_to_end",
+          "status": "passed",
+          "warmup_count": 1,
+          "repetitions": 7,
+          "iterations": 2,
+          "run_order": [
+            "candidate",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "reference",
+            "candidate",
+            "candidate",
+            "reference",
+            "candidate",
+            "reference",
+            "reference"
+          ],
+          "reference_samples_ns": [
+            86625.0,
+            85917.0,
+            86041.0,
+            85500.0,
+            85583.0,
+            86334.0,
+            85417.0
+          ],
+          "candidate_samples_ns": [
+            73125.0,
+            71583.0,
+            70750.0,
+            71000.0,
+            71459.0,
+            71042.0,
+            70917.0
+          ],
+          "reference_median_ns": 85917.0,
+          "candidate_median_ns": 71042.0,
+          "improvement_percent": 17.313220899239965,
+          "confidence_interval_low_percent": 16.388709745055806,
+          "confidence_interval_high_percent": 17.674049293786418,
+          "effect_size": 1.0,
+          "rationale": "confidence interval exceeds practical and measured noise thresholds"
+        }
+      ],
+      "sandbox_termination": "success",
+      "sandbox_backend": "macos_sandbox_exec"
+    }
+  ],
+  "runtime_impacts": [
+    {
+      "schema_version": "sloforge.genesis.kernel-runtime-impact/v1",
+      "candidate": {
+        "candidate_id": "qstate-u1-branches-cached",
+        "operator_schema": {
+          "schema_version": "sloforge.genesis.kernel-lab/v1",
+          "operator_id": "quantized-state-update",
+          "symbol": "quantized_recurrent_state_update",
+          "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+          "inputs": [
+            {
+              "name": "previous_state",
+              "dtype": "int8",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": true
+            },
+            {
+              "name": "activation",
+              "dtype": "float64",
+              "shape": [
+                {
+                  "name": "batch",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "multiple_of": 1
+                }
+              ],
+              "allowed_strides": [
+                1,
+                2,
+                3
+              ],
+              "contiguous_required": false,
+              "mutable": false
+            }
+          ],
+          "output": {
+            "name": "updated_state",
+            "dtype": "int8",
+            "shape": [
+              {
+                "name": "batch",
+                "minimum": 1,
+                "maximum": 128,
+                "multiple_of": 1
+              }
+            ],
+            "allowed_strides": [
+              1,
+              2,
+              3
+            ],
+            "contiguous_required": false,
+            "mutable": true
+          },
+          "aliasing": {
+            "output_may_alias": [
+              "previous_state"
+            ],
+            "activation_alias_forbidden": true,
+            "exact_index_mapping_required": true
+          },
+          "numerical": {
+            "exact": true,
+            "rounding": "nearest_ties_to_even",
+            "saturation_minimum": -127,
+            "saturation_maximum": 127,
+            "maximum_absolute_error": 0.0,
+            "maximum_relative_error": 0.0,
+            "nan_behavior": "reject",
+            "infinity_behavior": "reject",
+            "deterministic": true
+          },
+          "architecture": {
+            "backend": "python_cpu",
+            "architectures": [
+              "cpu-generic"
+            ],
+            "minimum_python": "3.11",
+            "requires_gpu": false,
+            "hidden_fallback_forbidden": true
+          },
+          "stateful": true,
+          "atomicity": "per_token"
+        },
+        "backend": "python_cpu",
+        "target_architecture": "cpu-generic",
+        "parameters": {
+          "unroll_factor": 1,
+          "clamp_style": "branches",
+          "cache_coefficients": true
+        },
+        "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+        "deterministic_seed": 73131,
+        "fallback_symbol": "reference_quantized_state_update"
+      },
+      "config": {
+        "synthesis_seed": 73131,
+        "runtime_generation_seed": 11943450324005855496,
+        "trace_seed": 16077757830609104787,
+        "trial_order_seed": 11354205736788399115,
+        "bootstrap_seed": 6407853777475128914,
+        "sandbox_seed": 2417397425,
+        "warmup_count": 1,
+        "repetitions": 7,
+        "bootstrap_rounds": 500,
+        "confidence": 0.95,
+        "practical_significance_percent": 2.0,
+        "noise_floor_percent": 1.0,
+        "request_count": 6,
+        "request_timeout_seconds": 3.0,
+        "sandbox_wall_time_seconds": 30.0
+      },
+      "measurement_scope": "cpu_generated_runtime_end_to_end_serving",
+      "hardware_backed_gpu": false,
+      "timing_boundary": "after_runtime_start_from_interleaved_submission_through_state_release",
+      "source_package_hash": "ab6b60a6a4b7c89b273e82a1dead475b22d2692b3a41615d918af3222cd24591",
+      "patched_package_hash": "b942ed6bc103ba11b57c0c0199fed0be4bfa4d2be6b5c9c5e996c99f44b12841",
+      "candidate_source_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-package/generated_kernel.py",
+      "candidate_source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+      "trace_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/interleaved-trace.json",
+      "trace_sha256": "560447b880fad0a1385b8468c919a96cda12790694bd9a275d4b06081619e898",
+      "workload_fingerprint": "560447b880fad0a1385b8468c919a96cda12790694bd9a275d4b06081619e898",
+      "hardware_fingerprint": "local-cpu:d53a0c8f2d76f68d8bde8fbb1af8da0ecfbbe58674fe9d66d61715cd8dbd4770",
+      "software_manifest": [
+        "python=3.12.7",
+        "implementation=CPython",
+        "machine=arm64",
+        "system=Darwin",
+        "release=24.6.0",
+        "logical_cpu_count=12",
+        "cpu_affinity=unavailable",
+        "timer=perf_counter_ns",
+        "gpu_execution=false"
+      ],
+      "runtime_bundles": [
+        {
+          "alternative": "reference",
+          "bundle_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-runtime",
+          "runtime_id": "c0e79105dbe4612928679b3964c28ab1a034cd3869a799e8b284bf174ebebb6e",
+          "package_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-package",
+          "package_hash": "ab6b60a6a4b7c89b273e82a1dead475b22d2692b3a41615d918af3222cd24591",
+          "inspection_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-inspection.json",
+          "inspection_sha256": "2a0cc7dd70d8bdd1565c1120c1c782bafe185196f5202de854d11916c33faf0a",
+          "artifact_manifest_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-runtime/artifact_manifest.json",
+          "artifact_manifest_sha256": "116edafe92fb2ca3c7fff4cdfdef61e7fa1820da190258b6423e25073d6cf3e0"
+        },
+        {
+          "alternative": "candidate",
+          "bundle_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-runtime",
+          "runtime_id": "f09de2d66fb3573a28aca20953a40927cdcbb4ce0ded7b55437b4f46242f7558",
+          "package_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-package",
+          "package_hash": "b942ed6bc103ba11b57c0c0199fed0be4bfa4d2be6b5c9c5e996c99f44b12841",
+          "inspection_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-inspection.json",
+          "inspection_sha256": "aa4f4e97774f123a6b41524fc52e9ebc51a681d5f7cec8405b6033a5a7635360",
+          "artifact_manifest_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-runtime/artifact_manifest.json",
+          "artifact_manifest_sha256": "bae20316925fb11b0db1b0a9369424afe5802dbc36732cb6f3331e75738a9447"
+        }
+      ],
+      "samples": [
+        {
+          "alternative": "reference",
+          "trial_index": 0,
+          "order_index": 0,
+          "duration_ns": 3636625,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 0,
+          "order_index": 1,
+          "duration_ns": 3713459,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 1,
+          "order_index": 2,
+          "duration_ns": 3805541,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 1,
+          "order_index": 3,
+          "duration_ns": 3639000,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 2,
+          "order_index": 4,
+          "duration_ns": 3771750,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 2,
+          "order_index": 5,
+          "duration_ns": 2720209,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 3,
+          "order_index": 6,
+          "duration_ns": 3710875,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 3,
+          "order_index": 7,
+          "duration_ns": 2839083,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 4,
+          "order_index": 8,
+          "duration_ns": 3246708,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 4,
+          "order_index": 9,
+          "duration_ns": 3629000,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 5,
+          "order_index": 10,
+          "duration_ns": 3636084,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 5,
+          "order_index": 11,
+          "duration_ns": 3728834,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "reference",
+          "trial_index": 6,
+          "order_index": 12,
+          "duration_ns": 3659416,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        },
+        {
+          "alternative": "candidate",
+          "trial_index": 6,
+          "order_index": 13,
+          "duration_ns": 3726708,
+          "request_count": 6,
+          "emitted_token_count": 24,
+          "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+        }
+      ],
+      "raw_samples_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/raw-runtime-samples.jsonl",
+      "raw_samples_sha256": "279163a4a6f1f0a6a15338c4dce787d29adcb88650534982db26012a1d594efd",
+      "runner_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/measurement-sandbox/runner-output.json",
+      "runner_output_sha256": "4f3c3f5289e7974055e29804add9e305551bb15253f28382d85af3597156b10f",
+      "runner_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/runtime-impact-runner.py",
+      "runner_sha256": "024053aec07e8c1ae35b458e47b3924c9c18c7ceae158893f0620e0bd32d6cb8",
+      "reference_semantics": [
+        {
+          "request_id": "kernel-impact-00",
+          "token_ids": [
+            13,
+            1,
+            29
+          ],
+          "final_state": {
+            "kv_window": [
+              22,
+              7,
+              12,
+              12,
+              13,
+              1
+            ],
+            "recurrent_state": 0.6793327706805105,
+            "quantized_state": 52,
+            "expert_loads": [
+              4,
+              3,
+              2
+            ],
+            "speculative_state": 5,
+            "prompt_length": 6
+          }
+        },
+        {
+          "request_id": "kernel-impact-01",
+          "token_ids": [
+            15,
+            0,
+            23,
+            2,
+            1
+          ],
+          "final_state": {
+            "kv_window": [
+              20,
+              20,
+              15,
+              0,
+              23,
+              2
+            ],
+            "recurrent_state": 0.6253772208055529,
+            "quantized_state": 44,
+            "expert_loads": [
+              1,
+              4,
+              6
+            ],
+            "speculative_state": 9,
+            "prompt_length": 6
+          }
+        },
+        {
+          "request_id": "kernel-impact-02",
+          "token_ids": [
+            2,
+            23,
+            29
+          ],
+          "final_state": {
+            "kv_window": [
+              12,
+              11,
+              11,
+              11,
+              2,
+              23
+            ],
+            "recurrent_state": 0.36136850388791375,
+            "quantized_state": 37,
+            "expert_loads": [
+              2,
+              4,
+              5
+            ],
+            "speculative_state": 1,
+            "prompt_length": 8
+          }
+        },
+        {
+          "request_id": "kernel-impact-03",
+          "token_ids": [
+            22,
+            30,
+            17,
+            17,
+            14
+          ],
+          "final_state": {
+            "kv_window": [
+              8,
+              8,
+              22,
+              30,
+              17,
+              17
+            ],
+            "recurrent_state": 0.790988039387291,
+            "quantized_state": 56,
+            "expert_loads": [
+              0,
+              5,
+              5
+            ],
+            "speculative_state": 4,
+            "prompt_length": 5
+          }
+        },
+        {
+          "request_id": "kernel-impact-04",
+          "token_ids": [
+            20,
+            22,
+            21
+          ],
+          "final_state": {
+            "kv_window": [
+              7,
+              12,
+              15,
+              15,
+              20,
+              22
+            ],
+            "recurrent_state": 0.7187121199459471,
+            "quantized_state": 52,
+            "expert_loads": [
+              2,
+              5,
+              3
+            ],
+            "speculative_state": 2,
+            "prompt_length": 7
+          }
+        },
+        {
+          "request_id": "kernel-impact-05",
+          "token_ids": [
+            1,
+            19,
+            16,
+            14,
+            16
+          ],
+          "final_state": {
+            "kv_window": [
+              30,
+              30,
+              1,
+              19,
+              16,
+              14
+            ],
+            "recurrent_state": 0.7724891992778149,
+            "quantized_state": 59,
+            "expert_loads": [
+              3,
+              5,
+              4
+            ],
+            "speculative_state": 7,
+            "prompt_length": 7
+          }
+        }
+      ],
+      "candidate_semantics": [
+        {
+          "request_id": "kernel-impact-00",
+          "token_ids": [
+            13,
+            1,
+            29
+          ],
+          "final_state": {
+            "kv_window": [
+              22,
+              7,
+              12,
+              12,
+              13,
+              1
+            ],
+            "recurrent_state": 0.6793327706805105,
+            "quantized_state": 52,
+            "expert_loads": [
+              4,
+              3,
+              2
+            ],
+            "speculative_state": 5,
+            "prompt_length": 6
+          }
+        },
+        {
+          "request_id": "kernel-impact-01",
+          "token_ids": [
+            15,
+            0,
+            23,
+            2,
+            1
+          ],
+          "final_state": {
+            "kv_window": [
+              20,
+              20,
+              15,
+              0,
+              23,
+              2
+            ],
+            "recurrent_state": 0.6253772208055529,
+            "quantized_state": 44,
+            "expert_loads": [
+              1,
+              4,
+              6
+            ],
+            "speculative_state": 9,
+            "prompt_length": 6
+          }
+        },
+        {
+          "request_id": "kernel-impact-02",
+          "token_ids": [
+            2,
+            23,
+            29
+          ],
+          "final_state": {
+            "kv_window": [
+              12,
+              11,
+              11,
+              11,
+              2,
+              23
+            ],
+            "recurrent_state": 0.36136850388791375,
+            "quantized_state": 37,
+            "expert_loads": [
+              2,
+              4,
+              5
+            ],
+            "speculative_state": 1,
+            "prompt_length": 8
+          }
+        },
+        {
+          "request_id": "kernel-impact-03",
+          "token_ids": [
+            22,
+            30,
+            17,
+            17,
+            14
+          ],
+          "final_state": {
+            "kv_window": [
+              8,
+              8,
+              22,
+              30,
+              17,
+              17
+            ],
+            "recurrent_state": 0.790988039387291,
+            "quantized_state": 56,
+            "expert_loads": [
+              0,
+              5,
+              5
+            ],
+            "speculative_state": 4,
+            "prompt_length": 5
+          }
+        },
+        {
+          "request_id": "kernel-impact-04",
+          "token_ids": [
+            20,
+            22,
+            21
+          ],
+          "final_state": {
+            "kv_window": [
+              7,
+              12,
+              15,
+              15,
+              20,
+              22
+            ],
+            "recurrent_state": 0.7187121199459471,
+            "quantized_state": 52,
+            "expert_loads": [
+              2,
+              5,
+              3
+            ],
+            "speculative_state": 2,
+            "prompt_length": 7
+          }
+        },
+        {
+          "request_id": "kernel-impact-05",
+          "token_ids": [
+            1,
+            19,
+            16,
+            14,
+            16
+          ],
+          "final_state": {
+            "kv_window": [
+              30,
+              30,
+              1,
+              19,
+              16,
+              14
+            ],
+            "recurrent_state": 0.7724891992778149,
+            "quantized_state": 59,
+            "expert_loads": [
+              3,
+              5,
+              4
+            ],
+            "speculative_state": 7,
+            "prompt_length": 7
+          }
+        }
+      ],
+      "output_exact_match": true,
+      "state_exact_match": true,
+      "statistics": {
+        "analysis_method": "paired_trial_bootstrap_median_improvement",
+        "benchmark_contract_sha256": "8cbbc8ed73810d231f48f03b43918b81f7c5556679d75fa4dc7070953ae4a2c9",
+        "status": "inconclusive",
+        "reference_median_ns": 3710875.0,
+        "candidate_median_ns": 3636084.0,
+        "improvement_percent": 2.0154545760770706,
+        "confidence_interval_low_percent": -1.8388726507180382,
+        "confidence_interval_high_percent": 23.492895880351668,
+        "effect_size": 0.4285714285714286,
+        "practical_significance_percent": 2.0,
+        "noise_floor_percent": 1.0,
+        "rationale": "paired confidence interval overlaps the declared practical or noise threshold"
+      },
+      "sandbox_termination": "success",
+      "sandbox_backend": "macos_sandbox_exec",
+      "validation": {
+        "status": "passed",
+        "artifact_hashes_verified": true,
+        "statistics_reconstructed": true,
+        "runtime_outputs_replayed": true,
+        "state_semantics_replayed": true,
+        "replay_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/independent-validation-sandbox/runner-output.json",
+        "replay_output_sha256": "f8498e347002bf44fac6c21ea355f790d4d7c8f526423c801ba646cdb3269a8c",
+        "sandbox_termination": "success",
+        "sandbox_backend": "macos_sandbox_exec"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "candidate_id": "qstate-u1-branches-cached",
+      "status": "inconclusive",
+      "correctness_status": "passed",
+      "microbenchmark_status": "passed",
+      "operator_loop_status": "passed",
+      "full_stack_status": "inconclusive",
+      "claim": "no speedup claim; end-to-end generated-runtime acceptance gate did not pass",
+      "reasons": [
+        "exact semantics passed",
+        "end-to-end statistical gate was inconclusive",
+        "isolated operator results cannot override the generated-runtime serving gate"
+      ]
+    },
+    {
+      "candidate_id": "qstate-u1-branches-literal",
+      "status": "inconclusive",
+      "correctness_status": "passed",
+      "microbenchmark_status": "passed",
+      "operator_loop_status": "passed",
+      "full_stack_status": "unavailable",
+      "claim": "no speedup claim; isolated operator evidence is not end-to-end serving evidence",
+      "reasons": [
+        "not every declared supported benchmark regime passed",
+        "no end-to-end serving benchmark was executed; isolated operator evidence cannot promote"
+      ]
+    }
+  ],
+  "triton_adapter": {
+    "status": "unavailable",
+    "installed_version": null,
+    "exercised": false,
+    "reason": "Triton is not installed; no generated GPU code was compiled or benchmarked",
+    "required_opt_in": "SLOFORGE_GENESIS_ALLOW_GPU"
+  }
+}

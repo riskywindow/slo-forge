@@ -1,0 +1,16 @@
+{
+  "deployed": false,
+  "files": {
+    "README.md": "e58099c9b419e32f1b87657eddd6f65c8e6dfa7115ca4ce123e9e7d466abaafe",
+    "app.py": "05b1e0b9ee4913a55fecd2d5d45f958fc4da1c5288033d68b43ce400f6e1e9f9",
+    "requirements.txt": "010c030d909f84a4f1a66eab1cee2dc9f31465a97344c923291982f139067fbc"
+  },
+  "generated_at": "2026-08-04T03:55:36.000014+00:00",
+  "output_dir": "artifacts/helix/baseline/demo/exports/modal",
+  "schema_version": "sloforge.export/v1",
+  "target": "modal",
+  "validation": [
+    "Modal app AST and bytecode compilation passed without resource invocation",
+    "Modal 1.5.3 offline import passed without credentials"
+  ]
+}

@@ -1,0 +1,676 @@
+{
+  "schema_version": "sloforge.genesis.kernel-runtime-impact/v1",
+  "candidate": {
+    "candidate_id": "qstate-u1-branches-cached",
+    "operator_schema": {
+      "schema_version": "sloforge.genesis.kernel-lab/v1",
+      "operator_id": "quantized-state-update",
+      "symbol": "quantized_recurrent_state_update",
+      "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+      "inputs": [
+        {
+          "name": "previous_state",
+          "dtype": "int8",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": true
+        },
+        {
+          "name": "activation",
+          "dtype": "float64",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": false
+        }
+      ],
+      "output": {
+        "name": "updated_state",
+        "dtype": "int8",
+        "shape": [
+          {
+            "name": "batch",
+            "minimum": 1,
+            "maximum": 128,
+            "multiple_of": 1
+          }
+        ],
+        "allowed_strides": [
+          1,
+          2,
+          3
+        ],
+        "contiguous_required": false,
+        "mutable": true
+      },
+      "aliasing": {
+        "output_may_alias": [
+          "previous_state"
+        ],
+        "activation_alias_forbidden": true,
+        "exact_index_mapping_required": true
+      },
+      "numerical": {
+        "exact": true,
+        "rounding": "nearest_ties_to_even",
+        "saturation_minimum": -127,
+        "saturation_maximum": 127,
+        "maximum_absolute_error": 0.0,
+        "maximum_relative_error": 0.0,
+        "nan_behavior": "reject",
+        "infinity_behavior": "reject",
+        "deterministic": true
+      },
+      "architecture": {
+        "backend": "python_cpu",
+        "architectures": [
+          "cpu-generic"
+        ],
+        "minimum_python": "3.11",
+        "requires_gpu": false,
+        "hidden_fallback_forbidden": true
+      },
+      "stateful": true,
+      "atomicity": "per_token"
+    },
+    "backend": "python_cpu",
+    "target_architecture": "cpu-generic",
+    "parameters": {
+      "unroll_factor": 1,
+      "clamp_style": "branches",
+      "cache_coefficients": true
+    },
+    "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+    "deterministic_seed": 73131,
+    "fallback_symbol": "reference_quantized_state_update"
+  },
+  "config": {
+    "synthesis_seed": 73131,
+    "runtime_generation_seed": 11943450324005855496,
+    "trace_seed": 16077757830609104787,
+    "trial_order_seed": 11354205736788399115,
+    "bootstrap_seed": 6407853777475128914,
+    "sandbox_seed": 2417397425,
+    "warmup_count": 1,
+    "repetitions": 7,
+    "bootstrap_rounds": 500,
+    "confidence": 0.95,
+    "practical_significance_percent": 2.0,
+    "noise_floor_percent": 1.0,
+    "request_count": 6,
+    "request_timeout_seconds": 3.0,
+    "sandbox_wall_time_seconds": 30.0
+  },
+  "measurement_scope": "cpu_generated_runtime_end_to_end_serving",
+  "hardware_backed_gpu": false,
+  "timing_boundary": "after_runtime_start_from_interleaved_submission_through_state_release",
+  "source_package_hash": "ab6b60a6a4b7c89b273e82a1dead475b22d2692b3a41615d918af3222cd24591",
+  "patched_package_hash": "b942ed6bc103ba11b57c0c0199fed0be4bfa4d2be6b5c9c5e996c99f44b12841",
+  "candidate_source_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-package/generated_kernel.py",
+  "candidate_source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+  "trace_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/interleaved-trace.json",
+  "trace_sha256": "560447b880fad0a1385b8468c919a96cda12790694bd9a275d4b06081619e898",
+  "workload_fingerprint": "560447b880fad0a1385b8468c919a96cda12790694bd9a275d4b06081619e898",
+  "hardware_fingerprint": "local-cpu:d53a0c8f2d76f68d8bde8fbb1af8da0ecfbbe58674fe9d66d61715cd8dbd4770",
+  "software_manifest": [
+    "python=3.12.7",
+    "implementation=CPython",
+    "machine=arm64",
+    "system=Darwin",
+    "release=24.6.0",
+    "logical_cpu_count=12",
+    "cpu_affinity=unavailable",
+    "timer=perf_counter_ns",
+    "gpu_execution=false"
+  ],
+  "runtime_bundles": [
+    {
+      "alternative": "reference",
+      "bundle_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-runtime",
+      "runtime_id": "c0e79105dbe4612928679b3964c28ab1a034cd3869a799e8b284bf174ebebb6e",
+      "package_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-package",
+      "package_hash": "ab6b60a6a4b7c89b273e82a1dead475b22d2692b3a41615d918af3222cd24591",
+      "inspection_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-inspection.json",
+      "inspection_sha256": "2a0cc7dd70d8bdd1565c1120c1c782bafe185196f5202de854d11916c33faf0a",
+      "artifact_manifest_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/reference-runtime/artifact_manifest.json",
+      "artifact_manifest_sha256": "116edafe92fb2ca3c7fff4cdfdef61e7fa1820da190258b6423e25073d6cf3e0"
+    },
+    {
+      "alternative": "candidate",
+      "bundle_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-runtime",
+      "runtime_id": "f09de2d66fb3573a28aca20953a40927cdcbb4ce0ded7b55437b4f46242f7558",
+      "package_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-package",
+      "package_hash": "b942ed6bc103ba11b57c0c0199fed0be4bfa4d2be6b5c9c5e996c99f44b12841",
+      "inspection_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-inspection.json",
+      "inspection_sha256": "aa4f4e97774f123a6b41524fc52e9ebc51a681d5f7cec8405b6033a5a7635360",
+      "artifact_manifest_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/candidate-runtime/artifact_manifest.json",
+      "artifact_manifest_sha256": "bae20316925fb11b0db1b0a9369424afe5802dbc36732cb6f3331e75738a9447"
+    }
+  ],
+  "samples": [
+    {
+      "alternative": "reference",
+      "trial_index": 0,
+      "order_index": 0,
+      "duration_ns": 3636625,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 0,
+      "order_index": 1,
+      "duration_ns": 3713459,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 1,
+      "order_index": 2,
+      "duration_ns": 3805541,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 1,
+      "order_index": 3,
+      "duration_ns": 3639000,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 2,
+      "order_index": 4,
+      "duration_ns": 3771750,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 2,
+      "order_index": 5,
+      "duration_ns": 2720209,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 3,
+      "order_index": 6,
+      "duration_ns": 3710875,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 3,
+      "order_index": 7,
+      "duration_ns": 2839083,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 4,
+      "order_index": 8,
+      "duration_ns": 3246708,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 4,
+      "order_index": 9,
+      "duration_ns": 3629000,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 5,
+      "order_index": 10,
+      "duration_ns": 3636084,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 5,
+      "order_index": 11,
+      "duration_ns": 3728834,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "reference",
+      "trial_index": 6,
+      "order_index": 12,
+      "duration_ns": 3659416,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    },
+    {
+      "alternative": "candidate",
+      "trial_index": 6,
+      "order_index": 13,
+      "duration_ns": 3726708,
+      "request_count": 6,
+      "emitted_token_count": 24,
+      "output_sha256": "3799113abfdd6972715b0958efe4d94d12c64653736451bd9f9d3ed2aceb4170"
+    }
+  ],
+  "raw_samples_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/raw-runtime-samples.jsonl",
+  "raw_samples_sha256": "279163a4a6f1f0a6a15338c4dce787d29adcb88650534982db26012a1d594efd",
+  "runner_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/measurement-sandbox/runner-output.json",
+  "runner_output_sha256": "4f3c3f5289e7974055e29804add9e305551bb15253f28382d85af3597156b10f",
+  "runner_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/execution-inputs/runtime-impact-runner.py",
+  "runner_sha256": "024053aec07e8c1ae35b458e47b3924c9c18c7ceae158893f0620e0bd32d6cb8",
+  "reference_semantics": [
+    {
+      "request_id": "kernel-impact-00",
+      "token_ids": [
+        13,
+        1,
+        29
+      ],
+      "final_state": {
+        "kv_window": [
+          22,
+          7,
+          12,
+          12,
+          13,
+          1
+        ],
+        "recurrent_state": 0.6793327706805105,
+        "quantized_state": 52,
+        "expert_loads": [
+          4,
+          3,
+          2
+        ],
+        "speculative_state": 5,
+        "prompt_length": 6
+      }
+    },
+    {
+      "request_id": "kernel-impact-01",
+      "token_ids": [
+        15,
+        0,
+        23,
+        2,
+        1
+      ],
+      "final_state": {
+        "kv_window": [
+          20,
+          20,
+          15,
+          0,
+          23,
+          2
+        ],
+        "recurrent_state": 0.6253772208055529,
+        "quantized_state": 44,
+        "expert_loads": [
+          1,
+          4,
+          6
+        ],
+        "speculative_state": 9,
+        "prompt_length": 6
+      }
+    },
+    {
+      "request_id": "kernel-impact-02",
+      "token_ids": [
+        2,
+        23,
+        29
+      ],
+      "final_state": {
+        "kv_window": [
+          12,
+          11,
+          11,
+          11,
+          2,
+          23
+        ],
+        "recurrent_state": 0.36136850388791375,
+        "quantized_state": 37,
+        "expert_loads": [
+          2,
+          4,
+          5
+        ],
+        "speculative_state": 1,
+        "prompt_length": 8
+      }
+    },
+    {
+      "request_id": "kernel-impact-03",
+      "token_ids": [
+        22,
+        30,
+        17,
+        17,
+        14
+      ],
+      "final_state": {
+        "kv_window": [
+          8,
+          8,
+          22,
+          30,
+          17,
+          17
+        ],
+        "recurrent_state": 0.790988039387291,
+        "quantized_state": 56,
+        "expert_loads": [
+          0,
+          5,
+          5
+        ],
+        "speculative_state": 4,
+        "prompt_length": 5
+      }
+    },
+    {
+      "request_id": "kernel-impact-04",
+      "token_ids": [
+        20,
+        22,
+        21
+      ],
+      "final_state": {
+        "kv_window": [
+          7,
+          12,
+          15,
+          15,
+          20,
+          22
+        ],
+        "recurrent_state": 0.7187121199459471,
+        "quantized_state": 52,
+        "expert_loads": [
+          2,
+          5,
+          3
+        ],
+        "speculative_state": 2,
+        "prompt_length": 7
+      }
+    },
+    {
+      "request_id": "kernel-impact-05",
+      "token_ids": [
+        1,
+        19,
+        16,
+        14,
+        16
+      ],
+      "final_state": {
+        "kv_window": [
+          30,
+          30,
+          1,
+          19,
+          16,
+          14
+        ],
+        "recurrent_state": 0.7724891992778149,
+        "quantized_state": 59,
+        "expert_loads": [
+          3,
+          5,
+          4
+        ],
+        "speculative_state": 7,
+        "prompt_length": 7
+      }
+    }
+  ],
+  "candidate_semantics": [
+    {
+      "request_id": "kernel-impact-00",
+      "token_ids": [
+        13,
+        1,
+        29
+      ],
+      "final_state": {
+        "kv_window": [
+          22,
+          7,
+          12,
+          12,
+          13,
+          1
+        ],
+        "recurrent_state": 0.6793327706805105,
+        "quantized_state": 52,
+        "expert_loads": [
+          4,
+          3,
+          2
+        ],
+        "speculative_state": 5,
+        "prompt_length": 6
+      }
+    },
+    {
+      "request_id": "kernel-impact-01",
+      "token_ids": [
+        15,
+        0,
+        23,
+        2,
+        1
+      ],
+      "final_state": {
+        "kv_window": [
+          20,
+          20,
+          15,
+          0,
+          23,
+          2
+        ],
+        "recurrent_state": 0.6253772208055529,
+        "quantized_state": 44,
+        "expert_loads": [
+          1,
+          4,
+          6
+        ],
+        "speculative_state": 9,
+        "prompt_length": 6
+      }
+    },
+    {
+      "request_id": "kernel-impact-02",
+      "token_ids": [
+        2,
+        23,
+        29
+      ],
+      "final_state": {
+        "kv_window": [
+          12,
+          11,
+          11,
+          11,
+          2,
+          23
+        ],
+        "recurrent_state": 0.36136850388791375,
+        "quantized_state": 37,
+        "expert_loads": [
+          2,
+          4,
+          5
+        ],
+        "speculative_state": 1,
+        "prompt_length": 8
+      }
+    },
+    {
+      "request_id": "kernel-impact-03",
+      "token_ids": [
+        22,
+        30,
+        17,
+        17,
+        14
+      ],
+      "final_state": {
+        "kv_window": [
+          8,
+          8,
+          22,
+          30,
+          17,
+          17
+        ],
+        "recurrent_state": 0.790988039387291,
+        "quantized_state": 56,
+        "expert_loads": [
+          0,
+          5,
+          5
+        ],
+        "speculative_state": 4,
+        "prompt_length": 5
+      }
+    },
+    {
+      "request_id": "kernel-impact-04",
+      "token_ids": [
+        20,
+        22,
+        21
+      ],
+      "final_state": {
+        "kv_window": [
+          7,
+          12,
+          15,
+          15,
+          20,
+          22
+        ],
+        "recurrent_state": 0.7187121199459471,
+        "quantized_state": 52,
+        "expert_loads": [
+          2,
+          5,
+          3
+        ],
+        "speculative_state": 2,
+        "prompt_length": 7
+      }
+    },
+    {
+      "request_id": "kernel-impact-05",
+      "token_ids": [
+        1,
+        19,
+        16,
+        14,
+        16
+      ],
+      "final_state": {
+        "kv_window": [
+          30,
+          30,
+          1,
+          19,
+          16,
+          14
+        ],
+        "recurrent_state": 0.7724891992778149,
+        "quantized_state": 59,
+        "expert_loads": [
+          3,
+          5,
+          4
+        ],
+        "speculative_state": 7,
+        "prompt_length": 7
+      }
+    }
+  ],
+  "output_exact_match": true,
+  "state_exact_match": true,
+  "statistics": {
+    "analysis_method": "paired_trial_bootstrap_median_improvement",
+    "benchmark_contract_sha256": "8cbbc8ed73810d231f48f03b43918b81f7c5556679d75fa4dc7070953ae4a2c9",
+    "status": "inconclusive",
+    "reference_median_ns": 3710875.0,
+    "candidate_median_ns": 3636084.0,
+    "improvement_percent": 2.0154545760770706,
+    "confidence_interval_low_percent": -1.8388726507180382,
+    "confidence_interval_high_percent": 23.492895880351668,
+    "effect_size": 0.4285714285714286,
+    "practical_significance_percent": 2.0,
+    "noise_floor_percent": 1.0,
+    "rationale": "paired confidence interval overlaps the declared practical or noise threshold"
+  },
+  "sandbox_termination": "success",
+  "sandbox_backend": "macos_sandbox_exec",
+  "validation": {
+    "status": "passed",
+    "artifact_hashes_verified": true,
+    "statistics_reconstructed": true,
+    "runtime_outputs_replayed": true,
+    "state_semantics_replayed": true,
+    "replay_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evolution-demo/kernel/lab/candidates/qstate-u1-branches-cached/runtime-impact/independent-validation-sandbox/runner-output.json",
+    "replay_output_sha256": "f8498e347002bf44fac6c21ea355f790d4d7c8f526423c801ba646cdb3269a8c",
+    "sandbox_termination": "success",
+    "sandbox_backend": "macos_sandbox_exec"
+  }
+}

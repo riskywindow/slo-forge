@@ -1,0 +1,3289 @@
+{
+  "outlier_policy": "none removed",
+  "raw_aggregate": {
+    "path": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+    "sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197"
+  },
+  "schema_version": "sloforge.branchfabric.cpu-characterization-statistics/v1",
+  "statistics": {
+    "branch_lifetime_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "branch_lifetime_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.08333333333333333,
+            "value": 384151000.0
+          },
+          {
+            "cumulative_probability": 0.16666666666666666,
+            "value": 384575541.0
+          },
+          {
+            "cumulative_probability": 0.25,
+            "value": 384966333.0
+          },
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 385363041.0
+          },
+          {
+            "cumulative_probability": 0.4166666666666667,
+            "value": 405154667.0
+          },
+          {
+            "cumulative_probability": 0.5,
+            "value": 405694625.0
+          },
+          {
+            "cumulative_probability": 0.5833333333333334,
+            "value": 406131750.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 406589584.0
+          },
+          {
+            "cumulative_probability": 0.75,
+            "value": 407984083.0
+          },
+          {
+            "cumulative_probability": 0.8333333333333334,
+            "value": 408458833.0
+          },
+          {
+            "cumulative_probability": 0.9166666666666666,
+            "value": 408915042.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 409369417.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.branch_lifetime_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/branch_lifetime_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          384151000.0,
+          387303302.125,
+          390455604.25,
+          393607906.375,
+          396760208.5,
+          399912510.625,
+          403064812.75,
+          406217114.875,
+          409369417.0
+        ],
+        "counts": [
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          5
+        ],
+        "method": "equal width",
+        "metric": "branch_lifetime_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.branch_lifetime_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/branch_lifetime_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 385164687.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "branch_lifetime_ns",
+        "observed": 405913187.5,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.branch_lifetime_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260809,
+        "series_id": "cpu-characterization/branch_lifetime_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 408221458.0
+      },
+      "raw_series": {
+        "metric": "branch_lifetime_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.branch_lifetime_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          384966333.0,
+          384151000.0,
+          384575541.0,
+          385363041.0,
+          408915042.0,
+          407984083.0,
+          408458833.0,
+          409369417.0,
+          406131750.0,
+          405154667.0,
+          405694625.0,
+          406589584.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/branch_lifetime_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 409369417.0,
+        "mean": 399779493.0,
+        "median": 405913187.5,
+        "metric": "branch_lifetime_ns",
+        "minimum": 384151000.0,
+        "outlier_policy": "none removed",
+        "p90": 408869421.1,
+        "p95": 409119510.75,
+        "p99": 409319435.75,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.branch_lifetime_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/branch_lifetime_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_commit_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_commit_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 79292.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 84917.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 106625.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_commit_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_commit_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          79292.0,
+          88403.0,
+          97514.0,
+          106625.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_commit_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_commit_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_commit_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 79292.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_commit_latency_ns",
+        "observed": 84917.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_commit_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260810,
+        "series_id": "cpu-characterization/continuum_commit_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 106625.0
+      },
+      "raw_series": {
+        "metric": "continuum_commit_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_commit_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          106625.0,
+          84917.0,
+          79292.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_commit_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 106625.0,
+        "mean": 90278.0,
+        "median": 84917.0,
+        "metric": "continuum_commit_latency_ns",
+        "minimum": 79292.0,
+        "outlier_policy": "none removed",
+        "p90": 102283.4,
+        "p95": 104454.2,
+        "p99": 106190.84,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_commit_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_commit_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_cow_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_cow_bytes",
+        "points": [
+          {
+            "cumulative_probability": 1.0,
+            "value": 512.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_cow_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 512.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_cow_bytes",
+        "observed": 512.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260811,
+        "series_id": "cpu-characterization/continuum_cow_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 512.0
+      },
+      "raw_series": {
+        "metric": "continuum_cow_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          512.0,
+          512.0,
+          512.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_cow_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 512.0,
+        "mean": 512.0,
+        "median": 512.0,
+        "metric": "continuum_cow_bytes",
+        "minimum": 512.0,
+        "outlier_policy": "none removed",
+        "p90": 512.0,
+        "p95": 512.0,
+        "p99": 512.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_cow_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "continuum_cow_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_cow_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 15167.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 19375.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 20916.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_cow_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          15167.0,
+          17083.333333333332,
+          18999.666666666668,
+          20916.0
+        ],
+        "counts": [
+          1,
+          0,
+          2
+        ],
+        "method": "equal width",
+        "metric": "continuum_cow_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_cow_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 15167.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_cow_latency_ns",
+        "observed": 19375.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260812,
+        "series_id": "cpu-characterization/continuum_cow_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 20916.0
+      },
+      "raw_series": {
+        "metric": "continuum_cow_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          20916.0,
+          19375.0,
+          15167.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_cow_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 20916.0,
+        "mean": 18486.0,
+        "median": 19375.0,
+        "metric": "continuum_cow_latency_ns",
+        "minimum": 15167.0,
+        "outlier_policy": "none removed",
+        "p90": 20607.8,
+        "p95": 20761.9,
+        "p99": 20885.18,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_cow_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_cow_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_delta_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_delta_bytes",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 1130.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 1131.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 1134.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_delta_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          1130.0,
+          1131.3333333333333,
+          1132.6666666666667,
+          1134.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_delta_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_delta_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 1130.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_delta_bytes",
+        "observed": 1131.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260813,
+        "series_id": "cpu-characterization/continuum_delta_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 1134.0
+      },
+      "raw_series": {
+        "metric": "continuum_delta_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          1130.0,
+          1131.0,
+          1134.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_delta_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 1134.0,
+        "mean": 1131.6666666666667,
+        "median": 1131.0,
+        "metric": "continuum_delta_bytes",
+        "minimum": 1130.0,
+        "outlier_policy": "none removed",
+        "p90": 1133.4,
+        "p95": 1133.7,
+        "p99": 1133.94,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_delta_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "continuum_delta_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_delta_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 518750.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 545250.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 633042.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_delta_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          518750.0,
+          556847.3333333334,
+          594944.6666666666,
+          633042.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_delta_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_delta_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 518750.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_delta_latency_ns",
+        "observed": 545250.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260814,
+        "series_id": "cpu-characterization/continuum_delta_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 633042.0
+      },
+      "raw_series": {
+        "metric": "continuum_delta_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          518750.0,
+          633042.0,
+          545250.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_delta_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 633042.0,
+        "mean": 565680.6666666666,
+        "median": 545250.0,
+        "metric": "continuum_delta_latency_ns",
+        "minimum": 518750.0,
+        "outlier_policy": "none removed",
+        "p90": 615483.6,
+        "p95": 624262.8,
+        "p99": 631286.16,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_delta_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_delta_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_fork_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_fork_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 32699958.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 32842750.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 41890750.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_fork_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_fork_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          32699958.0,
+          35763555.333333336,
+          38827152.666666664,
+          41890750.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_fork_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_fork_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_fork_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 32699958.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_fork_latency_ns",
+        "observed": 32842750.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_fork_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260815,
+        "series_id": "cpu-characterization/continuum_fork_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 41890750.0
+      },
+      "raw_series": {
+        "metric": "continuum_fork_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_fork_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          32842750.0,
+          32699958.0,
+          41890750.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_fork_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 41890750.0,
+        "mean": 35811152.666666664,
+        "median": 32842750.0,
+        "metric": "continuum_fork_latency_ns",
+        "minimum": 32699958.0,
+        "outlier_policy": "none removed",
+        "p90": 40081150.0,
+        "p95": 40985950.0,
+        "p99": 41709790.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_fork_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_fork_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_reclaim_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_reclaim_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 18500.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 19375.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 21208.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reclaim_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_reclaim_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          18500.0,
+          19402.666666666668,
+          20305.333333333332,
+          21208.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_reclaim_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reclaim_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_reclaim_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 18500.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_reclaim_latency_ns",
+        "observed": 19375.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reclaim_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260816,
+        "series_id": "cpu-characterization/continuum_reclaim_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 21208.0
+      },
+      "raw_series": {
+        "metric": "continuum_reclaim_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reclaim_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          21208.0,
+          19375.0,
+          18500.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_reclaim_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 21208.0,
+        "mean": 19694.333333333332,
+        "median": 19375.0,
+        "metric": "continuum_reclaim_latency_ns",
+        "minimum": 18500.0,
+        "outlier_policy": "none removed",
+        "p90": 20841.4,
+        "p95": 21024.7,
+        "p99": 21171.34,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reclaim_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_reclaim_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "continuum_reshard_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "continuum_reshard_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 1281417.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 1281667.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 1779125.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reshard_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/continuum_reshard_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          1281417.0,
+          1447319.6666666667,
+          1613222.3333333333,
+          1779125.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "continuum_reshard_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reshard_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/continuum_reshard_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 1281417.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "continuum_reshard_latency_ns",
+        "observed": 1281667.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reshard_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260817,
+        "series_id": "cpu-characterization/continuum_reshard_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 1779125.0
+      },
+      "raw_series": {
+        "metric": "continuum_reshard_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reshard_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          1779125.0,
+          1281667.0,
+          1281417.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/continuum_reshard_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 1779125.0,
+        "mean": 1447403.0,
+        "median": 1281667.0,
+        "metric": "continuum_reshard_latency_ns",
+        "minimum": 1281417.0,
+        "outlier_policy": "none removed",
+        "p90": 1679633.4,
+        "p95": 1729379.2,
+        "p99": 1769175.8399999999,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.continuum_reshard_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/continuum_reshard_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "environment_checkpoint_private_dirty_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "environment_checkpoint_private_dirty_bytes",
+        "points": [
+          {
+            "cumulative_probability": 1.0,
+            "value": 1303.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_checkpoint_private_dirty_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/environment_checkpoint_private_dirty_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 1303.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "environment_checkpoint_private_dirty_bytes",
+        "observed": 1303.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_checkpoint_private_dirty_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260818,
+        "series_id": "cpu-characterization/environment_checkpoint_private_dirty_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 1303.0
+      },
+      "raw_series": {
+        "metric": "environment_checkpoint_private_dirty_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_checkpoint_private_dirty_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          1303.0,
+          1303.0,
+          1303.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/environment_checkpoint_private_dirty_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 1303.0,
+        "mean": 1303.0,
+        "median": 1303.0,
+        "metric": "environment_checkpoint_private_dirty_bytes",
+        "minimum": 1303.0,
+        "outlier_policy": "none removed",
+        "p90": 1303.0,
+        "p95": 1303.0,
+        "p99": 1303.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_checkpoint_private_dirty_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/environment_checkpoint_private_dirty_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "environment_live_workspace_physical_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "environment_live_workspace_physical_bytes",
+        "points": [
+          {
+            "cumulative_probability": 1.0,
+            "value": 2376.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_live_workspace_physical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/environment_live_workspace_physical_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 2376.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "environment_live_workspace_physical_bytes",
+        "observed": 2376.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_live_workspace_physical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260819,
+        "series_id": "cpu-characterization/environment_live_workspace_physical_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 2376.0
+      },
+      "raw_series": {
+        "metric": "environment_live_workspace_physical_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_live_workspace_physical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          2376.0,
+          2376.0,
+          2376.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/environment_live_workspace_physical_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 2376.0,
+        "mean": 2376.0,
+        "median": 2376.0,
+        "metric": "environment_live_workspace_physical_bytes",
+        "minimum": 2376.0,
+        "outlier_policy": "none removed",
+        "p90": 2376.0,
+        "p95": 2376.0,
+        "p99": 2376.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.environment_live_workspace_physical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/environment_live_workspace_physical_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "fork_to_first_private_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "fork_to_first_private_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.08333333333333333,
+            "value": 5690292.0
+          },
+          {
+            "cumulative_probability": 0.16666666666666666,
+            "value": 6167917.0
+          },
+          {
+            "cumulative_probability": 0.25,
+            "value": 6522666.0
+          },
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 88801750.0
+          },
+          {
+            "cumulative_probability": 0.4166666666666667,
+            "value": 95080792.0
+          },
+          {
+            "cumulative_probability": 0.5,
+            "value": 95365333.0
+          },
+          {
+            "cumulative_probability": 0.5833333333333334,
+            "value": 170519709.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 181859584.0
+          },
+          {
+            "cumulative_probability": 0.75,
+            "value": 182765291.0
+          },
+          {
+            "cumulative_probability": 0.8333333333333334,
+            "value": 253466584.0
+          },
+          {
+            "cumulative_probability": 0.9166666666666666,
+            "value": 265686791.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 269221417.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.fork_to_first_private_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/fork_to_first_private_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          5690292.0,
+          38631682.625,
+          71573073.25,
+          104514463.875,
+          137455854.5,
+          170397245.125,
+          203338635.75,
+          236280026.375,
+          269221417.0
+        ],
+        "counts": [
+          3,
+          0,
+          3,
+          0,
+          0,
+          3,
+          0,
+          3
+        ],
+        "method": "equal width",
+        "metric": "fork_to_first_private_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.fork_to_first_private_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/fork_to_first_private_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 47662208.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "fork_to_first_private_ns",
+        "observed": 132942521.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.fork_to_first_private_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260820,
+        "series_id": "cpu-characterization/fork_to_first_private_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 218115937.5
+      },
+      "raw_series": {
+        "metric": "fork_to_first_private_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.fork_to_first_private_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          170519709.0,
+          5690292.0,
+          88801750.0,
+          253466584.0,
+          181859584.0,
+          6167917.0,
+          95080792.0,
+          269221417.0,
+          182765291.0,
+          6522666.0,
+          95365333.0,
+          265686791.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/fork_to_first_private_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 269221417.0,
+        "mean": 135095677.16666666,
+        "median": 132942521.0,
+        "metric": "fork_to_first_private_ns",
+        "minimum": 5690292.0,
+        "outlier_policy": "none removed",
+        "p90": 264464770.3,
+        "p95": 267277372.7,
+        "p99": 268832608.14,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 12,
+          "sample_selector": "series.fork_to_first_private_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 12,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/fork_to_first_private_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "helix_cpu_time_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "helix_cpu_time_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 1903949000.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 2028647000.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 2062528000.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_cpu_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/helix_cpu_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          1903949000.0,
+          1956808666.6666667,
+          2009668333.3333333,
+          2062528000.0
+        ],
+        "counts": [
+          1,
+          0,
+          2
+        ],
+        "method": "equal width",
+        "metric": "helix_cpu_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_cpu_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/helix_cpu_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 1903949000.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "helix_cpu_time_ns",
+        "observed": 2028647000.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_cpu_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260821,
+        "series_id": "cpu-characterization/helix_cpu_time_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 2062528000.0
+      },
+      "raw_series": {
+        "metric": "helix_cpu_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_cpu_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          1903949000.0,
+          2028647000.0,
+          2062528000.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/helix_cpu_time_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 2062528000.0,
+        "mean": 1998374666.6666667,
+        "median": 2028647000.0,
+        "metric": "helix_cpu_time_ns",
+        "minimum": 1903949000.0,
+        "outlier_policy": "none removed",
+        "p90": 2055751800.0,
+        "p95": 2059139900.0,
+        "p99": 2061850380.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_cpu_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/helix_cpu_time_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "helix_wall_time_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "helix_wall_time_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 10764844291.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 11444778583.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 11486239750.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_wall_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/helix_wall_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          10764844291.0,
+          11005309444.0,
+          11245774597.0,
+          11486239750.0
+        ],
+        "counts": [
+          1,
+          0,
+          2
+        ],
+        "method": "equal width",
+        "metric": "helix_wall_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_wall_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/helix_wall_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 10764844291.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "helix_wall_time_ns",
+        "observed": 11444778583.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_wall_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260822,
+        "series_id": "cpu-characterization/helix_wall_time_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 11486239750.0
+      },
+      "raw_series": {
+        "metric": "helix_wall_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_wall_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          10764844291.0,
+          11444778583.0,
+          11486239750.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/helix_wall_time_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 11486239750.0,
+        "mean": 11231954208.0,
+        "median": 11444778583.0,
+        "metric": "helix_wall_time_ns",
+        "minimum": 10764844291.0,
+        "outlier_policy": "none removed",
+        "p90": 11477947516.6,
+        "p95": 11482093633.3,
+        "p99": 11485410526.66,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.helix_wall_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/helix_wall_time_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "host_inprocess_send_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "host_inprocess_send_bytes",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 3434.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 3435.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 3438.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          3434.0,
+          3435.3333333333335,
+          3436.6666666666665,
+          3438.0
+        ],
+        "counts": [
+          2,
+          0,
+          1
+        ],
+        "method": "equal width",
+        "metric": "host_inprocess_send_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 3434.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "host_inprocess_send_bytes",
+        "observed": 3435.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260823,
+        "series_id": "cpu-characterization/host_inprocess_send_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 3438.0
+      },
+      "raw_series": {
+        "metric": "host_inprocess_send_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          3434.0,
+          3435.0,
+          3438.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 3438.0,
+        "mean": 3435.6666666666665,
+        "median": 3435.0,
+        "metric": "host_inprocess_send_bytes",
+        "minimum": 3434.0,
+        "outlier_policy": "none removed",
+        "p90": 3437.4,
+        "p95": 3437.7,
+        "p99": 3437.94,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "host_inprocess_send_latency_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "host_inprocess_send_latency_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 359250.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 431416.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 470791.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          359250.0,
+          396430.3333333333,
+          433610.6666666667,
+          470791.0
+        ],
+        "counts": [
+          1,
+          1,
+          1
+        ],
+        "method": "equal width",
+        "metric": "host_inprocess_send_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 359250.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "host_inprocess_send_latency_ns",
+        "observed": 431416.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260824,
+        "series_id": "cpu-characterization/host_inprocess_send_latency_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 470791.0
+      },
+      "raw_series": {
+        "metric": "host_inprocess_send_latency_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          431416.0,
+          359250.0,
+          470791.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 470791.0,
+        "mean": 420485.6666666667,
+        "median": 431416.0,
+        "metric": "host_inprocess_send_latency_ns",
+        "minimum": 359250.0,
+        "outlier_policy": "none removed",
+        "p90": 462916.0,
+        "p95": 466853.5,
+        "p99": 470003.5,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.host_inprocess_send_latency_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/host_inprocess_send_latency_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    },
+    "model_physical_allocated_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "model_physical_allocated_bytes",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 2660.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 2661.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 2662.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_physical_allocated_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/model_physical_allocated_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          2660.0,
+          2660.6666666666665,
+          2661.3333333333335,
+          2662.0
+        ],
+        "counts": [
+          1,
+          1,
+          1
+        ],
+        "method": "equal width",
+        "metric": "model_physical_allocated_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_physical_allocated_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/model_physical_allocated_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 2660.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "model_physical_allocated_bytes",
+        "observed": 2661.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_physical_allocated_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260825,
+        "series_id": "cpu-characterization/model_physical_allocated_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 2662.0
+      },
+      "raw_series": {
+        "metric": "model_physical_allocated_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_physical_allocated_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          2660.0,
+          2661.0,
+          2662.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/model_physical_allocated_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 2662.0,
+        "mean": 2661.0,
+        "median": 2661.0,
+        "metric": "model_physical_allocated_bytes",
+        "minimum": 2660.0,
+        "outlier_policy": "none removed",
+        "p90": 2661.8,
+        "p95": 2661.9,
+        "p99": 2661.98,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_physical_allocated_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/model_physical_allocated_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "model_shared_logical_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "model_shared_logical_bytes",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 8844.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 8848.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_shared_logical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/model_shared_logical_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          8844.0,
+          8846.0,
+          8848.0
+        ],
+        "counts": [
+          1,
+          2
+        ],
+        "method": "equal width",
+        "metric": "model_shared_logical_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_shared_logical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/model_shared_logical_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 8844.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "model_shared_logical_bytes",
+        "observed": 8848.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_shared_logical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260826,
+        "series_id": "cpu-characterization/model_shared_logical_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 8848.0
+      },
+      "raw_series": {
+        "metric": "model_shared_logical_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_shared_logical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          8844.0,
+          8848.0,
+          8848.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/model_shared_logical_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 8848.0,
+        "mean": 8846.666666666666,
+        "median": 8848.0,
+        "metric": "model_shared_logical_bytes",
+        "minimum": 8844.0,
+        "outlier_policy": "none removed",
+        "p90": 8848.0,
+        "p95": 8848.0,
+        "p99": 8848.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_shared_logical_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/model_shared_logical_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "model_sharing_efficiency": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "model_sharing_efficiency",
+        "points": [
+          {
+            "cumulative_probability": 1.0,
+            "value": 0.75
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_sharing_efficiency",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/model_sharing_efficiency",
+        "unit": "ratio",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 0.75,
+        "method": "deterministic percentile bootstrap",
+        "metric": "model_sharing_efficiency",
+        "observed": 0.75,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_sharing_efficiency",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260827,
+        "series_id": "cpu-characterization/model_sharing_efficiency",
+        "statistic": "median",
+        "unit": "ratio",
+        "upper": 0.75
+      },
+      "raw_series": {
+        "metric": "model_sharing_efficiency",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_sharing_efficiency",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          0.75,
+          0.75,
+          0.75
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/model_sharing_efficiency",
+        "unit": "ratio",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 0.75,
+        "mean": 0.75,
+        "median": 0.75,
+        "metric": "model_sharing_efficiency",
+        "minimum": 0.75,
+        "outlier_policy": "none removed",
+        "p90": 0.75,
+        "p95": 0.75,
+        "p99": 0.75,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.model_sharing_efficiency",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/model_sharing_efficiency",
+        "unit": "ratio",
+        "warmup_count": 0
+      }
+    },
+    "simulated_migration_send_bytes": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "simulated_migration_send_bytes",
+        "points": [
+          {
+            "cumulative_probability": 0.3333333333333333,
+            "value": 4653.0
+          },
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 4655.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 4656.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/simulated_migration_send_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          4653.0,
+          4654.0,
+          4655.0,
+          4656.0
+        ],
+        "counts": [
+          1,
+          0,
+          2
+        ],
+        "method": "equal width",
+        "metric": "simulated_migration_send_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/simulated_migration_send_bytes",
+        "unit": "bytes",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 4653.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "simulated_migration_send_bytes",
+        "observed": 4655.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260828,
+        "series_id": "cpu-characterization/simulated_migration_send_bytes",
+        "statistic": "median",
+        "unit": "bytes",
+        "upper": 4656.0
+      },
+      "raw_series": {
+        "metric": "simulated_migration_send_bytes",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          4653.0,
+          4655.0,
+          4656.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/simulated_migration_send_bytes",
+        "unit": "bytes",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 4656.0,
+        "mean": 4654.666666666667,
+        "median": 4655.0,
+        "metric": "simulated_migration_send_bytes",
+        "minimum": 4653.0,
+        "outlier_policy": "none removed",
+        "p90": 4655.8,
+        "p95": 4655.9,
+        "p99": 4655.98,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_send_bytes",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/simulated_migration_send_bytes",
+        "unit": "bytes",
+        "warmup_count": 0
+      }
+    },
+    "simulated_migration_transfer_time_ns": {
+      "ecdf": {
+        "exact": true,
+        "max_points": 4096,
+        "method": "exact unique values",
+        "metric": "simulated_migration_transfer_time_ns",
+        "points": [
+          {
+            "cumulative_probability": 0.6666666666666666,
+            "value": 2470000.0
+          },
+          {
+            "cumulative_probability": 1.0,
+            "value": 2471000.0
+          }
+        ],
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_transfer_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.empirical-cdf/v1",
+        "series_id": "cpu-characterization/simulated_migration_transfer_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "histogram": {
+        "bin_edges": [
+          2470000.0,
+          2470500.0,
+          2471000.0
+        ],
+        "counts": [
+          2,
+          1
+        ],
+        "method": "equal width",
+        "metric": "simulated_migration_transfer_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_transfer_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.histogram/v1",
+        "series_id": "cpu-characterization/simulated_migration_transfer_time_ns",
+        "unit": "nanoseconds",
+        "warmup_excluded": true
+      },
+      "median_95pct_ci": {
+        "confidence_level": 0.95,
+        "lower": 2470000.0,
+        "method": "deterministic percentile bootstrap",
+        "metric": "simulated_migration_transfer_time_ns",
+        "observed": 2470000.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_transfer_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "repetitions": 2000,
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.bootstrap-confidence-interval/v1",
+        "seed": 20260829,
+        "series_id": "cpu-characterization/simulated_migration_transfer_time_ns",
+        "statistic": "median",
+        "unit": "nanoseconds",
+        "upper": 2471000.0
+      },
+      "raw_series": {
+        "metric": "simulated_migration_transfer_time_ns",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_transfer_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_order": "preserved",
+        "samples": [
+          2470000.0,
+          2471000.0,
+          2470000.0
+        ],
+        "schema_version": "sloforge.branchfabric.raw-sample-series/v1",
+        "series_id": "cpu-characterization/simulated_migration_transfer_time_ns",
+        "unit": "nanoseconds",
+        "warmup_policy": {
+          "declared_warmup_count": 0,
+          "excluded_from_derived_statistics": true,
+          "method": "none",
+          "rationale": "Standalone aligned seed runs use no discarded warmup; samples are preserved."
+        },
+        "warmup_samples": []
+      },
+      "summary": {
+        "maximum": 2471000.0,
+        "mean": 2470333.3333333335,
+        "median": 2470000.0,
+        "metric": "simulated_migration_transfer_time_ns",
+        "minimum": 2470000.0,
+        "outlier_policy": "none removed",
+        "p90": 2470800.0,
+        "p95": 2470900.0,
+        "p99": 2470980.0,
+        "percentile_method": "Hyndman-Fan type 7",
+        "provenance": {
+          "artifact_reference": "artifacts/branchfabric/analysis/cpu-characterization-raw-aggregate.json",
+          "artifact_sha256": "e55967de3d42710ac40171250c5df1e45b553dd24719c3d072cd3b86a824d197",
+          "evidence_class": "SYNTHETIC",
+          "raw_artifact_immutable": true,
+          "repetition": 0,
+          "sample_count": 3,
+          "sample_selector": "series.simulated_migration_transfer_time_ns",
+          "schema_version": "sloforge.branchfabric.artifact-evidence/v1",
+          "seed": 20260809,
+          "source_experiment": "helix-continuum-three-seed-cpu"
+        },
+        "sample_count": 3,
+        "schema_version": "sloforge.branchfabric.summary-statistics/v1",
+        "series_id": "cpu-characterization/simulated_migration_transfer_time_ns",
+        "unit": "nanoseconds",
+        "warmup_count": 0
+      }
+    }
+  },
+  "timing_measurement_class": "HARDWARE_BACKED_REAL except explicitly named simulated series",
+  "workload_evidence_class": "SYNTHETIC"
+}

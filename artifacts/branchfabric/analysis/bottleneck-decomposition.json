@@ -1,0 +1,151 @@
+{
+  "amdahl_bounds": [
+    {
+      "critical_path_fraction": 0.003437907220769208,
+      "free_speedup": 1.0034497672003373,
+      "objective": "full_helix_transaction",
+      "primitive": "cow_handling",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.002480757056575301,
+      "free_speedup": 1.0024869265170817,
+      "objective": "full_helix_transaction",
+      "primitive": "reclamation",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.022954931735746757,
+      "free_speedup": 1.0234942404207892,
+      "objective": "migration_latency",
+      "primitive": "reshard",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.005708959351722072,
+      "free_speedup": 1.0057417387045948,
+      "objective": "migration_latency",
+      "primitive": "delta_extraction",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.000755954189828146,
+      "free_speedup": 1.0007565260888949,
+      "objective": "migration_latency",
+      "primitive": "transaction_commit",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.00017553473073149078,
+      "free_speedup": 1.000175565548583,
+      "objective": "migration_latency",
+      "primitive": "cow_handling",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.00013936502833086943,
+      "free_speedup": 1.0001393844536492,
+      "objective": "migration_latency",
+      "primitive": "reclamation",
+      "sample_count": 1,
+      "timing_measurement_class": "HARDWARE_BACKED_REAL"
+    },
+    {
+      "critical_path_fraction": 0.009984065748283661,
+      "free_speedup": 1.0100847525811085,
+      "objective": "migration_latency",
+      "primitive": "transfer",
+      "sample_count": 1,
+      "timing_measurement_class": "SIMULATED_HARDWARE"
+    }
+  ],
+  "conclusion": "Measured reward work dominates the sum of observed Helix stage unions, while no measured candidate state primitive exceeds 2.30% of its analyzed objective. Hardware resource attribution remains unsupported.",
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/analysis/workload/helix-coding-agent-seed-41.json",
+      "sha256": "4833fe3851aee3be931c75f57dcfcf350f52d34d637f41136bf7ec52f34ca8fa"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/amdahl/cpu-reference.json",
+      "sha256": "22eb97b1d19bf31751c700ef7b8f762ac205dc8ef760e737fdb6966df768b9a7"
+    },
+    {
+      "path": "artifacts/branchfabric/analysis/roofline/cpu-reference-unknown.json",
+      "sha256": "6cf3c652ce584a4ee82d1582b4a6510075ef05a3c0c0ee7042e07e3d610584cd"
+    }
+  ],
+  "helix_stage_ranking": [
+    {
+      "event_count": 4,
+      "inclusive_wall_union_ns": 316409293,
+      "share_of_sum_of_observed_stage_unions": 0.7754351273348516,
+      "stage": "REWARD",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 8,
+      "inclusive_wall_union_ns": 46300291,
+      "share_of_sum_of_observed_stage_unions": 0.11346971420092168,
+      "stage": "FORK",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 5,
+      "inclusive_wall_union_ns": 19543875,
+      "share_of_sum_of_observed_stage_unions": 0.0478968460614759,
+      "stage": "CHECKPOINT",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 1,
+      "inclusive_wall_union_ns": 13968417,
+      "share_of_sum_of_observed_stage_unions": 0.03423287954776128,
+      "stage": "CAPTURE",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 4,
+      "inclusive_wall_union_ns": 10147750,
+      "share_of_sum_of_observed_stage_unions": 0.02486943963877901,
+      "stage": "ROLLOUT",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 3,
+      "inclusive_wall_union_ns": 762333,
+      "share_of_sum_of_observed_stage_unions": 0.0018682756796481307,
+      "stage": "PRUNE",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 2,
+      "inclusive_wall_union_ns": 513125,
+      "share_of_sum_of_observed_stage_unions": 0.0012575330703504203,
+      "stage": "TRAIN",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    },
+    {
+      "event_count": 1,
+      "inclusive_wall_union_ns": 395875,
+      "share_of_sum_of_observed_stage_unions": 0.0009701844662118834,
+      "stage": "PROMOTE",
+      "warning": "share uses a sum of stage interval unions, not exclusive critical-path time"
+    }
+  ],
+  "not_attributed_interpretation": "arithmetic remainder only; stage unions are inclusive and can overlap, so this is not an exclusive bottleneck bucket",
+  "not_attributed_to_stages_ns": 10342564208,
+  "resource_classification": {
+    "reason": "complete traffic/wait counters and measured CPU-memory/GPU/PCIe/network ceilings are absent",
+    "sample_count": 35,
+    "status": "UNKNOWN"
+  },
+  "schema_version": "sloforge.branchfabric.bottleneck-decomposition/v1",
+  "timing_scope": "real host timings around the deterministic CPU fixtures",
+  "workload_evidence_class": "SYNTHETIC"
+}

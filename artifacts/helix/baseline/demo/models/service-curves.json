@@ -1,0 +1,215 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "mock-balanced",
+      "decode": {
+        "calibration_sample_count": 15,
+        "conformal_radius_ms": 0.24225000000000563,
+        "dimension": "active_sequences",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 4.604042,
+            "p95_ms": 4.638242000000003,
+            "sample_count": 2,
+            "x": 1.0
+          },
+          {
+            "median_ms": 4.626614499999999,
+            "p95_ms": 4.7541427,
+            "sample_count": 2,
+            "x": 2.0
+          },
+          {
+            "median_ms": 4.899051749999998,
+            "p95_ms": 4.9677984749999995,
+            "sample_count": 2,
+            "x": 4.0
+          }
+        ],
+        "residual_p95_ms": 0.24225000000000563
+      },
+      "decode_held_out_mape": 0.021881377932168985,
+      "decode_interval_coverage": 1.0,
+      "held_out_mape": 0.08280929225047302,
+      "held_out_sample_count": 12,
+      "interval_coverage": 1.0,
+      "prefill": {
+        "calibration_sample_count": 16,
+        "conformal_radius_ms": 233.4466328046875,
+        "dimension": "prompt_tokens",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 30.61325,
+            "p95_ms": 32.3196122,
+            "sample_count": 3,
+            "x": 32.0
+          },
+          {
+            "median_ms": 47.813041,
+            "p95_ms": 48.828954700000004,
+            "sample_count": 3,
+            "x": 128.0
+          },
+          {
+            "median_ms": 112.199375,
+            "p95_ms": 113.2309244,
+            "sample_count": 3,
+            "x": 512.0
+          },
+          {
+            "median_ms": 361.564,
+            "p95_ms": 362.5955872,
+            "sample_count": 3,
+            "x": 2048.0
+          }
+        ],
+        "residual_p95_ms": 233.4466328046875
+      },
+      "startup_median_ms": 227.391021,
+      "startup_p95_ms": 247.48470179999998
+    },
+    {
+      "candidate_id": "mock-fast",
+      "decode": {
+        "calibration_sample_count": 15,
+        "conformal_radius_ms": 0.3647294999999957,
+        "dimension": "active_sequences",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 3.532687499999998,
+            "p95_ms": 3.601218449999997,
+            "sample_count": 2,
+            "x": 1.0
+          },
+          {
+            "median_ms": 3.536583499999999,
+            "p95_ms": 3.5761834999999995,
+            "sample_count": 2,
+            "x": 2.0
+          },
+          {
+            "median_ms": 3.5506249999999966,
+            "p95_ms": 3.592493899999995,
+            "sample_count": 2,
+            "x": 4.0
+          }
+        ],
+        "residual_p95_ms": 0.3647294999999957
+      },
+      "decode_held_out_mape": 0.009738178705879116,
+      "decode_interval_coverage": 1.0,
+      "held_out_mape": 0.10984989559064638,
+      "held_out_sample_count": 12,
+      "interval_coverage": 0.9166666666666666,
+      "prefill": {
+        "calibration_sample_count": 16,
+        "conformal_radius_ms": 36.18810766601564,
+        "dimension": "prompt_tokens",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 24.348875,
+            "p95_ms": 24.4218497,
+            "sample_count": 3,
+            "x": 32.0
+          },
+          {
+            "median_ms": 32.74675,
+            "p95_ms": 32.9688628,
+            "sample_count": 3,
+            "x": 128.0
+          },
+          {
+            "median_ms": 65.243,
+            "p95_ms": 65.3598497,
+            "sample_count": 3,
+            "x": 512.0
+          },
+          {
+            "median_ms": 200.332625,
+            "p95_ms": 200.83666279999997,
+            "sample_count": 3,
+            "x": 2048.0
+          }
+        ],
+        "residual_p95_ms": 36.18810766601564
+      },
+      "startup_median_ms": 486.70631249999997,
+      "startup_p95_ms": 529.95080185
+    },
+    {
+      "candidate_id": "mock-economy",
+      "decode": {
+        "calibration_sample_count": 14,
+        "conformal_radius_ms": 0.7724164999999914,
+        "dimension": "active_sequences",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 6.676541499999999,
+            "p95_ms": 6.96476695,
+            "sample_count": 2,
+            "x": 1.0
+          },
+          {
+            "median_ms": 6.676541499999999,
+            "p95_ms": 6.892919324999996,
+            "sample_count": 2,
+            "x": 2.0
+          }
+        ],
+        "residual_p95_ms": 0.7724164999999914
+      },
+      "decode_held_out_mape": 0.05827140612223247,
+      "decode_interval_coverage": 1.0,
+      "held_out_mape": 0.09651196021138626,
+      "held_out_sample_count": 12,
+      "interval_coverage": 0.9166666666666666,
+      "prefill": {
+        "calibration_sample_count": 16,
+        "conformal_radius_ms": 96.74121630859378,
+        "dimension": "prompt_tokens",
+        "nominal_coverage": 0.95,
+        "points": [
+          {
+            "median_ms": 40.710208,
+            "p95_ms": 40.835233300000006,
+            "sample_count": 3,
+            "x": 32.0
+          },
+          {
+            "median_ms": 63.92775,
+            "p95_ms": 64.1857503,
+            "sample_count": 3,
+            "x": 128.0
+          },
+          {
+            "median_ms": 158.64075,
+            "p95_ms": 158.86428750000002,
+            "sample_count": 3,
+            "x": 512.0
+          },
+          {
+            "median_ms": 510.4785,
+            "p95_ms": 515.6980878,
+            "sample_count": 3,
+            "x": 2048.0
+          }
+        ],
+        "residual_p95_ms": 96.74121630859378
+      },
+      "startup_median_ms": 119.74674999999999,
+      "startup_p95_ms": 143.0086036
+    }
+  ],
+  "limitations": [
+    "Intervals are calibrated only on measured mock or hardware configurations.",
+    "Conformal radii use deterministic coordinate and representative-load calibration splits with disjoint load test samples.",
+    "No claim is made about unmeasured hardware generalization."
+  ],
+  "schema_version": "sloforge.models/v1",
+  "seed": 41
+}

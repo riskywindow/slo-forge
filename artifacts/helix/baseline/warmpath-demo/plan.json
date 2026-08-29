@@ -1,0 +1,94 @@
+{
+  "compiler_version": "sloforge-warmpath/0.1.0",
+  "evaluated_candidate_count": 243,
+  "evidence_references": [
+    "artifacts/helix/baseline/warmpath-demo/profile/raw",
+    "artifacts/helix/baseline/warmpath-demo/profile/environment.json"
+  ],
+  "graph_hash": "388b47de3fd3e27af426e132c25098cc6c5cd2ba3793b518fbd23f838ec5f2c8",
+  "graph_id": "warmpath-local-demo",
+  "host_fingerprint": "ee6b0f43a82078a5a06aab7252f382aa5cfbf58525c917d41c95adac583ca295",
+  "objective_value": 0.8784549231193869,
+  "optimizer": "exhaustive",
+  "optimizer_seed": 2026,
+  "placements": [
+    {
+      "artifact_id": "model-config",
+      "estimate_source": "measured",
+      "expected_duration_ms": 0.000458,
+      "mode": "eager_restore",
+      "prefetch_order": 0,
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "tokenizer",
+      "estimate_source": "measured",
+      "expected_duration_ms": 0.013754899999999999,
+      "mode": "eager_restore",
+      "prefetch_order": 1,
+      "tier_id": "page-cache"
+    },
+    {
+      "artifact_id": "model-weights",
+      "estimate_source": "measured",
+      "expected_duration_ms": 0.8417635,
+      "mode": "eager_restore",
+      "prefetch_order": 2,
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "runtime-cache",
+      "estimate_source": "measured",
+      "expected_duration_ms": 0.11875009999999997,
+      "mode": "lazy_restore",
+      "prefetch_order": 3,
+      "tier_id": "page-cache"
+    }
+  ],
+  "plan_id": "warmpath-0a2979491e2c58b5",
+  "predicted_hourly_cost": 9.765787981450557e-06,
+  "predicted_p50_ready_time_ms": 0.840618521784585,
+  "predicted_p95_ready_time_ms": 0.8784544348299879,
+  "predicted_restore_failure_probability": 0.0,
+  "prediction_interval_high_ms": 0.9117618785895486,
+  "prediction_interval_low_ms": 0.7853540836369679,
+  "profile_hash": "4ee7f6368376d56041cf37699d6981c57992c162fc8daa5b390364dbd50e9a8e",
+  "profile_id": "warmpath-local-demo",
+  "rejected_candidates": [],
+  "schema_version": "1.0.0",
+  "stage_predictions": [
+    {
+      "artifact_id": "model-config",
+      "estimate_source": "measured",
+      "finish_ms": 0.000458,
+      "resource": "host-memory",
+      "stage": "restore",
+      "start_ms": 0.0
+    },
+    {
+      "artifact_id": "tokenizer",
+      "estimate_source": "measured",
+      "finish_ms": 0.014212899999999999,
+      "resource": "page-cache",
+      "stage": "restore",
+      "start_ms": 0.000458
+    },
+    {
+      "artifact_id": "model-weights",
+      "estimate_source": "measured",
+      "finish_ms": 0.8422215,
+      "resource": "host-memory",
+      "stage": "restore",
+      "start_ms": 0.000458
+    },
+    {
+      "artifact_id": "runtime-cache",
+      "estimate_source": "measured",
+      "finish_ms": 0.9609715999999999,
+      "resource": "page-cache",
+      "stage": "restore",
+      "start_ms": 0.8422215
+    }
+  ],
+  "warm_replica_count": 0
+}

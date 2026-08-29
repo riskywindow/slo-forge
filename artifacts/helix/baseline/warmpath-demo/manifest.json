@@ -1,0 +1,37 @@
+{
+  "artifact_count": 4,
+  "artifacts": [
+    {
+      "path": "input/artifact-graph.json",
+      "sha256": "2bd062c1b4820435fed0e94364744b69ba66697e72c5f88c21c1beec8c7aa674"
+    },
+    {
+      "path": "profile/profile.json",
+      "sha256": "90a997283e268e4ef074318afda12966232481f47f43f302eb6c4b97f954419e"
+    },
+    {
+      "path": "plan.json",
+      "sha256": "4f94842357c98dcf1052ca12ead52354bf0984864604502fde84c749147d622e"
+    },
+    {
+      "path": "simulation.json",
+      "sha256": "05ee11af3b01206293743b8131ec9f08cc5fe53defce03a8858320e5cec14cff"
+    },
+    {
+      "path": "execution/warmpath-execution.json",
+      "sha256": "5e6a17f5cd604665f0728e27b9bc05fd14e67c59f32792cf5c339324efb5f4a2"
+    }
+  ],
+  "candidates_evaluated": 243,
+  "checksum_verified": true,
+  "deferred_artifact_count": 1,
+  "measured_ready_ms": 4.379209,
+  "optimizer": "exhaustive",
+  "plan_id": "warmpath-0a2979491e2c58b5",
+  "predicted_p50_ready_ms": 0.8348064925797614,
+  "predicted_p95_ready_ms": 0.8862909259548759,
+  "profile_source": "measured",
+  "restore_success": true,
+  "schema_version": "sloforge.warmpath.demo/v1",
+  "synthetic_snapshot": true
+}

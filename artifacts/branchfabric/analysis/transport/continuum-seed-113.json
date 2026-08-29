@@ -1,0 +1,432 @@
+{
+  "aggregates": [
+    {
+      "chunk_size": {
+        "maximum": 166,
+        "minimum": 166,
+        "observation_count": 1,
+        "p50": 166,
+        "p95": 166,
+        "p99": 166,
+        "percentile_method": "nearest-rank"
+      },
+      "concurrency": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "cpu_time": {
+        "maximum": 470000,
+        "minimum": 470000,
+        "observation_count": 1,
+        "p50": 470000,
+        "p95": 470000,
+        "p99": 470000,
+        "percentile_method": "nearest-rank"
+      },
+      "destination_location": "host_dram",
+      "destination_physical_representation": "host_dram",
+      "devices": [
+        "cpu"
+      ],
+      "event_count": 1,
+      "failed_events": 0,
+      "fanout": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "gpu_time": null,
+      "logical_delivery_bytes": 3438,
+      "observed_throughput_bytes_per_second": 49826086.95652174,
+      "operation_latency": {
+        "maximum": 470791,
+        "minimum": 470791,
+        "observation_count": 1,
+        "p50": 470791,
+        "p95": 470791,
+        "p99": 470791,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_type": "STATE_RECEIVE",
+      "queue_delay": null,
+      "recorded_payload_bytes": 3438,
+      "retry_results": 0,
+      "skipped_events": 0,
+      "source_location": "host_dram",
+      "source_physical_representation": "transport/in_process",
+      "successful_events": 1,
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ],
+      "transfer_latency": {
+        "maximum": 69000,
+        "minimum": 69000,
+        "observation_count": 1,
+        "p50": 69000,
+        "p95": 69000,
+        "p99": 69000,
+        "percentile_method": "nearest-rank"
+      },
+      "transfer_time_observation_count": 1,
+      "transfer_time_total_ns": 69000,
+      "transport_type": "memory_copy",
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    },
+    {
+      "chunk_size": {
+        "maximum": 166,
+        "minimum": 166,
+        "observation_count": 3,
+        "p50": 166,
+        "p95": 166,
+        "p99": 166,
+        "percentile_method": "nearest-rank"
+      },
+      "concurrency": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 3,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "cpu_time": {
+        "maximum": 223000,
+        "minimum": 145000,
+        "observation_count": 3,
+        "p50": 146000,
+        "p95": 223000,
+        "p99": 223000,
+        "percentile_method": "nearest-rank"
+      },
+      "destination_location": "host_dram",
+      "destination_physical_representation": "host_dram",
+      "devices": [
+        "cpu"
+      ],
+      "event_count": 3,
+      "failed_events": 0,
+      "fanout": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 3,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "gpu_time": null,
+      "logical_delivery_bytes": 4656,
+      "observed_throughput_bytes_per_second": 1885020.2429149798,
+      "operation_latency": {
+        "maximum": 223666,
+        "minimum": 140458,
+        "observation_count": 3,
+        "p50": 146084,
+        "p95": 223666,
+        "p99": 223666,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_type": "STATE_RECEIVE",
+      "queue_delay": null,
+      "recorded_payload_bytes": 4656,
+      "retry_results": 0,
+      "skipped_events": 0,
+      "source_location": "host_dram",
+      "source_physical_representation": "transport/deterministic_simulated",
+      "successful_events": 3,
+      "timing_measurement_classes": [
+        "SIMULATED_HARDWARE"
+      ],
+      "transfer_latency": {
+        "maximum": 1148000,
+        "minimum": 653000,
+        "observation_count": 3,
+        "p50": 669000,
+        "p95": 1148000,
+        "p99": 1148000,
+        "percentile_method": "nearest-rank"
+      },
+      "transfer_time_observation_count": 3,
+      "transfer_time_total_ns": 2470000,
+      "transport_type": "synthetic",
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    },
+    {
+      "chunk_size": {
+        "maximum": 166,
+        "minimum": 166,
+        "observation_count": 1,
+        "p50": 166,
+        "p95": 166,
+        "p99": 166,
+        "percentile_method": "nearest-rank"
+      },
+      "concurrency": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "cpu_time": {
+        "maximum": 470000,
+        "minimum": 470000,
+        "observation_count": 1,
+        "p50": 470000,
+        "p95": 470000,
+        "p99": 470000,
+        "percentile_method": "nearest-rank"
+      },
+      "destination_location": "host_dram",
+      "destination_physical_representation": "transport/in_process",
+      "devices": [
+        "cpu"
+      ],
+      "event_count": 1,
+      "failed_events": 0,
+      "fanout": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "gpu_time": null,
+      "logical_delivery_bytes": 3438,
+      "observed_throughput_bytes_per_second": 49826086.95652174,
+      "operation_latency": {
+        "maximum": 470791,
+        "minimum": 470791,
+        "observation_count": 1,
+        "p50": 470791,
+        "p95": 470791,
+        "p99": 470791,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_type": "STATE_SEND",
+      "queue_delay": null,
+      "recorded_payload_bytes": 3438,
+      "retry_results": 0,
+      "skipped_events": 0,
+      "source_location": "host_dram",
+      "source_physical_representation": "host_dram",
+      "successful_events": 1,
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ],
+      "transfer_latency": {
+        "maximum": 69000,
+        "minimum": 69000,
+        "observation_count": 1,
+        "p50": 69000,
+        "p95": 69000,
+        "p99": 69000,
+        "percentile_method": "nearest-rank"
+      },
+      "transfer_time_observation_count": 1,
+      "transfer_time_total_ns": 69000,
+      "transport_type": "memory_copy",
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    },
+    {
+      "chunk_size": {
+        "maximum": 166,
+        "minimum": 166,
+        "observation_count": 3,
+        "p50": 166,
+        "p95": 166,
+        "p99": 166,
+        "percentile_method": "nearest-rank"
+      },
+      "concurrency": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 3,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "cpu_time": {
+        "maximum": 223000,
+        "minimum": 145000,
+        "observation_count": 3,
+        "p50": 146000,
+        "p95": 223000,
+        "p99": 223000,
+        "percentile_method": "nearest-rank"
+      },
+      "destination_location": "host_dram",
+      "destination_physical_representation": "transport/deterministic_simulated",
+      "devices": [
+        "cpu"
+      ],
+      "event_count": 3,
+      "failed_events": 0,
+      "fanout": {
+        "maximum": 1,
+        "minimum": 1,
+        "observation_count": 3,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "gpu_time": null,
+      "logical_delivery_bytes": 4656,
+      "observed_throughput_bytes_per_second": 1885020.2429149798,
+      "operation_latency": {
+        "maximum": 223666,
+        "minimum": 140458,
+        "observation_count": 3,
+        "p50": 146084,
+        "p95": 223666,
+        "p99": 223666,
+        "percentile_method": "nearest-rank"
+      },
+      "operation_type": "STATE_SEND",
+      "queue_delay": null,
+      "recorded_payload_bytes": 4656,
+      "retry_results": 0,
+      "skipped_events": 0,
+      "source_location": "host_dram",
+      "source_physical_representation": "host_dram",
+      "successful_events": 3,
+      "timing_measurement_classes": [
+        "SIMULATED_HARDWARE"
+      ],
+      "transfer_latency": {
+        "maximum": 1148000,
+        "minimum": 653000,
+        "observation_count": 3,
+        "p50": 669000,
+        "p95": 1148000,
+        "p99": 1148000,
+        "percentile_method": "nearest-rank"
+      },
+      "transfer_time_observation_count": 3,
+      "transfer_time_total_ns": 2470000,
+      "transport_type": "synthetic",
+      "workload_provenance": [
+        "SYNTHETIC"
+      ]
+    }
+  ],
+  "evidence": {
+    "artifact_reference": "artifacts/branchfabric/continuum/seed-113/state-operation-trace-v1.jsonl",
+    "artifact_sha256": "385c7f397e501056e367b8e8432ed0a213a65862c44c2aa48abf33a4c3da3ec5",
+    "input_event_count": 18,
+    "raw_artifact_immutable": true,
+    "repetition": 0,
+    "schema_version": "sloforge.branchfabric.trace-analysis-evidence/v1",
+    "seed": 113,
+    "selected_event_count": 8,
+    "source_experiment": "continuum-seed-113",
+    "timing_measurement_classes": [
+      "HARDWARE_BACKED_REAL",
+      "SIMULATED_HARDWARE"
+    ],
+    "trace_ids": [
+      "92286f4cdd66851b1605d23ccadc2b6a62f49fc3f6f2c7f184050fea7b0f2752"
+    ],
+    "workload_provenance": [
+      "SYNTHETIC"
+    ]
+  },
+  "logical_delivery_bytes": 8094,
+  "multicast": {
+    "by_minimum_fanout": [
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 2,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 4,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 8,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 16,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 32,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 64,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      },
+      {
+        "destination_transform_reduction_upper_bound_bytes": 0,
+        "exact_payload_reduction_bytes": 0,
+        "minimum_fanout": 128,
+        "opportunity_count": 0,
+        "repeated_unicast_source_bytes": 0
+      }
+    ],
+    "event_content_hash_used_as_payload_identity": false,
+    "limitations": [
+      "repeated sends without a shared non-empty dependency set are not grouped",
+      "logical identity and epoch establish content identity; no payload hash exists in v1",
+      "mixed destination layouts are excluded from exact-payload multicast savings",
+      "source egress bounds do not estimate topology-dependent aggregate link traffic"
+    ],
+    "opportunities": [],
+    "opportunity_count": 0,
+    "topology_dependent_aggregate_link_bytes": null,
+    "ungrouped_send_event_count": 4
+  },
+  "receive_payload_bytes": 8094,
+  "retry_payload_bytes": 0,
+  "schema_version": "sloforge.branchfabric.transport-analysis/v1",
+  "source_payload_bytes": 8094,
+  "unknown_counters": [
+    "queue_delay_ns for events recorded with zero/N/A",
+    "GPU time for transport events recorded with zero/N/A",
+    "transport protocol/header bytes are not represented by StateOperationTrace v1",
+    "topology route and aggregate link bytes are not represented by v1"
+  ]
+}

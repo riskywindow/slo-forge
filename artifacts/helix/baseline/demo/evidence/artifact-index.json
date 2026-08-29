@@ -1,0 +1,168 @@
+{
+  "artifacts": [
+    {
+      "media_type": "application/json",
+      "name": "chaos",
+      "path": "artifacts/helix/baseline/demo/chaos/result.json",
+      "sha256": "18c48d29a17b3b164dc63658658df5f78187b704f0593f10c41d8125002ba370"
+    },
+    {
+      "media_type": "text/plain",
+      "name": "command_transcript",
+      "path": "artifacts/helix/baseline/demo/command-transcript.txt",
+      "sha256": "df5fcafbb8e0cfae8ab6c72d92fa5c4f7867d0275226bc2cb35042e51e1a742a"
+    },
+    {
+      "media_type": "application/json",
+      "name": "controller",
+      "path": "artifacts/helix/baseline/demo/controller/evaluation.json",
+      "sha256": "5b536bc1914cf7cc1241a12f1e383922d95c96de01ac81d21de5a1428a7a5768"
+    },
+    {
+      "media_type": "application/json",
+      "name": "evidence",
+      "path": "artifacts/helix/baseline/demo/evidence/evidence.json",
+      "sha256": "1f178ac5b1d7947e9358bb2c64de0f8ef2a5bf9ee9fc8e22144760c80d63d235"
+    },
+    {
+      "media_type": "text/plain",
+      "name": "gateway_metrics",
+      "path": "artifacts/helix/baseline/demo/gateway/metrics.prom",
+      "sha256": "23d26915f05faa7f0f8e8e8bbfb1672428443ca6c4dfa80c04635f5414ae78e8"
+    },
+    {
+      "media_type": "application/json",
+      "name": "gateway_replay",
+      "path": "artifacts/helix/baseline/demo/gateway/replay.json",
+      "sha256": "115d2eea8aa33700e8902f94ad3fa72a73e7ae3ebcd6ecb27a6031f22950be33"
+    },
+    {
+      "media_type": "application/json",
+      "name": "gateway_trace",
+      "path": "artifacts/helix/baseline/demo/runtime/gateway-trace.json",
+      "sha256": "6dfb4e4f0aef87789c2f8204c12c6f2de4e779e54cfdc301f3b143f5735fd4e6"
+    },
+    {
+      "media_type": "application/json",
+      "name": "hardware",
+      "path": "artifacts/helix/baseline/demo/hardware/local-cpu.json",
+      "sha256": "c08f9abcd2e9d8c568fffaf8631f667ca5e3800f99d8789bbee44ad8f39bc2d6"
+    },
+    {
+      "media_type": "application/json",
+      "name": "models",
+      "path": "artifacts/helix/baseline/demo/models/service-curves.json",
+      "sha256": "08283ed26312fb6807a93e6272ae05d3ee1fa8a619d2c49f49958bf7d64be22c"
+    },
+    {
+      "media_type": "application/json",
+      "name": "optimization",
+      "path": "artifacts/helix/baseline/demo/optimization/result.json",
+      "sha256": "6ff14be3e45008216ad329313decbb6aeb8b6e3fba9660064497295eb3ce5f4f"
+    },
+    {
+      "media_type": "application/json",
+      "name": "plan",
+      "path": "artifacts/helix/baseline/demo/plans/qwen3-coding-agent.json",
+      "sha256": "f0b61bc76150eedeb362596ca1bf43eb4b15eecb1218e6b7d6a1aa08a152840a"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_raw",
+      "path": "artifacts/helix/baseline/demo/controller/predictive-twin.raw.json",
+      "sha256": "502f58dc7a07c5dce914160d3559a8f38254a981660582a193d0ce3175463a9c"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_scenario",
+      "path": "artifacts/helix/baseline/demo/controller/predictive-twin.scenario.json",
+      "sha256": "719eb72d239e26e18acffe4bf1d561b80983d9c0d9d31d45bf3ac66fe218850d"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_trace",
+      "path": "artifacts/helix/baseline/demo/controller/predictive-twin-trace.json",
+      "sha256": "ba5d73bc62ee720db17ff0c39f7d0bde6a38b797c561b5aaa502c8a599b7b74f"
+    },
+    {
+      "media_type": "application/json",
+      "name": "predictive_controller_twin",
+      "path": "artifacts/helix/baseline/demo/controller/predictive-twin.json",
+      "sha256": "62e359e9970406d4e9b0e25615f19f9ede6ca2e5009cd33f5b558d94c89451c4"
+    },
+    {
+      "media_type": "application/json",
+      "name": "profile",
+      "path": "artifacts/helix/baseline/demo/profiles/qwen3-cpu-mocks/profile.json",
+      "sha256": "d60a392b14b1982adc6b5902cf15468a1242187fc8e7a8cc65cdf35052bda439"
+    },
+    {
+      "media_type": "application/x-ndjson",
+      "name": "raw_measurements",
+      "path": "artifacts/helix/baseline/demo/profiles/qwen3-cpu-mocks/measurements.jsonl",
+      "sha256": "308d5969eb591e65d2790f5778e76d52f5c80a28dd4dcbeac6c0973245f2e62d"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_raw",
+      "path": "artifacts/helix/baseline/demo/controller/reactive-twin.raw.json",
+      "sha256": "30de3dc1e1b4fd6e220f3847df1255a9a206856bcdd30d8d228e324017115f2d"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_scenario",
+      "path": "artifacts/helix/baseline/demo/controller/reactive-twin.scenario.json",
+      "sha256": "76ff7324e685bb7e92625cde3285b5efa6f610ce5c862900bc26a22a3aea404e"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_trace",
+      "path": "artifacts/helix/baseline/demo/controller/reactive-twin-trace.json",
+      "sha256": "a44db0c02d18a61329e8d0df4fa1016b35f92b12609fae6a6fa297c7f2123361"
+    },
+    {
+      "media_type": "application/json",
+      "name": "reactive_controller_twin",
+      "path": "artifacts/helix/baseline/demo/controller/reactive-twin.json",
+      "sha256": "6264c394d8bceefa7466c411edd8a548ee618f11308bffa05bb976848b57a81c"
+    },
+    {
+      "media_type": "application/json",
+      "name": "replay",
+      "path": "artifacts/helix/baseline/demo/simulator/replay.json",
+      "sha256": "eb32b0613aebb4f16655856c565d1dcf926e2e44a7565285a7c94b01f6066f46"
+    },
+    {
+      "media_type": "application/json",
+      "name": "serving_baselines",
+      "path": "artifacts/helix/baseline/demo/benchmarks/serving-baselines.json",
+      "sha256": "671ba49f4184e49d620a8619c0e21829e26c90cacd1806c5836ffb3352f55978"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_raw",
+      "path": "artifacts/helix/baseline/demo/simulator/replay.raw.json",
+      "sha256": "e65b59edb2cbce89f25c15ae9b001e6ae126becf15b1a3acc062f0aa96e7cf87"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_scenario",
+      "path": "artifacts/helix/baseline/demo/simulator/replay.scenario.json",
+      "sha256": "582b9674fd3d621b5e5d394bdad35dab2e0f89705947d82d952aaf88cb9c0ec9"
+    },
+    {
+      "media_type": "application/json",
+      "name": "simulator_trace",
+      "path": "artifacts/helix/baseline/demo/simulator/trace.json",
+      "sha256": "06c1203c5d46d02b6ccbbe221ae62a37dd5b2715dcea82d62996e80179b08db6"
+    },
+    {
+      "media_type": "application/x-ndjson",
+      "name": "workload",
+      "path": "artifacts/helix/baseline/demo/workloads/coding-agent.jsonl",
+      "sha256": "cefef52050e51049d4562e38aed554cd2ddbc9c32c1bb64c6266c086cbb34e52"
+    }
+  ],
+  "generated_at": "2026-08-04T03:55:36.807428+00:00",
+  "schema_version": "sloforge.artifact-index/v1"
+}

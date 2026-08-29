@@ -1,0 +1,285 @@
+{
+  "schema_version": "sloforge.genesis.evolution.persistence/v1",
+  "payload_sha256": "2dd871dc3cd128d06a0f286df0681c9e0ad63cf42bf69260c7278d64fa420e14",
+  "payload": {
+    "schema_version": "sloforge.genesis.evolution/v1",
+    "deployment_id": "genesis-demo",
+    "controller_safety_config_sha256": "b64bbde85aa8ccc59352793625abecb3479a84bbff551850c9263724de990227",
+    "seed": 73129,
+    "sequence": 9,
+    "phase": "evolving",
+    "champion": {
+      "capsule_id": "genesis-corrected",
+      "capsule_digest": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c",
+      "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+      "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/evolution/challenger-capsule/manifests/dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c.json"
+    },
+    "previous_champion": {
+      "capsule_id": "genesis-champion",
+      "capsule_digest": "d41cfc225a8dbdb478e260648c111a124f6a2e895d04380b9045dc2b24de0612",
+      "genome_hash": "4db91427bcb35144e076ee8fd21a9b9c32b4d30fe09e25d75c68f409859a8f3b",
+      "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/capsule/manifests/d41cfc225a8dbdb478e260648c111a124f6a2e895d04380b9045dc2b24de0612.json"
+    },
+    "active_trigger": "fabric_degradation",
+    "selected_candidate_id": null,
+    "challengers": [
+      {
+        "spec": {
+          "candidate_id": "candidate-corrected-c48727c86899",
+          "capsule": {
+            "capsule_id": "genesis-corrected",
+            "capsule_digest": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c",
+            "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+            "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/evolution/challenger-capsule/manifests/dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c.json"
+          },
+          "transition_category": "request_boundary_swap",
+          "isolation": {
+            "mode": "sandbox",
+            "writable_artifact_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/evolution/challenger-isolation",
+            "network_access": false,
+            "cloud_credentials_exposed": false,
+            "host_device_access": false,
+            "live_traffic_enabled": false
+          },
+          "active_stream_compatible": false,
+          "state_conversion_verified": false
+        },
+        "status": "promoted",
+        "capsule_validation": {
+          "capsule_digest": {
+            "algorithm": "sha256",
+            "value": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c"
+          },
+          "candidate_genome_hash": {
+            "algorithm": "sha256",
+            "value": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff"
+          },
+          "promotion_verification_level": null,
+          "integrity_valid": true,
+          "contract_compatible": true,
+          "evidence_complete": true,
+          "promotion_eligible": false,
+          "checked_at": "2026-01-01T20:18:50Z",
+          "issues": [],
+          "local_evolution_eligible": true,
+          "external_production_eligible": false
+        },
+        "shadow_observation": {
+          "event_id": "fixture-shadow-evidence",
+          "candidate_id": "candidate-corrected-c48727c86899",
+          "capsule_digest": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c",
+          "evidence_digest": "e0d79ea7553aafaa8e4fcc00d4baf52a583d4477a68c798513164e86822940be",
+          "stage": "shadow",
+          "verification_level": "level_2_property",
+          "observed_at_ms": 40,
+          "deterministic_seed": 73129,
+          "sample_count": 2,
+          "error_rate": 0.0,
+          "p95_ttft_ratio": 0.9494595027577947,
+          "p99_tpot_ratio": 1.0489729729729729,
+          "quality_regression": 0.0,
+          "interrupted_streams": 0
+        },
+        "canary_observation": {
+          "event_id": "fixture-canary-evidence",
+          "candidate_id": "candidate-corrected-c48727c86899",
+          "capsule_digest": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c",
+          "evidence_digest": "a6338edfeb1114e6c6ca92cbbfd480c55c8a2b864b1380872e683b72aab3091c",
+          "stage": "canary",
+          "verification_level": "level_2_property",
+          "observed_at_ms": 60,
+          "deterministic_seed": 73129,
+          "sample_count": 3,
+          "error_rate": 0.0,
+          "p95_ttft_ratio": 0.9216266362786348,
+          "p99_tpot_ratio": 0.9509221796017024,
+          "quality_regression": 0.0,
+          "interrupted_streams": 0
+        },
+        "rejection_reason": null
+      }
+    ],
+    "active_streams": [
+      {
+        "stream_id": "active-stream-before-promotion",
+        "capsule_id": "genesis-champion",
+        "opened_sequence": 1,
+        "externally_visible_output": true
+      }
+    ],
+    "retained_capsule_ids": [
+      "genesis-champion"
+    ],
+    "retained_capsules": [
+      {
+        "capsule_id": "genesis-champion",
+        "capsule_digest": "d41cfc225a8dbdb478e260648c111a124f6a2e895d04380b9045dc2b24de0612",
+        "genome_hash": "4db91427bcb35144e076ee8fd21a9b9c32b4d30fe09e25d75c68f409859a8f3b",
+        "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/capsule/manifests/d41cfc225a8dbdb478e260648c111a124f6a2e895d04380b9045dc2b24de0612.json"
+      },
+      {
+        "capsule_id": "genesis-corrected",
+        "capsule_digest": "dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c",
+        "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+        "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/evolution/challenger-capsule/manifests/dd6fba7a6dfb7c66920885c5a5ea55162678e48ab5b47452b50fb2a093cf185c.json"
+      }
+    ],
+    "processed_event_ids": [
+      "controller-initialized",
+      "demo-open-active-stream",
+      "fixture-workload-drift",
+      "fixture-register-challenger",
+      "fixture-begin-shadow",
+      "fixture-shadow-evidence",
+      "fixture-begin-canary",
+      "fixture-canary-evidence",
+      "fixture-promote",
+      "demo-fabric-degradation"
+    ],
+    "processed_events": [
+      {
+        "event_id": "controller-initialized",
+        "payload_sha256": "4620ac94017824e959d373075f28ceb5aa54483665ba89ecca9a07834c4be2b7"
+      },
+      {
+        "event_id": "demo-open-active-stream",
+        "payload_sha256": "0db4ff1e6bf1bb69e3d9c300363ce3f1de65356ef126ce0dda7e57a33db9edad"
+      },
+      {
+        "event_id": "fixture-workload-drift",
+        "payload_sha256": "59a617ed0f1b34191c6dafc1fa00bf11695c64e998e0fc40fc4decc50af2f15c"
+      },
+      {
+        "event_id": "fixture-register-challenger",
+        "payload_sha256": "0f2a2330d63227b65bb61f2cefe078b9c424975e3bb06363db088b0931044109"
+      },
+      {
+        "event_id": "fixture-begin-shadow",
+        "payload_sha256": "d7c9ddb6644a7707b4021ace0bc628659da1c23f1124a52cd16031d902cb0cea"
+      },
+      {
+        "event_id": "fixture-shadow-evidence",
+        "payload_sha256": "ffda2698ebdc9d8e1da37e0beb3fffbad3aeccbe6db9bcdd7eb20e941f73e22d"
+      },
+      {
+        "event_id": "fixture-begin-canary",
+        "payload_sha256": "83da4cf6db6abe48854efa6d27834d1d9077564c2a98eb5a64f0e6ad39ae6596"
+      },
+      {
+        "event_id": "fixture-canary-evidence",
+        "payload_sha256": "0c7532a0c08142a074e0e2dea5ab0bcd14246da3d0d0051a108582477718e0f5"
+      },
+      {
+        "event_id": "fixture-promote",
+        "payload_sha256": "76104363728f7a0b0be437bab09399925accd854a29fc372786e45f33db07b1e"
+      },
+      {
+        "event_id": "demo-fabric-degradation",
+        "payload_sha256": "9d38f984330a4e1f336b92ebcf9155060604b54c17f39d1c2863d97700f59076"
+      }
+    ],
+    "audit": [
+      {
+        "sequence": 0,
+        "event_id": "controller-initialized",
+        "observed_at_ms": 0,
+        "action": "initialize",
+        "phase_before": "idle",
+        "phase_after": "idle",
+        "reason": "independently validated champion loaded; production mutation remains disabled",
+        "candidate_id": null
+      },
+      {
+        "sequence": 1,
+        "event_id": "demo-open-active-stream",
+        "observed_at_ms": 1,
+        "action": "open_stream",
+        "phase_before": "idle",
+        "phase_after": "idle",
+        "reason": "stream is pinned to capsule genesis-champion until completion",
+        "candidate_id": null
+      },
+      {
+        "sequence": 2,
+        "event_id": "fixture-workload-drift",
+        "observed_at_ms": 10,
+        "action": "begin_evolution",
+        "phase_before": "idle",
+        "phase_after": "evolving",
+        "reason": "workload_drift: fixture prompt distribution moved from short to bimodal",
+        "candidate_id": null
+      },
+      {
+        "sequence": 3,
+        "event_id": "fixture-register-challenger",
+        "observed_at_ms": 20,
+        "action": "register_challenger",
+        "phase_before": "evolving",
+        "phase_after": "challenger_ready",
+        "reason": "challenger remains isolated and passed capsule validation",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 4,
+        "event_id": "fixture-begin-shadow",
+        "observed_at_ms": 30,
+        "action": "begin_shadow",
+        "phase_before": "challenger_ready",
+        "phase_after": "shadowing",
+        "reason": "deterministic replay is routed to the isolated challenger",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 5,
+        "event_id": "fixture-shadow-evidence",
+        "observed_at_ms": 40,
+        "action": "record_shadow_gate",
+        "phase_before": "shadowing",
+        "phase_after": "shadow_validated",
+        "reason": "shadow evidence satisfied all promotion criteria",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 6,
+        "event_id": "fixture-begin-canary",
+        "observed_at_ms": 50,
+        "action": "begin_canary",
+        "phase_before": "shadow_validated",
+        "phase_after": "canarying",
+        "reason": "bounded canary routing enabled after shadow acceptance",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 7,
+        "event_id": "fixture-canary-evidence",
+        "observed_at_ms": 60,
+        "action": "record_canary_gate",
+        "phase_before": "canarying",
+        "phase_after": "ready_to_promote",
+        "reason": "canary evidence satisfied all promotion criteria",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 8,
+        "event_id": "fixture-promote",
+        "observed_at_ms": 70,
+        "action": "promote",
+        "phase_before": "ready_to_promote",
+        "phase_after": "promoted",
+        "reason": "capsule revalidated; new requests use the challenger while existing stream leases remain pinned",
+        "candidate_id": "candidate-corrected-c48727c86899"
+      },
+      {
+        "sequence": 9,
+        "event_id": "demo-fabric-degradation",
+        "observed_at_ms": 100,
+        "action": "begin_evolution",
+        "phase_before": "promoted",
+        "phase_after": "evolving",
+        "reason": "fabric_degradation: simulated selected-link degradation after promotion",
+        "candidate_id": null
+      }
+    ],
+    "last_observed_at_ms": 100
+  }
+}
