@@ -1,0 +1,245 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-serving-methodology-review/v1",
+  "agent": 9,
+  "role": "serving-methodology-review",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "reviewed_at_utc": "2026-08-20T03:20:55Z",
+  "review_status": "PASS",
+  "scientific_validity": "FAIL",
+  "scientific_validity_reason": "The early reclaim trigger executed correctly, but the rollout worker raised V11RuntimeTeardownRequired before reclamation because the source allocation zero-queue differed from the authenticated capture plan. No useful GPU1 capacity, recovery, SLO-restoration, or restore-interference evidence exists, and the queue subsequently reached the independent 64-request emergency ceiling.",
+  "methodology_gates": [
+    {
+      "gate": "reviewed_artifacts_match_remote_manifest",
+      "status": "PASS"
+    },
+    {
+      "gate": "exactly_two_engines_ready",
+      "status": "PASS",
+      "evidence": "BOTH_ENGINES_READY=true; gpu0 and gpu1 readiness records both passed on distinct NVIDIA A100-SXM4-80GB devices."
+    },
+    {
+      "gate": "12_rps_stale_calibration_guard",
+      "status": "PASS",
+      "metrics": {
+        "offered_rate_rps": 12.0,
+        "completed_rate_rps": 11.666666666666666,
+        "queue_depth_start": 11,
+        "queue_depth_end": 12,
+        "maximum_queue_depth": 12,
+        "queue_slope_requests_per_second": 0.3,
+        "p95_ttft_seconds": 0.043463622
+      }
+    },
+    {
+      "gate": "15_rps_stale_calibration_guard",
+      "status": "PASS",
+      "metrics": {
+        "offered_rate_rps": 15.0,
+        "completed_rate_rps": 14.0,
+        "queue_depth_start": 15,
+        "queue_depth_end": 18,
+        "maximum_queue_depth": 18,
+        "queue_slope_requests_per_second": 1.0,
+        "p95_ttft_seconds": 0.2239184722,
+        "positive_queue_slope": true,
+        "completed_rate_below_offered": true
+      }
+    },
+    {
+      "gate": "no_broad_capacity_recalibration",
+      "status": "PASS",
+      "evidence": "broad_capacity_calibration_performed=false"
+    },
+    {
+      "gate": "five_second_9_rps_control_interval",
+      "status": "PASS",
+      "metrics": {
+        "configured_seconds": 5.0,
+        "configured_rate_rps": 9.0,
+        "offered_requests": 45,
+        "completed_requests": 45,
+        "first_token_requests": 45,
+        "eventual_completion_ratio": 1.0,
+        "completion_interarrival_rate_rps": 8.246608187576493,
+        "completion_rate_fraction_of_offer": 0.9162897986196104,
+        "p95_ttft_seconds": 0.072223092,
+        "maximum_outstanding_requests": 14
+      },
+      "evidence": "All 45 requests completed, TTFT remained far below 2 seconds, completion cadence tracked the offer within 8.4%, and outstanding work remained below the 16-sequence running capacity."
+    },
+    {
+      "gate": "no_deferred_compilation_during_measured_transaction",
+      "status": "PASS",
+      "evidence": "Both serving and rollout bounded compilation observers passed with empty event lists."
+    },
+    {
+      "gate": "normal_reclaim_trigger",
+      "status": "PASS",
+      "metrics": {
+        "normal_trigger_requests": 20,
+        "queue_at_overload_detection": 20,
+        "queue_at_trigger": 21,
+        "queue_slope_requests_per_second": 4.0,
+        "trigger_window_offered_rate_rps": 12.0,
+        "trigger_window_completed_rate_rps": 8.0,
+        "confirmation_window_seconds": 0.25,
+        "predicate_to_emission_seconds": 0.00029008,
+        "detection_to_emission_seconds": 0.25029008,
+        "emergency_ceiling_requests": 64,
+        "emergency_headroom_at_trigger_requests": 43
+      }
+    },
+    {
+      "gate": "rollout_admission_stop_after_trigger",
+      "status": "PASS",
+      "metrics": {
+        "trigger_to_admission_stop_seconds": 0.020103482
+      }
+    },
+    {
+      "gate": "trigger_precedes_state_quiescence",
+      "status": "UNAVAILABLE",
+      "evidence": "No STATE_QUIESCENCE record was produced before the rollout worker failed."
+    },
+    {
+      "gate": "normal_trigger_precedes_emergency_ceiling",
+      "status": "PASS",
+      "metrics": {
+        "queue_at_trigger": 21,
+        "emergency_ceiling": 64,
+        "headroom_requests": 43
+      }
+    },
+    {
+      "gate": "emergency_ceiling_remains_clear_during_transaction",
+      "status": "FAIL",
+      "metrics": {
+        "maximum_evidenced_outstanding_requests": 64,
+        "trigger_to_emergency_ceiling_seconds": 6.691778679,
+        "running_requests_at_ceiling": 16,
+        "waiting_requests_at_ceiling": 47,
+        "external_queue_at_ceiling": 1
+      },
+      "evidence": "After the rollout-side pipeline fault, the queue reached the independent abort bound exactly; no useful GPU1 capacity had appeared."
+    },
+    {
+      "gate": "hbm_reclamation",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "first_useful_gpu1_capacity",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "two_gpu_excess_service_and_negative_queue_slope",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "queue_drain",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "five_second_stable_slo_restoration",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "restore_precondition_gpu1_drained",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "gpu0_activity_and_interference_during_restore",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "gate": "integrated_serving_methodology_scientifically_valid",
+      "status": "FAIL"
+    }
+  ],
+  "queue_evolution": {
+    "configured_spike_rate_rps": 15.0,
+    "observed_spike_interarrival_rate_rps": 14.996478181941606,
+    "queue_at_overload_detection": 20,
+    "queue_at_trigger": 21,
+    "queue_at_terminal_partial_failure": 64,
+    "rollout_failure_after_trigger_seconds": 4.505015842,
+    "emergency_ceiling_after_trigger_seconds": 6.691778679,
+    "recovery_observed": false,
+    "slo_restoration_observed": false,
+    "restore_interval_observed": false
+  },
+  "primary_failure": {
+    "role": "rollout",
+    "type": "V11RuntimeTeardownRequired",
+    "message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+    "reclamation_completed": false
+  },
+  "conclusion": {
+    "integrated_v11_result_available": false,
+    "serving_recovery_evidence_available": false,
+    "restore_interference_evidence_available": false,
+    "required_terminal_classification_from_this_evidence": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "provenance": {
+    "bundle_root": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c",
+    "remote_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/REMOTE_MANIFEST.c.json",
+    "remote_manifest_sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8",
+    "artifacts": [
+      {
+        "path": "sanity/12-rps/assessment.json",
+        "sha256": "1162fbbfc5d1c1a718f1c3f923bfa381d6c133c6596ab1d002639753b9c32c48"
+      },
+      {
+        "path": "sanity/15-rps/assessment.json",
+        "sha256": "d436c1958e7e019dfc6e3984ddf0f4728fb059b7c75f075150fc137af41469e5"
+      },
+      {
+        "path": "sanity/sanity-result.json",
+        "sha256": "120b53b5cd78db0edb31c4e2fa09113ec04a34a8cd421d4a054438f48df4b4db"
+      },
+      {
+        "path": "readiness/both-engines-ready.json",
+        "sha256": "0bdcbad994d4e2600bb75029ada42768e00e708762c16c5740dd68edd8897faa"
+      },
+      {
+        "path": "barriers/transaction.command.json",
+        "sha256": "b16758a699cf82658f3b9eed7f9a7958844d5c58a3129ef4d7e2e4bfa2602b8c"
+      },
+      {
+        "path": "barriers/v10-reclaim-trigger.json",
+        "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+      },
+      {
+        "path": "barriers/v11-rollout-admission-stop.json",
+        "sha256": "f87312088d181d1a0a6b48ffc183332bf8b0658c50d4b29eb30d8c6221be2e0c"
+      },
+      {
+        "path": "barriers/v10-gpu0-partial-failure.json",
+        "sha256": "b2a4505216ce5dfdbd451e70bb190a46197498976a5d4d8926a6047d825dc5cb"
+      },
+      {
+        "path": "rollout/failure.json",
+        "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+      },
+      {
+        "path": "serving/failure.json",
+        "sha256": "755ea87ef7e3cd122a8aff62b63eba2082387553babb28996c898c93ca2c6056"
+      },
+      {
+        "path": "serving/telemetry/measured-transaction-compilation.json",
+        "sha256": "f2e64b2d848df98fe6fa09391818765d1f7e4cf4e485ee086e54c1722c8eef1c"
+      },
+      {
+        "path": "rollout/telemetry/measured-transaction-compilation.json",
+        "sha256": "1ceec2f8e1dccb160e93c074d360af31c97b6e077c9da224557a052112f60810"
+      },
+      {
+        "path": "controller-result.json",
+        "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+      },
+      {
+        "path": "function-completion.json",
+        "sha256": "a66e08dbb7f5dbc41a7fbada1ecdfdc2c6b162c23db401a404d3c59682c3e99d"
+      }
+    ]
+  }
+}

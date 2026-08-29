@@ -1,0 +1,160 @@
+{
+  "active_reservations": 0,
+  "attempt_d_independent_reviews": [
+    {
+      "agent": 3,
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-d-recorder-lifecycle-post-fix-audit.json",
+      "role": "production_lock_and_recorder_lifecycle",
+      "sha256": "5126c1dec9a619a1b1b6776beee5ba25f58d624cfad1e569a683e418c8cb3d23",
+      "status": "PASS"
+    },
+    {
+      "agent": 4,
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent04-attempt-d-cuda-pass-accounting-audit.json",
+      "role": "canonical_cuda_pass_accounting",
+      "sha256": "8307ceda704d85063d2e3bf7405b3fb5854f8c583070b6f653cc9d45c6033b05",
+      "status": "PASS"
+    },
+    {
+      "agent": 5,
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent05d-attempt-c-recorder-scrub-integrity-audit.json",
+      "role": "integrity_scrub_and_preflight_provenance",
+      "sha256": "28f5c3f06c2143be2942349ea21be5215847a7bc2188069e01c24b4e70c914f2",
+      "status": "PASS"
+    }
+  ],
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "budget": {
+    "authorization_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "consumed_gpu_seconds": 13498.623626085977,
+    "ledger_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_sha256_before_reservation": "0ccb9bdda15fd5d36204f1363dcfe73af0409cc7c9d283dad826ee276ae10cdb",
+    "next_gpu_count": 1,
+    "next_maximum_wall_seconds": 525.0,
+    "next_reserved_gpu_seconds": 525.0,
+    "planning_margin_fraction": 0.15,
+    "projected_cumulative_with_margin_gpu_seconds": 14102.373626085977,
+    "projected_remaining_after_margin_gpu_seconds": 7497.626373914023,
+    "projected_with_margin_gpu_seconds": 603.75,
+    "remaining_gpu_seconds": 8101.376373914023,
+    "status": "PASS"
+  },
+  "experiment": "BRANCHFABRIC_GPU_VALIDATION_EXPERIMENT_004_V11",
+  "frozen_v10": {
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "modified_by_v11_work": false
+  },
+  "full_repository_check": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-evidence.json",
+    "focused_v11_system_torch_passed": 93,
+    "python_optional_skipped": 8,
+    "python_passed": 1777,
+    "rust": "PASS",
+    "sha256": "56583d9926d2032d18d21ee4a450a70894d65eb9b69ee898835feb3eaf178d40",
+    "status": "PASS_POST_FIX",
+    "ui": "PASS"
+  },
+  "micro_workload": {
+    "continuation_tokens_per_branch": 8,
+    "dtype": "bfloat16",
+    "fanout": 8,
+    "gpu": "A100-80GB",
+    "gpu_count": 1,
+    "logical_state_bytes": 1056964608,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "prefix_tokens": 16384,
+    "private_blocks": 128,
+    "private_suffix_tokens_per_branch": 256,
+    "shared_blocks": 1024,
+    "torch": "2.11.0",
+    "total_blocks": 1152,
+    "vllm": "0.23.0"
+  },
+  "modal_active_apps": 0,
+  "modal_running_containers": 0,
+  "modal_running_tasks": 0,
+  "next_action": "DESIGNATED_COORDINATOR_ATOMIC_ONE_A100_ATTEMPT_D_RESERVATION",
+  "prior_attempts": [
+    {
+      "attempt_id": "exp004-v11-micro-s41-a",
+      "cleanup_pass": true,
+      "conservative_gpu_seconds_charged": 525.0,
+      "failure_artifact_sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+      "scientific_status": "NULL_BEFORE_MODEL_STATE_OR_MEASUREMENT"
+    },
+    {
+      "actual_accounted_gpu_seconds": 155.17,
+      "attempt_id": "exp004-v11-micro-s41-b",
+      "cleanup_pass": true,
+      "scientific_outcome_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/scientific-outcome.json",
+      "scientific_outcome_sha256": "6a2cbb182fe96077bf34df61a4e7ac2a8e993903fee10c630bc9c67a74b584f3",
+      "scientific_status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT"
+    },
+    {
+      "actual_accounted_gpu_seconds": 261.63,
+      "attempt_id": "exp004-v11-micro-s41-c",
+      "cleanup_pass": true,
+      "scientific_outcome_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/scientific-outcome.json",
+      "scientific_outcome_sha256": "c64ee825cd54c703d31fa4ac24f8338425924d61dfe4603bb34b79ba354cefda",
+      "scientific_status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT"
+    }
+  ],
+  "production_integration_gates": [
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-a-allocator-issued-epochs.json",
+      "gate": "A_ALLOCATOR_ISSUED_SINGLE_USE_EPOCHS",
+      "sha256": "53f9684921eafb98116898955e92a443ced571367fb8fa4b5e6e76691fda70b6",
+      "status": "PASS_OFFLINE_POST_FIX"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-b-post-free-ownership-refcount.json",
+      "gate": "B_POST_FREE_OWNERSHIP_AND_REFCOUNT_PROOF",
+      "sha256": "249ce23a99f612b5e65dd6657db2cb2f3eb1f1ef4daa81670b1bcba1f86f5b53",
+      "status": "PASS_OFFLINE_POST_FIX"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-c-engine-step-binding.json",
+      "gate": "C_PRODUCTION_ENGINE_STEP_LOCK_BINDING",
+      "sha256": "9f1a9282796e56bf6af03ec25bbc32b25b2801f31df0833c0e6d262a15091619",
+      "status": "PASS_OFFLINE_POST_FIX"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-d-canonical-cuda-state-pass-records.json",
+      "gate": "D_CANONICAL_MEASURED_CUDA_STATE_PASS_RECORDS",
+      "sha256": "6d7fcddd4e330104957cfa9cbce95a3b56cb4a03afaa0b0e8231241b149fe023",
+      "status": "PASS_OFFLINE_POST_FIX"
+    }
+  ],
+  "recorder_remediation": {
+    "authoritative_scrub_owner": "Vllm0230StreamingRestoreStager",
+    "diagnostic_emergency_lane": 256,
+    "exact_preflight_dependency": "logical_page_to_actual_preflight_pass",
+    "first_subset_cuda_passes": 4080,
+    "normal_lane": 3840,
+    "observed_attempt_c_cuda_passes": 8128,
+    "pending_event_bound": 4096,
+    "remaining_subset_cuda_passes": 4048,
+    "same_class_recurrence_policy": "TERMINAL_NO_RETRY",
+    "total_ledger_bound": 65536
+  },
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-offline-pre-gpu-attempt-d-manifest/v1",
+  "sealed_at_utc": "2026-08-19T02:09:26.094821+00:00",
+  "source_sha256": {
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb",
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "43d6170733d677941cf2b3f99b4471be19868a45dfed9bd3336b866497b2928b",
+    "python/sloforge/continuum/adapters/vllm_live.py": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718"
+  },
+  "status": "PASS"
+}

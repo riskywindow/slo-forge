@@ -1,0 +1,38 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-gpu-hours-snapshot/v1",
+  "terminal_attempt_id": "exp004-v11-integrated-s41-d",
+  "authoritative_ledger": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "authoritative_ledger_sha256": "8e8011ca993f82f4de7553fb0b2e1ff464d7a65b1c4148410194826895ad6e7d",
+  "hard_authorized_a100_seconds": 21600.0,
+  "price_per_a100_hour_usd": 2.4984,
+  "measured_settled_a100_seconds": 14168.975013231977,
+  "measured_settled_a100_hours": 3.935826392564438,
+  "measured_settled_gpu_only_cost_usd": 9.833268659182993,
+  "conservative_failure_a100_seconds": 5229.0,
+  "conservative_failure_a100_hours": 1.4525,
+  "conservative_failure_gpu_only_cost_usd": 3.628926,
+  "cumulative_conservative_a100_seconds": 19397.975013231975,
+  "cumulative_conservative_a100_hours": 5.388326392564437,
+  "cumulative_conservative_gpu_only_cost_usd": 13.462194659182991,
+  "remaining_authorized_a100_seconds": 2202.024986768025,
+  "remaining_authorized_a100_hours": 0.6116736074355625,
+  "active_reservations": 0,
+  "targeted_attempt_b": {
+    "actual_provider_seconds_per_gpu": 224.018188447,
+    "actual_a100_seconds": 448.036376894,
+    "actual_a100_hours": 0.12445454913722222,
+    "gpu_only_cost_usd": 0.310937245564436,
+    "scientific_status": "PASS_1152_OF_1152"
+  },
+  "integrated_attempt_d": {
+    "actual_a100_seconds": null,
+    "actual_a100_seconds_status": "unavailable-or-not-trusted",
+    "conservative_charged_a100_seconds": 1176.0,
+    "conservative_charged_a100_hours": 0.32666666666666666,
+    "conservative_charged_gpu_only_cost_usd": 0.8161440000000001,
+    "failure_stage": "modal-launch",
+    "function_entered": false,
+    "scientific_status": "INVALID_PRE_FUNCTION_IMAGE_BUILD_CLIENT_DISCONNECT"
+  },
+  "accounting_note": "Measured settled intervals and conservative failure charges are kept separate. Attempt D has no trusted GPU allocation interval and is not reported as zero; the authoritative ledger conservatively charged its full reservation."
+}

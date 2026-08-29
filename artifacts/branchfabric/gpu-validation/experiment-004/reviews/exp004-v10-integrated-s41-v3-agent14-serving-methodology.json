@@ -1,0 +1,28 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "reviewer": "agent14",
+  "scope": "serving-methodology",
+  "verdict": "reject-v10-causal-claims-accept-capacity-envelope",
+  "accepted_results": {
+    "lambda_1_rps": 12.0,
+    "one_gpu_unstable_rps": 15.0,
+    "lambda_2_rps": 20.0,
+    "lambda_spike_rps": 15.0
+  },
+  "unavailable_results": [
+    "control",
+    "live-overload-trigger",
+    "capacity-reclamation",
+    "two-gpu-recovery",
+    "queue-drain",
+    "SLO-restoration",
+    "restore-interference",
+    "restore-latency"
+  ],
+  "findings": [
+    "The controller timed out at the independent-review barrier before transaction-ready and emitted no serving or rollout result.",
+    "The 19.9 rps two-GPU measured completion rate satisfies calibration tolerance but is not evidence of the stricter post-reclaim service-rate-greater-than-offered gate.",
+    "The 15 rps point proves one-GPU unsustainability by positive queue drift and throughput shortfall, not by a live v10 SLO breach."
+  ]
+}

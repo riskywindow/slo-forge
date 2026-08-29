@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-c-scientific-validity",
+  "reviewer_role": "scientific_validity",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T04:38:45Z",
+  "authorization_subject_sha256": "63810b6ca42ba5c09efb305cebe004ab42ed43e971b382f2fdc9b6c3613b1acd",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The canonical authorization subject digest independently recomputes to 63810b6ca42ba5c09efb305cebe004ab42ed43e971b382f2fdc9b6c3613b1acd using sorted-key compact UTF-8 JSON with one trailing LF; all 11 referenced source files are regular repository files whose byte-level SHA-256 values match the subject.",
+    "Request-level recomputation from the raw 12-rps evidence yields 11.9 interval completions/s, 44.20-ms p95 TTFT, queue depth 11 to 12, +0.045 requests/s sampled slope, exact queue-flow conservation, complete identity/routing/output accounting, and no persistent positive drift.",
+    "Request-level recomputation from the raw 15-rps evidence yields 14.4 interval completions/s against 15 rps offered, 402.29-ms p95 TTFT, queue depth 15 to 21, +0.582 requests/s sampled slope, exact queue-flow conservation, and persistent positive drift; this demonstrates bounded one-GPU overload without relying on a catastrophic backlog.",
+    "Request-level recomputation from the raw 20-rps two-GPU evidence yields 19.9 interval completions/s, 42.44-ms p95 TTFT, queue depth 18 to 19, exact queue-flow conservation, no persistent positive drift, and 100 completed measurement-cohort requests on each GPU under deterministic round-robin routing.",
+    "The immutable selection is internally and scientifically consistent: 15 rps is exactly 25 percent above the validated 12-rps one-GPU point, exactly 25 percent below the validated 20-rps two-GPU point, and leaves 5 rps nominal queue-drain headroom; no repeat capacity campaign is required to authorize the stale-calibration sanity guards.",
+    "The historical calibration result's v10_launch_permitted=false records the unresolved live reviewer gate, not a failure of its hashed capacity measurements. This replacement subject requires all reviews before GPU allocation, forbids remote approval exchange and asynchronous review waits, and limits the measured controller to loading, verifying, and proceeding from the completed local seal.",
+    "This approval is narrowly scoped to the settled Experiment 004 v10 load selection, seed 41, and exactly one integrated naive-preservation capacity-reclamation baseline transaction. It does not authorize broad recalibration, movement-pipeline optimization, extra seeds, speculative retries, or any live reviewer handoff; implementation conformance and budget authorization remain separate mandatory pre-GPU gates."
+  ]
+}

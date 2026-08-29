@@ -1,0 +1,38 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "reviewer": "agent17",
+  "scope": "gpu-performance",
+  "verdict": "partial-pass-topology-readiness-capacity-only",
+  "topology": {
+    "gpu_count": 2,
+    "gpu_model": "NVIDIA A100-SXM4-80GB",
+    "memory_mib_per_gpu": 81920,
+    "driver_version": "580.95.05",
+    "torch_cuda_version": "13.0",
+    "bidirectional_peer_access": true,
+    "nvlink_links_per_gpu": 12,
+    "nvidia_smi_topo_m_pass": false,
+    "host_numa_affinity_available": false
+  },
+  "readiness": {
+    "both_engines_ready": true,
+    "gpu0_probe_ttft_seconds": 0.033247641,
+    "gpu1_probe_ttft_seconds": 0.032798381,
+    "probe_output_tokens_each": 64,
+    "engine_reloaded": false
+  },
+  "capacity": {
+    "lambda_1_rps": 12.0,
+    "one_gpu_unstable_rps": 15.0,
+    "lambda_2_rps": 20.0,
+    "candidate_spike_rps": 15.0
+  },
+  "v10_recovery_or_interference_available": false,
+  "caveats": [
+    "The nvidia-smi topology matrix failed, so host PCI/CPU/NUMA interference context is unavailable; validated P2P and NVLink evidence is the GPU-interconnect fallback.",
+    "Lambda2 is a conservative highest-tested operating point, not saturation.",
+    "The capacity envelope is one short seed-41 measurement.",
+    "The remote transaction gate timed out before accepting the independent reviews."
+  ]
+}

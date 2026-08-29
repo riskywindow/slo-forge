@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "runs": [],
+  "pilot": {
+    "requested": {
+      "fanout": 1,
+      "prefix_tokens": 16384,
+      "continuation_tokens": 256,
+      "seed": 41,
+      "state": "real_gpu_resident"
+    },
+    "status": "not_launched",
+    "reason": "The committed repository has no real-runtime adapter connecting an exact Helix BranchPoint and Continuum COW state to concurrent GPU decode. Launching a stock runtime would not measure the required path."
+  }
+}

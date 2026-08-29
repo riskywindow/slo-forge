@@ -1,0 +1,26 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-conservative-failure-charge-evidence/v1",
+  "attempt_id": "exp004-v11-micro-s41-a",
+  "reservation_id": "exp004-v11-micro-s41-a-reservation",
+  "modal_app_id": "ap-9tG2MqyxSwsSvIdnEBfwtL",
+  "modal_task_id": "ta-01M0BR2G8Y4QAX54F1CV0B172R",
+  "failure_stage": "REMOTE_AUTHORIZATION_BEFORE_MODEL_LOAD",
+  "failed_at_utc": "2026-08-19T00:52:57Z",
+  "error": {
+    "type": "RuntimeError",
+    "message": "v11 micro authorization does not bind the coordinator preflight token"
+  },
+  "cause": "The local module-level preflight token enabled graph hydration but was not present in the remote container environment.",
+  "remote_state_work_started": false,
+  "model_loaded": false,
+  "measurement_produced": false,
+  "retry_performed_by_modal": false,
+  "actual_gpu_seconds": null,
+  "actual_gpu_seconds_status": "UNAVAILABLE_AFTER_PRE_MEASUREMENT_REMOTE_FAILURE",
+  "charged_wall_seconds": 525.0,
+  "gpu_count": 1,
+  "conservatively_charged_gpu_seconds": 525.0,
+  "accounting_policy": "CHARGE_FULL_PREFLIGHT_BOUND_WITHOUT_FABRICATED_ACTUALS",
+  "config_sha256": "0ef031c32910ceab292affd374dc9a6f657955f48978a7de223c597d47730373",
+  "preflight_token_sha256": "869b57314df38d72333886396c38362e33e7eb1671533cf514adcc4422c7b73e"
+}

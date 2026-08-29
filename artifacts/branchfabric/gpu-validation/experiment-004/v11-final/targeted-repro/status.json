@@ -1,0 +1,57 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-status/v1",
+  "observed_at_utc": "2026-08-23T01:24:45Z",
+  "status": "FAIL_PRE_IDENTITY_COMMAND_SCHEMA",
+  "attempt_id": "exp004-v11-targeted-identity-s41-a",
+  "terminal_phase_if_run": "SOURCE_ALLOCATION_IDENTITY_GATE",
+  "execution_mode": "targeted-source-identity-v11",
+  "expected_allocation_count": 1152,
+  "observed_allocation_count": null,
+  "source_identity_gate_passed": null,
+  "source_identity_gate_reached": false,
+  "optimized_export_started": false,
+  "transaction_source_release_started": false,
+  "optimized_export_authorized": false,
+  "source_release_authorized": false,
+  "predicted_provider_wall_seconds_range": [205.0, 230.0],
+  "hard_provider_wall_seconds": 300.0,
+  "predicted_gpu_seconds_range": [410.0, 460.0],
+  "maximum_reserved_gpu_seconds": 600.0,
+  "ledger": {
+    "reference": "../gpu-hours.json",
+    "authoritative_reference": "../../gpu-hours.json",
+    "authoritative_sha256": "e9064b98e8563f2494d26435cf28040149832b9924253d4c2b15a51b669ee35d",
+    "hard_gpu_seconds": 21600.0,
+    "conservative_consumed_gpu_seconds": 17773.938636337978,
+    "remaining_gpu_seconds": 3826.061363662022,
+    "active_reservations": 0,
+    "ledger_capacity_sufficient": true
+  },
+  "measured_invocation": {
+    "provider_wall_seconds": 242.212505126,
+    "gpu_count": 2,
+    "gpu_seconds": 484.425010252,
+    "gpu_hours": 0.13456250284777777,
+    "gpu_only_cost_usd": 0.336190957114888,
+    "function_call_id": "fc-01M0P37PBZRCAC4R92S9D5HV7E"
+  },
+  "blocker": {
+    "code": "TARGETED_COMMAND_SCHEMA_REJECTED_BY_SHARED_WORKER_VALIDATOR",
+    "first_failure": "rollout worker rejected sloforge.branchfabric.targeted-source-identity-command/v1 before transaction handoff",
+    "producer": "gpu_reclamation_integrated_controller_v11._transaction_command",
+    "consumer": "gpu_reclamation_worker._validate_integrated_transaction_command",
+    "consumer_expected_schema": "sloforge.branchfabric.integrated-transaction-command/v1",
+    "observed_schema": "sloforge.branchfabric.targeted-source-identity-command/v1",
+    "integrated_retry_authorized": false,
+    "paid_retry_performed": false
+  },
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0
+  }
+}

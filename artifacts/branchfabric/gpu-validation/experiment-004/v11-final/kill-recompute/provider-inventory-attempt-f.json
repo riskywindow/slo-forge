@@ -1,0 +1,138 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-provider-inventory-capture/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-f",
+  "observed_at_utc": "2026-08-28T23:17:10.809803000Z",
+  "modal_client_version": "1.5.3",
+  "commands": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "app",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"app_id\": \"ap-pAywJ5QYg3BmZ0abZxdzhO\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 17:58:57-05:00\",\n    \"stopped_at\": \"2026-08-28 18:12:57-05:00\"\n  },\n  {\n    \"app_id\": \"ap-rjdwfRRFAldeVCQJhbpuCb\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 17:56:50-05:00\",\n    \"stopped_at\": \"2026-08-28 17:58:53-05:00\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "app_id": "ap-pAywJ5QYg3BmZ0abZxdzhO",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 17:58:57-05:00",
+          "stopped_at": "2026-08-28 18:12:57-05:00"
+        },
+        {
+          "app_id": "ap-rjdwfRRFAldeVCQJhbpuCb",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 17:56:50-05:00",
+          "stopped_at": "2026-08-28 17:58:53-05:00"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "container",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "volume",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"name\": \"sloforge-branchfabric-results\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  },\n  {\n    \"name\": \"sloforge-model-cache\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "name": "sloforge-branchfabric-results",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        },
+        {
+          "name": "sloforge-model-cache",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        }
+      ]
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "endpoint",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "queue",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--locked",
+        "modal",
+        "dict",
+        "list",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    }
+  ],
+  "ledger_reservations": [],
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/REMOTE_MANIFEST.json",
+    "sha256": "23655d7275730175054a63d18fc7d16b34eae093ab5fa2682bcc8b46e124dc83",
+    "verified_artifact_count": 508
+  },
+  "claim": "fresh read-only post-return provider inventory with exact captured provider rows; no scientific-validity or measured-duration claim",
+  "provenance": {
+    "observation_source": "user-supplied fresh read-only Modal CLI observation",
+    "all_commands_returncode_zero": true,
+    "claim_scope": "provider resource absence and authorized persistent-volume inventory only"
+  }
+}

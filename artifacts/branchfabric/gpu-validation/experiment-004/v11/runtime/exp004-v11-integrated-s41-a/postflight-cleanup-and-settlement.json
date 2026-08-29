@@ -1,0 +1,44 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-postflight/v1",
+  "attempt_id": "exp004-v11-integrated-s41-a",
+  "function_call_id": "fc-01M0C4SKRP86EM7VH6CYNZ7WG1",
+  "modal_app_id": "ap-uBFC4yVz0EybrOaky1rmlI",
+  "status": "PASS_CLEANUP_SCIENTIFICALLY_NULL_BUDGET_CHARGED",
+  "observed_at_utc": "2026-08-19T04:38:38Z",
+  "scientific_status": "NULL_BEFORE_GPU_INVENTORY_MODEL_LOAD_RUNTIME_STATE_OR_MEASUREMENT",
+  "failure_stage": "REMOTE_SEALED_EVIDENCE_BEFORE_GPU_INVENTORY_OR_MODEL_LOAD",
+  "remote_allocation_seconds": 57.046437036,
+  "client_elapsed_seconds": 128.52414954199776,
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/remote-download-dir/REMOTE_MANIFEST.json",
+    "sha256": "d29b2787edf942ae06a328fd4988db90aeb2647adce72bb6eae38679caba7a0a"
+  },
+  "function_completion": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/remote-download-dir/function-completion.json",
+    "sha256": "3e86d67ba59711529df2f94c8b9ef63012b5c051306f20bf321a3d631d9332c6"
+  },
+  "provider_cleanup": {
+    "app_state": "stopped",
+    "running_tasks": 0,
+    "running_containers": 0,
+    "active_apps": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "pass": true
+  },
+  "ledger": {
+    "settlement_method": "CONSERVATIVE_FULL_BOUND_FAILURE_CHARGE",
+    "reason": "The controller failed before physical GPU identities were captured, so measured-duration settlement was not admissible.",
+    "charged_wall_seconds": 588.0,
+    "gpu_count": 2,
+    "charged_gpu_seconds": 1176.0,
+    "charged_cost_usd": 0.816144,
+    "consumed_gpu_seconds_after": 14937.513626085978,
+    "remaining_gpu_seconds_after": 6662.486373914022,
+    "active_reservations_after": 0,
+    "sha256_after_charge": "84175458f5e0b2f54fdc7c1e2c37c7d9b855f4b3771127299bcbeb4ad827f603"
+  },
+  "cleanup_pass": true
+}

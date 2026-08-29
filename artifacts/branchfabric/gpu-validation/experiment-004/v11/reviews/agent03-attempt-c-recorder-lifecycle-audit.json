@@ -1,0 +1,83 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-recorder-lifecycle-review/v1",
+  "agent": 3,
+  "reviewed_at_utc": "2026-08-19T01:52:31Z",
+  "attempt_id": "exp004-v11-micro-s41-c",
+  "status": "FAIL",
+  "recommendation": "NO_GO_UNTIL_INCREMENTAL_RESOLUTION_AND_EMERGENCY_SCRUB_RESERVE_PASS_OFFLINE",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "v10_modified": false,
+  "attempt_failure": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-download/worker__failure.json",
+    "sha256": "1fb2cb6f296030e301f0864cf240550ff721b248d128adf9af22ee48e2887b59",
+    "direct_error": "v11 pending CUDA pass bound exceeded",
+    "scrub_blocked_by_same_full_recorder": true,
+    "branches_admitted": false,
+    "runtime_teardown_required": true,
+    "scientifically_valid": false
+  },
+  "root_cause": {
+    "classification": "DETERMINISTIC_RECORDER_LIVE_EVENT_CARDINALITY_UNDERSIZING",
+    "maximum_pending_cuda_passes": 4096,
+    "pages": 1152,
+    "layers": 28,
+    "worst_case_raw_validation_records": 32256,
+    "estimated_total_restore_cuda_records": "approximately 34000",
+    "state_byte_corruption_evidence": false
+  },
+  "incremental_resolution": {
+    "safe_under_import_admission": true,
+    "releases_engine_step_lock": false,
+    "changes_witness_generation": false,
+    "allows_competing_mutation": false,
+    "required_semantics": [
+      "non-final flush resolves pending events and retains pass IDs and records",
+      "recorder remains appendable after flush",
+      "final resolve freezes",
+      "dependencies may cross flush boundaries",
+      "one merged authoritative final validation",
+      "pending-event and total-record bounds remain explicit",
+      "resolution wait is not a physical-memory pass"
+    ]
+  },
+  "emergency_scrub": {
+    "mandatory": true,
+    "cuda_passes_per_28_layer_scrub": 57,
+    "maximum_nested_scrub_passes": 114,
+    "minimum_reserve": 128,
+    "recommended_reserve": 256,
+    "normal_work_may_borrow": false,
+    "allowed_classification": "DIAGNOSTIC",
+    "shares_authoritative_ledger": true,
+    "exhaustion_action": "V11RuntimeTeardownRequired"
+  },
+  "required_tests": [
+    "multi-flush equivalence to one-shot totals",
+    "cross-flush dependency closure",
+    "cross-flush duplicate rejection",
+    "non-final append and final freeze",
+    "separate pending and total bounds",
+    "witness validity across blocking flush",
+    "competing engine and allocator mutation excluded during flush",
+    "normal lane cannot borrow emergency reserve",
+    "scrub succeeds with normal lane full",
+    "two nested 57-pass scrubs fit reserve",
+    "emergency exhaustion forces typed teardown and no reuse",
+    "exact descending 1152-page 28-layer cardinality"
+  ],
+  "current_offline_tests": {
+    "command": "PYTHONPATH=python python -m pytest -q tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11.py tests/python/test_gpu_reclamation_runtime_v11.py",
+    "passed": 53,
+    "failed": 0,
+    "elapsed_seconds": 1.44,
+    "closes_attempt_c_failure": false
+  },
+  "audited_hashes_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "7b5752b37897f880f451068ea69e2439c979dbb3324ea0f8c15c354ecde0dc67",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "776a9b3ad0ee057524d0652f68688dc2aa7ce811c1b4450ebeac74f5d7fff2af",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-preservation-break-even/v1",
+  "status": "PARTIALLY_MEASURED_NOT_IDENTIFIABLE_WITHOUT_KILL_ARM",
+  "variables": {
+    "P": "shared prefix tokens",
+    "B": "branch count",
+    "A": "private suffix age in tokens per branch",
+    "q": "unique logical KV bytes per token",
+    "theta": "independent recompute throughput in tokens per second",
+    "delta_k": "non-prefill kill/rebuild overhead seconds",
+    "delta_p": "non-state-path preserve overhead seconds"
+  },
+  "equations": {
+    "unique_logical_tokens": "P + B*A",
+    "logical_state_bytes": "q*(P + B*A)",
+    "independent_kill_recompute_tokens": "B*(P + A)",
+    "kill_recompute_seconds": "B*(P + A)/theta + delta_k",
+    "measured_workload_preserve_seconds": "export_wall + restore_wall = 7.051284484",
+    "preserve_when": "7.051284484 + delta_p < B*(P + A)/theta + delta_k"
+  },
+  "frozen_workload": {
+    "P": 16384,
+    "B": 8,
+    "A": 256,
+    "q_bytes_per_unique_token": 57344,
+    "logical_state_bytes": 1056964608,
+    "analytical_independent_kill_recompute_tokens": 133120,
+    "actual_recompute_tokens": null
+  },
+  "measured_preserve_coefficients": {
+    "full_physical_amplification": 21.000762818351625,
+    "full_physical_bytes": 22197063040,
+    "export_wall_seconds": 2.61309087,
+    "restore_wall_seconds": 4.438193614,
+    "combined_state_path_wall_seconds": 7.051284484,
+    "effective_full_physical_bytes_per_second": 3147946035.9835343,
+    "effective_external_bytes_per_second": 299832032.70231295
+  },
+  "conditional_workload_threshold": {
+    "assumptions": "delta_k equals delta_p and preserve time is locally constant at the measured workload",
+    "recompute_throughput_tokens_per_second_below_which_preserve_wins": 18878.829850371414
+  },
+  "measured_theta": null,
+  "measured_delta_k": null,
+  "measured_break_even_surface": null,
+  "reason": "Integrated v11 failed before reclamation, so the prerequisite kill/recompute arm was forbidden and not run. One measured preserve point cannot identify throughput and fixed-overhead coefficients or validate the analytical 133,120-token count.",
+  "no_projected_value_presented_as_measured": true
+}

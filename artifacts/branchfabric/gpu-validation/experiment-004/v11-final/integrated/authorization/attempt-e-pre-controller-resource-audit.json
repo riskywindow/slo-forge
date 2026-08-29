@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-pre-controller-resource-audit/v1",
+  "status": "PASS_NO_CONTROLLER_TRANSACTION_RESOURCES_CREATED_WITH_CLEANUP_GAP_PRESERVED",
+  "observed_at_utc": "2026-08-26T23:15:33Z",
+  "attempt_id": "exp004-v11-integrated-s41-e",
+  "scientifically_valid": false,
+  "classification": "REMOTE_PRE_CONTROLLER_SEALED_EVIDENCE_FAILURE",
+  "evidence": {
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-e.json",
+      "sha256": "0f163e5cf5db5f07ee85e2fbe13baa74df969e18f4598c9ab83d864f49c339ea"
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-e.json",
+      "sha256": "9ce05c1dc289c67bab147e6aa30deadd87366ec24382c4472fb00c4f8a2c7b20"
+    },
+    "conservative_failure_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-e-conservative-charge.json",
+      "sha256": "3efbc040ee92364e93606bc550fe93c37fac57ee3c1950e30196d1e96b1d2bc7"
+    },
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/REMOTE_MANIFEST.json",
+      "sha256": "9d8890e16b75e2b612861a85deaebf81874d782f97d1bdd8dd366891a3e46747"
+    },
+    "function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-completion.json",
+      "sha256": "219f62c577d27fdb599ea55a5f8abbfadff8b473da6d0037f437ba4f7a7d1c8b"
+    },
+    "function_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-failure.json",
+      "sha256": "6565fca972ee3dcefa8fb33b646439c6cd2a6a3228b0f9c2246d1c651a8d5f89"
+    },
+    "function_finally_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-finally-cleanup.json",
+      "sha256": "ea38385b840a5e7fee13bf9fecd552d3b562d8ca88a689d55e1a07d0172b8143"
+    },
+    "pre_gpu_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-e-post-prefunction-pre-gpu-manifest.json",
+      "sha256": "b66879ec7cc3cd5606a24288ff33f929a8a21be3021f81da17fa366969cac8da"
+    },
+    "seal_verification": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/seal-verification-attempt-e.json",
+      "sha256": "0b9eb102c7797d8390cbd2d8936ffa9b07d8b8ed3751fef8d89c180b4bc37fb5"
+    }
+  },
+  "executed_source_commitments": {
+    "controller_sha256": "0818ca0ad905ef77a2ea38a2d0a9f842baffd64a04067c72c368b3cf01a25ec0",
+    "launcher_sha256": "5fffb0c62c121c48270f805c1cea37a831f195d2cd5eb98d8b8d933f405b78b4",
+    "source": "Attempt-E pre-GPU manifest integrated_prelaunch bindings"
+  },
+  "failure_join": {
+    "function_call_id": "fc-01M104ZGT6J8YPBJ50BN0BMT9H",
+    "reservation_id": "exp004-v11-e-28c798cbedbf2232eee7",
+    "remote_manifest_sha256": "9d8890e16b75e2b612861a85deaebf81874d782f97d1bdd8dd366891a3e46747",
+    "failure_type": "FileNotFoundError",
+    "missing_path": "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "failure_call_site": "verify_sealed_evidence -> _verify_prefunction_retry_integrated_authorization -> validate_bound_artifact",
+    "conservative_charged_wall_seconds": 588.0,
+    "conservative_charged_gpu_seconds": 1176.0,
+    "ledger_sha256_after_settlement": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4"
+  },
+  "ordering_proof": {
+    "remote_function_entered": true,
+    "controller_python_invoked": true,
+    "controller_transaction_started": false,
+    "sealed_evidence_verification_started": true,
+    "sealed_evidence_verification_completed": false,
+    "controller_work_root_initialization_reached": false,
+    "gpu_inventory_reached": false,
+    "model_runtime_load_reached": false,
+    "engine_creation_reached": false,
+    "worker_process_launch_reached": false,
+    "allocator_lifecycle_reached": false,
+    "source_capture_reached": false,
+    "optimized_export_reached": false,
+    "source_release_reached": false,
+    "proof_basis": "The immutable traceback terminates in the controller's first sealed-evidence verification. In the executed controller source, work-root initialization, GPU inventory, the owned-child list, and subprocess.Popen all occur strictly after this verification returns."
+  },
+  "resource_findings": {
+    "controller_owned_child_processes_created": 0,
+    "controller_owned_process_groups_created": 0,
+    "controller_cuda_contexts_created": 0,
+    "controller_allocator_instances_created": 0,
+    "controller_ipc_resources_created": 0,
+    "controller_profiler_processes_created": 0,
+    "provider_active_apps_after": 0,
+    "provider_running_tasks_after": 0,
+    "provider_running_containers_after": 0,
+    "provider_endpoints_after": 0,
+    "provider_queues_after": 0,
+    "provider_dicts_after": 0,
+    "provider_reservations_after": 0,
+    "ledger_reservations_after": 0
+  },
+  "cleanup_interpretation": {
+    "attempt_e_in_function_cleanup_status": "FAIL_MISSING_PRE_CONTROLLER_CLEANUP_EVIDENCE",
+    "attempt_e_provider_cleanup_status": "PASS",
+    "resource_cleanup_applicability": "NOT_APPLICABLE_NO_CONTROLLER_TRANSACTION_RESOURCES_CREATED",
+    "audit_is_not_in_function_cleanup_pass": true,
+    "required_runtime_hardening": "Future pre-controller failures must emit typed in-function cleanup evidence instead of relying on post-run code-path reconstruction."
+  },
+  "authorization_effect": {
+    "gpu_invocation_authorized": false,
+    "attempt_f_seal_authorized": false,
+    "kill_and_recompute_authorized": false,
+    "required_before_attempt_f": [
+      "runtime pre-controller cleanup hardening",
+      "immutable pre-reservation ledger snapshot binding",
+      "fresh make check PASS",
+      "content-addressed Attempt-F manifest and config",
+      "real local coordinator loader PASS"
+    ]
+  },
+  "provenance": "Offline reconstruction from immutable Attempt-E artifacts and the source hashes sealed for that execution; no GPU or provider action and no fabricated measurement."
+}

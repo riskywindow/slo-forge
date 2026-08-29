@@ -97,11 +97,25 @@ def test_hardware_gate_requires_system_headroom_and_realizability() -> None:
     assert not blocked.hardware_interest
     too_small = _gate(realistic_speedup=1.1)
     assert not too_small.hardware_interest
+    movement_only = _gate().model_copy(
+        update={
+            "fraction_of_reclamation": 0.14,
+            "fraction_of_resume": 0.14,
+            "fraction_of_full_transaction": 0.14,
+            "fraction_of_slo_restoration": 0.14,
+            "fraction_of_movement_time": 0.9,
+            "serving_degradation_fraction": 0.9,
+            "avoidable_physical_byte_fraction": 0.9,
+        }
+    )
+    assert not movement_only.system_gate
+    assert not movement_only.hardware_interest
 
 
 def test_outcome_ordering_is_exact_and_economic_gate_is_first() -> None:
     base = OutcomeEvidence(
         valid_pilot=True,
+        integrated_v11_scientifically_valid=True,
         kill_trials=1,
         naive_trials=1,
         optimized_trials=1,
@@ -113,11 +127,15 @@ def test_outcome_ordering_is_exact_and_economic_gate_is_first() -> None:
         optimized_path_measured_after_naive=True,
         optimized_path_semantics_match_naive=True,
         optimized_movement_fraction=0.3,
+        integrated_residual_critical_path_measured=True,
+        amdahl_analysis_calculated=True,
+        economic_comparison_established=True,
+        gpu_methodology_valid=True,
         chain_gates=(_gate(),),
     )
-    assert select_outcome(base).outcome is Experiment004Outcome.HOST_PIPELINE_HARDWARE_INTEREST
+    assert select_outcome(base).outcome is Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST
     fabric = base.model_copy(update={"chain_gates": (_gate(placement=PlacementClass.FABRIC),)})
-    assert select_outcome(fabric).outcome is Experiment004Outcome.FABRIC_HARDWARE_INTEREST
+    assert select_outcome(fabric).outcome is Experiment004Outcome.BRANCHFABRIC_HARDWARE_INTEREST
     uneconomic = fabric.model_copy(update={"preservation_economic_for_measured_workload": False})
     assert select_outcome(uneconomic).outcome is Experiment004Outcome.PRESERVATION_NOT_ECONOMIC
 
@@ -126,6 +144,7 @@ def test_software_and_closed_outcomes_require_no_passing_chain() -> None:
     blocked = _gate().model_copy(update={"regular_dataflow": False})
     software = OutcomeEvidence(
         valid_pilot=True,
+        integrated_v11_scientifically_valid=True,
         kill_trials=1,
         naive_trials=1,
         optimized_trials=1,
@@ -137,11 +156,79 @@ def test_software_and_closed_outcomes_require_no_passing_chain() -> None:
         optimized_path_measured_after_naive=True,
         optimized_path_semantics_match_naive=True,
         optimized_movement_fraction=0.1,
+        integrated_residual_critical_path_measured=True,
+        amdahl_analysis_calculated=True,
+        economic_comparison_established=True,
+        gpu_methodology_valid=True,
         chain_gates=(blocked,),
     )
-    assert select_outcome(software).outcome is Experiment004Outcome.GPU_SOFTWARE_TARGET
+    assert select_outcome(software).outcome is Experiment004Outcome.GPU_SOFTWARE_WINS
     closed = software.model_copy(update={"optimized_removed_most_naive_headroom": False})
-    assert select_outcome(closed).outcome is Experiment004Outcome.MOVEMENT_CLOSED
+    assert select_outcome(closed).outcome is Experiment004Outcome.SOFTWARE_WINS
+
+
+@pytest.mark.parametrize(
+    ("update", "missing_name"),
+    (
+        ({"valid_pilot": False}, "pilot_scientific_validity"),
+        ({"integrated_v11_scientifically_valid": False}, "integrated_v11_scientific_validity"),
+        ({"optimized_trials": 0}, "integrated_optimized_v11_trial"),
+        ({"kill_trials": 0}, "kill_and_recompute_trial"),
+        ({"optimized_semantics_valid": False}, "optimized_semantics"),
+        ({"profiling_hardware_backed": False}, "hardware_backed_profiling"),
+        ({"trace_overhead_gate_passed": False}, "trace_overhead_gate"),
+        (
+            {"integrated_residual_critical_path_measured": False},
+            "integrated_residual_critical_path",
+        ),
+        ({"amdahl_analysis_calculated": False}, "amdahl_analysis"),
+        ({"economic_comparison_established": False}, "economic_comparison"),
+        (
+            {"preservation_economic_for_measured_workload": None},
+            "preservation_economic_result",
+        ),
+        ({"optimized_movement_fraction": None}, "integrated_movement_fraction"),
+        ({"gpu_methodology_valid": False}, "gpu_methodology"),
+    ),
+)
+def test_missing_mandatory_evidence_fails_closed(
+    update: dict[str, object], missing_name: str
+) -> None:
+    complete = OutcomeEvidence(
+        valid_pilot=True,
+        integrated_v11_scientifically_valid=True,
+        kill_trials=1,
+        naive_trials=1,
+        optimized_trials=1,
+        optimized_semantics_valid=True,
+        preservation_economic_for_measured_workload=True,
+        optimized_removed_most_naive_headroom=False,
+        profiling_hardware_backed=True,
+        trace_overhead_gate_passed=True,
+        optimized_path_measured_after_naive=True,
+        optimized_path_semantics_match_naive=True,
+        optimized_movement_fraction=0.1,
+        integrated_residual_critical_path_measured=True,
+        amdahl_analysis_calculated=True,
+        economic_comparison_established=True,
+        gpu_methodology_valid=True,
+        chain_gates=(),
+    )
+    decision = select_outcome(complete.model_copy(update=update))
+
+    assert decision.outcome is Experiment004Outcome.HARDWARE_GATE_NOT_REACHED
+    assert missing_name in decision.missing_mandatory_evidence
+    assert not decision.strong_hardware_result
+
+
+def test_outcome_vocabulary_is_exactly_the_final_five_states() -> None:
+    assert {item.value for item in Experiment004Outcome} == {
+        "SOFTWARE_WINS",
+        "GPU_SOFTWARE_WINS",
+        "BRANCHFABRIC_HARDWARE_INTEREST",
+        "PRESERVATION_NOT_ECONOMIC",
+        "HARDWARE_GATE_NOT_REACHED",
+    }
 
 
 def test_fabric_and_speedup_claims_require_physical_evidence() -> None:

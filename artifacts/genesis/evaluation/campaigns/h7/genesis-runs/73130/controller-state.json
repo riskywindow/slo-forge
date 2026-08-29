@@ -1,0 +1,345 @@
+{
+  "schema_version": "sloforge.genesis.evolution.persistence/v1",
+  "payload_sha256": "23392c8fc56ce755a21f458f9721707db874cb15f67e8e6fd56fc5d9c2551715",
+  "payload": {
+    "schema_version": "sloforge.genesis.evolution/v1",
+    "deployment_id": "genesis-h7-73130",
+    "controller_safety_config_sha256": "b64bbde85aa8ccc59352793625abecb3479a84bbff551850c9263724de990227",
+    "seed": 73130,
+    "sequence": 10,
+    "phase": "promoted",
+    "champion": {
+      "capsule_id": "suite-core-challenger",
+      "capsule_digest": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4",
+      "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+      "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/evolution/challenger-capsule/manifests/aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4.json"
+    },
+    "previous_champion": {
+      "capsule_id": "suite-core-champion",
+      "capsule_digest": "8ea4da763921561ef64ab8ea3aa6902e7ad05b8f82237c244fd010013f4563ef",
+      "genome_hash": "4db91427bcb35144e076ee8fd21a9b9c32b4d30fe09e25d75c68f409859a8f3b",
+      "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/capsule/manifests/8ea4da763921561ef64ab8ea3aa6902e7ad05b8f82237c244fd010013f4563ef.json"
+    },
+    "active_trigger": "workload_drift",
+    "selected_candidate_id": "h7-challenger-73130",
+    "challengers": [
+      {
+        "spec": {
+          "candidate_id": "h7-rejected-challenger-73130",
+          "capsule": {
+            "capsule_id": "h7-rejected-capsule-73130",
+            "capsule_digest": "e2051598ba42d1b26b3f05094f6b8dc183f1615a63d601de8e366a72896c1b3e",
+            "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+            "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/evolution/challenger-capsule/manifests/aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4.json"
+          },
+          "transition_category": "request_boundary_swap",
+          "isolation": {
+            "mode": "sandbox",
+            "writable_artifact_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/h7/genesis-runs/73130/challenger-isolation",
+            "network_access": false,
+            "cloud_credentials_exposed": false,
+            "host_device_access": false,
+            "live_traffic_enabled": false
+          },
+          "active_stream_compatible": false,
+          "state_conversion_verified": false
+        },
+        "status": "capsule_rejected",
+        "capsule_validation": {
+          "capsule_digest": {
+            "algorithm": "sha256",
+            "value": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4"
+          },
+          "candidate_genome_hash": {
+            "algorithm": "sha256",
+            "value": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff"
+          },
+          "promotion_verification_level": null,
+          "integrity_valid": true,
+          "contract_compatible": true,
+          "evidence_complete": true,
+          "promotion_eligible": false,
+          "checked_at": "2026-01-01T20:18:50Z",
+          "issues": [],
+          "local_evolution_eligible": true,
+          "external_production_eligible": false
+        },
+        "shadow_observation": null,
+        "canary_observation": null,
+        "rejection_reason": "independent capsule validation rejected promotion"
+      },
+      {
+        "spec": {
+          "candidate_id": "h7-challenger-73130",
+          "capsule": {
+            "capsule_id": "suite-core-challenger",
+            "capsule_digest": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4",
+            "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+            "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/evolution/challenger-capsule/manifests/aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4.json"
+          },
+          "transition_category": "request_boundary_swap",
+          "isolation": {
+            "mode": "sandbox",
+            "writable_artifact_root": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/h7/genesis-runs/73130/challenger-isolation",
+            "network_access": false,
+            "cloud_credentials_exposed": false,
+            "host_device_access": false,
+            "live_traffic_enabled": false
+          },
+          "active_stream_compatible": false,
+          "state_conversion_verified": false
+        },
+        "status": "promoted",
+        "capsule_validation": {
+          "capsule_digest": {
+            "algorithm": "sha256",
+            "value": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4"
+          },
+          "candidate_genome_hash": {
+            "algorithm": "sha256",
+            "value": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff"
+          },
+          "promotion_verification_level": null,
+          "integrity_valid": true,
+          "contract_compatible": true,
+          "evidence_complete": true,
+          "promotion_eligible": false,
+          "checked_at": "2026-01-01T20:18:50Z",
+          "issues": [],
+          "local_evolution_eligible": true,
+          "external_production_eligible": false
+        },
+        "shadow_observation": {
+          "event_id": "fixture-shadow-evidence",
+          "candidate_id": "h7-challenger-73130",
+          "capsule_digest": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4",
+          "evidence_digest": "d9d9e7bc0e314a48190948d2e9fe0c25890025ddcf4d170243134f642262b390",
+          "stage": "shadow",
+          "verification_level": "level_2_property",
+          "observed_at_ms": 40,
+          "deterministic_seed": 73130,
+          "sample_count": 2,
+          "error_rate": 0.0,
+          "p95_ttft_ratio": 1.0960156041086624,
+          "p99_tpot_ratio": 1.0961105815061964,
+          "quality_regression": 0.0,
+          "interrupted_streams": 0
+        },
+        "canary_observation": {
+          "event_id": "fixture-canary-evidence",
+          "candidate_id": "h7-challenger-73130",
+          "capsule_digest": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4",
+          "evidence_digest": "7bcae7174aa747d62d966f83263adf67ed09155602eb076a1e952c6815ba9584",
+          "stage": "canary",
+          "verification_level": "level_2_property",
+          "observed_at_ms": 60,
+          "deterministic_seed": 73130,
+          "sample_count": 3,
+          "error_rate": 0.0,
+          "p95_ttft_ratio": 1.0214459377054115,
+          "p99_tpot_ratio": 0.9966973298751702,
+          "quality_regression": 0.0,
+          "interrupted_streams": 0
+        },
+        "rejection_reason": null
+      }
+    ],
+    "active_streams": [
+      {
+        "stream_id": "h7-active-stream-73130",
+        "capsule_id": "suite-core-champion",
+        "opened_sequence": 1,
+        "externally_visible_output": true
+      }
+    ],
+    "retained_capsule_ids": [
+      "suite-core-champion"
+    ],
+    "retained_capsules": [
+      {
+        "capsule_id": "suite-core-champion",
+        "capsule_digest": "8ea4da763921561ef64ab8ea3aa6902e7ad05b8f82237c244fd010013f4563ef",
+        "genome_hash": "4db91427bcb35144e076ee8fd21a9b9c32b4d30fe09e25d75c68f409859a8f3b",
+        "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/capsule/manifests/8ea4da763921561ef64ab8ea3aa6902e7ad05b8f82237c244fd010013f4563ef.json"
+      },
+      {
+        "capsule_id": "suite-core-challenger",
+        "capsule_digest": "aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4",
+        "genome_hash": "0a337566f03e16ad3740117136d823346bb9b4f1517e0fb6bdb6fd7fc7f61cff",
+        "path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/evaluation/campaigns/core/runs/73129/evolution/challenger-capsule/manifests/aeb500f8bf22e86bc755db97c6966da32db28d2bbf68877846c9a294e3131fb4.json"
+      }
+    ],
+    "processed_event_ids": [
+      "controller-initialized",
+      "h7-73130-open-stream",
+      "h7-73130-workload-drift",
+      "h7-73130-register-rejected",
+      "h7-73130-register",
+      "h7-73130-fabric-degradation",
+      "h7-73130-shadow",
+      "fixture-shadow-evidence",
+      "h7-73130-canary",
+      "fixture-canary-evidence",
+      "h7-73130-promote"
+    ],
+    "processed_events": [
+      {
+        "event_id": "controller-initialized",
+        "payload_sha256": "2fa4dd4d0a1b769164380e0869b4157480b7b7c1b241b626118fbcd16845bbb2"
+      },
+      {
+        "event_id": "h7-73130-open-stream",
+        "payload_sha256": "99315d1fec16d57f0642cc4e2bfab0973dfa27048490fd9e1e710f0fb0b25fe3"
+      },
+      {
+        "event_id": "h7-73130-workload-drift",
+        "payload_sha256": "3c1dfc7d2a3bafee132b4672c857bb92e22f8cf845378b1fee3b3a91249e9876"
+      },
+      {
+        "event_id": "h7-73130-register-rejected",
+        "payload_sha256": "cdc40759bd035c575b38b13023dadf9e606f863ae94b93045dbbb28a98f0c1b0"
+      },
+      {
+        "event_id": "h7-73130-register",
+        "payload_sha256": "fd068fb6829e833cdeadf423f99b780c33d6f83cb961d2561418dc6f793b2180"
+      },
+      {
+        "event_id": "h7-73130-fabric-degradation",
+        "payload_sha256": "22bed82ccd29046fb3b6d1a469e07a8aec4bf12fc93bf76c7f07dc41d194eda4"
+      },
+      {
+        "event_id": "h7-73130-shadow",
+        "payload_sha256": "e37f4fca53320d9b6069aa320d94aa8bdeae5296c868a15f5c258f563cb7df15"
+      },
+      {
+        "event_id": "fixture-shadow-evidence",
+        "payload_sha256": "9767739eec1d941074acba019c44f17029b4c30e14e62c293c17630ef3754bea"
+      },
+      {
+        "event_id": "h7-73130-canary",
+        "payload_sha256": "ab3fa25c16d0a6a964d456d8e9d175e27ecf8801e726414fe7198f12c62b96cf"
+      },
+      {
+        "event_id": "fixture-canary-evidence",
+        "payload_sha256": "f9bedd54d774f7ad4aeea0f01e88e8cea8ce020a1f951f748d34b8de328a8926"
+      },
+      {
+        "event_id": "h7-73130-promote",
+        "payload_sha256": "6f9bc6292e31d954dc827d94a97eb025ab076d0712057ec26bcc1dcd5a13474b"
+      }
+    ],
+    "audit": [
+      {
+        "sequence": 0,
+        "event_id": "controller-initialized",
+        "observed_at_ms": 0,
+        "action": "initialize",
+        "phase_before": "idle",
+        "phase_after": "idle",
+        "reason": "independently validated champion loaded; production mutation remains disabled",
+        "candidate_id": null
+      },
+      {
+        "sequence": 1,
+        "event_id": "h7-73130-open-stream",
+        "observed_at_ms": 1,
+        "action": "open_stream",
+        "phase_before": "idle",
+        "phase_after": "idle",
+        "reason": "stream is pinned to capsule suite-core-champion until completion",
+        "candidate_id": null
+      },
+      {
+        "sequence": 2,
+        "event_id": "h7-73130-workload-drift",
+        "observed_at_ms": 10,
+        "action": "begin_evolution",
+        "phase_before": "idle",
+        "phase_after": "evolving",
+        "reason": "workload_drift: deterministic H7 bimodal workload drift",
+        "candidate_id": null
+      },
+      {
+        "sequence": 3,
+        "event_id": "h7-73130-register-rejected",
+        "observed_at_ms": 16,
+        "action": "register_challenger",
+        "phase_before": "evolving",
+        "phase_after": "evolving",
+        "reason": "challenger remains isolated and was rejected by capsule validation",
+        "candidate_id": "h7-rejected-challenger-73130"
+      },
+      {
+        "sequence": 4,
+        "event_id": "h7-73130-register",
+        "observed_at_ms": 20,
+        "action": "register_challenger",
+        "phase_before": "evolving",
+        "phase_after": "challenger_ready",
+        "reason": "challenger remains isolated and passed capsule validation",
+        "candidate_id": "h7-challenger-73130"
+      },
+      {
+        "sequence": 5,
+        "event_id": "h7-73130-fabric-degradation",
+        "observed_at_ms": 22,
+        "action": "coalesce_trigger",
+        "phase_before": "challenger_ready",
+        "phase_after": "challenger_ready",
+        "reason": "fabric_degradation observed while an existing challenger remains proof-gated",
+        "candidate_id": null
+      },
+      {
+        "sequence": 6,
+        "event_id": "h7-73130-shadow",
+        "observed_at_ms": 30,
+        "action": "begin_shadow",
+        "phase_before": "challenger_ready",
+        "phase_after": "shadowing",
+        "reason": "deterministic replay is routed to the isolated challenger",
+        "candidate_id": "h7-challenger-73130"
+      },
+      {
+        "sequence": 7,
+        "event_id": "fixture-shadow-evidence",
+        "observed_at_ms": 40,
+        "action": "record_shadow_gate",
+        "phase_before": "shadowing",
+        "phase_after": "shadow_validated",
+        "reason": "shadow evidence satisfied all promotion criteria",
+        "candidate_id": "h7-challenger-73130"
+      },
+      {
+        "sequence": 8,
+        "event_id": "h7-73130-canary",
+        "observed_at_ms": 50,
+        "action": "begin_canary",
+        "phase_before": "shadow_validated",
+        "phase_after": "canarying",
+        "reason": "bounded canary routing enabled after shadow acceptance",
+        "candidate_id": "h7-challenger-73130"
+      },
+      {
+        "sequence": 9,
+        "event_id": "fixture-canary-evidence",
+        "observed_at_ms": 60,
+        "action": "record_canary_gate",
+        "phase_before": "canarying",
+        "phase_after": "ready_to_promote",
+        "reason": "canary evidence satisfied all promotion criteria",
+        "candidate_id": "h7-challenger-73130"
+      },
+      {
+        "sequence": 10,
+        "event_id": "h7-73130-promote",
+        "observed_at_ms": 70,
+        "action": "promote",
+        "phase_before": "ready_to_promote",
+        "phase_after": "promoted",
+        "reason": "capsule revalidated; new requests use the challenger while existing stream leases remain pinned",
+        "candidate_id": "h7-challenger-73130"
+      }
+    ],
+    "last_observed_at_ms": 70
+  }
+}

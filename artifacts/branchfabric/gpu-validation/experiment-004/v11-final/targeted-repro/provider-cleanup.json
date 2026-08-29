@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-23T01:24:45Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-targeted-identity-s41-a",
+  "function_call_id": "fc-01M0P37PBZRCAC4R92S9D5HV7E",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 1,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-targeted-identity-s41-a/in_function_cleanup.json",
+    "sha256": "2f02586b074a405130f11c5d6b8fb00d80b15f8201bda9a138534ad038a4a2c4",
+    "forced_kill_required": false,
+    "surviving_children": 0,
+    "zombies": 0,
+    "ipc_leaks": 0,
+    "profiler_processes": 0
+  },
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "ledger": {
+    "active_reservations": 0,
+    "sha256_after_settlement": "e9064b98e8563f2494d26435cf28040149832b9924253d4c2b15a51b669ee35d"
+  },
+  "provenance": "Direct post-return Modal CLI observations and immutable in-function cleanup evidence. A stopped historical app is not active provider state."
+}

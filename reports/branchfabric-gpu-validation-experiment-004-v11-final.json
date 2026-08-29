@@ -1,0 +1,296 @@
+{
+  "schema_version": "sloforge.branchfabric.gpu-validation-experiment-004-v11-final/v1",
+  "status": "TERMINAL_INTEGRATED_INVALID_NO_RETRY",
+  "seed": 41,
+  "frozen_v10": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "tag": "branchfabric-exp004-naive-baseline-v10"
+  },
+  "production_integration_gates": {
+    "allocator_issued_single_use_epochs": "PASS",
+    "post_free_ownership_refcount_proof": "PASS",
+    "production_engine_step_lock_binding": "PASS",
+    "canonical_cuda_state_pass_records": "PASS",
+    "full_make_check": {
+      "status": "PASS",
+      "python_passed": 1859,
+      "python_skipped": 8,
+      "rust": "PASS",
+      "ui": "PASS"
+    }
+  },
+  "micro_validation": {
+    "status": "PASS",
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "hardware": "NVIDIA A100 80GB PCIe",
+    "gpu_uuid": "GPU-c3ba4108-e98e-a487-8301-b4a564146d5e",
+    "logical_state_bytes": 1056964608,
+    "branches": 8,
+    "blocks": 1152,
+    "exact_first_resumed_token_matches": "8/8",
+    "minimum_continuation_tokens_per_branch": 8,
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_bytes": 2114200960,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_physical_bytes": 12684381568,
+    "avoidable_amplification": 12.000762818351625,
+    "full_state_pass_count": 10,
+    "raw_state_pass_record_count": 10454,
+    "physical_bytes_by_tier": {
+      "gpu_intermediates": 7399019520,
+      "host_intermediates": 9512948736,
+      "native_endpoints": 3170893824,
+      "links": 2114200960
+    },
+    "temporary_memory_bytes": {
+      "pinned_host": 58720256,
+      "pageable_host": 84832256,
+      "conservative_total_host": 143552512,
+      "gpu": 59769344
+    },
+    "timings_seconds": {
+      "export_wall": 2.61309087,
+      "export_cuda": 0.133267776,
+      "restore_wall": 4.438193614,
+      "restore_cuda": 0.697858271,
+      "sha_integrity": 3.505231979,
+      "raw_bit_validation_wall_aggregate": 0.485534818,
+      "synchronization": 0.521796759,
+      "continuation_start_to_first_token": 0.083229142,
+      "continuation_start_to_complete": 0.205774608
+    },
+    "go_no_go": "GO_MEANINGFUL",
+    "hardware_timing_comparable_to_v10": false
+  },
+  "v10_v11_micro_comparison": {
+    "full_physical_bytes_removed": 39106884224,
+    "full_physical_reduction_percent": 63.79178824422134,
+    "external_bytes_removed": 1056692864,
+    "external_reduction_percent": 33.3247633838149,
+    "avoidable_bytes_removed": 20081521280,
+    "avoidable_reduction_percent": 61.28786187628508,
+    "pass_count": {
+      "v10": 30,
+      "v11": 10,
+      "removed": 20
+    },
+    "host_temporary_memory": {
+      "v10_bytes": 2965372928,
+      "v11_bytes": 143552512,
+      "bytes_saved": 2821820416,
+      "reduction_factor": 20.65706051873199
+    },
+    "stage_decomposition": {
+      "capture_publish": {
+        "v10_amplification": 21.0,
+        "v11_measured_amplification": 9.000026157924108,
+        "bytes_removed": 12683547648
+      },
+      "restore_native_write": {
+        "v10_amplification": 20.0,
+        "v11_measured_amplification": 10.000736660427517,
+        "bytes_removed": 10568867456
+      },
+      "destination_validation": {
+        "v10_amplification": 17.0,
+        "v11_measured_amplification": 2.0,
+        "bytes_removed": 15854469120
+      }
+    }
+  },
+  "v10_v11_integrated_timing_comparison": {
+    "hardware_scope": "v10 A100-SXM4-80GB versus attempted v11 A100-SXM4-80GB",
+    "v10_time_to_hbm_reclamation_seconds": 5.222174431,
+    "v11_time_to_hbm_reclamation_seconds": null,
+    "v10_time_to_first_useful_gpu1_seconds": 5.413681427,
+    "v11_time_to_first_useful_gpu1_seconds": null,
+    "v10_time_to_serving_slo_restoration_seconds": 11.373208336,
+    "v11_time_to_serving_slo_restoration_seconds": null,
+    "v10_restore_first_resumed_token_seconds": 7.727983415,
+    "v11_restore_first_resumed_token_seconds": null,
+    "v10_restore_continuation_complete_seconds": 7.848228746,
+    "v11_restore_continuation_complete_seconds": null,
+    "v11_status": "NOT_REACHED_PRE_RECLAIM",
+    "null_values_are_not_zero_or_improvements": true
+  },
+  "integrated_v11": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "status": "FAILED_INVALID_PRE_RECLAIM",
+    "scientifically_valid": false,
+    "hardware": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA A100-SXM4-80GB"
+    ],
+    "gpu_uuids": [
+      "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59",
+      "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb"
+    ],
+    "sanity_12rps_pass": true,
+    "sanity_15rps_pass": true,
+    "failure": {
+      "phase": "PRE_RECLAIM_GPU0_OVERLOAD",
+      "outstanding_requests": 65,
+      "bounded_ceiling": 64,
+      "message": "calibrated v10 backlog exceeded its bounded safety ceiling during pre-reclaim"
+    },
+    "reclaim_trigger_reached": false,
+    "v11_state_pipeline_executed": false,
+    "scientific_validity_matrix": {
+      "two_engine_ready": "PASS",
+      "sanity_12rps_pass": "PASS",
+      "sanity_15rps_pass": "PASS",
+      "control_stable": "NOT_REACHED_FAIL_CLOSED",
+      "gpu0_overload_pass": "NOT_REACHED_FAIL_CLOSED",
+      "bounded_backlog_pass": "FAIL",
+      "state_capture_pass": "NOT_REACHED_FAIL_CLOSED",
+      "allocator_epoch_pass": "NOT_REACHED_FAIL_CLOSED",
+      "ownership_release_pass": "NOT_REACHED_FAIL_CLOSED",
+      "hbm_reclaim_pass": "NOT_REACHED_FAIL_CLOSED",
+      "gpu1_useful_capacity_pass": "NOT_REACHED_FAIL_CLOSED",
+      "two_gpu_service_gt_offered_pass": "NOT_REACHED_FAIL_CLOSED",
+      "queue_drain_pass": "NOT_REACHED_FAIL_CLOSED",
+      "slo_restoration_pass": "NOT_REACHED_FAIL_CLOSED",
+      "slo_stability_pass": "NOT_REACHED_FAIL_CLOSED",
+      "gpu0_active_during_restore_pass": "NOT_REACHED_FAIL_CLOSED",
+      "fresh_destination_allocations_pass": "NOT_REACHED_FAIL_CLOSED",
+      "integrity_pass": "NOT_REACHED_FAIL_CLOSED",
+      "branch_resume_pass": "NOT_REACHED_FAIL_CLOSED",
+      "movement_accounting_pass": "NOT_REACHED_FAIL_CLOSED",
+      "budget_pass": "PASS",
+      "cleanup_pass": "FAIL_IN_FUNCTION_PASS_PROVIDER_POST_RETURN"
+    },
+    "scientifically_valid_is_and_of_required_fields": true,
+    "time_to_hbm_reclamation_seconds": null,
+    "time_to_first_useful_gpu1_seconds": null,
+    "time_to_serving_slo_restoration_seconds": null,
+    "rollout_restore_latency_seconds": null,
+    "gpu0_restore_interference": null,
+    "branch_correctness": null,
+    "not_reached_values_are_not_measurements": true,
+    "in_function_cleanup_pass": false,
+    "provider_post_return_cleanup_pass": true,
+    "retry_authorized": false
+  },
+  "kill_and_recompute": {
+    "status": "NOT_RUN_PREREQUISITE_INTEGRATED_V11_FAILED",
+    "analytical_tokens": 133120,
+    "measured_tokens": null,
+    "measured_gpu_seconds": null
+  },
+  "preservation_break_even": {
+    "status": "NOT_IDENTIFIABLE_WITHOUT_KILL_ARM",
+    "measured_preserve_state_path_seconds": 7.051284484,
+    "conditional_theta_threshold_tokens_per_second": 18878.829850371414,
+    "conditional_assumption": "equal fixed overheads and locally constant measured preserve time",
+    "measured_break_even_surface": null
+  },
+  "residual_pipeline": {
+    "status": "MICRO_MEASURED_INTEGRATED_PATHS_NOT_REACHED",
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/residual-chains.json",
+    "artifact_sha256": "b1db5c1545550dd04a846a8d7fd367709cdd1ef3ed28ce8dd8e25ef004b2c248",
+    "dominant_micro_stage": "H2D -> direct scatter/native write -> raw-bit/hash validation",
+    "logical_bytes": 1056964608,
+    "physical_bytes": 12684353920,
+    "restore_stage_wall_seconds": 4.438193614,
+    "restore_stage_cuda_seconds": 0.697858271,
+    "restore_stage_cpu_seconds": null,
+    "restore_stage_cpu_seconds_status": "NOT_SEPARATELY_IDENTIFIABLE_OVERLAPPING_TIMING_VIEWS",
+    "restore_stage_synchronization_seconds": 0.516524914,
+    "restore_fraction_of_micro_state_path": 0.6294163317436222,
+    "source_stage": "native page read -> bounded gather/repack -> hash -> D2H",
+    "source_stage_wall_seconds": 2.61309087,
+    "source_fraction_of_micro_state_path": 0.3705836682563778,
+    "integrated_critical_path_share": null,
+    "integrated_critical_path_share_status": "NOT_REACHED_PRE_RECLAIM"
+  },
+  "amdahl": {
+    "scope": "MICRO_ONLY_COARSE_NON_OVERLAPPING_STAGES",
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/residual-chains.json",
+    "artifact_sha256": "b1db5c1545550dd04a846a8d7fd367709cdd1ef3ed28ce8dd8e25ef004b2c248",
+    "source_stage_speedup": {
+      "2x": 1.2274333827621697,
+      "5x": 1.4213973005500367,
+      "10x": 1.5004320526296473,
+      "free": 1.5887735185227547
+    },
+    "restore_stage_speedup": {
+      "2x": 1.459232330226399,
+      "5x": 2.0142328326365098,
+      "10x": 2.3066704450691904,
+      "free": 2.6984459533931173
+    },
+    "integrated_hbm_reclamation_impact": null,
+    "integrated_useful_gpu1_impact": null,
+    "integrated_slo_impact": null,
+    "integrated_restore_impact": null,
+    "integrated_economic_impact": null
+  },
+  "economics": {
+    "status": "NOT_IDENTIFIABLE_INTEGRATED_AND_KILL_ARMS_NOT_REACHED",
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/economics/headroom-status.json",
+    "artifact_sha256": "5ca20571c4cf4841d225a5c6a4967f25ee1de05c3aa38bdedafcb63e86d6f336",
+    "trajectories_per_gpu_hour_impact": null,
+    "reclaimed_gpu_capacity_availability_impact": null,
+    "rollout_interruption_impact": null,
+    "wasted_recomputation_impact": null,
+    "dollar_cost_impact": null,
+    "not_reached_values_are_not_measurements": true
+  },
+  "final_classification": "SOFTWARE_WINS",
+  "classification_qualification": "CONSERVATIVE_TERMINAL_HARDWARE_CLOSURE_NOT_A_MEASURED_END_TO_END_SOFTWARE_WIN",
+  "classification_evidence_status": "FORCED_LEAST_OVERCLAIMING_EXACT_ONE_DISPOSITION_ALL_STRICT_PREDICATES_UNESTABLISHED",
+  "strict_software_wins_predicate_measured": false,
+  "classification_exclusion_evidence": {
+    "GPU_SOFTWARE_WINS": "No realistic integrated GPU-versus-external-accelerator end-to-end headroom was measured.",
+    "BRANCHFABRIC_HARDWARE_INTEREST": "Integrated state-path share, >=1.20x economic improvement, burst rate, latency target, concurrency, and placement advantage were not measured.",
+    "PRESERVATION_NOT_ECONOMIC": "The prerequisite kill/recompute arm did not run."
+  },
+  "hardware_gate": {
+    "hardware_interest_survives": false,
+    "rationale": "Software removed 63.79% of measured physical work with exact correctness. The only integrated attempt never executed the state path, so no >=15% integrated share, >=1.20x economic improvement, burst/concurrency target, or placement advantage exists to justify custom hardware.",
+    "adversarial_answer": "NO_ON_CURRENT_EVIDENCE"
+  },
+  "experiment_005": {
+    "status": "NOT_GENERATED_HARDWARE_INTEREST_DID_NOT_SURVIVE",
+    "artifact_exists": false
+  },
+  "gpu_budget": {
+    "v11_known_actual_a100_hours_lower_bound": 0.5450292396083333,
+    "v11_conservative_a100_hours": 0.9879694444444445,
+    "v11_conservative_cost_usd": 2.46834286,
+    "campaign_conservative_a100_hours": 4.475976007246105,
+    "campaign_conservative_cost_usd": 11.18277845650367,
+    "campaign_actual_a100_hours_range": [
+      4.033035802410,
+      4.178869135743
+    ],
+    "campaign_actual_cost_usd_range": [
+      10.076136648741,
+      10.440486648741
+    ],
+    "remaining_authorized_a100_hours": 1.524023992753895,
+    "ledger_sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+    "active_reservations": 0
+  },
+  "cleanup": {
+    "provider_post_return": "PASS",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "in_function_cleanup_gate": "FAIL",
+    "remote_manifest_rows_verified": "460/460"
+  },
+  "plots": {
+    "count": 14,
+    "manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/plot-manifest.json",
+    "manifest_sha256": "99b0b9ab759fb91ac117ab953c80d6429c99e866cfc593776e5a069205753a44"
+  },
+  "no_fpga_implementation": true,
+  "no_projected_21x_reported_as_measured": true
+}

@@ -1,0 +1,256 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-state-correctness-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewer": {
+    "agent": "Agent 12",
+    "identity": "continuum-state-correctness-reviewer",
+    "task_path": "/root/postrun_state_reviewer",
+    "independence": "post-run CPU-only evidence review; no Modal invocation, GPU allocation, state-path source edit, or measurement mutation"
+  },
+  "reviewed_at_utc": "2026-08-13T06:37:04Z",
+  "authorized_repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "V10_STATE_CORRECTNESS_NOT_EVALUATED_TRANSACTION_DID_NOT_BEGIN",
+  "scientifically_valid_state_baseline": false,
+  "continuum_regression_evaluated": false,
+  "continuum_regression_observed": false,
+  "execution_boundary": {
+    "model_construction_started_on_both_roles": true,
+    "model_weights_loaded_on_both_roles": true,
+    "torch_compile_progress_observed_on_both_roles": true,
+    "initial_profiling_warmup_log_observed_on_both_roles": true,
+    "strict_readiness_barriers_published": false,
+    "integrated_calibration_phase_entered": false,
+    "rollout_state_preparation_entered": false,
+    "transaction_ready_barriers_published": false,
+    "transaction_start_barrier_published": false,
+    "rollout_state_prepared": false,
+    "naive_preservation_executed": false,
+    "source_state_released": false,
+    "hbm_reclamation_executed": false,
+    "restore_executed": false,
+    "destination_state_written": false,
+    "destination_validation_executed": false,
+    "branch_continuation_executed": false,
+    "branch_correctness_evaluated": false,
+    "movement_accounting_executed": false,
+    "reason": "The controller issued a TimeoutError abort while both workers were still inside adapter/engine construction. In the integrated worker sequence, _run_integrated_calibration_phase and _prepare_rollouts occur only after _create_adapter returns. Neither readiness barrier existed, the only barrier artifact was abort.json, and neither role emitted a non-Triton result artifact."
+  },
+  "artifact_inventory_audit": {
+    "remote_manifest_entries": 368,
+    "remote_manifest_missing_entries": 0,
+    "remote_manifest_hash_mismatches": 0,
+    "barrier_files": [
+      "barriers/abort.json"
+    ],
+    "rollout_non_triton_files": 0,
+    "serving_non_triton_files": 0,
+    "rollout_triton_compile_cache_files": 174,
+    "serving_triton_compile_cache_files": 177,
+    "triton_cache_interpretation": "Engine compilation diagnostics only; these files are not rollout KV state, a prepared branch set, a transport payload, or transaction evidence.",
+    "rollout_result_present": false,
+    "serving_result_present": false,
+    "state_pass_graph_present": false,
+    "branch_resume_validation_present": false,
+    "required_state_event_occurrences": 0,
+    "required_state_events_searched": [
+      "RECLAIM_TRIGGER",
+      "STATE_CAPTURE_BEGIN",
+      "STATE_PUBLISH",
+      "GPU1_STATE_RELEASE_BEGIN",
+      "GPU1_HBM_RECLAIM_CONFIRMED",
+      "RESTORE_TRIGGER",
+      "H2D_BEGIN",
+      "STATE_IMPORT_BEGIN",
+      "FIRST_RESUMED_TOKEN",
+      "ALL_BRANCHES_RESUMED",
+      "ROLLOUT_CONTINUATION_COMPLETE"
+    ]
+  },
+  "safe_abort_audit": {
+    "status": "PASS",
+    "abort_error": "TimeoutError",
+    "abort_issued_at_monotonic_ns": 184459088748,
+    "worker_returncodes": {
+      "serving": -15,
+      "rollout": -15
+    },
+    "worker_termination_interpretation": "Both workers were terminated by the controller with SIGTERM; neither emitted a state result or independently failed the state pipeline.",
+    "compute_processes_after": [],
+    "controller_cleanup_error": null,
+    "gpu_memory_used_mib_after_by_index": {
+      "0": 4,
+      "1": 4
+    },
+    "postflight_cleanup": {
+      "active_tasks": 0,
+      "running_containers": 0,
+      "endpoints": 0,
+      "reservations": 0,
+      "owned_child_processes": 0,
+      "profilers": 0,
+      "transient_exchange_verified_absent": true,
+      "persistent_volumes": [
+        "sloforge-model-cache",
+        "sloforge-branchfabric-results"
+      ]
+    },
+    "dependent_phases_stopped": true
+  },
+  "false_state_claim_audit": {
+    "status": "PASS_FOR_V4_RAW_ARTIFACTS",
+    "raw_scientific_validity_scientifically_valid": false,
+    "raw_scientific_validity_state_correctness": null,
+    "raw_scientific_validity_state_correctness_pass": false,
+    "raw_scientific_validity_gpu1_state_release_pass": false,
+    "raw_scientific_validity_gpu1_hbm_reclaim_pass": false,
+    "raw_scientific_validity_branch_resume_pass": false,
+    "raw_scientific_validity_movement_accounting_pass": false,
+    "raw_movement_accounting_status": "invalid",
+    "conclusion": "The v4 raw artifacts fail closed and make no positive preservation, release, restore, branch-correctness, or movement claim. The absence of a worker result is not interpreted as zero movement or successful correctness; all such v10 quantities remain NOT MEASURED."
+  },
+  "historical_v9_reference_only": {
+    "is_v10_result": false,
+    "status": "succeeded",
+    "branch_count": 8,
+    "logical_state_bytes": 1056964608,
+    "physical_source_bytes": 1056964608,
+    "shared_bytes": 939524096,
+    "private_bytes": 117440512,
+    "source_allocation_count": 1152,
+    "destination_allocation_count": 1152,
+    "source_destination_fresh": true,
+    "transport_integrity_valid": true,
+    "all_source_blocks_released": true,
+    "all_branches_resumed": true,
+    "minimum_continuation_tokens_per_branch": 8,
+    "first_resumed_token_exact_matches": 8,
+    "first_resumed_token_comparisons": 8,
+    "permitted_use": "Established correctness and historical phase-budget input only; no v9 value may be relabelled as a v10 measurement."
+  },
+  "readiness_fix_state_path_audit": {
+    "status": "PASS",
+    "comparison_base": "authorized commit 5b296ac8e4fdb6dd88f45103317606c3e7248370",
+    "authorized_worker_source_sha256": "cb0077e59d47ca5e81709f548b82dcc3afe3c3b83e423b6763e9bc4ea18529a5",
+    "working_tree_worker_source_sha256": "4ffef92fff01b30a58ac486d84a10e4193778e3cc234c876c975add1c193aadf",
+    "prepare_rollouts_function_sha256_authorized": "e44f5fa401c7b753f751a2ac77c232a1b021e1a9380f267698bcb4b19449fbb0",
+    "prepare_rollouts_function_sha256_working_tree": "e44f5fa401c7b753f751a2ac77c232a1b021e1a9380f267698bcb4b19449fbb0",
+    "rollout_transaction_function_sha256_authorized": "d2e3f0c8920a9daaccc82b5d4658197308462d3f2494b9f8605f060ae671a193",
+    "rollout_transaction_function_sha256_working_tree": "d2e3f0c8920a9daaccc82b5d4658197308462d3f2494b9f8605f060ae671a193",
+    "combined_pre_main_state_pipeline_region_sha256_authorized": "84ce1029277593848f858586e141e35fec6a0fc34d8db811181fbba56e8bc60a",
+    "combined_pre_main_state_pipeline_region_sha256_working_tree": "84ce1029277593848f858586e141e35fec6a0fc34d8db811181fbba56e8bc60a",
+    "state_pipeline_changed": false,
+    "movement_pipeline_changed": false,
+    "correctness_gate_changed": false,
+    "readiness_fix_scope": "The worker emits a PID/UUID-bound engine-started timestamp immediately before _create_adapter, and the controller derives the readiness deadline from that timestamp. The state preparation, capture, transformation, D2H, release, H2D, import, native write, validation, recomputation, and continuation implementation remains byte-identical in the audited function region."
+  },
+  "accepted_claims": [
+    "No v10 rollout state was prepared.",
+    "No v10 preservation, state release, HBM reclamation, restore, destination validation, or branch continuation ran.",
+    "The v4 raw artifacts fail closed and preserve no false state-success claim.",
+    "The readiness-clock fix leaves the naive state and movement pipeline unchanged.",
+    "The established v9 transaction remains historical input only; v4 neither reproduces it nor demonstrates a state regression."
+  ],
+  "prohibited_claims": [
+    "A real 1,056,964,608-byte rollout state was prepared in v10.",
+    "The v10 naive preservation path executed.",
+    "GPU1 rollout state or HBM was reclaimed in v10.",
+    "The v10 restore path executed or GPU0 served during restore.",
+    "Eight branches resumed or matched recomputation in v10.",
+    "Any v10 state movement or amplification was measured.",
+    "The readiness timeout is a Continuum or state-correctness regression.",
+    "A v10 naive baseline can be frozen from this attempt."
+  ],
+  "findings": [
+    {
+      "id": "STATE-V4-H1",
+      "severity": "high",
+      "status": "OPEN_TERMINAL_RESULT",
+      "finding": "No v10 state transaction or correctness gate ran, so this attempt cannot support a capacity-reclamation baseline or any v10 state-size, latency, branch, or movement metric.",
+      "required_resolution": "Report every v10 state-dependent metric as NOT MEASURED, keep scientifically_valid false, and do not freeze or tag a naive v10 baseline. Historical v9 values must remain explicitly labelled as inputs only."
+    },
+    {
+      "id": "STATE-V4-H2",
+      "severity": "high",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The experiment-root scientific-validity object and the non-final v10 report still identify the earlier v3 review-timeout outcome rather than the terminal v4 readiness-timeout plus post-v4 budget blocker.",
+      "required_resolution": "Supersede the root-level report and validity summary with hash-bound v4 failure evidence while retaining null/NOT MEASURED state metrics and preserving all older attempt evidence under its attempt path."
+    },
+    {
+      "id": "STATE-V4-M1",
+      "severity": "medium",
+      "status": "REQUIRED_BEFORE_ANY_FUTURE_GPU_ATTEMPT",
+      "finding": "The local readiness-clock repair is not part of the authorized 5b296ac commit even though its state-pipeline region is unchanged.",
+      "required_resolution": "If new GPU authorization is ever provided, commit the readiness-only fix and regenerate the code-commit-bound authorization and dependent pre-GPU reviews before allocation. This does not authorize a rerun under the current budget."
+    },
+    {
+      "id": "STATE-V4-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The v4 abort safely stopped all dependent state phases and cleanup left no compute process, Modal task, container, endpoint, reservation, profiler, or unauthorized persistent volume."
+    },
+    {
+      "id": "STATE-V4-N2",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The audited readiness fix does not alter _prepare_rollouts, _run_rollout_transaction, or the combined state-pipeline implementation region."
+    }
+  ],
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+      "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb",
+      "sample_selector": "$.artifacts"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/barriers/abort.json",
+      "artifact_sha256": "47ce6c3dd48215359f1add283b574bb09b390aaf89acfae55a12a0e6da7303ac",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/scientific-validity.json",
+      "artifact_sha256": "44b3c3240ea1d7260b97904ee649f29f8d398ff03fa4663f193fa4385114da0d",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/movement-accounting.json",
+      "artifact_sha256": "4256c019ea7c0e805d6c8da4af33026539359d30367ba94413c618cad6a82512",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/rollout.stdout.log",
+      "artifact_sha256": "dc8275a4b59bde23fdbf639e5277e19f28e448775af80cd70b70abb0f0ccb3ab",
+      "sample_selector": "complete file"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/serving.stdout.log",
+      "artifact_sha256": "41c42801c16dc81f8dbfd93e50f0e8746c04c11541cc1bbf48b04841b1c7a63f",
+      "sample_selector": "complete file"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v4.json",
+      "artifact_sha256": "132cf17e792e818cea1e27adb2d38594e3796a3c66954f4e33a3f6904cc0be79",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v9/rollout/result.json",
+      "artifact_sha256": "5bc1167139165cc36792186ae607e7a0d971aa8f614f784f5cf93ac5c2d7ae2e",
+      "sample_selector": "state-correctness fields only"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "artifact_sha256": "4ffef92fff01b30a58ac486d84a10e4193778e3cc234c876c975add1c193aadf",
+      "sample_selector": "_prepare_rollouts through _run_rollout_transaction and integrated main sequencing"
+    }
+  ],
+  "required_action": "Reject v4 as a v10 state-correctness baseline. Preserve the fail-closed diagnostic evidence, report v10 state-dependent quantities as NOT MEASURED, and do not launch another attempt under the current budget blocker."
+}

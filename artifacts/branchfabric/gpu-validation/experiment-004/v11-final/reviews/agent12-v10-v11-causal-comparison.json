@@ -1,0 +1,223 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-v10-v11-causal-comparison-review/v1",
+  "agent": 12,
+  "role": "v10-v11-causal-comparison-review",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "reviewed_at_utc": "2026-08-20T03:24:18Z",
+  "review_status": "PASS",
+  "comparison_status": "V11_INTEGRATED_UNAVAILABLE",
+  "scientifically_valid_causal_comparison": false,
+  "summary": "Attempt c establishes compatible pre-transaction workload and device-model context, plus a valid early trigger, but it failed the source-allocation zero-queue identity gate before source release. No v11 reclamation, useful-capacity, SLO-restoration, restore, movement-amplification, or temporary-memory result exists. Therefore no decisive v10-v11 delta is scientifically calculable.",
+  "review_constraints": {
+    "attempt_c_local_artifacts_only": true,
+    "immutable_v10_values_only": true,
+    "agent09_and_agent10_reviews_used": true,
+    "modal_or_cloud_access": false,
+    "gpu_access": false,
+    "source_modified": false,
+    "micro_validation_substitution_forbidden": true
+  },
+  "comparability_context": {
+    "valid_contextual_matches": [
+      {
+        "dimension": "gpu_model_class",
+        "status": "MATCH",
+        "v10": "2 x NVIDIA A100-SXM4-80GB",
+        "v11_attempt_c": "2 x NVIDIA A100-SXM4-80GB",
+        "qualification": "The exact device model and count match; this does not by itself prove the same interconnect placement."
+      },
+      {
+        "dimension": "driver_version",
+        "status": "MATCH",
+        "v10": "580.95.05",
+        "v11_attempt_c": "580.95.05"
+      },
+      {
+        "dimension": "model_and_runtime",
+        "status": "MATCH_AT_REQUIRED_LEVEL",
+        "v10": "Qwen2.5-7B-Instruct with vLLM 0.23.0",
+        "v11_attempt_c": "Qwen2.5-7B-Instruct with vLLM 0.23.0",
+        "qualification": "Attempt-c readiness directly persisted vLLM 0.23.0; this contextual match cannot rescue the failed transaction."
+      },
+      {
+        "dimension": "logical_state_topology",
+        "status": "MATCH",
+        "v10": {
+          "logical_bytes": 1056964608,
+          "blocks": 1152,
+          "shared_blocks": 1024,
+          "private_blocks": 128,
+          "branches": 8
+        },
+        "v11_attempt_c": {
+          "logical_bytes": 1056964608,
+          "blocks": 1152,
+          "shared_blocks": 1024,
+          "private_blocks": 128,
+          "branches": 8
+        },
+        "qualification": "Agent 10 established the v11 values through exact pre-failure runtime-topology validation. They describe the source topology, not a completed preservation transaction."
+      },
+      {
+        "dimension": "serving_load_methodology",
+        "status": "COMPATIBLE_UNTIL_FAILURE",
+        "v10": "12 rps stable guard, 15 rps overload point, 8-10 rps control/restore-period load",
+        "v11_attempt_c": "12 rps guard PASS, 15 rps guard PASS, exact five-second 9 rps control interval PASS, 15 rps transaction spike",
+        "qualification": "Only pre-failure methodology is comparable; no post-reclamation service recovery occurred."
+      }
+    ],
+    "topology_caveat": {
+      "status": "INTERCONNECT_COMPARABILITY_NOT_PROVEN",
+      "v10_evidence": "Two A100-SXM4-80GB devices, bidirectional peer read/write access, and 12 active NVLink links per GPU were persisted; nvidia-smi topo -m itself failed, so host PCI/CPU/NUMA placement was unavailable.",
+      "v11_attempt_c_evidence": "Two stable, distinct A100-SXM4-80GB UUIDs were persisted before and after the invocation, but attempt c did not persist an equivalent peer-access/NVLink/topology matrix.",
+      "consequence": "Exact device-name matching is adequate context, not proof of identical GPU-to-GPU or host interconnect placement. Even if the v11 transaction had completed, cross-run stage timing claims would require this caveat or within-run decomposition. Since it did not complete, no causal timing claim is permitted in any case."
+    }
+  },
+  "valid_non_decisive_observations": [
+    {
+      "observation": "attempt-c early-trigger behavior",
+      "status": "VALID_STANDALONE_V11_EVIDENCE",
+      "value": {
+        "queue_at_trigger": 21,
+        "emergency_ceiling": 64,
+        "headroom_requests": 43,
+        "predicate_to_emission_seconds": 0.00029008
+      },
+      "causal_comparison_limit": "The immutable v10 result set supplies no matched trigger-backlog or controller-reaction value, so no v10-v11 delta is computed."
+    },
+    {
+      "observation": "attempt-c logical source state",
+      "status": "VALID_TOPOLOGY_MATCH_ONLY",
+      "value": 1056964608,
+      "causal_comparison_limit": "This confirms like-sized source state, but does not establish any completed v11 movement or latency result."
+    },
+    {
+      "observation": "pre-transaction serving guards",
+      "status": "VALID_METHODOLOGY_GATES",
+      "value": "12 rps PASS; 15 rps overload PASS; five-second 9 rps control PASS",
+      "causal_comparison_limit": "These are sanity and control gates, not replacements for the missing reclamation and recovery endpoints."
+    }
+  ],
+  "decisive_metric_review": {
+    "hbm_reclamation_seconds": {
+      "v10": 5.222174431,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "Source release and HBM reclamation did not execute."
+    },
+    "first_useful_gpu1_capacity_seconds": {
+      "v10": 5.413681427,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "GPU1 never became useful for serving after the trigger."
+    },
+    "serving_slo_restoration_seconds": {
+      "v10": 11.373208336,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "There was no two-GPU recovery, queue drain, or accepted five-second SLO window."
+    },
+    "rollout_first_resumed_token_seconds": {
+      "v10": 7.727983415,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "Restore and branch resumption did not execute."
+    },
+    "rollout_continuation_complete_seconds": {
+      "v10": 7.848228746,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "No continuation tokens were produced after restore because restore did not execute."
+    },
+    "full_physical_amplification": {
+      "v10": 58.0,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "No completed integrated StatePassRecord ledger or movement summary was published."
+    },
+    "peak_host_temporary_bytes": {
+      "v10": 2965372928,
+      "v11": null,
+      "absolute_delta": null,
+      "percentage_delta": null,
+      "status": "UNAVAILABLE",
+      "reason": "No completed integrated transaction published an attributable temporary-memory peak."
+    }
+  },
+  "micro_validation_substitution_review": {
+    "allowed": false,
+    "decision": "NO_MICRO_VALUE_MAY_FILL_AN_INTEGRATED_V11_FIELD",
+    "reasons": [
+      "The micro-validation was an isolated state-path experiment, not the serving-overload, reclamation, recovery, and restore transaction that defines the integrated endpoints.",
+      "The micro-validation used an A100-80GB PCIe device while attempt c and frozen v10 used two A100-SXM4-80GB devices; mixing those wall timings would confound topology and scope.",
+      "Micro export and restore wall times are not anchored to the integrated RECLAIM_TRIGGER, useful-capacity, stable-SLO, or first-resumed-token endpoints.",
+      "Micro StatePassRecords cannot substitute for the missing canonical integrated pass ledger; attempt-c export records were transient and not persisted after the fail-closed exception.",
+      "The micro 21.000762818351625x full, 2.000257098485553x external, and 12.000762818351625x avoidable amplification values describe the micro transaction only.",
+      "The micro 143552512-byte peak host temporary-memory value is not an integrated peak under concurrent serving and restore."
+    ]
+  },
+  "existing_comparison_artifact_assessment": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/v10-v11-integrated-comparison.json",
+    "status": "PASS",
+    "assessment": "The artifact correctly preserves the seven immutable v10 values, leaves every v11 value and delta null, marks the comparison scientifically invalid, and explicitly forbids micro substitution."
+  },
+  "policy_conclusion": {
+    "integrated_v11_result_available": false,
+    "v10_v11_causal_performance_comparison_available": false,
+    "integrated_movement_comparison_available": false,
+    "cross_topology_timing_claim_allowed": false,
+    "v11_freeze_supported_by_comparison": false,
+    "kill_and_recompute_comparison_allowed": false,
+    "break_even_fit_allowed": false,
+    "integrated_amdahl_allowed": false,
+    "required_terminal_classification": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent09-serving-methodology-review.json",
+      "sha256": "01ec6ff20370f9593dd3858bd276d115a66138becf8410f165677382f2ea9691"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent10-state-correctness-review.json",
+      "sha256": "01c95fbcc69325a3a6d2535775a9d18828a6b8dbe377b106dd290c315eaf14bb"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/scientific-validity.json",
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/v10-v11-integrated-comparison.json",
+      "sha256": "0bccf9a2d5d97860dae21bb3579b593e967e2c27610774347a98d08b7c31b9bf"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/controller-result.json",
+      "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/REMOTE_MANIFEST.c.json",
+      "sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8"
+    }
+  ],
+  "immutable_v10_identity": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "scientific_validity": "PASS"
+  }
+}

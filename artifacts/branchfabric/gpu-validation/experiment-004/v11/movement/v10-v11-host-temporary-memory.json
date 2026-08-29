@@ -1,0 +1,27 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-v11-host-temporary-memory/v1",
+  "status": "MEASURED",
+  "v10_peak_host_temporary_bytes": 2965372928,
+  "v11_peak_pinned_staging_bytes": 58720256,
+  "v11_peak_pageable_temporary_bytes": 84832256,
+  "v11_conservative_peak_total_host_temporary_bytes": 143552512,
+  "resident_checkpoint_host_bytes_excluded": 1056964608,
+  "projected_two_slot_pinned_staging_bound_bytes": 58720256,
+  "measured_pinned_staging_equals_projected_bound": true,
+  "primary_conservative_comparison": {
+    "absolute_bytes_saved": 2821820416,
+    "host_temp_reduction_factor": 20.65706051873199,
+    "reduction_percent": 95.15904017857143
+  },
+  "pinned_staging_only_comparison": {
+    "absolute_bytes_saved": 2906652672,
+    "host_temp_reduction_factor": 50.5,
+    "reduction_percent": 98.01980198019803
+  },
+  "measurement_note": "The conservative primary peak sums the measured 58,720,256-byte pinned extent and the simultaneous 84,832,256-byte restore process-RSS pageable delta. The resident 1,056,964,608-byte checkpoint is excluded by contract.",
+  "provenance": {
+    "v10": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/movement-accounting.json",
+    "v11": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "v11_sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8"
+  }
+}

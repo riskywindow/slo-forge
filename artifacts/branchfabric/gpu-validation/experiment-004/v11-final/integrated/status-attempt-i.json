@@ -1,0 +1,77 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-terminal-status/v1",
+  "status": "INVALID_PRE_RESERVATION_REMOTE_PREFIX_SCHEMA_PARSER",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-integrated-s41-i",
+  "execution_mode": "integrated-reclamation-v11",
+  "failure_stage": "REMOTE_PREFIX_FRESHNESS",
+  "failure": {
+    "type": "ValueError",
+    "message": "Modal results-volume prefix inventory schema is invalid",
+    "root_cause": "The coordinator expected title-case display headers, but Modal JSON output canonically uses snake_case keys: filename, type, created_modified, and size."
+  },
+  "sealed_inputs": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-i-config.json",
+      "sha256": "a28f5f86d62706c8054e2534234458f7e2cbd3263bd07da87044ad6e7d157a64"
+    },
+    "authorization_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-i-post-image-closure-pre-gpu-manifest.json",
+      "sha256": "71d68e6f30c5edc26f905afb30f9806ae6574c60bfbb64f9f112ac2b72ef8ee8"
+    },
+    "seal_verification": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/seal-verification-attempt-i.json",
+      "sha256": "5c185fa63f7bd01237c48761743cee8f09adcbf99609a461aa87868305e41d4c"
+    },
+    "coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-final.py",
+      "sha256_at_attempt_i": "bf2a5d5a327a7d5ba2df5fb796ddc91224e72b1cb0ee2c854e6ef5b2e284b6e4"
+    },
+    "remote_prefix_inventory": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/preflight/attempt-i-remote-prefix-inventory.json",
+      "sha256": "20eeb978342cfaf4d59448066dc1259e367e874f60840abd2497b111ca7c332d"
+    }
+  },
+  "lifecycle": {
+    "coordinator_loader_passed": true,
+    "remote_read_only_inventory_invoked": true,
+    "remote_attempt_i_prefix_present": false,
+    "image_prebuild_started": false,
+    "provider_app_created": false,
+    "gpu_reservation_created": false,
+    "gpu_function_invoked": false,
+    "controller_python_invoked": false,
+    "controller_transaction_started": false,
+    "worker_processes_started": false,
+    "gpu_inventory_observed": false,
+    "source_identity_gate_reached": false,
+    "optimized_export_started": false,
+    "source_release_started": false,
+    "restore_started": false,
+    "branch_continuation_started": false
+  },
+  "accounting": {
+    "ledger_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_sha256_before": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c",
+    "ledger_sha256_after": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c",
+    "active_reservations_before": 0,
+    "active_reservations_after": 0,
+    "attempt_gpu_seconds": 0,
+    "attempt_cost_usd": 0.0,
+    "ledger_mutated": false
+  },
+  "cleanup": {
+    "in_function_cleanup": "NOT_APPLICABLE_GPU_FUNCTION_NOT_INVOKED",
+    "provider_cleanup": "NOT_APPLICABLE_PREBUILD_NOT_STARTED_AND_APP_NOT_CREATED",
+    "provider_resources_created": false
+  },
+  "terminal_decision": {
+    "classification": "HARDWARE_GATE_NOT_REACHED",
+    "v11_frozen": false,
+    "kill_and_recompute_authorized": false,
+    "attempt_i_reusable": false,
+    "next_attempt_id": "exp004-v11-integrated-s41-j"
+  },
+  "observed_at_utc": null,
+  "provenance": "Attempt I terminated before image prebuild, reservation, provider app creation, or GPU invocation. Exact read-only CLI output and byte-identical ledger state are preserved; no timestamp or measurement is fabricated."
+}

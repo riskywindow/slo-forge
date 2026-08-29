@@ -1,0 +1,107 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-27T02:07:39Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-g",
+  "function_call_id": "fc-01M10ESWY3XPGP145XTYNMEJT5",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "app_stop_result": "already stopped",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 4,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "listed_app_task_counts": [
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "container_list": [],
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-g/in_function_cleanup.json",
+    "sha256": "508a342ae6bd6a790f42b45a64dc110e07d5d254c6af9c9c3b1dee9b0fb3571c",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "required_lifecycle": [
+      "RUNNING",
+      "QUIESCE",
+      "ENGINE_STOP",
+      "WORKER_STOP",
+      "CHILD_REAP",
+      "PGID_EMPTY",
+      "CUDA_RELEASED",
+      "FUNCTION_RETURN"
+    ],
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": []
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-g/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "295d7acb987edc0d450a5ed6004663ecf541e1277d467516669ecc706cc56541",
+    "remote_manifest_artifact_count": 475,
+    "remote_manifest_integrity": "PASS",
+    "controller_result": "raw/exp004-v11-integrated-s41-g/controller-result.json",
+    "controller_result_sha256": "42fbc59f8aa579b53f22d7455b32a6604b541a61dbe7df28af77fb5d0745004d",
+    "function_completion": "raw/exp004-v11-integrated-s41-g/function-completion.json",
+    "function_completion_sha256": "eba7d8cc6e58f6fccfb7ccfae5977ed0e7b3978eda5a6738b6b35510ca031701",
+    "function_failure": "raw/exp004-v11-integrated-s41-g/function-failure.json",
+    "function_failure_sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437",
+    "function_finally_cleanup": "raw/exp004-v11-integrated-s41-g/function-finally-cleanup.json",
+    "function_finally_cleanup_sha256": "0b7cb7ce4006bc86204091c3113c890fcafe67ab3715027db6f90c4de08c4c30"
+  },
+  "provider_audit_input": {
+    "artifact": "provider-cleanup-audit-inputs-exp004-v11-integrated-s41-g.json",
+    "sha256": "0f1c4ec6f242d913bab0694468d28987da6b36b3fdb99250105697b21658974f",
+    "prior_status": "PENDING_EXPLICIT_PROVIDER_POST_RETURN_AUDIT"
+  },
+  "commands": [
+    "modal app stop sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+    "modal app list --json",
+    "modal container list --json"
+  ],
+  "ledger": {
+    "artifact": "../../gpu-hours.json",
+    "sha256_after_settlement": "4259181994cde63bb783fc42e6533ea79fc6f88cb7f1ebbc555baee40d2f8bf4",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 21481.37961294198,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 21718.62038705802,
+    "attempt_accounted_wall_seconds": 242.217073138,
+    "attempt_gpu_count": 2,
+    "attempt_actual_gpu_seconds": 484.434146276,
+    "attempt_actual_gpu_hours": 0.13456504063222222,
+    "attempt_cost_usd": 0.336197297515544,
+    "attempt_accounting_basis": "measured-function-allocation-interval",
+    "actual_gpu_models": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA A100-SXM4-80GB"
+    ],
+    "actual_gpu_uuids": [
+      "GPU-115e15c3-0dcd-d295-e8c7-1c0879231175",
+      "GPU-c9fc335e-7122-729f-0f06-1bc0ca9e93ec"
+    ]
+  },
+  "provenance": {
+    "provider_observation": "Designated GPU coordinator direct post-return Modal CLI observation",
+    "provider_and_in_function_independent": true,
+    "raw_bundle_preserved": true,
+    "interpretation": "Provider resources returned to exact zero; the four historical app rows were all stopped with zero tasks, no containers remained, reservations were empty, and the two authorized persistent volumes are the only retained provider resources."
+  }
+}

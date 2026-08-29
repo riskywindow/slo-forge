@@ -1,0 +1,428 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-f-queue-accounting-review/v1",
+  "agent": 12,
+  "role": "runtime-synchronization-and-queue-accounting-reviewer",
+  "attempt_id": "exp004-v11-integrated-s41-f",
+  "reviewed_at_utc": "2026-08-27T01:17:52Z",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "terminal_analysis_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "review_status": "PASS",
+  "decision": "GO_FOR_SCOPED_QUEUE_FIX_CONDITIONAL_ATTEMPT_G",
+  "attempt_f_scientific_status": "INVALID_QUEUE_ACCOUNTING_BUG",
+  "attempt_f_scientifically_valid": false,
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED",
+  "summary": "Attempt F passed both 1,152-allocation semantic identity gates, completed the optimized export read, released the source, reclaimed HBM, and made GPU1 useful. It then failed closed because the GPU0 recovery guard compared the current global offer count against a GPU1 completion cursor that had not consumed the newest immutable telemetry. The stale aggregate reached 64, while replay at the newest contiguous common watermark was 52 and the event-reconciled run maximum was 57. This is a cross-worker queue-accounting bug, not a real emergency-ceiling breach, allocator mutation, source-identity failure, export failure, or serving-capacity failure.",
+  "review_constraints": {
+    "local_immutable_attempt_f_bundle_only": true,
+    "repository_source_only": true,
+    "modal_invoked_by_reviewer": false,
+    "gpu_invoked_by_reviewer": false,
+    "network_invoked_by_reviewer": false,
+    "attempt_f_raw_evidence_modified": false,
+    "frozen_v10_modified": false,
+    "source_modified_by_reviewer": false,
+    "only_this_reviewer_artifact_created": true
+  },
+  "root_cause": {
+    "classification": "QUEUE_ACCOUNTING_BUG",
+    "failure_code": "STALE_CROSS_WORKER_QUEUE_ACCOUNTING_FALSE_EMERGENCY_ABORT",
+    "raw_failure_message": "integrated v11 backlog reached its emergency ceiling during two-gpu-recovery",
+    "old_guard_input": "global offers through the GPU0 local clock minus GPU0 completions and only the GPU1 completions already present in the independently lagging GPU0 telemetry cursor",
+    "semantic_defect": "The numerator advanced on the global arrival clock while the cross-worker completion side remained at an older GPU1 watermark. The resulting value was an unsynchronized upper bound, not a queue depth observed at one coherent instant.",
+    "correct_metric": "global outstanding requests at the newest contiguous, fresh GPU1 telemetry watermark, using all scheduled offers and both GPU0 and GPU1 completion timestamps at or before that same watermark",
+    "emergency_comparison": "synchronized_total_outstanding >= 64",
+    "real_emergency_ceiling_reached": false,
+    "allocator_or_source_lifecycle_implicated": false
+  },
+  "first_divergent_event": {
+    "event": "GPU1_REQUEST_COMPLETION",
+    "request_sequence": 103,
+    "request_id": "exp004-v11-integrated-s41-f.spike.000103",
+    "scheduled_arrival_ns": 197858555384,
+    "gpu1_first_token_ns": 197940803432,
+    "completed_ns": 198866817617,
+    "prior_gpu1_cursor_sequence": 1,
+    "prior_gpu1_cursor_watermark_ns": 198840857403,
+    "prior_gpu1_cursor_cumulative_completed_requests": 0,
+    "offers_scheduled_by_completion_ns": 164,
+    "gpu0_completions_by_completion_ns": 107,
+    "gpu1_completions_by_completion_ns": 1,
+    "stale_cursor_outstanding_at_completion_ns": 57,
+    "true_outstanding_at_completion_ns": 56,
+    "differing_field": "GPU1 cumulative completed request count",
+    "causal_consequence": "This was the first instant at which the stale GPU1 cursor and the completed runtime history represented different queues. Seven more GPU1 completions accumulated in telemetry sequence 2 before the false abort.",
+    "evidence_strength": "direct immutable request and telemetry timestamps joined with deterministic offline replay"
+  },
+  "attempt_f_replay": {
+    "failure_observed_ns": 200395090782,
+    "raw_unsynchronized_total_outstanding": 64,
+    "raw_gpu0_driver_active_requests": 44,
+    "raw_gpu1_cursor_next_sequence": 2,
+    "raw_gpu1_cursor_completed_requests": 0,
+    "newest_contiguous_telemetry_sequence_available_at_failure": 2,
+    "common_watermark_ns": 199864068274,
+    "offers_scheduled_at_or_before_common_watermark": 179,
+    "gpu0_completions_at_or_before_common_watermark": 119,
+    "gpu1_completions_at_or_before_common_watermark": 8,
+    "synchronized_total_outstanding": 52,
+    "replay_equation": "179 - 119 - 8 = 52",
+    "event_reconciled_true_maximum_outstanding": 57,
+    "true_maximum_scheduled_arrival_clock_ns": 198858555384,
+    "true_maximum_actual_offer_event_clock_ns": 198858810179,
+    "emergency_ceiling": 64,
+    "minimum_true_headroom_requests": 7,
+    "late_gpu1_completion_count_in_full_immutable_telemetry": 19,
+    "event_reconciled_terminal_outstanding": 45,
+    "replay_status": "PASS_FALSE_ABORT_PROVEN"
+  },
+  "trigger_and_lifecycle": [
+    {
+      "order": 1,
+      "event": "OVERLOAD_DETECTED",
+      "observed_ns": 191991980215,
+      "status": "PASS"
+    },
+    {
+      "order": 2,
+      "event": "TRIGGER_PREDICATE_SATISFIED",
+      "observed_ns": 192241980215,
+      "queue_depth": 21,
+      "positive_queue_slope": true,
+      "offered_rate_exceeded_completed_rate": true,
+      "status": "PASS"
+    },
+    {
+      "order": 3,
+      "event": "RECLAIM_TRIGGER_EMITTED",
+      "observed_ns": 192242234864,
+      "predicate_to_trigger_latency_ns": 254649,
+      "headroom_to_emergency_ceiling_requests": 43,
+      "status": "PASS"
+    },
+    {
+      "order": 4,
+      "event": "ROLLOUT_ADMISSION_STOP",
+      "observed_ns": 192252538513,
+      "trigger_to_stop_latency_ns": 10303649,
+      "status": "PASS"
+    },
+    {
+      "order": 5,
+      "event": "ALLOCATOR_QUIESCENT",
+      "observed_ns": 192701444858,
+      "same_production_engine_step_witness": true,
+      "scheduler_waiting_count": 0,
+      "scheduler_skipped_waiting_count": 0,
+      "allocator_mutations_excluded": true,
+      "status": "PASS"
+    },
+    {
+      "order": 6,
+      "event": "CAPTURE_COMMIT_END",
+      "observed_ns": 192968926852,
+      "allocation_count": 1152,
+      "logical_state_bytes": 1056964608,
+      "semantic_sha256": "2e1ca0f143ba2fb82970df22bdc336bcf8bc8040ab7ddab68d76df4e136dd77b",
+      "status": "PASS"
+    },
+    {
+      "order": 7,
+      "event": "SOURCE_ALLOCATION_IDENTITY_GATE_PRE_EXPORT",
+      "validated_ns": 193475569023,
+      "barrier_observed_ns": 193885750473,
+      "allocation_count": 1152,
+      "post_commit_allocation_event_count": 0,
+      "same_production_engine_step_witness": true,
+      "status": "PASS"
+    },
+    {
+      "order": 8,
+      "event": "SOURCE_ALLOCATION_IDENTITY_GATE_POST_EXPORT_READ",
+      "observed_ns": 197421235352,
+      "allocation_count": 1152,
+      "post_commit_allocation_event_count": 0,
+      "same_production_engine_step_witness": true,
+      "status": "PASS"
+    },
+    {
+      "order": 9,
+      "event": "SOURCE_RELEASE_HBM_RECLAIM",
+      "earliest_ns_exclusive": 197421235352,
+      "latest_ns_inclusive": 197767514674,
+      "exact_timestamp_available": false,
+      "source_release_completed": true,
+      "post_free_proof_passed_control_flow": true,
+      "zero_assigned_kv_bytes_passed_control_flow": true,
+      "hbm_reclaimed": true,
+      "status": "PASS_BINARY_ORDERING"
+    },
+    {
+      "order": 10,
+      "event": "GPU1_SERVING_READY",
+      "observed_ns": 197767514674,
+      "status": "PASS"
+    },
+    {
+      "order": 11,
+      "event": "GPU1_SERVING_ENABLE_ACK",
+      "observed_ns": 197794832416,
+      "status": "PASS"
+    },
+    {
+      "order": 12,
+      "event": "GPU1_FIRST_USEFUL_TOKEN",
+      "observed_ns": 197940803432,
+      "request_sequence": 103,
+      "status": "PASS"
+    },
+    {
+      "order": 13,
+      "event": "FIRST_GPU1_REQUEST_COMPLETION_AND_FIRST_QUEUE_DIVERGENCE",
+      "observed_ns": 198866817617,
+      "request_sequence": 103,
+      "status": "RUNTIME_PASS_ACCOUNTING_CURSOR_DIVERGED"
+    },
+    {
+      "order": 14,
+      "event": "GPU1_TELEMETRY_SEQUENCE_2_PUBLISHED",
+      "observed_ns": 199864068274,
+      "cumulative_gpu1_completions": 8,
+      "status": "PASS_UNCONSUMED_BY_OLD_INSTANTANEOUS_GUARD"
+    },
+    {
+      "order": 15,
+      "event": "FALSE_EMERGENCY_ABORT",
+      "observed_ns": 200395090782,
+      "stale_total_outstanding": 64,
+      "synchronized_total_outstanding": 52,
+      "true_run_maximum_outstanding": 57,
+      "status": "FAIL_QUEUE_ACCOUNTING"
+    }
+  ],
+  "scientific_boundary": {
+    "attempt_f_valid_through": "GPU1 first useful serving and binary source-release/HBM-reclamation ordering",
+    "serving_slo_restoration": "NOT_REACHED",
+    "rollout_restore": "NOT_STARTED",
+    "branch_continuation": "NOT_STARTED",
+    "integrated_movement_accounting": "UNAVAILABLE",
+    "integrated_v11_scientifically_valid": false,
+    "kill_and_recompute_permitted_from_attempt_f": false,
+    "v11_freeze_permitted_from_attempt_f": false
+  },
+  "scoped_fix_review": {
+    "implementation_scope": "v11 trigger overlay only",
+    "frozen_v10_byte_identity_preserved": true,
+    "pre_gpu1_emergency_guard": "unchanged >=64 fail-closed guard",
+    "post_gpu1_algorithm": "drain the independent GPU1 cursor through every currently available contiguous immutable telemetry record, reject gaps or a stale/future watermark, compute global outstanding at that common watermark, then apply the unchanged v11 >=64 emergency comparison",
+    "telemetry_staleness_limit_intervals": 1.5,
+    "telemetry_catchup_bounded_by_transaction_wall": true,
+    "coherent_depth_64_still_fails": true,
+    "attempt_f_stale_64_replays_to_52_and_passes": true,
+    "telemetry_gap_fails_typed": true,
+    "telemetry_staleness_fails_typed": true,
+    "missing_initial_watermark_fails_typed": true,
+    "overlay_globals_restored_after_success": true,
+    "overlay_globals_restored_after_body_failure": true,
+    "overlay_globals_restored_after_close_failure": true,
+    "successful_v11_result_requires_positive_synchronized_check_count": true,
+    "successful_v11_result_requires_last_synchronized_evidence": true,
+    "optimized_state_movement_algorithm_modified": false,
+    "review_decision": "GO_FOR_FIX"
+  },
+  "verification": {
+    "immutable_attempt_f_replay": "PASS",
+    "queue_v11_race_and_frozen_v10_tests": {
+      "command": "uv run pytest -q tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py tests/python/test_experiment_004_v10_serving_protocol.py",
+      "passed": 33,
+      "failed": 0
+    },
+    "adversarial_runtime_checks": [
+      "exact Attempt-F partial-failure plus telemetry 000000..000002 replay",
+      "coherent synchronized depth exactly 64 rejection",
+      "pre-first-useful depth exactly 64 rejection",
+      "telemetry sequence-gap rejection",
+      "stale and future watermark rejection",
+      "overlay restoration after body and close exceptions",
+      "underlying success without synchronized evidence rejection",
+      "exact successful synchronized evidence emission"
+    ],
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "git_diff_check": "PASS",
+    "broader_focused_suite": {
+      "passed": 269,
+      "failed": 23,
+      "queue_fix_related_failures": 0,
+      "failure_cause": "Legacy Attempt-E controller fixtures derive a pre-E ledger with conservative_failure_charges[:-1]; after Attempt F settlement this removes F rather than E and reconstructs SHA-256 3eb29145ae80e2a87952b336700ea95de6405123a8fcfec8cda23c914fe0a855 instead of the frozen pre-E digest ae4624645fb2fd57ef098a56826191e78d659742cb1ad0910e9d54cf841aed5d.",
+      "launch_consequence": "Attempt G remains blocked until history-dependent legacy fixtures are stabilized or superseded and the required repository check passes."
+    }
+  },
+  "attempt_g_methodology_constraints": {
+    "authorization_status_from_this_review": "CONDITIONAL_ONLY_NOT_A_GPU_AUTHORIZATION",
+    "fresh_attempt_id_required": "exp004-v11-integrated-s41-g",
+    "fresh_content_addressed_manifest_config_and_seal_required": true,
+    "current_authoritative_ledger_must_be_reloaded_before_reservation": true,
+    "provider_zero_and_output_collision_preflight_required": true,
+    "all_required_local_tests_and_make_check_must_pass": true,
+    "queue_fix_source_and_tests_must_be_bound_by_exact_sha256": true,
+    "frozen_v10_sha256_must_equal": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "optimized_v11_movement_code_must_remain_unchanged": true,
+    "targeted_identity_reproduction_rerun_required": false,
+    "targeted_rerun_reason": "The scoped fix begins only after GPU1 first useful serving. Attempt F itself independently passed the exact integrated trigger, quiescence, SourceCaptureCommit, 1,152/1,152 pre-export identity, optimized export read, 1,152/1,152 post-export identity, zero post-commit mutation, release/HBM ordering, and GPU1 first-useful boundary.",
+    "serving_methodology": {
+      "offered_load_rps": 15,
+      "normal_trigger_backlog": 20,
+      "observed_attempt_f_trigger_backlog": 21,
+      "emergency_ceiling": 64,
+      "pre_gpu1_guard_must_remain_live": true,
+      "post_gpu1_queue_metric": "global_outstanding_at_newest_contiguous_fresh_gpu1_watermark",
+      "post_gpu1_guard_comparison": "synchronized_total_outstanding >= 64",
+      "telemetry_gaps_staleness_or_future_watermarks": "FAIL_CLOSED",
+      "successful_result_requires_synchronized_queue_evidence": true
+    },
+    "attempt_count": "EXACTLY_ONE_AFTER_FRESH_AUTHORIZATION",
+    "cleanup_required": {
+      "in_function_cleanup_pass": true,
+      "provider_cleanup_pass": true
+    },
+    "kill_and_recompute_before_integrated_pass": "FORBIDDEN",
+    "v11_freeze_before_integrated_pass": "FORBIDDEN",
+    "fpga_or_experiment_005_work": "FORBIDDEN",
+    "decision": "GO_FOR_ATTEMPT_G_ONLY_AFTER_ALL_PRECONDITIONS_PASS"
+  },
+  "evidence_bindings": {
+    "settled_status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-f.json",
+      "sha256": "ee43aa48c6cb33410c6ec4cfab8587eaad299571a803c8bbf9a7ad445715d252"
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-f.json",
+      "sha256": "1a9f5ae7475cc77b075efb3c77c4f977b89bd4c2603191d74f7e5124898a101f"
+    },
+    "attempt_f_config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-f-config.json",
+      "sha256": "981fb1dd1ae9fdcd4ee7e449323caa67b6d7314289c0aa2793c85fb3f42885f3"
+    },
+    "attempt_f_effective_config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/effective-config.json",
+      "sha256": "7d43e9a3b1fc291bcd0b468fc9a4a72bbfc05dab07ff59c48d3bd456dca1ccd4"
+    },
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/REMOTE_MANIFEST.json",
+      "sha256": "994bd867e8b93dcc78cdba12355a1da9971e5460a5bfc18eb5f60ab40dbd6dfe",
+      "manifest_artifact_count": 478,
+      "missing_artifacts": 0,
+      "extra_artifacts": 0,
+      "hash_mismatches": 0,
+      "size_mismatches": 0
+    },
+    "queue_and_lifecycle_raw": [
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-reclaim-trigger.json",
+        "sha256": "81a1e57fecf5da8e0225adb2e9844c17a0ec8ba30072ce44b1197247b581dd28"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v11-rollout-admission-stop.json",
+        "sha256": "d7b1600ed0af5156f9ad1898bf3ebb8ad2fc9852e6b725e85a15b858d94cd6b1"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v11-source-capture-commit.json",
+        "sha256": "51f0b772b789e15b0d25bb0a3cb68440a96e59e91d30318caf78452dae719384"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v11-source-identity-pre-export-pass.json",
+        "sha256": "636aff8b05caf5a6f68795785a9aca9bd634e1e1e1377b0cb5b861c859d22ef6"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v11-source-identity-post-export-pass.json",
+        "sha256": "8631501a58c8286a5c838ff8093c1d7f84fc0036f4e200fdc09a0cc4c460df63"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu1-serving-ready.json",
+        "sha256": "169ce0db460685a935a21620e7e96de6d68e7e1e418eb5b5c1a21dca9d068bee"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-serving-enable-ack.json",
+        "sha256": "ab731982cbf193ac676d5e8eb49aadab7cc7002098f7224e003a278a2a17d3ed"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu1-first-useful.json",
+        "sha256": "80bb32a95023464215ab12afa34e637cb74a5aad462f4aa8d02e4922590ed083"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu0-partial-failure.json",
+        "sha256": "b7faf5e742b48be42704feea91a878e0bd6b386fa74b1dc70b6e428b6ebd4530"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu1-telemetry/000000.json",
+        "sha256": "4dfeb8295df42ad7ce4d3ccb4e5eb68f26ae13df8753c1193469ffa4241654ee"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu1-telemetry/000001.json",
+        "sha256": "800fe9bc6b5694fd473a8acba8be6b5b97ca3c889a847f97e839d276537fbf9b"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/barriers/v10-gpu1-telemetry/000002.json",
+        "sha256": "b7c7322090247f5ab779724784869ea3387e5bd69304850a6a277038c7244639"
+      }
+    ],
+    "failure_and_cleanup_raw": [
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/controller-result.json",
+        "sha256": "493a3f9782dd0e3b875a6bbe6cb4371d47e33c421fcb8537329d4ebe4b9f4415"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/serving/failure.json",
+        "sha256": "a5f4441ea6ba6f8698463e97562382da18d925c8a977071f3a72597f820263c1"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/function-completion.json",
+        "sha256": "379a5565874fe876e04c11fbd16d216b321dd58e0d61ffd9bddcaa1ec07d8b65"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/function-failure.json",
+        "sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/function-finally-cleanup.json",
+        "sha256": "8381df0f82d2bf5ac8d9ee486987be38beb4facf4ceb963249c3f8888cc26b94"
+      },
+      {
+        "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-f/in_function_cleanup.json",
+        "sha256": "4b5b0f2c4fe865ae1f8ba7ff004bc81722c69dbea2c9f3543342398c54aaa156"
+      }
+    ],
+    "queue_fix_source_and_tests": [
+      {
+        "artifact": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+        "sha256": "9e81ab90ed6d7cb8f7f77e9fd63f2a0b7f3001422c53bcef84eb01344c83d2cc"
+      },
+      {
+        "artifact": "tests/python/test_gpu_reclamation_integrated_trigger_v11.py",
+        "sha256": "fb54ba57cce6dfe8f9641ca637c93e057bd6b91af4f18de1e378601b641b4d44"
+      },
+      {
+        "artifact": "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py",
+        "sha256": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599"
+      },
+      {
+        "artifact": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+        "sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+        "frozen": true
+      },
+      {
+        "artifact": "tests/python/test_experiment_004_v10_serving_protocol.py",
+        "sha256": "26125107b2eed6c76f5901c305be826762841459edd2f53513ad6f4931ad8814"
+      }
+    ],
+    "settled_attempt_f_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "d42b760e3421d82478c00c1d8d85737c008c7c395aae8d7b7a4418a15c03725f",
+      "consumed_additional_gpu_seconds": 20996.945466665977,
+      "hard_additional_gpu_seconds": 43200.0,
+      "remaining_gpu_seconds": 22203.054533334023,
+      "active_reservations": 0
+    }
+  },
+  "terminal_statement": "PASS: Attempt F's emergency abort was a proven stale cross-worker accounting false positive. The scoped common-watermark fix preserves the exact >=64 emergency gate and frozen v10, passes immutable F replay and adversarial synchronization tests, and is suitable for one conditional Attempt G only after a fresh content-addressed authorization, clean repository checks, current-ledger reservation, collision/provider preflight, and both cleanup contracts. Attempt F itself remains scientifically invalid and authorizes neither kill/recompute nor a v11 freeze."
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-make-check/v1",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-kill-recompute-s41-f",
+  "command": "make check",
+  "gpu_or_cloud_invoked": false,
+  "completed_at_utc": "2026-08-28T22:49:48.472476+00:00",
+  "exit_code": 0,
+  "python": {
+    "ruff_format_check": "PASS; 714 files",
+    "ruff_check": "PASS",
+    "mypy": "PASS; 484 source files",
+    "pytest": "PASS; 2514 passed, 8 skipped, 6 warnings"
+  },
+  "rust": {
+    "cargo_fmt": "PASS",
+    "cargo_clippy_all_targets_all_features": "PASS",
+    "cargo_test_workspace_all_features": "PASS; unit, integration, and doc tests"
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "tests": "PASS; 37 passed, 1 skipped",
+    "build": "PASS"
+  },
+  "provenance": "Fresh repository-wide CPU-only make check completed successfully on the exact frozen Attempt-F source before this post-record upper-bound timestamp; no Modal, network, GPU, or cloud invocation occurred."
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-postreturn-validator-fix/v1",
+  "observed_at_utc": "2026-08-20T03:24:58Z",
+  "status": "PASS",
+  "defect": "the local coordinator compared complete pre/post GPU inventory rows and treated expected utilization changes as a physical device identity change",
+  "fix": "compare only stable identity fields: index, UUID, model name, driver version, and total memory; retain dynamic utilization and used-memory samples as telemetry",
+  "scientific_effect": "none; this validator ran after the remote experiment, which was independently invalid because the rollout worker failed its source allocation identity gate",
+  "gpu_or_modal_invoked_for_fix": false,
+  "tests": {
+    "command": "PYTHONPATH=python pytest -q tests/python/test_experiment_004_v11_final_coordinator.py",
+    "result": "11 passed"
+  },
+  "source": {
+    "path": "tools/branchfabric-experiment-004-v11-final.py",
+    "sha256": "0a4277a5aa7f301bc5bbacdae2552b7bdea8cc2b4b9afb608912d7bd34112c20"
+  },
+  "test": {
+    "path": "tests/python/test_experiment_004_v11_final_coordinator.py",
+    "sha256": "3047542157a2c54bb11e402664b7fec8a923592c6b8829acdcd87ce903f3fafc"
+  }
+}

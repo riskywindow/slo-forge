@@ -1,0 +1,63 @@
+{
+  "budgets": {
+    "SLOFORGE_BRANCHFABRIC_CHARACTERIZATION_GPU_BUDGET_USD": "ABSENT",
+    "SLOFORGE_GPU_BUDGET_USD": "ABSENT"
+  },
+  "captured_at_utc": "2026-08-09T21:29:44Z",
+  "host": {
+    "chip": "Apple M4 Pro",
+    "efficiency_cores": 4,
+    "kernel": "Darwin 24.6.0",
+    "kernel_architecture": "ARM64_T6041",
+    "logical_cpus": 12,
+    "memory_bytes": 25769803776,
+    "model_identifier": "Mac16,8",
+    "numa_nodes": 1,
+    "operating_system": "macOS 15.6.1 (24G90)",
+    "performance_cores": 8,
+    "physical_cpus_reported": 12,
+    "process_architecture": "x86_64"
+  },
+  "orchestration_derivation": {
+    "hardware_source_sha256": "c7b2c3b6aee95211385a5e62a6d0a98ea5c0b39aaabfb7750046cc51fe72f238",
+    "reason": "runner requires host fields stored in the hardware baseline",
+    "schema_version": "sloforge.branchfabric.manifest-derivation/v1",
+    "software_source_sha256": "f4b84bd48383b242af4b996e8ed2e77c3d9cc1187ad8d31f4a6494bc569c8edd"
+  },
+  "packages": {
+    "nixl": null,
+    "numpy": "2.3.5",
+    "opentelemetry_api": null,
+    "orjson": null,
+    "pandas": null,
+    "psutil": "7.2.2",
+    "pyarrow": null,
+    "pydantic": "2.13.4",
+    "scipy": null,
+    "sglang": null,
+    "torch": null,
+    "triton": null,
+    "vllm": null
+  },
+  "profilers": {
+    "nvcc": null,
+    "nvidia_smi": null,
+    "perf": null,
+    "powermetrics": "/usr/bin/powermetrics",
+    "rocm_smi": null,
+    "xctrace": "/usr/bin/xctrace"
+  },
+  "schema_version": "sloforge.branchfabric.software-manifest/v1",
+  "source_commit": "d6f77c839334a4644b4e2edf36a7543c68670a2d",
+  "tools": {
+    "cargo": "1.93.1",
+    "docker_client": "29.4.0",
+    "git": "2.39.5 Apple Git-154",
+    "locked_project_python": "3.12.7",
+    "node": "22.16.0",
+    "npm": "11.4.2",
+    "rustc": "1.93.1",
+    "system_python": "3.12.8",
+    "uv": "0.10.2"
+  }
+}

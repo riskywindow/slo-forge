@@ -1,0 +1,288 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-review/v1",
+  "reviewer_id": "agent-11-14-serving-methodology-gpu-performance-v7",
+  "reviewer_roles": [
+    "serving_methodology",
+    "gpu_performance"
+  ],
+  "attempt_id": "exp004-v10-naive-s41-v7",
+  "decided_at_utc": "2026-08-13T17:06:55Z",
+  "decision": "APPROVED",
+  "raw_transaction_scientifically_passes": true,
+  "gpu_rerun_required": false,
+  "raw_evidence_sha256": {
+    "serving/result.json": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
+    "rollout/result.json": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
+    "controller-result.json": "4cc850cad87a281f00e10563f2fd32dde7ea896d0bbf8074f4b8b8bbd3cff93e",
+    "effective-config.json": "a4cdc32358757ec0e2952d47475a4005bca5b1ce176e16385756e68e40eab172",
+    "readiness/both-engines-ready.json": "26290551770a0763011d66ee380bfb67842a28736513d0a893ec9671647c470d",
+    "sanity/sanity-result.json": "4268c59caba571ac5b9873e9cee5be062666077d1118af6e6a8a8e1abc0204cc",
+    "analysis/budget-settlement.json": "18f7458a6a196ef92e908f81688940a2d4137963d1fd7b9f39e9e15b86c84b64",
+    "serving/telemetry/resource-sampling.json": "0cc7a8c96cc54e8976ef137cae5da6c059fd9d5bf0598cdcde5fa8fbff44873e",
+    "rollout/telemetry/cuda-and-host-operations.json": "edf6958f6ad95009693223cc451eddc4abb75d2c91054b9ba2fd265c347875c7"
+  },
+  "canonical_artifacts_reviewed": {
+    "artifacts/branchfabric/gpu-validation/experiment-004/scientific-validity.json": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+    "artifacts/branchfabric/gpu-validation/experiment-004/serving-recovery.json": "ef2eb58d408d2297cf4d18b30385a8c9ebd797cf381bb0c5743214971549938d",
+    "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3",
+    "artifacts/branchfabric/gpu-validation/experiment-004/branch-resume-validation.json": "20f14ee8a11534d03be41d0b62c26e265acac2b6c396edd8587839b012bb9226",
+    "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+    "reports/branchfabric-gpu-validation-experiment-004-v10-final.json": "e273c29dca0571fe3f327d5dffa5890d98dfc23948ec8bb89da21db62ee096f9",
+    "baseline_internal_artifact_hash": "f58dfaab2301ab8f449efa38ba634ada80a41acc70ba97d73bcb151ab1b1d2fd",
+    "baseline_analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "canonical_scientifically_valid": true,
+    "canonical_invalid_reasons": [],
+    "canonical_baseline_status": "NAIVE_PRESERVE_V10_FROZEN",
+    "canonical_results_match_independent_review": true
+  },
+  "worker_result": {
+    "controller_status": "succeeded",
+    "serving_status": "succeeded",
+    "rollout_status": "succeeded",
+    "serving_returncode": 0,
+    "rollout_returncode": 0,
+    "global_offered_request_count": 516,
+    "complete_observation_count": 516,
+    "offer_observation_bijection": true,
+    "both_engines_compilation_free_during_measured_transaction": true
+  },
+  "postprocess_failure_diagnosis": {
+    "classification": "local_postprocessing_defects_after_successful_gpu_transaction",
+    "original_exception": "V10Timeline violates required causal event order",
+    "original_exact_inversion": {
+      "schema_left_event": "SERVING_QUEUE_DRAIN_BEGIN",
+      "schema_left_timestamp_ns": 231677152970,
+      "schema_right_event": "SERVING_SLO_RECOVERY_BEGIN",
+      "schema_right_timestamp_ns": 230717626061,
+      "inversion_ns": 959526909,
+      "root_cause": "The mapper correctly binds SLO recovery begin to the first useful GPU1 token, while the queue-drain regression begins at the next fixed telemetry sample. CAUSAL_V10_TIMELINE incorrectly required the later sampled drain-window start to precede the earlier first-useful event.",
+      "correct_order": [
+        "GPU1_FIRST_USEFUL_SERVING_REQUEST",
+        "SERVING_SLO_RECOVERY_BEGIN",
+        "SERVING_QUEUE_DRAIN_BEGIN"
+      ],
+      "real_causal_invalidity": false
+    },
+    "additional_local_defects_exposed_by_offline_replay": [
+      {
+        "defect": "SLO stability compared total outstanding requests, including actively served in-flight work, with the configured scheduler-waiting backlog threshold.",
+        "raw_metric_contract": "live_vllm_scheduler_waiting",
+        "raw_waiting_depths": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "stale_postprocessor_total_outstanding_maximum": 16,
+        "configured_waiting_threshold": 4,
+        "real_slo_failure": false
+      },
+      {
+        "defect": "Strict Pydantic Python-mode deserialization rejected tuple-valued StateMovementReport fields after their valid JSON array representation crossed the versioned worker boundary.",
+        "required_fix": "Validate the movement report in JSON mode.",
+        "real_movement_failure": false
+      },
+      {
+        "defect": "Strict Pydantic Python-mode deserialization rejected tuple-valued CanonicalKvTransportManifest fields after their valid JSON array representation crossed the versioned worker boundary.",
+        "required_fix": "Validate the transport manifest in JSON mode.",
+        "real_state_semantics_failure": false
+      }
+    ],
+    "offline_replay_after_local_fixes": {
+      "scientifically_valid": true,
+      "invalid_reasons": [],
+      "all_23_required_validity_booleans": true,
+      "targeted_tests": "24 passed"
+    }
+  },
+  "corrected_causal_timeline": [
+    {"phase": "CONTROL_STABLE", "monotonic_timestamp_ns": 222086831552},
+    {"phase": "LOAD_SPIKE_BEGIN", "monotonic_timestamp_ns": 222086831552},
+    {"phase": "GPU0_OVERLOAD_CONFIRMED", "monotonic_timestamp_ns": 225303037928},
+    {"phase": "RECLAIM_TRIGGER", "monotonic_timestamp_ns": 225303944634},
+    {"phase": "ROLLOUT_ADMISSION_STOP", "monotonic_timestamp_ns": 225313306655},
+    {"phase": "BRANCH_QUIESCE_BEGIN", "monotonic_timestamp_ns": 225313312015},
+    {"phase": "BRANCH_QUIESCE_END", "monotonic_timestamp_ns": 225313313107},
+    {"phase": "STATE_CAPTURE_BEGIN", "monotonic_timestamp_ns": 225314151761},
+    {"phase": "STATE_CAPTURE_END", "monotonic_timestamp_ns": 225468255858},
+    {"phase": "STATE_TRANSFORM_BEGIN", "monotonic_timestamp_ns": 225468258042},
+    {"phase": "STATE_TRANSFORM_END", "monotonic_timestamp_ns": 226797338503},
+    {"phase": "D2H_BEGIN", "monotonic_timestamp_ns": 226797340306},
+    {"phase": "D2H_END", "monotonic_timestamp_ns": 226966736538},
+    {"phase": "INTEGRITY_BEGIN", "monotonic_timestamp_ns": 227201683405},
+    {"phase": "INTEGRITY_END", "monotonic_timestamp_ns": 228939056398},
+    {"phase": "STATE_PUBLISH", "monotonic_timestamp_ns": 230480611662},
+    {"phase": "GPU1_STATE_RELEASE_BEGIN", "monotonic_timestamp_ns": 230487861239},
+    {"phase": "GPU1_STATE_RELEASE_END", "monotonic_timestamp_ns": 230509818210},
+    {"phase": "GPU1_HBM_RECLAIM_CONFIRMED", "monotonic_timestamp_ns": 230526119065},
+    {"phase": "GPU1_SERVING_ENABLE", "monotonic_timestamp_ns": 230554682023},
+    {"phase": "GPU1_FIRST_USEFUL_SERVING_REQUEST", "monotonic_timestamp_ns": 230717626061},
+    {"phase": "SERVING_SLO_RECOVERY_BEGIN", "monotonic_timestamp_ns": 230717626061},
+    {"phase": "SERVING_QUEUE_DRAIN_BEGIN", "monotonic_timestamp_ns": 231677152970},
+    {"phase": "SERVING_QUEUE_DRAIN_END", "monotonic_timestamp_ns": 236677152970},
+    {"phase": "SERVING_SLO_RESTORED", "monotonic_timestamp_ns": 236677152970},
+    {"phase": "SERVING_SLO_STABILITY_BEGIN", "monotonic_timestamp_ns": 236677152970},
+    {"phase": "SERVING_SLO_STABILITY_END", "monotonic_timestamp_ns": 241677152970},
+    {"phase": "TWO_GPU_SERVICE_STABLE", "monotonic_timestamp_ns": 243880170840},
+    {"phase": "RESTORE_LOAD_REDUCED", "monotonic_timestamp_ns": 245286831552},
+    {"phase": "GPU1_SERVING_DRAINED", "monotonic_timestamp_ns": 246014943567},
+    {"phase": "RESTORE_ELIGIBLE", "monotonic_timestamp_ns": 246020228885},
+    {"phase": "RESTORE_TRIGGER", "monotonic_timestamp_ns": 246020228885},
+    {"phase": "H2D_BEGIN", "monotonic_timestamp_ns": 247599143903},
+    {"phase": "H2D_END", "monotonic_timestamp_ns": 247642378403},
+    {"phase": "STATE_IMPORT_BEGIN", "monotonic_timestamp_ns": 247642387320},
+    {"phase": "DESTINATION_NATIVE_WRITE_BEGIN", "monotonic_timestamp_ns": 251089851919},
+    {"phase": "STATE_VALIDATE_BEGIN", "monotonic_timestamp_ns": 251095292922},
+    {"phase": "DESTINATION_NATIVE_WRITE_END", "monotonic_timestamp_ns": 253465742560},
+    {"phase": "STATE_VALIDATE_END", "monotonic_timestamp_ns": 253661168308},
+    {"phase": "STATE_IMPORT_END", "monotonic_timestamp_ns": 253663435685},
+    {"phase": "BRANCH_RESUME_BEGIN", "monotonic_timestamp_ns": 253664298754},
+    {"phase": "FIRST_RESUMED_TOKEN", "monotonic_timestamp_ns": 253748212300},
+    {"phase": "ALL_BRANCHES_RESUMED", "monotonic_timestamp_ns": 253748212300},
+    {"phase": "ROLLOUT_CONTINUATION_COMPLETE", "monotonic_timestamp_ns": 253868457631}
+  ],
+  "serving_methodology": {
+    "actual_arrival_cadence_pass": true,
+    "maximum_schedule_lateness_ns": 4973722,
+    "maximum_arrivals_per_50ms_window": 1,
+    "control": {
+      "offered_rate_rps": 9.0,
+      "completion_rate_rps": 9.0,
+      "p95_ttft_ms": 42.30888925,
+      "completed_requests": 36,
+      "emitted_tokens": 2297,
+      "token_rate_tps": 574.25,
+      "stable": true
+    },
+    "overload": {
+      "offered_rate_rps": 15.0,
+      "completion_rate_rps": 11.504236878610055,
+      "p95_ttft_ms": 266.8400262,
+      "queue_slope_requests_per_second": 2.90025236144552,
+      "trigger_queue_depth": 20,
+      "maximum_queue_depth_before_first_useful": 28,
+      "queue_depth_at_first_useful": 27,
+      "overload_pass": true,
+      "bounded_backlog_pass": true
+    },
+    "two_gpu_recovery": {
+      "whole_recovery_offered_rate_rps": 14.966710716479456,
+      "whole_recovery_completion_rate_rps": 15.878388526620336,
+      "fixed_five_second_drain_window_offered_rate_rps": 15.0,
+      "fixed_five_second_drain_window_completion_rate_rps": 17.6,
+      "fixed_five_second_drain_headroom_rps": 2.6000000000000014,
+      "queue_drain_slope_requests_per_second": -2.4857142857142858,
+      "queue_drain_pass": true,
+      "stability_window_p95_ttft_ms": [
+        72.00574299999997,
+        66.97971069999997,
+        89.11805739999999,
+        63.01704969999997,
+        60.89301839999997
+      ],
+      "stability_window_waiting_depths": [0, 0, 0, 0, 0],
+      "slo_stability_pass": true
+    }
+  },
+  "primary_latencies_seconds": {
+    "time_to_gpu1_hbm_reclamation": 5.222174431,
+    "time_to_first_useful_gpu1_serving_request": 5.413681427,
+    "time_to_serving_slo_restoration": 11.373208336,
+    "time_to_two_gpu_service_stable": 18.576226206,
+    "rollout_restore_to_first_resumed_token": 7.727983415,
+    "rollout_restore_to_all_branches_resumed": 7.727983415,
+    "rollout_restore_to_continuation_complete": 7.848228746
+  },
+  "gpu0_restore_activity": {
+    "restore_offered_rate_rps": 9.0,
+    "observed_completion_rate_rps": 9.046627245184018,
+    "completion_count": 71,
+    "emitted_tokens": 4507,
+    "token_rate_tps": 574.26970414147,
+    "ttft_sample_count": 70,
+    "p95_ttft_ms": 44.6986391,
+    "early_half_completions": 36,
+    "late_half_completions": 35,
+    "active_during_restore": true,
+    "eligible_restore_stages_passed": true,
+    "h2d_stage_sample_sufficient": false,
+    "h2d_stage_causal_interference_claim_permitted": false
+  },
+  "descriptive_serving_interference": {
+    "causal_claim": false,
+    "reason": "This single integrated run is a baseline, not a randomized multi-seed interference campaign. Preserve is additionally confounded by 15-rps offered load versus the 9-rps control. The 43.2345-ms H2D interval has no TTFT sample.",
+    "import_vs_control": {
+      "throughput_interference_pct": 0.3495797363521125,
+      "token_rate_interference_pct": -0.44577262390048666,
+      "p95_ttft_increase_pct": 4.291594230401574,
+      "ttft_samples": 54
+    },
+    "destination_native_write_vs_control": {
+      "throughput_interference_pct": 1.7912149209340034,
+      "token_rate_interference_pct": 0.3925078008950589,
+      "p95_ttft_increase_pct": 1.5685805318086832,
+      "ttft_samples": 22
+    },
+    "validation_vs_control": {
+      "throughput_interference_pct": 0.40219530927930736,
+      "token_rate_interference_pct": 0.43801439824457944,
+      "p95_ttft_increase_pct": 1.567808235476198,
+      "ttft_samples": 23
+    },
+    "full_restore_vs_control": {
+      "throughput_interference_pct": -0.5180805020446488,
+      "token_rate_interference_pct": -0.003431282798427304,
+      "p95_ttft_increase_pct": 5.64833984621802,
+      "ttft_samples": 70
+    }
+  },
+  "gpu0_resource_summary": {
+    "control": {"samples": 27, "mean_gpu_utilization_pct": 82.25925925925925, "mean_pcie_rx_bytes_per_second": 22766023.111111112, "mean_pcie_tx_bytes_per_second": 7340259.555555556, "mean_rss_bytes": 6109540352},
+    "preserve": {"samples": 33, "mean_gpu_utilization_pct": 78.18181818181819, "mean_pcie_rx_bytes_per_second": 23381426.424242426, "mean_pcie_tx_bytes_per_second": 6811554.909090909, "mean_rss_bytes": 6109540352},
+    "h2d": {"samples": 0, "claim_permitted": false},
+    "import": {"samples": 35, "mean_gpu_utilization_pct": 76.08571428571429, "mean_pcie_rx_bytes_per_second": 21183868.34285714, "mean_pcie_tx_bytes_per_second": 6808107.885714286, "mean_rss_bytes": 6111607544.685715},
+    "validation": {"samples": 15, "mean_gpu_utilization_pct": 76.66666666666667, "mean_pcie_rx_bytes_per_second": 21332855.466666665, "mean_pcie_tx_bytes_per_second": 6592853.333333333, "mean_rss_bytes": 6111637504}
+  },
+  "state_and_movement": {
+    "logical_state_bytes": 1056964608,
+    "source_blocks_released": 1152,
+    "fresh_destination_allocations": true,
+    "transport_integrity_valid": true,
+    "branch_first_token_matches": "8/8",
+    "continuation_tokens_per_branch": 8,
+    "external_movement_bytes": 3170893824,
+    "full_physical_touch_bytes": 61303947264,
+    "avoidable_movement_bytes": 32765902848,
+    "critical_path_movement_bytes": 61303947264,
+    "external_movement_amplification": 3.0,
+    "full_physical_touch_amplification": 58.0,
+    "avoidable_movement_amplification": 31.0,
+    "critical_path_movement_amplification": 58.0
+  },
+  "budget_and_cleanup": {
+    "actual_gpu_seconds": 530.812374186,
+    "actual_gpu_hours": 0.14744788171833334,
+    "actual_gpu_cost_usd": 0.36838378768508406,
+    "invocation_conservative_gpu_seconds": 758.1873215000087,
+    "invocation_conservative_gpu_hours": 0.21060758930555798,
+    "cumulative_conservative_gpu_seconds": 12556.823626085978,
+    "cumulative_conservative_gpu_hours": 3.4880065628016603,
+    "hard_ceiling_gpu_seconds": 13500.0,
+    "budget_pass": true,
+    "provider_cleanup_evidence": "logs/modal-cleanup-exp004-v10-naive-s41-v7.json",
+    "cleanup_pass": true
+  },
+  "findings": [
+    "The immutable GPU transaction completed successfully. The original function failure occurred only while reconstructing V10Timeline locally after both GPU workers exited.",
+    "The exact V10Timeline failure is a schema-order inversion between an earlier first-useful/SLO-recovery marker and a later fixed-sample queue-drain window; it is not a physical-event inversion.",
+    "Recovery is measured, not inferred: the fixed five-second window completes 88 requests against 75 offers, or 17.6 versus 15 rps, while scheduler-waiting backlog falls with slope -2.4857142857142858 requests/s.",
+    "All five one-second SLO stability windows have live scheduler waiting depth zero and p95 TTFT below 90 ms. Counting 16 actively served in-flight requests as waiting backlog is a stale local postprocessor semantic error.",
+    "GPU0 remains scientifically active during restoration, completing 71 requests and emitting 4,507 tokens across both halves of the restore interval; all restore stages with enough scheduled arrival mass pass.",
+    "The H2D interval is too short for a causal serving-interference estimate. Import and validation comparisons are descriptive only; they do not establish causality from this single run.",
+    "The independently reconstructed v10 pass graph yields 3x external, 58x full physical, 31x avoidable, and 58x critical-path amplification with zero duplicate accounting.",
+    "With the local timeline order, waiting-backlog SLO semantics, and JSON-boundary deserialization corrected, offline fail-closed replay reports every required validity boolean true and no invalid reasons. A GPU rerun would add no scientific evidence and is not justified."
+    ,
+    "The canonical scientific-validity artifact independently confirms all required booleans true with no invalid reasons, the final report status is success, all ten required plot pairs are published, and the immutable baseline status is NAIVE_PRESERVE_V10_FROZEN."
+  ]
+}

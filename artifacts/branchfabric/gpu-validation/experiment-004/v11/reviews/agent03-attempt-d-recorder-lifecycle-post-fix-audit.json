@@ -1,0 +1,125 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-recorder-lifecycle-review/v1",
+  "agent": 3,
+  "reviewed_at_utc": "2026-08-19T02:02:47Z",
+  "supersedes": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-c-recorder-lifecycle-audit.json",
+  "status": "PASS",
+  "recommendation": "ATTEMPT_D_ADMISSIBLE_SUBJECT_TO_ROOT_BUDGET_AND_ALL_OTHER_PRE_GPU_GATES",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "v10_modified": false,
+  "attempt_c_failure": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-download/worker__failure.json",
+    "sha256": "1fb2cb6f296030e301f0864cf240550ff721b248d128adf9af22ee48e2887b59",
+    "root_cause": "DETERMINISTIC_RECORDER_LIVE_EVENT_CARDINALITY_UNDERSIZING",
+    "closed_offline": true
+  },
+  "incremental_materialization": {
+    "status": "PASS",
+    "maximum_live_cuda_events": 4096,
+    "normal_live_event_limit": 3840,
+    "maximum_total_passes": 65536,
+    "normal_total_pass_limit": 65280,
+    "diagnostic_emergency_reserve": 256,
+    "materialized_record_appended_before_pending_removal": true,
+    "claimed_pass_ids_retained_across_drains": true,
+    "recorder_appendable_after_nonfinal_drain": true,
+    "final_resolve_freezes": true,
+    "cross_drain_dependencies_validated_globally": true,
+    "duplicate_ids_rejected_across_drains": true,
+    "failed_materialization_retains_retryable_suffix": true,
+    "normal_work_can_borrow_diagnostic_reserve": false,
+    "attempt_c_forward_cuda_passes": 8128,
+    "singleton_run_adversarial_cuda_passes": 35904,
+    "adversarial_cardinality_below_normal_total_limit": true
+  },
+  "production_lock_lifecycle": {
+    "status": "PASS",
+    "incremental_materialization_occurs_inside_import_admission": true,
+    "cuda_event_synchronize_releases_engine_step_gate": false,
+    "witness_owner_or_generation_changes": false,
+    "competing_engine_scheduler_allocator_or_queue_mutation_can_enter": false,
+    "reason": "The recorder drains synchronously from cuda_pass before the next launch; every production restore launch is inside the worker's enclosing IMPORT_ADMISSION critical section. Event synchronization may release the GIL but never exits Vllm0230EngineStepBinding._hold_lock. The binding's RLock and witness owner/generation remain held while all wrapped production mutation surfaces stay excluded.",
+    "final_resolve_outside_gate_safe": true,
+    "final_resolve_reason": "Each subset performs its compute-stream completion fence and exact validation before returning; stager admission occurs only after both typed subset proofs. The later final resolve only materializes completed timing events and cannot expose or mutate runtime state."
+  },
+  "preflight_dependency_proof": {
+    "status": "PASS",
+    "verified_token_binds_maximum_chunk_bytes": true,
+    "verified_token_binds_exact_page_to_preflight_pass_map": true,
+    "consumption_snapshot_depends_on_actual_covering_preflight_pass": true,
+    "missing_ambiguous_or_forged_provenance_rejected": true,
+    "full_ledger_dependency_closure_checked": true
+  },
+  "failure_scrub": {
+    "status": "PASS",
+    "production_owner": "Vllm0230StreamingRestoreStager",
+    "worker_declares_outer_scrub_ownership": true,
+    "one_authoritative_recorder": true,
+    "one_scrub_over_all_current_staged_allocations": true,
+    "cuda_passes_per_28_layer_scrub": 57,
+    "cpu_fence_passes_per_scrub": 1,
+    "total_passes_per_scrub": 58,
+    "historical_two_scrub_total_passes": 116,
+    "reserve_sufficient_for_historical_two_scrub_bound": true,
+    "only_diagnostic_passes_can_use_reserve": true,
+    "scrub_completion_fenced_and_raw_zero_verified": true,
+    "scrub_or_cleanup_failure_requires_typed_runtime_teardown": true,
+    "admission_after_failure": false
+  },
+  "test_evidence": [
+    {
+      "command": "PYTHONPATH=python python -m pytest -q tests/python/test_vllm_reclamation_v11_accounting.py",
+      "passed": 14,
+      "failed": 0,
+      "elapsed_seconds": 0.45
+    },
+    {
+      "command": "PYTHONPATH=python python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py",
+      "passed": 93,
+      "failed": 0,
+      "elapsed_seconds": 1.77
+    },
+    {
+      "command": "ruff check <seven reviewed source/test files> && ruff format --check <seven reviewed source/test files>",
+      "passed": true,
+      "result": "All checks passed; 7 files already formatted"
+    },
+    {
+      "command": "git diff --check -- <seven reviewed source/test files>",
+      "passed": true
+    }
+  ],
+  "coverage": [
+    "multi-drain exact-once materialization and idempotent final resolve",
+    "partial drain failure retains only unmaterialized suffix",
+    "cross-drain dependency closure and duplicate rejection",
+    "separate bounded live-event and total-record limits",
+    "normal lane cannot borrow diagnostic pending or total reserve",
+    "diagnostic reserve exhaustion fails closed",
+    "attempt-c and adversarial singleton-run exact cardinality",
+    "all production import callbacks share one recorder",
+    "outer stager owns exactly one scrub after either subset fails",
+    "scrub/free/reset/enqueue cleanup failures require runtime teardown",
+    "exact consumed-page preflight provenance",
+    "threaded exclusion of engine, scheduler, allocator, release, and zero-queue mutation surfaces"
+  ],
+  "non_blocking_observations": [
+    "The lock-contention and blocking-materialization properties are tested in separate focused tests and compose without an intervening call that releases the engine-step RLock.",
+    "The 35,904-pass adversarial cardinality test uses fake CUDA events; the next real-A100 attempt is still required to validate device-runtime behavior and measurements.",
+    "The production stager has one scrub owner, so the 116-pass historical nested-scrub calculation is conservative rather than an expected path."
+  ],
+  "audited_hashes_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "068e01ef8a8c3bfd487a2b57daec21c233336f9fcaf9e103abcd3c90d3cfb929",
+    "tests/python/test_vllm_reclamation_v11.py": "c53ed7e9f7daa08d3d37bae7bf656283f6fb8857fb75dbea60cb63f37ca860f4",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "02ac7d54b8bec7bd0de84e5a25696cc28dc7a7cbfae6eec4f6f3a73a0fec9aa5",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "7dc9f296befe42548b35a7599dd2a24667a4030a1ed15942e7de201d2f28d09f"
+  },
+  "final_verdict": "PASS. The attempt-c recorder exhaustion and scrub-starvation blockers are closed offline without weakening the production IMPORT_ADMISSION lock. Attempt d is lifecycle-admissible only after the root coordinator confirms the remaining independent gates and GPU budget."
+}

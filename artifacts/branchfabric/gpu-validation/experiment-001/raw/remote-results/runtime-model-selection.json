@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "selected_runtime": null,
+  "selected_model": null,
+  "model_revision": null,
+  "tokenizer": null,
+  "dtype": null,
+  "quantization": null,
+  "context_tokens": 16384,
+  "continuation_tokens": 256,
+  "runtime_candidates": {
+    "vllm": {
+      "remote_installed_version": null,
+      "repository_capability": "KV transfer configuration only; portable exact live-state export explicitly unsupported"
+    },
+    "sglang": {
+      "remote_installed_version": null,
+      "repository_capability": "prefill/decode launch configuration only; portable exact live-state export explicitly unsupported"
+    },
+    "genesis": {
+      "remote_installed_version": null,
+      "repository_capability": "bounded streaming only; active execution-state export explicitly unsupported"
+    }
+  },
+  "selection_status": "blocked_no_valid_existing_adapter",
+  "synthetic_fallback_used": false,
+  "global_model_cache_used": false,
+  "model_download_started": false
+}

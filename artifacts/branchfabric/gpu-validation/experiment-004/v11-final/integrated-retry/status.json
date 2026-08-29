@@ -1,0 +1,12 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-retry-status/v1",
+  "observed_at_utc": "2026-08-20T16:15:42Z",
+  "status": "NOT_RUN_BY_PRECOMMITTED_GATE",
+  "required_predecessor": "targeted source identity reproduction PASS",
+  "predecessor_status": "NOT_RUN_AUTHORIZATION_BLOCKER",
+  "scientifically_valid": false,
+  "optimized_export_executed": false,
+  "source_release_executed": false,
+  "v11_frozen": false,
+  "reason": "The full integrated retry is forbidden until the targeted real-runtime identity gate passes."
+}

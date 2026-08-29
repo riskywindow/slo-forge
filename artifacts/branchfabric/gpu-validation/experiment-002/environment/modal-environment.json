@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-environment/v1",
+  "backend": "modal",
+  "modal_sdk": "1.5.3",
+  "requested_gpu": "A100-80GB",
+  "observed_gpu": "NVIDIA A100 80GB PCIe",
+  "observed_gpu_uuid": "GPU-652804ee-42ae-7c14-21ef-b8d29adacc11",
+  "driver_version": "580.95.05",
+  "cuda_userspace": "13.0",
+  "pytorch": "2.11.0",
+  "vllm": "0.23.0",
+  "transformers": "5.14.1",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "model_manifest_sha256": "9c53cfa565eabb555e50b0f9b91032fe72f41ac9e3d8e7c87a22605fc8120d8d",
+  "source": "modal/modal-smoke-shared-s41-v5/wrapper/dependency-versions.json"
+}

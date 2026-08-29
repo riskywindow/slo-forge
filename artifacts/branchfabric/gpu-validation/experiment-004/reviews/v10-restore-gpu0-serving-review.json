@@ -1,0 +1,68 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-pre-gpu-review/v1",
+  "review_id": "v10-restore-gpu0-serving-review",
+  "reviewer_id": "agent-7-controller-restore-auditor",
+  "reviewer_role": "restore_phase_gpu0_serving_guarantee",
+  "decided_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "APPROVED",
+  "scope": "GPU1 drain-before-restore, continuous GPU0 service, restore-stage measurement, and interference claim discipline",
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+      "artifact_sha256": "0c37383b36ecbcbfc5a03ec9a669eec2aa6a18a1b135771a46209641bbfde74b"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "artifact_sha256": "cb0077e59d47ca5e81709f548b82dcc3afe3c3b83e423b6763e9bc4ea18529a5"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_validity.py",
+      "artifact_sha256": "1e3212ecd411c5d08cae5bfba70c87bfafe3576555175061afa5b21404637c60"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_postprocess.py",
+      "artifact_sha256": "56b6eaa29cd3691c558644c82723f965f23628d9ac731820dde2fa51b3165cea"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_publish.py",
+      "artifact_sha256": "6a2d21e13318b6792391487e5bdfbe2c7be49f04e3b474c86a5b4f920cce36c1"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "status": "RESOLVED",
+      "finding": "GPU1 drain evidence used a software-driver active set and a hard-coded zero waiting count rather than the live vLLM scheduler.",
+      "resolution": "The GPU1 handoff now samples and validates request, running, waiting, skipped-waiting, and derived queue counts from the retained vLLM 0.23 scheduler; any nonzero or inconsistent count aborts before restore, and the postprocessor rejects evidence without this live source binding."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED",
+      "finding": "The publication path computed no token-rate interference and could emit comparative values for intervals with too little active service.",
+      "resolution": "Publication now records token-rate interference, process RSS, GPU0 utilization, CPU and PCIe telemetry; every interference field is null unless its own minimum active-work sample rule passes, and the report explicitly labels comparisons descriptive rather than causal."
+    }
+  ],
+  "conformance": {
+    "load_reduced_below_lambda1_before_restore": true,
+    "new_restore_phase_requests_route_only_to_gpu0": true,
+    "gpu1_cutover_precedes_drain_gate": true,
+    "gpu1_running_zero_from_live_scheduler": true,
+    "gpu1_waiting_zero_from_live_scheduler": true,
+    "restore_starts_only_after_gpu1_drain": true,
+    "gpu0_arrivals_continue_during_restore": true,
+    "gpu0_completions_and_tokens_required_across_restore": true,
+    "h2d_import_native_write_validation_and_resume_stages_audited": true,
+    "queued_without_tokens_fails_restore_activity": true,
+    "preserve_and_restore_interference_intervals_recorded": true,
+    "insufficient_interference_samples_not_claimed_causal": true
+  },
+  "verification": {
+    "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_v10_serving_protocol.py tests/python/test_gpu_reclamation_worker_integrated.py tests/python/test_experiment_004_v10_sanity_path.py",
+    "result": "19 passed in 5.85s",
+    "gpu_used": false,
+    "static_analysis": "ruff targeted files: all checks passed",
+    "open_high_findings": 0,
+    "open_reasonable_medium_findings": 0
+  }
+}

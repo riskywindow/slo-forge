@@ -1,0 +1,108 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": "model-config",
+      "compatibility": {
+        "architectures": [],
+        "captured_host_fingerprint": null,
+        "driver_major_versions": [],
+        "gpu_architectures": [],
+        "maximum_gpu_count": null,
+        "operating_systems": [],
+        "portable": true,
+        "runtime_versions": [],
+        "runtimes": [],
+        "topology_fingerprint": null
+      },
+      "dependencies": [],
+      "kind": "model_config",
+      "lazy_restore_allowed": false,
+      "rebuild_time_ms": 0.0,
+      "required_for_readiness": true,
+      "security_class": "internal",
+      "sha256": "d79b7196833c6910a397de65530b5b543a4e72ed2eb63d4e403e0d1f1dc3c6d6",
+      "size_bytes": 35,
+      "source_relative_path": "config.json"
+    },
+    {
+      "artifact_id": "tokenizer",
+      "compatibility": {
+        "architectures": [],
+        "captured_host_fingerprint": null,
+        "driver_major_versions": [],
+        "gpu_architectures": [],
+        "maximum_gpu_count": null,
+        "operating_systems": [],
+        "portable": true,
+        "runtime_versions": [],
+        "runtimes": [],
+        "topology_fingerprint": null
+      },
+      "dependencies": [
+        "model-config"
+      ],
+      "kind": "tokenizer",
+      "lazy_restore_allowed": false,
+      "rebuild_time_ms": 0.0,
+      "required_for_readiness": true,
+      "security_class": "internal",
+      "sha256": "fde88adb86279f36f8e728be37620541e53c9a4d2995625a07a3d97aaa903bc1",
+      "size_bytes": 40,
+      "source_relative_path": "tokenizer.json"
+    },
+    {
+      "artifact_id": "model-weights",
+      "compatibility": {
+        "architectures": [],
+        "captured_host_fingerprint": null,
+        "driver_major_versions": [],
+        "gpu_architectures": [],
+        "maximum_gpu_count": null,
+        "operating_systems": [],
+        "portable": true,
+        "runtime_versions": [],
+        "runtimes": [],
+        "topology_fingerprint": null
+      },
+      "dependencies": [
+        "model-config"
+      ],
+      "kind": "model_weights",
+      "lazy_restore_allowed": false,
+      "rebuild_time_ms": 0.0,
+      "required_for_readiness": true,
+      "security_class": "restricted",
+      "sha256": "20c485ffcd24597402042ddc3fabb0a5be4968314e05dd06aeef19a049ad5578",
+      "size_bytes": 2097152,
+      "source_relative_path": "weights.bin"
+    },
+    {
+      "artifact_id": "runtime-cache",
+      "compatibility": {
+        "architectures": [],
+        "captured_host_fingerprint": null,
+        "driver_major_versions": [],
+        "gpu_architectures": [],
+        "maximum_gpu_count": null,
+        "operating_systems": [],
+        "portable": true,
+        "runtime_versions": [],
+        "runtimes": [],
+        "topology_fingerprint": null
+      },
+      "dependencies": [
+        "model-config"
+      ],
+      "kind": "runtime_cache",
+      "lazy_restore_allowed": true,
+      "rebuild_time_ms": 4.0,
+      "required_for_readiness": false,
+      "security_class": "internal",
+      "sha256": "eae6221dee11f84ac320f081b2cffdf77e45a768f357bc40b40cf66a253602c8",
+      "size_bytes": 262144,
+      "source_relative_path": "runtime.cache"
+    }
+  ],
+  "graph_id": "warmpath-local-demo",
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,123 @@
+{
+  "captured_at_utc": "2026-08-11T00:10:11.556096+00:00",
+  "captures": {
+    "cuda_compiler": {
+      "reason": "nvcc unavailable or local test mode",
+      "skipped": true
+    },
+    "date_utc": {
+      "command": [
+        "date",
+        "-u",
+        "+%Y-%m-%dT%H:%M:%SZ"
+      ],
+      "duration_ns": 1908262,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "2026-08-11T00:10:11Z\n",
+      "stdout_truncated": false
+    },
+    "disk": {
+      "command": [
+        "df",
+        "-Pk",
+        "/tmp/sloforge-real-cow-pX0b1JVu",
+        "/tmp"
+      ],
+      "duration_ns": 2363305,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "Filesystem     1024-blocks       Used Available Capacity Mounted on\n/dev/sda2       3689012264 3403012128  98533848      98% /\n/dev/sda2       3689012264 3403012128  98533848      98% /\n",
+      "stdout_truncated": false
+    },
+    "gpu_inventory": {
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=index,uuid,name,driver_version,memory.total,memory.used,utilization.gpu,utilization.memory,pstate,power.draw,clocks.sm,clocks.mem",
+        "--format=csv,noheader,nounits"
+      ],
+      "duration_ns": 102130311,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "0, GPU-9f432e61-badc-944e-6087-2f846d4c7e19, NVIDIA A100 80GB PCIe, 580.178.04, 81920, 7228, 69, 2, P0, 115.98, 1410, 1512\n1, GPU-a473e021-97fb-64b8-74ba-471825808bed, NVIDIA A100 80GB PCIe, 580.178.04, 81920, 7302, 71, 2, P0, 116.91, 1410, 1512\n",
+      "stdout_truncated": false
+    },
+    "gpu_processes": {
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory",
+        "--format=csv,noheader,nounits"
+      ],
+      "duration_ns": 48933102,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19, 2523643, python, 7210\nGPU-a473e021-97fb-64b8-74ba-471825808bed, 2524021, python, 7286\n",
+      "stdout_truncated": false
+    },
+    "hostname": {
+      "command": [
+        "hostname"
+      ],
+      "duration_ns": 793011,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "mew0\n",
+      "stdout_truncated": false
+    },
+    "identity": {
+      "command": [
+        "id"
+      ],
+      "duration_ns": 2240721,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "uid=1059(rishivin) gid=1060(rishivin) groups=1060(rishivin)\n",
+      "stdout_truncated": false
+    },
+    "kernel": {
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "duration_ns": 1884910,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "Linux mew0 5.15.0-25-generic #25-Ubuntu SMP Wed Mar 30 15:54:22 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux\n",
+      "stdout_truncated": false
+    },
+    "nvidia_smi": {
+      "command": [
+        "nvidia-smi"
+      ],
+      "duration_ns": 81768874,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "Tue Aug 11 00:10:11 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA A100 80GB PCIe          On  |   00000000:17:00.0 Off |                    0 |\n| N/A   62C    P0            124W /  300W |    7228MiB /  81920MiB |     66%      Default |\n|                                         |                        |             Disabled |\n+-----------------------------------------+------------------------+----------------------+\n|   1  NVIDIA A100 80GB PCIe          On  |   00000000:65:00.0 Off |                    0 |\n| N/A   60C    P0            130W /  300W |    7302MiB /  81920MiB |     74%      Default |\n|                                         |                        |             Disabled |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A         2523643      C   python                                 7210MiB |\n|    1   N/A  N/A         2524021      C   python                                 7286MiB |\n+-----------------------------------------------------------------------------------------+\n",
+      "stdout_truncated": false
+    },
+    "user": {
+      "command": [
+        "id",
+        "-un"
+      ],
+      "duration_ns": 2214319,
+      "returncode": 0,
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "rishivin\n",
+      "stdout_truncated": false
+    }
+  },
+  "kind": "environment-capture",
+  "label": "bootstrap",
+  "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+  "schema_version": "sloforge.branchfabric.remote-coordinator/v1"
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-review/v1",
+  "agent": 4,
+  "role": "process-lifecycle-review",
+  "gpu_or_cloud_invoked": false,
+  "experiment": "BRANCHFABRIC EXPERIMENT 004 v11 FINAL INTEGRATED GATE",
+  "review_agent": 4,
+  "review_role": "independent process lifecycle reviewer",
+  "status": "PASS",
+  "offline_only": true,
+  "gpu_resources_consumed": false,
+  "modal_invoked": false,
+  "reviewed_git_head": "1c51853e10809686d4368037153927f25e834117",
+  "scope": [
+    "controller PID, worker PID, PGID, SID, and descendant ownership",
+    "ordered in-function lifecycle",
+    "bounded SIGTERM and explicit SIGKILL fallback",
+    "worker-leader and adopted-descendant reaping",
+    "pipe, thread, IPC, resource-tracker, profiler, and zombie detection",
+    "CUDA process disappearance",
+    "forced-kill reporting",
+    "Modal launcher rejection of missing, failed, or contradictory cleanup evidence"
+  ],
+  "findings": [
+    {
+      "id": "LIFECYCLE-001",
+      "severity": "high",
+      "status": "FIXED",
+      "finding": "The Modal wrapper recorded missing or failed cleanup evidence but did not independently reject a contradictory controller success before provisional result publication.",
+      "resolution": "Added an independent launcher gate that requires the immutable cleanup artifact to equal embedded controller evidence; validates the exact eight lifecycle phases and monotonic ordering; requires empty survivor, profiler, serving, rollout, resource-tracker, zombie, leaked-thread, leaked-IPC, CUDA-process, and cleanup-error sets; binds worker PID/PGID/SID ownership; and requires reaping, pipe closure, IPC release, subreaper restoration, and CUDA release."
+    },
+    {
+      "id": "LIFECYCLE-002",
+      "severity": "medium",
+      "status": "FIXED",
+      "finding": "A newly owned controller descendant could be missed if Linux reused the PID of a process that was an initial controller descendant.",
+      "resolution": "Descendant ownership now treats a changed procfs start token as a new identity even when the PID appeared in the initial descendant snapshot; a regression test covers the reuse case."
+    }
+  ],
+  "review_matrix": {
+    "exact_lifecycle_order": {
+      "status": "PASS",
+      "required": [
+        "RUNNING",
+        "QUIESCE",
+        "ENGINE_STOP",
+        "WORKER_STOP",
+        "CHILD_REAP",
+        "PGID_EMPTY",
+        "CUDA_RELEASED",
+        "FUNCTION_RETURN"
+      ],
+      "evidence": "Controller transition guard rejects insertion, omission, duplication, or reordering; cleanup construction and launcher independently require exact equality."
+    },
+    "pid_pgid_sid_and_descendant_ownership": {
+      "status": "PASS",
+      "evidence": "Worker roots are start_new_session process-group leaders; procfs captures PID/PPID/PGID/SID/start token; ownership follows controller descendants, worker descendants, worker groups, worker sessions, and retained identities. Launcher cross-checks both role roots against owned-child PID/PGID/SID records."
+    },
+    "zombie_and_child_reaping": {
+      "status": "PASS",
+      "evidence": "Popen.poll/waitpid reaps leaders before PGID probes; Linux subreaper adoption enables waitpid of orphaned descendants; surviving Z-state records fail the gate. The dead-leader regression prevents a reaped zombie from being misreported as a live process group."
+    },
+    "bounded_signal_escalation": {
+      "status": "PASS",
+      "evidence": "Both worker groups receive SIGTERM in parallel within a five-second bound, then survivors receive explicitly recorded SIGKILL under the absolute cleanup deadline. Escaped exact-identity helpers receive the same bounded escalation."
+    },
+    "pipes_threads_ipc_resource_tracker_and_profiler": {
+      "status": "PASS",
+      "evidence": "Worker pipes must be closed; new live controller threads, new /dev/shm entries, surviving multiprocessing resource trackers, and surviving profiler commands independently fail cleanup."
+    },
+    "cuda_process_disappearance": {
+      "status": "PASS",
+      "evidence": "The controller waits under the caller cleanup deadline for the nvidia-smi compute-process inventory to become empty, rechecks stable physical inventory, and rejects CUDA-owning imports in the controller. Launcher requires matching empty controller and cleanup CUDA-process evidence."
+    },
+    "forced_kill_reporting": {
+      "status": "PASS",
+      "evidence": "Every termination action records target PID/PGID, signal, forced flag, target class, and UTC timestamp; forced_kills is the exact SIGKILL subset and does not prevent PASS after verified disappearance and reaping."
+    },
+    "launcher_fail_closed": {
+      "status": "PASS",
+      "evidence": "A provisional successful function result cannot proceed past the controller call unless cleanup evidence is present, PASS-complete, artifact-identical, role-ownership-consistent, and CUDA-empty."
+    }
+  },
+  "tests": {
+    "command": "PYTHONPATH=python:experiments/branchfabric pytest -q <15 explicit process-lifecycle and launcher-cleanup node IDs>",
+    "result": "15 passed, 2 warnings",
+    "warnings": "protobuf Python 3.14 deprecation warnings only",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "real_local_forced_group_probe": {
+      "status": "PASS",
+      "workload": "one process-group leader and one descendant both ignored SIGTERM",
+      "observed_signals": [
+        "SIGTERM",
+        "SIGKILL"
+      ],
+      "leader_returncode": -9,
+      "pgid_empty_after": true,
+      "gpu_resources_consumed": false
+    }
+  },
+  "source_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py": "9a6c71be8299d0d656fabd6974c3bea0f80f87a996604e977f8d8ca9c497685d",
+    "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": "432f0906ced864e10e7be7552c02b5efb9d4b0dd4d358a5ce7788ea0a210d1ca",
+    "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py": "64d214f55c0dee634c7d90a07c3f4e184f761051e5c41f6d29e144a0325e16eb"
+  },
+  "test_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_controller_v11.py": "2f0a85bb933a59348c3fa70df7f70c9c7453cce07e7808c1954491a39daefdc0",
+    "tests/python/test_modal_gpu_reclamation_integrated_v11.py": "568795845b5dc03a6ca49d7f6bb350ee8d855d0a7aeb2aa8cddbe0018ceac159"
+  },
+  "limitations": [
+    "This review did not invoke Modal or any GPU resource.",
+    "CUDA process disappearance is verified by fail-closed implementation and unit evidence here; the paid invocation must still produce real in_function_cleanup.json and provider post-return evidence."
+  ]
+}

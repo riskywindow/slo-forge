@@ -1,0 +1,118 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-paid-path-cross-audit/v1",
+  "review_id": "v10-paid-path-cross-audit-f6e9f8f-retry",
+  "reviewer": {
+    "identity": "retry_paid_path_auditor",
+    "role": "independent_paid_path_and_queue_drain_reviewer",
+    "gpu_coordinator": false,
+    "modal_or_gpu_invocation_performed": false
+  },
+  "reviewed_at_utc": "2026-08-13T15:44:35Z",
+  "decision": "APPROVED",
+  "repository": {
+    "head_commit": "f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4",
+    "authorization_code_commit": "f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4",
+    "head_matches_authorization": true,
+    "launcher_enumerated_paid_paths_clean": true
+  },
+  "immutable_bindings": {
+    "config_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v5-config.json",
+    "config_file_sha256": "d8f687cacbb68ad3ebd22d4c9f7a5aa6d4615ec8b3cd22fd22c4d9e7b45b6232",
+    "config_canonical_sha256": "c6a0e9fbdde23f1e46573fdb12fbfb9f23bddd879f4e31437ea99c2033be556a",
+    "authorization_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-authorization.json",
+    "authorization_file_sha256": "b6817fceed3838d552834490631d85dc46f9cc3a22e87ebd94605c699f939e9a",
+    "authorization_internal_hash": "c05c97afc773f7799de9d200d5a96fff7a0fcf870fe32c97098422b43e1fe496",
+    "authorization_subject_sha256": "4c80a284ca73889c8896b0be34c4db5a6e45927563b6f8ca6012d27805f7f7e4",
+    "phase_budget_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+    "phase_budget_file_sha256": "9fc20b3399b8051bbc13e196c9ad563e0040a612efd6475769f85d325f1630e0",
+    "ledger_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_file_sha256": "d3e59e8bb1b1919532092dff8ea2aa5ede47b32ce17eedbc879cb27b2ca6aa2a"
+  },
+  "recursive_authorization_audit": {
+    "status": "PASS",
+    "source_calibration_hashes_verified": 11,
+    "source_calibration_hash_mismatches": 0,
+    "review_artifact_hashes_verified": 3,
+    "review_artifact_hash_mismatches": 0,
+    "required_reviewer_roles_present_in_order": [
+      "capacity_methodology",
+      "queue_drain_methodology",
+      "scientific_validity"
+    ],
+    "all_reviewer_decisions": "APPROVED",
+    "authorization_status": "APPROVED",
+    "no_live_review_handoff": true
+  },
+  "phase_budget_audit": {
+    "status": "PASS",
+    "phase_count": 20,
+    "phase_upper_bound_subtotal_wall_seconds": 470.05,
+    "safety_margin_fraction": 0.25,
+    "safety_margin_wall_seconds": 117.95,
+    "sdk_rounding_margin_seconds": 0.4375,
+    "predicted_wall_clock_seconds": 588.0,
+    "required_A100_seconds": 1176.0,
+    "legacy_fixed_1800_A100_second_reservation_removed": true,
+    "startup_observation_uses_v4_evidence": true,
+    "all_phase_source_hashes_verified": true
+  },
+  "live_budget_gate": {
+    "status": "AUTHORIZE_V10",
+    "budget_pass": true,
+    "configured_hard_ceiling_A100_seconds": 12600.0,
+    "current_conservative_usage_A100_seconds": 10298.167208919993,
+    "required_A100_seconds": 1176.0,
+    "projected_conservative_usage_A100_seconds": 11474.167208919993,
+    "remaining_A100_seconds_after_reservation": 1125.8327910800072,
+    "active_reservations_before_launch": 0,
+    "maximum_attempt_cost_usd_including_gpu_cpu_and_memory": 1.02293184
+  },
+  "modal_architecture": {
+    "status": "PASS",
+    "requested_gpu": "A100-80GB:2",
+    "gpu_count": 2,
+    "single_physical_container": true,
+    "maximum_containers": 1,
+    "retries": 0,
+    "buffer_containers": 0,
+    "single_use_containers": true,
+    "mew0_used": false,
+    "reservation_wall_seconds": 588.0,
+    "controller_wall_seconds": 578.0,
+    "post_controller_cleanup_reserve_seconds": 10.0,
+    "one_designated_gpu_coordinator_required": true
+  },
+  "scientific_path": {
+    "status": "PASS",
+    "broad_capacity_calibration_performed": false,
+    "short_sanity_guard_rates_rps": [12.0, 15.0],
+    "sanity_measurement_seconds_each": 3.0,
+    "transaction_mode": "PRESERVE_NAIVE",
+    "state_pipeline_optimized": false,
+    "overload_trigger_queue_depth": 20,
+    "overload_abort_queue_depth": 25,
+    "recovery_offered_rate_rps": 15.0,
+    "recovery_requires_completed_rate_strictly_greater_than_offered": true,
+    "recovery_requires_sustained_negative_queue_slope": true,
+    "slo_stability_window_seconds": 5.0,
+    "readiness_clock_origin": "first-worker-emitted-model-load-start",
+    "engine_reload_permitted": false
+  },
+  "source_hashes": {
+    "modal_gpu_reclamation_sha256": "b33bb8af0dc6fb72b57806f61a01d824ce659cef5a6b9bd87fad2e227985b956",
+    "gpu_reclamation_controller_sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9",
+    "gpu_reclamation_worker_sha256": "4ffef92fff01b30a58ac486d84a10e4193778e3cc234c876c975add1c193aadf",
+    "launcher_sha256": "ab2d0a10143141dc5becf2b054272c1822ff84390bc36dce905487705c444c15"
+  },
+  "verification": {
+    "strict_config_validation": "PASS",
+    "authorization_recursive_verification": "PASS",
+    "phase_budget_strict_validation": "PASS",
+    "budget_gate_evaluation": "PASS",
+    "focused_cpu_only_tests_passed": 71,
+    "focused_cpu_only_tests_failed": 0,
+    "gpu_time_consumed_by_review": false
+  },
+  "findings": [],
+  "conclusion": "The f6e9f8f v5 paid path is locally authorized for exactly one bounded two-A100 v10 retry. The controller has no live review channel, performs only the two predeclared stale-calibration guards, preserves the frozen naive state path, and fails closed on every measured validity gate."
+}

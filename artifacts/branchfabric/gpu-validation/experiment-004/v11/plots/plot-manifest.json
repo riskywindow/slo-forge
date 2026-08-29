@@ -1,0 +1,83 @@
+{
+  "data_artifact": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/plot-data.json",
+    "bytes": 3129,
+    "sha256": "21b6518b75fd32350960964aa60acb095d549fd8c75c6b0e57576da155b397d0"
+  },
+  "plot_count": 14,
+  "plots": [
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/01-v10-v11-amplification.png",
+      "bytes": 39830,
+      "sha256": "e5f49ee710b35f88e8b993dde4bfbbfa071d39db0780c661b05908c91d44098a"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/02-v10-v11-physical-by-tier.png",
+      "bytes": 51082,
+      "sha256": "b1326e9be1f7489ab98829bb70bf1720294e1a53d20b78ab9c3a47368bfd5acb"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/03-v10-v11-pass-count.png",
+      "bytes": 24156,
+      "sha256": "1f359b5bcc19abdbe64d313d861071fa6a55550f039bc91d3c3369f6d8a90ed4"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/04-v10-v11-host-temp.png",
+      "bytes": 33691,
+      "sha256": "553d7205ec86f1385f1b4e5dda76ac961ed3f0fa7c13119696830e93fd94c001"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/05-export-reclamation-waterfall.png",
+      "bytes": 73484,
+      "sha256": "52a832a33ccfeddc706dead7170af3e292ea4f5aacc5841ad240d2f3f9586935"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/06-restore-waterfall.png",
+      "bytes": 84573,
+      "sha256": "53b779581fd8366271c942a63a9360dc175b872f12f22c9176044f79ddc99ca6"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/07-useful-gpu1-capacity.png",
+      "bytes": 29419,
+      "sha256": "8cd35f992c62146307040b5ba09c58a8dabf8fc29399d38cb6ebf0d096e6932b"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/08-serving-slo-restoration.png",
+      "bytes": 33832,
+      "sha256": "f198687891efe0fd02952b6d0cd47756ab1f8a166ed84e61da006e8ad0af5c01"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/09-three-way-preservation.png",
+      "bytes": 46415,
+      "sha256": "6976625192e67fe9dde4947adf8fee68e2dc3a201ff40c37d95906bac4e94d00"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/10-break-even-prefix.png",
+      "bytes": 49739,
+      "sha256": "2f3439391ae415d14ad508d4cc3cc83932c687443f644a89dfddcc7dc47f9b24"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/11-break-even-branch-count.png",
+      "bytes": 48400,
+      "sha256": "b53a39afed2134905a30555ed90aebc376c4ecf46a0764289a3c88d98c8e7e62"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/12-residual-amdahl-headroom.png",
+      "bytes": 51175,
+      "sha256": "352a3cd8284d10f3afe12a04fd09bc900dd7e8c59b6534372877223bacd81765"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/13-before-after-movement-sankey.png",
+      "bytes": 128770,
+      "sha256": "e5723546ff229722e7a81b4148e6db9aa7f59f7b0aca5d65104c086db9033edf"
+    },
+    {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/14-gpu0-restore-interference.png",
+      "bytes": 50440,
+      "sha256": "31bb631b96b2845d46ffd901d20c8b9ba11374f55bb79d1b11110a29061509d0"
+    }
+  ],
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-plot-manifest/v1",
+  "seed": 41,
+  "status": "PASS"
+}

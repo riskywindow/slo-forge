@@ -1,90 +1,285 @@
 {
-  "schema_version": "sloforge.branchfabric.experiment-004-valid-blocker-manifest/v1",
-  "artifact_root": "artifacts/branchfabric/gpu-validation/experiment-004",
-  "completed_at_utc": "2026-08-12T19:31:02Z",
-  "scientific_status": "valid-blocker",
-  "classification": null,
-  "pilot_valid": false,
-  "v10_launched": false,
-  "attempt_count": 11,
-  "latest_attempt_id": "exp004-capacity-s41-v2",
-  "reason": "The v9 state transaction remains correct but its serving methodology is invalid. The complete offline audit corrected movement accounting. Both bounded calibration attempts then failed before the first capacity probe, so no empirical lambda_1, lambda_2, or reviewed spike exists and v10 was not launched.",
-  "budget_terminal": true,
-  "evidence": [
+  "attempt_id": "exp004-v10-naive-s41-v7",
+  "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+  "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+  "experiment_005_executed": false,
+  "fpga_justification_claimed": false,
+  "frozen_baseline": "NAIVE_PRESERVE_V10",
+  "generated_files_excluding_manifest": [
     {
-      "artifact_reference": "analysis/v9-movement-audit.json",
-      "artifact_sha256": "58916d341a2abfb58b9d65292974fadabb031255fda742bfbf5d9ee74d9e59de",
+      "bytes": 10151,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/analysis/manifests/pre-v10-84115ad9de3729e824ed485fd0901413f885bda8d4703c5f1a8b483d7a47d896.json",
+      "sha256": "84115ad9de3729e824ed485fd0901413f885bda8d4703c5f1a8b483d7a47d896"
+    },
+    {
+      "bytes": 5533,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+    },
+    {
+      "bytes": 802,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/v10-naive-baseline-status.json",
+      "sha256": "138641a1e8081b82e104ff037b8d19eeb3ad6fe7edaf047923eea2358d905b46"
+    },
+    {
+      "bytes": 1660726,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/branch-resume-validation.json",
+      "sha256": "20f14ee8a11534d03be41d0b62c26e265acac2b6c396edd8587839b012bb9226"
+    },
+    {
+      "bytes": 1053749,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+      "sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3"
+    },
+    {
+      "bytes": 5480,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/01-queue-depth-over-time.json",
+      "sha256": "6f2f3738f784328cc56371d2d0f67227fd82c3e641f7d065e5c64f47428c8ef3"
+    },
+    {
+      "bytes": 1919,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/01-queue-depth-over-time.svg",
+      "sha256": "20d3e04cd84dd45b98e2064988898d949ede7e0f673d05e9c88003e93846f82d"
+    },
+    {
+      "bytes": 5575,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/02-p95-ttft-over-time.json",
+      "sha256": "9b446c41e595776dc09c1009f43a5c6140a0be003c8270df0c2ca99c66b4253c"
+    },
+    {
+      "bytes": 866,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/02-p95-ttft-over-time.svg",
+      "sha256": "c5d6de8e5579c545d28e31666a15467c775e776145946bc8689116f88ea1ed2c"
+    },
+    {
+      "bytes": 5353,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/03-offered-vs-completed-rate.json",
+      "sha256": "db399d1ab544aadf4c298d97af1ef32772ed5044856924394c018567a0581682"
+    },
+    {
+      "bytes": 1925,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/03-offered-vs-completed-rate.svg",
+      "sha256": "3d4739fe8ec7dff42fbebc47eeee04048b08fe69b6aaee2c17614b0f46848f2c"
+    },
+    {
+      "bytes": 33650,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/04-gpu-hbm-over-time.json",
+      "sha256": "192009c5f23fcacc99336b3dbe38b3917948e5807137761defe4d053a6db6f6c"
+    },
+    {
+      "bytes": 11860,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/04-gpu-hbm-over-time.svg",
+      "sha256": "4dcb2f128d870a90f03a41cb7d6b15e671f3a4836ead860bce84bde44588cd5a"
+    },
+    {
+      "bytes": 3827,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/05-reclamation-waterfall.json",
+      "sha256": "a5077e8e8f54844634552539b6ff5983e061b30866e5151a48a9e11ba521962f"
+    },
+    {
+      "bytes": 1543,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/05-reclamation-waterfall.svg",
+      "sha256": "259b4aca44b85bd0430d5404d189b50e6512d9ab4d5a42af5dea6d5437b77065"
+    },
+    {
+      "bytes": 3743,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/06-restore-waterfall.json",
+      "sha256": "8bba17f31768bbced21f6d62b72268a6d45b0d208d4a335e0cf6954162d98455"
+    },
+    {
+      "bytes": 1340,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/06-restore-waterfall.svg",
+      "sha256": "7149795adbf680bf5b65393502a5d6f3e8d8c3be0fe988dbfaac776e3bd77e96"
+    },
+    {
+      "bytes": 4356,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/07-gpu0-throughput-during-restore.json",
+      "sha256": "98cf1d8328f1cb6c75c5cf3e33a363468fd0f7ef2cb12e3dccb2fbb0e58040dc"
+    },
+    {
+      "bytes": 1406,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/07-gpu0-throughput-during-restore.svg",
+      "sha256": "13369f54f598272063a5bc3f5e034e602f4f526b5f371e9f22a1abc56f2e90b3"
+    },
+    {
+      "bytes": 3603,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/08-logical-vs-physical-bytes.json",
+      "sha256": "354904dcf20039358fd86730fa049227fbc6c55a63099c1d14ba7e492a2d3d48"
+    },
+    {
+      "bytes": 1235,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/08-logical-vs-physical-bytes.svg",
+      "sha256": "4ca8ad865fa5cbfae99faff6ee81dd3c994839d2f0eb6961ae14ef3a7062372c"
+    },
+    {
+      "bytes": 22476,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/09-state-pass-graph.json",
+      "sha256": "8edb2945fde67467c7d3b705fa4cb9c2a78af4bcb31652fde77bc2abdfa69fe4"
+    },
+    {
+      "bytes": 2310,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/09-state-pass-graph.svg",
+      "sha256": "b821a78e5aeece2c0c2db1ee982a8391c1f86d2f8ff7bcf99868baba5c237f0a"
+    },
+    {
+      "bytes": 3864,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/10-state-movement-amplification-decomposition.json",
+      "sha256": "aeed90b4372f320b4ddb65bc19dcc87e3cbd21eac97d8b43e1aea5932d8f96e2"
+    },
+    {
+      "bytes": 1233,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/plots/10-state-movement-amplification-decomposition.svg",
+      "sha256": "5e35734c5e7d81d3fd8a6d6122dcfb0e0633a92fb7571d481035dd840930c571"
+    },
+    {
+      "bytes": 1679659,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8"
+    },
+    {
+      "bytes": 15038,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/serving-recovery.json",
+      "sha256": "ef2eb58d408d2297cf4d18b30385a8c9ebd797cf381bb0c5743214971549938d"
+    },
+    {
+      "bytes": 19145,
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/state-passes/v10-state-pass-graph.json",
+      "sha256": "a70d1f554201bab696084e055310bbbb6a85745740845def93a4cd8a87e52dfa"
+    },
+    {
+      "bytes": 1117,
+      "path": "docs/branchfabric/EXPERIMENT_004_BASELINE_CAMPAIGN_PLAN.md",
+      "sha256": "f99724ec16fbee87ce5470320b48c9121f53694518affcafcfdb5dd4babf2a05"
+    },
+    {
+      "bytes": 1859,
+      "path": "docs/branchfabric/EXPERIMENT_004_V11_OPTIMIZATION_PLAN.md",
+      "sha256": "f886c7bcc62aa3acdeb183a8bee8684e0453a846836f8abd47be660429b14a3e"
+    },
+    {
+      "bytes": 20913,
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v10-final.json",
+      "sha256": "e273c29dca0571fe3f327d5dffa5890d98dfc23948ec8bb89da21db62ee096f9"
+    },
+    {
+      "bytes": 2024,
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v10-final.md",
+      "sha256": "5ad1fdb50ae73c60a12684e5edef9ed5763234170d38401af57ef554f0c7deba"
+    }
+  ],
+  "kill_and_recompute_executed": false,
+  "optimized_preservation_executed": false,
+  "postrun_reviews": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-postrun-serving-gpu-performance-review-v7.json",
+      "artifact_sha256": "58d3d10d3b7cf04c70ebe2d2a8afbeaba92da294df6b9e2cef49e4e9371804be",
+      "decision": "APPROVED",
+      "reviewers": [
+        "Agent 11",
+        "Agent 14"
+      ]
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/exp004-v10-naive-s41-v7-agent12-agent13-state-movement.json",
+      "artifact_sha256": "37bc6539f58f68480387a05f2e4a37879c3d7fedbdbf893fb9f8b08327004fa9",
+      "decision": "APPROVED",
+      "reviewers": [
+        "Agent 12",
+        "Agent 13"
+      ]
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/exp004-v10-naive-s41-v7-agent15-agent16-budget-adversarial.json",
+      "artifact_sha256": "ebfb603ff93b22a545f566f400009506e7da0c24a61aec755d118a3fc39167f5",
+      "decision": "APPROVED",
+      "reviewers": [
+        "Agent 15",
+        "Agent 16"
+      ]
+    }
+  ],
+  "raw_provenance": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/scientific-validity.json",
+      "artifact_sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "analysis/v9-d2h-audit.json",
-      "artifact_sha256": "ba0558e06bb38a12750284ddd4b45f10bd372076e92c70ee319c0068aba3a4c0",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "artifact_sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "analysis/movement-formulas.json",
-      "artifact_sha256": "2a5bbfe71cd47770093f691d6a27c09aa5c15a8509217e059eb24e08d8e3d94a",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/result.json",
+      "artifact_sha256": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "analysis/v9-serving-loadgen-audit.json",
-      "artifact_sha256": "0215513d84082d49c915e53c726bf2c3e8e6d9d836e40d56f011c69f15d73907",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/movement-accounting.json",
+      "artifact_sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "raw/modal/exp004-pilot-naive-s41-v9/REMOTE_MANIFEST.json",
-      "artifact_sha256": "9ecfb80002ac0b2ec8ccd23ff1f4d4559ca676d81fcfe35197a4776f85361a11",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/serving-recovery.json",
+      "artifact_sha256": "ef2eb58d408d2297cf4d18b30385a8c9ebd797cf381bb0c5743214971549938d",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/raw/modal/exp004-capacity-s41-v1/REMOTE_MANIFEST.json",
-      "artifact_sha256": "05a19e609e3368351a327752e9099bbb16e2bb78fa0769604e2d87fd98c918f2",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/effective-config.json",
+      "artifact_sha256": "a4cdc32358757ec0e2952d47475a4005bca5b1ce176e16385756e68e40eab172",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/raw/modal/exp004-capacity-s41-v2/REMOTE_MANIFEST.json",
-      "artifact_sha256": "a3a397da61ca02391be99e331f92092f65b08df342aeec85f87b0d79ef6994bb",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/telemetry/resource-sampling.json",
+      "artifact_sha256": "0cc7a8c96cc54e8976ef137cae5da6c059fd9d5bf0598cdcde5fa8fbff44873e",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/logs/capacity-failure-charge-conversion-provenance-correction.json",
-      "artifact_sha256": "c54ae780a84e1206dc7873be325c78f0c6b6ad098b9db0167a7f2603ee85f1d1",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/telemetry/resource-sampling.json",
+      "artifact_sha256": "d341acc4cbb30ffe606320836f64998bf4969c6b0664cf0859c1db299bd59d9e",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/calibration-blocker.json",
-      "artifact_sha256": "c14f58049078ffd42134df2c7bc03b487484b21734d409fe2f4d7e243c46fd20",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/topology/topology-commands.json",
+      "artifact_sha256": "c5a05313f106a1dd5023b2011af32c06e66fb92f89567bff908180774b33bc88",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/calibration-outcome.json",
-      "artifact_sha256": "9f50bc014cd8010e8fb3164228a0250f798413f83920bd98f2237f3ec1370fd0",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/gpu-phase-ledger.json",
+      "artifact_sha256": "66c874c1e11a648c6c0e286fd49dc96c17454ac0ece93a27c275419cb0f6adef",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "calibration/reviews/terminal-valid-blocker-review.json",
-      "artifact_sha256": "ae20bfbcab3eb5ce7c3555c6d2308ea96e4a8ed356ac3e7a9e8182de52b51b10",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/budget-settlement.json",
+      "artifact_sha256": "18f7458a6a196ef92e908f81688940a2d4137963d1fd7b9f39e9e15b86c84b64",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "gpu-hours.json",
-      "artifact_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v7.json",
+      "artifact_sha256": "306bb58e033fe931a7f6b332220988838bddd5a13e278d1104b289a2c72fa185",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "logs/modal-final-cleanup-and-settlement.json",
-      "artifact_sha256": "4ad42b0d40743bf93d605cf3f473792dc28f9802ad8fd7f5934b69d3b64d3764",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-authorization.json",
+      "artifact_sha256": "adf8d1d71b00813d012fe00632325012aeaeb5fe8465e99364656cbb62c26997",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "../../../../reports/branchfabric-gpu-validation-experiment-004-v10.json",
-      "artifact_sha256": "17dd661f723554f1816120af1c153e3ff3f44db4f7d535740f089ed95fb33b04",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "bc5b5c635b203e1f86f2ef5a9e86f7fbc6be031d7e3b671c6b8bf54e6a6a54b8",
       "sample_selector": "$"
     },
     {
-      "artifact_reference": "../../../../reports/branchfabric-gpu-validation-experiment-004-v10.md",
-      "artifact_sha256": "72e6bbabeebcdd067817271ce2b32f5ccc7dd162258377cdfbc402068e60bcee",
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "artifact_sha256": "cd34f0636d5f091345104f953c27b6cd64966e82241ee14bd0b725239c94d39f",
       "sample_selector": "$"
     }
-  ]
+  ],
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-success-manifest/v1",
+  "scientifically_valid": true,
+  "superseded_manifest": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/analysis/manifests/pre-v10-84115ad9de3729e824ed485fd0901413f885bda8d4703c5f1a8b483d7a47d896.json",
+    "artifact_sha256": "84115ad9de3729e824ed485fd0901413f885bda8d4703c5f1a8b483d7a47d896",
+    "sample_selector": "$"
+  }
 }

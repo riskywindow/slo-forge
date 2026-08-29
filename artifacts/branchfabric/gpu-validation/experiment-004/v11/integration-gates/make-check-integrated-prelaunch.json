@@ -1,0 +1,52 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-make-check/v1",
+  "status": "PASS",
+  "command": "make check",
+  "invocation": "taskpolicy -l 0 make check",
+  "scheduling_policy_reason": "Preserve the frozen v10 sub-100ms synthetic cadence gates under unrelated sustained host load without changing code, thresholds, seeds, or test selection.",
+  "exit_code": 0,
+  "completed_at_utc": "2026-08-19T05:03:06Z",
+  "execution_head": "1c51853e10809686d4368037153927f25e834117",
+  "frozen_v10_execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+  "python": {
+    "format_files_checked": 709,
+    "ruff_pass": true,
+    "mypy_source_files": 484,
+    "mypy_pass": true,
+    "tests_passed": 1859,
+    "tests_skipped": 8,
+    "tests_failed": 0,
+    "duration_seconds": 295.98
+  },
+  "rust": {
+    "cargo_fmt_pass": true,
+    "cargo_clippy_all_targets_all_features_pass": true,
+    "cargo_test_workspace_all_features_pass": true,
+    "doc_tests_pass": true
+  },
+  "ui": {
+    "typecheck_pass": true,
+    "lint_pass": true,
+    "test_files_passed": 10,
+    "test_files_skipped": 1,
+    "tests_passed": 37,
+    "tests_skipped": 1,
+    "build_pass": true
+  },
+  "bindings": {
+    "methodology_sha256": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c",
+    "worker_sha256": "745adf4d9bc2c9b69e4e389fc0a309d511d8f89486a167a31fa7e94f353976f9",
+    "controller_sha256": "c4d1bc57873ac1c9293c168b80fe16ae974c362c1ca33294277cea5cb9f325fb",
+    "launcher_sha256": "8dfb80dcb13e76f304b39b4a89705a216941871ce789f0d881a53aff4282abe5",
+    "worker_test_sha256": "41b89c674af122aa59e8f667d6f2d15f93fe70713e602d76877a43f925ec8072",
+    "controller_test_sha256": "c7887de417238c344556aec20ed6154d36bbe368fbd51d4c9ea0aaeb9fbbfed0",
+    "launcher_test_sha256": "7f6f6f0351ba96571541b523d8bbbeced97cee8857d01dd22af3fcae0bc81cda",
+    "cross_runtime_review_sha256": "a5657133a969c383d1c44d960285ebd5a21f07205c08fd93c0ced52f52be56cd",
+    "packaging_replacement_review_sha256": "f38c3b95ed385e4740a5ebb826bc35ed4323e16189ddb7f1f058f27d5291f99f",
+    "replacement_integrity_review_sha256": "35c6602ef302556c6767986c0f79fb6e5a60bbf3f089234b9f2ce597deb28f83",
+    "budget_replacement_review_sha256": "472c5974edbd7000a280785edee35b5f9eb920f6479d7513158d2f73741a9f6d",
+    "prior_attempt_cleanup_sha256": "d267b199f196ab6e60b6c318a511c5d36576c9e8615ff7f386981f7eabbe5197",
+    "ledger_sha256_before_replacement_reservation": "84175458f5e0b2f54fdc7c1e2c37c7d9b855f4b3771127299bcbeb4ad827f603"
+  },
+  "gpu_or_modal_used": false
+}

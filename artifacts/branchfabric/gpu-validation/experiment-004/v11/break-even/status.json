@@ -1,0 +1,31 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-break-even-status/v1",
+  "status": "PARTIALLY_MEASURED_NOT_IDENTIFIABLE_WITHOUT_KILL_ARM",
+  "authoritative_model": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/economics/break-even-model.json",
+    "sha256": "f1eee0e10a188095b03af0aa6ddf14a421bb491bbba8d005e46d07793640470b"
+  },
+  "equations": {
+    "logical_state_bytes": "q*(P + B*A)",
+    "independent_recompute_tokens": "B*(P + A)",
+    "kill_recompute_seconds": "B*(P + A)/theta + delta_k",
+    "preserve_when": "7.051284484 + delta_p < B*(P + A)/theta + delta_k"
+  },
+  "measured_workload": {
+    "prefix_tokens": 16384,
+    "branch_count": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "logical_state_bytes": 1056964608,
+    "preserve_state_path_seconds": 7.051284484,
+    "analytical_recompute_tokens_unverified": 133120
+  },
+  "measured_recompute_throughput_tokens_per_second": null,
+  "measured_recompute_setup_overhead_seconds": null,
+  "measured_break_even_surface": null,
+  "conditional_diagnostic": {
+    "assumptions": "delta_k equals delta_p and measured preserve time is locally constant",
+    "preservation_wins_below_recompute_throughput_tokens_per_second": 18878.829850371414
+  },
+  "reason": "The prerequisite kill/recompute arm was forbidden after integrated v11 failed before reclamation. One preservation point cannot identify recompute throughput, recompute setup overhead, and preservation fixed overhead.",
+  "no_analytical_value_presented_as_measured": true
+}

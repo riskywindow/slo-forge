@@ -1,0 +1,69 @@
+SECTION identity
+mew0
+rishivin
+/home/rishivin
+2026-08-10T22:34:29+00:00
+2026-08-10T22:34:29Z
+ 22:34:29 up 3 days,  3:45,  4 users,  load average: 0.86, 0.65, 0.85
+SECTION nvidia-smi
+Mon Aug 10 22:34:29 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100 80GB PCIe          On  |   00000000:17:00.0 Off |                    0 |
+| N/A   50C    P0             84W /  300W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA A100 80GB PCIe          On  |   00000000:65:00.0 Off |                    0 |
+| N/A   48C    P0             85W /  300W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+SECTION gpu-query
+0, GPU-9f432e61-badc-944e-6087-2f846d4c7e19, NVIDIA A100 80GB PCIe, 00000000:17:00.0, 580.178.04, 81920, 0, 81152, 0, 0, 50, 84.71, 300.00, Default
+1, GPU-a473e021-97fb-64b8-74ba-471825808bed, NVIDIA A100 80GB PCIe, 00000000:65:00.0, 580.178.04, 81920, 0, 81152, 0, 0, 48, 85.92, 300.00, Default
+SECTION compute-apps
+SECTION cuda
+bash: line 1: nvcc: command not found
+SECTION disk
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       3.5T  3.2T   95G  98% /
+/dev/sda2       3.5T  3.2T   95G  98% /
+Filesystem        Inodes    IUsed     IFree IUse% Mounted on
+/dev/sda2      234315776 10036354 224279422    5% /
+/dev/sda2      234315776 10036354 224279422    5% /
+SECTION relevant-user-processes
+2163055 bash -c set -u; printf "SECTION identity\n"; hostname; id -un; pwd; date --iso-8601=seconds 2>/dev/null || date; date -u +%Y-%m-%dT%H:%M:%SZ; uptime; printf "SECTION nvidia-smi\n"; nvidia-smi; printf "SECTION gpu-query\n"; nvidia-smi --query-gpu=index,uuid,name,pci.bus_id,driver_version,memory.total,memory.used,memory.free,utilization.gpu,utilization.memory,temperature.gpu,power.draw,power.limit,compute_mode --format=csv,noheader,nounits; printf "SECTION compute-apps\n"; nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory --format=csv,noheader,nounits 2>&1; printf "SECTION cuda\n"; command -v nvcc || true; nvcc --version 2>&1 || true; printf "SECTION disk\n"; df -h /tmp "$HOME"; df -i /tmp "$HOME"; printf "SECTION relevant-user-processes\n"; pgrep -u "$(id -u)" -af "sloforge|python|vllm|sglang|triton|cuda|nsys|ncu" || true; printf "SECTION experiment-env\n"; for v in XDG_CACHE_HOME HF_HOME HUGGINGFACE_HUB_CACHE TRANSFORMERS_CACHE TORCH_HOME TRITON_CACHE_DIR TMPDIR CUDA_VISIBLE_DEVICES; do value=$(printenv "$v" 2>/dev/null || true); printf "%s=%s\n" "$v" "$value"; done; printf "SECTION prior-temp-roots\n"; find /tmp -maxdepth 1 -user "$(id -u)" -name "sloforge-branchgpu-*" -print 2>/dev/null | sort; printf "SECTION tools\n"; for t in python3 uv nvidia-smi nvcc dcgmi nsys ncu docker podman rsync git; do command -v "$t" 2>/dev/null || printf "%s=UNAVAILABLE\n" "$t"; done
+SECTION experiment-env
+XDG_CACHE_HOME=
+HF_HOME=
+HUGGINGFACE_HUB_CACHE=
+TRANSFORMERS_CACHE=
+TORCH_HOME=
+TRITON_CACHE_DIR=
+TMPDIR=
+CUDA_VISIBLE_DEVICES=
+SECTION prior-temp-roots
+SECTION tools
+/usr/bin/python3
+uv=UNAVAILABLE
+/usr/bin/nvidia-smi
+nvcc=UNAVAILABLE
+dcgmi=UNAVAILABLE
+/usr/local/bin/nsys
+ncu=UNAVAILABLE
+/usr/bin/docker
+podman=UNAVAILABLE
+/usr/bin/rsync
+/usr/bin/git

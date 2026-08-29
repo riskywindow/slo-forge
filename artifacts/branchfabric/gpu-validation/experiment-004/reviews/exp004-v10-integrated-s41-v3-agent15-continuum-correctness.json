@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "reviewer": "agent15",
+  "scope": "continuum-correctness",
+  "verdict": "not-applicable-transaction-never-began",
+  "remote_manifest_sha256": "97ae5afeaeef8eac2cc9384d0968c78e8e167f0e02cf38113d1e78bdef43ae20",
+  "manifest_entries_verified": 491,
+  "manifest_verification_failures": 0,
+  "rollout_preparation_completed": false,
+  "naive_preservation_executed": false,
+  "restore_executed": false,
+  "required_reclaim_restore_marker_occurrences": 0,
+  "branch_correctness_evaluated": false,
+  "continuum_regression_observed": false,
+  "reason": "The review timeout produced abort.json before final reset, transaction authorization, rollout preparation, transaction-ready, or start. No serving, rollout, state-pass, movement, or branch-validation result exists."
+}

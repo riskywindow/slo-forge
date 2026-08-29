@@ -1,0 +1,39 @@
+{
+  "captured_at_utc": "2026-08-11T00:10:25.954322+00:00",
+  "gpu_query": {
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=index,uuid,name,memory.total,memory.used,utilization.gpu,utilization.memory",
+      "--format=csv,noheader,nounits"
+    ],
+    "duration_ns": 92140004,
+    "returncode": 0,
+    "stderr": "",
+    "stderr_truncated": false,
+    "stdout": "0, GPU-9f432e61-badc-944e-6087-2f846d4c7e19, NVIDIA A100 80GB PCIe, 81920, 7248, 77, 2\n1, GPU-a473e021-97fb-64b8-74ba-471825808bed, NVIDIA A100 80GB PCIe, 81920, 7302, 87, 2\n",
+    "stdout_truncated": false
+  },
+  "process_query": {
+    "command": [
+      "nvidia-smi",
+      "--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory",
+      "--format=csv,noheader,nounits"
+    ],
+    "duration_ns": 43986499,
+    "returncode": 0,
+    "stderr": "",
+    "stderr_truncated": false,
+    "stdout": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19, 2523643, python, 7230\nGPU-a473e021-97fb-64b8-74ba-471825808bed, 2524021, python, 7286\n",
+    "stdout_truncated": false
+  },
+  "schema_version": "sloforge.branchfabric.remote-coordinator/v1",
+  "selected_gpu": null,
+  "selection_policy": {
+    "gpu_utilization_percent": 0,
+    "maximum_used_mib": 16,
+    "memory_utilization_percent": 0,
+    "no_compute_process": true,
+    "single_observation_no_wait": true
+  },
+  "status": "blocked_no_idle_gpu"
+}

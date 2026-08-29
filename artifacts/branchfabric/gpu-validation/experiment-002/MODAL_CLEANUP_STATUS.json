@@ -1,0 +1,31 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-cleanup-status/v1",
+  "attempt": "modal-smoke-shared-s41-v5",
+  "function_call_id": "fc-01KZQFZS9WHYTAC9VN1MZPFG7S",
+  "single_use_ephemeral_container": true,
+  "experiment_child_processes_remaining_at_postflight": [],
+  "kv_assigned_bytes_after_root_release": 0,
+  "kv_pool_free_blocks": 55959,
+  "kv_pool_usable_blocks": 55959,
+  "driver_visible_hbm_recovered_within_1_gib": false,
+  "preflight_memory_used_mib": 4,
+  "postflight_memory_used_mib": 14213,
+  "postflight_holder": "/bin/dumb-init PID 1",
+  "provider_container_teardown_verified": true,
+  "provider_terminal_audit_sha256": null,
+  "final_provider_audit_utc": "2026-08-11T04:31:20Z",
+  "final_provider_audit": {
+    "experiment_apps_not_stopped_or_with_tasks": [],
+    "running_modal_containers": [],
+    "explicitly_stopped_zero_task_app_id": "ap-drLJXGOCa4tLbsRaFZ8Hqt",
+    "provider_hbm_after_teardown_sampled": false
+  },
+  "modal_in_flight_gpu_reservations": [],
+  "modal_in_flight_model_reservations": [],
+  "persistent_resources_allowed": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "cleanup_status": "failed_in_function_postflight_gate_no_running_provider_resources",
+  "mew0_used": false
+}

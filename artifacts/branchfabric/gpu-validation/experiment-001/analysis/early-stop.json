@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "decision_at_utc": "2026-08-10T22:37:55Z",
+  "condition": "runtime_or_model_incompatibility_makes_measurement_invalid",
+  "decision": "stop_before_gpu_launch",
+  "evidence": [
+    "docs/branchfabric/FUTURE_MEASUREMENT_PLAN.md states the real-runtime measurement subcommand is intentionally absent and an adapter is a prerequisite.",
+    "python/sloforge/continuum/adapters/vllm.py explicitly rejects portable execution-state export.",
+    "python/sloforge/continuum/adapters/sglang.py explicitly rejects portable execution-state export.",
+    "python/sloforge/continuum/adapters/genesis.py explicitly rejects portable execution-state export.",
+    "python/sloforge/continuum/operations/branching.py implements reference decode/re-encode plus content-addressed publication, not physical GPU COW.",
+    "mew0 system Python has no torch, transformers, vLLM, or SGLang package."
+  ],
+  "why_installation_would_not_fix_validity": "An isolated package installation could provide a stock engine, but no existing SLOForge adapter would connect its live GPU KV blocks to exact Helix/Continuum BranchPoint semantics and StateOperationTrace. Implementing that adapter is outside this measurement-only task.",
+  "independent_prefill_executed": false,
+  "optimized_cow_executed": false,
+  "concurrent_decode_cow_executed": false,
+  "fanout_1_executed": false,
+  "fanout_8_executed": false,
+  "fanout_32_executed": false,
+  "branchfabric_interest_conditions_evaluable": false,
+  "branchfabric_interest_conditions_triggered": null
+}

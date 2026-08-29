@@ -38,9 +38,10 @@ ORDER_ALGORITHM: Literal["position-balanced-cyclic-permutation:sha256-seeded/v1"
     "position-balanced-cyclic-permutation:sha256-seeded/v1"
 )
 TARGET_ADDITIONAL_GPU_SECONDS = 3_600.0
-# Explicitly extended for the user-authorized v9 validation attempt. This
-# remains a finite hard ceiling independent of the dollar budget.
-HARD_ADDITIONAL_GPU_SECONDS = 7_200.0
+# Explicitly extended on 2026-08-12 for the user-authorized v10 baseline run.
+# This remains a finite 3.0 A100-hour hard ceiling independent of the separate
+# 40 USD authorization.
+HARD_ADDITIONAL_GPU_SECONDS = 10_800.0
 HISTORICAL_THROUGH_EXPERIMENT_003_GPU_HOURS = 1.669146
 _MODES = tuple(ReclamationMode)
 
@@ -579,7 +580,7 @@ class GpuInvocationReservation(_StrictModel):
     reservation_id: NonEmpty
     invocation_id: NonEmpty
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
-    gpu_count: Literal[2] = 2
+    gpu_count: Literal[1, 2] = 2
     maximum_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     config_sha256: Sha256
 
@@ -592,9 +593,9 @@ class GpuActiveInterval(_StrictModel):
     invocation_id: NonEmpty
     function_call_id: NonEmpty
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
-    actual_gpu_models: tuple[NonEmpty, NonEmpty]
-    gpu_uuids: tuple[GpuUuid, GpuUuid]
-    gpu_count: Literal[2] = 2
+    actual_gpu_models: tuple[NonEmpty, ...] = Field(min_length=1, max_length=2)
+    gpu_uuids: tuple[GpuUuid, ...] = Field(min_length=1, max_length=2)
+    gpu_count: Literal[1, 2] = 2
     accounted_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     gpu_price_per_hour_usd: float | None = Field(
         default=None,
@@ -605,13 +606,17 @@ class GpuActiveInterval(_StrictModel):
 
     @model_validator(mode="after")
     def exact_hardware(self) -> Self:
-        if len(set(self.gpu_uuids)) != 2:
-            raise ValueError("settled invocation requires two distinct GPU UUIDs")
+        if len(self.actual_gpu_models) != self.gpu_count:
+            raise ValueError("settled GPU model count does not match the reservation")
+        if len(self.gpu_uuids) != self.gpu_count:
+            raise ValueError("settled GPU UUID count does not match the reservation")
+        if len(set(self.gpu_uuids)) != self.gpu_count:
+            raise ValueError("settled invocation requires distinct GPU UUIDs")
         if any(
             "A100" not in model or "80GB" not in model.replace(" ", "")
             for model in self.actual_gpu_models
         ):
-            raise ValueError("settled invocation did not receive two A100-80GB GPUs")
+            raise ValueError("settled invocation did not receive only A100-80GB GPUs")
         return self
 
     @property
@@ -625,16 +630,58 @@ class GpuActiveInterval(_StrictModel):
         return self.gpu_seconds / 3_600.0 * self.gpu_price_per_hour_usd
 
 
+class GpuConservativeFailureCharge(_StrictModel):
+    """Full preflight charge when an actual allocation cannot be settled safely.
+
+    This is deliberately separate from :class:`GpuActiveInterval`: a launcher
+    or result-validation failure may prevent trustworthy observation of the
+    allocation duration or physical GPU identities.  Charging the complete
+    reservation is conservative accounting, not a fabricated measurement.
+    """
+
+    reservation_id: NonEmpty
+    invocation_id: NonEmpty
+    requested_gpu: Literal["A100-80GB"] = "A100-80GB"
+    gpu_count: Literal[1, 2] = 2
+    charged_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
+    config_sha256: Sha256
+    failure_stage: NonEmpty
+    failure_evidence: ArtifactSampleRef
+    gpu_price_per_hour_usd: float | None = Field(
+        default=None,
+        gt=0.0,
+        allow_inf_nan=False,
+    )
+
+    @property
+    def conservative_gpu_seconds(self) -> float:
+        return self.charged_wall_seconds * self.gpu_count
+
+    @property
+    def conservative_gpu_cost_usd(self) -> float | None:
+        if self.gpu_price_per_hour_usd is None:
+            return None
+        return self.conservative_gpu_seconds / 3_600.0 * self.gpu_price_per_hour_usd
+
+
 class Experiment004GpuHourLedger(_StrictModel):
     schema_version: Literal["sloforge.branchfabric.experiment-004-gpu-hours/v1"] = (
         "sloforge.branchfabric.experiment-004-gpu-hours/v1"
     )
     historical_through_experiment_003_gpu_hours: float = HISTORICAL_THROUGH_EXPERIMENT_003_GPU_HOURS
     target_additional_gpu_seconds: float = TARGET_ADDITIONAL_GPU_SECONDS
-    hard_additional_gpu_seconds: float = HARD_ADDITIONAL_GPU_SECONDS
+    # The persisted ledger is the authoritative configured ceiling.  The
+    # constant is only the default for a newly initialized ledger; validation
+    # must not reject a larger value that the user explicitly configured.
+    hard_additional_gpu_seconds: float = Field(
+        default=HARD_ADDITIONAL_GPU_SECONDS,
+        gt=0.0,
+        allow_inf_nan=False,
+    )
     consumed_additional_gpu_seconds: float = Field(ge=0.0, allow_inf_nan=False)
     intervals: tuple[GpuActiveInterval, ...] = ()
     reservations: tuple[GpuInvocationReservation, ...] = ()
+    conservative_failure_charges: tuple[GpuConservativeFailureCharge, ...] = ()
 
     @model_validator(mode="after")
     def ledger_is_derived_and_bounded(self) -> Self:
@@ -649,31 +696,38 @@ class Experiment004GpuHourLedger(_StrictModel):
                 self.target_additional_gpu_seconds,
                 TARGET_ADDITIONAL_GPU_SECONDS,
             ),
-            (
-                "hard_additional_gpu_seconds",
-                self.hard_additional_gpu_seconds,
-                HARD_ADDITIONAL_GPU_SECONDS,
-            ),
         )
         for field, actual, expected in constants:
             if not math.isclose(actual, expected, rel_tol=0.0, abs_tol=1e-12):
                 raise ValueError(f"{field} is fixed by the Experiment 004 contract")
-        derived = sum(interval.gpu_seconds for interval in self.intervals)
+        derived = sum(interval.gpu_seconds for interval in self.intervals) + sum(
+            charge.conservative_gpu_seconds for charge in self.conservative_failure_charges
+        )
         if not math.isclose(
             self.consumed_additional_gpu_seconds,
             derived,
             rel_tol=0.0,
             abs_tol=1e-9,
         ):
-            raise ValueError("consumed additional GPU-seconds must equal settled intervals")
+            raise ValueError(
+                "consumed additional GPU-seconds must equal settled intervals and failure charges"
+            )
         if self.consumed_additional_gpu_seconds > self.hard_additional_gpu_seconds:
             raise ValueError("settled GPU use exceeds the Experiment 004 hard limit")
         if len({item.function_call_id for item in self.intervals}) != len(self.intervals):
             raise ValueError("function call IDs must be unique in the GPU ledger")
         if len({item.reservation_id for item in self.reservations}) != len(self.reservations):
             raise ValueError("reservation IDs must be unique in the GPU ledger")
+        failure_reservation_ids = [
+            item.reservation_id for item in self.conservative_failure_charges
+        ]
+        if len(set(failure_reservation_ids)) != len(failure_reservation_ids):
+            raise ValueError("failure-charge reservation IDs must be unique")
+        if set(failure_reservation_ids) & {item.reservation_id for item in self.reservations}:
+            raise ValueError("reservation IDs cannot be both active and failure-charged")
         invocation_ids = [item.invocation_id for item in self.intervals]
         invocation_ids.extend(item.invocation_id for item in self.reservations)
+        invocation_ids.extend(item.invocation_id for item in self.conservative_failure_charges)
         if len(set(invocation_ids)) != len(invocation_ids):
             raise ValueError("invocation IDs cannot be repeated or both settled and reserved")
         committed = self.consumed_additional_gpu_seconds + sum(
@@ -698,7 +752,7 @@ class Experiment004GpuHourLedger(_StrictModel):
 
 class GpuBudgetPreflight(_StrictModel):
     invocation_id: NonEmpty
-    gpu_count: Literal[2] = 2
+    gpu_count: Literal[1, 2] = 2
     requested_gpu: Literal["A100-80GB"] = "A100-80GB"
     maximum_wall_seconds: float = Field(gt=0.0, le=3_600.0, allow_inf_nan=False)
     proposed_maximum_gpu_seconds: float = Field(gt=0.0, allow_inf_nan=False)
@@ -717,23 +771,31 @@ def reserve_gpu_invocation(
     invocation_id: str,
     maximum_wall_seconds: float,
     config_sha256: str,
+    gpu_count: Literal[1, 2] = 2,
 ) -> tuple[Experiment004GpuHourLedger, GpuBudgetPreflight]:
-    """Atomically model one explicit two-A100 reservation after budget preflight."""
+    """Atomically model one explicit one- or two-A100 reservation after preflight.
+
+    ``gpu_count`` defaults to two so frozen v10 callers and serialized records
+    retain their existing behavior.  The one-GPU form exists for the bounded
+    v11 state-pipeline micro-validation only.
+    """
 
     if ledger.reservations:
         raise ValueError("another GPU invocation reservation is already active")
     reservation = GpuInvocationReservation(
         reservation_id=reservation_id,
         invocation_id=invocation_id,
+        gpu_count=gpu_count,
         maximum_wall_seconds=maximum_wall_seconds,
         config_sha256=config_sha256,
     )
     committed_before = ledger.committed_additional_gpu_seconds
     projected = committed_before + reservation.maximum_gpu_seconds
     if projected > ledger.hard_additional_gpu_seconds:
-        raise ValueError("GPU invocation preflight would exceed 2.0 additional A100-hours")
+        raise ValueError("GPU invocation preflight would exceed the configured hard ceiling")
     preflight = GpuBudgetPreflight(
         invocation_id=invocation_id,
+        gpu_count=reservation.gpu_count,
         maximum_wall_seconds=maximum_wall_seconds,
         proposed_maximum_gpu_seconds=reservation.maximum_gpu_seconds,
         consumed_before_gpu_seconds=ledger.consumed_additional_gpu_seconds,
@@ -751,8 +813,8 @@ def settle_gpu_invocation(
     *,
     reservation_id: str,
     function_call_id: str,
-    actual_gpu_models: tuple[str, str],
-    gpu_uuids: tuple[str, str],
+    actual_gpu_models: tuple[str, ...],
+    gpu_uuids: tuple[str, ...],
     client_elapsed_seconds: float,
     remote_observed_allocation_seconds: float,
     raw_manifest: ArtifactSampleRef,
@@ -776,6 +838,7 @@ def settle_gpu_invocation(
     interval = GpuActiveInterval(
         invocation_id=reservation.invocation_id,
         function_call_id=function_call_id,
+        gpu_count=reservation.gpu_count,
         actual_gpu_models=actual_gpu_models,
         gpu_uuids=gpu_uuids,
         accounted_wall_seconds=accounted_wall,
@@ -787,9 +850,54 @@ def settle_gpu_invocation(
         item for item in ledger.reservations if item.reservation_id != reservation_id
     )
     return Experiment004GpuHourLedger(
-        consumed_additional_gpu_seconds=sum(item.gpu_seconds for item in intervals),
+        hard_additional_gpu_seconds=ledger.hard_additional_gpu_seconds,
+        consumed_additional_gpu_seconds=(
+            sum(item.gpu_seconds for item in intervals)
+            + sum(item.conservative_gpu_seconds for item in ledger.conservative_failure_charges)
+        ),
         intervals=intervals,
         reservations=reservations,
+        conservative_failure_charges=ledger.conservative_failure_charges,
+    )
+
+
+def charge_failed_gpu_reservation(
+    ledger: Experiment004GpuHourLedger,
+    *,
+    reservation_id: str,
+    failure_stage: str,
+    failure_evidence: ArtifactSampleRef,
+    gpu_price_per_hour_usd: float | None = None,
+) -> Experiment004GpuHourLedger:
+    """Clear a failed reservation while conservatively charging its full bound."""
+
+    matches = [item for item in ledger.reservations if item.reservation_id == reservation_id]
+    if len(matches) != 1:
+        raise ValueError("GPU reservation is absent or duplicated")
+    reservation = matches[0]
+    charge = GpuConservativeFailureCharge(
+        reservation_id=reservation.reservation_id,
+        invocation_id=reservation.invocation_id,
+        gpu_count=reservation.gpu_count,
+        charged_wall_seconds=reservation.maximum_wall_seconds,
+        config_sha256=reservation.config_sha256,
+        failure_stage=failure_stage,
+        failure_evidence=failure_evidence,
+        gpu_price_per_hour_usd=gpu_price_per_hour_usd,
+    )
+    reservations = tuple(
+        item for item in ledger.reservations if item.reservation_id != reservation_id
+    )
+    charges = (*ledger.conservative_failure_charges, charge)
+    return Experiment004GpuHourLedger(
+        hard_additional_gpu_seconds=ledger.hard_additional_gpu_seconds,
+        consumed_additional_gpu_seconds=(
+            sum(item.gpu_seconds for item in ledger.intervals)
+            + sum(item.conservative_gpu_seconds for item in charges)
+        ),
+        intervals=ledger.intervals,
+        reservations=reservations,
+        conservative_failure_charges=charges,
     )
 
 
@@ -804,6 +912,7 @@ __all__ = [
     "FinalCampaignPlan",
     "GpuActiveInterval",
     "GpuBudgetPreflight",
+    "GpuConservativeFailureCharge",
     "GpuInvocationReservation",
     "MetricSample",
     "RawTrial",
@@ -814,6 +923,7 @@ __all__ = [
     "TrialSemanticEvidence",
     "TrialValidity",
     "analyze_final_campaign",
+    "charge_failed_gpu_reservation",
     "evaluate_trace_controls",
     "evaluate_trial_validity",
     "plan_final_campaign",

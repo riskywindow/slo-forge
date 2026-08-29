@@ -1,0 +1,62 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-status/v1",
+  "observed_at_utc": "2026-08-26T23:05:23Z",
+  "status": "FAIL_PRE_CONTROLLER_MISSING_BUNDLED_LEDGER",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-integrated-s41-e",
+  "execution_mode": "integrated-reclamation-v11",
+  "failure_stage": "remote-pre-controller-sealed-evidence",
+  "function_entered": true,
+  "function_call_id": "fc-01M104ZGT6J8YPBJ50BN0BMT9H",
+  "gpu_allocation_observed": true,
+  "controller_python_invoked": true,
+  "controller_transaction_started": false,
+  "source_identity_gate_reached": false,
+  "optimized_export_started": false,
+  "transaction_source_release_started": false,
+  "hbm_reclaimed": false,
+  "gpu1_serving_enabled": false,
+  "restore_started": false,
+  "branch_continuation_started": false,
+  "blocker": {
+    "code": "REMOTE_VERIFIER_LEDGER_ARTIFACT_NOT_BUNDLED",
+    "missing_path": "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "exception": "FileNotFoundError",
+    "semantic_consequence": "The controller Python function was invoked, but its first sealed-evidence check failed before transaction setup, model runtime loading, engine creation, allocator lifecycle, source capture, export, or release."
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-e/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "9d8890e16b75e2b612861a85deaebf81874d782f97d1bdd8dd366891a3e46747",
+    "function_completion": "raw/exp004-v11-integrated-s41-e/function-completion.json",
+    "function_completion_sha256": "219f62c577d27fdb599ea55a5f8abbfadff8b473da6d0037f437ba4f7a7d1c8b",
+    "manifest_artifact_count": 3,
+    "manifest_integrity": "PASS"
+  },
+  "accounting": {
+    "remote_reported_gpu_allocation_seconds": 28.607167652,
+    "remote_reported_gpu_seconds": 57.214335304,
+    "ledger_accounting_basis": "conservative-full-reservation",
+    "conservative_charged_gpu_seconds": 1176.0,
+    "conservative_charged_wall_seconds": 588.0,
+    "failure_evidence": "failures/exp004-v11-integrated-s41-e-conservative-charge.json",
+    "failure_evidence_sha256": "3efbc040ee92364e93606bc550fe93c37fac57ee3c1950e30196d1e96b1d2bc7",
+    "ledger_sha256_after_settlement": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4",
+    "remaining_gpu_seconds": 22626.024986768025,
+    "active_reservations": 0
+  },
+  "cleanup": {
+    "in_function": "FAIL_MISSING_PRE_CONTROLLER_CLEANUP_EVIDENCE",
+    "provider": "PASS",
+    "provider_artifact": "provider-cleanup-attempt-e.json",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0
+  },
+  "integrated_retry_authorized": false,
+  "kill_and_recompute_authorized": false,
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED"
+}

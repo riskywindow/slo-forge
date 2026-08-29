@@ -1,0 +1,38 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup-evidence/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "observed_at_utc": "2026-08-13T01:37:16Z",
+  "observed_after_function_call_id": "fc-01KZWBK6BD7H8AH11K7PTK4S36",
+  "raw_provider_queries": [
+    {
+      "command": "modal app list --json",
+      "result": [
+        {"app_id": "ap-A4LmWISDgYZvmL2JOICnkY", "state": "stopped", "tasks": "0"},
+        {"app_id": "ap-QKTKNOqO2o5DrhGSdILg5O", "state": "stopped", "tasks": "0"},
+        {"app_id": "ap-eAQFxiUKmeygUPCVsqb9kL", "state": "stopped", "tasks": "0"}
+      ]
+    },
+    {"command": "modal container list --json", "result": []},
+    {"command": "modal endpoint list --json", "result": []},
+    {
+      "command": "modal volume list --json",
+      "result": ["sloforge-branchfabric-results", "sloforge-model-cache"]
+    },
+    {"command": "gpu-hours.json $.reservations", "result": []},
+    {"command": "process audit for gpu_reclamation, nsys, ncu, and modal run", "result": []}
+  ],
+  "active_tasks": [],
+  "running_containers": [],
+  "endpoints": [],
+  "reservations": [],
+  "owned_child_processes": [],
+  "profilers": [],
+  "persistent_volumes": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "transient_exchange_cleanup": {
+    "deleted_remote_path": "experiment-004/modal/exp004-v10-integrated-s41-v3.inflight",
+    "verified_absent": true
+  }
+}

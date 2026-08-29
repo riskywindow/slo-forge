@@ -1,0 +1,187 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-integrated-amdahl-review/v1",
+  "agent": 13,
+  "role": "integrated-amdahl-review",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "reviewed_at_utc": "2026-08-20T03:26:31Z",
+  "review_status": "PASS",
+  "integrated_amdahl_status": "UNAVAILABLE",
+  "summary": "Attempt c failed the source-allocation zero-queue identity gate before source release. It therefore has neither a completed residual state chain nor any of the five required integrated critical-path denominators. Integrated residual shares, 2x/5x/10x/free Amdahl effects, and a realistic accelerator lower bound are not scientifically calculable.",
+  "review_constraints": {
+    "local_evidence_only": true,
+    "modal_or_cloud_access": false,
+    "gpu_access": false,
+    "source_modified": false,
+    "measurements_invented": false,
+    "micro_validation_substitution_forbidden": true
+  },
+  "attempt_c_observations": {
+    "scientifically_valid": false,
+    "terminal_failure_stage": "source-allocation-zero-queue-verification",
+    "normal_trigger_emitted": true,
+    "queue_at_trigger": 21,
+    "trigger_emergency_headroom_requests": 43,
+    "predicate_to_trigger_emission_seconds": 0.00029008,
+    "logical_state_bytes_validated_before_failure": 1056964608,
+    "source_state_released": false,
+    "hbm_reclaimed": false,
+    "gpu1_became_useful": false,
+    "slo_restored": false,
+    "restore_executed": false,
+    "canonical_integrated_state_pass_records": 0,
+    "complete_non_overlapping_reclamation_chain": false,
+    "complete_non_overlapping_restore_chain": false
+  },
+  "integrated_residual_chains": {
+    "source_chain": {
+      "expected_scope": "authentication + gather/repack + D2H",
+      "measured_wall_seconds": null,
+      "integrated_share": null,
+      "status": "UNAVAILABLE",
+      "reason": "No complete source state chain or HBM-reclamation endpoint was published before the fail-closed exception."
+    },
+    "restore_chain": {
+      "expected_scope": "authentication + H2D + direct scatter/native write + raw-bit/hash validation",
+      "measured_wall_seconds": null,
+      "integrated_share": null,
+      "status": "UNAVAILABLE",
+      "reason": "Restore did not execute."
+    }
+  },
+  "required_integrated_path_matrix": {
+    "time_to_hbm_reclamation": {
+      "residual_fraction": null,
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null,
+      "status": "UNAVAILABLE"
+    },
+    "time_to_useful_gpu1_capacity": {
+      "residual_fraction": null,
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null,
+      "status": "UNAVAILABLE"
+    },
+    "time_to_serving_slo_restoration": {
+      "residual_fraction": null,
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null,
+      "status": "UNAVAILABLE"
+    },
+    "rollout_restore_latency": {
+      "residual_fraction": null,
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null,
+      "status": "UNAVAILABLE"
+    },
+    "full_preservation_transaction": {
+      "residual_fraction": null,
+      "speedup_2x": null,
+      "speedup_5x": null,
+      "speedup_10x": null,
+      "speedup_effectively_free": null,
+      "status": "UNAVAILABLE"
+    },
+    "reason": "Amdahl speedup requires both a measured non-overlapping residual-chain duration and a completed important-path denominator. Attempt c provides neither pair."
+  },
+  "realistic_accelerator_projection": {
+    "status": "UNAVAILABLE",
+    "projected_lower_bound_seconds": null,
+    "projected_end_to_end_speedup": null,
+    "projected_range": null,
+    "regular_surviving_integrated_chain_measured": false,
+    "missing_measured_inputs": [
+      "integrated physical bytes by pass and tier",
+      "integrated unavoidable link movement",
+      "integrated unavoidable endpoint reads and writes",
+      "integrated transform throughput",
+      "integrated transfer bandwidth",
+      "achievable overlap under serving load",
+      "integrated launch and control overhead",
+      "completed critical-path denominator"
+    ],
+    "reason": "The validated logical byte count alone cannot support a physical streaming lower bound or an end-to-end speedup. No FPGA, external-data-plane, or CUDA bandwidth is assumed."
+  },
+  "micro_reference_explicitly_not_integrated": {
+    "status": "MEASURED_MICRO_ONLY",
+    "topology": "A100-80GB PCIe",
+    "source_export_wall_seconds": 2.61309087,
+    "restore_wall_seconds": 4.438193614,
+    "micro_full_state_path_seconds": 7.051284484,
+    "source_fraction_of_micro_state_path": 0.3705836682563778,
+    "restore_fraction_of_micro_state_path": 0.6294163317436222,
+    "micro_source_stage_sensitivity": {
+      "2x": 1.2274333827621697,
+      "5x": 1.4213973005500367,
+      "10x": 1.5004320526296473,
+      "effectively_free": 1.5887735185227547
+    },
+    "micro_restore_stage_sensitivity": {
+      "2x": 1.459232330226399,
+      "5x": 2.0142328326365098,
+      "10x": 2.3066704450691904,
+      "effectively_free": 2.6984459533931173
+    },
+    "eligibility": {
+      "integrated_residual_share": false,
+      "integrated_amdahl": false,
+      "realistic_integrated_accelerator_bound": false,
+      "economic_comparison": false
+    },
+    "qualification": "These are established isolated PCIe micro-state-path sensitivities. They are not anchored to attempt-c's reclaim trigger, HBM reclamation, useful-capacity, stable-SLO, restore, or full-transaction endpoints and do not fill any integrated field."
+  },
+  "hardware_gate_implications": {
+    "residual_chain_at_least_15_percent": null,
+    "realistic_acceleration_at_least_1_20x": null,
+    "bandwidth_dataflow_dominated": null,
+    "numeric_hardware_gate_passed": false,
+    "classification": "HARDWARE_GATE_NOT_REACHED",
+    "software_wins_supported": false,
+    "gpu_software_wins_supported": false,
+    "branchfabric_hardware_interest_supported": false,
+    "preservation_not_economic_supported": false,
+    "experiment_005_permitted": false
+  },
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/scientific-validity.json",
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/serving/outcome.json",
+      "sha256": "0d1c26bbcea93efc15e5b502040a4a37f507b939672b24b4d27393ef73c3b06c"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/rollout/outcome.json",
+      "sha256": "02b2bf8d1937510c7476fa555a305453bce311532fb701806b5fb463c30722a5"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/movement/status.json",
+      "sha256": "5bb820ec22e4aa3c92a0b567823b416db0d17530af79fd6d3f4346a60e6d3286"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/state-passes/status.json",
+      "sha256": "bbabbea46b18490581663eb3f4b4ea827bacb861906225efc2c6b9d3832f0483"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/status.json",
+      "sha256": "14d3560857e510319e2b24042a3cac1962ee4f27cf15e29e1927df59bc6945a0"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/residual-chains.json",
+      "sha256": "b1db5c1545550dd04a846a8d7fd367709cdd1ef3ed28ce8dd8e25ef004b2c248"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494"
+    }
+  ],
+  "terminal_statement": "PASS: the integrated Amdahl review fails closed. All five integrated residual shares and all 2x/5x/10x/free effects remain null; the micro projections are retained only as non-integrated reference evidence; HARDWARE_GATE_NOT_REACHED is mandatory."
+}

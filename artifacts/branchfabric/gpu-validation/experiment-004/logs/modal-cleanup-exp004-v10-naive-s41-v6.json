@@ -1,0 +1,22 @@
+{
+  "attempt_id": "exp004-v10-naive-s41-v6",
+  "checked_at_utc": "2026-08-13T16:24:10Z",
+  "modal_app": {
+    "app_id": "ap-9rd1E7UYVqLGaY3w4xzX7k",
+    "description": "sloforge-branchfabric-gpu-reclamation-004",
+    "state": "stopped",
+    "tasks": 0
+  },
+  "running_containers": [],
+  "running_endpoints": [],
+  "active_reservations": [],
+  "child_processes": [],
+  "profilers": [],
+  "persistent_volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "reservation_cleared": true,
+  "schema_version": "sloforge.branchfabric.experiment-004-modal-cleanup/v1",
+  "status": "PASS"
+}

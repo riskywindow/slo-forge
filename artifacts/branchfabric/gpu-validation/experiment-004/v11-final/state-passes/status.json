@@ -1,0 +1,10 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-state-passes-status/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "status": "UNAVAILABLE",
+  "canonical_integrated_state_pass_records": 0,
+  "transient_source_export_authoritative_pass_validation": true,
+  "persisted_integrated_state_pass_collection": false,
+  "promotable_integrated_movement_accounting": false,
+  "reason": "the worker failed before publishing a completed integrated transaction result; micro-validation pass records are not substituted"
+}

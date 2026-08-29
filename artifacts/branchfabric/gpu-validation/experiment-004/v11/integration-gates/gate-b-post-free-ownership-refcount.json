@@ -1,0 +1,51 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integration-gate/v1",
+  "gate": "B_POST_FREE_OWNERSHIP_AND_REFCOUNT_PROOF",
+  "status": "PASS_OFFLINE",
+  "scope": "v11 production runtime integration only; frozen v10 path unchanged",
+  "implementation": {
+    "production_adapter": "sloforge.continuum.adapters.vllm_live.VllmLiveStateAdapter",
+    "proof_module": "sloforge.continuum.adapters.vllm_reclamation_v11_ownership",
+    "allocator_epoch_source": "sloforge.continuum.adapters.vllm_allocator_epochs.Vllm0230AllocatorEpochSource",
+    "engine_step_binding": "sloforge.continuum.adapters.vllm_reclamation_v11_sync.Vllm0230EngineStepBinding",
+    "exact_runtime_version": "vllm==0.23.0",
+    "test_adapter_substitution_accepted": false
+  },
+  "requirements": {
+    "exact_source_block_coverage": true,
+    "per_block_id": true,
+    "per_block_allocator_epoch": true,
+    "per_block_pre_release_owner": true,
+    "per_block_pre_release_refcount": true,
+    "per_block_release_operation": true,
+    "per_block_post_release_owner": true,
+    "per_block_post_release_refcount": true,
+    "per_block_allocator_availability": true,
+    "per_block_no_live_branch_reference": true,
+    "old_runtime_request_absence": true,
+    "native_single_type_manager_req_to_blocks_absence": true,
+    "old_session_layout_inaccessibility": true,
+    "root_reference_release": true,
+    "allocator_epoch_tombstone": true,
+    "allocator_hbm_byte_agreement": true,
+    "full_free_pool_recovery": true,
+    "fail_closed": true
+  },
+  "offline_tests": {
+    "command": "uv run --locked pytest -q tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11.py tests/python/test_gpu_reclamation_worker_movement.py",
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "skip_reason": null
+  },
+  "adversarial_cases": [
+    "missing source allocation coverage",
+    "foreign live request owner",
+    "allocator/HBM disagreement",
+    "scheduler request removed while native req_to_blocks table survives",
+    "stale allocator epoch after free",
+    "hash-retained shared root until prefix-cache reset"
+  ],
+  "real_a100_measurement_claimed": false,
+  "micro_validation_requirement": "The real 1152-block run must pass the same exact-count proof before HBM reclamation is accepted."
+}

@@ -1,0 +1,108 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-review/v1",
+  "reviewer": "agent05-v11-integrity-audit",
+  "reviewed_at_utc": "2026-08-19T00:34:41Z",
+  "scope": "offline-pre-gpu",
+  "result": "PASS",
+  "real_gpu_execution": "NOT_RUN_BY_REVIEWER",
+  "summary": "The isolated v11 adapter and one-A100 micro worker fail closed on transport corruption, stale or reused allocation lifetimes, destination bit mismatches, incomplete mappings, invalid production-gate evidence, and unsafe cleanup. The real-A100 8/8 result remains a runtime gate and is not asserted by this offline review.",
+  "criteria": {
+    "whole_state_sha256": {
+      "status": "PASS",
+      "evidence": "Capture hashes every canonical payload byte in deterministic chunk order and commits the digest into the immutable manifest; streaming preflight recomputes and compares the whole-state digest."
+    },
+    "per_page_sha256": {
+      "status": "PASS",
+      "evidence": "Capture commits one SHA-256 per canonical page; preflight and consumption-time authentication recompute each bounded page digest with exact range-closure checks."
+    },
+    "manifest_commitment": {
+      "status": "PASS",
+      "evidence": "A domain-separated SHA-256 covers manifest.canonical_bytes(); verified-transport, destination-write, and scrub evidence bind the same commitment."
+    },
+    "consumption_time_authentication": {
+      "status": "PASS",
+      "evidence": "Every restore chunk is copied into an owned bounded snapshot and page-authenticated immediately before H2D/native consumption. NumPy alias mutation that bypasses the PyTorch version counter is rejected."
+    },
+    "bfloat16_raw_bit_comparison": {
+      "status": "PASS",
+      "evidence": "Destination validation compares int16 views, preserving NaN payload and signed-zero distinctions, and covers every logical destination byte."
+    },
+    "partial_tail_zero_proof": {
+      "status": "PASS",
+      "evidence": "Only partial-page tails are zero-filled; every tail is raw-zero validated, logical-plus-tail byte coverage must equal selected physical-page bytes, and full pages skip redundant zero fill."
+    },
+    "destination_mapping_device_epoch_commitment": {
+      "status": "PASS",
+      "evidence": "The destination target binds tensor data pointers, shapes, strides, dtype, geometry, exact CUDA index and GPU UUID. The mapping commitment additionally binds ordered logical-page destinations and allocator-issued block epochs. The production stager independently recomputes and checks sealed evidence."
+    },
+    "failure_scrub_typed_teardown": {
+      "status": "PASS",
+      "evidence": "Write failure triggers raw-zero scrub with completion fencing. Scrub, free, cache-reset, or admission-cleanup uncertainty escalates to V11RuntimeTeardownRequired with affected allocation IDs; forged or incomplete evidence is rejected."
+    },
+    "admission_ordering": {
+      "status": "PASS",
+      "evidence": "The production IMPORT_ADMISSION critical section covers transport verification, allocation, write, integrity, block-table construction, epoch validation and single-use consumption. The gate is rechecked before and between enqueue operations."
+    },
+    "fresh_allocation_lifetimes": {
+      "status": "PASS",
+      "evidence": "Runtime-issued epochs are monotonic and tombstoned after free. The micro worker requires 1,152 destination blocks and rejects intersection between source and destination (physical block ID, allocation epoch) lifetimes; reuse of a physical ID is valid only with a later epoch."
+    },
+    "continuation_oracle_methodology": {
+      "status": "PASS",
+      "evidence": "The micro worker requires exactly eight branches, at least eight continuation tokens per branch, then drains/reset-prefix-cache and independently prefills the immutable token histories using the exact original effective seed. It requires equality of all eight first resumed tokens and fails closed otherwise."
+    }
+  },
+  "tests": {
+    "focused_suite": {
+      "result": "PASS",
+      "passed": 59,
+      "failed": 0,
+      "command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_methodology.py"
+    },
+    "adversarial_subset": {
+      "result": "PASS",
+      "passed": 15,
+      "failed": 0,
+      "cases": [
+        "payload corruption before write",
+        "missing duplicated or reordered payload ranges",
+        "destination post-write bit corruption",
+        "PyTorch-version-visible mutation after verification",
+        "NumPy alias mutation after verification",
+        "BF16 NaN payload and signed-zero raw-bit preservation",
+        "untyped or mismatched fused evidence",
+        "scrub/free/reset/final-enqueue cleanup failures",
+        "production admission-gate displacement",
+        "double import epoch consumption",
+        "freed/stale epoch proof",
+        "physical block reuse with a later epoch"
+      ]
+    },
+    "ruff": "PASS",
+    "py_compile": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "reviewed_file_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "43d6170733d677941cf2b3f99b4471be19868a45dfed9bd3336b866497b2928b",
+    "python/sloforge/continuum/adapters/vllm_live.py": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "095384e5d892d6a1899a9dc1ddc9e2c2bea9d3dbcc3d8c87176c381aab2afbd0",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "128465c0f00fa1c67bfb4e78a8e692d1ad9e6dfab76e95efe6f751eb5e516268",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b",
+    "tests/python/test_vllm_allocator_epochs.py": "be044ce2be9ee8d2f83b13be27b4834ba4447387b1a41dc317458e11dfa2874f",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "35daa70da4006bcd5cf412d870eb30bc0b921b0d0715b15dd2c44b8d3faf5ebc",
+    "tests/python/test_vllm_reclamation_v11_ownership.py": "2e45a183923de79acf198db5f7ed153712ef9bf268ba23f4e308143ff32efe84",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "f234ff79e9f3aacd3e0960ffb8838b61d4987ad4609615f6879cdc57074d490c"
+  },
+  "non_blocking_observations": [
+    "The review proves offline control flow and CPU-fixture equivalence only; it does not convert projected amplification or continuation behavior into a measured result.",
+    "Physical block IDs may repeat only across distinct allocator epochs. The worker records physical-ID overlap separately and treats allocation lifetime as the authoritative freshness identity.",
+    "The independent oracle intentionally uses the same retained model engine after finished restored requests and a successful prefix-cache reset; this preserves identical runtime/model semantics while forcing KV recomputation."
+  ],
+  "gpu_authorization": "NONE",
+  "modal_invocations": 0,
+  "network_operations": 0
+}

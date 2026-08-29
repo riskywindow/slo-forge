@@ -1,0 +1,128 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewer": "agent11-serving-methodology-reviewer",
+  "scope": "serving-methodology and readiness-time-budget diagnosis",
+  "decided_at_utc": "2026-08-13T06:45:00Z",
+  "verdict": "REJECT_ATTEMPT_AS_SCIENTIFIC_BASELINE_LOCAL_CONTROLLER_FIX_VERIFIED_RERUN_BUDGET_BLOCKER",
+  "root_cause": {
+    "classification": "local-controller-readiness-clock-origin-bug",
+    "severity": "high",
+    "engine_failure": false,
+    "controller_timeout": true,
+    "finding": "The integrated controller started the 160-second readiness deadline at controller entry, before the independently startup-budgeted CUDA peer probe, worker imports, and retained-engine model-load start. The phase budget defines readiness from retained-engine startup, so startup work was incorrectly deducted from the engine readiness window.",
+    "contributing_evidence": [
+      "Both worker processes remained alive until the controller issued SIGTERM; their observed return codes were -15, not spontaneous engine failure codes.",
+      "Both vLLM logs show the pinned Qwen2.5-7B-Instruct model loaded and both engines reached initial profiling/warmup before the timeout.",
+      "Neither log contains a Python exception, CUDA fault, vLLM engine-core failure, or worker-initiated exit.",
+      "The v4 diagnostic log path was slower than v3 before strict readiness: model-resolution logging moved from approximately 18 seconds after worker logging began to approximately 33 seconds, while torch.compile moved from 40.90/41.01 seconds to 47.90/48.52 seconds. These wall-clock log deltas are diagnostic only; the authoritative failure is the controller timeout evidence."
+    ]
+  },
+  "serving_work_audit": {
+    "two_engine_readiness_published": false,
+    "gpu0_12_rps_sanity_executed": false,
+    "gpu0_15_rps_sanity_executed": false,
+    "control_interval_executed": false,
+    "overload_interval_executed": false,
+    "reclamation_transaction_executed": false,
+    "restore_serving_executed": false,
+    "probe_count": 0,
+    "sanity_guard_count": 0,
+    "remote_manifest_scientific_serving_artifacts": [],
+    "conclusion": "Attempt v4 contains topology, engine-initialization logs, failure, settlement, and cleanup diagnostics only. It provides no new 12-rps, 15-rps, control, recovery, queue-drain, restore-interference, or transaction metric."
+  },
+  "local_fix": {
+    "status": "IMPLEMENTED_AND_TESTED_NO_GPU_USED",
+    "state_pipeline_changed": false,
+    "movement_pipeline_changed": false,
+    "serving_protocol_changed": false,
+    "description": "Each retained worker now emits an immutable startup barrier immediately before real model construction. The controller validates both PID/UUID-bound barriers, derives the readiness deadline from the earliest real model-load timestamp to match the historical phase definition, retains the absolute controller cap, and emits the clock evidence in controller-result.json.",
+    "changed_artifacts": [
+      {
+        "artifact_reference": "experiments/branchfabric/gpu_reclamation_controller.py",
+        "artifact_sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9"
+      },
+      {
+        "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+        "artifact_sha256": "4ffef92fff01b30a58ac486d84a10e4193778e3cc234c876c975add1c193aadf"
+      },
+      {
+        "artifact_reference": "tests/python/test_experiment_004_v10_sanity_path.py",
+        "artifact_sha256": "8ebde9bb9299a64a2157e9324008cd4a8b8db48d72af3a07613f06f440112d9a"
+      },
+      {
+        "artifact_reference": "tests/python/test_gpu_reclamation_worker_integrated.py",
+        "artifact_sha256": "8c1bf93a8a26cc078cfb96cdc1d9e4f87d2ff6dc37b6b3e9e4154c23838a8a99"
+      }
+    ],
+    "verification": {
+      "targeted_test_command": "uv run pytest -q tests/python/test_experiment_004_v10_sanity_path.py tests/python/test_experiment_004_v10_serving_protocol.py tests/python/test_gpu_reclamation_worker_integrated.py tests/python/test_experiment_004_gpu_harness.py",
+      "targeted_test_result": "42 passed in 4.54s",
+      "ruff_result": "all checks passed",
+      "git_diff_check": "passed",
+      "gpu_used": false
+    }
+  },
+  "budget_audit": {
+    "ledger_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_artifact_sha256": "e25b2730b9d51374aefc8db07e1d2fbe1022687ced6f76d6ad0ce584b3762478",
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "current_conservative_usage_A100_seconds": 10298.167208919993,
+    "remaining_A100_seconds": 501.83279108000715,
+    "superseded_pre_v4_required_A100_seconds": 938.0,
+    "v4_adjusted_startup_upper_bound_wall_seconds": 230.0,
+    "v4_adjusted_evidence_derived_required_A100_seconds": 1176.0,
+    "projected_usage_for_rerun_A100_seconds": 11474.167208919993,
+    "deficit_A100_seconds": 674.1672089199929,
+    "decision": "BUDGET_BLOCKER",
+    "rerun_scientifically_authorized_under_current_ledger": false,
+    "reasoning": "The v4 client-visible startup/import evidence invalidates reuse of the old 135-second startup upper bound and yields a 1,176-A100-second adjusted rerun estimate. The current live ledger cannot satisfy current_conservative_usage + required_A100_seconds <= configured_hard_ceiling even under the superseded 938-second estimate. The controller fix does not authorize weakening the evidence-derived reservation or increasing the configured ceiling."
+  },
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/serving.stdout.log",
+      "artifact_sha256": "41c42801c16dc81f8dbfd93e50f0e8746c04c11541cc1bbf48b04841b1c7a63f"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/logs/rollout.stdout.log",
+      "artifact_sha256": "dc8275a4b59bde23fdbf639e5277e19f28e448775af80cd70b70abb0f0ccb3ab"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+      "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+      "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d"
+    }
+  ],
+  "open_findings": [
+    {
+      "severity": "high",
+      "status": "BLOCKED_BY_CONFIGURED_BUDGET",
+      "finding": "No scientifically valid v10 transaction exists, and the ledger has insufficient remaining authorization for the evidence-derived rerun reservation."
+    },
+    {
+      "severity": "medium",
+      "status": "REQUIRED_BEFORE_ANY_FUTURE_GPU_ALLOCATION",
+      "finding": "Because the controller source changed, any future attempt must commit the fix and regenerate the code-commit-bound immutable authorization and dependent pre-GPU reviews before launch."
+    },
+    {
+      "severity": "high",
+      "status": "REQUIRED_BEFORE_ANY_FUTURE_GPU_ALLOCATION",
+      "finding": "The 135-second startup upper bound is stale against v4's client-visible startup/import proxy; any future phase budget must incorporate the post-v4 evidence and be independently reviewed."
+    }
+  ]
+}

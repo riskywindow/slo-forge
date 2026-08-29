@@ -1,0 +1,97 @@
+{
+  "scenarios": [
+    {
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "hypothesis_kind": "network_bandwidth_degradation",
+      "modifications": [
+        {
+          "fault_id": "degrade-primary-rail",
+          "type": "remove_fault"
+        }
+      ],
+      "rationale": "remove the measured network-path degradation",
+      "scenario_id": "remove-network-fault"
+    },
+    {
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "hypothesis_kind": "rank_straggler",
+      "modifications": [
+        {
+          "fault_id": "slow-rank-six",
+          "type": "remove_fault"
+        }
+      ],
+      "rationale": "remove the rank-specific service-rate degradation",
+      "scenario_id": "remove-rank-fault"
+    },
+    {
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "hypothesis_kind": "network_bandwidth_degradation",
+      "modifications": [
+        {
+          "fault_id": "degrade-primary-rail",
+          "type": "remove_fault"
+        },
+        {
+          "fault_id": "slow-rank-six",
+          "type": "remove_fault"
+        }
+      ],
+      "rationale": "restore both independently observed physical resources",
+      "scenario_id": "remove-both-faults"
+    },
+    {
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "hypothesis_kind": "network_bandwidth_degradation",
+      "modifications": [
+        {
+          "bandwidth_multiplier": 20.0,
+          "latency_multiplier": 1.0,
+          "resource_id": "nic-network:host-0/nic/0:rail-0",
+          "type": "scale_resource_curve"
+        }
+      ],
+      "rationale": "restore calibrated bandwidth while retaining the fault interval",
+      "scenario_id": "restore-network-curve"
+    },
+    {
+      "hypothesis_id": "hypothesis-14-network_bandwidth_degradation",
+      "hypothesis_kind": "network_bandwidth_degradation",
+      "modifications": [
+        {
+          "from_resource_id": "nic-network:host-0/nic/0:rail-0",
+          "to_resource_id": "nic-network:host-0/nic/1:rail-1",
+          "type": "replace_resource"
+        }
+      ],
+      "rationale": "route affected operations onto the alternate rail",
+      "scenario_id": "move-network-resource"
+    },
+    {
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "hypothesis_kind": "rank_straggler",
+      "modifications": [
+        {
+          "duration_multiplier": 0.25,
+          "rank_id": "rank-6",
+          "type": "scale_rank"
+        }
+      ],
+      "rationale": "counteract the measured rank service-time multiplier",
+      "scenario_id": "restore-rank-rate"
+    },
+    {
+      "hypothesis_id": "hypothesis-16-rank_straggler",
+      "hypothesis_kind": "rank_straggler",
+      "modifications": [
+        {
+          "duration_multiplier": 1.25,
+          "rank_id": "rank-1",
+          "type": "scale_rank"
+        }
+      ],
+      "rationale": "negative control: slow an unaffected rank",
+      "scenario_id": "wrong-rank-control"
+    }
+  ]
+}

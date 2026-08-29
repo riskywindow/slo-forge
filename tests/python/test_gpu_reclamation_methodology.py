@@ -21,6 +21,7 @@ from sloforge.helix.characterization.gpu_reclamation_methodology import (
     TraceMetricControl,
     TrialSemanticEvidence,
     analyze_final_campaign,
+    charge_failed_gpu_reservation,
     evaluate_trace_controls,
     evaluate_trial_validity,
     plan_final_campaign,
@@ -407,7 +408,7 @@ def test_gpu_budget_preflight_counts_two_gpus_and_active_reservation() -> None:
     )
 
     assert preflight.proposed_maximum_gpu_seconds == 1_800.0
-    assert preflight.remaining_hard_budget_after_gpu_seconds == 5_400.0
+    assert preflight.remaining_hard_budget_after_gpu_seconds == 9_000.0
     assert not preflight.target_exceeded_if_fully_consumed
     assert reserved.committed_additional_gpu_seconds == 1_800.0
     with pytest.raises(ValueError, match="already active"):
@@ -426,7 +427,7 @@ def test_gpu_budget_hard_stop_includes_consumed_hours() -> None:
         ledger,
         reservation_id="first",
         invocation_id="first",
-        maximum_wall_seconds=1_800.0,
+        maximum_wall_seconds=1_801.0,
         config_sha256="c" * 64,
     )
     settled = settle_gpu_invocation(
@@ -435,21 +436,50 @@ def test_gpu_budget_hard_stop_includes_consumed_hours() -> None:
         function_call_id="fc-first",
         actual_gpu_models=("NVIDIA A100 80GB PCIe", "NVIDIA A100 80GB PCIe"),
         gpu_uuids=("GPU-first-1", "GPU-second-2"),
-        client_elapsed_seconds=1_700.0,
-        remote_observed_allocation_seconds=1_650.0,
+        client_elapsed_seconds=1_801.0,
+        remote_observed_allocation_seconds=1_801.0,
         raw_manifest=_artifact("first"),
         gpu_price_per_hour_usd=3.0,
     )
-    assert settled.consumed_additional_gpu_hours == pytest.approx(3_400.0 / 3_600.0)
-    assert settled.intervals[0].gpu_cost_usd == pytest.approx(3_400.0 / 3_600.0 * 3.0)
-    with pytest.raises(ValueError, match=r"would exceed 2\.0"):
+    assert settled.consumed_additional_gpu_hours == pytest.approx(3_602.0 / 3_600.0)
+    assert settled.intervals[0].gpu_cost_usd == pytest.approx(3_602.0 / 3_600.0 * 3.0)
+    with pytest.raises(ValueError, match="configured hard ceiling"):
         reserve_gpu_invocation(
             settled,
             reservation_id="too-large",
             invocation_id="too-large",
-            maximum_wall_seconds=2_000.0,
+            maximum_wall_seconds=3_600.0,
             config_sha256="d" * 64,
         )
+
+
+def test_gpu_budget_honors_authoritative_configured_larger_ceiling() -> None:
+    ledger = Experiment004GpuHourLedger(
+        hard_additional_gpu_seconds=12_600.0,
+        consumed_additional_gpu_seconds=0.0,
+    )
+    reserved, preflight = reserve_gpu_invocation(
+        ledger,
+        reservation_id="explicit-larger-ceiling",
+        invocation_id="explicit-larger-ceiling",
+        maximum_wall_seconds=3_600.0,
+        config_sha256="c" * 64,
+    )
+
+    assert reserved.hard_additional_gpu_seconds == 12_600.0
+    assert preflight.projected_committed_gpu_seconds == 7_200.0
+    assert preflight.remaining_hard_budget_after_gpu_seconds == 5_400.0
+    settled = settle_gpu_invocation(
+        reserved,
+        reservation_id="explicit-larger-ceiling",
+        function_call_id="fc-explicit-larger-ceiling",
+        actual_gpu_models=("NVIDIA A100 80GB PCIe", "NVIDIA A100 80GB PCIe"),
+        gpu_uuids=("GPU-larger-first", "GPU-larger-second"),
+        client_elapsed_seconds=1.0,
+        remote_observed_allocation_seconds=1.0,
+        raw_manifest=_artifact("explicit-larger-ceiling"),
+    )
+    assert settled.hard_additional_gpu_seconds == 12_600.0
 
 
 def test_gpu_settlement_uses_conservative_elapsed_bound_and_rejects_overrun() -> None:
@@ -473,6 +503,31 @@ def test_gpu_settlement_uses_conservative_elapsed_bound_and_rejects_overrun() ->
         )
 
 
+def test_failed_gpu_reservation_is_cleared_and_charged_without_fabricated_interval() -> None:
+    ledger, _ = reserve_gpu_invocation(
+        Experiment004GpuHourLedger(consumed_additional_gpu_seconds=0.0),
+        reservation_id="failed-reservation",
+        invocation_id="failed-invocation",
+        maximum_wall_seconds=456.3125,
+        config_sha256="c" * 64,
+    )
+    charged = charge_failed_gpu_reservation(
+        ledger,
+        reservation_id="failed-reservation",
+        failure_stage="modal-process",
+        failure_evidence=_artifact("failed-charge"),
+        gpu_price_per_hour_usd=2.4984,
+    )
+
+    assert not charged.reservations
+    assert not charged.intervals
+    assert charged.consumed_additional_gpu_seconds == 912.625
+    charge = charged.conservative_failure_charges[0]
+    assert charge.charged_wall_seconds == 456.3125
+    assert charge.conservative_gpu_seconds == 912.625
+    assert charge.conservative_gpu_cost_usd == pytest.approx(912.625 / 3_600.0 * 2.4984)
+
+
 def test_gpu_ledger_rejects_fabricated_consumption() -> None:
-    with pytest.raises(ValueError, match="must equal settled intervals"):
+    with pytest.raises(ValueError, match="must equal settled intervals and failure charges"):
         Experiment004GpuHourLedger(consumed_additional_gpu_seconds=1.0)

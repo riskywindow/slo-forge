@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0.0",
+  "expected_first_regressing_commit": "17afc8fb225f09c2deb0d0bd4509107892bfd87a",
+  "identified_first_regressing_commit": "17afc8fb225f09c2deb0d0bd4509107892bfd87a",
+  "bisection_correct": true,
+  "commits_in_range": 4,
+  "unique_commits_evaluated": 3,
+  "inconclusive_rate": 0.0,
+  "comparison": {
+    "schema_version": "1.0.0",
+    "comparison_id": "forgeci-intentional-regression-1efc47156bac-8e58561496--forgeci-intentional-regression-17afc8fb225f-0387e5e00b",
+    "baseline_run_id": "forgeci-intentional-regression-1efc47156bac-8e58561496",
+    "candidate_run_id": "forgeci-intentional-regression-17afc8fb225f-0387e5e00b",
+    "classification": "regression",
+    "metrics": [
+      {
+        "metric": "p99_ttft_ms",
+        "unit": "ms",
+        "baseline_median": 100.1467666484547,
+        "candidate_median": 112.16437864626927,
+        "degradation_percent": 12.000000000000005,
+        "degradation_ci_low_percent": 11.467605713847089,
+        "degradation_ci_high_percent": 12.53493712067524,
+        "cliffs_delta": 1.0,
+        "noise_floor_percent": 0.31243573491120286,
+        "corrected_significance_level": 0.025,
+        "classification": "regression",
+        "rationale": "degradation 12.000% exceeds practical/noise threshold 5.000% and corrected 97.5% interval excludes zero"
+      },
+      {
+        "metric": "throughput_rps",
+        "unit": "request/s",
+        "baseline_median": 99.85344844035764,
+        "candidate_median": 89.15486467889075,
+        "degradation_percent": 10.714285714285719,
+        "degradation_ci_low_percent": 10.287837116808655,
+        "degradation_ci_high_percent": 11.204913099473204,
+        "cliffs_delta": 1.0,
+        "noise_floor_percent": 0.3117787080006179,
+        "corrected_significance_level": 0.025,
+        "classification": "regression",
+        "rationale": "degradation 10.714% exceeds practical/noise threshold 5.000% and corrected 97.5% interval excludes zero"
+      }
+    ],
+    "correction_method": "bonferroni",
+    "warnings": []
+  },
+  "bisection": {
+    "schema_version": "1.0.0",
+    "repository": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/forgeci-demo/fixture-repository",
+    "good_commit": "1efc47156bacf885ae1253bf7039b7e56977ee68",
+    "bad_commit": "b67ae11c2464ab51afe38862f33950c7d9890e0c",
+    "first_regressing_commit": "17afc8fb225f09c2deb0d0bd4509107892bfd87a",
+    "confidence": 0.975,
+    "steps": [
+      {
+        "commit": "b67ae11c2464ab51afe38862f33950c7d9890e0c",
+        "classification": "regression",
+        "comparison_artifact": "artifacts/helix/baseline/forgeci-demo/bisect/comparisons/b67ae11c2464ab51afe38862f33950c7d9890e0c-0.json",
+        "repetitions": 7,
+        "attempt": 0
+      },
+      {
+        "commit": "b15b65e0c7371ffca24c72e074df6c3fc0532db6",
+        "classification": "unchanged",
+        "comparison_artifact": "artifacts/helix/baseline/forgeci-demo/bisect/comparisons/b15b65e0c7371ffca24c72e074df6c3fc0532db6-0.json",
+        "repetitions": 7,
+        "attempt": 0
+      },
+      {
+        "commit": "17afc8fb225f09c2deb0d0bd4509107892bfd87a",
+        "classification": "regression",
+        "comparison_artifact": "artifacts/helix/baseline/forgeci-demo/bisect/comparisons/17afc8fb225f09c2deb0d0bd4509107892bfd87a-0.json",
+        "repetitions": 7,
+        "attempt": 0
+      }
+    ],
+    "inconclusive_commits": [],
+    "artifact_directory": "artifacts/helix/baseline/forgeci-demo/bisect",
+    "caveats": []
+  },
+  "reproducer": {
+    "schema_version": "1.0.0",
+    "good_commit": "1efc47156bacf885ae1253bf7039b7e56977ee68",
+    "bad_commit": "b67ae11c2464ab51afe38862f33950c7d9890e0c",
+    "benchmark": {
+      "command": {
+        "executable": "/Users/rishivinodkumar/sloforge/.venv/bin/python3",
+        "arguments": [
+          "benchmark.py"
+        ],
+        "timeout_seconds": 5.0
+      },
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "unit": "ms",
+          "direction": "lower_is_better",
+          "practical_threshold_percent": 5.0,
+          "significance_level": 0.05,
+          "maximum_noise_percent": 3.0
+        },
+        {
+          "name": "throughput_rps",
+          "unit": "request/s",
+          "direction": "higher_is_better",
+          "practical_threshold_percent": 5.0,
+          "significance_level": 0.05,
+          "maximum_noise_percent": 3.0
+        }
+      ],
+      "input": {
+        "model": "synthetic-moe",
+        "workload": "long-context",
+        "physical_plan": null,
+        "prompt_tokens": 1,
+        "output_tokens": 1,
+        "concurrency": 1,
+        "runtime_arguments": []
+      },
+      "warmup_trials": 2,
+      "repetitions": 7,
+      "maximum_repetitions": 21,
+      "failed_trial_retries": 1,
+      "bootstrap_rounds": 500,
+      "seed": 2026
+    },
+    "steps": [
+      {
+        "field": "prompt_tokens",
+        "before": "256",
+        "after": "128",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "128",
+        "after": "64",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "64",
+        "after": "32",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "32",
+        "after": "16",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "16",
+        "after": "8",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "8",
+        "after": "4",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "4",
+        "after": "2",
+        "preserved_regression": true
+      },
+      {
+        "field": "prompt_tokens",
+        "before": "2",
+        "after": "1",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "64",
+        "after": "32",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "32",
+        "after": "16",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "16",
+        "after": "8",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "8",
+        "after": "4",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "4",
+        "after": "2",
+        "preserved_regression": true
+      },
+      {
+        "field": "output_tokens",
+        "before": "2",
+        "after": "1",
+        "preserved_regression": true
+      },
+      {
+        "field": "concurrency",
+        "before": "8",
+        "after": "4",
+        "preserved_regression": true
+      },
+      {
+        "field": "concurrency",
+        "before": "4",
+        "after": "2",
+        "preserved_regression": true
+      },
+      {
+        "field": "concurrency",
+        "before": "2",
+        "after": "1",
+        "preserved_regression": true
+      },
+      {
+        "field": "runtime_arguments",
+        "before": "--collective ring --diagnostics",
+        "after": "ring --diagnostics",
+        "preserved_regression": true
+      },
+      {
+        "field": "runtime_arguments",
+        "before": "ring --diagnostics",
+        "after": "--diagnostics",
+        "preserved_regression": true
+      },
+      {
+        "field": "runtime_arguments",
+        "before": "--diagnostics",
+        "after": "<empty>",
+        "preserved_regression": true
+      }
+    ],
+    "reproduction_commands": [
+      "git checkout --detach b67ae11c2464ab51afe38862f33950c7d9890e0c",
+      "/Users/rishivinodkumar/sloforge/.venv/bin/python3 benchmark.py"
+    ],
+    "expected_regression": "both p99 TTFT and throughput degrade by at least 5%",
+    "confidence_interval": "family-wise 95% bootstrap intervals exclude zero",
+    "hardware": {
+      "architecture": "cpu",
+      "minimum_cpu_cores": 1,
+      "minimum_memory_gib": 0.25,
+      "gpu_count": 0,
+      "gpu_model": null,
+      "minimum_gpu_memory_gib": null,
+      "requires_rdma": false,
+      "topology_fingerprint": null
+    },
+    "artifact_references": [
+      "artifacts/helix/baseline/forgeci-demo/bisect/bisect-result.json",
+      "artifacts/helix/baseline/forgeci-demo/bisect/comparisons/17afc8fb225f09c2deb0d0bd4509107892bfd87a-0.json",
+      "artifacts/helix/baseline/forgeci-demo/minimization"
+    ]
+  },
+  "report_path": "reports/helix-baseline/forgeci-evaluation.md",
+  "issue_path": "artifacts/helix/baseline/forgeci-demo/upstream-issue.md"
+}

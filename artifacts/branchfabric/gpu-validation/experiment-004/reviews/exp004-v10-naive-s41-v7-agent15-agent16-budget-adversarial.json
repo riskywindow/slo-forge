@@ -1,0 +1,187 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-postrun-budget-adversarial-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v7",
+  "reviewed_at_utc": "2026-08-13T17:14:27Z",
+  "reviewers": [
+    {
+      "identity": "/root/v6_science_budget_reviewer",
+      "role": "Agent 15: independent budget reviewer"
+    },
+    {
+      "identity": "/root/v6_science_budget_reviewer",
+      "role": "Agent 16: adversarial BranchFabric reviewer"
+    }
+  ],
+  "decision": "APPROVED",
+  "open_high_severity_findings": 0,
+  "open_medium_severity_findings": 0,
+  "adversarial_question": "Would I accept this as a valid capacity-reclamation baseline if I did not know the team wanted to build an FPGA?",
+  "adversarial_answer": "YES",
+  "adversarial_rationale": "The immutable raw transaction, strict 23-gate scientific assessment, independently recomputed movement graph, settled budget ledger, and provider cleanup evidence establish a valid naive-preservation capacity-reclamation baseline without relying on an FPGA motivation. This single run is a frozen baseline, not a causal hardware-comparison campaign or FPGA justification.",
+  "budget_audit": {
+    "passed": true,
+    "configured_hard_ceiling_A100_seconds": 13500.0,
+    "configured_hard_ceiling_A100_hours": 3.75,
+    "evidence_derived_required_A100_seconds": 1176.0,
+    "predicted_wall_clock_seconds": 588.0,
+    "conservative_usage_before_A100_seconds": 11798.636304585969,
+    "v7_actual_A100_seconds": 530.812374186,
+    "v7_actual_A100_hours": 0.14744788171833334,
+    "v7_actual_gpu_cost_usd": 0.36838378768508406,
+    "v7_conservative_A100_seconds": 758.1873215000087,
+    "v7_conservative_A100_hours": 0.21060758930555798,
+    "v7_conservative_gpu_cost_usd": 0.5261820011210061,
+    "conservative_usage_after_A100_seconds": 12556.823626085978,
+    "cumulative_conservative_A100_hours": 3.4880065628016603,
+    "cumulative_conservative_gpu_cost_usd": 8.71443559650367,
+    "remaining_hard_budget_A100_seconds": 943.1763739140224,
+    "remaining_hard_budget_A100_hours": 0.26199343719833955,
+    "settled_v7_interval_count": 1,
+    "active_reservation_count": 0,
+    "arithmetic_recomputed": true,
+    "within_configured_ceiling": true,
+    "ledger_sha256": "cd34f0636d5f091345104f953c27b6cd64966e82241ee14bd0b725239c94d39f"
+  },
+  "scientific_validity_audit": {
+    "passed": true,
+    "scientifically_valid": true,
+    "required_boolean_count": 23,
+    "required_booleans_true": 23,
+    "invalid_reasons": [],
+    "scientific_validity_sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+    "key_observations": {
+      "control_p95_ttft_ms": 42.30888925,
+      "overload_completion_rate_rps": 11.504236878610055,
+      "overload_p95_ttft_ms": 266.8400262,
+      "trigger_queue_depth": 20,
+      "maximum_queue_depth": 28,
+      "queue_drain_slope_requests_per_second": -2.4857142857142858,
+      "two_gpu_completed_rate_rps": 15.878388526620336,
+      "two_gpu_offered_rate_rps": 14.966710716479456,
+      "time_to_hbm_reclamation_seconds": 5.222174431,
+      "time_to_first_useful_gpu1_request_seconds": 5.413681427,
+      "time_to_serving_slo_restoration_seconds": 11.373208336,
+      "gpu0_restore_completions": 71,
+      "gpu0_restore_emitted_tokens": 4507,
+      "branch_first_token_matches": 8,
+      "branch_count": 8,
+      "logical_state_bytes": 1056964608,
+      "external_movement_amplification": 3.0,
+      "full_physical_touch_amplification": 58.0,
+      "avoidable_movement_amplification": 31.0
+    }
+  },
+  "cleanup_audit": {
+    "passed": true,
+    "modal_app_state": "stopped",
+    "active_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ],
+    "transient_exchange_verified_absent": true,
+    "cleanup_evidence_sha256": "306bb58e033fe931a7f6b332220988838bddd5a13e278d1104b289a2c72fa185"
+  },
+  "baseline_audit": {
+    "passed": true,
+    "status": "FROZEN",
+    "immutable": true,
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "baseline_internal_artifact_hash": "f58dfaab2301ab8f449efa38ba634ada80a41acc70ba97d73bcb151ab1b1d2fd",
+    "baseline_file_sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+    "baseline_status_sha256": "138641a1e8081b82e104ff037b8d19eeb3ad6fe7edaf047923eea2358d905b46",
+    "recommended_git_tag": "branchfabric-exp004-naive-baseline-v10",
+    "git_tag_created": false
+  },
+  "findings": [
+    {
+      "id": "BUDGET-V7-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The v7 transaction was authorized by the 1,176 A100-second evidence-derived attempt budget, settled exactly once at 758.1873215000087 conservative A100-seconds, and left 943.1763739140224 A100-seconds below the configured cumulative ceiling with zero reservations."
+    },
+    {
+      "id": "BUDGET-V7-N2",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Independent arithmetic reproduces the authoritative ledger, invocation and cumulative cost, and remaining-budget values; no fixed 1,800-second reservation or duplicate v7 charge exists."
+    },
+    {
+      "id": "SCIENCE-V7-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The canonical scientific-validity object has all 23 required booleans true and no invalid reasons. Its capacity recovery, queue drain, SLO stability, restore serving activity, branch correctness, and movement accounting are supported by hash-bound raw artifacts."
+    },
+    {
+      "id": "CLEANUP-V7-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Saved provider queries show the Modal app stopped with zero tasks, containers, endpoints, reservations, child processes, and profilers; only the two authorized persistent volumes remain."
+    },
+    {
+      "id": "BASELINE-V7-M1",
+      "severity": "medium",
+      "status": "RESOLVED",
+      "finding": "The companion baseline status initially retained a superseded v4 NOT_FROZEN result. It now identifies v7 as FROZEN and binds the canonical validity and immutable baseline hashes."
+    },
+    {
+      "id": "BASELINE-V7-M2",
+      "severity": "medium",
+      "status": "RESOLVED",
+      "finding": "The immutable baseline initially bound only the paid execution commit. It now separately binds execution commit c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39 and analysis/postprocessing commit 1c51853e10809686d4368037153927f25e834117."
+    },
+    {
+      "id": "BUDGET-V7-A1",
+      "severity": "advisory",
+      "status": "NON_BLOCKING_FUTURE_ACTION",
+      "finding": "Several individual diagnostic phase spans exceeded their pre-run per-phase selected bounds, but the actual 530.812374186 A100-seconds and conservative 758.1873215000087 A100-seconds both remained below the authorized 1,176 A100-seconds. Future phase-budget revisions should incorporate the v7 observations without retroactively changing this immutable authorization."
+    },
+    {
+      "id": "ADVERSARIAL-V7-N1",
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The baseline is acceptable independently of any FPGA intent. No FPGA justification, optimized preservation, kill-and-recompute experiment, extra seed, or broad recalibration is claimed by this result."
+    }
+  ],
+  "artifact_references": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "cd34f0636d5f091345104f953c27b6cd64966e82241ee14bd0b725239c94d39f"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/budget-settlement.json",
+      "sha256": "18f7458a6a196ef92e908f81688940a2d4137963d1fd7b9f39e9e15b86c84b64"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/gpu-phase-ledger.json",
+      "sha256": "66c874c1e11a648c6c0e286fd49dc96c17454ac0ece93a27c275419cb0f6adef"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v7.json",
+      "sha256": "306bb58e033fe931a7f6b332220988838bddd5a13e278d1104b289a2c72fa185"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/v10-naive-baseline-status.json",
+      "sha256": "138641a1e8081b82e104ff037b8d19eeb3ad6fe7edaf047923eea2358d905b46"
+    },
+    {
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v10-final.json",
+      "sha256": "e273c29dca0571fe3f327d5dffa5890d98dfc23948ec8bb89da21db62ee096f9"
+    }
+  ],
+  "gpu_or_modal_invoked_by_reviewer": false
+}

@@ -1,0 +1,143 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-scientific-validity-review/v1",
+  "agent": 6,
+  "role": "scientific-validity-review",
+  "reviewed_at_utc": "2026-08-20T02:40:41Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "Offline-only pre-GPU scientific-validity review; no Modal, cloud, CUDA, GPU, commit, or tag operation was performed.",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "fresh_attempt_requirement": {
+    "required": true,
+    "attempt_id": "exp004-v11-integrated-s41-c",
+    "prior_invalid_attempt_id": "exp004-v11-integrated-s41-b",
+    "prior_status_required": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+    "reason": "Attempt b already has immutable invalid evidence. Reusing its identity would mix the 65-request pre-reclaim failure with the retry and collide with immutable remote publication.",
+    "sealed_manifest_required": true,
+    "outer_manifest_rule": "The attempt-c config seals a post-fix outer manifest; that manifest must hash-bind Agents 1-8, current source/tests, and fresh make-check evidence without self-hash cycles.",
+    "prior_provider_cleanup_pass_required": true,
+    "prior_active_ledger_reservations_required": 0
+  },
+  "review_result": {
+    "early_trigger": "PASS",
+    "trigger_exactly_once": "PASS",
+    "trigger_starvation_resistance": "PASS",
+    "emergency_abort_independence": "PASS",
+    "controller_reaction_instrumentation": "PASS",
+    "process_cleanup_contract": "PASS",
+    "fresh_attempt_exactly_once_admission": "PASS",
+    "sanity_guard_methodology": "PASS",
+    "recovery_and_slo_methodology": "PASS",
+    "restore_precondition_and_gpu0_interference": "PASS",
+    "cross_process_timestamp_accounting": "PASS",
+    "canonical_state_pass_accounting": "PASS",
+    "v11_state_pipeline_freeze_integrity": "PASS",
+    "scientific_fail_closed_validation": "PASS"
+  },
+  "scientific_contract": {
+    "normal_trigger": 20,
+    "maximum_scientifically_accepted_trigger_depth": 30,
+    "emergency_abort": 64,
+    "maximum_controller_reaction_ns": 100000000,
+    "required_slo_windows": 5,
+    "slo_window_seconds_each": 1,
+    "slo_ttft_limit_ns": 2000000000,
+    "recovery_queue_threshold": 4,
+    "control_rate_rps": 9.0,
+    "spike_rate_rps": 15.0,
+    "restore_interference_rate_rps": 9.0,
+    "sanity_guards": [
+      {"rate_rps": 12.0, "measurement_seconds": 3.0},
+      {"rate_rps": 15.0, "measurement_seconds": 3.0}
+    ],
+    "broad_capacity_recalibration_allowed": false,
+    "required_causal_order": [
+      "RECLAIM_TRIGGER_EMITTED",
+      "ROLLOUT_ADMISSION_STOP",
+      "EXPORT_STARTED",
+      "STATE_QUIESCENCE",
+      "EXPORT_ENDED",
+      "HBM_RECLAIM_CONFIRMED",
+      "FIRST_USEFUL_GPU1",
+      "SLO_RESTORATION_WINDOW_START",
+      "RESTORE_TRIGGER",
+      "RESTORE_STARTED",
+      "RESTORE_NATIVE_COMPLETE",
+      "FIRST_RESUMED_TOKEN",
+      "ALL_BRANCHES_RESUMED",
+      "CONTINUATION_COMPLETE"
+    ],
+    "cross_process_clock_basis": "time.monotonic_ns in two child processes of one Modal function/container; Linux monotonic time is host-wide and directly comparable across those processes",
+    "movement_validation": "Every canonical pass ID is unique, belongs to capture or restore, lies within its measured chain, and physical_touch_bytes sum exactly to integrated full_physical_bytes; reported amplification ratios are recomputed from integrated logical bytes.",
+    "classification_on_missing_decisive_evidence": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "freeze_integrity": {
+    "frozen_v10_source_matches_annotated_tag": true,
+    "frozen_v10_source_sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+    "v11_core_matches_real_a100_micro_validation_attempt_d": true,
+    "v11_optimization_modified_by_agent06": false,
+    "v11_core_source_hashes_sha256": {
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+      "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30"
+    }
+  },
+  "changes_made": [
+    "Fresh attempt-c authorization now accepts attempt b only as a hash-bound invalid pre-reclaim predecessor with provider cleanup PASS, verified remote manifest, zero active ledger reservations, and ledger continuity.",
+    "Attempt-c admission now requires an outer hash-sealed PASS set for all eight pre-GPU roles plus fresh make-check evidence; loaded evidence agent/role identities are checked against outer bindings.",
+    "The integrated source/test binding set now includes the early-trigger overlay and both trigger tests.",
+    "Remote packaging now includes v11-final evidence and attempt-b postflight cleanup instead of attempt-a cleanup.",
+    "Controller scientific validation now rejects missing, contradictory, noncausal, or arithmetically inconsistent decisive integrated evidence."
+  ],
+  "launch_blockers_remaining": [
+    "The standardized Agent 1/3/5/8 evidence wrappers, this Agent 6 hash, and fresh make-check evidence must be assembled into the outer attempt-c manifest after all reviews finish.",
+    "The attempt-c config and one atomic ledger reservation must be created only after the outer manifest is sealed.",
+    "The full repository make check was intentionally left to the root coordinator because concurrent offline fixes were still landing; attempt-c admission rejects a missing or stale make-check artifact."
+  ],
+  "launch_authorized_by_agent06_alone": false,
+  "test_results": [
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric pytest -q tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "status": "PASS",
+      "passed": 58
+    },
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric pytest -q controller/trigger/race/worker/methodology/modal targeted set -k not image_layout_materializes_all_replacement_evidence_bindings",
+      "status": "PASS",
+      "passed": 117,
+      "deselected": 1,
+      "deselection_reason": "The functional image-layout test requires the root-owned fresh make-check artifact, which did not yet exist during this independent review."
+    },
+    {
+      "command": "ruff check integrated controller/launcher and their tests",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m py_compile integrated controller/trigger/worker/launcher/methodology",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check on Agent 6 edited sources/tests",
+      "status": "PASS"
+    }
+  ],
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py": "de5dd17bbabf5a31055096d77fabcfdc2bec4cf04aa8d2545097e1bf85d84bbe",
+    "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd",
+    "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": "432f0906ced864e10e7be7552c02b5efb9d4b0dd4d358a5ce7788ea0a210d1ca",
+    "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py": "ebea747e9bcae1578db92982f5164160fc55ce4eb9c7ab8f02af92aa91720590",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "efdd3450cedae16c041e858809489e93e0214c57f59cecbe6f0044aad048b72c"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_controller_v11.py": "22a67e1da747038152b5a717cd6ebac7942b3678264679b479139f45e5c5a73d",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11.py": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599",
+    "tests/python/test_gpu_reclamation_integrated_worker_v11.py": "5292a705779b6ccd5daec3e4b2743daad167e21e64a553c484f40d6c0e6deae9",
+    "tests/python/test_modal_gpu_reclamation_integrated_v11.py": "8cb2d10f3a0516c047bf458b022049a110e22c7a498d7514f48315831ea13844",
+    "tests/python/test_gpu_reclamation_v11_methodology.py": "7d473282c07c3f4aa1b22f1f2ea100f06f4a2ac9203935ee9eb2a8209a8e277d"
+  },
+  "do_not_launch_modal_from_this_agent": true
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-a-capacity-methodology",
+  "reviewer_role": "capacity_methodology",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T04:28:32Z",
+  "authorization_subject_sha256": "63810b6ca42ba5c09efb305cebe004ab42ed43e971b382f2fdc9b6c3613b1acd",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The 12-rps one-GPU raw evidence independently re-evaluates to 11.9 completions/s, 44.20-ms p95 TTFT, queue depth 11 to 12, no persistent positive drift, and a sustainable verdict.",
+    "The 15-rps one-GPU raw evidence independently re-evaluates to 14.4 completions/s, queue depth 15 to 21, +0.582 requests/s queue slope, and an unsustainable verdict without a catastrophic backlog.",
+    "The 20-rps two-GPU raw evidence independently re-evaluates to 19.9 completions/s, 42.44-ms p95 TTFT, queue depth 18 to 19, no persistent positive drift, and 100 completed measurement-cohort requests on each GPU.",
+    "The selected spike is exactly 25 percent above the validated one-GPU point, preserves exactly 25 percent nominal reserve below the validated two-GPU point, and yields 5 rps nominal drain headroom.",
+    "The prior agent11, agent12, and agent13 approvals bind the same selected-load SHA-256; their late arrival invalidated only the live handoff, not the measured capacity evidence. The v10 authorization correctly forbids a live or asynchronous review wait."
+  ]
+}

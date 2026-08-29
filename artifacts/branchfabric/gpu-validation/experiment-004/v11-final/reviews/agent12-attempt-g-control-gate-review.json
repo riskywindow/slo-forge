@@ -1,0 +1,553 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-g-control-gate-review/v1",
+  "agent": 12,
+  "role": "runtime-synchronization-and-control-methodology-reviewer",
+  "attempt_id": "exp004-v11-integrated-s41-g",
+  "reviewed_at_utc": "2026-08-27T02:11:52Z",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "terminal_analysis_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "review_status": "PASS",
+  "attempt_g_scientific_status": "INVALID_POSTHOC_CONTROL_GATE_BUG",
+  "attempt_g_scientifically_valid": false,
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED",
+  "decision": "CORRECT_SCOPED_CONTROL_GATE_AND_REQUIRE_COMPLETE_FAIL_CLOSED_EVIDENCE",
+  "summary": "Attempt G completed the optimized source transaction, passed both 1,152-allocation identity gates, released the source, reclaimed HBM, made GPU1 useful, recovered the two-GPU serving SLO, restored all eight branches, and produced exact continuations. The serving worker then failed in a post-transaction control validator because that validator treats naturally in-service requests at the right edge of a finite five-second control cohort as evidence of instability. Frozen scientifically valid v10 attempt v7 fails the two newly imposed right-edge conjuncts while satisfying the actual service and SLO properties. This is a post-hoc methodology gate bug, not an allocator, source-identity, queue-accounting, export, release, recovery, or restore failure.",
+  "review_constraints": {
+    "local_immutable_attempt_g_bundle_only": true,
+    "repository_source_only": true,
+    "modal_invoked_by_reviewer": false,
+    "gpu_invoked_by_reviewer": false,
+    "network_invoked_by_reviewer": false,
+    "attempt_g_raw_evidence_modified": false,
+    "frozen_v10_v7_evidence_modified": false,
+    "runtime_source_modified_by_reviewer": false,
+    "only_this_reviewer_artifact_created": true
+  },
+  "evidence_bindings": {
+    "attempt_g_authorization_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-g-post-queue-accounting-pre-gpu-manifest.json",
+      "sha256": "56ea4d4c98a3fee1c6ca0e00290660783a09aed5cac7ddad0164009f3086f439"
+    },
+    "attempt_g_config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-g-config.json",
+      "sha256": "a386fc4b1e119315e5c2054629d8ef06b6a6d1577c1a9b4d99bf9eb2f4dbd616"
+    },
+    "attempt_g_seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/seal-verification-attempt-g.json",
+      "sha256": "b42411d960cd1e63ef4340bc9ee9bf6d732e88057cea3bee5bed03475bd34fc6"
+    },
+    "attempt_g_remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/REMOTE_MANIFEST.json",
+      "sha256": "295d7acb987edc0d450a5ed6004663ecf541e1277d467516669ecc706cc56541",
+      "declared_artifact_count": 475,
+      "verified_artifact_count": 475,
+      "integrity": "PASS"
+    },
+    "attempt_g_controller_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/controller-result.json",
+      "sha256": "42fbc59f8aa579b53f22d7455b32a6604b541a61dbe7df28af77fb5d0745004d",
+      "status": "failed"
+    },
+    "attempt_g_function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/function-completion.json",
+      "sha256": "eba7d8cc6e58f6fccfb7ccfae5977ed0e7b3978eda5a6738b6b35510ca031701",
+      "status": "failed",
+      "scientific_status": "invalid"
+    },
+    "attempt_g_serving_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/serving/failure.json",
+      "sha256": "9f3d074020145814c3a8838a686bb9634fbdb45401cefa391c4b4d5dd9b69d9f",
+      "status": "failed"
+    },
+    "attempt_g_rollout_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/rollout/result.json",
+      "sha256": "eba8eb44644b40ffaf1075771f62e1e1f0479f4e30bed9aa029800cb86e17807",
+      "status": "succeeded"
+    },
+    "attempt_g_provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-g.json",
+      "sha256": "6983acd188e961ee2194f9157ff80b7eb9f031035f79a4aa6b77eff4faaf2604",
+      "status": "PASS"
+    },
+    "authoritative_gpu_ledger_after_g": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "4259181994cde63bb783fc42e6533ea79fc6f88cb7f1ebbc555baee40d2f8bf4"
+    },
+    "frozen_v10_v7_remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/REMOTE_MANIFEST.json",
+      "sha256": "ada4d36309500d9e02d13cb1f31ce741248fdf54edddfc801155d13a3175ae04"
+    },
+    "frozen_v10_v7_serving_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477"
+    },
+    "frozen_v10_v7_scientific_validity": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8",
+      "scientifically_valid": true
+    },
+    "attempt_g_executed_worker_binding": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "c22082b6a58a8ac20f264c68e48e03fce68b0c3a45bbf400f1e0388554119201",
+      "binding_source": "attempt_g_authorization_manifest.integrated_prelaunch.bindings[label=worker]"
+    },
+    "frozen_v10_serving_methodology_binding": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+      "sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba",
+      "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+      "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+      "analysis_commit": "1c51853e10809686d4368037153927f25e834117"
+    }
+  },
+  "first_failure": {
+    "classification": "POSTHOC_CONTROL_METHODOLOGY_GATE_BUG",
+    "observed_at_monotonic_ns": 237839804532,
+    "worker_role": "serving",
+    "exception_type": "RuntimeError",
+    "exception_message": "integrated v11 9-rps control interval was not stable",
+    "call_path": [
+      "run_integrated_v11_gpu0",
+      "_validate_gpu0_result",
+      "_control_interval_evidence"
+    ],
+    "executed_source_lines": {
+      "control_evidence": "409-515",
+      "validator_call": "603-608"
+    },
+    "transaction_phase": "POST_TRANSACTION_RESULT_VALIDATION_AFTER_ROLLOUT_RESTORE_AND_CONTINUATION",
+    "first_detected_failure_exact": true,
+    "exact_failed_control_conjunct_recoverable": false,
+    "recoverability_reason": "The helper constructs the evidence mapping and raises before returning it; the serving result is therefore not written and the immutable failure contains only the aggregate exception.",
+    "allocator_or_source_lifecycle_implicated": false,
+    "queue_accounting_failure_implicated": false,
+    "export_or_release_failure_implicated": false
+  },
+  "old_control_invariant": {
+    "cohort": "control requests scheduled in [start_ns, spike_start_ns)",
+    "expected_duration_seconds": 5.0,
+    "expected_rate_per_second": 9.0,
+    "expected_arrivals": 45,
+    "conjuncts": [
+      "exactly 45 selected request rows",
+      "TTFT present for all selected rows",
+      "exact offered rate of 9 requests per second",
+      "requests completed by spike_start_ns divided by five seconds is at least 90 percent of offered rate",
+      "p95 TTFT is below two seconds",
+      "terminal total outstanding requests is at most four",
+      "maximum total outstanding requests is below the normal trigger of twenty"
+    ],
+    "unstable_fields": [
+      "completed_by_interval_end",
+      "terminal_total_outstanding"
+    ],
+    "semantic_defect": "The right boundary stops admitting the finite control cohort but does not drain it. Requests that arrived near that boundary and are legitimately running are counted as backlog. Completion fraction at the admission boundary and terminal total active requests therefore depend on right-edge censoring and output length, not only on sustainable serving capacity."
+  },
+  "frozen_valid_v10_v7_replay": {
+    "source": "frozen_v10_v7_serving_result",
+    "selection": "phase == control and start_ns <= scheduled_arrival_ns < spike_start_ns",
+    "start_ns": 217086831552,
+    "spike_start_ns": 222086831552,
+    "duration_seconds": 5.0,
+    "arrivals": 45,
+    "sequence_first": 0,
+    "sequence_last": 44,
+    "completed_by_spike_boundary": 37,
+    "completed_by_spike_boundary_fraction": 0.8222222222222222,
+    "completed_eventually": 45,
+    "eventual_completion_fraction": 1.0,
+    "all_output_token_counts": 64,
+    "p95_ttft_ns_linear_interpolation": 42932950.6,
+    "p95_ttft_ms_linear_interpolation": 42.9329506,
+    "maximum_total_outstanding": 10,
+    "terminal_total_outstanding": 8,
+    "first_to_last_completion_span_seconds": 5.058423988,
+    "steady_intercompletion_rate_per_second": 8.698361407501691,
+    "steady_intercompletion_equation": "(45 - 1) / 5.058423988 = 8.698361407501691",
+    "old_completion_boundary_gate_threshold_per_second": 8.1,
+    "old_observed_completion_boundary_rate_per_second": 7.4,
+    "old_boundary_completion_conjunct": "FAIL",
+    "old_terminal_total_outstanding_conjunct": "FAIL",
+    "actual_control_service_and_slo": "PASS",
+    "scientific_validity": true,
+    "decisive_conclusion": "A scientifically valid frozen baseline is rejected by the new v11 post-hoc invariant. The invariant, not the serving lifecycle, is incorrect."
+  },
+  "corrected_control_invariant": {
+    "name": "BOUNDARY_CORRECTED_STABLE_CONTROL_V2",
+    "required_conjuncts": [
+      {
+        "field": "exact_control_cohort",
+        "requirement": "Exactly round(rate * duration) unique requests are scheduled in the half-open control interval with the expected sequence/cadence and no missing or duplicate request identity."
+      },
+      {
+        "field": "eventual_completion",
+        "requirement": "Every selected control request eventually completes successfully and produces exactly 64 output tokens."
+      },
+      {
+        "field": "declared_warmup_and_assessment_window",
+        "requirement": "Exclude the declared first one-second warmup from latency and throughput assessment, then assess the exact four-second half-open interval ending at spike_start_ns without including the boundary spike."
+      },
+      {
+        "field": "ttft_slo",
+        "requirement": "Every post-warmup control request has a valid first-token timestamp and assessment-cohort p95 TTFT is at most two seconds."
+      },
+      {
+        "field": "boundary_corrected_steady_completion",
+        "requirement": "Count only completions from the exact full control cohort whose completion timestamp falls in the four-second assessment interval; completion count divided by four seconds must be at least 90 percent of the configured 9-rps offer. There is no upper rejection for excess service."
+      },
+      {
+        "field": "waiting_backlog_bounded",
+        "requirement": "Request-level conservative waiting backlog, ending at the first scheduler-visible output and distinct from in-service requests, remains below the normal overload trigger of twenty."
+      },
+      {
+        "field": "total_outstanding_bounded_and_stable",
+        "requirement": "Phase-scoped total outstanding remains below twenty and one-second samples show neither a positive regression slope with final depth above initial depth nor a larger second-half mean."
+      }
+    ],
+    "diagnostic_only_fields": [
+      "completed_by_interval_end",
+      "total_running_plus_waiting_at_interval_end"
+    ],
+    "removed_pass_fail_conditions": [
+      "completed_by_interval_end / duration >= 0.90 * offered_rate",
+      "terminal total running-plus-waiting outstanding <= 4"
+    ],
+    "preserved_fail_closed_gates": [
+      "9-rps control p95 TTFT below two seconds",
+      "15-rps overload detection",
+      "normal reclaim trigger at backlog 20..30 with positive slope and offered greater than completed",
+      "independent emergency ceiling at coherent outstanding >= 64",
+      "two-GPU completions exceed observed offered rate",
+      "negative recovery queue slope and queue drain",
+      "five consecutive one-second SLO windows",
+      "GPU0 active during the actual restore interval",
+      "1,152-allocation epoch, ownership, refcount, liveness, and mapping gates"
+    ],
+    "failure_evidence_rule": "Persist the complete control evidence, including every conjunct and its boolean result, before raising a fail-closed exception."
+  },
+  "attempt_g_trigger_and_queue_accounting": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-reclaim-trigger.json",
+    "sha256": "6a13fa69d2e32118eb537a28d5dca419385fa7851cfd1ac299fcfcae873a8398",
+    "window_start_ns": 196674502829,
+    "window_end_ns": 196924502829,
+    "queue_depth_start": 20,
+    "offered_requests": 3,
+    "completed_requests": 2,
+    "queue_depth_end": 21,
+    "conservation_equation": "20 + 3 - 2 = 21",
+    "queue_depth_slope_per_second": 4.0,
+    "offered_rate_per_second": 12.0,
+    "completed_rate_per_second": 8.0,
+    "trigger_backlog": 21,
+    "emergency_ceiling": 64,
+    "headroom_requests": 43,
+    "predicate_to_trigger_latency_ns": 174623,
+    "status": "PASS"
+  },
+  "attempt_g_synchronization_and_allocator": {
+    "engine_step_binding_id": "vllm-0.23-engine-step-6a5ea051-f210-4284-9487-d4c40b75b8b7",
+    "gate_acquisition_generation": 1,
+    "runtime_version": "0.23.0",
+    "asynchronous_scheduling": false,
+    "wrapped_surface_count": 20,
+    "wrappers_intact": true,
+    "allocator_quiescence_observed_ns": 197300418703,
+    "allocator_mutations_excluded": true,
+    "engine_step_excluded": true,
+    "paused_branch_count": 8,
+    "scheduler_waiting_count": 0,
+    "scheduler_skipped_waiting_count": 0,
+    "source_capture_commit_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-capture-commit.json",
+      "sha256": "e80792a648f29e1d2d38e5b06426cb842b4fa80fb373370981d6b0ea2f804db3"
+    },
+    "source_capture_commit_sha256": "94898d493a67ab5e7bbd62a5baaf9eb22eb2a1cb6ff957a4c865d93a2f7bf7ba",
+    "source_allocation_count": 1152,
+    "allocator_lifecycle_event_count": 34433,
+    "source_lifetime_event_count": 34432,
+    "pre_commit_history_event_count": 2210,
+    "pre_commit_duplicate_event_count": 0,
+    "pre_commit_post_commit_event_count": 0,
+    "pre_commit_queue_empty_after_retirement": true,
+    "pre_export_identity_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-identity-pre-export-pass.json",
+      "sha256": "8a8575965aa52ba89c87416a1179a55f781b2ef8169b2dec4ebcc0277c34f71e"
+    },
+    "post_export_identity_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v11-source-identity-post-export-pass.json",
+      "sha256": "b099a28798922264b0c4ce6d8b4051bd437eece6c1e807dd5036586e86411c53"
+    },
+    "identity_before_export": {
+      "allocation_count": 1152,
+      "exact_logical_mapping": true,
+      "exact_block_epoch_identity": true,
+      "exact_owner_sets": true,
+      "exact_refcounts": true,
+      "all_allocations_live": true,
+      "post_commit_allocation_event_count": 0,
+      "passed": true
+    },
+    "identity_after_export_read": {
+      "allocation_count": 1152,
+      "semantic_sha256_unchanged": true,
+      "exact_logical_mapping": true,
+      "exact_block_epoch_identity": true,
+      "exact_owner_sets": true,
+      "exact_refcounts": true,
+      "all_allocations_live": true,
+      "post_export_allocation_event_count": 0,
+      "passed": true
+    },
+    "zero_post_commit_semantic_mutations": true,
+    "status": "PASS"
+  },
+  "attempt_g_ordering_monotonic_ns": [
+    {
+      "order": 1,
+      "event": "OVERLOAD_DETECTED",
+      "observed_ns": 196674502829
+    },
+    {
+      "order": 2,
+      "event": "TRIGGER_PREDICATE_SATISFIED",
+      "observed_ns": 196924502829
+    },
+    {
+      "order": 3,
+      "event": "RECLAIM_TRIGGER_EMITTED",
+      "observed_ns": 196924677452
+    },
+    {
+      "order": 4,
+      "event": "ROLLOUT_ADMISSION_STOP",
+      "observed_ns": 196937312441
+    },
+    {
+      "order": 5,
+      "event": "PRODUCTION_ENGINE_STEP_BINDING_INSTALLED",
+      "observed_ns": 196938955672
+    },
+    {
+      "order": 6,
+      "event": "STATE_QUIESCENCE",
+      "observed_ns": 196944784865
+    },
+    {
+      "order": 7,
+      "event": "ALLOCATOR_QUIESCENT",
+      "observed_ns": 197300418703
+    },
+    {
+      "order": 8,
+      "event": "CAPTURE_COMMIT_END",
+      "observed_ns": 197507041224
+    },
+    {
+      "order": 9,
+      "event": "PRE_EXPORT_IDENTITY_END",
+      "observed_ns": 198349901747
+    },
+    {
+      "order": 10,
+      "event": "FUSED_EXPORT_READ_END",
+      "observed_ns": 203873972976
+    },
+    {
+      "order": 11,
+      "event": "POST_EXPORT_IDENTITY_END",
+      "observed_ns": 204423676564
+    },
+    {
+      "order": 12,
+      "event": "STATE_PUBLISH_END",
+      "observed_ns": 204449971100
+    },
+    {
+      "order": 13,
+      "event": "SOURCE_RELEASE_END",
+      "observed_ns": 204701905096
+    },
+    {
+      "order": 14,
+      "event": "HBM_RECLAIM_CONFIRMED",
+      "observed_ns": 204707017805
+    },
+    {
+      "order": 15,
+      "event": "GPU1_SERVING_READY",
+      "observed_ns": 204707251503
+    },
+    {
+      "order": 16,
+      "event": "GPU1_FIRST_USEFUL_TOKEN",
+      "observed_ns": 204886127567
+    },
+    {
+      "order": 17,
+      "event": "SERVING_RECOVERY_EVALUATED",
+      "observed_ns": 218077137669
+    },
+    {
+      "order": 18,
+      "event": "GPU1_DRAINED",
+      "observed_ns": 220039716928
+    },
+    {
+      "order": 19,
+      "event": "RESTORE_TRIGGER",
+      "observed_ns": 220048215278
+    },
+    {
+      "order": 20,
+      "event": "RESTORE_NATIVE_START",
+      "observed_ns": 220071282366
+    },
+    {
+      "order": 21,
+      "event": "FIRST_AND_ALL_BRANCHES_RESUMED",
+      "observed_ns": 229345680424
+    },
+    {
+      "order": 22,
+      "event": "CONTINUATION_COMPLETE",
+      "observed_ns": 229839085656
+    },
+    {
+      "order": 23,
+      "event": "POSTHOC_CONTROL_GATE_FAILURE",
+      "observed_ns": 237839804532
+    }
+  ],
+  "attempt_g_release_and_movement": {
+    "logical_state_bytes": 1056964608,
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_bytes": 2114200960,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_physical_bytes": 12684381568,
+    "avoidable_amplification": 12.000762818351625,
+    "full_state_pass_count": 10,
+    "canonical_state_pass_record_count": 10454,
+    "movement_accounting_complete": true,
+    "source_release_proof_pass": true,
+    "source_allocator_epochs_tombstoned": true,
+    "source_assigned_bytes_after_release": 0,
+    "full_free_pool_recovered": true,
+    "trigger_to_hbm_reclamation_seconds": 7.782340353,
+    "trigger_to_gpu1_serving_ready_seconds": 7.782574051,
+    "trigger_to_gpu1_first_useful_seconds": 7.961450115,
+    "status": "PASS_STANDALONE_SUBRESULT_NOT_GLOBAL_SCIENTIFIC_VALIDITY"
+  },
+  "attempt_g_recovery": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-serving-recovery.json",
+    "sha256": "6bb8ee4da1384487225743e543cb7a27c4f50f12b60e826f4fb0533539c5fb89",
+    "recovery_queue_metric": "live_vllm_scheduler_waiting",
+    "offered_rate_per_second": 15.0,
+    "completed_rate_per_second": 20.4,
+    "queue_depth_at_gpu1_first_useful": 47,
+    "queue_trend_final_depth": 20,
+    "queue_depth_slope_per_second": -5.6,
+    "queue_depth_at_evaluation": 0,
+    "five_second_slo_window_count": 5,
+    "maximum_window_p95_ttft_ns": 74478301.89999998,
+    "two_gpu_excess_capacity_pass": true,
+    "queue_drain_pass": true,
+    "slo_restoration_pass": true,
+    "pre_restore_stability_pass": true,
+    "restore_eligible": true,
+    "status": "PASS"
+  },
+  "attempt_g_restore_and_gpu0": {
+    "gpu1_drain_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-gpu1-drained.json",
+      "sha256": "5efadba5d9081224a9ecf64c309557b04179708e22e539a2f883dab179c8548e"
+    },
+    "restore_start_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/v10-restore-start.json",
+      "sha256": "20cab5a0fa6a6b786ebc224840bd1089f20af1b68d6916aa269f052e1760b76b"
+    },
+    "restore_complete_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/barriers/rollout-restore-complete.json",
+      "sha256": "4680b54a7fd2ce6ff0e96021eaa5f042f47d7201680f6b262cf96b5694bc32e3"
+    },
+    "gpu1_last_admitted_sequence": 352,
+    "restore_cutover_sequence": 353,
+    "gpu1_running_at_drain": 0,
+    "gpu1_waiting_at_drain": 0,
+    "gpu1_scheduler_requests_at_drain": 0,
+    "fresh_destination_allocation_count": 1152,
+    "source_destination_physical_overlap_count": 0,
+    "source_destination_lifetime_overlap_count": 0,
+    "first_resumed_token_ns": 229345680424,
+    "all_branches_resumed_ns": 229345680424,
+    "continuation_complete_ns": 229839085656,
+    "branch_count": 8,
+    "minimum_tokens_per_branch": 8,
+    "exact_first_token_matches": 8,
+    "rollout_restore_status": "PASS",
+    "gpu0_activity_log": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/logs/serving.stdout.log",
+      "sha256": "51f89d9f7644551a669f79b689d5b5af367ee945f3f07c74d09ccd48ec2cc4bf",
+      "before_or_during_restore_observation": "01:58:15 Running: 10, Waiting: 0",
+      "after_restore_interval_observation": "01:58:25 Running: 16, Waiting: 1",
+      "activity_spans_restore": true
+    },
+    "formal_gpu0_restore_interference_result_persisted": false,
+    "formal_gpu0_restore_interference_result_status": "UNAVAILABLE_BECAUSE_CONTROL_VALIDATOR_RAISED_FIRST",
+    "scientific_consequence": "Observed GPU0 activity supports the runtime ordering review, but cannot replace the missing formal result; Attempt G cannot be promoted to scientific PASS offline."
+  },
+  "cleanup_and_ledger": {
+    "in_function_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-g/in_function_cleanup.json",
+      "sha256": "508a342ae6bd6a790f42b45a64dc110e07d5d254c6af9c9c3b1dee9b0fb3571c",
+      "status": "PASS",
+      "children_reaped": true,
+      "process_groups_empty": true,
+      "zombies": 0,
+      "profilers": 0,
+      "leaked_ipc_resources": 0,
+      "cuda_owning_children": 0,
+      "forced_kills": []
+    },
+    "provider_cleanup": {
+      "status": "PASS",
+      "active_apps": 0,
+      "running_tasks": 0,
+      "running_containers": 0,
+      "endpoints": 0,
+      "provider_reservations": 0,
+      "unexpected_persistent_volumes": []
+    },
+    "ledger": {
+      "status": "SETTLED",
+      "active_reservations": 0,
+      "attempt_accounted_wall_seconds": 242.217073138,
+      "attempt_gpu_count": 2,
+      "attempt_actual_a100_seconds": 484.434146276,
+      "attempt_actual_a100_hours": 0.13456504063222222,
+      "attempt_gpu_cost_usd": 0.336197297515544,
+      "consumed_additional_a100_seconds": 21481.37961294198,
+      "hard_authorized_a100_seconds": 43200.0,
+      "remaining_authorized_a100_seconds": 21718.62038705802
+    }
+  },
+  "final_verdict": {
+    "runtime_synchronization": "PASS",
+    "coherent_queue_accounting": "PASS",
+    "source_capture_commit": "PASS",
+    "source_identity_pre_export": "PASS_1152_OF_1152",
+    "source_identity_post_export": "PASS_1152_OF_1152",
+    "zero_post_commit_allocator_mutation": "PASS",
+    "export_release_hbm_reclaim": "PASS",
+    "gpu1_useful_and_slo_recovery": "PASS",
+    "rollout_restore_and_branch_correctness": "PASS_8_OF_8",
+    "formal_gpu0_restore_interference_evidence": "UNAVAILABLE",
+    "control_gate": "FAIL_GATE_BUG",
+    "in_function_cleanup": "PASS",
+    "provider_cleanup": "PASS",
+    "ledger_settlement": "PASS",
+    "attempt_g_scientific_validity": "INVALID",
+    "freeze_v11": false,
+    "kill_and_recompute_authorized": false,
+    "terminal_classification": "HARDWARE_GATE_NOT_REACHED"
+  }
+}

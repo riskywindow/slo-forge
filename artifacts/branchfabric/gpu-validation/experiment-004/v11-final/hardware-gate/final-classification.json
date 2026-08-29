@@ -1,0 +1,34 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-hardware-gate/v1",
+  "classification": "HARDWARE_GATE_NOT_REACHED",
+  "strong_hardware_result": false,
+  "hardware_interest_chain_ids": [],
+  "integrated_v11_scientifically_valid": false,
+  "kill_and_recompute_run": false,
+  "experiment_005_generated": false,
+  "missing_mandatory_evidence": [
+    "integrated_v11_scientific_validity",
+    "optimized_semantics",
+    "optimized_after_naive",
+    "optimized_naive_semantic_equivalence",
+    "integrated_residual_critical_path",
+    "amdahl_analysis",
+    "economic_comparison",
+    "gpu_methodology",
+    "kill_and_recompute_trial",
+    "integrated_optimized_v11_trial",
+    "preservation_economic_result",
+    "software_headroom_result",
+    "integrated_movement_fraction"
+  ],
+  "rationale": "The only integrated v11 retry failed the source allocation identity gate before source release and HBM reclamation. Integrated movement, residual critical-path share, Amdahl headroom, and preservation economics are unavailable. The precommitted dependency therefore forbids the kill/recompute arm and prevents SOFTWARE_WINS, GPU_SOFTWARE_WINS, hardware interest, or preservation-economic classification.",
+  "numeric_hardware_gates": {
+    "regular_residual_chain_measured": false,
+    "integrated_fraction_at_least_0_15": null,
+    "realistic_speedup_at_least_1_20": null,
+    "bandwidth_dataflow_dominated": null,
+    "kill_recompute_preservation_relevant": null,
+    "gpu_software_adversary_resolved": false,
+    "external_placement_advantage": null
+  }
+}

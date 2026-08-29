@@ -1,0 +1,28 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-make-check-terminal-handoff/v1",
+  "status": "PASS",
+  "command": "make check",
+  "completed_at_utc": "2026-08-19T06:02:11Z",
+  "python": {
+    "format": "PASS",
+    "ruff": "PASS",
+    "mypy": "PASS",
+    "pytest_passed": 1859,
+    "pytest_skipped": 8,
+    "pytest_warnings": 6,
+    "duration_seconds": 282.37
+  },
+  "rust": {
+    "cargo_fmt": "PASS",
+    "cargo_clippy": "PASS",
+    "cargo_test": "PASS"
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "tests_passed": 37,
+    "tests_skipped": 1,
+    "build": "PASS"
+  },
+  "scope_note": "Executed after terminal reports, status artifacts, plot generator, waterfalls, Sankey, and terminal manifest were created."
+}

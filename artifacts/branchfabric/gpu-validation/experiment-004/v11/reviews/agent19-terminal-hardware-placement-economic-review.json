@@ -1,0 +1,173 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent19-terminal-hardware-placement-economic-review/v1",
+  "review_id": "agent19-terminal-hardware-placement-economic-review",
+  "reviewer_task_path": "/root/integrated_budget_audit",
+  "reviewed_at_utc": "2026-08-19T05:33:05Z",
+  "status": "PASS",
+  "passed": true,
+  "scope": "terminal final-classification, hardware-interest, placement-plan, and preservation-policy audit after the invalid integrated attempt",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "evidence": {
+    "real_a100_micro_outcome": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494",
+      "status": "MICRO_VALIDATION_PASS",
+      "classification": "MEANINGFUL",
+      "full_physical_amplification": 21.000762818351625,
+      "exact_first_resumed_token_matches": 8
+    },
+    "adversarial_software_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent12-adversarial-software-review.json",
+      "sha256": "ae3739962e58de4e2bcab4df2fbe5f4aab2438771461a24fe8467a40e590671c",
+      "status": "PASS",
+      "scope_limit": "micro measurements do not authorize end-to-end classification or hardware interest"
+    },
+    "break_even_amdahl_methodology": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/economic-break-even-amdahl-methodology-review.json",
+      "sha256": "283660bbc58f60a175f410bb8fcec10f938f93ae54ac6f47e2b5533c130d6e6c",
+      "status": "METHOD_READY_GPU_MEASUREMENTS_PENDING",
+      "classification_ready": false
+    },
+    "integrated_terminal_outcome": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180",
+      "scientific_status": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+      "scientifically_valid_integrated_transaction": false,
+      "reclaim_trigger_reached": false,
+      "v11_export_started": false,
+      "v11_release_started": false,
+      "v11_import_started": false,
+      "retry_authorized": false
+    },
+    "economic_budget_cleanup_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent16-economic-budget-cleanup-review.json",
+      "sha256": "d6eb0ba6b9727e73c5db980f6560b6812e410f8c409a453c6cc65eee44e6dae9",
+      "status": "PASS"
+    }
+  },
+  "measurement_availability": {
+    "strong_v11_software_micro_measurement": true,
+    "micro_correctness_8_of_8": true,
+    "micro_full_physical_amplification_measured": true,
+    "scientifically_valid_integrated_v11": false,
+    "integrated_reclamation_timing_measured": false,
+    "integrated_restore_timing_measured": false,
+    "integrated_residual_critical_path_share_measured": false,
+    "kill_and_recompute_authorized": false,
+    "kill_and_recompute_executed": false,
+    "measured_recompute_tokens": null,
+    "measured_recompute_gpu_seconds": null,
+    "measured_preservation_break_even": false,
+    "measured_nonoverlapping_amdahl_headroom": false,
+    "measured_hardware_economic_headroom": false
+  },
+  "classification_audit": {
+    "SOFTWARE_WINS": {
+      "selected": false,
+      "v11_removes_most_physical_amplification": true,
+      "measured_reduction_percent_from_v10_58x": 63.79178824422134,
+      "remaining_pipeline_below_10_percent_of_important_paths": null,
+      "ideal_free_full_system_speedup_below_1_15x": null,
+      "predicate_status": "NOT_SATISFIED_MISSING_INTEGRATED_CRITICAL_PATH_AND_AMDAHL_MEASUREMENTS",
+      "rationale": "The micro byte reduction alone does not satisfy either required end-to-end closure predicate."
+    },
+    "GPU_SOFTWARE_WINS": {
+      "selected": false,
+      "meaningful_residual_state_work": "MICRO_ONLY",
+      "gpu_natural_placement_proven_end_to_end": null,
+      "cuda_or_triton_realistic_headroom_measured": null,
+      "external_accelerator_incremental_improvement_below_1_15x": null,
+      "predicate_status": "NOT_SATISFIED_MISSING_INTEGRATED_RESIDUAL_AND_REALISTIC_ACCELERATION_MEASUREMENTS"
+    },
+    "BRANCHFABRIC_HARDWARE_INTEREST": {
+      "selected": false,
+      "strong_v11_software_optimization_measured": true,
+      "regular_residual_fused_chain_remains_on_integrated_path": null,
+      "residual_chain_at_least_15_percent_of_important_path": null,
+      "realistic_acceleration_at_least_1_20x_on_economic_metric": null,
+      "bandwidth_or_dataflow_dominance_established_for_integrated_path": null,
+      "stable_semantics": true,
+      "measured_bytes": true,
+      "measured_burst_rate": false,
+      "measured_latency_target": false,
+      "measured_concurrency": false,
+      "plausible_advantage_outside_normal_gpu_path": false,
+      "predicate_status": "NOT_SATISFIED_AND_EXPLICITLY_PROHIBITED_WITHOUT_MEASURED_INTEGRATED_V11_TIMINGS"
+    },
+    "PRESERVATION_NOT_ECONOMIC": {
+      "selected": false,
+      "kill_recompute_measured": false,
+      "kill_recompute_dominates_measured_workload": null,
+      "kill_recompute_dominates_reasonable_nearby_regimes": null,
+      "predicate_status": "NOT_SATISFIED_KILL_RECOMPUTE_FORBIDDEN_AND_NOT_RUN"
+    }
+  },
+  "final_classification": null,
+  "classification_status": "TERMINAL_NOT_REACHED_INTEGRATED_INVALID_NO_RETRY",
+  "exact_one_classification_completion_contract_satisfied": false,
+  "fail_closed_reason": "Selecting any of the four enumerated classifications would assert an unmeasured predicate. The requirement to select exactly one does not authorize fabricating missing integrated, recompute, Amdahl, or economic measurements.",
+  "hardware_gate": {
+    "branchfabric_hardware_interest_survives": false,
+    "status": "NOT_ESTABLISHED_ON_CURRENT_EVIDENCE",
+    "custom_hardware_engineering_recommendation": "DO_NOT_SPEND_ENGINEERING_TIME_ON_CUSTOM_HARDWARE_FROM_THIS_CAMPAIGN",
+    "adversarial_question": "After giving software every reasonable chance, would I independently spend engineering time investigating custom hardware for this remaining bottleneck?",
+    "adversarial_answer": "NO_ON_CURRENT_EVIDENCE",
+    "answer_rationale": "The optimized micro path is meaningful, but the only integrated attempt stopped before the state path. There is no measured residual critical-path fraction, realistic end-to-end acceleration, preservation-versus-recompute economics, or placement advantage."
+  },
+  "placement_review": {
+    "ranking_status": "NOT_AUTHORIZED_HARDWARE_GATE_DID_NOT_SURVIVE",
+    "gpu_kernel": "NOT_RANKED",
+    "gpu_host_boundary": "NOT_RANKED",
+    "pcie_adjacent": "NOT_RANKED",
+    "nic_rdma_adjacent": "NOT_RANKED",
+    "dpu_smartnic": "NOT_RANKED",
+    "cxl_memory": "NOT_RANKED",
+    "fpga_architecture_discovery": "NOT_RANKED",
+    "reason": "Integrated byte locality, burst rate, latency target, concurrency, copy-engine interference, GPU opportunity cost, and economic impact are unavailable."
+  },
+  "experiment_005": {
+    "status": "NOT_GENERATED",
+    "plan_path": "docs/branchfabric/EXPERIMENT_005_PLACEMENT_PLAN.md",
+    "plan_exists": false,
+    "gate_requires_branchfabric_hardware_interest": true,
+    "gate_passed": false,
+    "execute_experiment_005": false,
+    "fpga_implementation_authorized": false
+  },
+  "closure_artifact_policy": {
+    "generate_branchfabric_software_closure": false,
+    "software_closure_path": "docs/branchfabric/BRANCHFABRIC_SOFTWARE_CLOSURE.md",
+    "reason_not_software_closure": "SOFTWARE_WINS predicates are not measured.",
+    "generate_preservation_policy": false,
+    "preservation_policy_path": "docs/branchfabric/PRESERVATION_POLICY.md",
+    "reason_not_preservation_policy": "PRESERVATION_NOT_ECONOMIC predicates are not measured because kill/recompute was forbidden and not run.",
+    "required_terminal_closure": "Update BRANCHFABRIC_HARDWARE_GATE.md and the final report to an evidence-closure status of TERMINAL_NOT_REACHED_INTEGRATED_INVALID_NO_RETRY with final_classification null.",
+    "hardware_gate_document_is_the_closure_record": true
+  },
+  "stale_downstream_artifacts_requiring_update": [
+    {
+      "artifact": "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE.md",
+      "sha256_before_update": "2aaf07f7c5b6cd09da19b67003a55a25a15230e34a25523dede7c49cf20b8679",
+      "stale_claim": "NOT REACHED — BUDGET_BLOCKER and no real-A100 v11 micro result",
+      "required_claim": "real-A100 micro PASS; integrated invalid pre-reclaim; classification not reached; no retry; no Experiment 005"
+    },
+    {
+      "artifact": "reports/branchfabric-gpu-validation-experiment-004-v11.json",
+      "sha256_before_update": "38bf9670ec629dcd4f881265236e0a32c08e974f1588eb1cf10e88399b668e14",
+      "stale_claim": "NOT_REACHED_BUDGET_BLOCKER",
+      "required_claim": "TERMINAL_NOT_REACHED_INTEGRATED_INVALID_NO_RETRY"
+    }
+  ],
+  "terminal_policy": [
+    "Do not run kill/recompute because the integrated v11 prerequisite did not pass and no retry is authorized.",
+    "Do not fit preservation break-even or Amdahl coefficients from micro-only timings or frozen v10 timings.",
+    "Do not infer software closure, GPU placement superiority, custom-hardware interest, or preservation non-economics from missing measurements.",
+    "Do not generate Experiment 005 or implement FPGA hardware.",
+    "Report the measured micro result and the invalid integrated result separately, preserve nulls for unreached metrics, and close this campaign fail-closed."
+  ],
+  "residual_findings": [],
+  "review_pass": true
+}

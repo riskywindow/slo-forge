@@ -1,0 +1,65 @@
+{
+  "artifact_hash": "45f7086f5757b5aa68dae72f6dc24ecf31083dd6746f70c93135dc8a54f1ad5d",
+  "cache_evictions": [],
+  "execution_id": "warmpath-local-demo",
+  "failure_reason": null,
+  "output_directory": "artifacts/helix/baseline/warmpath-demo/execution",
+  "plan_id": "warmpath-0a2979491e2c58b5",
+  "ready_time_ms": 4.379209,
+  "records": [
+    {
+      "artifact_id": "model-config",
+      "bytes_materialized": 35,
+      "checksum_verified": true,
+      "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/execution/config.json",
+      "error": null,
+      "finished_ns": 30957679482875,
+      "mode": "eager_restore",
+      "source_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/input/files/config.json",
+      "started_ns": 30957678927000,
+      "status": "restored",
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "tokenizer",
+      "bytes_materialized": 40,
+      "checksum_verified": true,
+      "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/execution/tokenizer.json",
+      "error": null,
+      "finished_ns": 30957680452916,
+      "mode": "eager_restore",
+      "source_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/input/files/tokenizer.json",
+      "started_ns": 30957679498875,
+      "status": "restored",
+      "tier_id": "page-cache"
+    },
+    {
+      "artifact_id": "model-weights",
+      "bytes_materialized": 2097152,
+      "checksum_verified": true,
+      "destination_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/execution/weights.bin",
+      "error": null,
+      "finished_ns": 30957683292000,
+      "mode": "eager_restore",
+      "source_path": "/Users/rishivinodkumar/sloforge/artifacts/helix/baseline/warmpath-demo/input/files/weights.bin",
+      "started_ns": 30957680461000,
+      "status": "restored",
+      "tier_id": "host-memory"
+    },
+    {
+      "artifact_id": "runtime-cache",
+      "bytes_materialized": 0,
+      "checksum_verified": false,
+      "destination_path": null,
+      "error": null,
+      "finished_ns": 30957683301541,
+      "mode": "lazy_restore",
+      "source_path": null,
+      "started_ns": 30957683300708,
+      "status": "deferred",
+      "tier_id": "page-cache"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "success": true
+}

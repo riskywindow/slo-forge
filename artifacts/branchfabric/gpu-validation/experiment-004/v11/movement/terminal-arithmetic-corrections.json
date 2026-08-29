@@ -1,0 +1,27 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-terminal-arithmetic-corrections/v1",
+  "status": "PASS_IMMUTABLE_PRELAUNCH_ARTIFACTS_PRESERVED",
+  "reason": "The integrated attempt authenticated the original post-micro artifacts. Their bytes remain immutable; this terminal overlay corrects a derived percentage without rewriting the executed evidence graph.",
+  "inputs": {
+    "v10_full_physical_bytes": 61303947264,
+    "v11_full_physical_bytes": 22197063040,
+    "physical_bytes_removed": 39106884224
+  },
+  "exact_calculation": "(61303947264 - 22197063040) / 61303947264 * 100",
+  "correct_full_physical_reduction_percent": 63.79178824422134,
+  "superseded_derived_value": 63.79181449900818,
+  "immutable_artifacts": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff.json",
+      "sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99",
+      "corrected_selector": "$.reduction.physical_bytes_reduction_percent"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-measured-comparison.json",
+      "sha256": "10e078d518cc24efa0db744e590338979104e738619c921f99fc4f6ba599f16b",
+      "corrected_selector": "$.v10_minus_v11.full_physical_reduction_percent"
+    }
+  ],
+  "authoritative_terminal_value_used_by_reports": 63.79178824422134,
+  "measured_bytes_unchanged": true
+}

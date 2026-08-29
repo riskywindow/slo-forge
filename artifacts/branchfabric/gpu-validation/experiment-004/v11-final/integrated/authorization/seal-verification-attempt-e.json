@@ -1,0 +1,46 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integrated-seal-verification/v1",
+  "status": "PASS",
+  "verified_at_utc": "2026-08-26T22:58:28Z",
+  "attempt_id": "exp004-v11-integrated-s41-e",
+  "execution_mode": "integrated-reclamation-v11",
+  "maximum_wall_seconds": 588.0,
+  "maximum_gpu_seconds": 1176.0,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-e-config.json",
+    "sha256": "4b034b809bfc6cb8fd82674de9d2e5965d276d188d62b4a46f238dd90ed7fa96"
+  },
+  "authorization_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-e-post-prefunction-pre-gpu-manifest.json",
+    "sha256": "b66879ec7cc3cd5606a24288ff33f929a8a21be3021f81da17fa366969cac8da"
+  },
+  "expanded_budget_authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11-continuation.json",
+    "sha256": "cf71d63d6427a58003f25dd87922cc19406a1c720e4b03dbb250094d2d9e02d6",
+    "authorized_gpu_budget_usd": 80.0,
+    "authorized_cumulative_gpu_seconds": 43200.0
+  },
+  "ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "ae4624645fb2fd57ef098a56826191e78d659742cb1ad0910e9d54cf841aed5d",
+    "active_reservations": 0,
+    "conservative_consumed_gpu_seconds": 19397.975013231975,
+    "remaining_gpu_seconds": 23802.024986768025,
+    "remaining_after_maximum_gpu_seconds": 22626.024986768025
+  },
+  "verification": {
+    "real_coordinator_loader": "PASS",
+    "controller_sealed_evidence": "PASS",
+    "prelaunch_bindings_verified": 24,
+    "prior_attempt_evidence_bindings_verified": 3,
+    "prior_attempt_id": "exp004-v11-integrated-s41-d",
+    "prior_function_entered": false,
+    "prior_in_function_cleanup": "NOT_APPLICABLE_FUNCTION_NOT_ENTERED",
+    "prior_provider_cleanup": "PASS",
+    "expanded_budget_verified": true,
+    "successful_integrated_contract_verified": true,
+    "make_check": "PASS; 2081 Python passed, 8 skipped, 6 warnings; Rust/UI PASS"
+  },
+  "paid_resources_invoked": false,
+  "provenance": "Real local coordinator _load_sealed_config and controller verify_sealed_evidence output; no fabricated measurement and no Modal/GPU invocation."
+}

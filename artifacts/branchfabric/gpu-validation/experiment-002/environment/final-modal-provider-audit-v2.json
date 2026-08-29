@@ -1,0 +1,98 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-provider-final-audit/v2",
+  "experiment": "experiment-002",
+  "recorded_at_utc": "2026-08-11T15:55:20Z",
+  "modal_app_list_command": [
+    "modal",
+    "app",
+    "list",
+    "--json"
+  ],
+  "modal_container_list_command": [
+    "modal",
+    "container",
+    "list",
+    "--json"
+  ],
+  "source_attempt_ids": [
+    "modal-16k-f1-independent-s41-v1",
+    "modal-16k-f1-independent-s41-v2",
+    "modal-16k-f1-shared-s41-v1",
+    "modal-16k-f8-independent-s41-v1",
+    "modal-16k-f8-shared-s41-v1",
+    "modal-smoke-shared-s41-v1",
+    "modal-smoke-shared-s41-v2",
+    "modal-smoke-shared-s41-v3",
+    "modal-smoke-shared-s41-v4",
+    "modal-smoke-shared-s41-v5",
+    "modal-smoke-shared-s41-v6",
+    "modal-smoke-shared-s41-v7"
+  ],
+  "source_function_call_ids": [
+    "fc-01KZRNR4P73T6XEQ5HPWYACH0F",
+    "fc-01KZRPAH4DQ6T05QEKHJXCB8Y4",
+    "fc-01KZRPTTDEV6YJ5V1B3HC4XBB8",
+    "fc-01KZRQ69EVW5M9AVFGZSZ3J9EG",
+    "fc-01KZRQMANR9Y09EFAF2SYA8TZN",
+    "fc-01KZQER09E0M6QXC2QVJP4D6KC",
+    "fc-01KZQEYY3EGDFHQ9WYTV4P108A",
+    "fc-01KZQF7GYV3TBRBF8TC5XYXWHD",
+    "fc-01KZQFN17TMY76N2AWBE4RY26Z",
+    "fc-01KZQFZS9WHYTAC9VN1MZPFG7S",
+    "fc-01KZRMPSJ8QM871GE0G1SMBQYJ",
+    "fc-01KZRN9CXXFBKV7SDN1TCQWX1X"
+  ],
+  "experiment_app_description": "sloforge-branchfabric-real-gpu-cow",
+  "experiment_apps": [
+    {
+      "app_id": "ap-vp6f5skAIMoLOSW8hAHxqw",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-P3YYryVkRpfyHfiI1kHP1k",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-XeLR6WHe8LROzmDc8qkLV7",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-jWcZitd68vwX4ytFsNKYoQ",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-qZLaeAapIREYWkwlCzgSBE",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-cvPsbS6o0897qGBSOeUxLp",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    },
+    {
+      "app_id": "ap-YpehsMzRQNx8XbOo8SpPEP",
+      "description": "sloforge-branchfabric-real-gpu-cow",
+      "state": "stopped",
+      "task_count": 0
+    }
+  ],
+  "experiment_apps_not_stopped_or_with_tasks": [],
+  "all_experiment_apps_stopped": true,
+  "running_containers": [],
+  "provider_hbm_after_container_teardown_sampled": false,
+  "persistent_resources_retained": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ]
+}

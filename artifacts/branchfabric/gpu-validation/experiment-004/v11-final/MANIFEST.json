@@ -1,0 +1,101 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-final-manifest/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "classification": "HARDWARE_GATE_NOT_REACHED",
+  "v11_frozen": false,
+  "kill_recompute_run": false,
+  "experiment_005_generated": false,
+  "remote_manifest": {
+    "path": "integrated/raw/REMOTE_MANIFEST.c.json",
+    "sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8",
+    "artifact_count": 465,
+    "downloaded_and_hash_verified_non_compiler_artifacts": 57
+  },
+  "terminal_artifacts": [
+    {
+      "path": "integrated/scientific-validity.json",
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    },
+    {
+      "path": "hardware-gate/final-classification.json",
+      "sha256": "bd5718d89b93ec1117e6c4d76a6ea97d71242c31b20720bc66afa2991f695c45"
+    },
+    {
+      "path": "gpu-hours.json",
+      "sha256": "a0101792513e721a7c03a82f95f2d1a1abb218e1cd9bd251669716484a72b8f5"
+    },
+    {
+      "path": "cleanup/in_function_cleanup-summary.json",
+      "sha256": "e58bc6bbe37d4659cb678de3a5b05100717f6b909f08cf47548e3f6965b35ed1"
+    },
+    {
+      "path": "integrated/postflight-provider-cleanup.json",
+      "sha256": "0a1ca74afa873dc46dca664d1a9f173f3df9ab7e61a125addb9e6ed16445c037"
+    },
+    {
+      "path": "trigger/integrated-trigger-evidence.json",
+      "sha256": "3181b6e95a47d97c2290ce4982ed3ff2d98d11bf7624a9600621446fa25c1a23"
+    },
+    {
+      "path": "offline-fixes/make-check-postrun.json",
+      "sha256": "084264c1816c3c232a5399be861968af4bafa5d2e8b82351433ec008890e52ad"
+    }
+  ],
+  "postrun_reviews": [
+    {
+      "agent": 9,
+      "path": "reviews/agent09-serving-methodology-review.json",
+      "sha256": "01ec6ff20370f9593dd3858bd276d115a66138becf8410f165677382f2ea9691"
+    },
+    {
+      "agent": 10,
+      "path": "reviews/agent10-state-correctness-review.json",
+      "sha256": "01c95fbcc69325a3a6d2535775a9d18828a6b8dbe377b106dd290c315eaf14bb"
+    },
+    {
+      "agent": 11,
+      "path": "reviews/agent11-movement-accounting-review.json",
+      "sha256": "e12d512fbdafc2984eb384c90439e6a86d2d1f06df6a497d8f823e5dd516b1a0"
+    },
+    {
+      "agent": 12,
+      "path": "reviews/agent12-v10-v11-causal-comparison.json",
+      "sha256": "ef3ab851a46f666180e41d60083fe9fbda3e4ca011dad6db328b75243eae9ac1"
+    },
+    {
+      "agent": 13,
+      "path": "reviews/agent13-integrated-amdahl-review.json",
+      "sha256": "8e69741daa876313edc033f4f29755f0e4f75b0dda34abca14ad0418150fb68c"
+    },
+    {
+      "agent": 14,
+      "path": "reviews/agent14-gpu-cuda-adversary.json",
+      "sha256": "e687362bfe37183c5eb48635e0ed483532a24237a53fe570ea1ae0db0a0eda0c"
+    }
+  ],
+  "reports": [
+    {
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v11-integrated-final.json",
+      "sha256": "1dbbe153981c506d6d0c5b85d73c8b44e07a6412f18d13c32f9ba0fac6fc2765"
+    },
+    {
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v11-integrated-final.md",
+      "sha256": "82559255c92411f90245ad9e0a1d7919e542fd632e07e49be54affc6f8745f82"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/branchfabric/V11_INTEGRATED_RESULT.md",
+      "sha256": "7b48799af2cb8bd78d04e2d36825579580948fb85879d9bec42b33df28a8afa8"
+    },
+    {
+      "path": "docs/branchfabric/PRESERVATION_BREAK_EVEN.md",
+      "sha256": "e231c4225b65487f5de4b7cc2740dec580f44806c42a5f17979b541df4660c8c"
+    },
+    {
+      "path": "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE_FINAL.md",
+      "sha256": "9bfdebe2baf43c69a7973aa40db076f9b8a33756f10d5fd94e9bad0ccfe21cef"
+    }
+  ]
+}

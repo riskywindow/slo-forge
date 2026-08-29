@@ -1,0 +1,19 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-c-scientific-validity-5b296ac",
+  "reviewer_role": "scientific_validity",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T06:04:49Z",
+  "authorization_subject_sha256": "67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "The canonical authorization subject digest independently recomputes to 67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409 using the versioned sorted-key compact UTF-8 JSON representation with one trailing LF; all 11 referenced source files are regular repository files whose byte-level SHA-256 values match the subject.",
+    "The authorization binds commit 5b296ac8e4fdb6dd88f45103317606c3e7248370, which exists and is the repository HEAD reviewed here; every paid-path source named by the launcher is clean relative to that commit, so the measured implementation cannot silently drift from this approval.",
+    "The hashed 12-rps one-GPU result records 120 interval offers, 119 interval completions over 10 seconds, 11.9 completions/s, 44.20-ms p95 TTFT, queue depth 11 to 12, +0.045 requests/s sampled slope, exact queue-flow conservation, complete request accounting, and no persistent positive drift.",
+    "The hashed 15-rps one-GPU result records 150 interval offers, 144 interval completions over 10 seconds, 14.4 completions/s, 402.29-ms p95 TTFT, queue depth 15 to 21, +0.582 requests/s sampled slope, exact queue-flow conservation, and persistent positive drift; this is a bounded overload observation rather than a catastrophic-backlog artifact.",
+    "The hashed 20-rps two-GPU result records 200 interval offers, 199 interval completions over 10 seconds, 19.9 completions/s, 42.44-ms p95 TTFT, queue depth 18 to 19, exact queue-flow conservation, no persistent positive drift, and 100 completed measurement-cohort requests on each GPU under deterministic round-robin assignment.",
+    "The settled selection is internally and scientifically sufficient for the specified transaction: 15 rps is exactly 25 percent above the validated 12-rps one-GPU point, exactly 25 percent below the validated 20-rps two-GPU point, and leaves 5 rps nominal two-GPU drain headroom; short stale-calibration sanity guards remain mandatory, while another broad capacity campaign is neither required nor authorized.",
+    "The subject requires all three approvals before GPU allocation, explicitly forbids remote review exchange and asynchronous approval waits, and restricts the live controller to loading the authorization, verifying its artifact and source hashes and APPROVED status, then proceeding. The committed controller implements that offline-only handoff without a reviewer channel.",
+    "This approval is narrowly scoped to seed 41 and exactly one integrated v10 naive-preservation capacity-reclamation baseline transaction. Budget authorization, engine readiness, sanity guards, state correctness, recovery, movement accounting, restore-time GPU0 activity, and cleanup remain independent fail-closed validity gates; this review does not authorize optimization, extra seeds, broad recalibration, or speculative GPU retries."
+  ]
+}

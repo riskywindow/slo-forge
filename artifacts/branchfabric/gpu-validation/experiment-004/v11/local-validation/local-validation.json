@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-local-validation/v1",
+  "status": "PASS_CPU_LOCAL_GPU_GATE_NOT_RUN",
+  "command": "PYTHONPATH=python python -m pytest -q tests/python/test_experiment_004_v11_analysis.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_adapter.py tests/python/test_vllm_reclamation_capture_plan.py tests/python/test_experiment_004_accounting.py",
+  "result": "47 passed",
+  "v11_test_count": 19,
+  "exact_dag_test_count": 1,
+  "combined_targeted_test_count": 47,
+  "v11_test_path": "tests/python/test_vllm_reclamation_v11.py",
+  "v11_test_sha256": "b17afa122a4fe980be4e10ce40a2cb96d702bb905aa2becaa080d2473c2b473b",
+  "coverage": [
+    "random page ordering and block-axis placement",
+    "multiple layer counts and bounded chunk sizes",
+    "shared/private pages and partial final pages",
+    "bitwise v10/v11 canonical transport equality",
+    "logical v10/v11 native restore equality",
+    "raw BF16 NaN payload and signed-zero preservation",
+    "payload corruption, missing range, duplicate range, and reordered range",
+    "post-verification tensor and NumPy-alias mutation",
+    "destination corruption and failure scrub",
+    "dimension normalization before mutation",
+    "stale validation evidence and changed block/allocation epoch",
+    "scrub, allocator-free, prefix-cache-reset, and enqueue failure paths",
+    "engine-step admission-gate loss between group enqueues",
+    "frozen v10 regression and canonical accounting"
+  ],
+  "gpu_semantics_validated": false,
+  "gpu_blocker": "artifacts/branchfabric/gpu-validation/experiment-004/v11/v11-gpu-budget.json"
+}

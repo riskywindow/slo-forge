@@ -1,0 +1,56 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-continuation-authorization/v1",
+  "status": "AUTHORIZED",
+  "authorized_attempt_id": "exp004-v11-kill-recompute-s41-c",
+  "maximum_fresh_invocations": 1,
+  "maximum_wall_seconds": 660,
+  "maximum_gpu_seconds": 1320,
+  "source": "USER_COMPLETION_CONTRACT_APPLIED_TO_STILL_UNEXECUTED_REAL_KILL_AND_RECOMPUTE_ARM",
+  "rationale": [
+    "The user requires exactly one real KILL_AND_RECOMPUTE arm after integrated v11 passes.",
+    "Attempt A ended before prebuild, reservation, Function, or GPU invocation.",
+    "Attempt B was conservatively charged but failed during remote module import before the handler, controller, model, source discard, recompute, or any scientific measurement began.",
+    "Attempt C is a bounded continuation to obtain the one still-missing real arm; it does not authorize additional retries or broader GPU work."
+  ],
+  "scientific_arm_executions_before_c": 0,
+  "prior_attempts": {
+    "a": {
+      "status": "INVALID_PRE_RESERVATION",
+      "consumed_gpu_authorization": false
+    },
+    "b": {
+      "status": "INVALID_PAID_INFRASTRUCTURE_BEFORE_HANDLER",
+      "conservative_gpu_seconds_charged": 1320,
+      "scientific_arm_executed": false
+    }
+  },
+  "budget": {
+    "settled_ledger_sha256": "7ebbe3e61f13124ca04d2c288ac7665961807d5d62a116530f5334155f5abc30",
+    "remaining_gpu_seconds": 17556.58500987602,
+    "required_gpu_seconds_with_15_percent_margin": 1518,
+    "margin_gate_pass": true
+  },
+  "evidence_bindings": {
+    "attempt_b_status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-b.json",
+      "sha256": "9c43d27066325accb5d5ab620df58391dbc63e3f49ea0b79e8db8f699c457147"
+    },
+    "attempt_b_provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-b.json",
+      "sha256": "8fd8d7f3a929a41bf8ebb86f936735b2790fedda024bf65cb5f4d2b3f84d9b34"
+    },
+    "attempt_b_conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-b-conservative-charge.json",
+      "sha256": "523d078decd6c31b3b6107957331084166063083812b7d970ddb7194b19a8a1c"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "7ebbe3e61f13124ca04d2c288ac7665961807d5d62a116530f5334155f5abc30"
+    }
+  },
+  "restrictions": [
+    "No Modal or GPU invocation before a fresh post-fix make check and content-addressed Attempt-C seal pass independent review.",
+    "No change to integrated K, allocator, movement, serving, trigger, recompute, or correctness gates.",
+    "No invocation after Attempt C under this authorization."
+  ]
+}

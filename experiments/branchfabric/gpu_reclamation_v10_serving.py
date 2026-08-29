@@ -8,14 +8,16 @@ the process boundary and no GPU library is imported by this module.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
 import queue
 import statistics
 import threading
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import Path
@@ -23,6 +25,32 @@ from typing import Any, Literal
 
 NS_PER_SECOND = 1_000_000_000
 _POLL_SECONDS = 0.005
+_OFFER_STATE_MAX_STALENESS_SECONDS = 2.0
+
+
+def _canonical_bytes(value: Any) -> bytes:
+    return (
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n"
+    ).encode()
+
+
+def _canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+
+
+def _write_replace(path: Path, value: Any) -> None:
+    """Atomically create or replace one compact live-state document."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    try:
+        with temporary.open("xb") as handle:
+            handle.write(_canonical_bytes(value))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
@@ -40,8 +68,11 @@ class LiveV10Config:
     output_tokens: int
     maximum_wall_seconds: float
     restore_grace_seconds: float
+    producer_queue_capacity: int
     maximum_pending_requests: int
     restore_handoff_lead_requests: int
+    overload_queue_trigger: int
+    overload_queue_abort: int
 
     @classmethod
     def from_mapping(cls, config: dict[str, Any]) -> LiveV10Config:
@@ -61,8 +92,11 @@ class LiveV10Config:
             output_tokens=int(config["serving_output_tokens"]),
             maximum_wall_seconds=float(config["maximum_wall_seconds"]),
             restore_grace_seconds=float(config["temporary_serving_seconds"]),
+            producer_queue_capacity=int(config["producer_queue_capacity"]),
             maximum_pending_requests=int(config["serving_maximum_pending_requests"]),
             restore_handoff_lead_requests=int(config["serving_restore_handoff_lead_requests"]),
+            overload_queue_trigger=int(config["serving_overload_queue_trigger"]),
+            overload_queue_abort=int(config["serving_overload_queue_abort"]),
         )
         finite_positive = (
             result.control_rate_per_second,
@@ -86,10 +120,16 @@ class LiveV10Config:
             raise ValueError("v10 stability must contain whole recovery evaluation windows")
         if result.recovery_queue_threshold < 0:
             raise ValueError("v10 recovery queue threshold cannot be negative")
+        if not 64 <= result.producer_queue_capacity <= 512:
+            raise ValueError("v10 producer queue capacity is outside 64..512")
         if not 1 <= result.maximum_pending_requests <= 20_000:
             raise ValueError("v10 pending-request queue bound is outside 1..20000")
         if not 2 <= result.restore_handoff_lead_requests <= 64:
             raise ValueError("v10 restore handoff lead must be within 2..64 requests")
+        if not 10 <= result.overload_queue_trigger <= 30:
+            raise ValueError("v10 overload queue trigger must be within the 10..30 target")
+        if not result.overload_queue_trigger < result.overload_queue_abort <= 64:
+            raise ValueError("v10 overload queue abort must exceed trigger and be at most 64")
         return result
 
 
@@ -111,6 +151,74 @@ class OfferedRequest:
             "device": self.device,
             "offered_ns": self.offered_ns,
         }
+
+
+@dataclass
+class _OfferStateCursor:
+    generation: int = -1
+    observed_ns: int = -1
+
+
+@dataclass
+class _Gpu1TelemetryCursor:
+    next_sequence: int = 0
+    watermark_ns: int | None = None
+    cumulative_completed_requests: int = 0
+    completed: dict[str, dict[str, Any]] = field(default_factory=dict)
+    active: dict[str, dict[str, Any]] = field(default_factory=dict)
+    runtime_queue_state: dict[str, int] | None = None
+
+    def observation_rows(self) -> tuple[dict[str, Any], ...]:
+        return tuple(self.completed.values()) + tuple(self.active.values())
+
+
+def _read_offer_state(
+    path: Path,
+    *,
+    attempt_id: str,
+    cursor: _OfferStateCursor,
+    now_ns: int,
+) -> dict[str, Any] | None:
+    payload = _read_json(path)
+    if payload is None:
+        return None
+    required = {
+        "schema_version",
+        "attempt_id",
+        "generation",
+        "observed_ns",
+        "last_offered_sequence",
+        "next_sequence",
+        "stopped",
+        "error",
+    }
+    if set(payload) != required:
+        raise ValueError("v10 global offer state fields differ from the exact contract")
+    generation = int(payload["generation"])
+    observed_ns = int(payload["observed_ns"])
+    last_offered = int(payload["last_offered_sequence"])
+    next_sequence = int(payload["next_sequence"])
+    if (
+        payload["schema_version"] != "sloforge.branchfabric.v10-global-offer-state/v1"
+        or payload["attempt_id"] != attempt_id
+        or generation < 0
+        or observed_ns < 0
+        or last_offered < -1
+        or next_sequence != last_offered + 1
+        or not isinstance(payload["stopped"], bool)
+        or (payload["error"] is not None and not isinstance(payload["error"], dict))
+    ):
+        raise ValueError("v10 global offer state is malformed")
+    if generation < cursor.generation or observed_ns < cursor.observed_ns:
+        raise RuntimeError("v10 global offer state regressed")
+    cursor.generation = generation
+    cursor.observed_ns = observed_ns
+    if payload["stopped"] and payload["error"] is not None:
+        raise RuntimeError("v10 global offer producer stopped with an error")
+    maximum_age_ns = int(_OFFER_STATE_MAX_STALENESS_SECONDS * NS_PER_SECOND)
+    if not payload["stopped"] and now_ns - observed_ns > maximum_age_ns:
+        raise RuntimeError("v10 global offer state is stale")
+    return payload
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -174,9 +282,11 @@ class _EngineDriver:
         self.observations: dict[str, dict[str, Any]] = {}
 
     def admit(self, request: OfferedRequest) -> None:
+        offset = request.sequence % len(self.prefix)
+        request_prefix = self.prefix[offset:] + self.prefix[:offset]
         self.engine.add_request(
             request.request_id,
-            {"prompt_token_ids": list(self.prefix)},
+            {"prompt_token_ids": list(request_prefix)},
             self.params,
         )
         self.observations[request.request_id] = {
@@ -230,6 +340,26 @@ class _EngineDriver:
             and len(row["output_token_ids"]) == self.output_tokens
         )
 
+    def observation_rows(self) -> tuple[dict[str, Any], ...]:
+        return tuple(self.observations.values())
+
+    def active_telemetry_rows(self) -> tuple[dict[str, Any], ...]:
+        fields = (
+            "sequence",
+            "request_id",
+            "phase",
+            "scheduled_arrival_ns",
+            "device",
+            "admitted_ns",
+            "service_start_ns",
+            "first_token_ns",
+        )
+        return tuple(
+            {field_name: row[field_name] for field_name in fields}
+            for request_id, row in self.observations.items()
+            if request_id in self.active
+        )
+
     def validate_complete(self) -> None:
         if self.active or len(self.complete_rows()) != len(self.observations):
             raise RuntimeError("v10 serving driver stopped with incomplete requests")
@@ -250,7 +380,7 @@ class _GlobalGpu0Producer:
         self.barriers = barriers
         self.write_new = write_new
         self.gpu0_queue: queue.Queue[OfferedRequest] = queue.Queue(
-            maxsize=config.maximum_pending_requests
+            maxsize=config.producer_queue_capacity
         )
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -260,6 +390,8 @@ class _GlobalGpu0Producer:
         self._restore_cutover: int | None = None
         self._restore_start_ns: int | None = None
         self._offered: list[OfferedRequest] = []
+        self._offer_state_generation = 0
+        self._last_offered_sequence = -1
         self.error: BaseException | None = None
         self.thread = threading.Thread(target=self._run, name="exp004-v10-arrivals", daemon=False)
 
@@ -274,6 +406,7 @@ class _GlobalGpu0Producer:
             return self._enable_cutover
 
     def start(self) -> None:
+        self._publish_offer_state(stopped=False, error=None)
         self.thread.start()
 
     def request_restore(self) -> None:
@@ -288,6 +421,39 @@ class _GlobalGpu0Producer:
         if self.error is not None:
             raise RuntimeError("v10 arrival producer failed") from self.error
 
+    def _publish_offer_state(
+        self, *, stopped: bool, error: BaseException | None
+    ) -> None:
+        with self._lock:
+            generation = self._offer_state_generation
+            self._offer_state_generation += 1
+            last_offered = self._last_offered_sequence
+        _write_replace(
+            self.barriers / "v10-global-offer-state.json",
+            {
+                "schema_version": "sloforge.branchfabric.v10-global-offer-state/v1",
+                "attempt_id": self.config.attempt_id,
+                "generation": generation,
+                "observed_ns": time.monotonic_ns(),
+                "last_offered_sequence": last_offered,
+                "next_sequence": last_offered + 1,
+                "stopped": stopped,
+                "error": (
+                    None
+                    if error is None
+                    else {"type": type(error).__name__, "message": str(error)}
+                ),
+            },
+        )
+
+    def _record_spike_offer(self, sequence: int) -> None:
+        with self._lock:
+            if sequence != self._last_offered_sequence + 1:
+                raise RuntimeError("v10 global offered sequence is not contiguous")
+            self._last_offered_sequence = sequence
+            self._next_spike_sequence = sequence + 1
+        self._publish_offer_state(stopped=False, error=None)
+
     def _offer(self, request: OfferedRequest) -> None:
         offered = OfferedRequest(
             sequence=request.sequence,
@@ -297,13 +463,13 @@ class _GlobalGpu0Producer:
             device=request.device,
             offered_ns=time.monotonic_ns(),
         )
-        with self._lock:
-            self._offered.append(offered)
         if offered.device == "gpu0":
             try:
                 self.gpu0_queue.put_nowait(offered)
             except queue.Full as exc:
                 raise RuntimeError("bounded v10 GPU0 admission queue overflowed") from exc
+        with self._lock:
+            self._offered.append(offered)
 
     def _wait_until(self, target_ns: int) -> bool:
         while not self._stop.is_set():
@@ -359,8 +525,7 @@ class _GlobalGpu0Producer:
                     )
                 )
                 restore_sequence += 1
-                with self._lock:
-                    self._next_spike_sequence += 1
+                self._record_spike_offer(sequence)
                 continue
             scheduled = spike_arrival_ns(
                 spike_start_ns=self.spike_start_ns,
@@ -420,8 +585,7 @@ class _GlobalGpu0Producer:
                     device=device,
                 )
             )
-            with self._lock:
-                self._next_spike_sequence += 1
+            self._record_spike_offer(sequence)
 
     def _run(self) -> None:
         try:
@@ -430,6 +594,8 @@ class _GlobalGpu0Producer:
         except BaseException as exc:
             self.error = exc
             self._stop.set()
+        finally:
+            self._publish_offer_state(stopped=True, error=self.error)
 
 
 def _drain_admission_queue(
@@ -445,23 +611,90 @@ def _drain_admission_queue(
             return
 
 
-def _load_gpu1_snapshot(
-    barriers: Path,
-) -> tuple[tuple[dict[str, Any], ...], int | None]:
-    snapshots = sorted((barriers / "v10-gpu1-telemetry").glob("*.json"))
-    if not snapshots:
-        return (), None
-    payload = _read_json(snapshots[-1])
-    if payload is None or not isinstance(payload.get("requests"), list):
-        raise ValueError("GPU1 telemetry snapshot is malformed")
-    return tuple(payload["requests"]), int(payload["observed_ns"])
+def _load_gpu1_incremental(
+    barriers: Path, cursor: _Gpu1TelemetryCursor
+) -> bool:
+    """Consume at most one bounded incremental GPU1 sample by exact sequence."""
+
+    path = barriers / "v10-gpu1-telemetry" / f"{cursor.next_sequence:06d}.json"
+    payload = _read_json(path)
+    if payload is None:
+        return False
+    required = {
+        "schema_version",
+        "sequence",
+        "observed_ns",
+        "completed_requests",
+        "active_requests",
+        "runtime_queue_state",
+        "cumulative_completed_requests",
+        "provenance",
+    }
+    if set(payload) != required:
+        raise ValueError("incremental GPU1 telemetry fields differ from the exact contract")
+    sequence = int(payload["sequence"])
+    observed_ns = int(payload["observed_ns"])
+    completed = payload["completed_requests"]
+    active = payload["active_requests"]
+    runtime_state = payload["runtime_queue_state"]
+    provenance = payload["provenance"]
+    if (
+        payload["schema_version"]
+        != "sloforge.branchfabric.v10-gpu1-telemetry-incremental/v1"
+        or sequence != cursor.next_sequence
+        or observed_ns < 0
+        or (cursor.watermark_ns is not None and observed_ns <= cursor.watermark_ns)
+        or not isinstance(completed, list)
+        or not isinstance(active, list)
+        or not isinstance(runtime_state, dict)
+        or not isinstance(provenance, dict)
+        or len(completed) > 512
+        or len(active) > 64
+    ):
+        raise ValueError("incremental GPU1 telemetry is malformed or unbounded")
+    completed_rows = tuple(dict(row) for row in completed if isinstance(row, dict))
+    active_rows = tuple(dict(row) for row in active if isinstance(row, dict))
+    if len(completed_rows) != len(completed) or len(active_rows) != len(active):
+        raise ValueError("incremental GPU1 telemetry contains non-object request rows")
+    completed_ids = tuple(str(row.get("request_id", "")) for row in completed_rows)
+    active_ids = tuple(str(row.get("request_id", "")) for row in active_rows)
+    if (
+        any(not request_id for request_id in (*completed_ids, *active_ids))
+        or len(set(completed_ids)) != len(completed_ids)
+        or len(set(active_ids)) != len(active_ids)
+        or set(completed_ids) & set(active_ids)
+        or set(completed_ids) & set(cursor.completed)
+    ):
+        raise ValueError("incremental GPU1 telemetry request identities are inconsistent")
+    expected_provenance = {
+        "completed_batch_sha256": _canonical_sha256(completed),
+        "active_request_ids_sha256": _canonical_sha256(sorted(active_ids)),
+    }
+    if provenance != expected_provenance:
+        raise ValueError("incremental GPU1 telemetry provenance hashes do not match")
+    disappeared_active = set(cursor.active) - set(active_ids) - set(completed_ids)
+    if disappeared_active:
+        raise ValueError("incremental GPU1 active request disappeared without completion")
+    for row in completed_rows:
+        cursor.completed[str(row["request_id"])] = row
+    cursor.active = {str(row["request_id"]): row for row in active_rows}
+    if set(cursor.active) & set(cursor.completed):
+        raise ValueError("incremental GPU1 active/completed state overlaps")
+    cumulative = int(payload["cumulative_completed_requests"])
+    if cumulative != len(cursor.completed):
+        raise ValueError("incremental GPU1 cumulative completion count disagrees")
+    validated_state = _validated_runtime_queue_snapshot(runtime_state)
+    cursor.cumulative_completed_requests = cumulative
+    cursor.runtime_queue_state = validated_state
+    cursor.watermark_ns = observed_ns
+    cursor.next_sequence += 1
+    return True
 
 
 def _combined_rows(
-    driver: _EngineDriver, barriers: Path
+    driver: _EngineDriver, cursor: _Gpu1TelemetryCursor
 ) -> tuple[tuple[dict[str, Any], ...], int | None]:
-    gpu1_rows, gpu1_watermark_ns = _load_gpu1_snapshot(barriers)
-    return tuple(driver.complete_rows()) + gpu1_rows, gpu1_watermark_ns
+    return driver.observation_rows() + cursor.observation_rows(), cursor.watermark_ns
 
 
 def _trigger_evidence(
@@ -472,9 +705,10 @@ def _trigger_evidence(
     window_end_ns: int,
 ) -> dict[str, Any]:
     rows = driver.complete_rows()
+    offered_snapshot = producer.offered
     offered = tuple(
         item
-        for item in producer.offered
+        for item in offered_snapshot
         if window_start_ns <= item.scheduled_arrival_ns < window_end_ns
     )
     completed = sum(window_start_ns <= int(row["completed_ns"]) < window_end_ns for row in rows)
@@ -485,7 +719,7 @@ def _trigger_evidence(
             row["request_id"] == item.request_id and int(row["completed_ns"]) <= window_start_ns
             for row in rows
         )
-        for item in producer.offered
+        for item in offered_snapshot
     )
     queue_end = sum(
         item.scheduled_arrival_ns <= window_end_ns
@@ -493,7 +727,7 @@ def _trigger_evidence(
             row["request_id"] == item.request_id and int(row["completed_ns"]) <= window_end_ns
             for row in rows
         )
-        for item in producer.offered
+        for item in offered_snapshot
     )
     p95 = _p95(
         [
@@ -503,29 +737,50 @@ def _trigger_evidence(
         ]
     )
     completed_rate = completed / duration
+    offered_rate = len(offered) / duration
     queue_slope = (queue_end - queue_start) / duration
+    ttft_above_slo = p95 is not None and p95 > 2 * NS_PER_SECOND
+    positive_slope = queue_slope > 0.10
+    material_deficit = completed_rate < 0.90 * offered_rate
+    bounded_backlog = (
+        producer.config.overload_queue_trigger <= queue_end <= 25
+    )
     reasons: list[str] = []
-    if p95 is not None and p95 > 2 * NS_PER_SECOND:
+    if ttft_above_slo:
         reasons.append("p95_ttft_above_slo")
-    if queue_slope > 0:
-        reasons.append("queue_positive_drift")
-    if len(offered) / duration > completed_rate:
-        reasons.append("offered_above_completed")
+    if positive_slope:
+        reasons.append("queue_sustained_positive_drift")
+    if material_deficit:
+        reasons.append("material_service_deficit")
+    if bounded_backlog:
+        reasons.append("bounded_backlog_trigger_reached")
+    # The load selection already has independent approval.  Trigger at the
+    # fixed depth on its approved overload signal instead of waiting for a
+    # catastrophic TTFT/deficit threshold that would exceed the preferred
+    # 10..25-request backlog range.
+    overload_confirmed = bounded_backlog and positive_slope
     return {
         "schema_version": "sloforge.branchfabric.reclamation-trigger-evidence/v1",
         "window_start_ns": window_start_ns,
         "window_end_ns": window_end_ns,
+        "offered_snapshot_count": len(offered_snapshot),
         "offered_requests": len(offered),
-        "offered_rate_per_second": len(offered) / duration,
+        "offered_rate_per_second": offered_rate,
         "completed_requests": completed,
         "completed_rate_per_second": completed_rate,
         "queue_depth_start": queue_start,
         "queue_depth_end": queue_end,
         "queue_depth_slope_per_second": queue_slope,
         "p95_ttft_ns": p95,
-        "trigger_rule": "fixed-overload-window-with-measured-overload",
+        "queue_trigger": producer.config.overload_queue_trigger,
+        "queue_abort": producer.config.overload_queue_abort,
+        "material_service_deficit": material_deficit,
+        "trigger_rule": (
+            f"fixed_depth_{producer.config.overload_queue_trigger}_with_positive_queue_slope_"
+            "and_trigger_depth_at_most_25"
+        ),
         "trigger_reason": reasons,
-        "overload_confirmed": bool(reasons),
+        "overload_confirmed": overload_confirmed,
         "triggered_ns": time.monotonic_ns(),
     }
 
@@ -542,6 +797,91 @@ def _outstanding_at(
         item.scheduled_arrival_ns <= timestamp_ns and item.request_id not in completed
         for item in offered
     )
+
+
+def _waiting_backlog_at(
+    offered: tuple[OfferedRequest, ...], rows: tuple[dict[str, Any], ...], timestamp_ns: int
+) -> int:
+    """Count offered work that has not produced a scheduler-visible output."""
+
+    started = {
+        str(row["request_id"])
+        for row in rows
+        if row.get("service_start_ns") is not None
+        and int(row["service_start_ns"]) <= timestamp_ns
+    }
+    return sum(
+        item.scheduled_arrival_ns <= timestamp_ns and item.request_id not in started
+        for item in offered
+    )
+
+
+def _queue_depths_at(
+    offered: tuple[OfferedRequest, ...], rows: tuple[dict[str, Any], ...], timestamp_ns: int
+) -> dict[str, int]:
+    return {
+        "total_outstanding": _outstanding_at(offered, rows, timestamp_ns),
+        "waiting_backlog": _waiting_backlog_at(offered, rows, timestamp_ns),
+    }
+
+
+def _enforce_pre_gpu1_queue_abort(
+    *,
+    trigger_written: bool,
+    gpu1_first_useful: dict[str, Any] | None,
+    instantaneous_depth: int,
+    maximum_depth: int,
+) -> None:
+    """Compatibility wrapper for the pre-useful hard total-outstanding bound."""
+
+    if instantaneous_depth < 0 or maximum_depth < 0:
+        raise ValueError("v10 queue-depth abort inputs cannot be negative")
+    if gpu1_first_useful is None:
+        _enforce_recovery_queue_bound(
+            total_outstanding=instantaneous_depth,
+            maximum_depth=maximum_depth,
+            phase="post-reclaim-pre-gpu1" if trigger_written else "pre-reclaim",
+        )
+
+
+def _enforce_recovery_queue_bound(
+    *, total_outstanding: int, maximum_depth: int, phase: str = "two-gpu-recovery"
+) -> None:
+    """Keep the scientific total-outstanding ceiling live throughout recovery."""
+
+    if total_outstanding < 0 or maximum_depth < 0:
+        raise ValueError("v10 queue-depth abort inputs cannot be negative")
+    if total_outstanding > maximum_depth:
+        raise RuntimeError(
+            f"calibrated v10 backlog exceeded its bounded safety ceiling during {phase}"
+        )
+
+
+def _validated_runtime_queue_snapshot(state: dict[str, int]) -> dict[str, int]:
+    required = (
+        "request_count",
+        "running_requests",
+        "waiting_requests",
+        "skipped_waiting_requests",
+        "queue_depth",
+    )
+    if set(state) != set(required) or any(
+        isinstance(state[name], bool) or not isinstance(state[name], int) or state[name] < 0
+        for name in required
+    ):
+        raise ValueError("GPU1 runtime drain state is incomplete or malformed")
+    if state["queue_depth"] != state["waiting_requests"] + state["skipped_waiting_requests"]:
+        raise ValueError("GPU1 runtime queue-depth accounting is inconsistent")
+    return dict(state)
+
+
+def _validated_runtime_drain_state(state: dict[str, int]) -> dict[str, int]:
+    """Fail closed unless the live vLLM scheduler is observably empty."""
+
+    validated = _validated_runtime_queue_snapshot(state)
+    if any(validated[name] != 0 for name in validated):
+        raise RuntimeError("GPU1 vLLM scheduler was not fully drained before restore")
+    return validated
 
 
 def _sustained_queue_trend(
@@ -569,10 +909,13 @@ def _sustained_queue_trend(
     mean_x = statistics.fmean(seconds)
     mean_y = statistics.fmean(depths)
     denominator = sum((value - mean_x) ** 2 for value in seconds)
-    slope = sum(
-        (x_value - mean_x) * (y_value - mean_y)
-        for x_value, y_value in zip(seconds, depths, strict=True)
-    ) / denominator
+    slope = (
+        sum(
+            (x_value - mean_x) * (y_value - mean_y)
+            for x_value, y_value in zip(seconds, depths, strict=True)
+        )
+        / denominator
+    )
     midpoint = len(depths) // 2
     first_half_mean = statistics.fmean(depths[:midpoint])
     second_half_mean = statistics.fmean(depths[midpoint:])
@@ -588,9 +931,7 @@ def _sustained_queue_trend(
     offered_rate = offered_count / duration
     completed_rate = completed_count / duration
     sustained_negative = (
-        slope < 0.0
-        and depths[-1] < depths[0]
-        and second_half_mean < first_half_mean
+        slope < 0.0 and depths[-1] < depths[0] and second_half_mean < first_half_mean
     )
     return {
         "window_start_ns": window_start_ns,
@@ -623,9 +964,14 @@ def _recovery_evidence(
     gpu1_first_useful_ns: int,
     now_ns: int,
     candidate_start_ns: int | None,
+    scheduler_waiting_backlog: int,
 ) -> tuple[dict[str, Any], int | None]:
     offered = producer.offered
-    queue_now = _outstanding_at(offered, rows, now_ns)
+    depths_now = _queue_depths_at(offered, rows, now_ns)
+    if scheduler_waiting_backlog < 0:
+        raise ValueError("v10 scheduler waiting backlog cannot be negative")
+    queue_now = scheduler_waiting_backlog
+    total_now = depths_now["total_outstanding"]
     queue_first = _outstanding_at(offered, rows, gpu1_first_useful_ns)
     if candidate_start_ns is None:
         minimum_trend_ns = int(config.recovery_stability_seconds * NS_PER_SECOND)
@@ -656,7 +1002,7 @@ def _recovery_evidence(
             for item in cohort
             if item.request_id in by_id and by_id[item.request_id].get("first_token_ns") is not None
         ]
-        depth = _outstanding_at(offered, rows, end)
+        depth = _waiting_backlog_at(offered, rows, end)
         p95 = _p95(ttft)
         passed = (
             bool(cohort)
@@ -685,7 +1031,8 @@ def _recovery_evidence(
     )
     completed_rate = float(trend["completed_rate_per_second"])
     offered_rate = float(trend["offered_rate_per_second"])
-    queue_candidate = _outstanding_at(offered, rows, candidate_start_ns)
+    queue_candidate = _waiting_backlog_at(offered, rows, candidate_start_ns)
+    total_candidate = _outstanding_at(offered, rows, candidate_start_ns)
     slope = float(trend["slope_requests_per_second"])
     evidence = {
         "schema_version": "sloforge.branchfabric.serving-recovery-evidence/v1",
@@ -696,6 +1043,9 @@ def _recovery_evidence(
         "queue_depth_at_gpu1_first_useful": queue_first,
         "queue_depth_at_stability_start": queue_candidate,
         "queue_depth_at_evaluation": queue_now,
+        "recovery_queue_metric": "live_vllm_scheduler_waiting",
+        "total_outstanding_at_stability_start": total_candidate,
+        "total_outstanding_at_evaluation": total_now,
         "queue_depth_slope_per_second": slope,
         "queue_trend": trend,
         "recovery_queue_threshold": config.recovery_queue_threshold,
@@ -729,6 +1079,7 @@ def run_v10_gpu0(
     start_ns: int,
     barriers: Path,
     write_new: Callable[[Path, Any], None],
+    runtime_queue_state: Callable[[], dict[str, int]],
 ) -> dict[str, Any]:
     """Run the global clock, GPU0 shard, trigger, recovery, and restore gates."""
 
@@ -754,6 +1105,8 @@ def run_v10_gpu0(
     recovery: dict[str, Any] | None = None
     restore_started_ns: int | None = None
     complete_observed_ns: int | None = None
+    gpu1_cursor = _Gpu1TelemetryCursor()
+    next_recovery_evaluation_ns = 0
     try:
         while True:
             now = time.monotonic_ns()
@@ -767,43 +1120,90 @@ def run_v10_gpu0(
                 maximum_active=config.maximum_pending_requests,
             )
             driver.step()
+            # Re-sample after ``engine.step`` so a request completed in this
+            # iteration is not conservatively counted as still outstanding.
+            now = time.monotonic_ns()
+            first_useful = _read_json(barriers / "v10-gpu1-first-useful.json")
+            instantaneous_depth = _outstanding_at(
+                producer.offered, driver.observation_rows(), now
+            )
+            _enforce_pre_gpu1_queue_abort(
+                trigger_written=trigger_written,
+                gpu1_first_useful=first_useful,
+                instantaneous_depth=instantaneous_depth,
+                maximum_depth=config.overload_queue_abort,
+            )
+            if first_useful is not None and restore_started_ns is None:
+                conservative_recovery_depth = _outstanding_at(
+                    producer.offered,
+                    driver.observation_rows() + tuple(gpu1_cursor.completed.values()),
+                    now,
+                )
+                _enforce_recovery_queue_bound(
+                    total_outstanding=conservative_recovery_depth,
+                    maximum_depth=config.overload_queue_abort,
+                )
             if not trigger_written and now >= trigger_deadline_ns:
                 trigger = _trigger_evidence(
                     producer=producer,
                     driver=driver,
-                    window_start_ns=producer.spike_start_ns,
-                    window_end_ns=trigger_deadline_ns,
+                    window_start_ns=max(
+                        producer.spike_start_ns,
+                        now - int(config.overload_probe_seconds * NS_PER_SECOND),
+                    ),
+                    window_end_ns=now,
                 )
                 if not trigger["overload_confirmed"]:
-                    raise RuntimeError("calibrated v10 spike did not overload GPU0")
+                    time.sleep(_POLL_SECONDS)
+                    continue
                 write_new(barriers / "v10-reclaim-trigger.json", trigger)
                 trigger_written = True
-            first_useful = _read_json(barriers / "v10-gpu1-first-useful.json")
             # An empty evidence object means the drain/stability candidate has
             # not matured yet.  Keep evaluating until all recovery gates pass;
             # treating the first empty result as terminal would deadlock both
             # workers at the restore barrier.
-            if first_useful is not None and not (
-                recovery is not None and recovery.get("restore_eligible")
+            if (
+                first_useful is not None
+                and restore_started_ns is None
+                and now >= next_recovery_evaluation_ns
             ):
-                rows, gpu1_watermark_ns = _combined_rows(driver, barriers)
+                next_recovery_evaluation_ns = now + int(
+                    config.recovery_evaluation_seconds * NS_PER_SECOND
+                )
+                _load_gpu1_incremental(barriers, gpu1_cursor)
+                rows, gpu1_watermark_ns = _combined_rows(driver, gpu1_cursor)
                 if gpu1_watermark_ns is None:
                     continue
-                recovery, recovery_candidate = _recovery_evidence(
-                    config=config,
-                    producer=producer,
-                    rows=rows,
-                    gpu1_first_useful_ns=int(first_useful["first_token_ns"]),
-                    # Queue depth must be evaluated only through the newest
-                    # timestamp for which both workers have published complete
-                    # observations.  Advancing on GPU0's clock while GPU1's
-                    # snapshot is stale invents a growing queue.
-                    now_ns=min(now, gpu1_watermark_ns),
-                    candidate_start_ns=recovery_candidate,
+                evaluation_ns = min(now, gpu1_watermark_ns)
+                recovery_depth = _outstanding_at(producer.offered, rows, evaluation_ns)
+                _enforce_recovery_queue_bound(
+                    total_outstanding=recovery_depth,
+                    maximum_depth=config.overload_queue_abort,
                 )
-                if recovery and recovery["restore_eligible"]:
-                    write_new(barriers / "v10-serving-recovery.json", recovery)
-                    producer.request_restore()
+                gpu0_runtime = _validated_runtime_queue_snapshot(runtime_queue_state())
+                if gpu1_cursor.runtime_queue_state is None:
+                    continue
+                scheduler_waiting_backlog = (
+                    gpu0_runtime["queue_depth"]
+                    + gpu1_cursor.runtime_queue_state["queue_depth"]
+                )
+                if not (recovery is not None and recovery.get("restore_eligible")):
+                    recovery, recovery_candidate = _recovery_evidence(
+                        config=config,
+                        producer=producer,
+                        rows=rows,
+                        gpu1_first_useful_ns=int(first_useful["first_token_ns"]),
+                        # Queue depth must be evaluated only through the newest
+                        # timestamp for which both workers have published complete
+                        # observations.  Advancing on GPU0's clock while GPU1's
+                        # snapshot is stale invents a growing queue.
+                        now_ns=evaluation_ns,
+                        candidate_start_ns=recovery_candidate,
+                        scheduler_waiting_backlog=scheduler_waiting_backlog,
+                    )
+                    if recovery and recovery["restore_eligible"]:
+                        write_new(barriers / "v10-serving-recovery.json", recovery)
+                        producer.request_restore()
             if recovery is not None and recovery.get("restore_eligible"):
                 drained = _read_json(barriers / "v10-gpu1-drained.json")
                 cutover = _read_json(barriers / "v10-restore-route-cutover.json")
@@ -812,6 +1212,18 @@ def run_v10_gpu0(
                         cutover["restore_cutover_sequence"]
                     ):
                         raise RuntimeError("GPU1 admitted work at or beyond restore cutover")
+                    if (
+                        int(drained.get("running_requests", -1)) != 0
+                        or int(drained.get("waiting_requests", -1)) != 0
+                    ):
+                        raise RuntimeError("GPU1 restore handoff was not fully drained")
+                    if now < int(cutover["restore_start_ns"]):
+                        continue
+                    if not any(
+                        item.phase == "restore-interference" and item.offered_ns is not None
+                        for item in producer.offered
+                    ):
+                        continue
                     restore_started_ns = time.monotonic_ns()
                     write_new(
                         barriers / "v10-restore-start.json",
@@ -840,6 +1252,46 @@ def run_v10_gpu0(
             if not driver.active and producer.gpu0_queue.empty():
                 time.sleep(_POLL_SECONDS)
         driver.validate_complete()
+    except BaseException as error:
+        producer._stop.set()
+        producer.thread.join(timeout=10.0)
+        failure_runtime_state: dict[str, Any]
+        try:
+            failure_runtime_state = _validated_runtime_queue_snapshot(runtime_queue_state())
+        except BaseException as queue_error:
+            failure_runtime_state = {
+                "error_type": type(queue_error).__name__,
+                "error_message": str(queue_error),
+            }
+        observed_ns = time.monotonic_ns()
+        offered_snapshot = producer.offered
+        gpu0_rows = driver.observation_rows()
+        partial = {
+            "schema_version": "sloforge.branchfabric.v10-gpu0-partial-failure/v1",
+            "observed_ns": observed_ns,
+            "error": {"type": type(error).__name__, "message": str(error)},
+            "global_offered_requests": tuple(item.as_dict() for item in offered_snapshot),
+            "gpu0_requests": gpu0_rows,
+            "queue_state": {
+                "external_gpu0_queue_size": producer.gpu0_queue.qsize(),
+                "driver_active_requests": len(driver.active),
+                "runtime_queue_state": failure_runtime_state,
+                "total_outstanding": _outstanding_at(
+                    offered_snapshot,
+                    gpu0_rows + gpu1_cursor.observation_rows(),
+                    observed_ns,
+                ),
+            },
+            "gpu1_incremental_completed_requests": tuple(gpu1_cursor.completed.values()),
+            "gpu1_incremental_active_requests": tuple(gpu1_cursor.active.values()),
+            "gpu1_telemetry_next_sequence": gpu1_cursor.next_sequence,
+            "producer_thread_stopped": not producer.thread.is_alive(),
+            "global_offer_state": _read_json(
+                barriers / "v10-global-offer-state.json"
+            ),
+        }
+        _write_replace(barriers / "v10-gpu0-partial-failure.json", partial)
+        raise
     finally:
         if producer.thread.is_alive():
             producer.stop()
@@ -847,6 +1299,7 @@ def run_v10_gpu0(
         "schema_version": "sloforge.branchfabric.experiment-004-v10-serving-raw/v1",
         "methodology": "v10-global-capacity",
         "start_ns": start_ns,
+        "spike_start_ns": producer.spike_start_ns,
         "end_ns": time.monotonic_ns(),
         "requests": tuple(driver.observations.values()),
         "global_offered_requests": tuple(item.as_dict() for item in producer.offered),
@@ -854,8 +1307,56 @@ def run_v10_gpu0(
         "serving_recovery_evidence": _read_json(barriers / "v10-serving-recovery.json"),
         "serving_enable_ack": _read_json(barriers / "v10-serving-enable-ack.json"),
         "restore_route_cutover": _read_json(barriers / "v10-restore-route-cutover.json"),
+        "gpu1_drained": _read_json(barriers / "v10-gpu1-drained.json"),
         "restore_start": _read_json(barriers / "v10-restore-start.json"),
+        "prefix_cache_policy": {
+            "enabled_for_rollout_semantics": True,
+            "serving_reuse_prevented": True,
+            "method": "request-unique-first-block-rotation-transitive-hash-chain",
+        },
     }
+
+
+def _publish_gpu1_incremental_telemetry(
+    *,
+    driver: _EngineDriver,
+    barriers: Path,
+    write_new: Callable[[Path, Any], None],
+    telemetry_sequence: int,
+    published_completed_ids: set[str],
+    runtime_queue_state: Callable[[], dict[str, int]],
+) -> int:
+    completed = driver.complete_rows()
+    new_completed = tuple(
+        row for row in completed if str(row["request_id"]) not in published_completed_ids
+    )
+    active = driver.active_telemetry_rows()
+    state = _validated_runtime_queue_snapshot(runtime_queue_state())
+    observed_ns = time.monotonic_ns()
+    completed_payload = list(new_completed)
+    active_payload = list(active)
+    write_new(
+        barriers / "v10-gpu1-telemetry" / f"{telemetry_sequence:06d}.json",
+        {
+            "schema_version": (
+                "sloforge.branchfabric.v10-gpu1-telemetry-incremental/v1"
+            ),
+            "sequence": telemetry_sequence,
+            "observed_ns": observed_ns,
+            "completed_requests": completed_payload,
+            "active_requests": active_payload,
+            "runtime_queue_state": state,
+            "cumulative_completed_requests": len(completed),
+            "provenance": {
+                "completed_batch_sha256": _canonical_sha256(completed_payload),
+                "active_request_ids_sha256": _canonical_sha256(
+                    sorted(str(row["request_id"]) for row in active_payload)
+                ),
+            },
+        },
+    )
+    published_completed_ids.update(str(row["request_id"]) for row in new_completed)
+    return observed_ns
 
 
 def run_v10_gpu1(
@@ -866,6 +1367,7 @@ def run_v10_gpu1(
     config: LiveV10Config,
     barriers: Path,
     write_new: Callable[[Path, Any], None],
+    runtime_queue_state: Callable[[], dict[str, int]],
 ) -> dict[str, Any]:
     """Serve only GPU1's acknowledged shard, publish telemetry, then drain."""
 
@@ -892,7 +1394,12 @@ def run_v10_gpu1(
     sequence = cutover
     telemetry_sequence = 0
     last_snapshot_ns = 0
+    published_completed_ids: set[str] = set()
+    offer_state_cursor = _OfferStateCursor()
+    offer_state: dict[str, Any] | None = None
+    next_offer_state_poll_ns = 0
     restore_cutover: int | None = None
+    restore_start_ns: int | None = None
     last_admitted = -1
     while True:
         now = time.monotonic_ns()
@@ -901,13 +1408,28 @@ def run_v10_gpu1(
         restore = _read_json(barriers / "v10-restore-route-cutover.json")
         if restore is not None:
             restore_cutover = int(restore["restore_cutover_sequence"])
+            restore_start_ns = int(restore["restore_start_ns"])
         scheduled = spike_arrival_ns(
             spike_start_ns=spike_start_ns,
             rate_per_second=config.spike_rate_per_second,
             sequence=sequence,
         )
+        if now >= scheduled and now >= next_offer_state_poll_ns:
+            offer_state = _read_offer_state(
+                barriers / "v10-global-offer-state.json",
+                attempt_id=config.attempt_id,
+                cursor=offer_state_cursor,
+                now_ns=now,
+            )
+            next_offer_state_poll_ns = now + 50_000_000
+        if offer_state is None:
+            time.sleep(_POLL_SECONDS)
+            continue
+        last_offered_sequence = int(offer_state["last_offered_sequence"])
         if (
             (restore_cutover is None or sequence < restore_cutover)
+            and not bool(offer_state["stopped"])
+            and sequence <= last_offered_sequence
             and now >= scheduled
             and len(driver.active) < config.maximum_pending_requests
         ):
@@ -935,29 +1457,32 @@ def run_v10_gpu1(
                     "first_token_ns": first["first_token_ns"],
                 },
             )
-        if complete and now - last_snapshot_ns >= int(config.recovery_evaluation_seconds * 1e9):
-            snapshot_ns = time.monotonic_ns()
-            write_new(
-                barriers / "v10-gpu1-telemetry" / f"{telemetry_sequence:06d}.json",
-                {
-                    "schema_version": "sloforge.branchfabric.v10-gpu1-telemetry/v1",
-                    "sequence": telemetry_sequence,
-                    "observed_ns": snapshot_ns,
-                    "requests": complete,
-                },
+        if now - last_snapshot_ns >= int(config.recovery_evaluation_seconds * 1e9):
+            last_snapshot_ns = _publish_gpu1_incremental_telemetry(
+                driver=driver,
+                barriers=barriers,
+                write_new=write_new,
+                telemetry_sequence=telemetry_sequence,
+                published_completed_ids=published_completed_ids,
+                runtime_queue_state=runtime_queue_state,
             )
             telemetry_sequence += 1
-            last_snapshot_ns = snapshot_ns
-        if restore_cutover is not None and sequence >= restore_cutover and not driver.active:
+        if (
+            restore_cutover is not None
+            and restore_start_ns is not None
+            and sequence >= restore_cutover
+            and now >= restore_start_ns
+            and not driver.active
+        ):
+            scheduler_state = _validated_runtime_drain_state(runtime_queue_state())
             final = driver.complete_rows()
-            write_new(
-                barriers / "v10-gpu1-telemetry" / f"{telemetry_sequence:06d}.json",
-                {
-                    "schema_version": "sloforge.branchfabric.v10-gpu1-telemetry/v1",
-                    "sequence": telemetry_sequence,
-                    "observed_ns": time.monotonic_ns(),
-                    "requests": final,
-                },
+            _publish_gpu1_incremental_telemetry(
+                driver=driver,
+                barriers=barriers,
+                write_new=write_new,
+                telemetry_sequence=telemetry_sequence,
+                published_completed_ids=published_completed_ids,
+                runtime_queue_state=runtime_queue_state,
             )
             write_new(
                 barriers / "v10-gpu1-drained.json",
@@ -967,6 +1492,14 @@ def run_v10_gpu1(
                     "restore_cutover_sequence": restore_cutover,
                     "last_admitted_sequence": last_admitted,
                     "request_count": len(final),
+                    "running_requests": scheduler_state["running_requests"],
+                    "waiting_requests": scheduler_state["waiting_requests"],
+                    "skipped_waiting_requests": scheduler_state[
+                        "skipped_waiting_requests"
+                    ],
+                    "scheduler_request_count": scheduler_state["request_count"],
+                    "queue_depth": scheduler_state["queue_depth"],
+                    "runtime_state_source": "live-vllm-0.23-scheduler",
                 },
             )
             break

@@ -1,0 +1,63 @@
+{
+  "artifacts": [
+    "artifacts/branchfabric/continuum/seed-113/state-operation-trace-v1.jsonl",
+    "artifacts/branchfabric/continuum/seed-113/continuum-lifecycle.perfetto.json",
+    "artifacts/branchfabric/continuum/seed-113/raw-continuum-observations.json",
+    "artifacts/branchfabric/continuum/seed-113/sharing-analysis.json",
+    "artifacts/branchfabric/continuum/seed-113/resource-trace-v1.json"
+  ],
+  "attempted_events": 18,
+  "divergent_continuation_hash": "43b69e5ace83b7e6921679ca3ddfa9c13e620587164d5a08a07b9379b5ad9435",
+  "dropped_events": 0,
+  "filtered_events": 0,
+  "limitations": [
+    "The Continuum workload is a deterministic synthetic state fixture.",
+    "Reference runtime state names simulated GPU layouts but every byte executes in host memory.",
+    "Pre-copy network latency and bandwidth are deterministic simulated-hardware values.",
+    "No GPU, PCIe, NVLink, RDMA, or multi-node timing is inferred."
+  ],
+  "migration_transaction_id": "de064416e175efe60e9da741eb03e344b66934b734056b1d8b1f9f30821faf22",
+  "migration_transport_kind": "SIMULATED_HARDWARE",
+  "output": "artifacts/branchfabric/continuum/seed-113",
+  "parquet_status": "unavailable",
+  "resource_sample_count": 8,
+  "resource_samples_dropped": 0,
+  "schema_version": "sloforge.branchfabric.continuum-trace-run/v1",
+  "seed": 113,
+  "sharing_analysis": {
+    "branch_count": 2,
+    "cow_bytes": 512,
+    "cow_page_count": 8,
+    "evidence_references": [
+      "python/sloforge/continuum/operations/branching.py:fork_checkpoint",
+      "python/sloforge/continuum/storage/content_store.py:MemoryContentStore.put",
+      "python/sloforge/continuum/adapters/sdk.py:PageTableEntry.copy_on_write_refs"
+    ],
+    "logical_unique_bytes": 3179,
+    "metadata_bytes_per_branch": [
+      164532,
+      164532
+    ],
+    "naive_independent_allocation_bytes": 6358,
+    "physical_allocated_bytes": 3179,
+    "physical_amplification": 1.0,
+    "private_bytes_per_branch": [
+      450,
+      450
+    ],
+    "shared_logical_bytes": 2729,
+    "sharing_efficiency": 0.5,
+    "source_page_refcount": 3
+  },
+  "source_continuation_hash": "544cd5eab769ea100fbc485341d9b4561ea0b4d7e8dcb0f2c72b8d5442267257",
+  "state_event_count": 18,
+  "timing_measurement_counts": {
+    "HARDWARE_BACKED_REAL": 12,
+    "REPLAYED": 0,
+    "SIMULATED_HARDWARE": 6,
+    "SYNTHETIC": 0
+  },
+  "trace_corpus_hash": "726fb4556de7a3caacb0db6156749eaffdd07c74ddc52f1013518e7e996cbdc1",
+  "trace_id": "92286f4cdd66851b1605d23ccadc2b6a62f49fc3f6f2c7f184050fea7b0f2752",
+  "workload_evidence_class": "SYNTHETIC"
+}

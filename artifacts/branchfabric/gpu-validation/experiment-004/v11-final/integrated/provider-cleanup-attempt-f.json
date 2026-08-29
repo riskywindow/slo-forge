@@ -1,0 +1,93 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-27T01:01:50Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-f",
+  "function_call_id": "fc-01M10B0TF4F8T8M300EA972H9M",
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 4,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "PASS",
+    "artifact": "raw/exp004-v11-integrated-s41-f/in_function_cleanup.json",
+    "sha256": "4b5b0f2c4fe865ae1f8ba7ff004bc81722c69dbea2c9f3543342398c54aaa156",
+    "cleanup_schema_version": "sloforge.branchfabric.in-function-cleanup/v1",
+    "required_lifecycle": [
+      "RUNNING",
+      "QUIESCE",
+      "ENGINE_STOP",
+      "WORKER_STOP",
+      "CHILD_REAP",
+      "PGID_EMPTY",
+      "CUDA_RELEASED",
+      "FUNCTION_RETURN"
+    ],
+    "children_reaped": true,
+    "process_groups_empty": true,
+    "zombies": 0,
+    "profilers": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children": 0,
+    "forced_kills": []
+  },
+  "remote_evidence": {
+    "remote_manifest": "raw/exp004-v11-integrated-s41-f/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "994bd867e8b93dcc78cdba12355a1da9971e5460a5bfc18eb5f60ab40dbd6dfe",
+    "remote_manifest_artifact_count": 478,
+    "remote_manifest_integrity": "PASS",
+    "controller_result": "raw/exp004-v11-integrated-s41-f/controller-result.json",
+    "controller_result_sha256": "493a3f9782dd0e3b875a6bbe6cb4371d47e33c421fcb8537329d4ebe4b9f4415",
+    "function_completion": "raw/exp004-v11-integrated-s41-f/function-completion.json",
+    "function_completion_sha256": "379a5565874fe876e04c11fbd16d216b321dd58e0d61ffd9bddcaa1ec07d8b65",
+    "function_failure": "raw/exp004-v11-integrated-s41-f/function-failure.json",
+    "function_failure_sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437",
+    "function_finally_cleanup": "raw/exp004-v11-integrated-s41-f/function-finally-cleanup.json",
+    "function_finally_cleanup_sha256": "8381df0f82d2bf5ac8d9ee486987be38beb4facf4ceb963249c3f8888cc26b94"
+  },
+  "provider_audit_input": {
+    "artifact": "provider-cleanup-audit-inputs-exp004-v11-integrated-s41-f.json",
+    "sha256": "ad8904b273e104c2b11e18a13d13b3aa4f279265cccf03eb2ab3c97164a0153a",
+    "prior_status": "PENDING_EXPLICIT_PROVIDER_POST_RETURN_AUDIT"
+  },
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json"
+  ],
+  "ledger": {
+    "artifact": "../../gpu-hours.json",
+    "sha256_after_settlement": "d42b760e3421d82478c00c1d8d85737c008c7c395aae8d7b7a4418a15c03725f",
+    "active_reservations": 0,
+    "consumed_additional_gpu_seconds": 20996.945466665977,
+    "hard_additional_gpu_seconds": 43200.0,
+    "remaining_gpu_seconds": 22203.054533334023,
+    "attempt_accounted_wall_seconds": 211.485226717,
+    "attempt_gpu_count": 2,
+    "attempt_actual_gpu_seconds": 422.970453434,
+    "attempt_actual_gpu_hours": 0.11749179262055555,
+    "attempt_cost_usd": 0.293541494683196,
+    "attempt_accounting_basis": "measured-function-allocation-interval"
+  },
+  "provenance": {
+    "provider_observation": "Designated GPU coordinator direct post-return Modal CLI observation",
+    "provider_and_in_function_independent": true,
+    "raw_bundle_preserved": true,
+    "interpretation": "Provider resources returned to exact zero; the two authorized persistent volumes are the only retained provider resources."
+  }
+}

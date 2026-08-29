@@ -1,0 +1,46 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-software-pipeline-design/v1",
+  "status": "IMPLEMENTED_LOCAL_GPU_UNVALIDATED",
+  "implementation_path": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+  "implementation_sha256": "c6e7c3557b9bf41828e1f9038f48d3777e04abdf1477891ed0c714c975a6cf9f",
+  "frozen_v10_path": "python/sloforge/continuum/adapters/vllm_reclamation.py",
+  "frozen_v10_sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f",
+  "isolation": "separate versioned module; v10 source is unchanged",
+  "chunk_policy": {
+    "default_maximum_chunk_bytes": 29360128,
+    "baseline_pages_per_full_chunk": 32,
+    "buffer_count": 2,
+    "deterministic_seed_required": true,
+    "page_and_valid_extent_boundaries": true
+  },
+  "source_path": [
+    "preflight exact native geometry, semantic manifest, device index, and GPU UUID",
+    "bounded native index-select gather",
+    "bounded canonical repack",
+    "asynchronous D2H into the final pinned checkpoint",
+    "whole-payload and per-page SHA-256 while completed chunks are consumed"
+  ],
+  "restore_path": [
+    "pre-restore complete transport verification",
+    "bounded owned host snapshot with per-page consumption-time SHA-256",
+    "asynchronous H2D",
+    "direct native scatter into fresh blocks",
+    "raw-bit destination equality before visibility",
+    "tail-only raw zeroing for partial pages"
+  ],
+  "correctness_contracts": [
+    "manifest commitment binds model, tokenizer, policy epoch, ancestry, token history, page order, and ownership",
+    "validation and scrub evidence bind transport digest, ordered destination blocks, destination tensor identity, device index, GPU UUID, geometry, and allocation epoch",
+    "post-verification tensor and NumPy-alias mutation is rejected at consumption",
+    "failure scrubs all touched pages; cleanup uncertainty raises V11RuntimeTeardownRequired and quarantines ownership",
+    "an explicit sealed engine-step admission-gate witness is checked between every group enqueue"
+  ],
+  "zero_fill": {
+    "frozen_v10_full_pages": 1152,
+    "frozen_v10_partial_pages": 0,
+    "full_page_zero_fill_removed_when_complete_overwrite_is_proven": true,
+    "partial_tail_zero_fill_retained": true
+  },
+  "custom_cuda_kernel": "NOT_IMPLEMENTED_PROFILE_FIRST",
+  "fpga_hardware": "NOT_IMPLEMENTED"
+}

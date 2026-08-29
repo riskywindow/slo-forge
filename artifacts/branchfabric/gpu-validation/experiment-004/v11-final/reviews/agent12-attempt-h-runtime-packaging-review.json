@@ -1,0 +1,273 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-h-runtime-packaging-review/v1",
+  "agent": 12,
+  "role": "runtime-synchronization-and-image-packaging-reviewer",
+  "attempt_id": "exp004-v11-integrated-s41-h",
+  "reviewed_at_utc": "2026-08-27T17:09:32Z",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "terminal_analysis_commit": "6b36d097ac739097c5ad63f7179439903e0118b5",
+  "review_status": "PASS",
+  "decision": "GO_FOR_SCOPED_IMAGE_CLOSURE_AND_FAILURE_ADMISSION_FIX_CONDITIONAL_ATTEMPT_I",
+  "attempt_h_scientific_status": "INVALID_PRE_WORKER_MISSING_FROZEN_V10_REPLAY_IMAGE_CLOSURE",
+  "attempt_h_scientifically_valid": false,
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED",
+  "summary": "Attempt H entered the paid two-GPU Function and invoked the Python controller, but its content-addressed SEALED_EVIDENCE verifier failed before GPU inventory or worker creation. The H authorization newly required three frozen-v10 control-replay artifacts below experiment-004/raw/modal/exp004-v10-naive-s41-v7, while the Modal image bundled v11-final but no experiment-004/raw closure. The controller correctly emitted an exact PRE_WORKER_PREFLIGHT failure with empty inventories and PASS cleanup. The local coordinator then masked that primary error by unconditionally applying the two-row successful-runtime inventory validator to the failed pre-inventory envelope. This is an image evidence-closure defect plus a local failure-admission defect, not an allocator, source-identity, movement, serving, restore, or model-runtime failure.",
+  "review_constraints": {
+    "local_immutable_attempt_h_bundle_only": true,
+    "repository_source_only": true,
+    "modal_invoked_by_reviewer": false,
+    "gpu_invoked_by_reviewer": false,
+    "network_invoked_by_reviewer": false,
+    "attempt_h_raw_evidence_modified": false,
+    "runtime_source_modified_by_reviewer": false,
+    "only_this_reviewer_artifact_created": true
+  },
+  "evidence_bindings": {
+    "attempt_h_status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-h.json",
+      "sha256": "cfc4ebc883e6c8fd2ec7f5989c99ccf1248f5101d1a2ba2cc43ac4b2c2050d4a"
+    },
+    "attempt_h_provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-h.json",
+      "sha256": "44ac116033e8f9e10bed74ff195b24dc3a43c074759a3a99b865227ff11c649f"
+    },
+    "attempt_h_conservative_failure_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-h-conservative-charge.json",
+      "sha256": "77bd380d72a4afe2d9e644262545e1313ed89a5830615fa7120adb4840fc7394"
+    },
+    "attempt_h_remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/REMOTE_MANIFEST.json",
+      "sha256": "07abf45fb974d9e73b881fea990de98aeb1bef5ea4818c3c9672eb918336dcfb",
+      "declared_artifact_count": 5,
+      "verified_artifact_count": 5,
+      "exact_manifest_set_equality": true,
+      "symlink_count": 0,
+      "integrity": "PASS"
+    },
+    "attempt_h_controller_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/controller-result.json",
+      "sha256": "92a668d364ff62dfa7f803f24abdc3fc2c2109c2b3679cca87a1abbd4f76c5b3"
+    },
+    "attempt_h_function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-completion.json",
+      "sha256": "80355ea6f71b96d3ff62cfc2a817bee54374549f61c06ad76e8061cc91c75a41"
+    },
+    "attempt_h_function_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-failure.json",
+      "sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437"
+    },
+    "attempt_h_function_finally_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-finally-cleanup.json",
+      "sha256": "4fc275276efb40fcab584d5823ac3ece736e7d8d8ed3c0ac998e85f91f9239e9"
+    },
+    "attempt_h_in_function_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/in_function_cleanup.json",
+      "sha256": "18c60202722a2dfbb4f55ec2cf25e9c7bec74187422d4311d6de76974d5e6f8f"
+    },
+    "authoritative_gpu_ledger_after_h": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c"
+    },
+    "attempt_h_authorization_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-h-post-control-gate-pre-gpu-manifest.json",
+      "sha256": "84de6be77b13ebacec0019441a63fad2ffe7f87971ed2c4f0aa83083c5a9826d"
+    },
+    "attempt_h_config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-h-config.json",
+      "sha256": "89f3db25c2cfc2ed1a222da75cdad0aba3dc2a2c44c8befac5ba5b8aba27b97d"
+    },
+    "attempt_h_seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/seal-verification-attempt-h.json",
+      "sha256": "6a8a1ec407e8d01fde3fdaaa5e77065f0b86fee1e74aa1d35fc95ce0847ecb83"
+    },
+    "attempt_h_image_prebuild": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-image-prebuild/exp004-v11-integrated-s41-h.json",
+      "sha256": "ffe7db3d3a0106ea092d1b3cd357c0494cea0e38fb91774be6ff8f4c37a30d5f"
+    }
+  },
+  "remote_manifest_inventory": [
+    {
+      "relative_path": "controller-result.json",
+      "bytes": 3767,
+      "sha256": "92a668d364ff62dfa7f803f24abdc3fc2c2109c2b3679cca87a1abbd4f76c5b3"
+    },
+    {
+      "relative_path": "function-completion.json",
+      "bytes": 8787,
+      "sha256": "80355ea6f71b96d3ff62cfc2a817bee54374549f61c06ad76e8061cc91c75a41"
+    },
+    {
+      "relative_path": "function-failure.json",
+      "bytes": 338,
+      "sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437"
+    },
+    {
+      "relative_path": "function-finally-cleanup.json",
+      "bytes": 505,
+      "sha256": "4fc275276efb40fcab584d5823ac3ece736e7d8d8ed3c0ac998e85f91f9239e9"
+    },
+    {
+      "relative_path": "in_function_cleanup.json",
+      "bytes": 2407,
+      "sha256": "18c60202722a2dfbb4f55ec2cf25e9c7bec74187422d4311d6de76974d5e6f8f"
+    }
+  ],
+  "first_causal_failure": {
+    "classification": "REMOTE_IMAGE_EVIDENCE_CLOSURE_BUG",
+    "function_call_id": "fc-01M122M4JYMDD27K30ZJSR1P56",
+    "controller_stage": "SEALED_EVIDENCE",
+    "controller_error_type": "FileNotFoundError",
+    "controller_error_message": "[Errno 2] No such file or directory: '/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/raw'",
+    "required_binding_group": "CONTROL_GATE_FROZEN_V10_BINDINGS",
+    "first_required_missing_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/REMOTE_MANIFEST.json",
+    "other_required_missing_artifacts": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/scientific-validity.json"
+    ],
+    "packaging_fact": "The image bundled experiment-004/v11-final but no experiment-004/raw path. Local sealed verification passed because all repository evidence existed; the remote image was not closure-complete for the same verifier.",
+    "allocator_or_source_lifecycle_implicated": false,
+    "optimized_movement_implicated": false
+  },
+  "secondary_local_failure": {
+    "classification": "FAILED_ENVELOPE_ADMISSION_MASKING_BUG",
+    "error_type": "ValueError",
+    "error_message": "integrated result omits exactly two GPU inventory rows",
+    "causal_order": "SECONDARY_AFTER_REMOTE_SEALED_EVIDENCE_FAILURE",
+    "remote_envelope_exactly_parsed": true,
+    "non_inventory_identity_resource_and_status_checks_replayed": "PASS",
+    "defect": "The coordinator admitted status=failed with a generic run_error shape and then unconditionally invoked the successful-runtime two-row inventory validator. Empty inventory is the truthful state for a failure before GPU inventory.",
+    "safety_constraint": "A provisional success or any post-inventory failure must still provide exactly two stable, distinct A100-80GB inventory rows. Empty inventory may be admitted only for an exact PRE_WORKER_PREFLIGHT failure contract and may never enter measured settlement."
+  },
+  "runtime_ordering": [
+    {
+      "order": 1,
+      "event": "REMOTE_FUNCTION_ENTRY",
+      "status": "PASS",
+      "gpu_allocation_seconds_through_immutable_publish": 27.264601306
+    },
+    {
+      "order": 2,
+      "event": "MODEL_SNAPSHOT_FILE_VALIDATION",
+      "status": "PASS_CPU_ONLY_BEFORE_CONTROLLER"
+    },
+    {
+      "order": 3,
+      "event": "CONTROLLER_ENTRY",
+      "started_ns": 24928120678,
+      "status": "PASS"
+    },
+    {
+      "order": 4,
+      "event": "SEALED_EVIDENCE_FROZEN_V10_BINDING_RESOLUTION",
+      "status": "FAIL_MISSING_IMAGE_PATH"
+    },
+    {
+      "order": 5,
+      "event": "PRE_WORKER_IN_FUNCTION_CLEANUP",
+      "ended_ns": 27456562808,
+      "controller_duration_seconds": 2.52844213,
+      "status": "PASS"
+    },
+    {
+      "order": 6,
+      "event": "IMMUTABLE_REMOTE_FAILURE_PUBLICATION",
+      "remote_manifest_sha256": "07abf45fb974d9e73b881fea990de98aeb1bef5ea4818c3c9672eb918336dcfb",
+      "status": "PASS"
+    },
+    {
+      "order": 7,
+      "event": "LOCAL_RESULT_VALIDATION",
+      "status": "FAIL_SECONDARY_UNCONDITIONAL_INVENTORY_GATE"
+    }
+  ],
+  "runtime_boundary": {
+    "gpu_inventory_before": [],
+    "gpu_inventory_after": [],
+    "worker_pids": {},
+    "worker_process_groups": {},
+    "worker_session_ids": {},
+    "worker_returncodes": {},
+    "worker_results": [],
+    "engine_start_evidence": [],
+    "readiness_evidence": [],
+    "controller_transaction_started": false,
+    "source_capture_commit_created": false,
+    "source_identity_gate_reached": false,
+    "optimized_export_started": false,
+    "source_release_started": false,
+    "hbm_reclaimed": false,
+    "serving_recovery_started": false,
+    "restore_started": false,
+    "branch_continuation_started": false
+  },
+  "cleanup_and_accounting": {
+    "in_function_cleanup": "PASS",
+    "cleanup_scope": "PRE_WORKER_PREFLIGHT",
+    "owned_children_after": 0,
+    "surviving_process_groups": 0,
+    "zombies_after": 0,
+    "profilers_after": 0,
+    "leaked_ipc_resources": 0,
+    "cuda_owning_children_after": 0,
+    "forced_kills": [],
+    "provider_cleanup": "PASS",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "unexpected_persistent_volumes": [],
+    "ledger_active_reservations": 0,
+    "ledger_consumed_additional_gpu_seconds": 22657.37961294198,
+    "ledger_hard_additional_gpu_seconds": 43200.0,
+    "ledger_remaining_gpu_seconds": 20542.62038705802,
+    "attempt_accounting_basis": "conservative-full-reservation-bound",
+    "attempt_charged_gpu_seconds": 1176.0,
+    "remote_reported_gpu_seconds_diagnostic_only": 54.529202612
+  },
+  "scoped_fix_requirements": {
+    "image_packaging": [
+      "Bundle the three exact CONTROL_GATE_FROZEN_V10_BINDINGS files at their original repository-relative destinations.",
+      "Require each source to be a regular non-symlink file and match its frozen SHA-256 before image construction.",
+      "Do not bundle the broad 28 MiB, 509-file frozen-v10 raw tree when only three content-addressed files are consumed.",
+      "Prove the actual launcher-declared image evidence closure can satisfy Attempt-I sealed verification; a fixture that independently copies controller constants is insufficient."
+    ],
+    "failed_envelope_admission": [
+      "Preserve exact two-row stable A100-80GB inventory validation for provisional success and post-inventory failures.",
+      "Admit empty inventory only when controller status is failed, cleanup_scope is PRE_WORKER_PREFLIGHT, failure_stage precedes GPU inventory, both inventory arrays and all worker/engine/readiness collections are exactly empty, sealed_evidence is null, controller_error is nonempty, and remote/controller cleanup is identical and PASS-complete.",
+      "Download and verify the immutable remote failure bundle before classifying the failure.",
+      "Never measured-settle a pre-inventory failure without physical GPU identity; retain conservative fail-closed accounting.",
+      "Preserve the remote controller_error as the primary failure instead of replacing it with an inventory-schema error."
+    ],
+    "unchanged_runtime": [
+      "Do not change allocator epochs, source semantic identity, ownership/refcount proofs, quiescence, optimized movement, chunking, pinned buffers, scatter, integrity, zero-fill, serving load, trigger, recovery, or restore methodology."
+    ]
+  },
+  "required_regressions": [
+    "actual launcher image layout includes and hashes all three frozen-v10 control bindings",
+    "Attempt-I sealed verifier passes against a repository tree constructed only from launcher-declared image inputs",
+    "exact Attempt-H stdout envelope is classified as SEALED_EVIDENCE pre-worker failure rather than inventory omission",
+    "provisional success with empty inventory fails",
+    "pre-worker failure with either nonempty inventory or any worker, engine, readiness, or sanity evidence fails",
+    "post-inventory failure with empty or unstable inventory fails",
+    "verified pre-worker failure downloads and verifies immutable evidence but does not enter measured settlement",
+    "failed-envelope cross-mode, status, cleanup, and controller-error tampering fails closed"
+  ],
+  "attempt_i_constraints": {
+    "authorization_from_this_review": "CONDITIONAL_ONLY_NOT_A_GPU_AUTHORIZATION",
+    "fresh_attempt_id_required": true,
+    "fresh_local_and_remote_prefixes_required": true,
+    "immutable_attempt_h_predecessor_bindings_required": true,
+    "current_authoritative_ledger_snapshot_required": true,
+    "attempt_h_provider_zero_required": true,
+    "exact_bundle_closure_test_required": true,
+    "strict_failed_envelope_admission_tests_required": true,
+    "make_check_required": true,
+    "sole_gpu_coordinator_required": true,
+    "prebuild_provider_zero_required_before_reservation": true,
+    "no_kill_recompute_before_scientifically_valid_integrated_v11": true,
+    "no_fpga_work": true
+  }
+}

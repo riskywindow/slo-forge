@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-v11-pass-diff-terminal/v1",
+  "status": "AUTHORITATIVE_TERMINAL_CORRECTED_VIEW",
+  "immutable_measured_pass_diff": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff.json",
+    "sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99",
+    "v10_pass_dispositions_selector": "$.v10_pass_dispositions",
+    "chain_reductions_selector": "$.chain_reductions"
+  },
+  "arithmetic_correction": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/terminal-arithmetic-corrections.json",
+    "sha256": "fa6091966571c650fdd3cdca64cced400a7e250b2afdef5070186964c0fc162d"
+  },
+  "logical_state_bytes": 1056964608,
+  "v10_full_state_pass_count": 30,
+  "v11_full_state_pass_count": 10,
+  "full_state_passes_removed": 20,
+  "v10_full_physical_bytes": 61303947264,
+  "v11_full_physical_bytes": 22197063040,
+  "physical_bytes_removed": 39106884224,
+  "physical_bytes_reduction_percent": 63.79178824422134,
+  "chain_reductions": {
+    "capture_publish": {"v10_bytes": 22196256768, "v11_bytes": 9512709120, "bytes_removed": 12683547648},
+    "restore_native_write_excluding_destination_validation": {"v10_bytes": 21139292160, "v11_bytes": 10570424704, "bytes_removed": 10568867456},
+    "destination_validation": {"v10_bytes": 17968398336, "v11_bytes": 2113929216, "bytes_removed": 15854469120}
+  },
+  "consumer_rule": "Use this view for terminal arithmetic and the immutable measured artifact for every per-v10-pass disposition.",
+  "superseded_percentage": 63.79181449900818
+}

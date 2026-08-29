@@ -1,0 +1,69 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-provider-cleanup/v1",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-kill-recompute-s41-b",
+  "failure_boundary": "REMOTE_MODULE_IMPORT_BEFORE_FUNCTION_ENTRY",
+  "function_entry_reached": false,
+  "controller_started": false,
+  "in_function_cleanup_status": "UNAVAILABLE_MODULE_IMPORT_FAILED_BEFORE_HANDLER",
+  "provider_cleanup_status": "PASS",
+  "apps": [
+    {
+      "app_id": "ap-5NiGIGi2bFaFVNpFIXaBhy",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-27T22:14:01-05:00",
+      "stopped_at": "2026-08-27T22:28:22-05:00",
+      "state": "stopped",
+      "tasks": "0"
+    },
+    {
+      "app_id": "ap-bq9hPG9XYEKLlBJoFi1Jet",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-27T22:11:29-05:00",
+      "stopped_at": "2026-08-27T22:13:59-05:00",
+      "state": "stopped",
+      "tasks": "0"
+    }
+  ],
+  "containers": [],
+  "endpoints": [],
+  "queues": [],
+  "dicts": [],
+  "reservations": [],
+  "volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "authorized_volumes_only": true,
+  "raw_attempt_prefix_present": false,
+  "scientific_evidence_materialized": false,
+  "reservation_id": "exp004-v11-kill-b-b2ed62946125171fbd29",
+  "faulty_modal_source_sha256": "fa07b4fc075b3e36f7ce5802a9a5e658128a98db9ed54d222dc4edc431bdff89",
+  "evidence_bindings": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-b-config.json",
+      "sha256": "a75e054d5c06026abdaa26ad296e53eb4e47e527d15f8f1eed4607ad30100b56"
+    },
+    "seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-b.json",
+      "sha256": "6467467203d35e24207fea849f38de4af4bd2634d122b4103622326a0ae831fd"
+    },
+    "conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-b-conservative-charge.json",
+      "sha256": "523d078decd6c31b3b6107957331084166063083812b7d970ddb7194b19a8a1c"
+    },
+    "prebuild": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-b.json",
+      "sha256": "936025a11299cec392c92e04a92c2d8097f98df694d55695567f272909771a47"
+    },
+    "post_prebuild_freshness": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-b-pre-reservation-freshness.json",
+      "sha256": "eb25b0cf262cbbf60462e21dfc914b31f580acce6bb3b9800fe8970b1ef70c90"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "7ebbe3e61f13124ca04d2c288ac7665961807d5d62a116530f5334155f5abc30"
+    }
+  },
+  "provenance": "Post-failure read-only provider inventory supplied by the sole GPU coordinator. This proves provider zero only; it does not fabricate in-function cleanup for a module-import failure."
+}

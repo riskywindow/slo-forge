@@ -1,0 +1,86 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-postflight/v1",
+  "status": "PASS_CLEANUP_SCIENTIFICALLY_INVALID_BUDGET_CHARGED",
+  "attempt_id": "exp004-v11-integrated-s41-b",
+  "observed_at_utc": "2026-08-19T05:26:29Z",
+  "scientific_status": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+  "scientifically_valid_integrated_transaction": false,
+  "failure_stage": "PRE_RECLAIM_GPU0_OVERLOAD_BACKLOG_SAFETY_ABORT",
+  "failure_message": "calibrated v10 backlog exceeded its bounded safety ceiling during pre-reclaim",
+  "reclaim_trigger_reached": false,
+  "v11_export_started": false,
+  "v11_release_started": false,
+  "v11_import_started": false,
+  "function_call": {
+    "app_id": "ap-DcCj9yzxl10RoHIdu8Wy1O",
+    "function_call_id": "fc-01M0C6WT7E5T43CV3HM4BE2GKD",
+    "return_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/function-call-return.json",
+    "return_artifact_sha256": "78fd8545d369159d3c68945ebda4a56afe13ac21a40d7384982138ab73baba9b",
+    "status": "failed",
+    "gpu_allocation_seconds": 584.161194259,
+    "gpu_count": 2,
+    "actual_provider_gpu_seconds": 1168.322388518,
+    "actual_provider_gpu_hours": 0.32453399681055556
+  },
+  "hardware": {
+    "gpu_names": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA A100-SXM4-80GB"
+    ],
+    "gpu_uuids": [
+      "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59",
+      "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb"
+    ],
+    "inventory_before_pass": true,
+    "compute_processes_after": []
+  },
+  "remote_evidence": {
+    "remote_prefix": "experiment-004/v11/integrated/modal/exp004-v11-integrated-s41-b",
+    "download_root": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir",
+    "remote_manifest_sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+    "manifest_rows": 460,
+    "manifest_bytes": 20098327,
+    "manifest_rows_downloaded_and_hash_verified": 460,
+    "manifest_verification_pass": true,
+    "controller_result_sha256": "26392f35aa4f0fbb5aa349f2e6ea7b799528702e32ccadf2dfb33865f649251b",
+    "function_completion_sha256": "4dbdec0121beed0bdb5ca7bc86667d8911a00b9128107686ac8544a39a9dde97",
+    "partial_failure_sha256": "15623fe28138f59b86d63aab60a26b1d09cc8f7389e7c92d0b82f819a3700c33"
+  },
+  "settlement": {
+    "method": "CONSERVATIVE_FULL_BOUND_FAILURE_CHARGE",
+    "reason": "The coordinator wall interval included image construction and startup and exceeded the reservation wall bound; without a separately captured post-spawn client interval, measured-duration settlement was rejected fail-closed.",
+    "reservation_id": "exp004-v11-integrated-s41-b-reservation",
+    "charged_wall_seconds": 588.0,
+    "charged_gpu_count": 2,
+    "charged_gpu_seconds": 1176.0,
+    "actual_provider_gpu_seconds": 1168.322388518,
+    "conservative_minus_actual_gpu_seconds": 7.677611482,
+    "gpu_price_per_a100_hour_usd": 2.4984,
+    "conservative_cost_usd": 0.816144,
+    "ledger_sha256_before_settlement": "15f38709420714526a823e13161b0d8d1d74a6ab98a57cf85a52a0a6e45a4ca4",
+    "ledger_sha256_after_settlement": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+    "consumed_cumulative_gpu_seconds": 16113.513626085978,
+    "consumed_cumulative_gpu_hours": 4.475976007246105,
+    "remaining_authorized_gpu_seconds": 5486.486373914022,
+    "active_ledger_reservations_after": 0
+  },
+  "provider_cleanup": {
+    "pass": true,
+    "app_state": "stopped",
+    "app_tasks": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "active_apps": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "other_persistent_resources": []
+  },
+  "cleanup_pass": true,
+  "retry_authorized": false
+}

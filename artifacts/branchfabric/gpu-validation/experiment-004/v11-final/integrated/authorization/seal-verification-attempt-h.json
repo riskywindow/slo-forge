@@ -1,0 +1,79 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integrated-seal-verification/v1",
+  "status": "PASS",
+  "verified_at_utc": "2026-08-27T14:05:43.526114Z",
+  "attempt_id": "exp004-v11-integrated-s41-h",
+  "execution_mode": "integrated-reclamation-v11",
+  "maximum_wall_seconds": 588.0,
+  "maximum_gpu_seconds": 1176.0,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-h-config.json",
+    "sha256": "89f3db25c2cfc2ed1a222da75cdad0aba3dc2a2c44c8befac5ba5b8aba27b97d"
+  },
+  "authorization_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-h-post-control-gate-pre-gpu-manifest.json",
+    "sha256": "84de6be77b13ebacec0019441a63fad2ffe7f87971ed2c4f0aa83083c5a9826d"
+  },
+  "immutable_ledger_snapshot": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/ledger-snapshot-before-attempt-h.json",
+    "sha256": "4259181994cde63bb783fc42e6533ea79fc6f88cb7f1ebbc555baee40d2f8bf4",
+    "byte_identical_to_authoritative_pre_reservation_ledger": true
+  },
+  "expanded_budget_authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11-continuation.json",
+    "sha256": "cf71d63d6427a58003f25dd87922cc19406a1c720e4b03dbb250094d2d9e02d6",
+    "authorized_gpu_budget_usd": 80.0,
+    "authorized_cumulative_gpu_seconds": 43200.0
+  },
+  "ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "4259181994cde63bb783fc42e6533ea79fc6f88cb7f1ebbc555baee40d2f8bf4",
+    "active_reservations": 0,
+    "conservative_consumed_gpu_seconds": 21481.37961294198,
+    "remaining_gpu_seconds": 21718.62038705802,
+    "remaining_after_maximum_gpu_seconds": 20542.62038705802
+  },
+  "verification": {
+    "real_coordinator_loader": "PASS",
+    "controller_sealed_evidence": "PASS",
+    "prelaunch_bindings_verified": 24,
+    "attempt_g_remote_manifest_entries_verified": 475,
+    "prior_attempt_evidence_bindings_verified": 21,
+    "frozen_v10_control_bindings_verified": 3,
+    "control_gate_fix_bindings_verified": 2,
+    "unchanged_runtime_bindings_verified": 3,
+    "independent_reviews_verified": 2,
+    "prior_attempt_id": "exp004-v11-integrated-s41-g",
+    "attempt_g_scientifically_valid": false,
+    "attempt_g_classification": "INVALID_POST_RESTORE_CONTROL_GATE_BUG",
+    "attempt_g_preservation_transaction_verified": true,
+    "attempt_g_source_identity_pre_export_passed": 1152,
+    "attempt_g_source_identity_post_export_passed": 1152,
+    "attempt_g_source_capture_commit_semantic_sha256": "94898d493a67ab5e7bbd62a5baaf9eb22eb2a1cb6ff957a4c865d93a2f7bf7ba",
+    "attempt_g_zero_post_commit_events": true,
+    "frozen_v10_control_v2_passed": true,
+    "frozen_v10_full_control_arrivals": 45,
+    "frozen_v10_assessment_arrivals": 36,
+    "frozen_v10_assessment_completions": 36,
+    "frozen_v10_eventual_full_cohort_completions": 45,
+    "prior_in_function_cleanup": "PASS",
+    "prior_provider_cleanup": "PASS",
+    "immutable_ledger_snapshot_verified": true,
+    "expanded_budget_verified": true,
+    "successful_integrated_contract_verified": true,
+    "make_check": "PASS; 2186 Python passed, 8 skipped, 6 warnings; mypy/Rust/UI PASS"
+  },
+  "collision_preflight": {
+    "status": "PASS_ALL_FRESH",
+    "checked_outputs": [
+      "v11-final/integrated/raw/exp004-v11-integrated-s41-h",
+      "v11-final/integrated/provider-cleanup-audit-inputs-exp004-v11-integrated-s41-h.json",
+      "v11-final/integrated/status-attempt-h.json",
+      "v11-final/integrated/provider-cleanup-attempt-h.json",
+      "v11-final/integrated/failures/exp004-v11-integrated-s41-h-conservative-charge.json",
+      "v11-image-prebuild/exp004-v11-integrated-s41-h.json"
+    ]
+  },
+  "paid_resources_invoked": false,
+  "provenance": "Real local coordinator _load_sealed_config, controller verify_sealed_evidence, complete Attempt-G REMOTE_MANIFEST verification, and read-only collision preflight; no fabricated measurement and no Modal/GPU invocation."
+}

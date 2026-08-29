@@ -1,0 +1,22 @@
+{
+  "accounted_wall_seconds": 155.17,
+  "actual_accounted_cost_usd": 0.10768798,
+  "actual_accounted_gpu_hours": 0.043102777777777775,
+  "actual_accounted_gpu_seconds": 155.17,
+  "actual_gpu_model": "NVIDIA A100 80GB PCIe",
+  "attempt_id": "exp004-v11-micro-s41-b",
+  "client_elapsed_seconds": 155.17,
+  "function_call_id": "fc-01M0BS1T25WGWJQ9V6HBNTSEWW",
+  "gpu_count": 1,
+  "gpu_price_per_hour_usd": 2.4984,
+  "gpu_uuid": "GPU-334a2fbd-ab80-41d0-e3e3-c1807b002df4",
+  "ledger_sha256_after": "bd9c1f919f33d1c63f0edf4bc86134ad78e73d00638280c68d55111202ff19b3",
+  "ledger_sha256_before": "24736aabc7caace4b3cc4d395e91155c55f3226258cf34146e37ea9eacdfe136",
+  "remote_manifest_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-manifest-download.json",
+  "remote_manifest_sha256": "58af1fca605452dbdeddaed05410ba77ebb093e424b18ace131f711f7f2e25a6",
+  "remote_observed_gpu_allocation_seconds": 112.534982914,
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-gpu-settlement/v1",
+  "scientific_failure": "V11RuntimeTeardownRequired: preexisting zero-queue evidence consumed at restore",
+  "settled_at_utc": "2026-08-19T01:13:20.559102+00:00",
+  "status": "SETTLED_FAILED_SCIENTIFIC_RUN"
+}

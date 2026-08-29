@@ -1,0 +1,223 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-phase-budget-review/v1",
+  "reviewer": {
+    "agent": "Agent 4",
+    "identity": "phase_budget_auditor",
+    "task_path": "/root/phase_budget_auditor",
+    "independence": "independent pre-GPU review; no Modal invocation and no GPU consumption"
+  },
+  "final_addendum_reviewer": {
+    "agent": "Agent 10",
+    "identity": "gpu_budget_controller_auditor",
+    "task_path": "/root/gpu_budget_controller_auditor",
+    "scope": "independent SDK-granularity, authoritative-ledger, failure-settlement, and phase-accounting audit; no Modal invocation and no GPU consumption"
+  },
+  "reviewed_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "subject": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+    "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d",
+    "schema_version": "sloforge.branchfabric.experiment-004-v10-phase-budget/v1",
+    "status": "EVIDENCE_DERIVED"
+  },
+  "decision": "APPROVED",
+  "approved_for_pre_gpu_gate": true,
+  "mandatory_corrections": [],
+  "findings": [
+    {
+      "severity": "high",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "The initial integrated launcher and remote coordinator still reserved 900 wall seconds, or 1,800 A100-seconds, despite the evidence-derived budget.",
+      "resolution": "The final v10 path loads and hash-verifies the phase budget before reservation, reserves 469 wall seconds or 938 A100-seconds, uses a 459-second controller deadline plus a 10-second cleanup reserve, and bounds the outer Modal invocation by the same 469-second wall interval.",
+      "verified_in": [
+        {
+          "artifact_reference": "tools/branchfabric-experiment-004-launch.py",
+          "artifact_sha256": "6816992e30c4addc2d98e3e631c4a3498bc45d8a569a478c6db06b0fa6b52590"
+        },
+        {
+          "artifact_reference": "experiments/branchfabric/modal_gpu_reclamation.py",
+          "artifact_sha256": "832696dfcf7f14cd6271053c28e9e4e9341573273a6b4553ac05a97809abe763"
+        },
+        {
+          "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+          "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843"
+        }
+      ]
+    },
+    {
+      "severity": "high",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "The initial 12-second overload bound was shorter than the approximately 20.625 seconds implied by growth from the predeclared eight-rps control point to the immutable depth-20 trigger at the measured +0.581818 requests/s slope.",
+      "resolution": "The overload upper bound is now 22 seconds. Trigger depth 20 and abort depth 25 remain unchanged; the revision propagates through subtotal, 25% safety margin, A100-second reservation, live ledger projection, Modal deadline, config binding, and tests."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "All twenty required phase classes are present exactly once and in canonical order; no phase funds broad capacity calibration, live review waiting, profiling, retries, or movement optimization. The two three-second stale-calibration guards and request-state reset allowance are explicitly included in the readiness and rollout-preparation bounds."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "Every selected phase upper bound is at least its cited observation. Per-phase margins are followed by an additional transaction-wide 25 percent safety margin."
+    },
+    {
+      "severity": "none",
+      "status": "PASS",
+      "finding": "The live gate evaluates current committed conservative use plus the derived required A100-seconds against the configured immutable ceiling; it does not weaken or silently increase the ceiling."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED_BEFORE_APPROVAL",
+      "finding": "Modal SDK accepts an integer Function timeout, so a 468.8125-second reservation paired with a 469-second provider timeout could overrun the reservation by 0.1875 wall seconds.",
+      "resolution": "An explicit 0.1875-second SDK-granularity margin is recorded after the 25 percent transaction margin. Reservation, outer timeout, provider timeout, and authorization are now exactly 469 wall seconds or 938 A100-seconds."
+    }
+  ],
+  "independent_recomputation": {
+    "phase_count": 20,
+    "source_reference_count": 28,
+    "unique_source_file_count": 10,
+    "phase_upper_bound_subtotal_wall_seconds": 375.05,
+    "selected_safety_margin_fraction": 0.25,
+    "safety_margin_wall_seconds_excluding_sdk_rounding": 93.7625,
+    "sdk_timeout_rounding_margin_seconds": 0.1875,
+    "safety_and_sdk_rounding_total_wall_seconds": 93.95,
+    "predicted_wall_clock_seconds": 469.0,
+    "gpu_count": 2,
+    "required_A100_seconds": 938.0,
+    "required_A100_hours": 0.26055555555555554,
+    "formula_verified": "938.0 = 2 * 469.0",
+    "legacy_fixed_reservation_A100_seconds": 1800.0,
+    "legacy_fixed_reservation_used_by_v10": false,
+    "required_gpu_cost_usd_at_2_4984_per_A100_hour": 0.650972,
+    "required_total_upper_cost_usd_including_configured_cpu_and_memory": 0.81590992
+  },
+  "ledger_recomputation": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "artifact_sha256": "d85de03e136807d652f94af85074ed026f9f88571bb72410831c51d1feff983f",
+    "settled_interval_count": 14,
+    "active_reservation_count": 0,
+    "derived_current_conservative_usage_A100_seconds": 9622.470997419994,
+    "recorded_current_conservative_usage_A100_seconds": 9622.470997419994,
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "projected_conservative_usage_A100_seconds": 10560.470997419994,
+    "remaining_A100_seconds_after_reservation": 239.529002580006,
+    "condition": "9622.470997419994 + 938.0 <= 10800.0",
+    "decision": "AUTHORIZE_V10"
+  },
+  "source_hash_verification": {
+    "all_verified": true,
+    "mismatch_count": 0,
+    "artifacts": [
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-integrated-s41-v3-config.json",
+        "expected_sha256": "570d2879235e1acd5b0100763ca7ee5cd6fffd5873b68735ec2308d78d863726",
+        "observed_sha256": "570d2879235e1acd5b0100763ca7ee5cd6fffd5873b68735ec2308d78d863726",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v9/function-completion.json",
+        "expected_sha256": "3d9a653eedacebc6e9c2738ff6c0a250996275969f4f34e0310a37ff381d1eac",
+        "observed_sha256": "3d9a653eedacebc6e9c2738ff6c0a250996275969f4f34e0310a37ff381d1eac",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v9/rollout/result.json",
+        "expected_sha256": "5bc1167139165cc36792186ae607e7a0d971aa8f614f784f5cf93ac5c2d7ae2e",
+        "observed_sha256": "5bc1167139165cc36792186ae607e7a0d971aa8f614f784f5cf93ac5c2d7ae2e",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-pilot-naive-s41-v9/serving/result.json",
+        "expected_sha256": "b577199f621075780a0e11d986a6edb1a3a007835971504cbf3899f4fc8f578e",
+        "observed_sha256": "b577199f621075780a0e11d986a6edb1a3a007835971504cbf3899f4fc8f578e",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v2/analysis/budget-settlement.json",
+        "expected_sha256": "587e5f5c56687727990717da55176351972e04138a73f7ae1c0341fa9c876008",
+        "observed_sha256": "587e5f5c56687727990717da55176351972e04138a73f7ae1c0341fa9c876008",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v2/function-completion.json",
+        "expected_sha256": "4b56673d928fc43e7c84dffeee26b23e3fa70bf59be46e7d66ea49fe52e7305c",
+        "observed_sha256": "4b56673d928fc43e7c84dffeee26b23e3fa70bf59be46e7d66ea49fe52e7305c",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v3/calibration/one-gpu/capacity-02-gpu0-only/result.json",
+        "expected_sha256": "20353f2d09a16835fe853c0e3973e81d307f7b11e8eec30374db114a43570cf9",
+        "observed_sha256": "20353f2d09a16835fe853c0e3973e81d307f7b11e8eec30374db114a43570cf9",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v3/function-completion.json",
+        "expected_sha256": "14f61d779898d3e33a76d63fbe87d498049c325be1a4d03a9ae5d1defc33c782",
+        "observed_sha256": "14f61d779898d3e33a76d63fbe87d498049c325be1a4d03a9ae5d1defc33c782",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-integrated-s41-v3/readiness/both-engines-ready.json",
+        "expected_sha256": "f13f3ec65a32c5c55417ddaae6f0c8dfb138592458de079669d08652c5870a18",
+        "observed_sha256": "f13f3ec65a32c5c55417ddaae6f0c8dfb138592458de079669d08652c5870a18",
+        "verified": true
+      },
+      {
+        "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/selected-load.json",
+        "expected_sha256": "9138841fabea73346b7a9d8e0d950a6d1bf8bee706f4668d9a88982f819d37d9",
+        "observed_sha256": "9138841fabea73346b7a9d8e0d950a6d1bf8bee706f4668d9a88982f819d37d9",
+        "verified": true
+      }
+    ]
+  },
+  "launch_path_verification": {
+    "local_authorization_and_phase_budget_verified_before_reservation": true,
+    "live_gate_uses_current_committed_usage": true,
+    "configured_ceiling_preserved": true,
+    "reservation_wall_seconds": 469.0,
+    "controller_wall_seconds": 459.0,
+    "cleanup_reserve_seconds": 10.0,
+    "outer_modal_timeout_seconds": 469.0,
+    "remote_function_budget_seconds": 469.0,
+    "remote_maximum_gpu_seconds": 938.0,
+    "no_live_review_wait_in_budget": true,
+    "no_broad_capacity_recalibration_in_budget": true
+  },
+  "implementation_hashes": [
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_budget.py",
+      "artifact_sha256": "fc4ee32e303187ffd19cf6ca9ec42c7da02c1a12f8c50d439d7c929849f2039c"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+      "artifact_sha256": "197df8fb4b0432d030158e55ccdbad0cc6c267bc5e54ff8ed3701529676839d6"
+    },
+    {
+      "artifact_reference": "tests/python/test_gpu_reclamation_v10_budget.py",
+      "artifact_sha256": "1eac8d013fad5d6c9d9deffca4bf714e4a397cdf1619264dd09f81b566b92b19"
+    },
+    {
+      "artifact_reference": "tests/python/test_gpu_reclamation_methodology.py",
+      "artifact_sha256": "6dd74b40cddf52b603bcc77974acb287d233cb7752d62e58aed506f40b9753f7"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_gpu_harness.py",
+      "artifact_sha256": "e21d134a890704b4dae0758f83b88320f61e1ebd86aad6b0ba448213e6a03ed0"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_v10_finalizer.py",
+      "artifact_sha256": "a8e87835016f92173d00e348036db5a776739222e63932beb0d4fba2410e02b4"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-gpu-budget-controller-review.json",
+      "artifact_sha256": "b7395073a4853fa74afd600931d31a14fe58aa5c75047406215adaea308fe18d"
+    }
+  ],
+  "validation": {
+    "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_v10_finalizer.py tests/python/test_gpu_reclamation_v10_budget.py tests/python/test_gpu_reclamation_methodology.py tests/python/test_experiment_004_gpu_harness.py",
+    "result": "43 passed in 0.72s",
+    "ruff": "All checks passed!",
+    "passed": true,
+    "gpu_invoked": false
+  }
+}

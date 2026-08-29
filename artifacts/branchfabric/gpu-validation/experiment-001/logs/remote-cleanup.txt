@@ -1,0 +1,10 @@
+cleanup_started_at_utc=2026-08-10T22:41:14Z
+root_bytes_before=322994962
+owned_sockets_before
+owned_process_matches_before
+2165763 2165755 2165755 Mon Aug 10 22:41:13 2026 awk -v root=/tmp/sloforge-branchgpu-ZhfJJg8F -v current=2165755 index($0, root) && $1 != current {print}
+gpu_processes_before_cleanup
+root_removed=true
+cleanup_finished_at_utc=2026-08-10T22:41:14Z
+gpu_processes_after_cleanup
+

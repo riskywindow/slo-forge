@@ -1,0 +1,53 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integration-gate/v1",
+  "gate": "D_CANONICAL_MEASURED_CUDA_STATE_PASS_RECORDS",
+  "status": "PASS_OFFLINE",
+  "sealed_at_utc": "2026-08-19T02:07:40Z",
+  "authoritative_accounting_layer": "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py",
+  "production_operation_sites": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+  "production_runtime_consumer": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+  "requirements": {
+    "required_state_pass_fields": true,
+    "actual_operation_site_emission": true,
+    "cuda_start_and_end_events": true,
+    "wall_launch_intervals": true,
+    "explicit_synchronization_waits": true,
+    "required_avoidable_byte_conservation": true,
+    "physical_memory_tier_conservation": true,
+    "directional_d2h_h2d_accounting": true,
+    "single_shared_restore_recorder": true,
+    "dependency_dag_validation": true,
+    "gap_free_full_state_family_validation": true,
+    "no_profiler_or_counter_double_counting": true,
+    "bounded_incremental_cuda_event_materialization": true,
+    "normal_pending_cuda_event_limit": 3840,
+    "diagnostic_emergency_event_reserve": 256,
+    "total_state_pass_limit": 65536,
+    "one_authoritative_failure_scrub_owner": true,
+    "exact_page_to_preflight_dependency_binding": true
+  },
+  "source_sha256": {
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30"
+  },
+  "independent_review": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent04-attempt-d-cuda-pass-accounting-audit.json",
+    "sha256": "8307ceda704d85063d2e3bf7405b3fb5854f8c583070b6f653cc9d45c6033b05",
+    "result": "PASS"
+  },
+  "offline_validation": {
+    "focused_tests_passed": 93,
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "python_compile": "PASS"
+  },
+  "post_fix_movement_integrity_review": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent05d-attempt-c-recorder-scrub-integrity-audit.json",
+    "sha256": "28f5c3f06c2143be2942349ea21be5215847a7bc2188069e01c24b4e70c914f2",
+    "result": "PASS_NO_STATE_PASS_OR_BYTE_CONTAMINATION"
+  },
+  "real_cuda_measurement": "PENDING_ONE_A100_MICRO_VALIDATION",
+  "gpu_invoked": false,
+  "modal_invoked": false
+}

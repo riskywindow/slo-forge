@@ -1,0 +1,28 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-three-way-status/v1",
+  "status": "PARTIAL_TWO_MEASURED_PRESERVATION_POINTS_KILL_NOT_RUN",
+  "naive_preserve": {
+    "source": "frozen v10",
+    "logical_state_bytes": 1056964608,
+    "full_physical_bytes": 61303947264,
+    "full_physical_amplification": 58.0,
+    "full_state_pass_count": 30,
+    "integrated_scientifically_valid": true
+  },
+  "optimized_preserve": {
+    "source": "real-A100 v11 micro attempt D",
+    "logical_state_bytes": 1056964608,
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "full_state_pass_count": 10,
+    "micro_correctness": "8/8",
+    "integrated_scientifically_valid": false
+  },
+  "kill_and_recompute": {
+    "status": "NOT_RUN",
+    "measured_recompute_tokens": null,
+    "gpu_seconds": null,
+    "reason": "integrated v11 prerequisite failed"
+  },
+  "comparison_limit": "The optimized preservation byte reduction is measured and comparable; integrated latency/economics and the three-way policy comparison are not available."
+}

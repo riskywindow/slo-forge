@@ -1,0 +1,135 @@
+{
+  "status": "passed",
+  "candidate": {
+    "candidate_id": "qstate-u1-branches-cached",
+    "operator_schema": {
+      "schema_version": "sloforge.genesis.kernel-lab/v1",
+      "operator_id": "quantized-state-update",
+      "symbol": "quantized_recurrent_state_update",
+      "semantic_contract": "per-request HybridDecoder recurrent state: saturating int8 round-to-nearest of previous*0.625 + activation*31.0",
+      "inputs": [
+        {
+          "name": "previous_state",
+          "dtype": "int8",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": true
+        },
+        {
+          "name": "activation",
+          "dtype": "float64",
+          "shape": [
+            {
+              "name": "batch",
+              "minimum": 1,
+              "maximum": 128,
+              "multiple_of": 1
+            }
+          ],
+          "allowed_strides": [
+            1,
+            2,
+            3
+          ],
+          "contiguous_required": false,
+          "mutable": false
+        }
+      ],
+      "output": {
+        "name": "updated_state",
+        "dtype": "int8",
+        "shape": [
+          {
+            "name": "batch",
+            "minimum": 1,
+            "maximum": 128,
+            "multiple_of": 1
+          }
+        ],
+        "allowed_strides": [
+          1,
+          2,
+          3
+        ],
+        "contiguous_required": false,
+        "mutable": true
+      },
+      "aliasing": {
+        "output_may_alias": [
+          "previous_state"
+        ],
+        "activation_alias_forbidden": true,
+        "exact_index_mapping_required": true
+      },
+      "numerical": {
+        "exact": true,
+        "rounding": "nearest_ties_to_even",
+        "saturation_minimum": -127,
+        "saturation_maximum": 127,
+        "maximum_absolute_error": 0.0,
+        "maximum_relative_error": 0.0,
+        "nan_behavior": "reject",
+        "infinity_behavior": "reject",
+        "deterministic": true
+      },
+      "architecture": {
+        "backend": "python_cpu",
+        "architectures": [
+          "cpu-generic"
+        ],
+        "minimum_python": "3.11",
+        "requires_gpu": false,
+        "hidden_fallback_forbidden": true
+      },
+      "stateful": true,
+      "atomicity": "per_token"
+    },
+    "backend": "python_cpu",
+    "target_architecture": "cpu-generic",
+    "parameters": {
+      "unroll_factor": 1,
+      "clamp_style": "branches",
+      "cache_coefficients": true
+    },
+    "source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+    "deterministic_seed": 73129,
+    "fallback_symbol": "reference_quantized_state_update"
+  },
+  "deterministic_seed": 73129,
+  "source_allowlist_valid": true,
+  "cases_executed": 36,
+  "edge_cases": 6,
+  "randomized_cases": 24,
+  "stride_cases": 0,
+  "noncontiguous_cases": 1,
+  "nonfinite_cases": 3,
+  "alias_cases": 2,
+  "mismatches": [],
+  "sandbox_termination": "success",
+  "sandbox_backend": "macos_sandbox_exec",
+  "assumptions": [
+    "every symmetric int8 previous-state value is enumerated at zero activation",
+    "randomized values are search data and not a universal proof",
+    "generated source executes only in the fail-closed local sandbox"
+  ],
+  "candidate_source_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/candidate.py",
+  "candidate_source_sha256": "197c67a5672a0afce57430ea24e4b22f776f43fadbd05dc8b68249010892c62d",
+  "cases_config_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/config.json",
+  "cases_config_sha256": "34aae8f93546438baab02065c5135c48ed26be261b9613c26dbbdc8f960dcf55",
+  "runner_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/source/sandbox_runner.py",
+  "runner_sha256": "cc0e3aa76f2bec5c2b1571e7969c01751733cd2c6a1b1124081a86917d1dec4c",
+  "runner_output_path": "/Users/rishivinodkumar/sloforge/artifacts/genesis/zero-day-demo/kernel/lab/candidates/qstate-u1-branches-cached/correctness/artifacts/runner-output.json",
+  "runner_output_sha256": "09f4f24af429e015fd962e5aba960fe858f838d47aa2005cc10cc6177b89cd71"
+}

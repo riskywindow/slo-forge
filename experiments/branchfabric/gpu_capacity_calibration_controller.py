@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -79,9 +80,7 @@ def _validate_worker_completions(
     if len(result_paths) != 2 or len(expected_inventory) != 2:
         raise RuntimeError("capacity completion validation requires exactly two workers")
     payloads: list[dict[str, Any]] = []
-    for path, device, gpu in zip(
-        result_paths, expected_devices, expected_inventory, strict=True
-    ):
+    for path, device, gpu in zip(result_paths, expected_devices, expected_inventory, strict=True):
         payload = json.loads(path.read_text())
         if (
             not isinstance(payload, dict)
@@ -97,6 +96,167 @@ def _validate_worker_completions(
     if set(returncodes) != set(expected_devices) or set(returncodes.values()) != {0}:
         raise RuntimeError(f"capacity worker return codes were invalid: {returncodes}")
     return tuple(payloads)
+
+
+def _validate_readiness_payloads(
+    *,
+    payloads: tuple[dict[str, Any], ...],
+    expected_inventory: tuple[dict[str, Any], ...],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Require two complete, identity-bound EngineReadinessEvidence objects."""
+
+    if len(payloads) != 2 or len(expected_inventory) != 2:
+        raise RuntimeError("BOTH_ENGINES_READY requires exactly two readiness objects")
+    expected_devices = ("gpu0", "gpu1")
+    validated: list[dict[str, Any]] = []
+    for payload, device, gpu in zip(payloads, expected_devices, expected_inventory, strict=True):
+        runtime = payload.get("runtime_evidence")
+        compilation = payload.get("compilation_observation")
+        probe = payload.get("probe")
+        hbm = payload.get("hbm")
+        state = payload.get("runtime_state")
+        required_sizes = payload.get("required_cudagraph_batch_sizes")
+        observed_sizes = payload.get("observed_cudagraph_capture_sizes")
+        timestamps = tuple(
+            payload.get(field)
+            for field in (
+                "engine_started_ns",
+                "model_ready_ns",
+                "compile_warmup_started_ns",
+                "compile_warmup_ended_ns",
+            )
+        )
+        if (
+            payload.get("schema_version") != "sloforge.branchfabric.engine-readiness-evidence/v1"
+            or payload.get("device") != device
+            or payload.get("physical_gpu_uuid") != gpu.get("uuid")
+            or payload.get("passed") is not True
+            or any(isinstance(value, bool) or not isinstance(value, int) for value in timestamps)
+            or not timestamps[0] <= timestamps[1] <= timestamps[2] < timestamps[3]
+            or tuple(required_sizes or ()) != (1, 2, 4, 8, 16)
+            or not set(required_sizes or ()).issubset(set(observed_sizes or ()))
+            or payload.get("cudagraph_coverage_pass") is not True
+            or payload.get("warmup_request_count") != 31
+            or payload.get("warmup_output_target_verified") is not True
+            or payload.get("verification_request_count") != 31
+            or payload.get("verification_output_target_verified") is not True
+        ):
+            raise RuntimeError(f"capacity {device} readiness identity/warmup evidence failed")
+        if (
+            not isinstance(runtime, dict)
+            or runtime.get("packages", {}).get("vllm") != "0.23.0"
+            or runtime.get("packages", {}).get("torch") != "2.11.0"
+            or "A100" not in str(runtime.get("gpu_name", ""))
+            or not runtime.get("torch_cuda")
+        ):
+            raise RuntimeError(f"capacity {device} runtime evidence differs from its pins")
+        if (
+            not isinstance(compilation, dict)
+            or compilation.get("engine_initialization_completed_before_warmup") is not True
+            or compilation.get("no_active_compilation_event") is not True
+            or tuple(compilation.get("measured_probe_compilation_events", ()))
+        ):
+            raise RuntimeError(f"capacity {device} measured probe observed compilation")
+        if (
+            not isinstance(probe, dict)
+            or probe.get("requested_output_tokens") != 64
+            or probe.get("emitted_output_tokens") != 64
+            or probe.get("output_target_verified") is not True
+            or probe.get("ttft_sane") is not True
+            or not isinstance(probe.get("ttft_seconds"), (int, float))
+            or isinstance(probe.get("ttft_seconds"), bool)
+            or not 0.0 < float(probe["ttft_seconds"]) <= 2.0
+            or not isinstance(probe.get("request_throughput_rps"), (int, float))
+            or not math.isfinite(float(probe["request_throughput_rps"]))
+            or float(probe["request_throughput_rps"]) <= 0.0
+            or not isinstance(probe.get("output_token_throughput_tps"), (int, float))
+            or not math.isfinite(float(probe["output_token_throughput_tps"]))
+            or float(probe["output_token_throughput_tps"]) <= 0.0
+        ):
+            raise RuntimeError(f"capacity {device} readiness probe failed")
+        hbm_samples = hbm.get("samples", ()) if isinstance(hbm, dict) else ()
+        hbm_fields = (
+            "nvml_device_used_bytes",
+            "torch_allocated_bytes",
+            "torch_reserved_bytes",
+            "kv_pool_reserved_bytes",
+            "kv_assigned_bytes",
+        )
+        hbm_recomputed_stable = len(hbm_samples) >= 3
+        if hbm_recomputed_stable:
+            for field in hbm_fields:
+                values = tuple(sample.get(field) for sample in hbm_samples)
+                if any(
+                    isinstance(value, bool) or not isinstance(value, int) or value < 0
+                    for value in values
+                ):
+                    hbm_recomputed_stable = False
+                    break
+                tolerance = 16 * 1024 * 1024 if field == "nvml_device_used_bytes" else 0
+                if max(values) - min(values) > tolerance:
+                    hbm_recomputed_stable = False
+                    break
+        if (
+            not isinstance(hbm, dict)
+            or hbm.get("stable") is not True
+            or hbm.get("nvml_stability_tolerance_bytes") != 16 * 1024 * 1024
+            or not all(isinstance(sample, dict) for sample in hbm_samples)
+            or not hbm_recomputed_stable
+        ):
+            raise RuntimeError(f"capacity {device} HBM stability evidence failed")
+        zero_fields = (
+            "request_count",
+            "running_requests",
+            "waiting_requests",
+            "skipped_waiting_requests",
+            "queue_depth",
+        )
+        if (
+            not isinstance(state, dict)
+            or any(state.get(field) != 0 for field in zero_fields)
+            or state.get("prefix_cache_reset") is not True
+            or state.get("health") != "healthy"
+            or state.get("metrics_available") is not True
+            or payload.get("queue_empty_pass") is not True
+        ):
+            raise RuntimeError(f"capacity {device} idle/health/metrics evidence failed")
+        validated.append(payload)
+    return validated[0], validated[1]
+
+
+def _validate_reset_payloads(
+    *, payloads: tuple[dict[str, Any], ...], expected_probe_id: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if len(payloads) != 2:
+        raise RuntimeError("capacity reset evidence requires exactly two worker shards")
+    zero_fields = (
+        "request_count",
+        "running_requests",
+        "waiting_requests",
+        "skipped_waiting_requests",
+        "queue_depth",
+    )
+    for payload in payloads:
+        before = payload.get("state_before")
+        after = payload.get("state_after")
+        duration = payload.get("duration_seconds")
+        if (
+            payload.get("schema_version") != "sloforge.branchfabric.capacity-request-reset/v1"
+            or payload.get("probe_id") != expected_probe_id
+            or payload.get("engine_reloaded") is not False
+            or payload.get("prefix_cache_reset") is not True
+            or payload.get("passed") is not True
+            or not isinstance(before, dict)
+            or not isinstance(after, dict)
+            or any(before.get(field) != 0 for field in zero_fields)
+            or any(after.get(field) != 0 for field in zero_fields)
+            or not isinstance(duration, (int, float))
+            or isinstance(duration, bool)
+            or not math.isfinite(float(duration))
+            or float(duration) < 0.0
+        ):
+            raise RuntimeError("capacity request-state reset evidence failed")
+    return payloads[0], payloads[1]
 
 
 def run_capacity_calibration_controller(
@@ -136,6 +296,7 @@ def run_capacity_calibration_controller(
     controller_error: BaseException | None = None
     results: list[Any] = []
     final_action: Any = None
+    both_engines_ready = False
     started_ns = time.monotonic_ns()
     overall_deadline_ns = started_ns + round(float(config["controller_timeout_seconds"]) * 1e9)
     try:
@@ -188,18 +349,20 @@ def run_capacity_calibration_controller(
             phase="engine readiness",
             children=child_processes,
         )
-        ready_payloads = tuple(json.loads(path.read_text()) for path in ready_paths)
-        for payload, expected_gpu in zip(ready_payloads, inventory_before, strict=True):
-            runtime = payload.get("runtime_evidence")
-            if (
-                payload.get("physical_gpu_uuid") != expected_gpu["uuid"]
-                or not isinstance(runtime, dict)
-                or runtime.get("packages", {}).get("vllm") != "0.23.0"
-                or runtime.get("packages", {}).get("torch") != "2.11.0"
-                or "A100" not in str(runtime.get("gpu_name", ""))
-                or not runtime.get("torch_cuda")
-            ):
-                raise RuntimeError("capacity worker runtime evidence differs from its pins")
+        ready_payloads = _validate_readiness_payloads(
+            payloads=tuple(json.loads(path.read_text()) for path in ready_paths),
+            expected_inventory=tuple(inventory_before),
+        )
+        both_engines_ready = True
+        _write_new(
+            work_root / "readiness/both-engines-ready.json",
+            {
+                "schema_version": "sloforge.branchfabric.both-engines-ready/v1",
+                "BOTH_ENGINES_READY": True,
+                "observed_at_monotonic_ns": time.monotonic_ns(),
+                "engine_evidence": ready_payloads,
+            },
+        )
 
         for probe_index in range(int(config["maximum_probes"])):
             action = recommend_next_probe(
@@ -242,6 +405,23 @@ def run_capacity_calibration_controller(
                 children=child_processes,
             )
             worker_payloads = tuple(json.loads(path.read_text()) for path in worker_paths)
+            reset_paths = tuple(
+                command_root / f"probe-{probe_index:02d}.{device}.reset.json"
+                for device, *_ in children
+            )
+            _wait_for_paths(
+                reset_paths,
+                deadline_ns=min(
+                    overall_deadline_ns,
+                    time.monotonic_ns() + round(float(config["probe_timeout_seconds"]) * 1e9),
+                ),
+                phase=f"probe {probe_index} request-state reset",
+                children=child_processes,
+            )
+            reset_payloads = _validate_reset_payloads(
+                payloads=tuple(json.loads(path.read_text()) for path in reset_paths),
+                expected_probe_id=plan.probe_id,
+            )
             expected_tail_end_ns = plan.measurement_end_ns + round(
                 float(config["tail_drain_seconds"]) * 1e9
             )
@@ -280,6 +460,7 @@ def run_capacity_calibration_controller(
             _write_new(probe_root / "plan.json", plan)
             _write_new(probe_root / "raw.json", raw)
             _write_new(probe_root / "result.json", result)
+            _write_new(probe_root / "request-state-reset.json", reset_payloads)
             results.append(result)
         if final_action is None:
             final_action = recommend_next_probe(
@@ -356,6 +537,7 @@ def run_capacity_calibration_controller(
         "status": status,
         "inventory_before": inventory_before,
         "worker_ready_evidence": (locals().get("ready_payloads", ())),
+        "both_engines_ready": both_engines_ready,
         "worker_completion_evidence": (locals().get("worker_completions", ())),
         "worker_pids": {device: child.pid for device, child, *_ in children},
         "worker_returncodes": {device: child.returncode for device, child, *_ in children},
@@ -386,4 +568,9 @@ def run_capacity_calibration_controller(
     return result_payload
 
 
-__all__ = ["_validate_worker_completions", "run_capacity_calibration_controller"]
+__all__ = [
+    "_validate_readiness_payloads",
+    "_validate_reset_payloads",
+    "_validate_worker_completions",
+    "run_capacity_calibration_controller",
+]

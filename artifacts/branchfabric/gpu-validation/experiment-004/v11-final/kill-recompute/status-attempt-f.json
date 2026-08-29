@@ -1,0 +1,224 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-status/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-f",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "valid_kill_recompute_arm": false,
+  "terminal_classification": "INVALID_SCIENTIFIC_CONTROL_STABILITY_GATE",
+  "secondary_classification": "LOCAL_FUNCTION_CALL_CONFIG_COMMITMENT_REPRESENTATION_GATE_BUG",
+  "failure_stage": "STRICT_NINE_RPS_CONTROL_STABILITY_INTERVAL",
+  "primary_failure": {
+    "type": "CONTROL_STABILITY_GATE",
+    "message": "the retained serving engine failed the strict 9-rps control interval because total outstanding increased from 10 to 11 with a +0.2 requests/s slope",
+    "source": "immutable v11 GPU0 control-interval barrier and serving worker failure",
+    "interpretation": "the required serving-control precondition failed; later rollout-side transaction evidence cannot make this a scientifically valid kill/recompute arm"
+  },
+  "secondary_failure": {
+    "type": "FUNCTION_CALL_CONFIG_COMMITMENT_REPRESENTATION_MISMATCH",
+    "message": "the local validator compared a sparse raw config commitment with the FunctionCall producer's expanded validated-config commitment",
+    "source": "persisted FunctionCall capture, sealed config, local validation failure, and conservative charge evidence",
+    "raw_sparse_config_canonical_sha256": "38110e89e363c2972e280f5b7c0879e6ef286dc417cc57af6203a03f77b95c23",
+    "expanded_validated_config_canonical_sha256": "0880d14f78a16108c53f72cd3f0669a9ffd6ccb15d90869568c3f669cff0e865",
+    "interpretation": "local evidence-validation gate bug; it does not change the remote scientific failure and does not authorize measured settlement"
+  },
+  "lifecycle": {
+    "function_entry_reached": true,
+    "controller_started": true,
+    "both_engines_started": true,
+    "retained_engine_readiness_passed": true,
+    "twelve_rps_probe_a_passed": true,
+    "twelve_rps_probe_b_passed": true,
+    "normal_twelve_rps_sanity_passed": true,
+    "normal_fifteen_rps_sanity_passed": true,
+    "strict_nine_rps_control_interval_reached": true,
+    "strict_nine_rps_control_interval_passed": false,
+    "transaction_command_issued": true,
+    "reclaim_trigger_reached": true,
+    "source_state_discarded": true,
+    "source_release_reached": true,
+    "hbm_reclaim_reached": true,
+    "temporary_gpu1_serving_reached": true,
+    "serving_recovery_evidence_present": true,
+    "recompute_reached": true,
+    "continuation_correctness_reached": true,
+    "controller_two_worker_success_pair_present": false
+  },
+  "control_interval": {
+    "offered_rate_rps": 9.0,
+    "duration_seconds": 4.0,
+    "measurement_arrivals": 36,
+    "completions_in_interval": 34,
+    "completed_rate_rps": 8.5,
+    "completion_fraction": 0.9444444444444444,
+    "p95_ttft_ns": 57507309.25,
+    "waiting_queue_maximum_depth": 1,
+    "initial_total_outstanding": 10,
+    "maximum_total_outstanding": 12,
+    "final_total_outstanding": 11,
+    "total_outstanding_slope_requests_per_second": 0.2,
+    "outstanding_queue_non_positive_trend": false,
+    "passed": false
+  },
+  "partial_diagnostic_recompute": {
+    "admissibility": "PARTIAL_DIAGNOSTIC_ONLY",
+    "may_be_used_as_valid_kill_arm": false,
+    "may_be_used_as_final_measured_break_even": false,
+    "raw_rollout_worker_status": "success",
+    "branch_count": 8,
+    "actual_submitted_replay_tokens": 133128,
+    "actual_computed_boundary_tokens": 133120,
+    "actual_live_uncomputed_tail_tokens": 8,
+    "actual_runtime_cache_reused_tokens": 114688,
+    "actual_runtime_uncached_recompute_tokens": 18440,
+    "gpu_computed_tokens_derived_from_scheduler": 18440,
+    "recompute_wall_seconds": 1.769525765,
+    "recompute_cuda_gpu_seconds": 1.7178089599609374,
+    "lost_private_rollout_tokens": 2048,
+    "lost_private_rollout_cuda_gpu_seconds": 5.90749560546875,
+    "first_resumed_token_seconds": 1.798020579,
+    "all_branches_resumed_seconds": 1.798020579,
+    "all_continuations_complete_seconds": 2.098745139,
+    "exact_first_token_matches": 8,
+    "minimum_continuation_tokens_per_branch": 8,
+    "state_discarded_blocks": 1152,
+    "state_discarded_bytes": 1056964608,
+    "checkpoint_exported": false
+  },
+  "remote_result": {
+    "function_call_id": "fc-01M159JSQJM88WHXC702WG8GNS",
+    "function_completion_status": "failed",
+    "function_scientific_status": "invalid",
+    "controller_status": "failed",
+    "worker_returncodes": {
+      "serving": 1,
+      "rollout": 0
+    },
+    "worker_result_count": 0,
+    "controller_error": {
+      "type": "RuntimeError",
+      "message": "integrated v11 worker return codes failed: {'serving': 1, 'rollout': 0}"
+    }
+  },
+  "cleanup": {
+    "in_function_status": "PASS",
+    "provider_status": "PASS",
+    "forced_kill_required": false,
+    "provider_artifact": "provider-cleanup-attempt-f.json",
+    "provider_artifact_sha256": "16922c669509bcc4357b169633e89bcf862b6a0b51723ff0a884fe09c65dbd70"
+  },
+  "accounting": {
+    "settlement_kind": "CONSERVATIVE_FULL_BOUND",
+    "actual_gpu_seconds": null,
+    "actual_gpu_seconds_status": "unavailable-or-not-trusted",
+    "measured_settlement_performed": false,
+    "charged_gpu_seconds": 1320.0,
+    "charged_wall_seconds": 660.0,
+    "gpu_count": 2,
+    "reservation_id": "exp004-v11-kill-f-21196ad66e1c8dfa16a0",
+    "function_call_id": "fc-01M159JSQJM88WHXC702WG8GNS",
+    "ledger_reservations_empty": true,
+    "ledger_consumed_additional_gpu_seconds": 29603.41499012398,
+    "ledger_remaining_gpu_seconds": 13596.58500987602
+  },
+  "remote_bundle": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/REMOTE_MANIFEST.json",
+    "sha256": "23655d7275730175054a63d18fc7d16b34eae093ab5fa2682bcc8b46e124dc83",
+    "declared_files": 508,
+    "actual_files": 508,
+    "missing_files": 0,
+    "extra_files": 0,
+    "hash_or_size_mismatches": 0,
+    "symlinks": 0
+  },
+  "evidence_bindings": {
+    "config": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-f-config.json",
+      "771bd5dc2b1ca059f62d64edbfdb230dd0f16c07ce640ba49deb82548f53fd66"
+    ],
+    "seal": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-f.json",
+      "896aa4d9d1d4ad78b3d509f7a8aa4d8e7f08d045a75436c7ed7c283becbf9ffc"
+    ],
+    "make_check": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-f.json",
+      "03e468fdd2b051b4b562d3b31bd41bdc4acc38f6d50e3e541d247b0e114a4ab1"
+    ],
+    "prebuild": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-f.json",
+      "bdbda2ed8812f4e3f4467e2eca374b84f1899d376802b400ff1e9eeee475cd8e"
+    ],
+    "post_prebuild_freshness": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-f-pre-reservation-freshness.json",
+      "192e391a78a43a91cf59ce4440705b0bfee8476f54fbc49b753d34fb60770244"
+    ],
+    "remote_manifest": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/REMOTE_MANIFEST.json",
+      "23655d7275730175054a63d18fc7d16b34eae093ab5fa2682bcc8b46e124dc83"
+    ],
+    "function_completion": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/function-completion.json",
+      "90266d945f1149272f37eb28eb1d00663be4838cf6f82d72f0fbbc14a20ebb19"
+    ],
+    "function_failure": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/function-failure.json",
+      "f21d61ea03806b3a8d55514ceb8d9f2a1d3f83e1647aa7eca7752f69c1d99613"
+    ],
+    "function_finally_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/function-finally-cleanup.json",
+      "bf66346748a8dd9c0b8ef9af831cb6761cf0065b6028f5b046e50ec8a3f06c7b"
+    ],
+    "controller_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/controller-result.json",
+      "e65bd9e0d3b6ae12e204b54e05cdc1f7dd070d1999c0c5ab3a0835fcd7eacc1c"
+    ],
+    "kill_controller_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/kill-controller-result.json",
+      "2b8d03962ad2dea96b8d60c8436d5fee5bf68718c652688e373ea3bb72dfca1e"
+    ],
+    "serving_failure": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/serving/failure.json",
+      "777438d961e4724444e858d51210d11acf24704f6381f5a9f3abea7adbcb09fb"
+    ],
+    "control_interval": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/barriers/v11-gpu0-control-interval.json",
+      "d1156cf3df424a1368f69e9f54b0595d3aa92764acddf9c09e587977dcfd64c9"
+    ],
+    "rollout_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/rollout/result.json",
+      "143b0dbfd3b34e2c3d8d50ce525093767543196c8163773523e45d8ec23869a7"
+    ],
+    "state_discard": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/barriers/kill-state-discarded.json",
+      "1436df1be19756fda8b076d729561d0f95d8bf5b34595c73f168727de12b9c96"
+    ],
+    "rollout_restore": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/barriers/rollout-restore-complete.json",
+      "f38127e700f0376f0e12e6cbf2fc2f65a7c3c22fae7365dc8308fb0d63a96852"
+    ],
+    "in_function_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/in_function_cleanup.json",
+      "1f7fa107336a59931d062f429c38e463d6035dba49cdd9c330713153311f97f3"
+    ],
+    "function_call_capture": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/function-calls/exp004-v11-kill-recompute-s41-f/function-call.json",
+      "415c796eacb7c50eb1e63b800f5c7746491299133a66d0f1c65fe063882d3c77"
+    ],
+    "conservative_charge": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-f-conservative-charge.json",
+      "38905e7cbd92ced0ea523a001954135155c2451140beb861b41a31a417aec174"
+    ],
+    "provider_inventory": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-f.json",
+      "eb2f74c350b41b6bb66ce01233fefa58b9a2ef4ee910764fc035928d11491654"
+    ],
+    "provider_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-f.json",
+      "16922c669509bcc4357b169633e89bcf862b6a0b51723ff0a884fe09c65dbd70"
+    ],
+    "settled_ledger": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "aa81df8d3a26e370af1e715f86cb13a1b670cdccd4bbf6d4707dae1802a4ca26"
+    ]
+  },
+  "next_action": "DO_NOT_ACCEPT_ATTEMPT_F_AS_THE_REQUIRED_KILL_RECOMPUTE_ARM; FIX_THE_LOCAL_FUNCTION_CALL_COMMITMENT_REPRESENTATION_GATE_OFFLINE_AND_RETAIN_F_RECOMPUTE_VALUES_AS_PARTIAL_DIAGNOSTICS_ONLY"
+}

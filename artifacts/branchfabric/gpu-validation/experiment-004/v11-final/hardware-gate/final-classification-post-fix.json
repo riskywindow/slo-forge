@@ -1,0 +1,29 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-hardware-gate-post-fix/v1",
+  "observed_at_utc": "2026-08-24T02:57:34Z",
+  "classification": "HARDWARE_GATE_NOT_REACHED",
+  "allocator_root_cause": "GATE_BUG",
+  "offline_fix_status": "PASS",
+  "targeted_source_identity_status": "PASS_1152_OF_1152_ZERO_POST_COMMIT_MUTATIONS",
+  "integrated_attempt_status": "FAIL_PRE_FUNCTION_IMAGE_BUILD_CLIENT_DISCONNECT",
+  "integrated_v11_scientifically_valid": false,
+  "kill_and_recompute_run": false,
+  "cuda_adversary_result": "UNCLEAR_NOT_REACHED",
+  "experiment_005_generated": false,
+  "missing_mandatory_evidence": [
+    "integrated_v11_scientific_validity",
+    "integrated_residual_critical_path",
+    "kill_and_recompute_measurement",
+    "preservation_break_even",
+    "integrated_amdahl",
+    "streaming_accelerator_projection",
+    "cuda_triton_adversary"
+  ],
+  "numeric_hardware_gates": {
+    "integrated_fraction_at_least_0_15": null,
+    "realistic_speedup_at_least_1_20": null,
+    "bandwidth_dataflow_dominated": null,
+    "kill_recompute_preservation_relevant": null,
+    "external_placement_advantage": null
+  }
+}

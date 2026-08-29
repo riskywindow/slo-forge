@@ -1,0 +1,36 @@
+{
+  "schema_version": "sloforge.branchfabric.v11-targeted-independent-review/v1",
+  "attempt_id": "exp004-v11-targeted-identity-s41-b",
+  "agent": 11,
+  "role": "allocation-identity-reviewer",
+  "status": "PASS",
+  "integrated_retry_recommendation": "AUTHORIZE_EXACTLY_ONE",
+  "immutable_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/raw/exp004-v11-targeted-identity-s41-b/REMOTE_MANIFEST.json",
+    "sha256": "ba4ebb51909a6bb6f640920771dff40c6418b3252d4cf5d7cb6b9a01ad0418e1",
+    "verified_entries": 465,
+    "missing_entries": 0,
+    "hash_or_size_drift": 0
+  },
+  "identity": {
+    "expected_allocations": 1152,
+    "observed_allocations": 1152,
+    "logical_mapping_passed": 1152,
+    "block_epoch_passed": 1152,
+    "owner_set_passed": 1152,
+    "refcount_passed": 1152,
+    "device_passed": 1152,
+    "live_status_passed": 1152,
+    "shared_allocations": 1024,
+    "private_allocations": 128,
+    "post_commit_allocator_mutations": 0,
+    "source_capture_commit_semantic_sha256": "28168c11daf69cdc89e1ddf369a8c828fc274315d37c234c480ba63c5ab67086",
+    "source_identity_validation_sha256": "a2225d62ef90e6dd11460b8b62f3cfe0a6ed14aa1e1fecf008cbefe7e976eefe"
+  },
+  "safety": {
+    "optimized_export_started": false,
+    "transaction_source_release_started": false,
+    "in_function_cleanup": "PASS",
+    "provider_cleanup": "PASS"
+  }
+}

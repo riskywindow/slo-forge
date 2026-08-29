@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-process-cleanup-review/v1",
+  "agent": 3,
+  "role": "process-cleanup-implementation",
+  "status": "PASS",
+  "reviewed_at_utc": "2026-08-20T02:54:30Z",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "implementation_evidence": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/offline-fixes/cleanup/process-group-cleanup-implementation.json",
+    "sha256": "73f294fb3350f8dec16d6a332c535dfeb1c78c7475339854f0d5969ebd740e1c"
+  },
+  "result": {
+    "offline_cleanup_fix": "PASS",
+    "real_in_function_cleanup_gate": "REQUIRED_DURING_DESIGNATED_GPU_RUN",
+    "provider_cleanup_is_separate": true
+  }
+}

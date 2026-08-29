@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "forgeci-intentional-regression-1efc47156bac-419882af48",
+  "case_id": "forgeci-intentional-regression",
+  "revision": "1efc47156bacf885ae1253bf7039b7e56977ee68",
+  "started_at": "2026-08-04T03:56:35.529807Z",
+  "completed_at": "2026-08-04T03:56:35.634073Z",
+  "success": true,
+  "warmups": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.020252000002074055,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.28303957675942
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.71775927619069
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/warmup-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/warmup-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "warmup",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.019969291002780665,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.1467666484547
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.85344844035764
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/warmup-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/warmup-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "trials": [
+    {
+      "trial_index": 0,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2026,
+      "status": "succeeded",
+      "duration_seconds": 0.0202832920003857,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.28303957675942
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.71775927619069
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0000-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0000-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 1,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2027,
+      "status": "succeeded",
+      "duration_seconds": 0.020213291001709877,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 100.1467666484547
+        },
+        {
+          "name": "throughput_rps",
+          "value": 99.85344844035764
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0001-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0001-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "trial_index": 2,
+      "attempt": 0,
+      "phase": "measurement",
+      "seed": 2028,
+      "status": "succeeded",
+      "duration_seconds": 0.018149042000004556,
+      "metrics": [
+        {
+          "name": "p99_ttft_ms",
+          "value": 99.98714714601066
+        },
+        {
+          "name": "throughput_rps",
+          "value": 100.01285450616025
+        }
+      ],
+      "stdout_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0002-attempt-0.stdout",
+      "stderr_path": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48/trials/measurement-0002-attempt-0.stderr",
+      "exit_code": 0,
+      "error": null
+    }
+  ],
+  "summaries": [
+    {
+      "name": "p99_ttft_ms",
+      "unit": "ms",
+      "sample_count": 3,
+      "median": 100.1467666484547,
+      "median_absolute_deviation": 0.13627292830472015,
+      "p95": 100.26941228392896,
+      "confidence_level": 0.95,
+      "median_ci_low": 99.98714714601066,
+      "median_ci_high": 100.28303957675942,
+      "raw_samples": [
+        100.28303957675942,
+        100.1467666484547,
+        99.98714714601066
+      ]
+    },
+    {
+      "name": "throughput_rps",
+      "unit": "request/s",
+      "sample_count": 3,
+      "median": 99.85344844035764,
+      "median_absolute_deviation": 0.13568916416694776,
+      "p95": 99.99691389958,
+      "confidence_level": 0.95,
+      "median_ci_low": 99.71775927619069,
+      "median_ci_high": 100.01285450616025,
+      "raw_samples": [
+        99.71775927619069,
+        99.85344844035764,
+        100.01285450616025
+      ]
+    }
+  ],
+  "environment_manifest": {
+    "platform": "macOS-15.6.1-arm64-i386-64bit",
+    "python_version": "3.12.7",
+    "machine": "arm64",
+    "processor": "i386",
+    "git_commit": "1efc47156bacf885ae1253bf7039b7e56977ee68",
+    "environment": [],
+    "hardware_fingerprint": "56be35305c2f48eb794affefc402d278c73f90130675b3d746d822a915b50d1b"
+  },
+  "artifact_directory": "artifacts/helix/baseline/forgeci-demo/minimization/candidate-008/runs/forgeci-intentional-regression-1efc47156bac-419882af48",
+  "artifact_hash": "0b971690e0f8a90776ae685c4f0b20c358056801840b8360eac2fd1c691a567b",
+  "warnings": []
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-c-budget-scientific-admissibility/v1",
+  "created_at_utc": "2026-08-19T01:31:36Z",
+  "agent": "agent-07c-independent-budget-scientific-admissibility-auditor",
+  "status": "PASS",
+  "decision": "ONE_ATTEMPT_C_AUTHORIZED_AFTER_MECHANICAL_RESEAL",
+  "condition": "The sole GPU coordinator /root must bind the exact current hashes in a new immutable attempt-c offline manifest and config before atomically creating the one-A100/525-second reservation. No further scientific or budget remediation is required if those hashes and the ledger remain unchanged.",
+  "gpu_modal_or_network_actions": 0,
+  "reservation_created_by_reviewer": false,
+  "designated_gpu_coordinator": "/root",
+  "attempt_b": {
+    "attempt_id": "exp004-v11-micro-s41-b",
+    "status": "SETTLED_FAILED_SCIENTIFIC_RUN",
+    "failure": "V11RuntimeTeardownRequired: preexisting zero-queue evidence consumed at restore",
+    "reached_real_a100_model_and_state_work": true,
+    "restore_measurement_completed": false,
+    "continuation_completed": false,
+    "complete_movement_result_published": false,
+    "scientifically_admissible_as_micro_result": false,
+    "selection_on_amplification_or_correctness_outcome": false,
+    "accounted_wall_seconds": 155.17,
+    "accounted_gpu_seconds": 155.17,
+    "accounted_gpu_hours": 0.043102777777777775,
+    "accounted_cost_usd": 0.10768798,
+    "gpu_model": "NVIDIA A100 80GB PCIe",
+    "gpu_uuid": "GPU-334a2fbd-ab80-41d0-e3e3-c1807b002df4",
+    "function_call_id": "fc-01M0BS1T25WGWJQ9V6HBNTSEWW",
+    "evidence": {
+      "settlement": {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/gpu-settlement.json",
+        "sha256": "a18bf302a4d16894b3ed392e5b590fa619415534ab0738d74fbaf7c1a4274c14"
+      },
+      "remote_manifest": {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-manifest-download.json",
+        "sha256": "58af1fca605452dbdeddaed05410ba77ebb093e424b18ace131f711f7f2e25a6",
+        "ledger_commitment_matches": true
+      },
+      "worker_failure": {
+        "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-download/worker/failure.json",
+        "sha256": "17871ec58c1664d5b9e146e94ff50b97219e01ec0bbff417b25c77a5d72a3007"
+      }
+    }
+  },
+  "cleanup": {
+    "status": "PASS",
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/postflight-cleanup.json",
+    "sha256": "4bf07f34e857ddc2642ef6bc1df3f7e2e733041d30445f9c518bf6f2892d9138",
+    "stopped_apps": 2,
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "authorized_persistent_resources": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ]
+  },
+  "current_budget": {
+    "status": "PASS",
+    "authorization": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+      "sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+      "authorized_cumulative_a100_hours": 6.0,
+      "authorized_cumulative_gpu_seconds": 21600.0,
+      "authorized_gpu_budget_usd": 40.0,
+      "scope_includes_v11_micro": true
+    },
+    "ledger": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "bd9c1f919f33d1c63f0edf4bc86134ad78e73d00638280c68d55111202ff19b3",
+      "strict_schema_and_derived_consumption_pass": true,
+      "consumed_gpu_seconds": 13236.993626085978,
+      "consumed_gpu_hours": 3.6769426739127717,
+      "remaining_gpu_seconds": 8363.006373914022,
+      "remaining_gpu_hours": 2.3230573260872283,
+      "active_reservations": 0
+    },
+    "attempt_c_envelope": {
+      "gpu_count": 1,
+      "requested_gpu": "A100-80GB",
+      "maximum_wall_seconds": 525.0,
+      "maximum_gpu_seconds": 525.0,
+      "planning_margin_fraction": 0.15,
+      "planning_margin_gpu_seconds": 78.75,
+      "gpu_seconds_with_margin": 603.75,
+      "projected_cumulative_exact_gpu_seconds": 13761.993626085978,
+      "projected_cumulative_with_margin_gpu_seconds": 13840.743626085978,
+      "remaining_after_exact_reservation_gpu_seconds": 7838.006373914022,
+      "remaining_after_margin_gpu_seconds": 7759.256373914022,
+      "exact_maximum_cost_usd": 0.36435000000000006,
+      "cost_with_margin_usd": 0.4190025,
+      "hard_limit_pass": true
+    }
+  },
+  "cause_aligned_remediation": {
+    "status": "PASS",
+    "classification": "SOURCE_DESTINATION_ALLOCATION_QUEUE_LIFECYCLE_GAP",
+    "scope": "Exact 1,152-block source-allocation notification drain under the production EXPORT_CAPTURE binding after ownership and capture, before source release.",
+    "fail_closed_runtime_conditions": [
+      "scheduler.needs_kv_cache_zeroing is exactly false",
+      "one destructive read observes exactly 1,152 unique authenticated source block IDs",
+      "production gate, scheduler, and manager identities match before and after the read",
+      "lifetime, ownership, and capture-manifest commitments are present",
+      "any mismatch persists typed teardown evidence and cannot publish success",
+      "restore entry and every destination allocation delta retain strict queue checks"
+    ],
+    "movement_accounting_effect": "metadata only; no StatePassRecord and zero movement bytes",
+    "current_hashes": {
+      "experiments/branchfabric/gpu_reclamation_worker_v11.py": "bb2a8ba7fa4b6c1398e08635aa8b401270d68b301d0997422362b55ddc8fe867",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "7b5752b37897f880f451068ea69e2439c979dbb3324ea0f8c15c354ecde0dc67",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+      "tests/python/test_gpu_reclamation_runtime_v11.py": "3adbc2f2e1e0f424f23e6984a75846cc2c1d06c35fa390402f684a5cab587d45",
+      "tests/python/test_vllm_reclamation_v11_sync.py": "02ac7d54b8bec7bd0de84e5a25696cc28dc7a7cbfae6eec4f6f3a73a0fec9aa5"
+    }
+  },
+  "independent_post_fix_reviews": [
+    {
+      "role": "production synchronization and zero-queue lifecycle",
+      "status": "PASS",
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-c-zero-queue-post-fix-audit.json",
+      "sha256": "785f896089a1d3169b9c08910832ec99120887a08fee2bd76fc80ea0cd8d004a",
+      "tests_passed": 80
+    },
+    {
+      "role": "integrity, provenance, destination freshness, and accounting isolation",
+      "status": "PASS",
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent05c-agent08c-source-queue-integrity-audit.json",
+      "sha256": "721fe9985971a108c506a6c6f128c0c5d6ac983aaa4f2f182d9a206e6700d4a7",
+      "tests_passed": 61
+    }
+  ],
+  "full_offline_check": {
+    "status": "PASS",
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-evidence.json",
+    "sha256": "325cb8174fc362aaea2aa46f6c472ad0ac61f97adbc18b681c70089ff34c025e",
+    "python_tests_passed": 1771,
+    "python_tests_skipped_optional_dependencies": 8,
+    "rust": "PASS",
+    "ui": "PASS",
+    "focused_v11_tests_passed": 90
+  },
+  "scientific_admissibility": {
+    "status": "PASS",
+    "exactly_one_attempt_c": true,
+    "rationale": "Attempt b exposed a deterministic production lifecycle defect before restore measurement, complete movement accounting, continuation correctness, or a published micro outcome. The narrowly cause-aligned retry cannot select on measured amplification or correctness. One attempt c with the unchanged seed and scientific workload is therefore a remedial execution, not outcome cherry-picking.",
+    "unchanged_parameters": [
+      "seed 41",
+      "one A100-80GB",
+      "Qwen2.5-7B-Instruct revision a09a35458c702b33eeacc393d103063234e8bc28",
+      "vLLM 0.23.0 and PyTorch 2.11.0 BF16",
+      "16,384 shared tokens, fanout 8, 256 private tokens",
+      "1,152 blocks and 1,056,964,608 logical bytes",
+      "eight continuation tokens per branch and 8/8 independent recomputation",
+      "canonical StatePassRecord measurement and strict amplification go/no-go"
+    ],
+    "attempt_b_artifacts_remain_immutable": true,
+    "attempt_b_partial_execution_must_not_be_reported_as_measurement": true,
+    "no_automatic_retry": true,
+    "additional_retry_after_c": "requires a new independent budget and scientific audit"
+  },
+  "mechanical_pre_reservation_reseal": [
+    "create a new immutable attempt-c offline manifest binding this audit, both post-fix reviews, the final make-check evidence, current source/test hashes, current ledger, and budget authorization",
+    "create a fresh exp004-v11-micro-s41-c config with a unique immutable result prefix and unchanged scientific parameters",
+    "bind the config to the attempt-c manifest and ledger SHA-256 bd9c1f919f33d1c63f0edf4bc86134ad78e73d00638280c68d55111202ff19b3",
+    "validate the config locally, then re-read the unchanged ledger and clean provider state",
+    "atomically create one fresh unique 1-A100/525-second reservation immediately before launch",
+    "use a fresh one-time coordinator token, the authorized paid-launch environment, retries=0, and only /root as coordinator"
+  ],
+  "fail_closed": "If any bound hash, ledger value, cleanup state, workload parameter, GPU count, duration, or coordinator condition changes, this PASS is void and the result is BUDGET_BLOCKER pending re-audit."
+}

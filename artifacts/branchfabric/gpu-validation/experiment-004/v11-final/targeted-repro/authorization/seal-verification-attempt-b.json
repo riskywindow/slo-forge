@@ -1,0 +1,69 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-retry-seal-verification/v1",
+  "status": "PASS_PRE_RESERVATION",
+  "verified_at_utc": "2026-08-24T01:19:54Z",
+  "attempt_id": "exp004-v11-targeted-identity-s41-b",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "verification": {
+    "typed_targeted_config": "PASS",
+    "controller_verify_sealed_evidence": "PASS",
+    "sole_coordinator_load_sealed_config": "PASS",
+    "targeted_authorization_verified": true,
+    "prior_targeted_attempt_evidence_verified": true,
+    "prelaunch_binding_count": 24,
+    "offline_binding_count": 6
+  },
+  "artifacts": {
+    "config": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/exp004-v11-targeted-identity-s41-b-config.json",
+      "sha256": "23064e49f53fbe7f78c9e7f31766e86fe45b7fb27819614ad46709be1a53e39a"
+    },
+    "post_manifest": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/authorization/targeted-source-identity-pre-gpu-manifest-attempt-b.json",
+      "sha256": "52c78b3507147f3dbf3eb724e094e62f77efe718a5edd43221635f08ec88a8e2"
+    },
+    "fresh_make_check": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/offline-fixes/make-check.json",
+      "sha256": "e2c4971fc35f0edaf7a4067208847cbe7e699aa43ff6c25bc697d717eb21560b",
+      "pytest": "PASS; 1997 passed, 8 skipped, 6 warnings",
+      "rust": "PASS",
+      "ui": "PASS"
+    },
+    "prior_attempt_status": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/status.json",
+      "sha256": "534cb4c758ffd13164ffce02f39c66172058f725d7e15c77501d89d794e48e9c"
+    },
+    "prior_attempt_provider_cleanup": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/provider-cleanup.json",
+      "sha256": "d7eee1e5ff6f15debd7070eaf37b3434116f9b6ca0df2f612b5004a9492d22c2"
+    },
+    "prior_attempt_in_function_cleanup": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/raw/exp004-v11-targeted-identity-s41-a/in_function_cleanup.json",
+      "sha256": "2f02586b074a405130f11c5d6b8fb00d80b15f8201bda9a138534ad038a4a2c4"
+    }
+  },
+  "ledger": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256_before_reservation": "e9064b98e8563f2494d26435cf28040149832b9924253d4c2b15a51b669ee35d",
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "conservative_consumed_gpu_seconds": 17773.938636337978,
+    "remaining_gpu_seconds": 3826.061363662022,
+    "active_reservations": 0,
+    "targeted_maximum_gpu_seconds": 600.0,
+    "targeted_with_15_percent_planning_margin_gpu_seconds": 690.0,
+    "remaining_after_15_percent_planning_margin_gpu_seconds": 3136.061363662022,
+    "maximum_gpu_only_cost_usd": 0.4164,
+    "budget_capacity_pass": true
+  },
+  "terminal_contract": {
+    "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+    "expected_allocation_count": 1152,
+    "full_export_authorized": false,
+    "source_release_authorized": false,
+    "maximum_wall_seconds": 300.0,
+    "maximum_gpu_seconds": 600.0,
+    "gpu_count": 2
+  },
+  "note": "Attempt B is authorized exactly once and only while all bound source, test, evidence, and authoritative pre-reservation ledger hashes remain unchanged. It must stop at the source identity gate without export or source release."
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": "sloforge.branchfabric.v11-targeted-independent-review/v1",
+  "attempt_id": "exp004-v11-targeted-identity-s41-b",
+  "agent": 13,
+  "role": "scientific-methodology-reviewer",
+  "status": "PASS",
+  "integrated_retry_recommendation": "AUTHORIZE_EXACTLY_ONE",
+  "lifecycle": {
+    "live_rollouts": true,
+    "control_serving": true,
+    "twelve_rps_sanity_pass": true,
+    "fifteen_rps_overload_pass": true,
+    "trigger_backlog_requests": 21,
+    "trigger_emergency_headroom_requests": 43,
+    "maximum_outstanding_requests": 29,
+    "minimum_emergency_headroom_requests": 35,
+    "allocator_quiescence_pass": true,
+    "source_capture_commit_pass": true,
+    "identity_gate_pass": true,
+    "expected_allocations": 1152,
+    "observed_allocations": 1152,
+    "post_commit_mutations": 0
+  },
+  "terminal_contract": {
+    "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+    "optimized_export_started": false,
+    "transaction_source_release_started": false,
+    "final_serving_queues_zero": true
+  },
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS",
+    "active_provider_resources": 0,
+    "active_ledger_reservations": 0
+  },
+  "budget": {
+    "ledger_sha256": "d02df172dff078cedee9da8bb57ed1c811b63b7854ad988a8873d62867672a8b",
+    "remaining_gpu_seconds": 3378.024986768025,
+    "integrated_maximum_gpu_seconds": 1176.0,
+    "remaining_after_integrated_maximum_gpu_seconds": 2202.024986768025,
+    "sufficient": true
+  },
+  "prelaunch_requirement": "Use a fresh content-addressed attempt-D authorization; the already consumed attempt-C config is forbidden."
+}

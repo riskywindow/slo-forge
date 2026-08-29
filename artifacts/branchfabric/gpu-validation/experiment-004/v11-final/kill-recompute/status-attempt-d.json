@@ -1,0 +1,46 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-pre-reservation-status/v1",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-kill-recompute-s41-d",
+  "failure_classification": "INVALID_PRE_RESERVATION_HISTORICAL_C_REMOTE_PREFIX_POLICY_BUG",
+  "failure_stage": "REMOTE_PREFIX_FRESHNESS_BEFORE_PREBUILD",
+  "scientific_work_started": false,
+  "prebuild_started": false,
+  "reservation_created": false,
+  "function_invoked": false,
+  "gpu_invoked": false,
+  "controller_started": false,
+  "source_state_discarded": false,
+  "recompute_started": false,
+  "original_cli_inventory_rows_available": false,
+  "cleanup": {
+    "in_function": "NOT_APPLICABLE_FUNCTION_NOT_INVOKED",
+    "provider": "NOT_APPLICABLE_NO_PROVIDER_RESOURCE_CREATED",
+    "ledger_unchanged": true
+  },
+  "evidence_bindings": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-d-config.json",
+      "sha256": "d51a8164fff20dd105c5f7f8e60d508629011ba8f9451e620ce1f49157cc98f4"
+    },
+    "seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-d.json",
+      "sha256": "fe7ea3909d4e8216e5622669cd3e28724baaf29642a6cdca88bdee01e884daf0"
+    },
+    "make_check": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-d.json",
+      "sha256": "31f6c82ca30ccc87aecce73eda319125bfcf12d7b723722210bfdabc15d5e0f1"
+    },
+    "terminal_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/preflight/attempt-d-terminal-prefix-policy-failure.json",
+      "sha256": "a33859db2c4d6ec9153dd0e54516934c24c7c4dee2bb941928aed909ccd3078a"
+    },
+    "ledger_before_and_after": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c"
+    }
+  },
+  "retry_disposition": "AUTHORIZE_ONE_FRESH_ATTEMPT_E_ONLY_AFTER_CONTENT_BOUND_HISTORICAL_C_PREFIX_POLICY_FIX_AND_NEW_SOURCE_TO_MAKE_CHECK_TO_SEAL_CYCLE",
+  "kill_and_recompute_measurement_available": false
+}

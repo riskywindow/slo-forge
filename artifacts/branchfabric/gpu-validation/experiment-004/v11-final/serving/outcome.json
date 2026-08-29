@@ -1,0 +1,38 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-serving-outcome/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "status": "INVALID_AFTER_VALID_EARLY_TRIGGER",
+  "sanity_12_rps": {
+    "passed": true,
+    "offered_rate_rps": 12.0,
+    "completed_rate_rps": 11.666666666666666,
+    "p95_ttft_seconds": 0.043463622,
+    "queue_slope_requests_per_second": 0.3
+  },
+  "sanity_15_rps": {
+    "passed": true,
+    "offered_rate_rps": 15.0,
+    "completed_rate_rps": 14.0,
+    "p95_ttft_seconds": 0.2239184722,
+    "queue_slope_requests_per_second": 1.0
+  },
+  "trigger": {
+    "queue_depth": 21,
+    "queue_slope_requests_per_second": 4.0,
+    "configured_spike_rate_rps": 15.0,
+    "window_offered_rate_rps": 12.0,
+    "window_completed_rate_rps": 8.0,
+    "predicate_to_emission_ns": 290080,
+    "emergency_ceiling": 64,
+    "headroom_at_trigger": 43,
+    "emitted_once": true
+  },
+  "maximum_queue_depth": 64,
+  "emergency_abort": true,
+  "emergency_abort_context": "downstream rollout worker failure prevented GPU1 from becoming useful",
+  "time_to_hbm_reclamation_seconds": null,
+  "time_to_first_useful_gpu1_capacity_seconds": null,
+  "time_to_serving_slo_restoration_seconds": null,
+  "gpu0_restore_interference": null,
+  "reason_unavailable": "the state transaction failed before source release and no restore phase occurred"
+}

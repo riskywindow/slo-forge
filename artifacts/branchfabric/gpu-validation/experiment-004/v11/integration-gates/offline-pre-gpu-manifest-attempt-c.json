@@ -1,0 +1,106 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-offline-pre-gpu-attempt-c-manifest/v1",
+  "status": "PASS",
+  "sealed_at_utc": "2026-08-19T01:35:31Z",
+  "experiment": "BRANCHFABRIC_GPU_VALIDATION_EXPERIMENT_004_V11",
+  "attempt_id": "exp004-v11-micro-s41-c",
+  "frozen_v10": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "modified_by_v11_work": false
+  },
+  "prior_attempts": [
+    {
+      "attempt_id": "exp004-v11-micro-s41-a",
+      "scientific_status": "NULL_BEFORE_MODEL_STATE_OR_MEASUREMENT",
+      "conservative_gpu_seconds_charged": 525.0,
+      "failure_artifact_sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+      "cleanup_pass": true
+    },
+    {
+      "attempt_id": "exp004-v11-micro-s41-b",
+      "scientific_status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT",
+      "actual_accounted_gpu_seconds": 155.17,
+      "scientific_outcome_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/scientific-outcome.json",
+      "scientific_outcome_sha256": "6a2cbb182fe96077bf34df61a4e7ac2a8e993903fee10c630bc9c67a74b584f3",
+      "cleanup_pass": true
+    }
+  ],
+  "production_integration_gates": [
+    {"gate": "A_ALLOCATOR_ISSUED_SINGLE_USE_EPOCHS", "status": "PASS_OFFLINE", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-a-allocator-issued-epochs.json", "sha256": "53f9684921eafb98116898955e92a443ced571367fb8fa4b5e6e76691fda70b6"},
+    {"gate": "B_POST_FREE_OWNERSHIP_AND_REFCOUNT_PROOF", "status": "PASS_OFFLINE", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-b-post-free-ownership-refcount.json", "sha256": "249ce23a99f612b5e65dd6657db2cb2f3eb1f1ef4daa81670b1bcba1f86f5b53"},
+    {"gate": "C_PRODUCTION_ENGINE_STEP_LOCK_BINDING", "status": "PASS_OFFLINE_POST_FIX", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-c-engine-step-binding.json", "sha256": "046bb79e3606d6ec962370eaa7061cb439c35812797875f3c5be996c305dd3a1"},
+    {"gate": "D_CANONICAL_MEASURED_CUDA_STATE_PASS_RECORDS", "status": "PASS_OFFLINE_POST_FIX", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-d-canonical-cuda-state-pass-records.json", "sha256": "ac52fe49cb019bc93a11ed899bd18a8a4cc67de3bbf1c79675b5e50b3e99a3c4"}
+  ],
+  "base_pre_gpu_reviews": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest.json",
+    "sha256": "fec8a97465a26b90d9a63d4141fa86b845cc088560f6d466236d5e2972720f84",
+    "agents_1_through_8_passed": true
+  },
+  "post_attempt_b_independent_reviews": [
+    {"agent": 3, "role": "production_engine_step_and_source_queue_post_fix", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-c-zero-queue-post-fix-audit.json", "sha256": "785f896089a1d3169b9c08910832ec99120887a08fee2bd76fc80ea0cd8d004a"},
+    {"agent": 5, "role": "source_queue_integrity_and_provenance", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent05c-agent08c-source-queue-integrity-audit.json", "sha256": "721fe9985971a108c506a6c6f128c0c5d6ac983aaa4f2f182d9a206e6700d4a7"},
+    {"agent": 7, "role": "attempt_c_budget_and_scientific_admissibility", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent07c-attempt-c-budget-scientific-admissibility.json", "sha256": "6bf0dc9f426c4f8d6f5893b5d4e452c9da2a13bc0a36149ad3809fea2a039632"}
+  ],
+  "source_sha256": {
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "43d6170733d677941cf2b3f99b4471be19868a45dfed9bd3336b866497b2928b",
+    "python/sloforge/continuum/adapters/vllm_live.py": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "7b5752b37897f880f451068ea69e2439c979dbb3324ea0f8c15c354ecde0dc67",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "bb2a8ba7fa4b6c1398e08635aa8b401270d68b301d0997422362b55ddc8fe867",
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb"
+  },
+  "full_repository_check": {
+    "status": "PASS_POST_FIX",
+    "python_passed": 1771,
+    "python_optional_skipped": 8,
+    "rust": "PASS",
+    "ui": "PASS",
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-evidence.json",
+    "sha256": "325cb8174fc362aaea2aa46f6c472ad0ac61f97adbc18b681c70089ff34c025e"
+  },
+  "budget": {
+    "status": "PASS",
+    "authorization_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "ledger_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_sha256_before_reservation": "bd9c1f919f33d1c63f0edf4bc86134ad78e73d00638280c68d55111202ff19b3",
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "consumed_gpu_seconds": 13236.993626085978,
+    "remaining_gpu_seconds": 8363.006373914022,
+    "next_gpu_count": 1,
+    "next_maximum_wall_seconds": 525.0,
+    "next_reserved_gpu_seconds": 525.0,
+    "planning_margin_fraction": 0.15,
+    "projected_with_margin_gpu_seconds": 603.75,
+    "projected_cumulative_with_margin_gpu_seconds": 13840.743626085978,
+    "projected_remaining_after_margin_gpu_seconds": 7759.256373914022
+  },
+  "micro_workload": {
+    "gpu": "A100-80GB",
+    "gpu_count": 1,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "vllm": "0.23.0",
+    "torch": "2.11.0",
+    "dtype": "bfloat16",
+    "prefix_tokens": 16384,
+    "fanout": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "shared_blocks": 1024,
+    "private_blocks": 128,
+    "total_blocks": 1152,
+    "logical_state_bytes": 1056964608,
+    "continuation_tokens_per_branch": 8
+  },
+  "modal_active_apps": 0,
+  "modal_running_tasks": 0,
+  "modal_running_containers": 0,
+  "active_reservations": 0,
+  "next_action": "DESIGNATED_COORDINATOR_ATOMIC_ONE_A100_ATTEMPT_C_RESERVATION"
+}

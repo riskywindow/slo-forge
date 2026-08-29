@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-pre-reservation-terminal-capture/v1",
+  "status": "FAIL_CLOSED",
+  "attempt_id": "exp004-v11-kill-recompute-s41-d",
+  "failure_stage": "REMOTE_PREFIX_FRESHNESS_BEFORE_PREBUILD",
+  "failure_classification": "INVALID_PRE_RESERVATION_HISTORICAL_C_REMOTE_PREFIX_POLICY_BUG",
+  "terminal_invocation": "/usr/bin/caffeinate -dimsu env SLOFORGE_GPU_BUDGET_USD=80 uv run --locked python tools/branchfabric-experiment-004-v11-kill-recompute.py --config-path artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-d-config.json",
+  "exit_code": 1,
+  "observed_at_utc": null,
+  "full_pty_combined_output_available": false,
+  "pty_combined_output_exact_tail": "FileExistsError: fresh kill/recompute attempt remote prefix exists before reservation: experiment-004/v11/kill-recompute/modal/exp004-v11-kill-recompute-s41-c",
+  "original_cli_inventory_rows_available": false,
+  "original_cli_inventory_rows": null,
+  "prebuild_started": false,
+  "reservation_created": false,
+  "gpu_or_function_invoked": false,
+  "provider_resource_created": false,
+  "ledger_sha256_before": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c",
+  "ledger_sha256_after": "0c4c600b64eb58307758ee782d41f122c90b7610976e208b20a4b4b81ac57d9c",
+  "provenance": "Terminal invocation, exit code, and exact final traceback line preserved from the sole coordinator run. Original Modal CLI inventory rows and observation time were not persisted and are explicitly unavailable; none are reconstructed."
+}

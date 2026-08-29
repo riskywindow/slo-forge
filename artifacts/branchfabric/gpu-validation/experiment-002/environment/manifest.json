@@ -1,0 +1,17 @@
+{
+  "schema_version": "sloforge.branchfabric.environment-manifest/v1",
+  "host": "mew0",
+  "user": "rishivin",
+  "gpu_inventory": "2 x NVIDIA A100 80GB PCIe",
+  "driver": "580.178.04",
+  "cuda_driver_compatibility": "13.0",
+  "remote_disk_available_kib": 98533848,
+  "selected_runtime_pin": "vllm==0.23.0",
+  "selected_model": "Qwen/Qwen2.5-7B-Instruct",
+  "selected_model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "dependency_lock": "uv.lock",
+  "remote_packages_installed": [],
+  "remote_model_files_downloaded": [],
+  "reason_not_installed": "idle GPU gate failed before environment installation",
+  "raw_capture": "raw/remote-environment/bootstrap.json"
+}

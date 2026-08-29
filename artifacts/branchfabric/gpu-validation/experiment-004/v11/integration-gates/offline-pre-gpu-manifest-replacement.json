@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-offline-pre-gpu-replacement-manifest/v1",
+  "status": "PASS",
+  "sealed_at_utc": "2026-08-19T01:06:01Z",
+  "experiment": "BRANCHFABRIC_GPU_VALIDATION_EXPERIMENT_004_V11",
+  "replacement_attempt": "exp004-v11-micro-s41-b",
+  "supersedes_for_launch_only": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/offline-pre-gpu-manifest.json",
+  "first_attempt": {
+    "attempt_id": "exp004-v11-micro-s41-a",
+    "scientific_status": "NULL_BEFORE_MODEL_STATE_OR_MEASUREMENT",
+    "failure_stage": "REMOTE_AUTHORIZATION_BEFORE_MODEL_LOAD",
+    "failure_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/invocation-failure.json",
+    "failure_sha256": "3e6654d4e27e2309e60b4dfa8cbc8222fb78ace11dadbb41a91c1c48923e4554",
+    "postflight_cleanup_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-a/postflight-cleanup.json",
+    "postflight_cleanup_sha256": "f0e66566c3cd31ef5d5d96c87e7283e9bb86680243ebb7ea665c4573b2722f38",
+    "conservative_gpu_seconds_charged": 525.0,
+    "retry_reused": false
+  },
+  "frozen_v10": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "modified_by_v11_work": false
+  },
+  "production_integration_gates": [
+    {
+      "gate": "A_ALLOCATOR_ISSUED_SINGLE_USE_EPOCHS",
+      "status": "PASS_OFFLINE",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-a-allocator-issued-epochs.json",
+      "sha256": "53f9684921eafb98116898955e92a443ced571367fb8fa4b5e6e76691fda70b6"
+    },
+    {
+      "gate": "B_POST_FREE_OWNERSHIP_AND_REFCOUNT_PROOF",
+      "status": "PASS_OFFLINE",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-b-post-free-ownership-refcount.json",
+      "sha256": "249ce23a99f612b5e65dd6657db2cb2f3eb1f1ef4daa81670b1bcba1f86f5b53"
+    },
+    {
+      "gate": "C_PRODUCTION_ENGINE_STEP_LOCK_BINDING",
+      "status": "PASS_OFFLINE",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-c-engine-step-binding.json",
+      "sha256": "2d3b43186df9bc36ac422eedc7391e50d0ee82f08573de2da3f6b5214c0a808f"
+    },
+    {
+      "gate": "D_CANONICAL_MEASURED_CUDA_STATE_PASS_RECORDS",
+      "status": "PASS_OFFLINE",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-d-canonical-cuda-state-pass-records.json",
+      "sha256": "413052e9dfc673653d2d818f75242d42df04ae5d2c20ac7e43dbe0f2f292165a"
+    }
+  ],
+  "independent_reviews": [
+    {"agent": 1, "role": "allocator_epoch_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent01-allocator-epoch-audit.json", "sha256": "4b52bc131a9f4ec3f7edc6a6c06330a7e7325cdcbabdec620823206068ce954a"},
+    {"agent": 2, "role": "ownership_refcount_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent02-ownership-refcount-audit.json", "sha256": "fe606f249d19d3d7fe56c1ed6d154c4d0e917c9028a4171577c00b7e65c95707"},
+    {"agent": 3, "role": "engine_step_synchronization_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-engine-sync-audit.json", "sha256": "1950338f37f021d0ba45362e461101da95296877d9a56ae3b28de0fe2d76e093"},
+    {"agent": 4, "role": "cuda_pass_accounting_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent04-cuda-pass-accounting-audit.json", "sha256": "380f5f0cb46f918a9c3c3563c8d76293e83d84e301af27cf0e1beb615a7802aa"},
+    {"agent": 5, "role": "v11_integrity_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent05-v11-integrity-audit.json", "sha256": "8daf14131a4b430b984498d1bee35e621b634f52576e7d88939b13c7db53d06a"},
+    {"agent": 6, "role": "v11_local_equivalence_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent06-local-equivalence-audit.json", "sha256": "6c17bd4536addf1b9de359c682e9a659c02f282e7f4b7d315d5c38ef341bc698"},
+    {"agent": 7, "role": "gpu_budget_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent07b-replacement-budget-audit.json", "sha256": "3646551d77d4e23fb082edcdd8662244fb7c2b7962daee56485fd753b978d326"},
+    {"agent": 8, "role": "replacement_micro_methodology_audit", "status": "PASS", "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent08b-auth-remediation-audit.json", "sha256": "b4d1ae0cf9ea650091ba6096feba1faf257c48abeb094ff9f1885479d8f4efba"}
+  ],
+  "source_sha256": {
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "43d6170733d677941cf2b3f99b4471be19868a45dfed9bd3336b866497b2928b",
+    "python/sloforge/continuum/adapters/vllm_live.py": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "095384e5d892d6a1899a9dc1ddc9e2c2bea9d3dbcc3d8c87176c381aab2afbd0",
+    "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py": "ddf1d6c2577c804337342ae3810a96cc61c8628e294a9db8d6e215eab57ee718",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "428fa30235305246ec6168e2fb8220ccde335947e2d3aa08534b0151c82f57cb"
+  },
+  "full_repository_check": {
+    "status": "PASS_AFTER_AUTH_REMEDIATION",
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-evidence.json",
+    "sha256": "b04c3f4f74c47883bd0007177d959562fe8a1fdf335bdba217c6df58995c9b83"
+  },
+  "budget": {
+    "status": "PASS",
+    "authorization_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/budget-authorization-v11.json",
+    "authorization_sha256": "86158d49e10c39afd3a07f0dc665202cadaa5cccd053748d98634c8d7f387300",
+    "ledger_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_sha256_before_reservation": "fa7800a901f443696d0405d32843b0114f4f2adb780e2fbf0704a09366b6d172",
+    "authorized_cumulative_a100_seconds": 21600.0,
+    "consumed_conservative_gpu_seconds": 13081.823626085978,
+    "remaining_gpu_seconds": 8518.176373914022,
+    "next_gpu_count": 1,
+    "next_maximum_wall_seconds": 525.0,
+    "next_reserved_gpu_seconds": 525.0,
+    "planning_margin": 0.15,
+    "projected_gpu_seconds_with_margin": 603.75,
+    "projected_cumulative_gpu_seconds_with_margin": 13685.573626085978,
+    "projected_remaining_after_margin_gpu_seconds": 7914.426373914022
+  },
+  "micro_workload": {
+    "gpu": "A100-80GB",
+    "gpu_count": 1,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "vllm": "0.23.0",
+    "torch": "2.11.0",
+    "dtype": "bfloat16",
+    "prefix_tokens": 16384,
+    "fanout": 8,
+    "private_suffix_tokens_per_branch": 256,
+    "shared_blocks": 1024,
+    "private_blocks": 128,
+    "total_blocks": 1152,
+    "logical_state_bytes": 1056964608,
+    "continuation_tokens_per_branch": 8
+  },
+  "gpu_invoked_after_remediation_before_seal": false,
+  "modal_invoked_after_remediation_before_seal": false,
+  "next_action": "DESIGNATED_COORDINATOR_ATOMIC_ONE_A100_REPLACEMENT_MICRO_RESERVATION"
+}

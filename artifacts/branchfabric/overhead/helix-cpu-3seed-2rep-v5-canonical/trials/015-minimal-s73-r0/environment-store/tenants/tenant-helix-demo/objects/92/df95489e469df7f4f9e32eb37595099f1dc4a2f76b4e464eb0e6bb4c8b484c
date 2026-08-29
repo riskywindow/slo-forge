@@ -1,0 +1,11 @@
+def retry_delay(status: int, retry_after: str | None) -> int:
+    """Return seconds before retrying a response."""
+    if status == 429:
+        try:
+            delay = int((retry_after or '').strip())
+        except ValueError:
+            delay = 1
+        return max(0, delay) if delay >= 0 else 1
+    if status >= 500:
+        return 2
+    return 0

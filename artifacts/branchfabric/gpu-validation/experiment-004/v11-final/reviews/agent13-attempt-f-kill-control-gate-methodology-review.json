@@ -1,0 +1,271 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-f-kill-control-gate-methodology-review/v1",
+  "status": "PASS",
+  "reviewer": "agent13",
+  "role": "independent-scientific-methodology-reviewer",
+  "review_mode": "CPU_ONLY_READ_ONLY_IMMUTABLE_EVIDENCE_AND_SOURCE_REPLAY",
+  "attempt_id": "exp004-v11-kill-recompute-s41-f",
+  "authorized_successor_attempt_id": "exp004-v11-kill-recompute-s41-g",
+  "classification": "KILL_CONTROL_DRIFT_GATE_METHODOLOGY_BUG",
+  "attempt_f_scientific_validity": false,
+  "attempt_f_offline_promotion_permitted": false,
+  "gpu_or_modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "runtime_source_edited_by_reviewer": false,
+  "methodology_decision": {
+    "decision": "PASS_FOR_FRESH_ATTEMPT_G_ONLY",
+    "old_predicate": "slope>0 AND final>initial AND second-half-mean>first-half-mean",
+    "old_predicate_problem": "A one-request net change in bounded in-service work over five one-second samples is sufficient to fail the old predicate even when waiting depth, TTFT, completion fraction, total outstanding, eventual accounting, cadence, and outputs all pass.",
+    "corrected_predicate": "slope>0.10 AND last-quarter-median>first-quarter-median+2",
+    "corrected_predicate_origin": "The exact material-and-persistent queue-drift predicate already used by gpu_capacity_calibration.py; this is not a threshold invented from Attempt F.",
+    "corrected_predicate_scope": "KILL_RECOMPUTE_ONLY",
+    "quarter_count": "max(2,n//4)",
+    "both_conditions_required": true,
+    "strict_boundaries": true,
+    "frozen_integrated_k_changed": false,
+    "fresh_runtime_attempt_required": true
+  },
+  "attempt_f_evidence": {
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-f.json",
+      "sha256": "dbee5570ea716d6fc6ed602792ee2fb5c6182fdbb268b341a9b2c51d51a519be",
+      "status": "INVALID",
+      "scientifically_valid": false
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-f.json",
+      "sha256": "16922c669509bcc4357b169633e89bcf862b6a0b51723ff0a884fe09c65dbd70",
+      "status": "PASS"
+    },
+    "provider_inventory_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-f.json",
+      "sha256": "eb2f74c350b41b6bb66ce01233fefa58b9a2ef4ee910764fc035928d11491654",
+      "reservations": []
+    },
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/REMOTE_MANIFEST.json",
+      "sha256": "23655d7275730175054a63d18fc7d16b34eae093ab5fa2682bcc8b46e124dc83",
+      "declared_artifact_count": 508,
+      "verified_artifact_count": 508,
+      "hash_size_or_set_mismatches": 0,
+      "symlink_count": 0
+    },
+    "control_interval": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/barriers/v11-gpu0-control-interval.json",
+      "sha256": "d1156cf3df424a1368f69e9f54b0595d3aa92764acddf9c09e587977dcfd64c9"
+    },
+    "serving_prevalidation": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/barriers/v11-gpu0-serving-prevalidation.json",
+      "sha256": "9f2a6f14bc0401e80d3f40804df7fd2842bd491f3cf2989c1e85f9ee6c376fb2"
+    },
+    "serving_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/serving/failure.json",
+      "sha256": "777438d961e4724444e858d51210d11acf24704f6381f5a9f3abea7adbcb09fb"
+    },
+    "diagnostic_rollout_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/rollout/result.json",
+      "sha256": "143b0dbfd3b34e2c3d8d50ce525093767543196c8163773523e45d8ec23869a7",
+      "valid_measurement_materialized": false
+    },
+    "function_call_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/function-calls/exp004-v11-kill-recompute-s41-f/function-call.json",
+      "sha256": "415c796eacb7c50eb1e63b800f5c7746491299133a66d0f1c65fe063882d3c77",
+      "function_call_id": "fc-01M159JSQJM88WHXC702WG8GNS",
+      "validated_config_sha256": "0880d14f78a16108c53f72cd3f0669a9ffd6ccb15d90869568c3f669cff0e865"
+    },
+    "conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-f-conservative-charge.json",
+      "sha256": "38905e7cbd92ced0ea523a001954135155c2451140beb861b41a31a417aec174",
+      "charged_gpu_seconds": 1320.0
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "aa81df8d3a26e370af1e715f86cb13a1b670cdccd4bbf6d4707dae1802a4ca26",
+      "remaining_gpu_seconds": 13596.58500987602,
+      "reservations": []
+    }
+  },
+  "attempt_f_exact_replay": {
+    "full_control_arrivals": 45,
+    "evaluation_arrivals": 36,
+    "evaluation_completions": 34,
+    "completion_fraction": 0.9444444444444444,
+    "completed_rate_requests_per_second": 8.5,
+    "p95_ttft_seconds": 0.05750730925,
+    "waiting_depth_samples": [
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "waiting_queue_maximum_depth": 1,
+    "total_outstanding_samples": [
+      10,
+      12,
+      12,
+      12,
+      11
+    ],
+    "total_outstanding_maximum_depth": 12,
+    "slope_requests_per_second": 0.2,
+    "first_quarter_median_depth": 11.0,
+    "last_quarter_median_depth": 11.5,
+    "old_drift_predicate": true,
+    "corrected_material_persistent_drift": false,
+    "corrected_control_interval_pass": true,
+    "interpretation": "The immutable F control cohort passes the corrected kill-only predicate in offline replay, but that replay is diagnostic and cannot promote F because F did not emit the success-only serving result, retained handoff, or complete final scientific envelope."
+  },
+  "frozen_valid_and_same_allocation_comparators": {
+    "frozen_v10_control": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477",
+      "evaluation_arrivals": 36,
+      "evaluation_completions": 36,
+      "completed_rate_requests_per_second": 9.0,
+      "p95_ttft_seconds": 0.04230888925,
+      "total_outstanding_samples": [
+        9,
+        9,
+        9,
+        9,
+        8
+      ],
+      "corrected_material_persistent_drift": false,
+      "corrected_control_interval_pass": true
+    },
+    "attempt_f_twelve_rps_probe_a": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/sanity/12-rps-probe-a/assessment.json",
+      "sha256": "20f3532006533e521edbc8a227ebfbd2c8c533f294306300cc483089ced55a6d",
+      "completed_rate_requests_per_second": 11.333333333333334,
+      "p95_ttft_seconds": 0.0482215345,
+      "queue_start": 12,
+      "queue_end": 14,
+      "queue_slope_requests_per_second": 0.6,
+      "no_persistent_positive_drift": true,
+      "passed": true
+    },
+    "attempt_f_twelve_rps_probe_b": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-f/sanity/12-rps-probe-b/assessment.json",
+      "sha256": "649c197edca0c1ded98fd118a124eb2567df72957df3ddc3251ce517115a8676",
+      "completed_rate_requests_per_second": 11.333333333333334,
+      "p95_ttft_seconds": 0.049731242,
+      "queue_start": 12,
+      "queue_end": 14,
+      "queue_slope_requests_per_second": 0.6,
+      "no_persistent_positive_drift": true,
+      "passed": true
+    }
+  },
+  "unchanged_fail_closed_control_gates": {
+    "exact_full_and_evaluation_arrival_counts": true,
+    "unique_request_ids_and_scheduled_arrivals": true,
+    "exact_arrival_cadence": true,
+    "monotonic_control_timestamps": true,
+    "exact_full_cohort_output_tokens": true,
+    "complete_full_and_evaluation_request_accounting": true,
+    "configured_offered_rate": true,
+    "minimum_completion_fraction": 0.9,
+    "p95_ttft_slo_seconds": 2.0,
+    "waiting_queue_strictly_below_normal_trigger": 20,
+    "total_outstanding_strictly_below_normal_trigger": 20,
+    "eventual_cohort_completion": true,
+    "only_replaced_field": "outstanding_queue_non_positive_trend"
+  },
+  "required_rejections_and_boundary_behavior": {
+    "material_persistent_samples_10_12_15_17_19": "FAIL",
+    "material_persistent_samples_10_10_11_12_13": "FAIL",
+    "strict_median_boundary_samples_10_10_11_12_12": "PASS_DRIFT_SUBGATE_ONLY",
+    "attempt_f_samples_10_12_12_12_11": "PASS_DRIFT_SUBGATE_ONLY",
+    "slope_without_terminal_persistence_samples_10_10_100_0_0_0_13_13": "PASS_DRIFT_SUBGATE_ONLY",
+    "fewer_than_four_samples": "FAIL_CLOSED",
+    "non_integer_or_negative_depth": "FAIL_CLOSED",
+    "non_exact_cadence": "FAIL_CLOSED",
+    "tampered_summary_or_slope": "FAIL_CLOSED",
+    "thirty_two_of_thirty_six_completions": "FAIL",
+    "failed_ttft_waiting_total_output_or_accounting_gate": "FAIL"
+  },
+  "implementation_review": {
+    "worker_scope": "The kill worker temporarily binds the kill-only evaluator around the inherited integrated GPU0 path and restores the frozen evaluator in finally on success and exception.",
+    "controller_scope": "The kill controller independently recomputes the serving result and cross-role consistency with the kill-only evaluator, then restores the frozen evaluator in finally.",
+    "downloaded_success_scope": "The kill coordinator invokes the kill controller's deep worker-result validator for a downloaded provisional success bundle; it does not trust worker-provided pass booleans.",
+    "function_call_digest_fix": "The coordinator strict-validates the raw JSON as Experiment004V11KillRecomputeConfig before canonical hashing. The exact F capture hash 0880d14f... now validates; the former raw-dict hash 38110e89... is not used.",
+    "attempt_f_terminal_join": "The current coordinator independently validated the exact F status, provider cleanup, provider inventory, 508-entry manifest closure, conservative charge, current ledger, and continuation-v5 history.",
+    "freshness_v5": "The coordinator requires the exact historical C/E/F final directories, forbids their staging/inflight variants, forbids A/B/D/G final/staging/inflight variants, and checks the same inventory before and after image prebuild before reservation.",
+    "frozen_integrated_k": "The current integrated controller and worker still match the frozen K whole-file hashes; the kill-only policy is not installed into the integrated preserve path."
+  },
+  "d_independent_runtime_and_test_bindings": {
+    "kill_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py",
+      "sha256": "6266db3fbd3809ec7ab5561f33b8283df93801264068614fd6ec4bd9c7ee2579"
+    },
+    "kill_controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_controller_v11.py",
+      "sha256": "05d790d5d1ac1e23ba98cccc167a24855cc2b5ec5619fc295d7a3556c9e040c1"
+    },
+    "kill_modal_surface": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "858007ec9ab938e8199cc02fe5f5794ad1260de56d6903f5a6a7c588cc8f30ef"
+    },
+    "kill_tests": {
+      "artifact": "tests/python/test_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "ed5b76c2e8074a8cd6a33408532a0a4d60ca9fb6457dd37586b16516f3e50c2b"
+    },
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "23b8c3b2b6521c0dea1982c903f1a32c62a3e96d72712b7d35b08c82b20d1368"
+    },
+    "established_capacity_policy": {
+      "artifact": "python/sloforge/helix/characterization/gpu_capacity_calibration.py",
+      "sha256": "7ffb993004fbc9b595cc3c5fc2e503ffd9dd2370befdeb8714d017badc4e0b3d"
+    },
+    "frozen_sanity_assessor": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_controller.py",
+      "sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9"
+    },
+    "frozen_integrated_controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7c07ea0444874a100aa6d6da273058edd4f8cee03548e2c08c62bca5ecae2fc"
+    },
+    "frozen_integrated_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "a9312a017116ffc86ac311b578da67f2afb97198815f30369c8ee3e0159c2002"
+    },
+    "integrated_controller_tests": {
+      "artifact": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "00f5f2bee68735b5b84da52c731aa181f3a2e7466fbde67d1450d1167156496f"
+    }
+  },
+  "frozen_integrated_k_binding": {
+    "freeze_record": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/v11-freeze-record.json",
+      "sha256": "76bddc6fcd35c304ced2202e044babdb8bc56d108e3d7d63ac36c448b08ddbf3"
+    },
+    "whole_file_runtime_review": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent13-attempt-k-whole-file-runtime-review.json",
+      "sha256": "34b1c8569ce2914c6319542507bf403afad96aeec1a103487c4a44cd8e117674"
+    },
+    "integrated_controller_current_hash_matches_freeze": true,
+    "integrated_worker_current_hash_matches_freeze": true
+  },
+  "consumer_checkpoint_and_cycle_free_trust": {
+    "reviewed_pre_review_coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-kill-recompute.py",
+      "sha256": "41455d1611f8bd3a8f039d2e2f85caf75ed137320187ca9d9b118800f3041983",
+      "purpose": "Records the exact coordinator checkpoint audited for downloaded-result deep recomputation, validated-config FunctionCall hashing, immutable F joins, continuation-v5 validation, and freshness-v5 behavior. It is historical review provenance, not the future current-equality trust anchor."
+    },
+    "cycle_free_rule": "This review binds only D-independent runtime and test files as current-equality implementation anchors. The final Attempt-G coordinator may consume and validate this review, so this review must not require equality to the post-review coordinator hash.",
+    "required_final_trust_placement": "The fresh Attempt-G seal must content-bind this review SHA-256 and the final post-review coordinator whole-file SHA-256 independently, and the loader must validate the review schema, status, semantic fields, and D-independent bindings before paid reservation.",
+    "review_alone_authorizes_gpu": false
+  },
+  "verification": {
+    "exact_f_terminal_and_508_manifest_validator": "PASS",
+    "continuation_v5_and_current_ledger_validator": "PASS",
+    "focused_kill_suite": "PASS; 196 passed",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS; 5 files",
+    "git_diff_check": "PASS",
+    "gpu_or_cloud_invoked": false
+  },
+  "authorization_recommendation": "The kill-scoped control-drift correction is scientifically justified and fail-closed for a fresh Attempt G after a fresh repository-wide make check and content-addressed seal. Attempt F remains invalid and cannot be promoted offline. The final seal and loader must independently bind this review and the post-review coordinator; this review does not itself launch or authorize paid resources."
+}

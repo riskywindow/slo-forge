@@ -1,0 +1,91 @@
+{
+  "physical_plan_id": "physical-plan-efb13f64c01aea35",
+  "request_count": 12,
+  "samples": [
+    {
+      "end_to_end_ms": 50.785833,
+      "priority": "normal",
+      "request_id": "request-000000",
+      "stream_bytes": 634,
+      "ttft_ms": 43.5235
+    },
+    {
+      "end_to_end_ms": 25.15175,
+      "priority": "high",
+      "request_id": "request-000001",
+      "stream_bytes": 634,
+      "ttft_ms": 18.975208
+    },
+    {
+      "end_to_end_ms": 25.208667,
+      "priority": "high",
+      "request_id": "request-000002",
+      "stream_bytes": 634,
+      "ttft_ms": 18.617625
+    },
+    {
+      "end_to_end_ms": 46.691583,
+      "priority": "low",
+      "request_id": "request-000003",
+      "stream_bytes": 634,
+      "ttft_ms": 39.1795
+    },
+    {
+      "end_to_end_ms": 46.907792,
+      "priority": "normal",
+      "request_id": "request-000004",
+      "stream_bytes": 634,
+      "ttft_ms": 40.1895
+    },
+    {
+      "end_to_end_ms": 27.013667,
+      "priority": "high",
+      "request_id": "request-000005",
+      "stream_bytes": 634,
+      "ttft_ms": 20.802417
+    },
+    {
+      "end_to_end_ms": 49.192959,
+      "priority": "low",
+      "request_id": "request-000006",
+      "stream_bytes": 634,
+      "ttft_ms": 41.583542
+    },
+    {
+      "end_to_end_ms": 29.275458,
+      "priority": "high",
+      "request_id": "request-000007",
+      "stream_bytes": 634,
+      "ttft_ms": 22.096208
+    },
+    {
+      "end_to_end_ms": 52.618458,
+      "priority": "normal",
+      "request_id": "request-000008",
+      "stream_bytes": 634,
+      "ttft_ms": 45.18375
+    },
+    {
+      "end_to_end_ms": 47.381,
+      "priority": "low",
+      "request_id": "request-000009",
+      "stream_bytes": 634,
+      "ttft_ms": 40.6965
+    },
+    {
+      "end_to_end_ms": 25.799583,
+      "priority": "high",
+      "request_id": "request-000010",
+      "stream_bytes": 638,
+      "ttft_ms": 20.471541
+    },
+    {
+      "end_to_end_ms": 28.169417,
+      "priority": "high",
+      "request_id": "request-000011",
+      "stream_bytes": 638,
+      "ttft_ms": 20.226792
+    }
+  ],
+  "schema_version": "sloforge.fabric.gateway-replay/v1"
+}

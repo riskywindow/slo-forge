@@ -1,0 +1,115 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-source-queue-integrity-audit/v1",
+  "reviewed_at_utc": "2026-08-19T01:26:16Z",
+  "reviewer": "agent05c-agent08c-source-queue-integrity-provenance",
+  "scope": "offline post-fix review of the exact source-allocation zero-queue lifecycle, typed teardown persistence, lifecycle commitments, destination freshness, and movement-accounting isolation",
+  "result": "PASS",
+  "blocking_findings": [],
+  "gpu_modal_or_network_actions": 0,
+  "source_files_modified_by_reviewer": false,
+  "summary": "The strengthened worker consumes the production zero-queue exactly once only after the exact topology, allocator lifetimes, pre-release ownership snapshot, canonical capture and manifest commitment exist. The production EXPORT_CAPTURE gate is authenticated before and after the destructive read. Any malformed, missing, duplicate, unrelated, zeroing-mode, API, or gate condition raises typed V11RuntimeTeardownRequired evidence and cannot publish a successful micro result. Queue evidence is persisted as source-lifecycle metadata and is not included in StatePassRecord movement totals.",
+  "criteria": {
+    "production_gate_binding": {
+      "status": "PASS",
+      "evidence": "require_production_export_gate_v11 authenticates the actual scheduler, manager, gate binding and EXPORT_CAPTURE operation both immediately before and immediately after the destructive drain."
+    },
+    "safe_order": {
+      "status": "PASS",
+      "order": [
+        "exact 16K/fanout-8/full-page topology",
+        "source allocator epoch map",
+        "pre-release ownership snapshot",
+        "canonical export capture and manifest",
+        "exact one-time source queue drain",
+        "source release and post-free proof"
+      ],
+      "evidence": "The drain occurs inside the same EXPORT_CAPTURE critical section after authenticated ownership/capture and before release. No engine step occurs between drain and release."
+    },
+    "exact_queue_identity": {
+      "status": "PASS",
+      "required_count": 1152,
+      "evidence": "Expected and observed IDs must be strict non-boolean nonnegative integers, length 1,152, duplicate-free and set-equal. Ordering is normalized only for deterministic SHA-256 commitment. The production take_new_block_ids method is invoked exactly once."
+    },
+    "attention_only_zeroing_mode": {
+      "status": "PASS",
+      "evidence": "The source drain is permitted only when scheduler.needs_kv_cache_zeroing is exactly False. Missing, true or ambiguous zeroing mode requires typed runtime teardown."
+    },
+    "lifecycle_commitments": {
+      "status": "PASS",
+      "commitments": [
+        "expected and observed sorted source block-ID SHA-256",
+        "sorted source (block ID, allocator epoch) lifetime SHA-256",
+        "public pre-release ownership snapshot SHA-256",
+        "canonical captured state-manifest SHA-256",
+        "production gate ID, binding ID and operation"
+      ],
+      "evidence": "All three external commitments must be lowercase 64-hex values before the queue can be read. Successful evidence is persisted under source_allocations.allocation_zero_queue beside the independent lifetime and ownership commitments."
+    },
+    "typed_destructive_failure": {
+      "status": "PASS",
+      "evidence": "Every precondition and post-read mismatch raises V11RuntimeTeardownRequired. After a destructive read, evidence records destructive_drain_performed, expected/observed counts and hashes, missing/unexpected/duplicate IDs, affected IDs and passed=false. Worker main persists the typed error and teardown evidence identically to failure.json and result.json with status=failed; no success result is possible."
+    },
+    "post_free_integrity": {
+      "status": "PASS",
+      "evidence": "The existing release_source_and_prove_v11 proof remains immediately after the drain and must prove all 1,152 source lifetimes tombstoned, allocator-available and inaccessible before export success."
+    },
+    "fresh_destination_validation": {
+      "status": "PASS",
+      "evidence": "Import behavior is unchanged: it first rejects any residual queue, each fresh allocation drains and validates its own exact subset, epoch proofs cover the current destination map, the final queue must be empty, and source/destination (block ID, epoch) lifetimes must be disjoint before continuation."
+    },
+    "movement_accounting_isolation": {
+      "status": "PASS",
+      "evidence": "The queue operation emits no StatePassRecord and declares no logical, physical, external or temporary bytes. all_passes remains exactly captured.state_passes plus restore_passes; movement, export_movement and restore_movement are computed solely from those canonical records before queue metadata is serialized separately. No double count or unmeasured traffic is introduced."
+    },
+    "failure_b_provenance": {
+      "status": "PASS",
+      "evidence": "Attempt exp004-v11-micro-s41-b failed closed on the preexisting restore queue, produced no successful result, settled 155.17 A100-seconds, and left provider cleanup clean. It is retained as causal evidence for this narrowly scoped lifecycle fix."
+    }
+  },
+  "tests": {
+    "independent_focused_suite": {
+      "status": "PASS",
+      "passed": 61,
+      "failed": 0,
+      "duration_seconds": 1.68,
+      "command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_gpu_reclamation_v11_methodology.py tests/python/test_gpu_reclamation_v11_budget_ledger.py tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_allocator_epochs.py"
+    },
+    "ruff": "PASS",
+    "covered_adversarial_cases": [
+      "arbitrary-order exact queue and exactly-one read",
+      "empty, missing, duplicate, equal-cardinality foreign and extra IDs",
+      "boolean, string and negative IDs",
+      "absent or raising manager API",
+      "non-attention-only zeroing mode",
+      "authenticated safe-order/no-engine-step structure",
+      "typed teardown evidence persistence without success"
+    ]
+  },
+  "reviewed_file_sha256": {
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "bb2a8ba7fa4b6c1398e08635aa8b401270d68b301d0997422362b55ddc8fe867",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "7b5752b37897f880f451068ea69e2439c979dbb3324ea0f8c15c354ecde0dc67",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820",
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "43d6170733d677941cf2b3f99b4471be19868a45dfed9bd3336b866497b2928b",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "3adbc2f2e1e0f424f23e6984a75846cc2c1d06c35fa390402f684a5cab587d45",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "776a9b3ad0ee057524d0652f68688dc2aa7ce811c1b4450ebeac74f5d7fff2af",
+    "tests/python/test_vllm_reclamation_v11_ownership.py": "8ac0f86cb1b475d55d63a2ff5896e96b9ba2b5d2e549ecfc5b5215e87c7e08b7",
+    "tests/python/test_vllm_reclamation_v11_sync.py": "02ac7d54b8bec7bd0de84e5a25696cc28dc7a7cbfae6eec4f6f3a73a0fec9aa5",
+    "tests/python/test_vllm_allocator_epochs.py": "2f3751a7c38893a112282605f00f116518e4b7ac8603d7af60f22e76bd78f85b"
+  },
+  "reviewed_runtime_evidence_sha256": {
+    "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/remote-download/worker/failure.json": "17871ec58c1664d5b9e146e94ff50b97219e01ec0bbff417b25c77a5d72a3007",
+    "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/gpu-settlement.json": "a18bf302a4d16894b3ed392e5b590fa619415534ab0738d74fbaf7c1a4274c14",
+    "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-b/postflight-cleanup.json": "4bf07f34e857ddc2642ef6bc1df3f7e2e733041d30445f9c518bf6f2892d9138",
+    "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json": "bd9c1f919f33d1c63f0edf4bc86134ad78e73d00638280c68d55111202ff19b3"
+  },
+  "constraints": [
+    "Use this fix only for the exact 1,152-full-page micro transaction and only with needs_kv_cache_zeroing exactly false.",
+    "Reseal the attempt configuration and offline manifest against every reviewed current hash before any invocation.",
+    "Treat any typed queue teardown as terminal for that runtime; never continue to import or publish measurement.",
+    "Keep queue lifecycle evidence outside canonical StatePassRecord byte totals.",
+    "Retain the existing import preflight, per-subset drain, epoch validation, final-empty-queue and source/destination lifetime-disjointness gates."
+  ],
+  "decision": "PASS: the strengthened source-allocation queue lifecycle is fail-closed, provenance-bound, physically accounting-neutral, and preserves the existing fresh-destination integrity path."
+}

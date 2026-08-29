@@ -1,0 +1,24 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-modal-cleanup/v1",
+  "status": "PASS_PROVIDER_POST_RETURN_IN_FUNCTION_CLEANUP_GATE_FAILED",
+  "attempt_id": "exp004-v11-integrated-s41-b",
+  "app_id": "ap-DcCj9yzxl10RoHIdu8Wy1O",
+  "function_call_id": "fc-01M0C6WT7E5T43CV3HM4BE2GKD",
+  "active_apps": 0,
+  "running_tasks": 0,
+  "running_containers": 0,
+  "endpoints": 0,
+  "provider_reservations": 0,
+  "owned_child_processes": 0,
+  "profilers": 0,
+  "ledger_reservations": 0,
+  "authorized_persistent_volumes": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "other_persistent_resources": [],
+  "provider_cleanup_pass": true,
+  "in_function_cleanup_pass": false,
+  "in_function_cleanup_error": "worker process group 9 survived the bounded SIGKILL liveness check even though provider compute_processes_after was empty",
+  "evidence": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json"
+}

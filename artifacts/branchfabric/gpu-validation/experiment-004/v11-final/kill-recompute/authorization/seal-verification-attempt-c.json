@@ -1,0 +1,286 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-seal/v1",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-kill-recompute-s41-c",
+  "maximum_invocations": 1,
+  "maximum_wall_seconds": 660,
+  "maximum_gpu_seconds": 1320,
+  "config": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-c-config.json",
+    "sha256": "eed1ee78b38b23420ff48a089402a18e698b4460d8adf22c7f0f7f3e942a7f25"
+  },
+  "current_ledger": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256": "7ebbe3e61f13124ca04d2c288ac7665961807d5d62a116530f5334155f5abc30",
+    "reservations_empty": true
+  },
+  "optimized_v11_freeze": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/v11-freeze-record.json",
+    "sha256": "76bddc6fcd35c304ced2202e044babdb8bc56d108e3d7d63ac36c448b08ddbf3",
+    "tag": "branchfabric-exp004-optimized-preserve-v11",
+    "tag_object": "14c6a7203b1b0811661126901ef78097091f86fa"
+  },
+  "make_check": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-c.json",
+    "sha256": "5d07ca3df8a48c299eaeb4f001b4fe0fab14d9edb3bc7a4e37b2f08a0840293e",
+    "status": "PASS"
+  },
+  "prior_attempt_a": {
+    "attempt_id": "exp004-v11-kill-recompute-s41-a",
+    "failure_classification": "INVALID_PRE_RESERVATION_MISSING_PREFIX_PARSER_ASSUMPTION",
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-a.json",
+      "sha256": "bc4e41571790e45a1984e3e56bd0f496941d1783db2fa1d36ce3f9ef4a92fad6"
+    },
+    "cli_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/preflight/attempt-a-remote-prefix-inventory-failure.json",
+      "sha256": "fd0ad21bfd9df293cdbd9fbbf180a5617cd77786aeff94a00de858c15b6dce1b"
+    },
+    "ledger_unchanged": true,
+    "consumed_authorized_arm": false
+  },
+  "source_bindings": {
+    "controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_controller_v11.py",
+      "sha256": "83b6249dce3ba4b69e244da559253c5c63c6a154c8f0beee44b11bb88fb112a0"
+    },
+    "coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-kill-recompute.py",
+      "sha256": "1f1b6d0e2ab9e14b9dd0b8fab16e4a7949f1911e74967b5c09c89fee8aba2f33"
+    },
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "abc8053e631120d36e75a5f4ab33ef6751c608400a1d7ff2e75ff485a7708faf"
+    },
+    "modal": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "9883d3a5057fd8a608c114f72ee5321a40616e65f1e6ac2713c64faa91cccf07"
+    },
+    "tests": {
+      "artifact": "tests/python/test_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "a0bb51d01746cbbe3112c5c898d5a18c29559b4bbc27272bf400c4002aff9291"
+    },
+    "worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py",
+      "sha256": "3b2b31b9be1bffd163f13a072cb9380a19e1a7c7741b40d0ff99f12eb75ea1d5"
+    }
+  },
+  "preimport_bindings": {
+    "allocator_epochs": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_allocator_epochs.py",
+      "sha256": "db543a8c4e7c2c7628e78f7dd0c4b04bcab60a4234bc2829787cca21214e35ce"
+    },
+    "base_coordinator": {
+      "artifact": "tools/branchfabric-experiment-004-v11-final.py",
+      "sha256": "5fea1327d9cca891ca244b7c80abd4948bbcb801950b193134fd4a57da34e100"
+    },
+    "base_modal": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "638555b54abb6804ced704f06fc6016c176c4f5f44abe7e32544e3b6dbc32cde"
+    },
+    "canonical_capture_plan": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation.py",
+      "sha256": "fa8f59b6e6755d0eb5c6c008d26df48b5fcbb4ad85f2af3b84233808c0ba953f"
+    },
+    "capacity_controller": {
+      "artifact": "experiments/branchfabric/gpu_capacity_calibration_controller.py",
+      "sha256": "31fb70855e49d3f59493592de84120fc82f6a950e5b5edd0e775d5ba47978aa2"
+    },
+    "capacity_model": {
+      "artifact": "python/sloforge/helix/characterization/gpu_capacity_calibration.py",
+      "sha256": "7ffb993004fbc9b595cc3c5fc2e503ffd9dd2370befdeb8714d017badc4e0b3d"
+    },
+    "capacity_worker": {
+      "artifact": "experiments/branchfabric/gpu_capacity_calibration_worker.py",
+      "sha256": "2c41499a847879b813ce01470a7e32625d772fc07233753404296125c4afc225"
+    },
+    "continuum_canonical": {
+      "artifact": "python/sloforge/continuum/ir/canonical.py",
+      "sha256": "ba84929cb375e0ac8b391970b5ce863b2680be0e98552b7e049f952bab7046c2"
+    },
+    "external_adapter": {
+      "artifact": "python/sloforge/continuum/adapters/external.py",
+      "sha256": "94784ebdf6392f824bfde953f184042cb4027a158a2c8e9a34e1b14b4e7759f4"
+    },
+    "frozen_gpu1_serving": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+      "sha256": "d53b007be4fc72d760ae7a83223773a206e0a0eed52137a834ce5b601bcad3ba"
+    },
+    "frozen_integrated_controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "c7c07ea0444874a100aa6d6da273058edd4f8cee03548e2c08c62bca5ecae2fc"
+    },
+    "frozen_integrated_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "a9312a017116ffc86ac311b578da67f2afb97198815f30369c8ee3e0159c2002"
+    },
+    "frozen_sanity": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_controller.py",
+      "sha256": "c91ccd8b3aa4b4c5a9034a5137ccc33257e3471528a96dcc2ca7920c8b7eefc9"
+    },
+    "frozen_trigger": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+      "sha256": "9e81ab90ed6d7cb8f7f77e9fd63f2a0b7f3001422c53bcef84eb01344c83d2cc"
+    },
+    "frozen_v11_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+      "sha256": "08449e5af89759847add7433054b2383eb9b1659785fb7e1184f25dc5e02de11"
+    },
+    "frozen_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "sha256": "e6858e445ddbca912877fc67155dd9422c82d6f6fd4dcbf71871831dee15008a"
+    },
+    "gpu_reclamation_accounting": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_accounting.py",
+      "sha256": "0285017813cb07367bb26acb24798bfc2b036ca3955907c82c2c6a1f55ba2a1c"
+    },
+    "gpu_reclamation_instrumentation": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_instrumentation.py",
+      "sha256": "32b3d134496b627354f4813d94f9c827a6ca4d04b1e0092bd20c985419ecaf53"
+    },
+    "gpu_reclamation_methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_methodology.py",
+      "sha256": "3a6217ec2b9c8ed4302a347ce5e36a0e1b1a19e8c1b1d38df6f6ea186b5507c3"
+    },
+    "gpu_reclamation_model": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation.py",
+      "sha256": "27c38db4bb4b7c1b61a29a54ab33f4e4769725a95754d86f4ce54e9a73a175ce"
+    },
+    "gpu_reclamation_trace": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_trace.py",
+      "sha256": "b9e416500c79a6e3620f6962d8fbdd187b8dfe40260758e9b7a3fe2e3659cc73"
+    },
+    "kill_controller": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_controller_v11.py",
+      "sha256": "83b6249dce3ba4b69e244da559253c5c63c6a154c8f0beee44b11bb88fb112a0"
+    },
+    "kill_modal": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "9883d3a5057fd8a608c114f72ee5321a40616e65f1e6ac2713c64faa91cccf07"
+    },
+    "kill_tests": {
+      "artifact": "tests/python/test_gpu_reclamation_kill_recompute_v11.py",
+      "sha256": "a0bb51d01746cbbe3112c5c898d5a18c29559b4bbc27272bf400c4002aff9291"
+    },
+    "kill_worker": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py",
+      "sha256": "3b2b31b9be1bffd163f13a072cb9380a19e1a7c7741b40d0ff99f12eb75ea1d5"
+    },
+    "methodology": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "sha256": "abc8053e631120d36e75a5f4ab33ef6751c608400a1d7ff2e75ff485a7708faf"
+    },
+    "real_runtime_adapter": {
+      "artifact": "python/sloforge/continuum/adapters/real_runtime.py",
+      "sha256": "b7b790e03da5f31c5e68dd1985b8163451d48ea8ee46c805fe20ba9f38aba8f9"
+    },
+    "sdk_adapter": {
+      "artifact": "python/sloforge/continuum/adapters/sdk.py",
+      "sha256": "6a1ca84eebf8865ee0e784961bc6e635789352b3c821fdbcafd5a512906bf361"
+    },
+    "trace_adapters": {
+      "artifact": "python/sloforge/helix/characterization/trace/adapters.py",
+      "sha256": "84a9e8c190b9016843df89c18af7beb071bbde08097315a45104cdeb6dd889f2"
+    },
+    "trace_buffer": {
+      "artifact": "python/sloforge/helix/characterization/trace/buffer.py",
+      "sha256": "4f768e042a07dc3acf206fa598589869233ddaa4b0365ed0dfb709cf7230d7f9"
+    },
+    "trace_canonical": {
+      "artifact": "python/sloforge/helix/characterization/trace/canonical.py",
+      "sha256": "7a765e489858b834424b810e0a0936c3062c301972eb720357c117de02b534c2"
+    },
+    "trace_conversion": {
+      "artifact": "python/sloforge/helix/characterization/trace/conversion.py",
+      "sha256": "f74e631d511bd62d28221c40f7e0ba9f55e83035dd70ddf9d0fa2ac7e2b70798"
+    },
+    "trace_init": {
+      "artifact": "python/sloforge/helix/characterization/trace/__init__.py",
+      "sha256": "73cf51ae90fadf84a0fee028818ec91cafc0ba8aaa002c185c701ae533dd2542"
+    },
+    "trace_io": {
+      "artifact": "python/sloforge/helix/characterization/trace/io.py",
+      "sha256": "fecb5332fb35a614c4e6ef9e48b4991afe66a6203cbc346380cb63a0c6a2eba6"
+    },
+    "trace_manifest": {
+      "artifact": "python/sloforge/helix/characterization/trace/manifest.py",
+      "sha256": "1fa378df8019c5767a865f70e5a7d4262bf85ebf55704aa88cac6848c91781a1"
+    },
+    "trace_models": {
+      "artifact": "python/sloforge/helix/characterization/trace/models.py",
+      "sha256": "da3a5d4cbbe0c418c3ab0506821781f29c3bf74f26741695196a8dfb5ff3b8bf"
+    },
+    "trace_parquet": {
+      "artifact": "python/sloforge/helix/characterization/trace/parquet.py",
+      "sha256": "4d450f39bc4c86783aaac69daaaf1b7dad1ff80175059e68a8ce2e9fec5a0bd0"
+    },
+    "trace_perfetto": {
+      "artifact": "python/sloforge/helix/characterization/trace/perfetto.py",
+      "sha256": "4edc9cdfc3b2c00b50d3667cefdf2aa33eb43b2b4a4e6fae769b58b56047f67c"
+    },
+    "v10_authorization": {
+      "artifact": "python/sloforge/helix/characterization/gpu_reclamation_v10_authorization.py",
+      "sha256": "3a06207c4865bf6df5fc38027e66d793726b89e0ca35a5472d9fa1f0d44ad840"
+    },
+    "v11_accounting": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py",
+      "sha256": "fe8c913af0414ec402ce230ffb19e8db9474bfe19b8ad539f80f0419c99b23ec"
+    },
+    "v11_ownership": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py",
+      "sha256": "0ca553fbe21b431bc315553e792b7b4de523da3c44f84f36e95ff469ba3e6de0"
+    },
+    "v11_pipeline": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+      "sha256": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458"
+    },
+    "v11_sync": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py",
+      "sha256": "05dc160d881f0b772d77db4f6b96298fe4290a7de81be9abcc876e83cada2820"
+    },
+    "vllm_live_adapter": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_live.py",
+      "sha256": "e22243b768c07d35afb6f98a40e979576a165c804b84944dba53d1aa1fca7ad4"
+    },
+    "vllm_live_trace": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_live_trace.py",
+      "sha256": "1e1cbf417e3996d4f22e27e1097be5c0c6282b5d86cd3090a705337511266bb6"
+    },
+    "vllm_metadata_0230": {
+      "artifact": "python/sloforge/continuum/adapters/vllm_metadata_0230.py",
+      "sha256": "779c446cbc1ae302ee76bf9d9717f7037aafa09216758b2d0d6e7b1bd06dcf95"
+    }
+  },
+  "freshness_contract": {
+    "local_final_absent": true,
+    "remote_final_staging_inflight_absent_before_reservation": true,
+    "maximum_active_reservations": 1,
+    "exactly_once_spawn": true,
+    "minimum_remaining_gpu_seconds_with_15_percent_margin": 1518,
+    "actual_remaining_gpu_seconds": 17556.58500987602
+  },
+  "prior_attempt_b": {
+    "attempt_id": "exp004-v11-kill-recompute-s41-b",
+    "failure_classification": "INVALID_PAID_INFRASTRUCTURE_REMOTE_MODULE_IMPORT_ROOT_RESOLUTION",
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/status-attempt-b.json",
+      "sha256": "9c43d27066325accb5d5ab620df58391dbc63e3f49ea0b79e8db8f699c457147"
+    },
+    "provider_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-b.json",
+      "sha256": "8fd8d7f3a929a41bf8ebb86f936735b2790fedda024bf65cb5f4d2b3f84d9b34"
+    },
+    "conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-b-conservative-charge.json",
+      "sha256": "523d078decd6c31b3b6107957331084166063083812b7d970ddb7194b19a8a1c",
+      "charged_gpu_seconds": 1320.0
+    },
+    "scientific_arm_executed": false
+  },
+  "continuation_authorization": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/continuation-authorization-attempt-c.json",
+    "sha256": "f9d5fa9919759ac1e3e592aca4862cd68932b863b6f8166a8e22522cbd1dfadc",
+    "authorized_attempt_id": "exp004-v11-kill-recompute-s41-c",
+    "maximum_fresh_invocations": 1
+  }
+}

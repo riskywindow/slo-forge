@@ -1,0 +1,75 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-implementation-manifest/v1",
+  "recorded_at_utc": "2026-08-11T04:23:07Z",
+  "execution_backend": "modal",
+  "modal_sdk_version": "1.5.3",
+  "app_name": "sloforge-branchfabric-real-gpu-cow",
+  "requested_gpu": "A100-80GB",
+  "gpu_count": 1,
+  "runtime": "vllm",
+  "runtime_version": "0.23.0",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "model_volume": "sloforge-model-cache",
+  "results_volume": "sloforge-branchfabric-results",
+  "persistent_resources_allowed": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "deployed_endpoints": [],
+  "modal_function_calls": [
+    "fc-01KZQER09E0M6QXC2QVJP4D6KC",
+    "fc-01KZQEYY3EGDFHQ9WYTV4P108A",
+    "fc-01KZQF7GYV3TBRBF8TC5XYXWHD",
+    "fc-01KZQFN17TMY76N2AWBE4RY26Z",
+    "fc-01KZQFZS9WHYTAC9VN1MZPFG7S"
+  ],
+  "gpu_hours_consumed_by_modal": 0.12330600836833336,
+  "cloud_budget_environment_present": true,
+  "cloud_budget_usd": 40.0,
+  "remote_execution_status": "semantic_smoke_observed_cleanup_failed",
+  "source_files": [
+    {
+      "path": "experiments/branchfabric/modal_real_gpu_cow.py",
+      "sha256": "5025ef925ccab9e10aadab65cdfe2ff94ebea6046a26e35d0c7a2fc2c6851cf2"
+    },
+    {
+      "path": "tools/branchfabric-modal-launch.py",
+      "sha256": "964ee3a486095aae4aa11e14d3927294ceb0af59f62dafd41764812ad78f6f79"
+    },
+    {
+      "path": "benchmarks/branchfabric/gpu_validation_runner.py",
+      "sha256": "2e051cd3ba507acf8896646c9d6d3c889c04c9a9ff7ce912816386f0fbd50335"
+    },
+    {
+      "path": "benchmarks/branchfabric/analyze_gpu_validation.py",
+      "sha256": "fecfe99207b9f4f170e27a3834282b9b087336aee691d5865cda7bed92e64602"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_live.py",
+      "sha256": "d83ce3c59e194443bc01ea709f0fde6519e812b0169c1c19d7b71bc7fbdc481e"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_live_trace.py",
+      "sha256": "1e1cbf417e3996d4f22e27e1097be5c0c6282b5d86cd3090a705337511266bb6"
+    },
+    {
+      "path": "docs/branchfabric/MODAL_REAL_GPU_EXECUTION.md",
+      "sha256": "9abd6f58384bdee6d1f4fc4eb0e540498f5a4bde9349eb642462adf9521b8597"
+    },
+    {
+      "path": "docs/branchfabric/REAL_GPU_COW_ADAPTER.md",
+      "sha256": "47d17ce7cafda9b06191da43511abe1d8f7a1fd55aeb47b34ca237b246d77d51"
+    },
+    {
+      "path": "tests/python/test_modal_real_gpu_cow.py",
+      "sha256": "f979fbbef9e90e86b92c9ef2521c4b5477be67e49ed27fa6363c083ef9d77d61"
+    }
+  ],
+  "measurements": "modal/modal-smoke-shared-s41-v5/runner/shared_root",
+  "real_physical_shared_root_demonstrated": true,
+  "complete_semantic_smoke_passed": false,
+  "postflight_blocker": "14213 MiB driver-visible HBM versus 4 MiB preflight baseline",
+  "gpu_cow_claim": false
+}

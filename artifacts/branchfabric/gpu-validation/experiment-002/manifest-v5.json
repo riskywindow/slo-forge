@@ -1,0 +1,33 @@
+{
+  "schema_version": "sloforge.branchfabric.gpu-validation-manifest/v1",
+  "experiment": "experiment-002",
+  "repository_commit": "ab86d7600234f22f38fb71ae1d3a9d98bc048175",
+  "created_at": "2026-08-10T23:21:51Z",
+  "runtime": "vllm",
+  "runtime_version": "0.23.0",
+  "runtime_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "status": "semantic_smoke_observed_cleanup_failed",
+  "execution_backend": "modal",
+  "modal_app": "sloforge-branchfabric-real-gpu-cow",
+  "modal_sdk_version": "1.5.3",
+  "requested_gpu": "A100-80GB",
+  "modal_function_calls": [
+    "fc-01KZQER09E0M6QXC2QVJP4D6KC",
+    "fc-01KZQEYY3EGDFHQ9WYTV4P108A",
+    "fc-01KZQF7GYV3TBRBF8TC5XYXWHD",
+    "fc-01KZQFN17TMY76N2AWBE4RY26Z",
+    "fc-01KZQFZS9WHYTAC9VN1MZPFG7S"
+  ],
+  "modal_blocker": "v5 retained 14213 MiB at postflight versus a 4 MiB baseline",
+  "previous_mew0_attempt_status": "remote_blocked_no_idle_gpu_cleanup_complete",
+  "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+  "gpu_workloads_launched": 5,
+  "benchmark_workloads_completed": 1,
+  "gpu_hours": 0.12330600836833336,
+  "real_physical_shared_root_demonstrated": true,
+  "complete_semantic_smoke_passed": false,
+  "sixteen_k_runs": 0,
+  "cleanup_receipt": "REMOTE_CLEANUP_RECEIPT.json (historical mew0 attempt only)"
+}

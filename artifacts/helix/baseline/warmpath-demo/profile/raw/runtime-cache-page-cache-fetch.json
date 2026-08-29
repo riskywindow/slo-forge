@@ -1,0 +1,26 @@
+{
+  "artifact_hash": "f7bf842c88c9c2a640266bd6b150a5188041ff64647b95951f2dee3f3dc25193",
+  "artifact_id": "runtime-cache",
+  "confidence_interval_high_ms": 0.030875,
+  "confidence_interval_low_ms": 0.023917,
+  "confidence_level": 0.95,
+  "environment_fingerprint": "2f582ad1f5498192077f7fa6825ac6bd10d0324db6ff0763be19932eb3935051",
+  "invocation": "local-read:runtime.cache:chunk=1048576",
+  "median_absolute_deviation_ms": 0.0018330000000000013,
+  "median_ms": 0.025625,
+  "p95_ms": 0.0314,
+  "raw_samples_ms": [
+    0.031625,
+    0.023917,
+    0.030875,
+    0.0255,
+    0.027458,
+    0.022375,
+    0.025625
+  ],
+  "source": "measured",
+  "stage": "fetch",
+  "tier_id": "page-cache",
+  "timeout_seconds": 10.0,
+  "warmup_count": 2
+}

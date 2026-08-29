@@ -1,0 +1,34 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-local-validation/v1",
+  "status": "PASS",
+  "observed_at_utc": "2026-08-23T01:07:44Z",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "pytest": {
+    "command": "PYTHONPATH=python pytest -q tests/python/test_gpu_reclamation_integrated_controller_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11.py tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py tests/python/test_gpu_reclamation_integrated_worker_v11.py tests/python/test_modal_gpu_reclamation_integrated_v11.py tests/python/test_experiment_004_v11_final_coordinator.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_vllm_reclamation_v11_ownership.py",
+    "passed": 181,
+    "failed": 0,
+    "warnings": 2,
+    "status": "PASS"
+  },
+  "ruff": {
+    "scope": [
+      "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py",
+      "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "python/sloforge/helix/characterization/gpu_reclamation_v11_methodology.py",
+      "python/sloforge/continuum/adapters/vllm_allocator_epochs.py",
+      "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py",
+      "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "tests/python/test_gpu_reclamation_integrated_trigger_v11.py",
+      "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py",
+      "tests/python/test_gpu_reclamation_integrated_worker_v11.py",
+      "tests/python/test_modal_gpu_reclamation_integrated_v11.py",
+      "tests/python/test_gpu_reclamation_runtime_v11.py",
+      "tests/python/test_vllm_reclamation_v11_ownership.py"
+    ],
+    "status": "PASS"
+  },
+  "provenance": "Direct local CPU-only pytest and ruff exit status; no Modal invocation and no GPU allocation."
+}

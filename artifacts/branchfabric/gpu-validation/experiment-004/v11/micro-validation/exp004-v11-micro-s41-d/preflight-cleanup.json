@@ -1,0 +1,45 @@
+{
+  "active_apps": 0,
+  "attempt_id": "exp004-v11-micro-s41-d",
+  "authorized_persistent_resources": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "checked_at_utc": "2026-08-19T02:09:55.296999+00:00",
+  "cleanup_pass": true,
+  "endpoints": 0,
+  "modal_app_list": [
+    {
+      "app_id": "ap-PjcID67RGw7sjCOheKjAPx",
+      "created_at": "2026-08-18 20:40:54-05:00",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-micro",
+      "state": "stopped",
+      "stopped_at": "2026-08-18 20:45:15-05:00",
+      "tasks": "0"
+    },
+    {
+      "app_id": "ap-EiNldZI0DC6BNeg0u9j4Qx",
+      "created_at": "2026-08-18 20:08:52-05:00",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-micro",
+      "state": "stopped",
+      "stopped_at": "2026-08-18 20:11:26-05:00",
+      "tasks": "0"
+    },
+    {
+      "app_id": "ap-9tG2MqyxSwsSvIdnEBfwtL",
+      "created_at": "2026-08-18 19:51:26-05:00",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-micro",
+      "state": "stopped",
+      "stopped_at": "2026-08-18 19:52:28-05:00",
+      "tasks": "0"
+    }
+  ],
+  "modal_container_list": [],
+  "owned_child_processes": 0,
+  "phase": "PREFLIGHT",
+  "profilers": 0,
+  "reservations": 0,
+  "running_containers": 0,
+  "running_tasks": 0,
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-modal-cleanup/v1"
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-modeled-movement-bound/v1",
+  "evidence_kind": "HISTORICAL_ALGORITHM_DERIVED_PROJECTION_SUPERSEDED_BY_MEASUREMENT",
+  "headline_eligible": false,
+  "logical_state_bytes": 1056964608,
+  "v10_measured": {
+    "full_physical_bytes": 61303947264,
+    "full_physical_amplification": 58.0,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "avoidable_bytes": 32765902848,
+    "avoidable_amplification": 31.0,
+    "conceptual_full_state_passes": 30
+  },
+  "v11_algorithm_projection": {
+    "full_physical_bytes": 22196256768,
+    "full_physical_amplification": 21.0,
+    "external_movement_bytes": 2113929216,
+    "external_movement_amplification": 2.0,
+    "aggregate_algorithm_stages": 9,
+    "classification_if_measured_identically": "WEAK",
+    "majority_of_v10_physical_work_removed": true,
+    "v10_to_projected_reduction_fraction": 0.637931034483
+  },
+  "projection_decomposition_amplification": {
+    "capture_bounded_native_gather": 2.0,
+    "capture_bounded_repack": 2.0,
+    "capture_d2h_endpoints_and_link": 3.0,
+    "capture_sha256": 2.0,
+    "restore_preverify_sha256": 2.0,
+    "restore_owned_snapshot_and_authentication": 3.0,
+    "restore_h2d_endpoints_and_link": 3.0,
+    "restore_direct_scatter": 2.0,
+    "restore_exact_device_validation": 2.0
+  },
+  "v11_measured": {
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "full_physical_bytes": 22197063040,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_bytes": 2114200960,
+    "external_movement_amplification": 2.000257098485553,
+    "full_state_pass_count": 10,
+    "provenance": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json"
+  },
+  "reason_not_measured": null,
+  "rule": "Do not cite the exact 21x projection as measured. The measured result is 21.000762818351625x."
+}

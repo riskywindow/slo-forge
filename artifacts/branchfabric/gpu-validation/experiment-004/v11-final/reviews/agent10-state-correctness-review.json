@@ -1,0 +1,245 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-state-correctness-review/v1",
+  "agent": 10,
+  "role": "state-correctness-review",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "status": "FAIL",
+  "decision": "INVALID_BEFORE_SOURCE_RELEASE",
+  "summary": "Attempt c reached and completed the frozen v11 source capture in memory, but failed the exact source-allocation zero-queue attribution gate before releasing any source branch. Consequently it provides no valid HBM reclamation, restore, continuation-correctness, or integrated movement-amplification result.",
+  "review_constraints": {
+    "local_attempt_c_bundle_only": true,
+    "repository_source_only": true,
+    "modal_or_cloud_access": false,
+    "gpu_access": false,
+    "implementation_modified": false,
+    "v11_modified": false
+  },
+  "primary_failure": {
+    "exception_type": "V11RuntimeTeardownRequired",
+    "message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+    "failure_function": "consume_exact_source_allocation_queue_v11",
+    "failure_call_site": "run_integrated_v11_gpu1 immediately after capture_native_to_transport_v11 and before release_source_and_prove_v11",
+    "reclaim_trigger_emitted_ns": 204102178211,
+    "rollout_admission_stop_ns": 204122281693,
+    "worker_failure_observed_ns": 208607194053,
+    "trigger_to_failure_seconds": 4.505015842,
+    "admission_stop_to_failure_seconds": 4.48491236,
+    "destructive_zero_queue_drain_occurred": true,
+    "expected_queue_shape": {
+      "block_count": 1152,
+      "unique": true,
+      "set_equal_to_authenticated_capture_plan": true
+    },
+    "observed_queue_details_persisted": false,
+    "unavailable_observed_fields": [
+      "observed_count",
+      "observed_block_ids_sha256",
+      "missing_block_ids",
+      "unexpected_block_ids",
+      "duplicate_block_ids"
+    ],
+    "evidence_loss_reason": "The typed exception carried teardown_evidence in process, but the worker failure serializer persisted only exception type, message, and traceback. Therefore the exact observed ID set and the relative contributions of stale, missing, and duplicate IDs cannot be reconstructed scientifically."
+  },
+  "root_cause": {
+    "classification": "retained-engine allocator-notification queue was not epoch-separated between readiness/calibration and rollout-source construction",
+    "confidence": "HIGH",
+    "source_sequence": [
+      "_run_integrated_calibration_phase executes retained-engine readiness and calibration requests on the rollout engine",
+      "_reset_probe_state proves empty request queues and calls reset_prefix_cache, but never consumes manager.take_new_block_ids",
+      "_prepare_rollouts then allocates the 16K shared-root plus eight private branch lifetimes",
+      "consume_exact_source_allocation_queue_v11 performs the first source-bound destructive drain only after the export capture",
+      "the drain is required to contain exactly the 1,152 current source IDs once each, so any retained calibration allocation notification or reused-ID duplicate makes it fail closed"
+    ],
+    "pinpointed_mismatch": "The zero-queue covered a longer retained-engine allocation history than the authenticated source capture lifetime, while the validator correctly required one exact source-lifetime set.",
+    "important_limit": "The attempt-c artifact does not serialize the observed queue count or IDs. The lifecycle boundary defect is pinpointed from the executed code path, but no claim is made about the exact stale-ID count or whether the observed mismatch also contained missing IDs."
+  },
+  "transaction_progress": [
+    {
+      "order": 1,
+      "stage": "eight-branch rollout preparation",
+      "status": "PASS",
+      "evidence_strength": "directly persisted",
+      "evidence": "rollout.transaction-ready.json records rollouts_ready=true, branch_count=8, passed=true"
+    },
+    {
+      "order": 2,
+      "stage": "normal reclaim trigger and rollout admission stop",
+      "status": "PASS",
+      "evidence_strength": "directly persisted",
+      "evidence": "trigger at queue 21 with 43 requests of emergency-ceiling headroom; rollout admission stop followed by 20.103482 ms"
+    },
+    {
+      "order": 3,
+      "stage": "exact runtime capture topology",
+      "status": "PASS",
+      "evidence_strength": "control-flow proven by the later failure location",
+      "evidence": "validate_exact_micro_topology had to accept 8 branches, 1,024 shared blocks, 128 private blocks, 1,152 unique full blocks, and 1,056,964,608 logical bytes before source ownership or capture could run"
+    },
+    {
+      "order": 4,
+      "stage": "pre-release source ownership/refcount/allocator-epoch proof",
+      "status": "PASS",
+      "evidence_strength": "control-flow proven but result object not serialized",
+      "evidence": "capture_source_ownership_v11 returned before capture; this requires exact native request owners, refcounts, current allocator-issued epochs, block coverage, and allocator-visible assigned-byte agreement for all 1,152 source blocks"
+    },
+    {
+      "order": 5,
+      "stage": "frozen v11 source gather/repack/D2H capture",
+      "status": "PASS_TRANSIENT",
+      "evidence_strength": "control-flow proven but StatePassRecords and timings not serialized",
+      "evidence": "capture_native_to_transport_v11 returned a captured state before its manifest hash was passed to the failing queue gate; return requires completion fences, whole-payload and per-page SHA-256 construction, manifest construction, and authoritative export StatePassRecord validation"
+    },
+    {
+      "order": 6,
+      "stage": "exact source allocation zero-queue attribution",
+      "status": "FAIL",
+      "evidence_strength": "directly persisted",
+      "evidence": "the one destructive drain was not length/uniqueness/set-equal to the authenticated 1,152-block capture plan"
+    },
+    {
+      "order": 7,
+      "stage": "source release and post-free ownership/refcount/epoch proof",
+      "status": "NOT_EXECUTED",
+      "evidence_strength": "source control flow",
+      "evidence": "release_source_and_prove_v11 is textually after the throwing queue gate"
+    },
+    {
+      "order": 8,
+      "stage": "allocator-visible release, HBM reclamation, and GPU1 serving enable",
+      "status": "NOT_EXECUTED",
+      "evidence_strength": "source control flow and absent result artifacts",
+      "evidence": "memory_after, the zero-assigned-byte gate, hbm_reclaim_ns, and run_v10_gpu1 occur only after successful source release"
+    },
+    {
+      "order": 9,
+      "stage": "checkpoint authentication and destination restore",
+      "status": "NOT_EXECUTED",
+      "evidence_strength": "source control flow and absent result artifacts",
+      "evidence": "no verify_transport_streaming_v11, fresh destination allocation, H2D, direct scatter/write, raw-bit validation, mapping commitment, epoch consumption, or admission was reached"
+    },
+    {
+      "order": 10,
+      "stage": "branch continuation and independent correctness oracle",
+      "status": "NOT_EXECUTED",
+      "evidence_strength": "source control flow and absent restore-complete barrier",
+      "evidence": "no first resumed token, eight-token continuation, or 8/8 exact first-token comparison was reached"
+    }
+  ],
+  "correctness_gate_matrix": {
+    "source_topology_exact": "PASS_CONTROL_FLOW_PROVEN",
+    "source_allocator_epochs_current": "PASS_CONTROL_FLOW_PROVEN",
+    "source_pre_release_ownership_and_refcounts": "PASS_CONTROL_FLOW_PROVEN",
+    "export_engine_step_gate": "PASS_CONTROL_FLOW_PROVEN",
+    "source_capture_completion_fenced": "PASS_CONTROL_FLOW_PROVEN",
+    "source_capture_hashes_and_manifest_built": "PASS_CONTROL_FLOW_PROVEN",
+    "source_export_state_pass_records_validated": "PASS_CONTROL_FLOW_PROVEN_NOT_PERSISTED",
+    "source_allocation_queue_exact": "FAIL_DIRECT_EVIDENCE",
+    "source_released": "NOT_EXECUTED",
+    "post_free_ownership_refcounts_and_epochs": "NOT_EXECUTED",
+    "allocator_visible_hbm_reclamation": "NOT_EXECUTED",
+    "checkpoint_streaming_authentication": "NOT_EXECUTED",
+    "fresh_destination_allocations": "NOT_EXECUTED",
+    "destination_integrity_and_mapping_commitment": "NOT_EXECUTED",
+    "restore_admission": "NOT_EXECUTED",
+    "minimum_eight_continuation_tokens_per_branch": "NOT_EXECUTED",
+    "exact_first_token_matches_8_of_8": "NOT_EXECUTED"
+  },
+  "byte_count_reportability": {
+    "reportable": [
+      {
+        "name": "logical_state_bytes",
+        "value": 1056964608,
+        "qualification": "Exact pre-failure runtime topology value. It may be reported only as the integrated attempt-c source topology that passed validation, not as evidence of a completed reclamation transaction."
+      }
+    ],
+    "reportable_non_byte_topology": {
+      "total_blocks": 1152,
+      "shared_blocks": 1024,
+      "private_blocks": 128,
+      "branch_count": 8
+    },
+    "not_reportable_as_integrated_measurements": [
+      "full_physical_bytes",
+      "full_physical_amplification",
+      "external_movement_bytes",
+      "external_movement_amplification",
+      "avoidable_physical_bytes",
+      "avoidable_amplification",
+      "GPU intermediate bytes",
+      "host intermediate bytes",
+      "native endpoint bytes",
+      "link bytes",
+      "temporary host peak",
+      "temporary GPU peak"
+    ],
+    "reason": "Export StatePassRecords existed only in the rollout worker's transient captured object and were discarded on the exception path. No authoritative integrated movement summary or canonical pass ledger was serialized. Micro-validation values must not be substituted."
+  },
+  "teardown_distinction": {
+    "runtime_cleanup": "PASS: process teardown ultimately removed CUDA-owning workers and released CUDA according to in_function_cleanup.json",
+    "scientific_source_release": "FAIL/NOT EXECUTED: generic runtime teardown is not the in-transaction release_source_and_prove_v11 gate and cannot establish reclamation latency, allocator-epoch invalidation, or post-free ownership correctness"
+  },
+  "scientific_conclusion": {
+    "integrated_v11_scientifically_valid": false,
+    "optimized_pipeline_executed": "SOURCE_EXPORT_ONLY",
+    "valid_reclamation_transaction_completed": false,
+    "valid_restore_transaction_completed": false,
+    "valid_branch_correctness_result_available": false,
+    "valid_integrated_movement_result_available": false,
+    "freeze_v11_allowed": false,
+    "kill_and_recompute_arm_allowed": false,
+    "required_terminal_classification_if_no_other_valid_integrated_attempt_exists": "HARDWARE_GATE_NOT_REACHED"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json",
+      "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.transaction-ready.json",
+      "sha256": "21814b13a03b0446abfe7cc972141bd892d1cd4a7327ebcbd0bced90d4b3ab3c"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json",
+      "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/barriers/v11-rollout-admission-stop.json",
+      "sha256": "f87312088d181d1a0a6b48ffc183332bf8b0658c50d4b29eb30d8c6221be2e0c"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/controller-result.json",
+      "sha256": "d628b41fe99d06d6acceaede9851893548d8264811c63014f03c05217d0cb660"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-c/in_function_cleanup.json",
+      "sha256": "901baea2d82de01d3dac49cbfcee90deff5e7059a30c99afd767431a91478d0c"
+    }
+  ],
+  "source_bindings": [
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "1b967aaa7485c807393ae89756b537daabe5c1b0c82e2c2f5ea60fd56948aeb2"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_worker_v11.py",
+      "sha256": "ad4d4c4963b0aca7f0d5a36881349b865e4178947a0db0c788d731917aaece30"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "sha256": "e6858e445ddbca912877fc67155dd9422c82d6f6fd4dcbf71871831dee15008a"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_capacity_calibration_worker.py",
+      "sha256": "6bc7210518a67085a933b6e7cbeaf0a538f7148e89f39578d63df78e30bd275a"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_reclamation_v11_ownership.py",
+      "sha256": "ec28e4ff1362c81e7ab2ec2095ce509aaf625f892ae08e26d1708a87b846228f"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+      "sha256": "697d9d9786fbd1759bc4e4242f5b507a7123d1f6daf1af42c12cffc790dde458"
+    }
+  ]
+}

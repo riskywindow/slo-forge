@@ -1,0 +1,303 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-independent-naive-dag-builder-review/v1",
+  "reviewer": "independent-naive-dag-builder-review",
+  "review_date": "2026-08-18",
+  "scope": "Offline independent review of benchmarks/branchfabric/build_experiment_004_v11_analysis.py and its generated frozen-v10 execution/accounting DAG.",
+  "gpu_or_modal_used": false,
+  "source_modified": false,
+  "result": "PASS_ACCOUNTING_AND_SEMANTIC_ORDER_WITH_REQUIRED_DAG_FIXES",
+  "reviewed_artifacts": [
+    {
+      "path": "benchmarks/branchfabric/build_experiment_004_v11_analysis.py",
+      "sha256": "cec5ad7963bd742428cd458760b623b3fed4a4907865be6d7b8a712203b56970"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-analysis/naive-pass-graph.json",
+      "sha256": "3aadcf22b7aa78dfe4c1a33f8c950a2ff5b63529ab361efc44f5c5ac76c5a0d4",
+      "embedded_dag_sha256": "e56062d62dd25fdb79d5fcb2ae5af1534ae102cbf0afab38dff422c9db36864b"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+      "sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/telemetry/cuda-and-host-operations.json",
+      "sha256": "edf6958f6ad95009693223cc451eddc4abb75d2c91054b9ba2fd265c347875c7"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/state-passes/v10-state-pass-graph.json",
+      "sha256": "a70d1f554201bab696084e055310bbbb6a85745740845def93a4cd8a87e52dfa"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+    }
+  ],
+  "audit_summary": {
+    "aggregate_pass_count": 30,
+    "expanded_execution_node_count": 44,
+    "expanded_edge_count": 46,
+    "raw_state_pass_record_count": 270,
+    "acyclic": true,
+    "reachable_node_count_in_topological_sort": 44,
+    "semantic_order": "PASS",
+    "subset_partition_and_timing_union": "PASS_FOR_FROZEN_INPUT",
+    "primary_categories": "PASS_WITH_DISPOSITION_NAMING_FIX",
+    "byte_conservation": "PASS",
+    "deterministic_generation": "PASS",
+    "executable_critical_path_semantics": "FAIL_UNTIL_SHARED_TIMING_AND_LIFETIMES_ARE_SEPARATED",
+    "provenance_fail_closed": "FAIL"
+  },
+  "semantic_order_audit": {
+    "result": "PASS",
+    "verified_chains": [
+      "capture source native read -> native-axis contiguous materialization",
+      "capture valid-token unpage -> layer stack -> page concatenation -> D2H",
+      "host payload materialization/manifest evidence -> aggregate and per-page hash reads -> publish validation materialization -> publish hash reads",
+      "pre-restore transport validation materialization -> transport hash reads -> H2D -> duplicate import validation materialization -> import hash reads",
+      "each restore subset: zero page -> overlay valid tokens -> inverse-axis contiguous materialization -> layer/page stack -> destination native write",
+      "each validation subset: destination native read -> native-axis contiguous materialization -> valid-token unpage -> layer stack -> page concatenation -> validation D2H -> expected-page concatenation -> host compare",
+      "subset 0 root+branch0 validation completes before the remaining branch allocations and subset 1 conversion/validation"
+    ],
+    "important_interpretation": "Several verified arrows are semantic accounting order inside one PyTorch/CPU call, not independently timed serial kernels. They need a distinct edge kind and one timing owner."
+  },
+  "subset_audit": {
+    "result": "PASS_FOR_FROZEN_INPUT",
+    "subset_0": {
+      "logical_segments": [
+        "kv.private:branch.0",
+        "kv.shared-root"
+      ],
+      "logical_bytes": 954204160,
+      "semantics": "shared root plus branch 0 private pages"
+    },
+    "subset_1": {
+      "logical_segments": [
+        "kv.private:branch.1",
+        "kv.private:branch.2",
+        "kv.private:branch.3",
+        "kv.private:branch.4",
+        "kv.private:branch.5",
+        "kv.private:branch.6",
+        "kv.private:branch.7"
+      ],
+      "logical_bytes": 102760448,
+      "semantics": "remaining seven private suffixes"
+    },
+    "partition_sum_bytes": 1056964608,
+    "partition_equals_logical_state": true,
+    "all_13_serial_subset_stages_share_the_same_segment_partition": true,
+    "fourteenth_split_stage": "validation-recapture-host-lifetime",
+    "aggregate_wall_time_rule": "The builder sums the two disjoint measured callback intervals, not the outer span containing intervening allocations. This is correct.",
+    "execution_count_identity": "30 aggregate labels + one additional execution node for each of 14 split labels = 44 execution nodes."
+  },
+  "classification_audit": {
+    "valid_primary_category_per_pass": true,
+    "counts": {
+      "SEMANTICALLY_REQUIRED": 4,
+      "CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE": 6,
+      "SOFTWARE_IMPLEMENTATION_ARTIFACT": 20
+    },
+    "physical_touch_bytes_by_primary_category": {
+      "SEMANTICALLY_REQUIRED": 10569646080,
+      "CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE": 12683575296,
+      "SOFTWARE_IMPLEMENTATION_ARTIFACT": 38050725888
+    },
+    "physical_touch_amplification_by_primary_category": {
+      "SEMANTICALLY_REQUIRED": 10.0,
+      "CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE": 12.0,
+      "SOFTWARE_IMPLEMENTATION_ARTIFACT": 36.0
+    },
+    "warning": "The 36x SOFTWARE_IMPLEMENTATION_ARTIFACT total and 12x CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE total are optimization-candidate accounting, not 48x removable traffic. The frozen independently established conservative avoidable lower bound remains 31x."
+  },
+  "byte_conservation_audit": {
+    "result": "PASS",
+    "logical_state_bytes": 1056964608,
+    "aggregate_bytes_read": 33822867456,
+    "aggregate_read_amplification": 32.0,
+    "aggregate_bytes_written": 24310185984,
+    "aggregate_write_amplification": 23.0,
+    "aggregate_transfer_bytes": 3170893824,
+    "aggregate_transfer_amplification": 3.0,
+    "aggregate_full_physical_touch_bytes": 61303947264,
+    "aggregate_full_physical_touch_amplification": 58.0,
+    "aggregate_temporary_allocation_bytes": 22196256768,
+    "aggregate_temporary_allocation_amplification": 21.0,
+    "aggregate_equals_raw_record_physical_touch": true,
+    "expanded_execution_equals_aggregate_physical_touch": true,
+    "external_movement_identity": "capture D2H + restore H2D + validation D2H = 3 logical-state transfers",
+    "temporary_memory_caveat": "21x is allocation churn summed across records, not a peak-live-memory measurement."
+  },
+  "determinism_audit": {
+    "result": "PASS",
+    "method": "Ran the builder in separate processes with PYTHONHASHSEED=1 and PYTHONHASHSEED=777 and compared both outputs with the checked-in generated graph.",
+    "hash_seed_1_sha256": "3aadcf22b7aa78dfe4c1a33f8c950a2ff5b63529ab361efc44f5c5ac76c5a0d4",
+    "hash_seed_777_sha256": "3aadcf22b7aa78dfe4c1a33f8c950a2ff5b63529ab361efc44f5c5ac76c5a0d4",
+    "checked_in_sha256": "3aadcf22b7aa78dfe4c1a33f8c950a2ff5b63529ab361efc44f5c5ac76c5a0d4",
+    "embedded_digest_valid": true,
+    "embedded_digest_convention_inferred": "SHA-256 of canonical JSON before adding dag_sha256",
+    "randomness_used": false
+  },
+  "shared_timing_audit": {
+    "result": "FAIL_AS_EXECUTABLE_TIMING_DAG",
+    "serial_edges_with_source_end_after_destination_start": 21,
+    "reason": "The affected nodes are semantic byte-accounting subpasses inside the same measured CUDA or CPU operation. The file correctly sets timing_shared=true, but still labels their edges serial_data_dependency and gives every subpass the complete shared wall/CUDA interval.",
+    "consequence": "A conventional topological longest-path, summed stage waterfall, or Amdahl calculation will count the same interval two to four times. The warning text does not make the graph mechanically safe.",
+    "affected_groups": [
+      {
+        "measured_operation": "capture-source-native-read",
+        "accounting_subpasses": [
+          "capture-source-native-read",
+          "capture-native-axis-contiguous"
+        ]
+      },
+      {
+        "measured_operation": "capture-native-to-canonical-transform",
+        "accounting_subpasses": [
+          "capture-unpage-valid-tokens",
+          "capture-stack-layers",
+          "capture-concatenate-pages"
+        ]
+      },
+      {
+        "measured_operation": "capture-integrity CPU call",
+        "accounting_subpasses": [
+          "capture-integrity-manifest",
+          "capture-integrity-hash-reads"
+        ]
+      },
+      {
+        "measured_operation": "publish verify CPU call",
+        "accounting_subpasses": [
+          "transport-publish-validation",
+          "transport-publish-hash-reads"
+        ]
+      },
+      {
+        "measured_operation": "pre-restore verify CPU call",
+        "accounting_subpasses": [
+          "restore-transport-validation",
+          "restore-transport-hash-reads"
+        ]
+      },
+      {
+        "measured_operation": "duplicate import verify CPU call",
+        "accounting_subpasses": [
+          "restore-import-validation",
+          "restore-import-hash-reads"
+        ]
+      },
+      {
+        "measured_operation": "each restore destination conversion callback",
+        "accounting_subpasses": [
+          "restore-zero-native-pages",
+          "restore-overlay-valid-tokens",
+          "restore-native-axis-contiguous",
+          "restore-stack-native-pages"
+        ]
+      },
+      {
+        "measured_operation": "each validation native read callback",
+        "accounting_subpasses": [
+          "validation-destination-native-read",
+          "validation-native-axis-contiguous"
+        ]
+      },
+      {
+        "measured_operation": "each validation canonical transform callback",
+        "accounting_subpasses": [
+          "validation-unpage-valid-tokens",
+          "validation-stack-layers",
+          "validation-concatenate-pages"
+        ]
+      },
+      {
+        "measured_operation": "each validation host construction/compare callback",
+        "accounting_subpasses": [
+          "validation-expected-page-concatenation",
+          "validation-host-tensor-compare"
+        ]
+      }
+    ]
+  },
+  "exact_required_fixes": [
+    {
+      "id": "DAG-001",
+      "severity": "HIGH",
+      "problem": "Accounting subpasses that share one measured operation are encoded as separately timed serial execution nodes.",
+      "required_fix": "Make measured operations the timed execution-DAG nodes and attach byte-accounting subpasses as ordered children, or add a first-class timing_group_id and mark intra-group edges semantic_order_within_shared_measured_operation. Attribute wall_time_ns, cuda_time_ns, and synchronization wait to exactly one timing owner per group; set exclusive timing null or zero on the other accounting children. Add a validation that every true serial_data_dependency satisfies source_end_ns <= destination_start_ns.",
+      "acceptance": "A longest-path calculation over timed nodes reproduces the union of measured intervals without double counting, while all 58x accounting subpasses remain visible."
+    },
+    {
+      "id": "DAG-002",
+      "severity": "HIGH",
+      "problem": "pass_row drops CUDA operation IDs for every operation=='allocate'. This correctly avoids treating host residency as CUDA work, but incorrectly strips restore-zero-native-pages, whose raw GPU records contain restore-destination-conversion-00/01 CUDA operation IDs.",
+      "required_fix": "Suppress CUDA IDs only for explicit CPU allocation-lifetime nodes, identified by stage or CPU processor and lifetime semantics. Preserve the destination-conversion CUDA IDs, shared CUDA event time, stream, and synchronization metadata on restore-zero-native-pages.",
+      "acceptance": "Both restore-zero subset nodes retain their raw conversion operation ID and report GPU/shared timing; capture-pinned-transport-lifetime and validation-recapture-host-lifetime remain non-CUDA lifetime nodes."
+    },
+    {
+      "id": "DAG-003",
+      "severity": "HIGH",
+      "problem": "The builder calls every non-SEMANTICALLY_REQUIRED pass removable, including correctness-required evidence and allocation residency. This can convert an optimization target into an unsupported claim that up to 48x may simply disappear.",
+      "required_fix": "Rename removable_pass_ranking to optimization_candidate_ranking and add an explicit disposition per row: REMOVE_REDUNDANT, REIMPLEMENT_EQUIVALENT_REQUIRED, FUSE_OR_STREAM, RETAIN_REQUIRED, or LIFETIME_NOT_A_PASS. Record the correctness replacement condition and minimum remaining proof/read bytes where known. Only rows independently proven redundant may be labeled removable.",
+      "acceptance": "No correctness-required pass or checkpoint residency is described as removable without an equivalent replacement contract, and the frozen 31x avoidable lower bound is not conflated with classification totals."
+    },
+    {
+      "id": "DAG-004",
+      "severity": "HIGH",
+      "problem": "Frozen provenance is asserted with hard-coded commits, but the baseline manifest is not read, source hashes are not checked, and graph_path is never loaded despite being named in every raw_evidence object.",
+      "required_fix": "Load and verify the immutable baseline manifest and its canonical artifact hash; verify execution/analysis commits, attempt ID, movement hash, aggregate graph hash, required raw state-record/telemetry hashes, schemas, unique record IDs, unique CUDA operation IDs, exact stage set, and record coverage before building. Emit all verified source hashes in the output. Either reconcile the old aggregate graph's nodes/bytes while deliberately replacing its known-bad edges, or stop claiming it as read evidence.",
+      "acceptance": "Changing any frozen input byte, inserting an unrecognized zero-byte stage, duplicating an ID, or changing the attempt identity fails closed before output."
+    },
+    {
+      "id": "DAG-005",
+      "severity": "MEDIUM",
+      "problem": "Allocation lifetimes live in the same executable node/edge namespace as completion dependencies. capture-pinned-transport-lifetime overlaps restoration and ends after its consumers, yet it is a predecessor of restore validation; the ranking also calls its 28.5-second residence a critical_path_interval.",
+      "required_fix": "Separate ownership/lifetime relations from executable dependencies. Model zero-duration allocation/free events plus interval containment, or place lifetimes in a dedicated lifetime_records collection. Exclude lifetime duration from critical-path latency and optimization time ranking.",
+      "acceptance": "No scheduler or Amdahl consumer can interpret a residence interval as serial work; lifetime bytes still contribute to peak-memory analysis."
+    },
+    {
+      "id": "DAG-006",
+      "severity": "MEDIUM",
+      "problem": "The two restore subsets are hard-coded with range(2) and are inferred independently from interval sorting without proving that every split stage has the same logical partition.",
+      "required_fix": "Derive subset identities from callback/CUDA operation sequence or a canonical segment-set key. Assert exactly two subsets for this frozen attempt, identical segment membership and logical bytes across all 13 serial split stages plus the recapture lifetime, disjointness, full-state union, and subset-0-before-subset-1 temporal order.",
+      "acceptance": "A missing, extra, reordered, or differently partitioned stage fails with a specific validation error rather than producing disconnected or mislabeled nodes."
+    },
+    {
+      "id": "DAG-007",
+      "severity": "MEDIUM",
+      "problem": "The aggregate ranking exposes repeated shared wall intervals as critical_path_interval_ns, and the publish-to-restore edge is labeled serial_data_dependency despite intervening source release, serving recovery, stability, and restore trigger.",
+      "required_fix": "Rename the repeated field measured_operation_interval_union_ns and leave exclusive_critical_path_ns null until a non-overlapping timing partition exists. Mark publish-to-restore as a control/checkpoint dependency with intervening reclamation_and_serving, or add explicit zero-byte milestone nodes outside the state-pass accounting total.",
+      "acceptance": "The pass graph cannot be mistaken for a gap-free end-to-end waterfall, and critical-path cost ranking uses only non-overlapping timing groups."
+    },
+    {
+      "id": "DAG-008",
+      "severity": "MEDIUM",
+      "problem": "restore-zero-native-pages inherits the default purpose 'no independent semantic invariant'. The measured pages are full, so this full-page zero pass is avoidable in this fixture, but zeroing invalid tails is a tenant-isolation and deterministic-padding invariant for partial pages.",
+      "required_fix": "Give zero-fill an explicit correctness purpose and measured-scope annotation: all measured pages full and fully overwritten, zero physical padding bytes in this fixture; partial-page invalid tails remain semantically required before visibility.",
+      "acceptance": "No downstream optimizer can generalize the measured zero-fill removal to partial pages or weaken stale-tenant-byte protection."
+    },
+    {
+      "id": "DAG-009",
+      "severity": "LOW",
+      "problem": "dag_sha256 has no emitted hash-convention field, and raw_record_ids rely on source-list order rather than an explicit canonical sort.",
+      "required_fix": "Emit the digest convention ('canonical JSON excluding dag_sha256') and sort raw_record_ids by their numeric record prefix before hashing.",
+      "acceptance": "Independent consumers can reproduce the embedded digest, and semantically identical record ordering cannot perturb output."
+    }
+  ],
+  "recommended_tests": [
+    "builder output is byte-identical across at least two PYTHONHASHSEED values",
+    "embedded DAG digest recomputes under the declared exclusion convention",
+    "all raw record IDs and CUDA operation IDs are unique and referenced IDs exist",
+    "input source hashes and immutable baseline body hash are verified before build",
+    "aggregate and expanded byte totals equal the frozen 61,303,947,264 bytes",
+    "read/write/transfer decomposition is exactly 32x/23x/3x",
+    "subset segment partitions are identical across every split stage and union to 1,056,964,608 bytes",
+    "true serial edges are timestamp-monotone",
+    "each shared timing group has exactly one timing owner",
+    "lifetime records cannot enter critical-path time sums",
+    "GPU zero-fill retains destination-conversion CUDA provenance",
+    "unknown, missing, duplicate, or zero-byte raw stages fail closed"
+  ],
+  "final_assessment": "The builder is trustworthy for frozen v10 byte accounting, aggregate classifications, semantic pass order, subset byte unions, and deterministic reproduction. It is not yet safe as an executable timing DAG or as a literal removable-pass ranking. Apply DAG-001 through DAG-004 before using it for critical-path/Amdahl automation or optimization acceptance; apply the remaining fixes before freezing the v11 analysis artifact."
+}

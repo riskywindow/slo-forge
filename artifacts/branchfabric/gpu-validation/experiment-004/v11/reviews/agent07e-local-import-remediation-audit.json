@@ -1,0 +1,91 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent07e-local-import-remediation-audit/v1",
+  "review_id": "agent07e-local-import-remediation-audit",
+  "reviewer_task_path": "/root/integrated_budget_audit",
+  "reviewed_at_utc": "2026-08-19T04:32:32Z",
+  "status": "PASS",
+  "scientific_classification": "SCIENTIFICALLY_NULL_BEFORE_MODAL_APP_OR_GPU_ALLOCATION",
+  "retry_admission": "APPROVE_ONE_LOCAL_MODAL_CLI_RETRY_WITH_SAME_RESERVATION",
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "failure_evidence": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/local-launch-preflight-failure.json",
+    "sha256": "d09978ef76b55732caf89580ca83b8f9d24e97a349227578cd9601eb0680e77d",
+    "failure_stage": "LOCAL_MODAL_CLI_MODULE_IMPORT",
+    "failure_type": "ModuleNotFoundError",
+    "client_elapsed_seconds": 0.8148895000012999,
+    "modal_app_created": false,
+    "modal_function_call_created": false,
+    "gpu_allocated": false,
+    "model_loaded": false,
+    "runtime_state_created": false,
+    "measurement_started": false,
+    "post_failure_active_apps": 0,
+    "post_failure_running_containers": 0
+  },
+  "root_cause": {
+    "cause": "The local Modal CLI child could not import the repository-local sloforge package because PYTHONPATH omitted the repository's python and experiments/branchfabric roots.",
+    "boundary": "local Python module import before launcher initialization, Modal app creation, FunctionCall creation, or paid allocation",
+    "scientific_state_affected": false,
+    "paid_gpu_state_affected": false
+  },
+  "remediation": {
+    "kind": "LOCAL_CHILD_ENVIRONMENT_ONLY",
+    "working_directory": "/Users/rishivinodkumar/sloforge",
+    "pythonpath_exact": "python:experiments/branchfabric",
+    "overwrite_instead_of_append": true,
+    "source_change": false,
+    "config_change": false,
+    "reservation_change": false,
+    "post_micro_manifest_change": false,
+    "remote_retry_policy_change": false,
+    "methodology_change": false
+  },
+  "sealed_state_after_failure": {
+    "config_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/config.json",
+    "config_file_sha256": "67a6c1bf3f5928e077b9f347e82fe710ff759b607a2b5dd41d6aea6a74c6b4c1",
+    "config_canonical_sha256": "88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b",
+    "post_micro_manifest_sha256": "e7b48588923919928e5b2178b93ea1f55e6e94f233609e6fec564b5156b82d67",
+    "controller_sha256": "36c1f95b33ccdba3a2a14a18de3379e73ffee25a181a5ea2762803c102f5f8a7",
+    "launcher_sha256": "ae0071f12e2a4b26b7ed08a556cc7c4689d42059881b12f4c3f80e1d6e19894f",
+    "source_hashes_unchanged": true
+  },
+  "reservation_and_budget_after_failure": {
+    "ledger_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_sha256": "7a76715dfad8f09f02401b75df126a4b0d4f6b05e378c23672d5bdbcf021f927",
+    "ledger_sha256_matches_failure_evidence": true,
+    "active_reservation_count": 1,
+    "reservation_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-a/gpu-reservation.json",
+    "reservation_artifact_sha256": "22e404866054c5d314801d709185ddd3bf2fb63858f3eec222a58499632f6108",
+    "reservation_id": "exp004-v11-integrated-s41-a-reservation",
+    "reservation_invocation_id": "exp004-v11-integrated-s41-a",
+    "reservation_config_sha256_matches": true,
+    "pre_reservation_ledger_reconstruction_pass": true,
+    "reservation_commitment_sha256": "3dc94de6a122f7862c07fd1e579498b50666e2cc274a170ba4c5bf06ff32de62",
+    "consumed_gpu_seconds": 13761.513626085978,
+    "committed_gpu_seconds_including_reservation": 14937.513626085978,
+    "remaining_gpu_seconds_after_reservation": 6662.486373914022,
+    "additional_gpu_seconds_charged_for_failed_local_import": 0.0,
+    "new_reservation_required": false,
+    "failure_charge_required": false,
+    "hard_ceiling_pass": true
+  },
+  "admissibility_reasoning": [
+    "The failure preceded Modal app and FunctionCall creation, so no remote integrated transaction or paid GPU allocation occurred.",
+    "The same sole reservation remains active and validates against the unchanged canonical config and reconstructed pre-reservation ledger commitment.",
+    "Adding the two repository roots to only the local coordinator child's PYTHONPATH changes import resolution, not the sealed remote runtime, state workload, serving methodology, instrumentation, or GPU retry policy.",
+    "Therefore one corrected local CLI attempt still corresponds to the first and only remote integrated-v11 transaction."
+  ],
+  "mandatory_retry_conditions": [
+    "Run from /Users/rishivinodkumar/sloforge and set PYTHONPATH exactly to python:experiments/branchfabric in the child environment.",
+    "Reuse reservation exp004-v11-integrated-s41-a-reservation; do not create a second reservation or charge the scientifically null local import failure.",
+    "Reuse the unchanged config with file SHA-256 67a6c1bf3f5928e077b9f347e82fe710ff759b607a2b5dd41d6aea6a74c6b4c1 and canonical SHA-256 88293cd24640a15ec90d75b14aa43a5f7a7beaf02262eaff5ff533e25968988b.",
+    "Keep the authorized budget, reservation ID, preflight token, source tree, post-micro manifest, and retries=0 policy otherwise unchanged.",
+    "If a Modal app or FunctionCall is created, treat that corrected command as the one authorized actual invocation and do not relaunch on a later failure without a new independent audit.",
+    "After return, settle the active reservation or conservatively charge it if trustworthy allocation duration and identity cannot be recovered, then prove Modal cleanup."
+  ],
+  "residual_findings": [],
+  "passed": true
+}

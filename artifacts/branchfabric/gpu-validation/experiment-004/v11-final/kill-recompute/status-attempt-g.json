@@ -1,0 +1,316 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-status/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-g",
+  "status": "SCIENTIFICALLY_VALID",
+  "scientifically_valid": true,
+  "valid_kill_recompute_arm": true,
+  "terminal_classification": "VALID_MEASURED_KILL_AND_RECOMPUTE_ARM",
+  "execution_mode": "integrated-kill-recompute-v11",
+  "function_call_id": "fc-01M15EW2B2F21RZWFKMSAZ92FS",
+  "reservation_id": "exp004-v11-kill-g-06f055057fdf11384021",
+  "evidence_closure_utc": "2026-08-29T00:50:19Z",
+  "scientific_scope": {
+    "claim": "Attempt G is a valid measured kill-and-recompute arm on the retained two-engine allocation",
+    "preservation_break_even_classification": "NOT_DERIVED_FROM_THIS_ARM_ALONE",
+    "interpretation": "the arm establishes measured discard, HBM reclamation, replay work, serving continuity, restoration, and correctness; preservation break-even requires a separate fit using these measured values"
+  },
+  "lifecycle": {
+    "function_entry_reached": true,
+    "controller_started": true,
+    "both_engines_started": true,
+    "retained_engine_readiness_passed": true,
+    "twelve_rps_probe_a_passed": true,
+    "twelve_rps_probe_b_passed": true,
+    "normal_twelve_rps_sanity_passed": true,
+    "normal_fifteen_rps_sanity_passed": true,
+    "strict_nine_rps_control_interval_passed": true,
+    "transaction_command_issued": true,
+    "reclaim_trigger_reached": true,
+    "source_state_discarded": true,
+    "source_release_reached": true,
+    "hbm_reclaim_reached": true,
+    "temporary_gpu1_serving_reached": true,
+    "serving_recovery_passed": true,
+    "recompute_reached": true,
+    "continuation_correctness_passed": true,
+    "controller_two_worker_success_pair_present": true,
+    "in_function_cleanup_passed": true,
+    "provider_cleanup_passed": true,
+    "measured_ledger_settlement_completed": true
+  },
+  "hardware_and_runtime": {
+    "gpu_count": 2,
+    "requested_gpu": "A100-80GB:2",
+    "topology": "2 x NVIDIA A100-SXM4-80GB",
+    "serving_gpu_uuid": "GPU-e7446667-04f6-a4f6-39e6-46aa0871cf3f",
+    "rollout_gpu_uuid": "GPU-72c41885-eaa2-00d0-a040-94e0baa07376",
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "runtime": "vllm",
+    "runtime_version": "0.23.0",
+    "dtype": "bfloat16",
+    "direct_k_comparison_ready": true
+  },
+  "retained_capacity_and_serving": {
+    "readiness_batch16_serving_rps": 17.67470039794864,
+    "readiness_batch16_rollout_rps": 17.749644512338413,
+    "readiness_floor_rps": 15.0,
+    "twelve_rps_replication_classification": "PASS_PASS",
+    "fifteen_rps_overload_guard_pass": true,
+    "control_policy_schema": "sloforge.branchfabric.kill-recompute-control-drift-policy/v1",
+    "control_policy": "slope>0.10-and-last-quarter-median>first-quarter-median+2",
+    "control_measurement_arrivals": 36,
+    "control_measurement_completions": 36,
+    "control_eventual_full_arrivals": 45,
+    "control_eventual_full_completions": 45,
+    "control_completed_rate_rps": 9.0,
+    "control_p95_ttft_ns": 49338938.5,
+    "control_waiting_queue_maximum": 1,
+    "control_total_outstanding_samples": [
+      10,
+      11,
+      11,
+      11,
+      9
+    ],
+    "control_total_outstanding_slope_requests_per_second": -0.2,
+    "control_first_quarter_median_depth": 10.5,
+    "control_last_quarter_median_depth": 10.0,
+    "trigger_backlog": 21,
+    "trigger_headroom_to_emergency_ceiling": 43,
+    "controller_reaction_latency_ns": 202899,
+    "recovery_completion_rps": 17.2,
+    "recovery_offered_rps": 15.0,
+    "recovery_queue_slope_requests_per_second": -2.0,
+    "recovery_maximum_window_p95_ttft_ns": 74382157.3,
+    "gpu0_active_during_restore": true,
+    "gpu0_restore_arrivals": 71,
+    "gpu0_restore_completions": 71,
+    "gpu0_restore_emitted_tokens": 4544,
+    "all_serving_gates_pass": true
+  },
+  "state_discard_and_release": {
+    "event": "STATE_DISCARDED",
+    "source_block_count": 1152,
+    "source_physical_bytes": 1056964608,
+    "shared_block_count": 1024,
+    "private_block_count": 128,
+    "private_blocks_per_branch": 16,
+    "kv_assigned_bytes_before": 1056964608,
+    "kv_assigned_bytes_after": 0,
+    "allocator_hbm_agreement": true,
+    "post_free_ownership_pass": true,
+    "all_allocator_epochs_tombstoned": true,
+    "full_free_pool_recovered": true,
+    "export_started": false,
+    "checkpoint_materialized": false,
+    "no_preservation_output_scan_passed": true,
+    "forbidden_output_matches": []
+  },
+  "recompute": {
+    "analytical_independent_branch_expectation_tokens": 133120,
+    "computed_state_topology_tokens": 18432,
+    "actual_submitted_prefix_tokens": 131072,
+    "actual_submitted_private_tokens": 2056,
+    "actual_submitted_replay_tokens": 133128,
+    "actual_computed_boundary_tokens": 133120,
+    "actual_live_uncomputed_tail_tokens": 8,
+    "actual_runtime_cache_reused_tokens": 114688,
+    "actual_runtime_uncached_recompute_tokens": 18440,
+    "gpu_computed_tokens_derived_from_scheduler": 18440,
+    "unique_submitted_replay_history_tokens": 18440,
+    "prefill_wall_seconds": 1.724884711,
+    "prefill_cuda_gpu_seconds": 1.6786678466796876,
+    "uncached_prefill_tokens_per_second_wall": 10690.569568159388,
+    "uncached_prefill_tokens_per_gpu_second": 10984.90093586608,
+    "source_build_wall_seconds": 7.102905554,
+    "source_build_cuda_gpu_seconds": 7.1027509765625,
+    "lost_private_rollout_tokens": 2048,
+    "lost_private_rollout_wall_seconds": 5.824458873,
+    "lost_private_rollout_cuda_gpu_seconds": 5.82428271484375,
+    "replay_accounting_passed": true
+  },
+  "critical_timings": {
+    "reclaim_trigger_ns": 213893602285,
+    "state_quiescence_ns": 213911950730,
+    "state_discard_started_ns": 214274383651,
+    "state_discard_completed_ns": 214507120782,
+    "hbm_reclaim_confirmed_ns": 214512158260,
+    "gpu1_first_useful_ns": 214732536283,
+    "serving_slo_evaluated_ns": 227878694242,
+    "restore_trigger_ns": 229931285895,
+    "replay_started_ns": 229953909593,
+    "first_resumed_token_ns": 231678794304,
+    "all_branches_resumed_ns": 231678794304,
+    "continuation_complete_ns": 231957155098,
+    "reclaim_trigger_to_hbm_reclamation_seconds": 0.618555975,
+    "reclaim_trigger_to_first_useful_gpu1_seconds": 0.838933998,
+    "reclaim_trigger_to_serving_slo_restoration_seconds": 13.985091957,
+    "restore_trigger_to_first_resumed_token_seconds": 1.747508409,
+    "restore_trigger_to_all_branches_resumed_seconds": 1.747508409,
+    "restore_trigger_to_continuation_complete_seconds": 2.025869203
+  },
+  "rollout_correctness": {
+    "branch_count": 8,
+    "minimum_continuation_tokens_per_branch": 8,
+    "exact_first_resumed_token_matches": 8,
+    "all_branches_resumed": true,
+    "continuation_passed": true,
+    "gpu0_serving_during_restore": true,
+    "no_checkpoint_export": true
+  },
+  "remote_result": {
+    "function_call_id": "fc-01M15EW2B2F21RZWFKMSAZ92FS",
+    "function_completion_status": "provisional",
+    "function_scientific_status": "pending-local-budget-settlement-and-provider-cleanup",
+    "controller_status": "succeeded",
+    "worker_returncodes": {
+      "serving": 0,
+      "rollout": 0
+    },
+    "worker_result_count": 2,
+    "controller_error": null,
+    "local_terminal_status": "SCIENTIFICALLY_VALID"
+  },
+  "cleanup": {
+    "in_function": {
+      "status": "PASS",
+      "forced_kill_required": false,
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/in_function_cleanup.json",
+      "sha256": "4e8046ff236201c973a1b1d76d05950a8a757e992d73c8e4b6e29241db5511f5"
+    },
+    "provider": {
+      "status": "PASS",
+      "active_apps": 0,
+      "running_tasks": 0,
+      "containers": 0,
+      "endpoints": 0,
+      "queues": 0,
+      "dicts": 0,
+      "reservations": 0,
+      "authorized_volumes_only": true,
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-g.json",
+      "sha256": "1ffff942c105fe9697eaa3a8507191fdea6af80db6770b5fa74ad67b8a9208df"
+    }
+  },
+  "accounting": {
+    "settlement_kind": "MEASURED_SUCCESS_INTERVAL",
+    "accounted_wall_seconds": 279.360269719,
+    "charged_gpu_seconds": 558.720539438,
+    "charged_gpu_hours": 0.1552001498438889,
+    "charged_cost_usd": 0.387752054369972,
+    "gpu_count": 2,
+    "gpu_price_per_hour_usd": 2.4984,
+    "measured_settlement_performed": true,
+    "ledger_reservations_empty": true,
+    "ledger_consumed_additional_gpu_seconds": 30162.13552956198,
+    "ledger_remaining_gpu_seconds": 13037.86447043802
+  },
+  "remote_bundle": {
+    "artifact_root": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g",
+    "remote_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json",
+    "sha256": "db9d56c305faddca5f24cb411b45d8ec3b57496b1bd56f9f66db544505b43361",
+    "manifest_entry_count": 507,
+    "verified_entry_count": 507,
+    "actual_files_excluding_manifest": 507,
+    "missing_files": 0,
+    "extra_files": 0,
+    "hash_or_size_mismatches": 0,
+    "symlinks": 0
+  },
+  "evidence_bindings": {
+    "config": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-g-config.json",
+      "b7376e931caa2895eef9b131fb7e13eda3b9778820f6c5a96ecc851a907c3601"
+    ],
+    "seal": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-g.json",
+      "54c861f44af9011347d9028cd2fa34fe9ddb6d9348251f262943d93f507f8906"
+    ],
+    "make_check": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-g.json",
+      "b2859f589c72a0f76827253021934f12087b24da4f171aa24b4ba7acaf9ed666"
+    ],
+    "control_gate_policy_review": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent13-attempt-f-kill-control-gate-methodology-review.json",
+      "b6828316d33d0fa2349b37c7d94abe5b22fd9e5d4a983593126940cd69ff6aa8"
+    ],
+    "prebuild": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-g.json",
+      "dde81922059febca3ed8f796733a07b7801069e61f6b6b7dbbc33051f9a83a87"
+    ],
+    "post_prebuild_freshness": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-g-pre-reservation-freshness.json",
+      "163ae7ecfbbf92c4e1c4c439504f45dc69ad0524979d475e5ace6d9c3da6747b"
+    ],
+    "remote_manifest": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json",
+      "db9d56c305faddca5f24cb411b45d8ec3b57496b1bd56f9f66db544505b43361"
+    ],
+    "function_completion": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/function-completion.json",
+      "ee12ff766e0e2a00c6c9a34cea5de57a63e36dfdb97a2f22289897eed1a364d1"
+    ],
+    "kill_controller_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/kill-controller-result.json",
+      "3ab4f5375d0ac6f766004a5d049e08e9915c4c01a98334b9a147d874c523ba67"
+    ],
+    "serving_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/serving/result.json",
+      "fed02c3220e73f75e2484388b0081ca2bee5a15a02f0bad2f77976f47c6d11a5"
+    ],
+    "rollout_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/rollout/result.json",
+      "294dc5d2a90cf4ce258adfe9a6c85c0d22e7badfe2c0e596f96c7b478d4d51bd"
+    ],
+    "readiness_comparability": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/readiness/retained-engine-comparability.json",
+      "4f0499f8809ed31038c4059d66673f20ee1b2041eab226e2cfbebec679a39be0"
+    ],
+    "targeted_twelve_rps_reproduction": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/sanity/targeted-12rps-reproduction.json",
+      "9c2c63fa4c293de58f941e5207e771967ac9487fca11554875d7164616ac317a"
+    ],
+    "sanity_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/sanity/sanity-result.json",
+      "fb4bb7cb8a099bf0f58f34a4dda502b81426ae8239ee48efae521f493ac4ab81"
+    ],
+    "control_interval": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/barriers/v11-gpu0-control-interval.json",
+      "3e48977135f003cfcae726faefdebad8e02cf5267d4b8c73ec7d57dfdc63da3b"
+    ],
+    "state_discard": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/barriers/kill-state-discarded.json",
+      "875509584bb5d5e5b81550b7effe86d05ef756fc494a8b2c741ca3772584e445"
+    ],
+    "rollout_restore": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/barriers/rollout-restore-complete.json",
+      "1e995f07c7fed3f2ae77f6915cfa014469f5516342618161f579cecf80e7673b"
+    ],
+    "no_preservation_outputs": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/kill-no-preservation-output-artifacts.json",
+      "3c3a81d299c10f8e5febd57797ec3d8d2f87eed030915816086e8316ef86f170"
+    ],
+    "in_function_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/in_function_cleanup.json",
+      "4e8046ff236201c973a1b1d76d05950a8a757e992d73c8e4b6e29241db5511f5"
+    ],
+    "function_call_capture": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/function-calls/exp004-v11-kill-recompute-s41-g/function-call.json",
+      "17e8d7b4f5fa23f2c8e159d01b116ed3808cd59f1546d455558cddb26915ba17"
+    ],
+    "provider_inventory": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-g.json",
+      "c6a880d6bc60d83b1d735549f2f1b65d44b21bbe00d32ae6790e092352667aeb"
+    ],
+    "provider_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-g.json",
+      "1ffff942c105fe9697eaa3a8507191fdea6af80db6770b5fa74ad67b8a9208df"
+    ],
+    "settled_ledger": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "d6b515388a7ffa9579b28fe957c56e854370497afd60d01742d8a2c94f6c5d24"
+    ]
+  },
+  "next_action": "FREEZE_ATTEMPT_G_AS_THE_VALID_MEASURED_KILL_AND_RECOMPUTE_ARM; FIT_AND_REVIEW_THE_PRESERVATION_BREAK_EVEN_SEPARATELY"
+}

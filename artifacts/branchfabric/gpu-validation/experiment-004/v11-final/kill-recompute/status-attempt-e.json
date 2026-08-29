@@ -1,0 +1,162 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-status/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-e",
+  "status": "INVALID",
+  "scientifically_valid": false,
+  "terminal_classification": "INVALID_PAID_INFRASTRUCTURE_CLIENT_POLL_TIMEOUT_CANCELED_REMOTE_STARTUP",
+  "failure_stage": "RETAINED_ENGINE_INITIALIZATION_BEFORE_READINESS",
+  "primary_failure": {
+    "type": "CLIENT_FUNCTIONCALL_POLL_TIMEOUT_AND_EPHEMERAL_APP_DISCONNECT",
+    "message": "the local 840-second FunctionCall poll timed out; allowing TimeoutError to escape the Modal local entrypoint stopped the ephemeral App and delivered KeyboardInterrupt to the still-running remote controller",
+    "source": "local Modal traceback plus immutable remote controller/abort evidence",
+    "interpretation": "control-plane retrieval timeout bug; not a vLLM capacity, allocator, scientific-gate, or kill/recompute result"
+  },
+  "lifecycle": {
+    "function_entry_reached": true,
+    "controller_started": true,
+    "both_engines_started": true,
+    "retained_engine_readiness_passed": false,
+    "transaction_command_issued": false,
+    "twelve_rps_probe_a_reached": false,
+    "twelve_rps_probe_b_reached": false,
+    "fifteen_rps_probe_reached": false,
+    "reclaim_trigger_reached": false,
+    "source_state_discarded": false,
+    "source_release_reached": false,
+    "hbm_reclaim_reached": false,
+    "temporary_gpu1_serving_reached": false,
+    "recompute_reached": false,
+    "continuation_correctness_reached": false
+  },
+  "timing_evidence": {
+    "local_modal_client_elapsed_seconds": 873.3595645410242,
+    "first_poll_timeout_seconds": 840,
+    "remote_function_entry_monotonic_ns": 2243805300,
+    "controller_started_ns": 24709260670,
+    "serving_engine_started_ns": 30333853698,
+    "rollout_engine_started_ns": 30337734309,
+    "abort_issued_ns": 120563690477,
+    "controller_ended_ns": 122119152670,
+    "remote_controller_and_analysis_interval_seconds": 119.882310463,
+    "controller_deadline_ns": 652243805300,
+    "function_deadline_ns": 662243805300,
+    "remaining_controller_deadline_seconds_at_controller_end": 530.12465263,
+    "remaining_function_deadline_seconds_at_cleanup_record": 540.124052929,
+    "inference": "the remote controller was interrupted with most of its sealed paid Function deadline remaining; the local trace records TimeoutError followed by ephemeral App stop"
+  },
+  "remote_failure": {
+    "controller_error": {
+      "type": "KeyboardInterrupt",
+      "message": ""
+    },
+    "worker_returncodes": {
+      "serving": -15,
+      "rollout": -15
+    },
+    "readiness_evidence_count": 0,
+    "worker_result_count": 0,
+    "abort_error": "KeyboardInterrupt",
+    "function_call_id": "fc-01M152JAGCBMQSBQ1TD55Y9HXV",
+    "function_completion_status": "failed",
+    "function_scientific_status": "invalid"
+  },
+  "measurement": {
+    "actual_recompute_submitted_tokens": null,
+    "actual_recompute_uncached_tokens": null,
+    "actual_recompute_gpu_seconds": null,
+    "state_discard_seconds": null,
+    "continuation_exact_branch_count": null,
+    "availability": "UNAVAILABLE_INTERRUPTED_BEFORE_READINESS"
+  },
+  "cleanup": {
+    "in_function_status": "PASS",
+    "provider_status": "PASS",
+    "provider_artifact": "provider-cleanup-attempt-e.json",
+    "provider_artifact_sha256": "da208a07339e98dc631fee6be7be1bfc5fb3cb22e4b38674e5dba93339903a21"
+  },
+  "accounting": {
+    "settlement_kind": "CONSERVATIVE_FULL_BOUND",
+    "actual_gpu_seconds": null,
+    "actual_gpu_seconds_status": "unavailable-or-not-trusted",
+    "charged_gpu_seconds": 1320.0,
+    "charged_wall_seconds": 660.0,
+    "gpu_count": 2,
+    "reservation_id": "exp004-v11-kill-e-a2132b54b248c90b8385",
+    "function_call_id": "fc-01M152JAGCBMQSBQ1TD55Y9HXV",
+    "ledger_reservations_empty": true,
+    "ledger_remaining_gpu_seconds": 14916.58500987602
+  },
+  "function_call_reconciliation": {
+    "result_status": "REMOTE_ERROR",
+    "exception_type": "modal.exception.RemoteError",
+    "exception_message": "",
+    "result_retrieved": false,
+    "timeout_observed": false,
+    "interpretation": "post-return reconciliation confirms the exact FunctionCall is terminal but cannot reconstruct the lost return envelope"
+  },
+  "remote_bundle": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/REMOTE_MANIFEST.json",
+    "sha256": "935a51578d9a1e4676d3d86b59e65e901efc36f8b28154d55cadeecd1dd2d394",
+    "declared_files": 16,
+    "actual_files": 16,
+    "missing_files": 0,
+    "extra_files": 0,
+    "hash_or_size_mismatches": 0,
+    "symlinks": 0
+  },
+  "evidence_bindings": {
+    "config": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-e-config.json",
+      "de43980611c1d4f735cbb7171f9e7fb4cd108c0fe18466818a58b3e848dbe3e6"
+    ],
+    "seal": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-e.json",
+      "70af826e1f68f307851c8049201e094fd53adcd200dfc644213689003de0ccb4"
+    ],
+    "make_check": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-e.json",
+      "c4c3a416be47097f266f420c7f5695e77b60a19326f40fe07aa9b29e0c3b0593"
+    ],
+    "remote_manifest": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/REMOTE_MANIFEST.json",
+      "935a51578d9a1e4676d3d86b59e65e901efc36f8b28154d55cadeecd1dd2d394"
+    ],
+    "function_completion": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/function-completion.json",
+      "44285b2ae08cb685c369a6585f66b114989157137a851212ed44953f448c41b4"
+    ],
+    "controller_result": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/controller-result.json",
+      "61d8910b1b99d8235c817d0dd3329637827ef0f9cecc73ac1321ebe4cd0e300c"
+    ],
+    "abort": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/barriers/abort.json",
+      "339302f9888077a3ed832ee86262e8b5599deb50a5e98221e832338cbcd1c17a"
+    ],
+    "in_function_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/in_function_cleanup.json",
+      "4fb195f76a970f586b4e95941249b611be207cb6088dd16013f32c52e94a6136"
+    ],
+    "conservative_charge": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/failures/exp004-v11-kill-recompute-s41-e-conservative-charge.json",
+      "5bc8f8798e81af9b06634358574147c5c8930b322c284fecba4bef6603602e47"
+    ],
+    "provider_inventory": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-e.json",
+      "ecb836bab99b7a02b64b8b3e3088a510585c77bff14d5c40e0c74b3a5e3e9c66"
+    ],
+    "provider_cleanup": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-cleanup-attempt-e.json",
+      "da208a07339e98dc631fee6be7be1bfc5fb3cb22e4b38674e5dba93339903a21"
+    ],
+    "function_call_reconciliation": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/preflight/attempt-e-function-call-reconciliation.json",
+      "0afbf3198d6c24c163e8d8d98e98bf4858821f1ee7619dbb3adff9d07e10259b"
+    ],
+    "settled_ledger": [
+      "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "fec6652110c39d28447991c87b03dbc806b345de323483479dc3af36b0a6f17b"
+    ]
+  },
+  "next_action": "CATCH_FIRST_FUNCTIONCALL_TIMEOUT_PERSIST_CALL_ID_AND_REPOLL_SAME_CALL_UNDER_UNCHANGED_REMOTE_660_SECOND_BOUND_THEN_RESEAL_FRESH_F_ID"
+}

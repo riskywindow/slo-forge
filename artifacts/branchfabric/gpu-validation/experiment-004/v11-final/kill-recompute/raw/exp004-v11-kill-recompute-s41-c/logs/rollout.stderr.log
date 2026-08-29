@@ -1,0 +1,31 @@
+Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:00<00:02,  1.27it/s]
+Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:01<00:01,  1.08it/s]
+Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:02<00:00,  1.11it/s]
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.17it/s]
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.15it/s]
+
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/7 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▊       | 2/7 [00:00<00:00, 17.94it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  57%|█████▋    | 4/7 [00:00<00:00, 18.29it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  86%|████████▌ | 6/7 [00:00<00:00, 16.41it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 7/7 [00:00<00:00, 15.91it/s]
+Capturing CUDA graphs (decode, FULL):   0%|          | 0/5 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):  40%|████      | 2/5 [00:00<00:00, 14.22it/s]Capturing CUDA graphs (decode, FULL):  80%|████████  | 4/5 [00:00<00:00, 14.66it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 5/5 [00:00<00:00, 14.76it/s]
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 965, in <module>
+[rank0]:     raise SystemExit(main())
+[rank0]:                      ^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 941, in main
+[rank0]:     result = run_worker(
+[rank0]:              ^^^^^^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 891, in run_worker
+[rank0]:     result = _run_measured_v10_transaction(
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_worker.py", line 876, in _run_measured_v10_transaction
+[rank0]:     result = operation()
+[rank0]:              ^^^^^^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 881, in operation
+[rank0]:     return run_kill_recompute_gpu1(
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 484, in run_kill_recompute_gpu1
+[rank0]:     history = _history_evidence(
+[rank0]:               ^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/opt/sloforge/experiments/branchfabric/gpu_reclamation_kill_recompute_worker_v11.py", line 75, in _history_evidence
+[rank0]:     raise RuntimeError("kill/recompute branch history differs from its live KV boundary")
+[rank0]: RuntimeError: kill/recompute branch history differs from its live KV boundary

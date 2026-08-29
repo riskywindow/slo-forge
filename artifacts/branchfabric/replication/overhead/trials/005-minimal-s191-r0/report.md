@@ -1,0 +1,9 @@
+# SLOForge Helix CPU demonstration
+
+Artifact hash: `897d3f817a861fb40c0f1f076e4ab4658f311a115affd5fac0699317bc575b44`
+
+The executed champion chose `naive_parse` and achieved 0.625 hidden task success. The one-step candidate was rejected at 0.667; the corrected branch-relative candidate achieved 0.792.
+
+Joint capture bound Continuum capsule `aca15b246e4ad0fb7e5ca6fc8876f3c3417808ed8aea6aa05f578f0d736decd5` to environment capsule `e41a8f2a8687ad8e0bd6051546cb8b5799e4822b51db777bac5e7e90a211a3bf` at one persisted boundary. An incompatible active session remained on the champion. New traffic reached the challenger after atomic promotion, and the separate rollback drill restored the champion pointer.
+
+All quality scores came from the sandboxed visible and hidden Python verifiers. This is CPU-only synthetic validation; it is not a GPU or production measurement.

@@ -1,0 +1,77 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-integration-gate/v1",
+  "gate": "C",
+  "name": "production_engine_step_synchronization",
+  "status": "PASS",
+  "resealed_at_utc": "2026-08-19T02:07:40Z",
+  "runtime_scope": {
+    "runtime": "vllm",
+    "runtime_version": "0.23.0",
+    "engine_core_client": "vllm.v1.*.InprocClient",
+    "asynchronous_scheduling": false
+  },
+  "binding": {
+    "implementation": "python/sloforge/continuum/adapters/vllm_reclamation_v11_sync.py",
+    "adapter_integration": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py",
+    "lock": "bounded_reentrant_controller_lock_installed_on_production_mutation_entry_points",
+    "synthetic_probe_accepted": false,
+    "witness_scope": [
+      "binding_uuid",
+      "operation",
+      "scheduler_identity",
+      "manager_identity",
+      "owner_thread",
+      "acquisition_generation"
+    ],
+    "operations": [
+      "EXPORT_CAPTURE",
+      "IMPORT_ADMISSION"
+    ],
+    "required_allocator_observation_surface": [
+      "manager.take_new_block_ids"
+    ]
+  },
+  "race_exclusions": {
+    "kv_block_mutation": true,
+    "scheduler_reassignment": true,
+    "branch_append_or_cache_publication": true,
+    "block_table_modification": true
+    ,"allocator_zero_queue_observation": true
+  },
+  "admission_order": [
+    "native_allocation_and_block_table",
+    "allocator_epoch_proof",
+    "native_write_and_cuda_fence",
+    "raw_bit_integrity_and_tail_proof",
+    "destination_mapping_ownership_and_epoch_validation",
+    "single_use_epoch_consumption",
+    "serial_scheduler_queue_admission"
+  ],
+  "fail_closed": [
+    "wrong_runtime_version",
+    "non_inproc_client",
+    "async_scheduling",
+    "missing_mutation_surface",
+    "lock_timeout",
+    "foreign_witness",
+    "stale_witness",
+    "cross_thread_witness",
+    "operation_mismatch",
+    "wrapper_displacement"
+  ],
+  "offline_validation": {
+    "command": "PYTHONPATH=python python -m pytest -q tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_allocator_epochs.py",
+    "passed": 93,
+    "failed": 0,
+    "elapsed_seconds": 1.71,
+    "ruff": "PASS",
+    "mypy": "PASS"
+  },
+  "post_gpu_failure_remediation_review": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent03-attempt-d-recorder-lifecycle-post-fix-audit.json",
+    "sha256": "5126c1dec9a619a1b1b6776beee5ba25f58d624cfad1e569a683e418c8cb3d23",
+    "status": "PASS"
+  },
+  "gpu_invoked_for_gate_c_measurement": false,
+  "modal_invoked_for_gate_c_measurement": false
+}

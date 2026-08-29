@@ -1,0 +1,48 @@
+SECTION python
+Python 3.10.12 (main, Jan 26 2026, 14:55:28) [GCC 11.4.0]
+torch=UNAVAILABLE
+transformers=UNAVAILABLE
+vllm=UNAVAILABLE
+sglang=UNAVAILABLE
+sglang-router=UNAVAILABLE
+accelerate=UNAVAILABLE
+huggingface-hub=0.23.0
+nvidia-ml-py=12.560.30
+pynvml=UNAVAILABLE
+triton=3.1.0
+SECTION candidate-interpreters
+SECTION command-paths
+vllm=UNAVAILABLE
+sglang=UNAVAILABLE
+/usr/bin/python
+/usr/bin/python3
+conda=UNAVAILABLE
+micromamba=UNAVAILABLE
+SECTION shared-model-roots
+drwx------ 5 rishivin rishivin 4096 Jun 28 23:41 /home/rishivin/.cache/huggingface
+SECTION root-isolation
+REMOTE_ROOT=/tmp/sloforge-branchgpu-ZhfJJg8F
+DO_NOT_TRACK=1
+HF_HOME=/tmp/sloforge-branchgpu-ZhfJJg8F/hf
+HF_HUB_DISABLE_TELEMETRY=1
+HUGGINGFACE_HUB_CACHE=/tmp/sloforge-branchgpu-ZhfJJg8F/hf/hub
+TMPDIR=/tmp/sloforge-branchgpu-ZhfJJg8F/tmp
+TORCH_HOME=/tmp/sloforge-branchgpu-ZhfJJg8F/torch
+TRANSFORMERS_CACHE=/tmp/sloforge-branchgpu-ZhfJJg8F/hf/transformers
+TRITON_CACHE_DIR=/tmp/sloforge-branchgpu-ZhfJJg8F/triton
+WANDB_DISABLED=true
+WANDB_MODE=disabled
+XDG_CACHE_HOME=/tmp/sloforge-branchgpu-ZhfJJg8F/cache
+SECTION root-content
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/cache
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/env
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/hf
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/logs
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/models
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/pids
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/repo
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/results
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/tmp
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/torch
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/traces
+drwx------ rishivin rishivin /tmp/sloforge-branchgpu-ZhfJJg8F/triton

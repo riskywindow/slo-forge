@@ -1,0 +1,243 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-j-scientific-methodology-review/v1",
+  "status": "PASS",
+  "agent": 13,
+  "role": "independent-scientific-methodology-reviewer",
+  "review_mode": "CPU_ONLY_READ_ONLY_EVIDENCE_REPLAY_AND_FIX_REVIEW",
+  "gpu_or_modal_invoked_by_reviewer": false,
+  "attempt_id": "exp004-v11-integrated-s41-j",
+  "function_call_id": "fc-01M12DKVVFHJ8S6G1QPRQXDY97",
+  "attempt_j_scientifically_valid": false,
+  "failure_classification": "INVALID_PRE_TRANSACTION_REAL_RUNTIME_CAPACITY_DRIFT",
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED",
+  "scientific_work_started": true,
+  "integrated_lifecycle_reached": false,
+  "methodology_conclusion": {
+    "gate_verdict": "THE_PREDECLARED_12RPS_GATE_CORRECTLY_REJECTED_THIS_ALLOCATION",
+    "first_divergence": "ENGINE_READINESS_VERIFICATION_CROSS_BATCH_AND_CROSS_DEVICE_THROUGHPUT_LOSS",
+    "measured_scope": "Both retained A100 engines were materially slower than frozen v10 and Attempts F/G across warmed batch sizes before the 12-rps probe failed.",
+    "mechanism_scope": "No physical clock, power, thermal, host, or placement mechanism is claimed because Attempt J did not sample those fields.",
+    "allocator_conclusion": "NONE_SOURCE_IDENTITY_NOT_REACHED",
+    "optimized_pipeline_conclusion": "NONE_EXPORT_NOT_STARTED"
+  },
+  "lifecycle": {
+    "both_engines_ready": true,
+    "sanity_12rps_started": true,
+    "sanity_12rps_passed": false,
+    "sanity_15rps_started": false,
+    "transaction_command_published": false,
+    "live_rollouts_created": false,
+    "source_capture_commit_created": false,
+    "source_identity_gate_reached": false,
+    "optimized_export_started": false,
+    "source_release_started": false,
+    "restore_started": false
+  },
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS",
+    "active_provider_resources": 0,
+    "active_ledger_reservations": 0
+  },
+  "same_allocation_fix": {
+    "status": "PASS_CPU_VALIDATED",
+    "readiness_batch16_minimum_rps_each_engine": 15.0,
+    "readiness_recomputed_from_timestamps": true,
+    "readiness_assessment_persisted_before_gate": true,
+    "probe_a": "UNCHANGED_CANONICAL_12RPS_GUARD",
+    "probe_b": "MANDATORY_12RPS_REPLICATION",
+    "both_probes_always_run_after_VALID_A_RESET": true,
+    "classification_set": [
+      "CURRENT_RETAINED_ENVELOPE_STABLE",
+      "SUSTAINED_WITHIN_ALLOCATION_FAILURE",
+      "ORDER_DEPENDENT_RECOVERY_SIGNAL",
+      "UNSTABLE_ENVELOPE"
+    ],
+    "only_pass_pass_continues": true,
+    "unchanged_15rps_guard_runs_after_pass_pass": true,
+    "probe_request_counts": {
+      "A_12rps": 48,
+      "B_12rps": 48,
+      "15rps": 60,
+      "exact_cumulative_cache_salts_at_15rps": 156
+    },
+    "all_probe_artifacts_persisted_before_verdict": true,
+    "selection_recursively_binds_each_A_B_plan_raw_shards_result_assessment_reset": true,
+    "selection_revalidated_before_final_reset_handoff": true,
+    "selection_revalidated_before_transaction_command": true,
+    "command_schema_changed": false,
+    "frozen_v10_changed": false,
+    "independent_runtime_reaudit": "PASS",
+    "broad_cpu_tests": "523_PASS",
+    "ruff_format_check": "PASS",
+    "ruff_check": "PASS",
+    "diff_check": "PASS"
+  },
+  "approved_runtime_projection": {
+    "algorithm": "python-ast-dump-no-attributes/v1",
+    "schema_version": "sloforge.branchfabric.v11-retained-capacity-runtime-projection/v1",
+    "sha256": "24192ca447520179284e62767448144ca90e096627d9a674141d8e961cffcb65",
+    "sources": {
+      "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py": [
+        "ROLES",
+        "DEVICES",
+        "SANITY_RATES_RPS",
+        "TARGETED_SERVING_SANITY_CLASSIFICATIONS",
+        "_retained_engine_readiness_assessment_components",
+        "_validate_retained_engine_readiness_comparability",
+        "_assess_retained_engine_readiness_comparability",
+        "_classify_targeted_serving_sanity",
+        "_validate_targeted_probe_runtime_evidence",
+        "_run_targeted_serving_sanity_probe",
+        "_validate_selected_load_gate_commitment",
+        "run_integrated_v11_controller"
+      ],
+      "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": [
+        "_V11_POST_J_SANITY_PROBE_COUNT",
+        "_run_v11_integrated_calibration_phase"
+      ],
+      "tests/python/test_gpu_reclamation_integrated_controller_v11.py": [
+        "_retained_readiness_replay",
+        "test_retained_engine_readiness_comparability_accepts_measured_replays",
+        "test_retained_engine_readiness_comparability_rejects_attempt_j_replay",
+        "test_retained_engine_readiness_assessment_persists_recomputed_attempt_j_failure",
+        "test_retained_engine_readiness_comparability_rejects_invalid_floor",
+        "test_retained_engine_readiness_comparability_rejects_non_exact_finite_float",
+        "test_retained_engine_readiness_comparability_requires_exactly_one_batch16",
+        "test_retained_engine_readiness_comparability_requires_exact_batch_matrix",
+        "test_retained_engine_readiness_comparability_requires_exact_float_for_every_batch",
+        "test_retained_engine_readiness_comparability_rejects_non_exact_batch16_timing",
+        "test_retained_engine_readiness_comparability_rejects_batch16_timestamp_order",
+        "test_retained_engine_readiness_comparability_binds_batch16_throughput_to_timing",
+        "test_retained_engine_readiness_comparability_rejects_batch_accounting_tamper",
+        "test_retained_engine_readiness_comparability_rejects_identity_tamper",
+        "test_retained_engine_readiness_comparability_rejects_continuity_tamper",
+        "test_retained_engine_readiness_comparability_requires_disjoint_engine_identity",
+        "test_retained_engine_readiness_comparability_requires_exact_pair",
+        "test_retained_readiness_comparator_does_not_replace_frozen_sanity_assessor",
+        "test_integrated_readiness_comparability_precedes_all_serving_probes"
+      ]
+    }
+  },
+  "evidence_bindings": [
+    {
+      "label": "attempt_j_status",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-j.json",
+      "sha256": "641bc33ce3975d43722d692da22f459eb5079803536581818f4f65aeda86a4cb"
+    },
+    {
+      "label": "attempt_j_provider_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-j.json",
+      "sha256": "67cdf01cdd33aff305d126bc1481dfefe9d038292dfc0a1ec5487d6e5ce7b56c"
+    },
+    {
+      "label": "attempt_j_remote_manifest",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/REMOTE_MANIFEST.json",
+      "sha256": "5167a6542aa250e7f1de3b6009603cb17acdb43312507be2e25fc370cd4f10de"
+    },
+    {
+      "label": "attempt_j_controller_result",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/controller-result.json",
+      "sha256": "015e6350dbe25ecb1a97c072c5c6259bebe0f8cd8b63b878e409c8975a02ed0e"
+    },
+    {
+      "label": "attempt_j_function_completion",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/function-completion.json",
+      "sha256": "5b3c8f088625d1e8c790108bd165616a6e44b110ede4a97d66a202cfbf135826"
+    },
+    {
+      "label": "attempt_j_function_failure",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/function-failure.json",
+      "sha256": "8aad1a23ece1287ec95a9a86a001da3742e9f57986cb7d7c4f035e7107a70f5f"
+    },
+    {
+      "label": "attempt_j_function_finally_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/function-finally-cleanup.json",
+      "sha256": "4340731863e6271574e4dd00faac1a86dc8659f946ffc31a4b20cf7f4c192140"
+    },
+    {
+      "label": "attempt_j_in_function_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/in_function_cleanup.json",
+      "sha256": "9243ce948af5875057e3af836a2df82662c73720fd576e11f1ac0834e4c9fb57"
+    },
+    {
+      "label": "attempt_j_both_engines_ready",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/readiness/both-engines-ready.json",
+      "sha256": "e304f2317d30d067d912866c8deff75873729202867829012f597989857e051b"
+    },
+    {
+      "label": "attempt_j_serving_readiness",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/serving.ready.json",
+      "sha256": "e3587cffa4fcf56a7c4687a00406218c7135fcc09e38467b1b5e70da2bf571c4"
+    },
+    {
+      "label": "attempt_j_rollout_readiness",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/rollout.ready.json",
+      "sha256": "5cf944dc6323ccfdbf0d9495d4ee7ff32cc7ed1c095d9c6b755dcb5783b8d3b9"
+    },
+    {
+      "label": "attempt_j_probe_command",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/capacity/probe-00.command.json",
+      "sha256": "1070bbd9ff14b8ae74be57929c5f1ca8ae527fb4faec23395f64e84c87f871e7"
+    },
+    {
+      "label": "attempt_j_probe_gpu0_raw",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/capacity/probe-00.gpu0.raw.json",
+      "sha256": "5c3e1da4ffee429bc724cd61aafee8f30e05024c82b417355571f695c50d9c0e"
+    },
+    {
+      "label": "attempt_j_probe_gpu0_reset",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/capacity/probe-00.gpu0.reset.json",
+      "sha256": "aa1534e9e9f9b7d4b1faffb70611fd1ac1e459606e07a181ee16d3d4ad416224"
+    },
+    {
+      "label": "attempt_j_probe_gpu1_raw",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/capacity/probe-00.gpu1.raw.json",
+      "sha256": "49b759021cbb50977683fd0a5d0ce750790a62c2110040017dc278c48b6d131e"
+    },
+    {
+      "label": "attempt_j_probe_gpu1_reset",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-j/barriers/capacity/probe-00.gpu1.reset.json",
+      "sha256": "b98c9a5e608fc6fd85da52093444ecc515843a94bc986123ca81b44fb7350392"
+    },
+    {
+      "label": "attempt_j_conservative_failure_charge",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-j-conservative-charge.json",
+      "sha256": "cf6ca51e3a3dddf1a892f0383f622abee50598aaf89e1f75b5c9497a7f39dc49"
+    },
+    {
+      "label": "attempt_j_settled_ledger",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "a6209f1cd59e8471f342dccae5bf467b65e78ce17dd21d74165cb4c3ee845670"
+    },
+    {
+      "label": "agent12_attempt_j_runtime_capacity_review",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/reviews/agent12-attempt-j-runtime-capacity-review.json",
+      "sha256": "f5bef536dfe3fc3174158eb592c6c66da6635b19ca4f80ed49c359f111befa05"
+    }
+  ],
+  "fix_bindings": [
+    {
+      "label": "same_allocation_controller",
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "59f6eed10855f5957618a054f0cb089f2b443c1eb5d9764d882bdf7661bdcb44"
+    },
+    {
+      "label": "three_probe_scoped_worker_wrapper",
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py",
+      "sha256": "a9312a017116ffc86ac311b578da67f2afb97198815f30369c8ee3e0159c2002"
+    },
+    {
+      "label": "controller_and_readiness_tests",
+      "artifact": "tests/python/test_gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "a4c5acdad7377e6fdf0fcfbd87129ff0d7cc75213d8a1b99ec724d8f68d885c2"
+    },
+    {
+      "label": "same_allocation_reproduction_tests",
+      "artifact": "tests/python/test_gpu_reclamation_integrated_sanity_reproduction_v11.py",
+      "sha256": "18d086cd5f204aeca66a0c2894a9ce5dc5f20e61715579058777a6eadc648abe"
+    }
+  ],
+  "recommendation": "AUTHORIZE_EXACTLY_ONE_INTEGRATED_RETRY_K_AFTER_CONTENT_ADDRESSED_RESEAL",
+  "kill_and_recompute_authorized": false
+}

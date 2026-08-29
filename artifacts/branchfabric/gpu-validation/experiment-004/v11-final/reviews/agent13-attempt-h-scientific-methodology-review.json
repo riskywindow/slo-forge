@@ -1,0 +1,106 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-h-scientific-methodology-review/v1",
+  "status": "PASS",
+  "agent": 13,
+  "role": "independent-scientific-methodology-reviewer",
+  "attempt_id": "exp004-v11-integrated-s41-h",
+  "function_call_id": "fc-01M122M4JYMDD27K30ZJSR1P56",
+  "attempt_h_scientifically_valid": false,
+  "failure_classification": "INVALID_PRE_WORKER_MISSING_FROZEN_V10_REPLAY_IMAGE_CLOSURE",
+  "scientific_work_started": false,
+  "exact_pre_worker_failure_proven": true,
+  "image_closure_bug_proven": true,
+  "cleanup": {
+    "in_function": "PASS",
+    "provider": "PASS"
+  },
+  "evidence_bindings": [
+    {
+      "label": "attempt_h_status",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-h.json",
+      "sha256": "cfc4ebc883e6c8fd2ec7f5989c99ccf1248f5101d1a2ba2cc43ac4b2c2050d4a"
+    },
+    {
+      "label": "attempt_h_provider_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-h.json",
+      "sha256": "44ac116033e8f9e10bed74ff195b24dc3a43c074759a3a99b865227ff11c649f"
+    },
+    {
+      "label": "attempt_h_remote_manifest",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/REMOTE_MANIFEST.json",
+      "sha256": "07abf45fb974d9e73b881fea990de98aeb1bef5ea4818c3c9672eb918336dcfb"
+    },
+    {
+      "label": "attempt_h_controller_result",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/controller-result.json",
+      "sha256": "92a668d364ff62dfa7f803f24abdc3fc2c2109c2b3679cca87a1abbd4f76c5b3"
+    },
+    {
+      "label": "attempt_h_function_completion",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-completion.json",
+      "sha256": "80355ea6f71b96d3ff62cfc2a817bee54374549f61c06ad76e8061cc91c75a41"
+    },
+    {
+      "label": "attempt_h_function_failure",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-failure.json",
+      "sha256": "dd8960358c34ba76684f02cf757f386dca829431b2e048b23c05b3eb4a00e437"
+    },
+    {
+      "label": "attempt_h_function_finally_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/function-finally-cleanup.json",
+      "sha256": "4fc275276efb40fcab584d5823ac3ece736e7d8d8ed3c0ac998e85f91f9239e9"
+    },
+    {
+      "label": "attempt_h_in_function_cleanup",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-h/in_function_cleanup.json",
+      "sha256": "18c60202722a2dfbb4f55ec2cf25e9c7bec74187422d4311d6de76974d5e6f8f"
+    },
+    {
+      "label": "attempt_h_conservative_failure_charge",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-h-conservative-charge.json",
+      "sha256": "77bd380d72a4afe2d9e644262545e1313ed89a5830615fa7120adb4840fc7394"
+    },
+    {
+      "label": "settled_gpu_ledger",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "37cdf269d92611f947684d1d0f79152446d87a6753b98b87d5e732237dd8d00c"
+    },
+    {
+      "label": "attempt_h_config",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/exp004-v11-integrated-s41-h-config.json",
+      "sha256": "89f3db25c2cfc2ed1a222da75cdad0aba3dc2a2c44c8befac5ba5b8aba27b97d"
+    },
+    {
+      "label": "attempt_h_authorization_manifest",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-h-post-control-gate-pre-gpu-manifest.json",
+      "sha256": "84de6be77b13ebacec0019441a63fad2ffe7f87971ed2c4f0aa83083c5a9826d"
+    },
+    {
+      "label": "attempt_h_seal_verification",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/seal-verification-attempt-h.json",
+      "sha256": "6a8a1ec407e8d01fde3fdaaa5e77065f0b86fee1e74aa1d35fc95ce0847ecb83"
+    },
+    {
+      "label": "attempt_h_image_prebuild",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-image-prebuild/exp004-v11-integrated-s41-h.json",
+      "sha256": "ffe7db3d3a0106ea092d1b3cd357c0494cea0e38fb91774be6ff8f4c37a30d5f"
+    },
+    {
+      "label": "frozen_v10_remote_manifest",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/REMOTE_MANIFEST.json",
+      "sha256": "ada4d36309500d9e02d13cb1f31ce741248fdf54edddfc801155d13a3175ae04"
+    },
+    {
+      "label": "frozen_v10_serving_result",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/serving/result.json",
+      "sha256": "aa20776b88e0c0757059ccdafcdf82415357f024b2c3daff8c13f7e225576477"
+    },
+    {
+      "label": "frozen_v10_scientific_validity",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/analysis/scientific-validity.json",
+      "sha256": "1e0ac4601f658bcdc7e451cb07105ed836bd3f67e54deaf3a75e8b49b48bd1d8"
+    }
+  ],
+  "recommendation": "AUTHORIZE_EXACTLY_ONE_INTEGRATED_RETRY_I",
+  "kill_and_recompute_authorized": false
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-residual-amdahl/v1",
+  "status": "MICRO_ONLY_INTEGRATED_ECONOMIC_PATHS_NOT_IDENTIFIABLE",
+  "micro_non_overlapping_timing_seconds": {
+    "export_stage": 2.61309087,
+    "restore_stage": 4.438193614,
+    "continuation_after_restore": 0.205774608,
+    "full_micro_preservation_state_path": 7.051284484
+  },
+  "micro_stage_fractions": {
+    "source_export_stage": 0.3705836682563778,
+    "restore_stage": 0.6294163317436222,
+    "all_state_pipeline": 1.0
+  },
+  "micro_full_transaction_speedup": {
+    "source_export_stage": {
+      "2x": 1.2274333827621697,
+      "5x": 1.4213973005500367,
+      "10x": 1.5004320526296473,
+      "free": 1.5887735185227547
+    },
+    "restore_stage": {
+      "2x": 1.459232330226399,
+      "5x": 2.0142328326365098,
+      "10x": 2.3066704450691904,
+      "free": 2.6984459533931173
+    },
+    "all_state_pipeline": {
+      "2x": 2.0,
+      "5x": 5.0,
+      "10x": 10.0,
+      "free": null,
+      "free_reason": "The denominator is zero when the entire measured micro state path is removed; no finite speedup is defined."
+    }
+  },
+  "integrated_path_impacts": {
+    "time_to_hbm_reclamation": null,
+    "time_to_useful_gpu1_capacity": null,
+    "time_to_serving_slo_restoration": null,
+    "rollout_restore_latency": null,
+    "full_economic_preservation_transaction": null
+  },
+  "qualification": "The micro source and restore stages are coarse, non-overlapping measured walls, not isolated hardware-accelerable subchains. Integrated Amdahl and economic headroom are unidentifiable because attempt B failed before the reclaim trigger.",
+  "no_overlapping_record_durations_summed": true
+}

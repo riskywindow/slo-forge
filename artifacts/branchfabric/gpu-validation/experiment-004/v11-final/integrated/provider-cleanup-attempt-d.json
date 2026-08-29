@@ -1,0 +1,51 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-provider-cleanup/v1",
+  "observed_at_utc": "2026-08-24T02:57:34Z",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-integrated-s41-d",
+  "function_call_id": null,
+  "app_name": "sloforge-branchfabric-gpu-reclamation-004-v11-integrated",
+  "provider": "Modal",
+  "provider_observation": {
+    "active_apps": 0,
+    "stopped_apps": 2,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "authorized_persistent_volumes": [
+      "sloforge-branchfabric-results",
+      "sloforge-model-cache"
+    ],
+    "unexpected_persistent_volumes": []
+  },
+  "in_function_cleanup": {
+    "status": "NOT_APPLICABLE_FUNCTION_NOT_ENTERED",
+    "artifact": null,
+    "reason": "The Modal app stopped during image build after the local client heartbeat connection failed. No function call ID, function entry, controller result, worker, CUDA, or GPU allocation evidence exists."
+  },
+  "failure_evidence": {
+    "artifact": "failures/exp004-v11-integrated-s41-d-conservative-charge.json",
+    "sha256": "a3a3b9e3304fecb057d799209ead5dc80b5a6917ca5ba73b623e50c88e536986",
+    "stage": "modal-launch",
+    "actual_gpu_seconds": null,
+    "conservative_charged_gpu_seconds": 1176.0
+  },
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal endpoint list --json",
+    "modal queue list --json",
+    "modal dict list --json",
+    "modal volume list --json"
+  ],
+  "ledger": {
+    "active_reservations": 0,
+    "sha256_after_settlement": "8e8011ca993f82f4de7553fb0b2e1ff464d7a65b1c4148410194826895ad6e7d",
+    "conservative_consumed_gpu_seconds": 19397.975013231975,
+    "remaining_gpu_seconds": 2202.024986768025
+  },
+  "provenance": "Direct post-return Modal CLI observations, immutable conservative failure evidence, and authoritative ledger settlement. No GPU usage is claimed because no trusted function-allocation interval was produced."
+}

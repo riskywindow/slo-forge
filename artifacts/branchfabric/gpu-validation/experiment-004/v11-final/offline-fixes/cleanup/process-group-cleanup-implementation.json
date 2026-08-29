@@ -1,0 +1,42 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-cleanup-implementation/v1",
+  "status": "PASS",
+  "implemented_at_utc": "2026-08-20T02:54:30Z",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "root_cause": "The controller tested process-group emptiness before reaping a terminated worker leader. The unreaped zombie kept killpg(pgid, 0) true and produced a false survivor failure.",
+  "fix": {
+    "reap_during_term_and_kill_polling": true,
+    "bounded_sigterm_then_sigkill": true,
+    "forced_kills_recorded": true,
+    "pid_reuse_safe_descendant_tracking": true,
+    "linux_child_subreaper": true,
+    "ipc_pipe_thread_profiler_resource_tracker_checks": true,
+    "cuda_process_release_check": true,
+    "lifecycle": [
+      "RUNNING",
+      "QUIESCE",
+      "ENGINE_STOP",
+      "WORKER_STOP",
+      "CHILD_REAP",
+      "PGID_EMPTY",
+      "CUDA_RELEASED",
+      "FUNCTION_RETURN"
+    ],
+    "artifact": "in_function_cleanup.json"
+  },
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py": "a96df9ef7ff7b7a7d35708188ca91ec2d230438a1f174f2fe1279f4235b3e2c3",
+    "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py": "ebea747e9bcae1578db92982f5164160fc55ce4eb9c7ab8f02af92aa91720590"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_controller_v11.py": "44fb331995b5d4eb0dada853fdb59077e10f5fa0533a3d9a2b4e6c3a40db635a",
+    "tests/python/test_modal_gpu_reclamation_integrated_v11.py": "8cb2d10f3a0516c047bf458b022049a110e22c7a498d7514f48315831ea13844"
+  },
+  "verification": {
+    "agent03_targeted_suite": "90 passed",
+    "agent04_real_sigterm_ignoring_group_probe": "PASS; SIGKILL recorded; PGID empty",
+    "root_integrated_targeted_suite": "152 passed"
+  },
+  "real_gpu_confirmation_required": "The final invocation must produce a PASS in_function_cleanup.json before Function return."
+}

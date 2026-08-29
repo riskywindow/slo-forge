@@ -1,0 +1,6 @@
+policy deadline_batch
+input queue_length int 0 32
+input slo_slack_ms int 0 1000
+output int 0 4
+limit 64
+return (clamp (if (lt slo_slack_ms 20) 1 (min queue_length 4)) 0 4)

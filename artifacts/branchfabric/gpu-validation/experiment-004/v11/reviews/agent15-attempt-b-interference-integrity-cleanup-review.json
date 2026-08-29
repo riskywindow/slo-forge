@@ -1,0 +1,276 @@
+{
+  "schema_version": "sloforge.branchfabric.exp004-v11-agent15-attempt-b-interference-integrity-cleanup-review/v1",
+  "review_id": "agent15-attempt-b-interference-integrity-cleanup-review",
+  "reviewer_task_path": "/root/review_v11_integrity",
+  "reviewed_at_utc": "2026-08-19T05:28:02Z",
+  "status": "PASS",
+  "passed": true,
+  "review_verdict": "TERMINAL_FAILURE_EVIDENCE_COHERENT_AND_PROVIDER_CLEAN",
+  "attempt_id": "exp004-v11-integrated-s41-b",
+  "attempt_status": "FAILED_TERMINAL",
+  "scientific_status": "INVALID_PRE_RECLAIM_BOUNDED_BACKLOG_ABORT",
+  "scientifically_valid_integrated_transaction": false,
+  "retry_authorized": false,
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "source_modified_by_reviewer": false,
+  "review_artifacts_modified_only": true,
+  "failure_boundary": {
+    "stage": "PRE_RECLAIM_GPU0_OVERLOAD_BACKLOG_SAFETY_ABORT",
+    "error_type": "RuntimeError",
+    "error_message": "calibrated v10 backlog exceeded its bounded safety ceiling during pre-reclaim",
+    "reclaim_trigger_exists": false,
+    "start_monotonic_ns": 204943491072,
+    "failure_observed_monotonic_ns": 217626169035,
+    "seconds_from_start_to_failure": 12.682677963,
+    "seconds_from_spike_start_to_failure": 7.682677963,
+    "total_outstanding_at_abort": 65,
+    "bounded_safety_ceiling": 64,
+    "runtime_running_requests": 16,
+    "runtime_waiting_requests": 48,
+    "external_gpu0_queue_size": 1,
+    "producer_thread_stopped": true
+  },
+  "hardware_identity": {
+    "inventory_before_pass": true,
+    "gpu_count": 2,
+    "gpu_names": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA A100-SXM4-80GB"
+    ],
+    "gpu_uuids": [
+      "GPU-fa6b9b63-9524-7b67-b047-3294b4520f59",
+      "GPU-b25f165e-23f7-9af6-4e24-b34940efeadb"
+    ],
+    "distinct_uuids": true,
+    "engine_start_readiness_and_transaction_ready_identity_continuity": true,
+    "inventory_after": [],
+    "controller_stable_physical_gpu_identity_gate": false,
+    "direct_v10_timing_comparison_scientifically_admissible": false,
+    "reason": "The physical devices were exact SXM4-80GB units before and through transaction readiness, but the experiment failed before the transaction and did not produce a valid post-run identity or integrated result."
+  },
+  "measured_evidence": {
+    "both_engines_ready": true,
+    "serving_readiness_pass": true,
+    "rollout_readiness_pass": true,
+    "runtime_versions": {
+      "vllm": "0.23.0",
+      "torch": "2.11.0",
+      "transformers": "5.14.1",
+      "dtype": "bfloat16"
+    },
+    "sanity_12rps": {
+      "passed": true,
+      "measurement_seconds": 3.0,
+      "offered_rate_rps": 12.0,
+      "completed_rate_rps": 12.0,
+      "queue_slope_requests_per_second": 0.0,
+      "p95_ttft_seconds": 0.046882928750000004
+    },
+    "sanity_15rps": {
+      "passed": true,
+      "measurement_seconds": 3.0,
+      "offered_rate_rps": 15.0,
+      "completed_rate_rps": 13.666666666666666,
+      "queue_slope_requests_per_second": 1.3,
+      "p95_ttft_seconds": 0.2678379936
+    },
+    "transaction_ready": {
+      "serving_pass": true,
+      "rollout_pass": true,
+      "rollout_branch_count": 8,
+      "exact_1152_block_topology_proved": false,
+      "integrated_continuation_correctness_proved": false
+    },
+    "partial_pre_reclaim_serving": {
+      "classification": "DESCRIPTIVE_FAILURE_EVIDENCE_ONLY",
+      "offered_requests": 161,
+      "request_records": 160,
+      "control_offered": 45,
+      "overload_offered": 116,
+      "completed_requests": 96,
+      "requests_with_first_token": 112,
+      "gpu1_incremental_active_requests": 0,
+      "gpu1_incremental_completed_requests": 0
+    },
+    "provider_allocation": {
+      "allocation_seconds": 584.161194259,
+      "actual_gpu_seconds": 1168.322388518,
+      "actual_gpu_hours": 0.32453399681055556,
+      "actual_cost_usd": 0.8108157376314921
+    }
+  },
+  "not_reached": {
+    "reclaim_trigger": true,
+    "rollout_quiesce_for_export": true,
+    "v11_export_capture": true,
+    "v11_integrity_publish": true,
+    "source_release": true,
+    "post_free_ownership_refcount_proof": true,
+    "hbm_reclamation_measurement": true,
+    "gpu1_serving_enablement": true,
+    "first_useful_gpu1_request": true,
+    "two_gpu_excess_service": true,
+    "queue_drain": true,
+    "serving_slo_restoration": true,
+    "five_second_slo_stability": true,
+    "restore_trigger": true,
+    "v11_import": true,
+    "destination_integrity": true,
+    "fresh_destination_epoch_and_mapping_validation": true,
+    "destination_admission": true,
+    "integrated_branch_continuation": true,
+    "integrated_8_of_8_first_token_comparison": true
+  },
+  "invalid_or_unavailable_results": {
+    "integrated_v11_scientific_validity": false,
+    "integrated_v11_full_physical_amplification": null,
+    "integrated_v11_external_amplification": null,
+    "integrated_v11_avoidable_amplification": null,
+    "integrated_v11_state_pass_count": null,
+    "integrated_v11_export_latency": null,
+    "integrated_v11_hbm_reclamation_time": null,
+    "integrated_v11_first_useful_gpu1_time": null,
+    "integrated_v11_slo_restoration_time": null,
+    "integrated_v11_restore_latency": null,
+    "integrated_v11_integrity_and_8_of_8": null,
+    "v10_vs_integrated_v11_timing_comparison": null,
+    "gpu0_interference_during_gpu1_restore": null,
+    "kill_and_recompute_admission": false,
+    "note": "The separately valid attempt-D micro-validation remains measured evidence; none of its 21.000762818351625x or 8/8 results are integrated attempt-B measurements."
+  },
+  "gpu0_restore_interference": {
+    "status": "NOT_REACHED",
+    "restore_start_artifact_exists": false,
+    "arrivals": null,
+    "completions": null,
+    "emitted_tokens": null,
+    "completion_rps": null,
+    "token_rps": null,
+    "p95_ttft": null,
+    "queue_depth": null,
+    "claim_of_improvement_over_v10": false
+  },
+  "state_pipeline_integrity": {
+    "v11_state_pipeline_entered": false,
+    "causal_reason": "GPU1 waits for the immutable v10-reclaim-trigger barrier before constructing the export plan or calling capture_native_to_transport_v11; that barrier does not exist.",
+    "manifest_paths_matching_reclaim": 0,
+    "manifest_paths_matching_export": 0,
+    "manifest_paths_matching_import": 0,
+    "manifest_paths_matching_state_pass": 0,
+    "manifest_paths_matching_movement": 0,
+    "manifest_paths_matching_ownership": 0,
+    "manifest_paths_matching_restore": 0,
+    "manifest_paths_matching_admission": 0,
+    "integrated_state_pass_records_produced": 0,
+    "integrated_movement_accounting_produced": false
+  },
+  "artifact_integrity": {
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/REMOTE_MANIFEST.json",
+      "sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+      "rows": 460,
+      "bytes": 20098327,
+      "rows_downloaded": 460,
+      "rows_with_exact_size_and_sha256": 460,
+      "missing_rows": 0,
+      "unexpected_files_excluding_manifest": 0,
+      "passed": true
+    },
+    "controller_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/controller-result.json",
+      "sha256": "26392f35aa4f0fbb5aa349f2e6ea7b799528702e32ccadf2dfb33865f649251b"
+    },
+    "function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/function-completion.json",
+      "sha256": "4dbdec0121beed0bdb5ca7bc86667d8911a00b9128107686ac8544a39a9dde97"
+    },
+    "function_call_return": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/function-call-return.json",
+      "sha256": "78fd8545d369159d3c68945ebda4a56afe13ac21a40d7384982138ab73baba9b"
+    },
+    "function_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/function-failure.json",
+      "sha256": "dd5df917eef4a538f693337a1c047f300167cdad4d2bf08ce5396011b0b8d329"
+    },
+    "abort": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/barriers/abort.json",
+      "sha256": "1b59141d3daf2e66fd439d3801641283952d9c18d435db4033f65ec81b949acb"
+    },
+    "partial_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/barriers/v10-gpu0-partial-failure.json",
+      "sha256": "15623fe28138f59b86d63aab60a26b1d09cc8f7389e7c92d0b82f819a3700c33"
+    },
+    "readiness": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/readiness/both-engines-ready.json",
+      "sha256": "cc7753f8cb8c2bb77753ce2a7dd4ff11b1e2f526c57ca89462c26aaf5335e5cb"
+    }
+  },
+  "worker_teardown": {
+    "serving_pid": 8,
+    "serving_returncode": 1,
+    "serving_failure_artifact_written": true,
+    "serving_run_worker_finally_path_present_in_source": true,
+    "serving_typed_teardown_completion_artifact": false,
+    "rollout_pid": 9,
+    "rollout_returncode_at_controller_result": null,
+    "rollout_sigterm_sent": true,
+    "rollout_sigkill_sent": true,
+    "rollout_process_group_reported_surviving_sigkill": true,
+    "rollout_typed_teardown_proved": false,
+    "both_worker_typed_teardown_proved": false,
+    "gpu_compute_processes_after_controller_cleanup": [],
+    "assessment": "The controller correctly failed closed, but its in-run cleanup gate failed. Final provider teardown, not worker-level typed teardown, proves that no live resource remains."
+  },
+  "cleanup_and_settlement": {
+    "controller_in_run_cleanup_gate": "FAIL",
+    "controller_cleanup_error": "worker process groups survived SIGKILL: [9]",
+    "controller_compute_processes_after": [],
+    "launcher_finally_provider_status_at_function_return": "PENDING_LOCAL_POSTFLIGHT",
+    "provider_postflight_cleanup": "PASS",
+    "app_state": "stopped",
+    "app_tasks": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "active_apps": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "only_authorized_persistent_volumes_remain": true,
+    "final_resource_leak": false,
+    "postflight_artifact": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180"
+    }
+  },
+  "budget_settlement": {
+    "method": "CONSERVATIVE_FULL_BOUND_FAILURE_CHARGE",
+    "actual_provider_gpu_seconds": 1168.322388518,
+    "conservative_charged_gpu_seconds": 1176.0,
+    "conservative_minus_actual_gpu_seconds": 7.677611482,
+    "conservative_cost_usd": 0.816144,
+    "ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7",
+      "consumed_cumulative_gpu_seconds": 16113.513626085978,
+      "consumed_cumulative_gpu_hours": 4.475976007246105,
+      "remaining_authorized_gpu_seconds": 5486.486373914022,
+      "active_reservations": 0
+    },
+    "reservation": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/gpu-reservation.json",
+      "sha256": "03a1df2bc6dbe19dc71e541d2deda46e6f6ba39411134ef35a4cd4368faee694",
+      "status": "TERMINAL_FAILURE_CONSERVATIVELY_SETTLED",
+      "additional_attempt_authorized": false
+    }
+  },
+  "terminal_conclusions": [
+    "Attempt B is the authorized replacement and is terminally failed and scientifically invalid; it must not be retried or relabeled as the integrated v11 transaction.",
+    "The bounded-backlog guard worked as designed and stopped the run before reclaim. It therefore protected scientific validity but left no integrated state-pipeline result.",
+    "No integrated v11 export, release, ownership proof, HBM reclamation, GPU1 serving recovery, import, admission, continuation, movement, or restore-interference measurement exists.",
+    "The full remote evidence set is content-integral. Provider cleanup and budget settlement pass, while the in-run controller cleanup and typed worker teardown evidence do not pass.",
+    "The separately measured attempt-D micro-validation remains valid and must remain clearly separated from this invalid integrated attempt."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-economic-headroom/v1",
+  "status": "NOT_IDENTIFIABLE_INTEGRATED_AND_KILL_ARMS_NOT_REACHED",
+  "authoritative_sources": [
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/postflight-cleanup-and-settlement.json",
+      "sha256": "82678f57e9e346f1b4dc68fd6df15d6685987aeda44ef1fd30e7284a5ab55180"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent16-economic-budget-cleanup-review.json",
+      "sha256": "d6eb0ba6b9727e73c5db980f6560b6812e410f8c409a453c6cc65eee44e6dae9"
+    },
+    {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent19-terminal-hardware-placement-economic-review.json",
+      "sha256": "b4d41a389e860f75d9b9d28ad217c464732acb5ea5ae8766b9dd4d5b91860127"
+    }
+  ],
+  "required_economic_impacts": {
+    "trajectories_per_gpu_hour": {"value": null, "status": "NOT_REACHED", "reason": "No valid integrated preservation transaction or kill/recompute arm completed."},
+    "reclaimed_gpu_capacity_availability": {"value": null, "status": "NOT_REACHED", "reason": "The reclaim trigger was not reached and HBM was not reclaimed."},
+    "rollout_interruption": {"value": null, "status": "NOT_REACHED", "reason": "No integrated restore or kill/recompute continuation interval exists."},
+    "wasted_recomputation": {"value": null, "status": "NOT_REACHED", "reason": "The kill/recompute arm was forbidden and actual recompute work was not measured."},
+    "dollar_cost_impact": {"value": null, "status": "NOT_IDENTIFIABLE", "reason": "GPU campaign cost is measured, but no valid end-to-end arm pair exists from which to attribute an acceleration cost delta."}
+  },
+  "measured_budget_context_not_acceleration_impact": {
+    "campaign_conservative_a100_hours": 4.475976007246105,
+    "campaign_conservative_cost_usd": 11.18277845650367,
+    "v11_known_actual_a100_hours_lower_bound": 0.5450292396083333,
+    "v11_conservative_a100_hours": 0.9879694444444445
+  },
+  "no_null_value_presented_as_zero": true,
+  "no_hardware_economic_claim": true
+}

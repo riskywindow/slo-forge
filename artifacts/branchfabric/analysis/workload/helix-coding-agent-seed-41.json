@@ -1,0 +1,743 @@
+{
+  "schema_version": "sloforge.branchfabric.workload-analysis/v1",
+  "evidence": {
+    "branch_trace": {
+      "source_experiment": "helix-coding-agent-seed-41",
+      "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/branch-workload-trace-v1.jsonl",
+      "artifact_sha256": "ebc7dbd2517a59ab84a86c2e5a4cce24a5218364dbed21a9f8558486d693f49a",
+      "seed": 41,
+      "repetition": 0,
+      "event_count": 61,
+      "trace_ids": [
+        "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82"
+      ],
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    },
+    "state_trace": {
+      "source_experiment": "helix-coding-agent-seed-41",
+      "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/state-operation-trace-v1.jsonl",
+      "artifact_sha256": "685448b9670c021f85e46518f00b8d4b231d43ef91ba98d30cdf4d36854b5f3d",
+      "seed": 41,
+      "repetition": 0,
+      "event_count": 17,
+      "trace_ids": [
+        "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82"
+      ],
+      "workload_provenance": [
+        "SYNTHETIC"
+      ],
+      "timing_measurement_classes": [
+        "HARDWARE_BACKED_REAL"
+      ]
+    },
+    "trajectories": [
+      {
+        "source_experiment": "helix-coding-agent-seed-41",
+        "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/alternative-tool.json",
+        "artifact_sha256": "9a2a0a4c06aafb2df79f82d22463dd7a64cd9d1dafbd6aedbb779bb8e6f52fbc",
+        "seed": 41,
+        "repetition": 0,
+        "branch_id": "alternative-tool",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "byte_length": 3437,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "helix-coding-agent-seed-41",
+        "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/different-rng.json",
+        "artifact_sha256": "1e65ccd1c8b3f5baf0ab8f47467846d89e2a91dc90e56827cf1dfbfd10e379b1",
+        "seed": 41,
+        "repetition": 0,
+        "branch_id": "different-rng",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "byte_length": 3433,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "helix-coding-agent-seed-41",
+        "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/forced-alternative.json",
+        "artifact_sha256": "dea1402d1bef5755832596073630dc35ee1f1b40365b64e0ca0966289a13cf1e",
+        "seed": 41,
+        "repetition": 0,
+        "branch_id": "forced-alternative",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "byte_length": 3454,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "source_experiment": "helix-coding-agent-seed-41",
+        "artifact_reference": "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/verifier-assisted.json",
+        "artifact_sha256": "a9fc2b19fd8b947ade307bc6e9f36954b2449c0333533b8afa2a03112a739ff5",
+        "seed": 41,
+        "repetition": 0,
+        "branch_id": "verifier-assisted",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "byte_length": 3454,
+        "token_count": 1,
+        "action_count": 1,
+        "provenance": "SYNTHETIC"
+      }
+    ]
+  },
+  "branch_dag": {
+    "nodes": [
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "branch_id": "alternative-tool",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 26946000,
+        "fork_complete_timestamp_ns": 73246291,
+        "first_private_timestamp_ns": 243766000,
+        "fork_to_first_private_ns": 170519709,
+        "terminal_timestamp_ns": 411912333,
+        "lifetime_ns": 384966333,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "branch_id": "different-rng",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 26946000,
+        "fork_complete_timestamp_ns": 73246291,
+        "first_private_timestamp_ns": 78936583,
+        "fork_to_first_private_ns": 5690292,
+        "terminal_timestamp_ns": 411097000,
+        "lifetime_ns": 384151000,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "branch_id": "forced-alternative",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 26946000,
+        "fork_complete_timestamp_ns": 73246291,
+        "first_private_timestamp_ns": 162048041,
+        "fork_to_first_private_ns": 88801750,
+        "terminal_timestamp_ns": 411521541,
+        "lifetime_ns": 384575541,
+        "outcome": "SUCCEEDED",
+        "pruned": false,
+        "aborted": false,
+        "succeeded": true
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "branch_id": "verifier-assisted",
+        "parent_branch_id": "production-session",
+        "fork_timestamp_ns": 26946000,
+        "fork_complete_timestamp_ns": 73246291,
+        "first_private_timestamp_ns": 326712875,
+        "fork_to_first_private_ns": 253466584,
+        "terminal_timestamp_ns": 412309041,
+        "lifetime_ns": 385363041,
+        "outcome": "PRUNED",
+        "pruned": true,
+        "aborted": false,
+        "succeeded": false
+      }
+    ],
+    "edges": [
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "alternative-tool"
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "different-rng"
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "forced-alternative"
+      },
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "parent_branch_id": "production-session",
+        "child_branch_id": "verifier-assisted"
+      }
+    ],
+    "groups": [
+      {
+        "trace_id": "1babd35d9669e57e2376ff3ba1292707149fa07f1dad422dde194924386fdb82",
+        "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+        "parent_branch_id": "production-session",
+        "branch_ids": [
+          "alternative-tool",
+          "different-rng",
+          "forced-alternative",
+          "verifier-assisted"
+        ],
+        "fanout": 4,
+        "pruned_count": 3,
+        "aborted_count": 0,
+        "succeeded_count": 1,
+        "active_or_unknown_count": 0,
+        "shared_root_creation_timestamp_ns": 73246291,
+        "shared_root_last_reference_timestamp_ns": 412309041,
+        "shared_root_lifetime_ns": 339062750,
+        "shared_root_logical_bytes": null,
+        "peak_refcount": 4,
+        "refcount_timeline": [
+          {
+            "normalized_timestamp_ns": 73246291,
+            "refcount": 4
+          },
+          {
+            "normalized_timestamp_ns": 411097000,
+            "refcount": 3
+          },
+          {
+            "normalized_timestamp_ns": 411521541,
+            "refcount": 2
+          },
+          {
+            "normalized_timestamp_ns": 411912333,
+            "refcount": 1
+          },
+          {
+            "normalized_timestamp_ns": 412309041,
+            "refcount": 0
+          }
+        ],
+        "active_siblings_timeline": [
+          {
+            "normalized_timestamp_ns": 73246291,
+            "active_siblings": 4
+          },
+          {
+            "normalized_timestamp_ns": 411097000,
+            "active_siblings": 3
+          },
+          {
+            "normalized_timestamp_ns": 411521541,
+            "active_siblings": 2
+          },
+          {
+            "normalized_timestamp_ns": 411912333,
+            "active_siblings": 1
+          },
+          {
+            "normalized_timestamp_ns": 412309041,
+            "active_siblings": 0
+          }
+        ]
+      }
+    ],
+    "fanout": {
+      "sample_count": 1,
+      "minimum": 4,
+      "p50": 4,
+      "p95": 4,
+      "p99": 4,
+      "maximum": 4,
+      "percentile_method": "nearest-rank"
+    },
+    "branch_lifetime_ns": {
+      "sample_count": 4,
+      "minimum": 384151000,
+      "p50": 384575541,
+      "p95": 385363041,
+      "p99": 385363041,
+      "maximum": 385363041,
+      "percentile_method": "nearest-rank"
+    },
+    "fork_to_first_private_ns": {
+      "sample_count": 4,
+      "minimum": 5690292,
+      "p50": 88801750,
+      "p95": 253466584,
+      "p99": 253466584,
+      "maximum": 253466584,
+      "percentile_method": "nearest-rank"
+    }
+  },
+  "divergence": [
+    {
+      "branch_group_id": "af0a5ff8052c295bf55473c060e39abc2c3a7105f8eb284767c21c43f4e345a5",
+      "coverage": "COMPLETE",
+      "expected_branch_ids": [
+        "alternative-tool",
+        "different-rng",
+        "forced-alternative",
+        "verifier-assisted"
+      ],
+      "compared_branch_ids": [
+        "alternative-tool",
+        "different-rng",
+        "forced-alternative",
+        "verifier-assisted"
+      ],
+      "first_divergent_token_index": 0,
+      "token_sequences_all_equal": false,
+      "first_divergent_action_index": 0,
+      "action_sequences_all_equal": false,
+      "trajectory_artifact_references": [
+        "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/alternative-tool.json",
+        "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/different-rng.json",
+        "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/forced-alternative.json",
+        "artifacts/branchfabric/characterization/vertical-seed-41-final/helix-demo/trajectories/verifier-assisted.json"
+      ]
+    }
+  ],
+  "state_composition": {
+    "segments": [
+      {
+        "state_segment": "model",
+        "logical_state_count": 5,
+        "unique_logical_state_bytes": 13300,
+        "operation_observed_bytes": 13300
+      },
+      {
+        "state_segment": "token_history",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "kv",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "recurrent",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "sampler",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "guided_decoding",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "workflow",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "environment",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "filesystem",
+        "logical_state_count": 9,
+        "unique_logical_state_bytes": 6376,
+        "operation_observed_bytes": 7325
+      },
+      {
+        "state_segment": "database",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "process_reconstruction",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "transaction",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "integrity",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "runtime_reconstructible",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      },
+      {
+        "state_segment": "unknown",
+        "logical_state_count": 0,
+        "unique_logical_state_bytes": 0,
+        "operation_observed_bytes": 0
+      }
+    ],
+    "model_state_bytes": 0,
+    "environment_state_bytes": 6376,
+    "workflow_transaction_and_integrity_bytes": 0,
+    "unknown_segment_bytes": 0,
+    "byte_semantics": "max bytes per logical_state_id and segment; operation bytes reported separately"
+  },
+  "operation_queues": [
+    {
+      "operation_type": "STATE_COW",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_FORK",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_FREE",
+      "event_count": 4,
+      "concurrency": {
+        "sample_count": 4,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 4,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    },
+    {
+      "operation_type": "STATE_SNAPSHOT",
+      "event_count": 5,
+      "concurrency": {
+        "sample_count": 5,
+        "minimum": 1,
+        "p50": 1,
+        "p95": 1,
+        "p99": 1,
+        "maximum": 1,
+        "percentile_method": "nearest-rank"
+      },
+      "queue_delay_ns": {
+        "sample_count": 5,
+        "minimum": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "maximum": 0,
+        "percentile_method": "nearest-rank"
+      }
+    }
+  ],
+  "waterfall": {
+    "stages": [
+      {
+        "stage": "PRODUCTION",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "CAPTURE",
+        "observed": true,
+        "event_count": 1,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 13968417,
+        "inclusive_wall_union_ns": 13968417,
+        "wall_envelope_ns": 13968417,
+        "cpu_time_ns": 13783000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 1062,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "FORK",
+        "observed": true,
+        "event_count": 8,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 7,
+        "inclusive_span_duration_sum_ns": 46300291,
+        "inclusive_wall_union_ns": 46300291,
+        "wall_envelope_ns": 46300291,
+        "cpu_time_ns": 46298000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 10640,
+        "branch_payload_bytes": 0,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "BRANCH_READY",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "ROLLOUT",
+        "observed": true,
+        "event_count": 4,
+        "unique_timing_span_count": 4,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 10147750,
+        "inclusive_wall_union_ns": 10147750,
+        "wall_envelope_ns": 250408083,
+        "cpu_time_ns": 9826000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 13774,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "PRUNE",
+        "observed": true,
+        "event_count": 3,
+        "unique_timing_span_count": 3,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 762333,
+        "inclusive_wall_union_ns": 762333,
+        "wall_envelope_ns": 1499166,
+        "cpu_time_ns": 759000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 0,
+        "branch_count": 3,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "CHECKPOINT",
+        "observed": true,
+        "event_count": 5,
+        "unique_timing_span_count": 5,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 19543875,
+        "inclusive_wall_union_ns": 19543875,
+        "wall_envelope_ns": 322905625,
+        "cpu_time_ns": 19172000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 5671,
+        "branch_payload_bytes": 0,
+        "branch_count": 5,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "MIGRATE",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "RESUME",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "REWARD",
+        "observed": true,
+        "event_count": 4,
+        "unique_timing_span_count": 4,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 316409293,
+        "inclusive_wall_union_ns": 316409293,
+        "wall_envelope_ns": 326535375,
+        "cpu_time_ns": 41377000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 9109,
+        "branch_count": 4,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "TRAIN",
+        "observed": true,
+        "event_count": 2,
+        "unique_timing_span_count": 2,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 513125,
+        "inclusive_wall_union_ns": 513125,
+        "wall_envelope_ns": 611459,
+        "cpu_time_ns": 512000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 5060,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "EVALUATE",
+        "observed": false,
+        "event_count": 0,
+        "unique_timing_span_count": 0,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": null,
+        "inclusive_wall_union_ns": null,
+        "wall_envelope_ns": null,
+        "cpu_time_ns": null,
+        "gpu_time_ns": null,
+        "network_bytes": null,
+        "storage_bytes": null,
+        "state_operation_bytes": null,
+        "branch_payload_bytes": null,
+        "branch_count": null,
+        "exclusive_critical_path_ns": null
+      },
+      {
+        "stage": "PROMOTE",
+        "observed": true,
+        "event_count": 1,
+        "unique_timing_span_count": 1,
+        "timing_deduplicated_event_count": 0,
+        "inclusive_span_duration_sum_ns": 395875,
+        "inclusive_wall_union_ns": 395875,
+        "wall_envelope_ns": 395875,
+        "cpu_time_ns": 363000,
+        "gpu_time_ns": null,
+        "network_bytes": 0,
+        "storage_bytes": 0,
+        "state_operation_bytes": 0,
+        "branch_payload_bytes": 0,
+        "branch_count": 0,
+        "exclusive_critical_path_ns": null
+      }
+    ],
+    "end_to_end_wall_envelope_ns": 10750605167,
+    "sum_of_stage_inclusive_unions_ns": 408040959,
+    "exclusive_critical_path_ns": null,
+    "timing_span_sidecar_entries_used": 12,
+    "timing_policy": "inclusive spans; explicit span IDs deduplicated; exclusive critical path unknown"
+  },
+  "unknowns": [
+    "exclusive critical-path time is unavailable from inclusive event spans",
+    "shared-root physical bytes are unavailable in canonical BranchWorkloadTrace v1",
+    "shared-root refcounts are derived from fork/terminal boundaries, not metadata counters",
+    "state composition is logical-state identity deduplication, not simultaneous residency"
+  ]
+}

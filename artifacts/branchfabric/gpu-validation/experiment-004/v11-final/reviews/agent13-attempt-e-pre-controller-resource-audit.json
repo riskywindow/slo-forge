@@ -1,0 +1,150 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-attempt-e-pre-controller-resource-audit/v1",
+  "reviewed_at_utc": "2026-08-26T23:10:33Z",
+  "review_scope": "Offline, read-only reconstruction of Experiment 004 integrated Attempt E before controller transaction setup. This review does not claim an in-function cleanup pass.",
+  "status": "PASS_SCOPED_CONTROLLER_RESOURCE_NON_CREATION",
+  "attempt_id": "exp004-v11-integrated-s41-e",
+  "function_call_id": "fc-01M104ZGT6J8YPBJ50BN0BMT9H",
+  "scientific_classification": "INVALID_PRE_CONTROLLER_MISSING_BUNDLED_LEDGER",
+  "failure_boundary": {
+    "exception": "FileNotFoundError",
+    "missing_path": "/opt/sloforge/artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "controller_python_invoked": true,
+    "controller_transaction_started": false,
+    "failure_location": "run_integrated_v11_controller -> verify_sealed_evidence -> _verify_prefunction_retry_integrated_authorization -> validate_bound_artifact -> Path.resolve(strict=True)",
+    "semantic_consequence": "The failure preceded live-contract expansion, controller work-tree construction, CUDA-clean audit, physical GPU inventory, compute-process audit, process-lifecycle construction, worker spawn, engine creation, allocator activity, source capture, export, and release."
+  },
+  "code_path_proof": {
+    "attempt_e_prelaunch_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/authorization/attempt-e-post-prefunction-pre-gpu-manifest.json",
+      "sha256": "b66879ec7cc3cd5606a24288ff33f929a8a21be3021f81da17fa366969cac8da",
+      "interpretation": "This immutable manifest binds the exact controller and launcher source hashes that executed in Attempt E. Later fresh-attempt admission edits may change the live worktree and do not rewrite the historical binding."
+    },
+    "controller_source": {
+      "artifact": "experiments/branchfabric/gpu_reclamation_integrated_controller_v11.py",
+      "sha256": "0818ca0ad905ef77a2ea38a2d0a9f842baffd64a04067c72c368b3cf01a25ec0",
+      "bound_by_attempt_e_prelaunch": true,
+      "historical_attempt_e_source_hash": true
+    },
+    "launcher_source": {
+      "artifact": "experiments/branchfabric/modal_gpu_reclamation_integrated_v11.py",
+      "sha256": "5fffb0c62c121c48270f805c1cea37a831f195d2cd5eb98d8b8d933f405b78b4",
+      "bound_by_attempt_e_prelaunch": true,
+      "historical_attempt_e_source_hash": true
+    },
+    "ordered_controller_sites_after_failure": [
+      "build_live_v10_config",
+      "expanded_runtime_config",
+      "controller work_root.mkdir",
+      "cuda_clean_import_audit before inventory",
+      "physical GPU inventory",
+      "compute-process audit",
+      "children list construction",
+      "_ProcessLifecycleAudit construction",
+      "subprocess.Popen serving worker",
+      "subprocess.Popen rollout worker",
+      "engine-start wait"
+    ],
+    "launcher_activity_before_failure": {
+      "model_snapshot_manifest_and_file_hash_validation": true,
+      "model_runtime_loaded": false,
+      "controller_worker_spawned": false,
+      "controller_cuda_context_created": false,
+      "note": "The launcher performed bounded file and hash validation of the pinned snapshot. That is not model runtime loading or engine creation."
+    }
+  },
+  "immutable_remote_bundle_audit": {
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/REMOTE_MANIFEST.json",
+      "sha256": "9d8890e16b75e2b612861a85deaebf81874d782f97d1bdd8dd366891a3e46747",
+      "listed_artifacts": 3,
+      "verified_artifacts": 3,
+      "missing_artifacts": 0,
+      "unexpected_artifacts": 0,
+      "sha256_or_size_mismatches": 0
+    },
+    "function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-completion.json",
+      "sha256": "219f62c577d27fdb599ea55a5f8abbfadff8b473da6d0037f437ba4f7a7d1c8b",
+      "controller_status": "failed",
+      "observed_gpu_names": [],
+      "observed_gpu_uuids": [],
+      "in_function_cleanup": null
+    },
+    "function_failure": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-failure.json",
+      "sha256": "6565fca972ee3dcefa8fb33b646439c6cd2a6a3228b0f9c2246d1c651a8d5f89"
+    },
+    "function_finally_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/raw/exp004-v11-integrated-s41-e/function-finally-cleanup.json",
+      "sha256": "ea38385b840a5e7fee13bf9fecd552d3b562d8ca88a689d55e1a07d0172b8143",
+      "controller_cleanup_evidence_present": false,
+      "in_function_cleanup_pass": false
+    },
+    "absent_controller_artifacts": [
+      "controller-result.json",
+      "in_function_cleanup.json",
+      "barriers/",
+      "serving/",
+      "rollout/"
+    ]
+  },
+  "controller_owned_resource_findings": {
+    "worker_processes_created": false,
+    "worker_process_groups_created": false,
+    "worker_sessions_created": false,
+    "engine_processes_created": false,
+    "controller_inventory_executed": false,
+    "controller_cuda_audit_executed": false,
+    "controller_cuda_context_created": false,
+    "controller_allocator_lifecycle_started": false,
+    "controller_ipc_resources_created": false,
+    "source_capture_started": false,
+    "optimized_export_started": false,
+    "transaction_source_release_started": false,
+    "proof_kind": "Static reachability joined to the exact remote traceback and immutable artifact inventory; not a contemporaneous in-function process snapshot."
+  },
+  "post_return_provider_audit": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/provider-cleanup-attempt-e.json",
+    "sha256": "9ce05c1dc289c67bab147e6aa30deadd87366ec24382c4472fb00c4f8a2c7b20",
+    "status": "PASS",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "queues": 0,
+    "dicts": 0,
+    "provider_reservations": 0,
+    "unexpected_persistent_volumes": []
+  },
+  "cross_artifact_bindings": {
+    "status": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/status-attempt-e.json",
+      "sha256": "0f163e5cf5db5f07ee85e2fbe13baa74df969e18f4598c9ab83d864f49c339ea"
+    },
+    "conservative_charge": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/integrated/failures/exp004-v11-integrated-s41-e-conservative-charge.json",
+      "sha256": "3efbc040ee92364e93606bc550fe93c37fac57ee3c1950e30196d1e96b1d2bc7",
+      "charged_gpu_seconds": 1176.0
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "d9d8e40909b1ffa67f3182545527dcc051c676b7164f6315b18fa5e69ad9ead4",
+      "active_reservations": 0
+    }
+  },
+  "cleanup_classification": {
+    "controller_owned_resources_created": false,
+    "provider_cleanup": "PASS",
+    "in_function_cleanup": "FAIL_MISSING_PRE_CONTROLLER_CLEANUP_EVIDENCE",
+    "in_function_cleanup_pass": false,
+    "retrospective_pass_forbidden": true,
+    "interpretation": "The exact code path proves no controller-owned runtime resources were created, and the provider later returned to zero. Because Attempt E emitted no in-function cleanup record or contemporaneous resource snapshot, this scoped proof must not be relabeled as IN_FUNCTION_CLEANUP_PASS."
+  },
+  "limitations": [
+    "This review does not prove absence of provider-internal processes during the FunctionCall.",
+    "This review does not replace the missing contemporaneous in-function process, IPC, profiler, or CUDA-resource audit.",
+    "This review does not authorize another GPU invocation by itself."
+  ],
+  "review_decision": "SCOPED_PROOF_ACCEPTED_WITH_CLEANUP_FAILURE_PRESERVED"
+}

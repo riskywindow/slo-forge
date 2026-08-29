@@ -1,0 +1,95 @@
+{
+  "audit": "canonical CUDA StatePassRecord",
+  "audited_at_utc": "2026-08-19T00:34:02Z",
+  "execution_commit": "1c51853e10809686d4368037153927f25e834117",
+  "gpu_work_performed": false,
+  "independent_reviewer": "Agent 4",
+  "result": "PASS",
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-review/v1",
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_controller_v11.py": "756465d42bdea6866fd1a327ff305e2562900ae212f8ffd8cf2174eb01197cee",
+    "experiments/branchfabric/gpu_reclamation_worker_v11.py": "ef21c2c159b727f350534e1307b3ea287fa9788b6c7c7b42be53512a2bdd5e45",
+    "experiments/branchfabric/modal_gpu_reclamation_v11.py": "128465c0f00fa1c67bfb4e78a8e692d1ad9e6dfab76e95efe6f751eb5e516268",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "ee8c0ca43068265c40c2d7fdb3ddd1d5730b93dc2aac98275bd7510e740c868e",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py": "7cd760d3e611eb6ca9e447265ebbdb1b62c8193e0b20719cd549809e3c844898",
+    "tests/python/test_gpu_reclamation_runtime_v11.py": "f234ff79e9f3aacd3e0960ffb8838b61d4987ad4609615f6879cdc57074d490c",
+    "tests/python/test_vllm_reclamation_v11_accounting.py": "776a9b3ad0ee057524d0652f68688dc2aa7ce811c1b4450ebeac74f5d7fff2af"
+  },
+  "checks": {
+    "all_required_schema_fields": "PASS",
+    "bounded_pending_cuda_events": "PASS",
+    "cuda_event_timing_at_operation_sites": "PASS",
+    "d2h_h2d_directional_totals": "PASS",
+    "dependency_dag_validation": "PASS",
+    "execution_site_success_path_coverage": "PASS",
+    "full_state_pass_count": "PASS",
+    "no_projected_aggregate_records": "PASS",
+    "one_authoritative_accounting_layer": "PASS",
+    "per_tier_conservation_in_runtime_summary": "PASS",
+    "required_avoidable_conservation": "PASS",
+    "shared_restore_recorder": "PASS",
+    "synchronization_time_measurement": "PASS",
+    "temporary_memory_measurement_surface": "PASS",
+    "wall_interval_measurement": "PASS"
+  },
+  "resolved_findings": [
+    {
+      "id": "A04-001",
+      "resolution": "Runtime totals now call canonical_pass_totals and canonical_physical_bytes_by_tier; display-tier reconstruction was removed."
+    },
+    {
+      "id": "A04-002",
+      "resolution": "Runtime reports D2H, H2D, separately conserved link-control bytes, raw record count, and gap-free conceptual full-state pass count."
+    },
+    {
+      "id": "A04-003",
+      "resolution": "CUDA wall_end_ns is the host launch-boundary timestamp; CUDA execution duration remains the measured event interval and recorder-resolution waits are separate."
+    },
+    {
+      "id": "A04-004",
+      "resolution": "Synchronization totals include explicit event/stream fence wall durations, end-event resolve waits, and implicit scalar validation waits."
+    },
+    {
+      "id": "A04-005",
+      "resolution": "Scrub and raw validation records use explicit conserved native-HBM, GPU-temporary, and link tier splits."
+    },
+    {
+      "id": "A04-006",
+      "resolution": "Every owned restore snapshot depends on the matching preflight SHA record."
+    },
+    {
+      "id": "A04-007",
+      "resolution": "Runtime reports process-RSS baseline/peak deltas, pageable attribution, explicit pinned extents, and Torch allocated baseline/peak temporary deltas."
+    },
+    {
+      "id": "A04-008",
+      "resolution": "The isolated worker/controller/Modal path and Gate D files are Ruff-clean and compile offline."
+    }
+  ],
+  "positive_evidence": [
+    "Every required StatePassRecord field is enforced, including CUDA stream and start/end event evidence on CUDA records.",
+    "Pass IDs are unique and chunk IDs bind both ordinal and payload offset, preventing shared/private subset collisions.",
+    "The validator rejects unknown dependencies, dependency cycles, duplicate IDs, mixed devices, mixed branch groups, and invalid timing ownership.",
+    "Capture records index upload, native gather, bounded repack, D2H, completion fence, and SHA at execution sites; restore records preflight/authentication, bounded host snapshot, H2D, direct scatter, exact raw-bit validation, and completion fences at execution sites.",
+    "The isolated runtime shares one restore recorder across preflight and all stager callbacks and resolves it after the native write/admission critical section.",
+    "Full-state pass families require exact gap-free, non-overlapping [0,L) chunk-offset coverage; incomplete families fail the micro transaction closed.",
+    "No inferred full-pipeline aggregate StatePassRecords remain in the adapter, and profiler/copy observations are not added to canonical byte totals."
+  ],
+  "offline_commands": [
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric python -m pytest -q tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_vllm_reclamation_v11_accounting.py tests/python/test_vllm_reclamation_v11.py tests/python/test_vllm_reclamation_v11_sync.py tests/python/test_vllm_reclamation_v11_ownership.py tests/python/test_gpu_reclamation_v11_methodology.py",
+      "result": "PASS",
+      "summary": "63 passed in 1.22s"
+    },
+    {
+      "command": "python -m py_compile python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py python/sloforge/continuum/adapters/vllm_reclamation_v11.py experiments/branchfabric/gpu_reclamation_worker_v11.py experiments/branchfabric/gpu_reclamation_controller_v11.py experiments/branchfabric/modal_gpu_reclamation_v11.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python -m ruff check python/sloforge/continuum/adapters/vllm_reclamation_v11_accounting.py python/sloforge/continuum/adapters/vllm_reclamation_v11.py experiments/branchfabric/gpu_reclamation_worker_v11.py experiments/branchfabric/gpu_reclamation_controller_v11.py experiments/branchfabric/modal_gpu_reclamation_v11.py tests/python/test_gpu_reclamation_runtime_v11.py tests/python/test_vllm_reclamation_v11_accounting.py",
+      "result": "PASS"
+    }
+  ],
+  "scope_note": "This PASS is the mandatory offline production-integration audit. CUDA event values and physical totals remain unmeasured until the authorized real-A100 micro-validation executes.",
+  "gpu_allocation_recommendation": "GATE_D_PASS"
+}

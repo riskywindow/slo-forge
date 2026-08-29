@@ -1,0 +1,85 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-provider-inventory-capture/v1",
+  "attempt_id": "exp004-v11-kill-recompute-s41-e",
+  "observed_at_utc": "2026-08-28T21:20:09.441134+00:00",
+  "modal_client_version": "1.5.3",
+  "commands": [
+    {
+      "argv": ["uv", "run", "--locked", "modal", "app", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"app_id\": \"ap-vp2tIIoVqVm8eDydpH9bOw\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 15:56:24-05:00\",\n    \"stopped_at\": \"2026-08-28 16:11:02-05:00\"\n  },\n  {\n    \"app_id\": \"ap-l4XMcxxRhQMFxS625O0utk\",\n    \"description\": \"sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute\",\n    \"state\": \"stopped\",\n    \"tasks\": \"0\",\n    \"created_at\": \"2026-08-28 15:53:32-05:00\",\n    \"stopped_at\": \"2026-08-28 15:56:20-05:00\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "app_id": "ap-vp2tIIoVqVm8eDydpH9bOw",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 15:56:24-05:00",
+          "stopped_at": "2026-08-28 16:11:02-05:00"
+        },
+        {
+          "app_id": "ap-l4XMcxxRhQMFxS625O0utk",
+          "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+          "state": "stopped",
+          "tasks": "0",
+          "created_at": "2026-08-28 15:53:32-05:00",
+          "stopped_at": "2026-08-28 15:56:20-05:00"
+        }
+      ]
+    },
+    {
+      "argv": ["uv", "run", "--locked", "modal", "container", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": ["uv", "run", "--locked", "modal", "volume", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[\n  {\n    \"name\": \"sloforge-branchfabric-results\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  },\n  {\n    \"name\": \"sloforge-model-cache\",\n    \"created_at\": \"2026-08-10 20:06:31-05:00\",\n    \"created_by\": \"rishivinodkumar\"\n  }\n]\n",
+      "stderr": "",
+      "rows": [
+        {
+          "name": "sloforge-branchfabric-results",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        },
+        {
+          "name": "sloforge-model-cache",
+          "created_at": "2026-08-10 20:06:31-05:00",
+          "created_by": "rishivinodkumar"
+        }
+      ]
+    },
+    {
+      "argv": ["uv", "run", "--locked", "modal", "endpoint", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": ["uv", "run", "--locked", "modal", "queue", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    },
+    {
+      "argv": ["uv", "run", "--locked", "modal", "dict", "list", "--json"],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": "",
+      "rows": []
+    }
+  ],
+  "ledger_reservations": [],
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-e/REMOTE_MANIFEST.json",
+    "sha256": "935a51578d9a1e4676d3d86b59e65e901efc36f8b28154d55cadeecd1dd2d394",
+    "verified_artifact_count": 16
+  },
+  "claim": "fresh read-only post-return provider inventory with exact captured command streams; no scientific-validity or measured-duration claim"
+}

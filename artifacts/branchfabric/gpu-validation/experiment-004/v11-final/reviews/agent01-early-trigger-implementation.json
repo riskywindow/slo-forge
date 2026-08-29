@@ -1,0 +1,39 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-early-trigger-review/v1",
+  "agent": 1,
+  "role": "early-trigger-implementation",
+  "status": "PASS",
+  "reviewed_at_utc": "2026-08-20T02:54:30Z",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "implementation_evidence": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/offline-fixes/trigger/early-trigger-implementation.json",
+    "sha256": "7ad2ed872d440a8aa4f042a3d4357c43357543c1e339f0520e97b5a4f539e763"
+  },
+  "result": {
+    "normal_trigger_depth": 20,
+    "scientifically_admissible_trigger_depth_maximum": 30,
+    "emergency_abort_depth": 64,
+    "minimum_emergency_headroom_requests": 34,
+    "confirmation_window_seconds": 0.25,
+    "positive_queue_slope_required": true,
+    "offered_rate_above_completed_rate_required": true,
+    "single_use_emission": true,
+    "asynchronous_bookkeeping_starvation_resistant": true,
+    "emergency_abort_independent": true
+  },
+  "source_hashes_sha256": {
+    "experiments/branchfabric/gpu_reclamation_integrated_trigger_v11.py": "48d229723ff4d14caed8328a1dc71ae86bb344dfa607ab8065d47c3fa26581cd",
+    "experiments/branchfabric/gpu_reclamation_integrated_worker_v11.py": "1b967aaa7485c807393ae89756b537daabe5c1b0c82e2c2f5ea60fd56948aeb2"
+  },
+  "test_hashes_sha256": {
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11.py": "633ad11cffdec4661f7c2e9696582263f03dc249d4dea25a4d127541be31021d",
+    "tests/python/test_gpu_reclamation_integrated_trigger_v11_races.py": "4c289df70427c0a1fc5df0fe9f8a14e2506567e7ef27889903a5beda50632599",
+    "tests/python/test_gpu_reclamation_integrated_worker_v11.py": "9d88f2cb4ba3b3bf6a5b5514016c06972d61f303ca9f995e00ee160009246f37"
+  },
+  "verification": {
+    "root_integrated_targeted_suite": "152 passed",
+    "agent01_focused_suite": "45 passed",
+    "agent02_starvation_stress": "10/10 passed"
+  }
+}

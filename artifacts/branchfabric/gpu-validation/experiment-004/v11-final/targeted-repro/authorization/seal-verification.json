@@ -1,0 +1,51 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-targeted-source-identity-seal-verification/v1",
+  "status": "PASS_PRE_RESERVATION",
+  "verified_at_utc": "2026-08-23T01:17:00Z",
+  "attempt_id": "exp004-v11-targeted-identity-s41-a",
+  "gpu_or_cloud_invoked": false,
+  "gpu_resources_consumed": false,
+  "verification": {
+    "typed_targeted_config": "PASS",
+    "controller_verify_sealed_evidence": "PASS",
+    "sole_coordinator_load_sealed_config": "PASS",
+    "targeted_authorization_verified": true,
+    "prelaunch_binding_count": 14,
+    "offline_binding_count": 6
+  },
+  "artifacts": {
+    "config": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/exp004-v11-targeted-identity-s41-a-config.json",
+      "sha256": "0420809e79ea45a701cb220e970de4056dc6e5304d892ce0f9ce02b9042a665b"
+    },
+    "post_manifest": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/authorization/targeted-source-identity-pre-gpu-manifest.json",
+      "sha256": "5b440ccd2630d4e1820253e6977578ba2946247a28030ea1f9c4bfc5a0c51f5c"
+    },
+    "targeted_local_validation": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/targeted-repro/authorization/targeted-local-validation.json",
+      "sha256": "495b6657028f1c04c2993d96db30f7e88e7df0d346d5606e9ef4e4ca1ae636c4"
+    }
+  },
+  "ledger": {
+    "path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "sha256_before_reservation": "7a70b9295f7fac3f29e115cbb634b20bea3d3b7a96b401180c69a320fa4088f5",
+    "authorized_cumulative_gpu_seconds": 21600.0,
+    "conservative_consumed_gpu_seconds": 17289.51362608598,
+    "remaining_gpu_seconds": 4310.48637391402,
+    "active_reservations": 0,
+    "targeted_maximum_gpu_seconds": 600.0,
+    "targeted_with_15_percent_planning_margin_gpu_seconds": 690.0,
+    "remaining_after_15_percent_planning_margin_gpu_seconds": 3620.48637391402,
+    "budget_capacity_pass": true
+  },
+  "terminal_contract": {
+    "terminal_phase": "SOURCE_ALLOCATION_IDENTITY_GATE",
+    "expected_allocation_count": 1152,
+    "full_export_authorized": false,
+    "source_release_authorized": false,
+    "maximum_wall_seconds": 300.0,
+    "gpu_count": 2
+  },
+  "note": "The seal is valid only while the bound source files and authoritative pre-reservation ledger retain their recorded hashes. Reservation must fail closed on any ledger drift."
+}

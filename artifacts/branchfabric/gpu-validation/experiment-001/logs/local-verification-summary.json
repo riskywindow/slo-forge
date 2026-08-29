@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "json_validation": {
+    "status": "pass",
+    "json_files_parsed": 26
+  },
+  "targeted_tests": {
+    "command": "uv run --locked pytest -q tests/python/test_continuum_external_adapters.py tests/python/test_branchfabric_helix_lifecycle.py tests/python/test_branchfabric_trace_adapters.py",
+    "status": "pass",
+    "passed": 13
+  },
+  "make_check": {
+    "status": "pass_after_repository_local_optional_dependency_repair",
+    "python_passed": 1268,
+    "python_skipped": 6,
+    "python_warnings": 6,
+    "ruff_format": "pass",
+    "ruff_lint": "pass",
+    "mypy": "pass",
+    "cargo_fmt": "pass",
+    "cargo_clippy": "pass",
+    "cargo_tests": "pass",
+    "ui_typecheck": "pass",
+    "ui_lint": "pass",
+    "ui_tests": {
+      "passed": 37,
+      "skipped": 1
+    },
+    "ui_build": "pass",
+    "first_attempt_note": "The first make check reached the UI tests and failed because the existing node_modules lacked lockfile-pinned @rollup/rollup-darwin-arm64 4.62.4. That package was installed repository-locally with --no-save and a temporary isolated npm cache; no package manifest or lockfile changed."
+  }
+}

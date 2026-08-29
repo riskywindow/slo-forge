@@ -1,0 +1,213 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "reviewed_at_utc": "2026-08-13T06:27:20Z",
+  "reviewer": {
+    "agent": "Agent 16",
+    "identity": "postrun_adversarial_reviewer",
+    "task_path": "/root/postrun_adversarial_reviewer",
+    "independence": "post-run CPU-only adversarial review; no Modal invocation, no GPU consumption, and no source edits"
+  },
+  "scope": "adversarial BranchFabric capacity-reclamation baseline review",
+  "question": "Would I accept this as a valid capacity-reclamation baseline if I did not know the team wanted to build an FPGA?",
+  "answer": "No.",
+  "verdict": "REJECT_AS_CAPACITY_RECLAMATION_BASELINE",
+  "baseline_claim_permissible": false,
+  "scientifically_valid": false,
+  "attempt_failure_classification": "LOCAL_CONTROL_PLANE_READINESS_TIMEOUT",
+  "attempt_failure_is_valid_scientific_blocker": false,
+  "terminal_completion_classification": "BUDGET_BLOCKER",
+  "terminal_blocker_valid": true,
+  "summary": "The paid v4 attempt verified the immutable authorization and exact two-A100 topology, but a fixed 160-second controller readiness deadline terminated both workers before either readiness barrier, probe, sanity guard, rollout-state preparation, or reclamation transaction. The timeout is not evidence that either engine became unhealthy: both logs show normal model load and compilation progress through initial profiling/warmup immediately before SIGTERM. No v10 capacity-reclamation result exists. A further attempt is now unauthorized because the configured ledger has only 501.83279108000715 A100-seconds remaining versus the unchanged evidence-derived requirement of 938 A100-seconds.",
+  "control_plane_observations": {
+    "immutable_authorization_verified": true,
+    "authorization_status": "APPROVED",
+    "authorization_artifact_hash": "843dcfcb3e7dfb31b4fa7696bea6433e20de7e3e90809a0dce7023d4a924cbd5",
+    "source_evidence_hashes_verified": true,
+    "remote_review_exchange_permitted": false,
+    "asynchronous_review_wait_permitted": false,
+    "fixed_1800_a100_second_reservation_present": false,
+    "evidence_derived_required_a100_seconds": 938.0,
+    "budget_passed_before_launch": true
+  },
+  "hardware_observations": {
+    "requested_gpu": "A100-80GB:2",
+    "observed_gpu_count": 2,
+    "observed_gpu_models": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA A100-SXM4-80GB"
+    ],
+    "observed_gpu_uuids": [
+      "GPU-58c47e32-ef98-4a87-070d-f74111769328",
+      "GPU-61c07e9a-bfb2-2e06-0b68-37f6ccca55d9"
+    ],
+    "peer_access_bidirectional": true,
+    "two_engine_ready": false,
+    "engine_readiness_regression_demonstrated": false,
+    "reason": "No readiness result, health failure, failed probe, or stable-HBM result was emitted. Both workers reached vLLM compilation and initial profiling/warmup, then the controller killed them at its readiness timeout."
+  },
+  "failure_boundary": {
+    "authorization_verified": true,
+    "topology_verified": true,
+    "readiness_barriers_observed": false,
+    "probe_count": 0,
+    "sanity_guard_count": 0,
+    "sanity_status": "failed",
+    "rollout_state_prepared": false,
+    "reclaim_trigger_observed": false,
+    "state_preservation_observed": false,
+    "gpu1_hbm_reclamation_observed": false,
+    "gpu1_useful_serving_observed": false,
+    "queue_recovery_observed": false,
+    "rollout_restore_observed": false,
+    "branch_correctness_observed": false,
+    "v10_movement_accounting_observed": false,
+    "dependent_phases_stopped": true,
+    "safe_abort_verified": true,
+    "safe_abort_evidence": {
+      "abort_error": "TimeoutError",
+      "worker_returncodes": {
+        "serving": -15,
+        "rollout": -15
+      },
+      "compute_processes_after": [],
+      "cleanup_error": null
+    }
+  },
+  "budget_observations": {
+    "configured_hard_ceiling_a100_seconds": 10800.0,
+    "conservative_usage_before_v4_a100_seconds": 9622.470997419994,
+    "v4_actual_a100_seconds": 367.147558954,
+    "v4_conservative_a100_seconds": 675.6962114999988,
+    "conservative_usage_after_v4_a100_seconds": 10298.167208919993,
+    "remaining_a100_seconds": 501.83279108000715,
+    "required_next_attempt_a100_seconds": 938.0,
+    "another_attempt_authorized": false,
+    "reservation_cleared": true,
+    "actual_cost_usd": 0.254800405914076,
+    "conservative_cost_usd": 0.46893317078099916
+  },
+  "cleanup_observations": {
+    "active_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ],
+    "cleanup_pass": true
+  },
+  "high_severity_findings": [
+    {
+      "id": "ADV-V4-H1",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "No integrated v10 transaction ran. There are no control, overload-trigger, preservation, HBM-reclamation, two-GPU recovery, queue-drain, restore, branch-correctness, serving-interference, or independently computed v10 movement results.",
+      "required_resolution": "Do not freeze or tag a v10 naive baseline, generate success-only plans or plots, or report historical v9 measurements as v10. Report every unmeasured transaction metric as NOT MEASURED and scientifically_valid as false."
+    },
+    {
+      "id": "ADV-V4-H2",
+      "status": "OPEN_FUTURE_RUN_GATE",
+      "finding": "The controller used initialization_timeout_seconds=160 as a hard readiness wait while the phase-budget row assigns 160 seconds to readiness plus two sanity guards and measures readiness from a different boundary. The workers were still making normal initialization progress, so this is a local deadline/phase-boundary implementation failure, not demonstrated engine unhealthiness or a scientific readiness regression.",
+      "required_resolution": "Classify the attempt failure as a local control-plane readiness timeout. Before any future authorized attempt, align per-phase deadline boundaries with the evidence-derived budget without weakening the global 469-second envelope. Do not cite this timeout itself as a valid scientific blocker."
+    },
+    {
+      "id": "ADV-V4-H3",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The current experiment-root scientific-validity, manifest, and non-final v10 reports still describe the earlier v3 live-review timeout and fixed 1,800-A100-second reservation; they do not represent v4 and would materially misstate the final outcome if delivered.",
+      "required_resolution": "Supersede the stale v3 objects with hash-bound v4 failure artifacts and the terminal BUDGET_BLOCKER classification. Preserve the older evidence under its own attempt path."
+    }
+  ],
+  "medium_severity_findings": [
+    {
+      "id": "ADV-V4-M1",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The v4 raw failure validity object correctly fails closed overall, but it sets authorization_alid, phase_budget_valid, budget_pass, and cleanup_pass false even though independent evidence proves those gates passed. This obscures the true failure boundary.",
+      "required_resolution": "In the canonical post-cleanup v4 validity object, retain true for independently proven pre-GPU authorization, phase-budget, launch-budget, and cleanup gates; retain false for two-engine readiness and every dependent scientific gate. The AND must remain false."
+    },
+    {
+      "id": "ADV-V4-M2",
+      "status": "OPEN_REPORTING_GATE",
+      "finding": "The worker logs prove load/compile progress only. They do not prove both-engine readiness, compilation-free measured execution, probe TTFT, stable HBM, or runtime health.",
+      "required_resolution": "Limit hardware reporting to the verified two-A100 inventory/topology and explicitly mark readiness, 12-rps sanity, 15-rps sanity, and every transaction metric NOT MEASURED."
+    },
+    {
+      "id": "ADV-V4-M3",
+      "status": "OPEN_PROVENANCE_GATE",
+      "finding": "Budget settlement, failed-run settlement, canonical validity, cleanup evidence, and this post-run review were generated after the remote manifest and therefore require their own final manifest hashes.",
+      "required_resolution": "Bind all post-download artifacts in the final experiment manifest so the diagnostic-only result is content-addressed and reproducible."
+    }
+  ],
+  "accepted_diagnostic_claims": [
+    "The immutable authorization was verified locally and remotely with no live review exchange.",
+    "Exactly two A100-SXM4-80GB devices with bidirectional peer access were allocated.",
+    "Both vLLM workers made initialization progress but did not reach the strict readiness gate before the controller deadline.",
+    "The controller aborted before sanity guards and before every reclamation-dependent phase.",
+    "The failed attempt consumed 367.147558954 actual and 675.6962114999988 conservative A100-seconds.",
+    "Modal cleanup completed and the reservation was cleared.",
+    "The configured remaining authorization is insufficient for another 938-A100-second attempt."
+  ],
+  "prohibited_claims": [
+    "v10 scientifically passed",
+    "two-engine readiness passed",
+    "12-rps or 15-rps v10 sanity passed",
+    "real v10 rollout state was prepared",
+    "GPU1 HBM was reclaimed",
+    "useful reclaimed serving capacity was demonstrated",
+    "the queue drained or the serving SLO was restored",
+    "GPU0 remained active during restore",
+    "8 of 8 branches resumed correctly in v10",
+    "v10 movement amplification was measured",
+    "a frozen naive v10 baseline exists",
+    "the readiness timeout demonstrates an engine readiness regression"
+  ],
+  "evidence": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/REMOTE_MANIFEST.json",
+      "artifact_sha256": "846db6980673a00d1f274ea41a76685b103299b227cba5055403c13548e9daeb",
+      "sample_selector": "$.artifacts"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/function-completion.json",
+      "artifact_sha256": "7d14ca636ea49778d4746f731cf83b5271363100e28b95b3b8501d532f416fdb",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/controller-result.json",
+      "artifact_sha256": "fee438e7dd6982848a5013cd31c98568475aa54a7f5bfb410c3475031860d578",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/scientific-validity.json",
+      "artifact_sha256": "44b3c3240ea1d7260b97904ee649f29f8d398ff03fa4663f193fa4385114da0d",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/budget-settlement.json",
+      "artifact_sha256": "6edda6c72154fb778ec27fa74803dd0254990ab545912928cc05b81c218b054f",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v4/analysis/failed-run-settlement.json",
+      "artifact_sha256": "123952d53e25a22ae078c17e33cd2ba2d078bfeb290bb14423f2125e9598e760",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/logs/modal-cleanup-exp004-v10-naive-s41-v4.json",
+      "artifact_sha256": "132cf17e792e818cea1e27adb2d38594e3796a3c66954f4e33a3f6904cc0be79",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d",
+      "sample_selector": "$"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-authorization.json",
+      "artifact_sha256": "3c0fa2f9df83827a98cfa0e20baa8e0c05e289841531747ecc1509a983242948",
+      "sample_selector": "$"
+    }
+  ]
+}

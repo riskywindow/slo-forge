@@ -1,0 +1,15 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-blocker/v1",
+  "stage": "remote_idle_gpu_gate",
+  "status": "blocked_no_idle_gpu",
+  "adapter_local_gates_passed": true,
+  "remote_smoke_started": false,
+  "full_experiment_started": false,
+  "gpu_hours": 0.0,
+  "evidence": [
+    "raw/remote-environment/selected-idle-gpu.json",
+    "environment/blocked-gpu-processes.json",
+    "REMOTE_CLEANUP_RECEIPT.json",
+    "environment/final-remote-audit.json"
+  ]
+}

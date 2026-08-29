@@ -1,0 +1,37 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integration-gate/v1",
+  "gate": "A_ALLOCATOR_ISSUED_SINGLE_USE_EPOCHS",
+  "status": "PASS_OFFLINE",
+  "scope": "isolated v11 runtime path; frozen v10 path unchanged",
+  "implementation": {
+    "source": "python/sloforge/continuum/adapters/vllm_allocator_epochs.py",
+    "runtime_wiring": "python/sloforge/continuum/adapters/vllm_live.py::VllmLiveStateAdapter._install_observers",
+    "restore_consumer": "python/sloforge/continuum/adapters/vllm_reclamation_v11.py::Vllm0230StreamingRestoreStager.import_group_v11",
+    "issuer": "KVCacheManager.allocate_slots interception after the real runtime block table is installed",
+    "caller_selected_epoch_accepted": false,
+    "runtime": "vllm==0.23.0"
+  },
+  "requirements": {
+    "runtime_allocation_path_issues_epoch": true,
+    "unique_monotonic_allocation_lifetime": true,
+    "free_tombstones_epoch": true,
+    "physical_block_reuse_advances_epoch": true,
+    "ownership_evidence_binds_epoch": true,
+    "destination_commitment_binds_epoch": true,
+    "admission_rechecks_current_epoch": true,
+    "admission_consumes_epoch_once": true,
+    "stale_epoch_rejected": true,
+    "freed_epoch_rejected": true,
+    "double_import_rejected": true,
+    "mismatched_destination_manifest_rejected": true,
+    "fail_closed": true
+  },
+  "offline_validation": {
+    "focused_review_tests_passed": 7,
+    "combined_gate_suite_passed": 78,
+    "ruff": "PASS",
+    "independent_review": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent01-allocator-epoch-audit.json"
+  },
+  "gpu_invoked": false,
+  "real_runtime_micro_requirement": "The A100 micro-validation must prove live allocator epochs for all 1,152 source allocations and every fresh destination allocation."
+}

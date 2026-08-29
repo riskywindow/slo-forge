@@ -1,0 +1,23 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-post-attempt-review/v1",
+  "attempt_id": "exp004-v10-integrated-s41-v3",
+  "reviewer": "agent16",
+  "scope": "movement-accounting",
+  "verdict": "reject-v10-movement-claim",
+  "v10_state_pass_records_available": false,
+  "v10_movement_amplification_available": false,
+  "readiness_or_calibration_traffic_counted_as_state_movement": false,
+  "reason": "V3 stopped before rollout preparation and transaction readiness. No state capture, D2H, H2D, restore, state-pass, or movement-graph evidence exists.",
+  "historical_v9_input_only": {
+    "logical_state_bytes": 1056964608,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "memory_endpoint_bytes": 58133053440,
+    "memory_endpoint_amplification": 55.0,
+    "full_physical_touch_bytes": 61303947264,
+    "full_physical_touch_amplification": 58.0,
+    "avoidable_bytes_lower_bound": 32765902848,
+    "avoidable_amplification_lower_bound": 31.0,
+    "may_be_relabelled_as_v10": false
+  }
+}

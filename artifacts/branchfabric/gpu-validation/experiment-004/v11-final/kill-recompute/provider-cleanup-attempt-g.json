@@ -1,0 +1,132 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-provider-cleanup/v1",
+  "status": "PASS",
+  "attempt_id": "exp004-v11-kill-recompute-s41-g",
+  "terminal_classification": "VALID_MEASURED_KILL_AND_RECOMPUTE_ARM",
+  "function_entry_reached": true,
+  "controller_started": true,
+  "in_function_cleanup_status": "PASS",
+  "provider_cleanup_status": "PASS",
+  "apps": [
+    {
+      "app_id": "ap-Abbr6ctxtJMvKTPudmUzNn",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-28 19:31:27-05:00",
+      "stopped_at": "2026-08-28 19:36:53-05:00",
+      "state": "stopped",
+      "tasks": "0",
+      "role": "attempt-g-paid-function-app"
+    },
+    {
+      "app_id": "ap-336JH1N6vef5xquLqDxNyv",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-28 19:29:11-05:00",
+      "stopped_at": "2026-08-28 19:31:23-05:00",
+      "state": "stopped",
+      "tasks": "0",
+      "role": "attempt-g-prebuild-app"
+    },
+    {
+      "app_id": "ap-pAywJ5QYg3BmZ0abZxdzhO",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-28 17:58:57-05:00",
+      "stopped_at": "2026-08-28 18:12:57-05:00",
+      "state": "stopped",
+      "tasks": "0",
+      "role": "historical-attempt-f-paid-function-app"
+    },
+    {
+      "app_id": "ap-rjdwfRRFAldeVCQJhbpuCb",
+      "description": "sloforge-branchfabric-gpu-reclamation-004-v11-kill-recompute",
+      "created_at": "2026-08-28 17:56:50-05:00",
+      "stopped_at": "2026-08-28 17:58:53-05:00",
+      "state": "stopped",
+      "tasks": "0",
+      "role": "historical-attempt-f-prebuild-app"
+    }
+  ],
+  "active_apps": [],
+  "running_tasks": [],
+  "containers": [],
+  "endpoints": [],
+  "queues": [],
+  "dicts": [],
+  "reservations": [],
+  "volumes": [
+    "sloforge-branchfabric-results",
+    "sloforge-model-cache"
+  ],
+  "authorized_volumes_only": true,
+  "raw_attempt_prefix_present": true,
+  "raw_attempt_prefix_root_entry_count": 18,
+  "raw_evidence_materialized": true,
+  "valid_kill_recompute_measurement_materialized": true,
+  "function_call_id": "fc-01M15EW2B2F21RZWFKMSAZ92FS",
+  "reservation_id": "exp004-v11-kill-g-06f055057fdf11384021",
+  "observed_at_utc": "2026-08-29T00:41:04.098989Z",
+  "evidence_bindings": {
+    "config": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/exp004-v11-kill-recompute-s41-g-config.json",
+      "sha256": "b7376e931caa2895eef9b131fb7e13eda3b9778820f6c5a96ecc851a907c3601"
+    },
+    "seal": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/seal-verification-attempt-g.json",
+      "sha256": "54c861f44af9011347d9028cd2fa34fe9ddb6d9348251f262943d93f507f8906"
+    },
+    "make_check": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/authorization/make-check-attempt-g.json",
+      "sha256": "b2859f589c72a0f76827253021934f12087b24da4f171aa24b4ba7acaf9ed666"
+    },
+    "prebuild": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-g.json",
+      "sha256": "dde81922059febca3ed8f796733a07b7801069e61f6b6b7dbbc33051f9a83a87"
+    },
+    "post_prebuild_freshness": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-kill-recompute-image-prebuild/exp004-v11-kill-recompute-s41-g-pre-reservation-freshness.json",
+      "sha256": "163ae7ecfbbf92c4e1c4c439504f45dc69ad0524979d475e5ace6d9c3da6747b"
+    },
+    "remote_manifest": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/REMOTE_MANIFEST.json",
+      "sha256": "db9d56c305faddca5f24cb411b45d8ec3b57496b1bd56f9f66db544505b43361"
+    },
+    "function_completion": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/function-completion.json",
+      "sha256": "ee12ff766e0e2a00c6c9a34cea5de57a63e36dfdb97a2f22289897eed1a364d1"
+    },
+    "kill_controller_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/kill-controller-result.json",
+      "sha256": "3ab4f5375d0ac6f766004a5d049e08e9915c4c01a98334b9a147d874c523ba67"
+    },
+    "serving_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/serving/result.json",
+      "sha256": "fed02c3220e73f75e2484388b0081ca2bee5a15a02f0bad2f77976f47c6d11a5"
+    },
+    "rollout_result": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/rollout/result.json",
+      "sha256": "294dc5d2a90cf4ce258adfe9a6c85c0d22e7badfe2c0e596f96c7b478d4d51bd"
+    },
+    "in_function_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/raw/exp004-v11-kill-recompute-s41-g/in_function_cleanup.json",
+      "sha256": "4e8046ff236201c973a1b1d76d05950a8a757e992d73c8e4b6e29241db5511f5"
+    },
+    "function_call_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/function-calls/exp004-v11-kill-recompute-s41-g/function-call.json",
+      "sha256": "17e8d7b4f5fa23f2c8e159d01b116ed3808cd59f1546d455558cddb26915ba17"
+    },
+    "settled_ledger": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+      "sha256": "d6b515388a7ffa9579b28fe957c56e854370497afd60d01742d8a2c94f6c5d24"
+    },
+    "provider_inventory_capture": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11-final/kill-recompute/provider-inventory-attempt-g.json",
+      "sha256": "c6a880d6bc60d83b1d735549f2f1b65d44b21bbe00d32ae6790e092352667aeb"
+    }
+  },
+  "provenance": {
+    "observation_kind": "fresh-post-return-read-only-provider-inventory",
+    "all_commands_returncode_zero": true,
+    "all_command_stderr_empty": true,
+    "ledger_reservations_empty": true,
+    "claim_scope": "provider cleanup and resource absence after the valid measured kill/recompute function returned"
+  }
+}

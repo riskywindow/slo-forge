@@ -1,0 +1,200 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-agent14-terminal-comparison-review/v1",
+  "review_id": "agent14-v10-v11-terminal-comparison-review",
+  "agent": 14,
+  "role": "post-integrated v10-v11 comparison reviewer",
+  "reviewed_at_utc": "2026-08-19T06:18:52Z",
+  "status": "PASS_TERMINAL_COMPARISON_WITH_INTEGRATED_NOT_REACHED",
+  "passed": true,
+  "source_modified_by_reviewer": false,
+  "gpu_invoked_by_reviewer": false,
+  "modal_invoked_by_reviewer": false,
+  "network_invoked_by_reviewer": false,
+  "review_artifacts_modified_only": true,
+  "scope": "Independent read-only post-integrated audit of the frozen v10 baseline, the valid attempt-D v11 A100 micro measurement, and terminal integrated attempt B. Micro byte, pass, and temporary-memory comparisons are admissible. Integrated v11 timing and serving comparisons are not reached because attempt B failed before the reclaim trigger.",
+  "evidence": {
+    "frozen_v10_baseline": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+      "sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e"
+    },
+    "v11_micro_worker_result": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+      "sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8"
+    },
+    "v11_micro_scientific_outcome": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/scientific-outcome.json",
+      "sha256": "4202d4d0ed936ae8364516113fca3dba2a41a85646e0a9324b047f186cc68494"
+    },
+    "immutable_pass_diff": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff.json",
+      "sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99"
+    },
+    "immutable_movement_comparison": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-measured-comparison.json",
+      "sha256": "10e078d518cc24efa0db744e590338979104e738619c921f99fc4f6ba599f16b"
+    },
+    "terminal_arithmetic_correction": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/terminal-arithmetic-corrections.json",
+      "sha256": "fa6091966571c650fdd3cdca64cced400a7e250b2afdef5070186964c0fc162d"
+    },
+    "host_temporary_memory_comparison": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-host-temporary-memory.json",
+      "sha256": "98828e31c0626c5f261416fe009ed253272c93d89d00613da6415752c99747bb"
+    },
+    "integrated_controller_result": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/controller-result.json",
+      "sha256": "26392f35aa4f0fbb5aa349f2e6ea7b799528702e32ccadf2dfb33865f649251b"
+    },
+    "serving_methodology_terminal_review": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent13-serving-methodology-terminal-review.json",
+      "sha256": "75ed04d42cfde2862e778c4307f845901330f820ccf8e302111b3add307d9c32"
+    },
+    "integrated_serving_status": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/serving/status.json",
+      "sha256": "c6e62d018a8fc5425f274e0c80be88117fbffd5a8383c441800cc943b172324b"
+    },
+    "integrated_rollout_status": {
+      "path": "artifacts/branchfabric/gpu-validation/experiment-004/v11/rollout/status.json",
+      "sha256": "4368daa81d4407f22fd8bee313702ff28e4c406a80f8f4775012f19d99454202"
+    }
+  },
+  "comparison_scope": {
+    "v10_context": "Frozen two-A100-SXM4-80GB integrated v10 baseline",
+    "v11_measured_context": "Valid single-A100-80GB-PCIe attempt-D micro-validation",
+    "byte_and_pass_comparison_admissible": true,
+    "host_temporary_memory_comparison_admissible": true,
+    "latency_directly_comparable": false,
+    "reason_latency_not_comparable": "The v11 micro timings are PCIe single-GPU state-path endpoints; the frozen v10 timings are SXM4 integrated serving-transaction endpoints.",
+    "integrated_v11_state_path_executed": false
+  },
+  "measured_micro_comparison": {
+    "logical_state_bytes": 1056964608,
+    "correctness": "8/8 exact first resumed-token matches with at least 8 continuation tokens per branch",
+    "full_physical": {
+      "v10_bytes": 61303947264,
+      "v10_amplification": 58.0,
+      "v11_bytes": 22197063040,
+      "v11_amplification": 21.000762818351625,
+      "bytes_removed": 39106884224,
+      "amplification_removed": 36.999237181648375,
+      "authoritative_reduction_percent": 63.79178824422134
+    },
+    "external_movement": {
+      "v10_bytes": 3170893824,
+      "v10_amplification": 3.0,
+      "v11_bytes": 2114200960,
+      "v11_amplification": 2.000257098485553,
+      "bytes_removed": 1056692864,
+      "reduction_percent": 33.3247633838149
+    },
+    "avoidable_physical": {
+      "v10_bytes": 32765902848,
+      "v10_amplification": 31.0,
+      "v11_bytes": 12684381568,
+      "v11_amplification": 12.000762818351625,
+      "bytes_removed": 20081521280,
+      "reduction_percent": 61.28786187628508
+    },
+    "full_state_passes": {
+      "v10": 30,
+      "v11": 10,
+      "removed": 20,
+      "reduction_percent": 66.66666666666667,
+      "v10_disposition_coverage": 30,
+      "retained": 3,
+      "fused": 9,
+      "removed_disposition": 10,
+      "replaced": 8
+    },
+    "physical_bytes_by_tier": {
+      "GPU_INTERMEDIATE": {
+        "v10": 30651973632,
+        "v11": 7399019520,
+        "bytes_removed": 23252954112
+      },
+      "HOST_INTERMEDIATE": {
+        "v10": 24310185984,
+        "v11": 9512948736,
+        "bytes_removed": 14797237248
+      },
+      "NATIVE_ENDPOINT": {
+        "v10": 3170893824,
+        "v11": 3170893824,
+        "bytes_removed": 0
+      },
+      "LINK": {
+        "v10": 3170893824,
+        "v11": 2114200960,
+        "bytes_removed": 1056692864
+      }
+    },
+    "peak_host_temporary_memory": {
+      "v10_bytes": 2965372928,
+      "v11_conservative_bytes": 143552512,
+      "v11_pinned_bytes": 58720256,
+      "v11_pageable_bytes": 84832256,
+      "bytes_saved": 2821820416,
+      "reduction_factor": 20.65706051873199
+    },
+    "chain_bytes_removed": {
+      "capture_publish": 12683547648,
+      "restore_native_write_excluding_destination_validation": 10568867456,
+      "destination_validation": 15854469120
+    }
+  },
+  "immutable_derived_value_audit": {
+    "immutable_pass_diff_and_movement_value": 63.79181449900818,
+    "status": "SUPERSEDED_DERIVED_PERCENT_ONLY",
+    "authoritative_terminal_calculation": "(61303947264 - 22197063040) / 61303947264 * 100",
+    "authoritative_terminal_value": 63.79178824422134,
+    "measured_bytes_changed": false,
+    "interpretation": "The executed post-micro artifacts remain byte-for-byte immutable. The content-addressed terminal correction supersedes only their derived percentage; all measured byte, amplification, pass, tier, and chain totals remain unchanged."
+  },
+  "integrated_v11_terminal_comparison": {
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "status": "FAILED_INVALID_PRE_RECLAIM",
+    "failure": "bounded pre-reclaim backlog 65 exceeded ceiling 64",
+    "reclaim_trigger_reached": false,
+    "state_pipeline_executed": false,
+    "scientifically_valid": false,
+    "v11_full_physical_bytes": null,
+    "v11_full_physical_amplification": null,
+    "v11_external_movement_bytes": null,
+    "v11_external_movement_amplification": null,
+    "v11_avoidable_physical_bytes": null,
+    "v11_avoidable_amplification": null,
+    "v11_full_state_pass_count": null,
+    "v11_physical_bytes_by_tier": null,
+    "v11_time_to_hbm_reclamation_seconds": null,
+    "v11_time_to_first_useful_gpu1_seconds": null,
+    "v11_time_to_two_gpu_excess_service_seconds": null,
+    "v11_queue_drain_time_seconds": null,
+    "v11_time_to_serving_slo_restoration_seconds": null,
+    "v11_restore_first_resumed_token_seconds": null,
+    "v11_restore_all_branches_resumed_seconds": null,
+    "v11_restore_continuation_complete_seconds": null,
+    "v11_gpu0_restore_interference": null,
+    "v11_integrated_branch_correctness": null,
+    "comparison_status": "NOT_REACHED_PRE_RECLAIM",
+    "null_values_are_not_zero_improvement_or_regression": true
+  },
+  "frozen_v10_integrated_reference_only": {
+    "time_to_hbm_reclamation_seconds": 5.222174431,
+    "time_to_first_useful_gpu1_seconds": 5.413681427,
+    "time_to_serving_slo_restoration_seconds": 11.373208336,
+    "restore_first_resumed_token_seconds": 7.727983415,
+    "restore_continuation_complete_seconds": 7.848228746,
+    "v11_counterparts": "NOT_REACHED",
+    "absolute_time_improvements": null,
+    "percentage_time_improvements": null
+  },
+  "non_fabrication_checks": {
+    "micro_timings_not_relabelled_as_integrated": true,
+    "v10_timings_not_used_as_v11_denominators": true,
+    "pre_reclaim_serving_samples_not_used_as_state_pipeline_results": true,
+    "missing_integrated_values_are_null": true,
+    "no_integrated_improvement_claimed": true,
+    "projected_21x_not_reported_as_measured": true
+  },
+  "review_verdict": "PASS: the measured v10-versus-v11 micro byte, pass, tier, and host-temporary comparisons are supported by immutable source hashes plus the terminal arithmetic correction. Every integrated v11 state-path and latency comparison is NOT_REACHED/null because attempt B failed before reclaim; no integrated improvement can be claimed."
+}

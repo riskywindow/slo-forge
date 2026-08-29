@@ -1,0 +1,38 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-micro-scientific-outcome/v1",
+  "attempt_id": "exp004-v11-micro-s41-c",
+  "status": "FAILED_CLOSED_BEFORE_RESTORE_MEASUREMENT",
+  "scientifically_admissible_measurement": false,
+  "real_a100_state_created": true,
+  "model_loaded": true,
+  "exact_workload_attempted": true,
+  "failure_type": "V11RuntimeTeardownRequired",
+  "failure_message": "v11 canonical pass recorder reached its 4096 unresolved-CUDA-event bound during direct restore; the saturated recorder also prevented failure-scrub accounting",
+  "root_cause": "The bounded recorder retained every completed CUDA event until final transaction resolution. A fragmented native destination mapping produced more than 4096 canonical restore operations, exhausting the unresolved-event bound even though no state-byte mismatch had been observed.",
+  "remote_manifest": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-manifest-download.json",
+    "sha256": "c05c9586d55526b2c86ec9c2ef6717f1dd3dd0772a975c09d92bf2aa76bac00f"
+  },
+  "worker_failure": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/remote-download/worker__failure.json",
+    "sha256": "1fb2cb6f296030e301f0864cf240550ff721b248d128adf9af22ee48e2887b59"
+  },
+  "settlement": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/gpu-settlement.json",
+    "sha256": "21718c18ef04d7803b98cb9707ae7d11b19e8800c7e2b63e28434ad9fcfab4c7",
+    "accounted_gpu_seconds": 261.63
+  },
+  "postflight_cleanup": {
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-c/postflight-cleanup.json",
+    "sha256": "b162ab290cca53ab115d8bb01ba557b1f733e2fd4017a78c4d038ae7439677d6",
+    "status": "PASS"
+  },
+  "affected_destination_blocks": 1152,
+  "first_destination_block_id": 1153,
+  "last_destination_block_id": 2304,
+  "admission_exposed": false,
+  "state_mismatch_observed": false,
+  "provider_cleanup_pass": true,
+  "integrated_v11_allowed_from_this_attempt": false,
+  "amplification_reportable_from_this_attempt": false
+}

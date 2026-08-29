@@ -1,0 +1,106 @@
+✓ Initialized. View run at 
+https://modal.com/apps/rishivinodkumar/main/ap-PjcID67RGw7sjCOheKjAPx
+Building image im-kgKHvWcS2JWkc1cmWIZ2tZ
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 3.92s
+
+Built image im-kgKHvWcS2JWkc1cmWIZ2tZ in 10.23s
+
+
+Building image im-0JvwUyJANkV5fe6ttfU4nR
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.73s
+
+Built image im-0JvwUyJANkV5fe6ttfU4nR in 4.02s
+
+
+Building image im-96udDLcx52AV2KQt3mhuMJ
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.01s
+
+Built image im-96udDLcx52AV2KQt3mhuMJ in 4.36s
+
+
+Building image im-illDD4upiuGI8SwtZCktg4
+
+=> Step 0: FROM base
+
+=> Step 1: ENV PYTHONPATH=/opt/sloforge:/opt/sloforge/python:/opt/sloforge/benchmarks/branchfabric:/opt/sloforge/experiments/branchfabric
+
+=> Step 2: ENV VLLM_ENABLE_V1_MULTIPROCESSING=0
+
+=> Step 3: ENV VLLM_USE_FLASHINFER_SAMPLER=0
+
+=> Step 4: ENV HF_HUB_DISABLE_TELEMETRY=1
+
+=> Step 5: ENV DO_NOT_TRACK=1
+
+=> Step 6: ENV WANDB_MODE=disabled
+
+=> Step 7: ENV WANDB_DISABLED=true
+
+=> Step 8: ENV TOKENIZERS_PARALLELISM=false
+
+=> Step 9: ENV HF_HUB_OFFLINE=1
+
+=> Step 10: ENV TRANSFORMERS_OFFLINE=1
+
+=> Step 11: ENV CC=/usr/bin/gcc
+Saving image...
+Image saved, took 2.08s
+
+Built image im-illDD4upiuGI8SwtZCktg4 in 3.97s
+
+
+Building image im-kbxqFGdHFCgeOiz8WU44bV
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.95s
+
+Built image im-kbxqFGdHFCgeOiz8WU44bV in 4.28s
+
+
+Building image im-32n7j42VufDaMPtNp3VW7U
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.03s
+
+Built image im-32n7j42VufDaMPtNp3VW7U in 4.34s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/rishivinodkumar/sloforge/experiments/branchfabric/modal_gpu_reclamati
+│   on_v11.py
+├── 🔨 Created mount /Users/rishivinodkumar/sloforge/python
+├── 🔨 Created mount /Users/rishivinodkumar/sloforge/benchmarks/branchfabric
+├── 🔨 Created mount /Users/rishivinodkumar/sloforge/experiments/branchfabric
+├── 🔨 Created mount 
+│   /Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experi
+│   ment-004/v11/integration-gates
+├── 🔨 Created mount 
+│   /Users/rishivinodkumar/sloforge/artifacts/branchfabric/gpu-validation/experi
+│   ment-004/budget-authorization-v11.json
+└── 🔨 Created function run_micro.
+{"result":{"attempt_id":"exp004-v11-micro-s41-c","completed_at_utc":"2026-08-19T01:45:07.791297+00:00","controller":{"run_error":{"message":"v11 one-GPU micro controller failed","traceback":"Traceback (most recent call last):\n  File \"/root/modal_gpu_reclamation_v11.py\", line 286, in run_micro\n    raise RuntimeError(\"v11 one-GPU micro controller failed\")\nRuntimeError: v11 one-GPU micro controller failed\n","type":"RuntimeError"},"schema_version":"sloforge.branchfabric.experiment-004-v11-controller-failure/v1","status":"failed"},"controller_and_analysis_interval_seconds":199.503305367,"function_call_id":"fc-01M0BTWT8SGRP4RZE2BCW0JENP","gpu_allocation_seconds":203.662525028,"gpu_allocation_seconds_status":"pending-final-function-return","gpu_count":1,"gpu_hours":0.05657292361888889,"gpu_seconds":203.662525028,"remote_manifest_sha256":"c05c9586d55526b2c86ec9c2ef6717f1dd3dd0772a975c09d92bf2aa76bac00f","remote_prefix":"experiment-004/v11/micro-validation/modal/exp004-v11-micro-s41-c","requested_gpu":"A100-80GB:1","reservation_id":"exp004-v11-micro-s41-c-reservation","run_error":{"message":"v11 one-GPU micro controller failed","traceback":"Traceback (most recent call last):\n  File \"/root/modal_gpu_reclamation_v11.py\", line 286, in run_micro\n    raise RuntimeError(\"v11 one-GPU micro controller failed\")\nRuntimeError: v11 one-GPU micro controller failed\n","type":"RuntimeError"},"schema_version":"sloforge.branchfabric.experiment-004-v11-micro-completion/v1","status":"failed"}}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/rishivinodkumar/main/ap-PjcID67RGw7sjCOheKjAPx

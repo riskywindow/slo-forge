@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "remote_host": "mew0",
+  "remote_user": "rishivin",
+  "captured_at_utc": "2026-08-10T22:34:29Z",
+  "driver_version": "580.178.04",
+  "nvidia_smi_driver_supported_cuda_version": "13.0",
+  "cuda_toolkit": null,
+  "nvcc_available": false,
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total_mib": 81920,
+      "memory_used_mib_at_preflight": 0,
+      "utilization_percent_at_preflight": 0
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-a473e021-97fb-64b8-74ba-471825808bed",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_total_mib": 81920,
+      "memory_used_mib_at_preflight": 0,
+      "utilization_percent_at_preflight": 0
+    }
+  ],
+  "selected_gpu_index_if_valid": 0,
+  "gpu_workload_started": false,
+  "tmp_available_gib_approx": 95,
+  "system_python": "3.10.12",
+  "system_runtime_packages": {
+    "torch": null,
+    "transformers": null,
+    "vllm": null,
+    "sglang": null,
+    "huggingface-hub": "0.23.0",
+    "nvidia-ml-py": "12.560.30",
+    "triton": "3.1.0"
+  }
+}

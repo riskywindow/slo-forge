@@ -51,7 +51,7 @@ class CapacityCalibrationBounds(_StrictModel):
     warmup_seconds: float = Field(default=1.0, ge=1.0, le=5.0, allow_inf_nan=False)
     minimum_measurement_seconds: float = Field(default=10.0, ge=10.0, le=20.0, allow_inf_nan=False)
     maximum_measurement_seconds: float = Field(default=10.0, ge=10.0, le=20.0, allow_inf_nan=False)
-    maximum_probes: int = Field(default=3, ge=3, le=3)
+    maximum_probes: int = Field(default=8, ge=3, le=8)
     maximum_allocation_wall_seconds: float = Field(
         default=212.0, gt=0.0, le=212.0, allow_inf_nan=False
     )
@@ -262,6 +262,18 @@ class CapacityProbeResult(_StrictModel):
     configured_rate_rps: float = Field(gt=0.0, allow_inf_nan=False)
     observed_offered_rate_rps: float = Field(ge=0.0, allow_inf_nan=False)
     completed_rate_rps: float = Field(ge=0.0, allow_inf_nan=False)
+    completed_rate_estimator: Literal["measurement-interval-completion-events"] = (
+        "measurement-interval-completion-events"
+    )
+    completed_rate_sample_count: int = Field(default=0, ge=0)
+    completed_rate_span_seconds: float | None = Field(default=None, gt=0.0, allow_inf_nan=False)
+    interval_offered_requests: int = Field(default=0, ge=0)
+    interval_completed_requests: int = Field(default=0, ge=0)
+    queue_flow_start_depth: int = Field(default=0, ge=0)
+    queue_flow_expected_end_depth: int = Field(default=0, ge=0)
+    queue_flow_observed_end_depth: int = Field(default=0, ge=0)
+    queue_flow_conservation_error_requests: int = 0
+    queue_flow_conservation_pass: bool = False
     p95_ttft_seconds: float | None = Field(default=None, ge=0.0, allow_inf_nan=False)
     queue_depth_start: int = Field(ge=0)
     queue_depth_end: int = Field(ge=0)
@@ -404,9 +416,12 @@ def _queue_depth(
 ) -> int:
     depth = 0
     for arrival in plan.arrivals:
-        if arrival.scheduled_arrival_ns > at_ns:
-            break
         observation = observations.get(arrival.request_id)
+        # Queue membership begins at the actual client offer, not at the ideal
+        # schedule. Counting a delayed, not-yet-offered request invents backlog.
+        offered_ns = arrival.scheduled_arrival_ns if observation is None else observation.offered_ns
+        if offered_ns > at_ns:
+            continue
         if (
             observation is None
             or observation.completed_ns is None
@@ -574,12 +589,21 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
     admission_lag_pass = (
         maximum_admission_lateness is not None and maximum_admission_lateness <= 0.250
     )
-    completed_in_window = sum(
-        observation.completed_ns is not None
-        and plan.measurement_start_ns <= observation.completed_ns < plan.measurement_end_ns
-        for observation in raw.observations
+    # Capacity is the count of real completion events during the half-open
+    # measurement interval. TTFT and output correctness remain attached to the
+    # scheduled measurement cohort. Queue-flow conservation proves warmup
+    # carry-ins and cohort carry-outs balance rather than inflating capacity:
+    # Q_end = Q_start + interval_offers - interval_completions.
+    interval_offered_requests = sum(
+        plan.measurement_start_ns <= item.offered_ns < plan.measurement_end_ns
+        for item in raw.observations
     )
-    completed_rate = completed_in_window / duration_s
+    interval_completed_requests = sum(
+        item.completed_ns is not None
+        and plan.measurement_start_ns <= item.completed_ns < plan.measurement_end_ns
+        for item in raw.observations
+    )
+    completed_rate = interval_completed_requests / duration_s
     ttft_values: list[float] = []
     for item in measurement_arrivals:
         observation = observations.get(item.request_id)
@@ -590,16 +614,25 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
     ttfts = tuple(ttft_values)
     p95_ttft = _percentile(ttfts, 0.95)
     sample_count = math.floor(duration_s) + 1
-    queue_points = tuple(
-        (
-            offset,
-            _queue_depth(
-                plan,
-                observations,
-                min(plan.measurement_end_ns, plan.measurement_start_ns + round(offset * 1e9)),
-            ),
-        )
-        for offset in (duration_s * index / (sample_count - 1) for index in range(sample_count))
+    queue_points_list: list[tuple[float, int]] = []
+    for index in range(sample_count):
+        offset = duration_s * index / (sample_count - 1)
+        if index == 0:
+            sample_ns = plan.measurement_start_ns - 1
+        elif index == sample_count - 1:
+            sample_ns = plan.measurement_end_ns - 1
+        else:
+            sample_ns = plan.measurement_start_ns + round(offset * 1e9)
+        queue_points_list.append((offset, _queue_depth(plan, observations, sample_ns)))
+    queue_points = tuple(queue_points_list)
+    queue_flow_start_depth = queue_points[0][1]
+    queue_flow_observed_end_depth = queue_points[-1][1]
+    queue_flow_expected_end_depth = (
+        queue_flow_start_depth + interval_offered_requests - interval_completed_requests
+    )
+    queue_flow_conservation_error = queue_flow_observed_end_depth - queue_flow_expected_end_depth
+    queue_flow_conservation_pass = (
+        queue_flow_expected_end_depth >= 0 and queue_flow_conservation_error == 0
     )
     slope = _linear_slope(queue_points)
     first_quarter = tuple(depth for _, depth in queue_points[: max(2, len(queue_points) // 4)])
@@ -622,7 +655,10 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
     )
     ttft_pass = p95_ttft is not None and p95_ttft <= slo_ttft_seconds
     queue_pass = not persistent_positive_drift
-    throughput_pass = completed_rate + 1e-12 >= offered_rate
+    # Apply the declared five-percent operating-point tolerance while exact
+    # cohort completion, flow conservation, queue drift, and TTFT remain
+    # independent sustainability gates.
+    throughput_pass = all_measurement_completed and completed_rate + 1e-12 >= offered_rate * 0.95
     validity = (
         arrival_rate_verified
         and admission_cadence_verified
@@ -630,6 +666,7 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
         and monotonic
         and output_verified
         and complete
+        and queue_flow_conservation_pass
     )
     obvious_overload = (
         max(depth for _, depth in queue_points) >= 64
@@ -660,6 +697,7 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
         (monotonic, "admission timestamps precede scheduled arrivals"),
         (output_verified, "64-token completion target was not reproduced"),
         (complete, "terminal request accounting is incomplete"),
+        (queue_flow_conservation_pass, "measurement queue flow does not conserve requests"),
         (
             sufficient_window,
             "measurement is shorter than 10 seconds without an objective early overload gate",
@@ -676,6 +714,15 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
         configured_rate_rps=plan.configured_rate_rps,
         observed_offered_rate_rps=offered_rate,
         completed_rate_rps=completed_rate,
+        completed_rate_sample_count=interval_completed_requests,
+        completed_rate_span_seconds=duration_s,
+        interval_offered_requests=interval_offered_requests,
+        interval_completed_requests=interval_completed_requests,
+        queue_flow_start_depth=queue_flow_start_depth,
+        queue_flow_expected_end_depth=queue_flow_expected_end_depth,
+        queue_flow_observed_end_depth=queue_flow_observed_end_depth,
+        queue_flow_conservation_error_requests=queue_flow_conservation_error,
+        queue_flow_conservation_pass=queue_flow_conservation_pass,
         p95_ttft_seconds=p95_ttft,
         queue_depth_start=queue_points[0][1],
         queue_depth_end=queue_points[-1][1],
@@ -715,7 +762,12 @@ def evaluate_probe(raw: CapacityProbeRaw, *, slo_ttft_seconds: float = 2.0) -> C
 
 
 def choose_spike(results: tuple[CapacityProbeResult, ...]) -> SpikeSelection | None:
-    """Select only a spike that was itself unsustainable on GPU0."""
+    """Select a measured GPU0 overload with the preferred two-GPU headroom.
+
+    The baseline path deliberately does not implement the 0.80--0.90 ADR
+    exception.  A spike above 80% of the measured two-GPU operating point must
+    therefore fail closed instead of being silently promoted to v10.
+    """
 
     one_stable = sorted(
         (
@@ -747,14 +799,14 @@ def choose_spike(results: tuple[CapacityProbeResult, ...]) -> SpikeSelection | N
         item
         for item in one_unstable
         if 1.15 <= item.configured_rate_rps / lambda_1.configured_rate_rps <= 1.30
-        and 0.80 <= item.configured_rate_rps / lambda_2.configured_rate_rps <= 0.90
+        and item.configured_rate_rps / lambda_2.configured_rate_rps <= 0.80
     )
     if not candidates:
         return None
     spike = min(
         candidates,
         key=lambda item: (
-            abs(item.configured_rate_rps / lambda_2.configured_rate_rps - 0.85),
+            abs(item.configured_rate_rps / lambda_2.configured_rate_rps - 0.75),
             item.configured_rate_rps,
         ),
     )
@@ -773,7 +825,7 @@ def choose_spike(results: tuple[CapacityProbeResult, ...]) -> SpikeSelection | N
 def recommend_next_probe(
     results: tuple[CapacityProbeResult, ...],
     *,
-    maximum_probes: int = 3,
+    maximum_probes: int = 8,
     rate_grid_rps: tuple[float, ...] = DEFAULT_RATE_GRID_RPS,
 ) -> NextProbe:
     """Advance a bounded adaptive search using only conclusive raw probe results."""
@@ -808,12 +860,19 @@ def recommend_next_probe(
         if not one_results:
             rate = 20.0
         else:
-            if min(one_unstable) != 20.0:
+            lower = tuple(
+                value
+                for value in reversed(rate_grid_rps)
+                if value < min(one_unstable) and (ProbeTopology.GPU0_ONLY, value) not in tested
+            )
+            if not lower:
                 return NextProbe(
                     status="blocked",
-                    reason="initial GPU0 overload was not the measured 20-rps prior point",
+                    reason="rate grid has no lower untested GPU0 operating point",
                 )
-            rate = 17.25
+            # Work downward from the lowest measured overload. This avoids an
+            # exhaustive sweep while allowing more than one bad prior point.
+            rate = lower[0]
         return NextProbe(
             status="probe",
             topology=ProbeTopology.GPU0_ONLY,
@@ -829,7 +888,24 @@ def recommend_next_probe(
             if value > stable_peak and (ProbeTopology.GPU0_ONLY, value) not in tested
         )
         if not higher:
-            return NextProbe(status="blocked", reason="rate grid has no GPU0 overload point")
+            # The v9 diagnostic establishes 96 rps as an extreme invalid load,
+            # but it is not itself a valid capacity point.  When the configured
+            # low-rate grid remains entirely sustainable, continue the real
+            # measurement geometrically instead of wasting the remaining
+            # bounded probes or promoting the diagnostic result.  The 96-rps
+            # cap prevents an unbounded offered-load escalation.
+            extrapolated = round(min(96.0, preferred), 3)
+            if extrapolated <= stable_peak or (ProbeTopology.GPU0_ONLY, extrapolated) in tested:
+                return NextProbe(
+                    status="blocked",
+                    reason="bounded 96-rps prior cap has no untested GPU0 overload point",
+                )
+            return NextProbe(
+                status="probe",
+                topology=ProbeTopology.GPU0_ONLY,
+                rate_rps=extrapolated,
+                reason="continue above the sustainable grid peak within the 96-rps prior cap",
+            )
         return NextProbe(
             status="probe",
             topology=ProbeTopology.GPU0_ONLY,
@@ -851,6 +927,15 @@ def recommend_next_probe(
                 rate_rps=between[0],
                 reason="test overload at a permitted v10 spike multiplier",
             )
+        fractional = round((1.20 * lambda_1) * 2.0) / 2.0
+        fractional_ratio = fractional / lambda_1
+        if 1.15 <= fractional_ratio <= 1.30 and (ProbeTopology.GPU0_ONLY, fractional) not in tested:
+            return NextProbe(
+                status="probe",
+                topology=ProbeTopology.GPU0_ONLY,
+                rate_rps=fractional,
+                reason="test fractional GPU0 overload inside the permitted spike interval",
+            )
         return NextProbe(
             status="blocked",
             reason="one-GPU bracket has no measured overload in the 1.15x-1.30x interval",
@@ -859,34 +944,34 @@ def recommend_next_probe(
     two_rates = tuple(
         value
         for value in rate_grid_rps
-        if 0.80 <= candidate_spike / value <= 0.90
+        if value > candidate_spike
+        and candidate_spike / value <= 0.80
         and (ProbeTopology.TWO_GPU_ROUND_ROBIN, value) not in tested
     )
     if not two_rates:
-        fractional = (
-            23.5 if candidate_spike == 20.0 else round((candidate_spike / 0.85) * 2.0) / 2.0
-        )
+        fractional = round((candidate_spike / 0.75) * 2.0) / 2.0
         if (
-            0.80 <= candidate_spike / fractional <= 0.90
+            fractional > candidate_spike
+            and candidate_spike / fractional <= 0.80
             and (ProbeTopology.TWO_GPU_ROUND_ROBIN, fractional) not in tested
         ):
             return NextProbe(
                 status="probe",
                 topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
                 rate_rps=fractional,
-                reason="test fractional two-GPU rate with measured drain headroom",
+                reason="test fractional two-GPU rate with at least 20% reserve headroom",
             )
         return NextProbe(
             status="blocked",
-            reason="no untested two-GPU point provides 10-20% drain headroom",
+            reason="no untested two-GPU point provides the preferred 20% reserve headroom",
         )
-    target = candidate_spike / 0.85
+    target = candidate_spike / 0.75
     rate = min(two_rates, key=lambda value: (abs(value - target), value))
     return NextProbe(
         status="probe",
         topology=ProbeTopology.TWO_GPU_ROUND_ROBIN,
         rate_rps=rate,
-        reason="verify sustainable two-GPU excess capacity for the measured overload",
+        reason="verify sustainable two-GPU excess capacity with preferred reserve headroom",
     )
 
 

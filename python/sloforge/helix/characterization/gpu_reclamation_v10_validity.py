@@ -58,8 +58,8 @@ class V10Phase(StrEnum):
     D2H_BEGIN = "D2H_BEGIN"
     D2H_END = "D2H_END"
     STATE_PUBLISH = "STATE_PUBLISH"
-    GPU1_KV_RELEASE_BEGIN = "GPU1_KV_RELEASE_BEGIN"
-    GPU1_KV_RELEASE_END = "GPU1_KV_RELEASE_END"
+    GPU1_STATE_RELEASE_BEGIN = "GPU1_STATE_RELEASE_BEGIN"
+    GPU1_STATE_RELEASE_END = "GPU1_STATE_RELEASE_END"
     GPU1_HBM_RECLAIM_CONFIRMED = "GPU1_HBM_RECLAIM_CONFIRMED"
     GPU1_SERVING_ENABLE = "GPU1_SERVING_ENABLE"
     GPU1_FIRST_USEFUL_SERVING_REQUEST = "GPU1_FIRST_USEFUL_SERVING_REQUEST"
@@ -70,12 +70,16 @@ class V10Phase(StrEnum):
     SERVING_SLO_RESTORED = "SERVING_SLO_RESTORED"
     SERVING_SLO_STABILITY_BEGIN = "SERVING_SLO_STABILITY_BEGIN"
     SERVING_SLO_STABILITY_END = "SERVING_SLO_STABILITY_END"
+    RESTORE_LOAD_REDUCED = "RESTORE_LOAD_REDUCED"
+    GPU1_SERVING_DRAINED = "GPU1_SERVING_DRAINED"
     RESTORE_ELIGIBLE = "RESTORE_ELIGIBLE"
     RESTORE_TRIGGER = "RESTORE_TRIGGER"
     H2D_BEGIN = "H2D_BEGIN"
     H2D_END = "H2D_END"
     STATE_IMPORT_BEGIN = "STATE_IMPORT_BEGIN"
     STATE_IMPORT_END = "STATE_IMPORT_END"
+    DESTINATION_NATIVE_WRITE_BEGIN = "DESTINATION_NATIVE_WRITE_BEGIN"
+    DESTINATION_NATIVE_WRITE_END = "DESTINATION_NATIVE_WRITE_END"
     STATE_VALIDATE_BEGIN = "STATE_VALIDATE_BEGIN"
     STATE_VALIDATE_END = "STATE_VALIDATE_END"
     BRANCH_RESUME_BEGIN = "BRANCH_RESUME_BEGIN"
@@ -115,24 +119,31 @@ CAUSAL_V10_TIMELINE = (
     V10Phase.INTEGRITY_BEGIN,
     V10Phase.INTEGRITY_END,
     V10Phase.STATE_PUBLISH,
-    V10Phase.GPU1_KV_RELEASE_BEGIN,
-    V10Phase.GPU1_KV_RELEASE_END,
+    V10Phase.GPU1_STATE_RELEASE_BEGIN,
+    V10Phase.GPU1_STATE_RELEASE_END,
     V10Phase.GPU1_HBM_RECLAIM_CONFIRMED,
     V10Phase.GPU1_SERVING_ENABLE,
     V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST,
-    V10Phase.SERVING_QUEUE_DRAIN_BEGIN,
     V10Phase.SERVING_SLO_RECOVERY_BEGIN,
+    # The sustained queue-drain series is sampled on the next fixed telemetry
+    # boundary after the first useful GPU1 token.  It therefore cannot be
+    # required to precede the raw first-useful event.
+    V10Phase.SERVING_QUEUE_DRAIN_BEGIN,
     V10Phase.SERVING_QUEUE_DRAIN_END,
     V10Phase.SERVING_SLO_RESTORED,
     V10Phase.SERVING_SLO_STABILITY_BEGIN,
     V10Phase.SERVING_SLO_STABILITY_END,
     V10Phase.TWO_GPU_SERVICE_STABLE,
+    V10Phase.RESTORE_LOAD_REDUCED,
+    V10Phase.GPU1_SERVING_DRAINED,
     V10Phase.RESTORE_ELIGIBLE,
     V10Phase.RESTORE_TRIGGER,
     V10Phase.H2D_BEGIN,
     V10Phase.H2D_END,
     V10Phase.STATE_IMPORT_BEGIN,
+    V10Phase.DESTINATION_NATIVE_WRITE_BEGIN,
     V10Phase.STATE_VALIDATE_BEGIN,
+    V10Phase.DESTINATION_NATIVE_WRITE_END,
     V10Phase.STATE_VALIDATE_END,
     V10Phase.STATE_IMPORT_END,
     V10Phase.BRANCH_RESUME_BEGIN,
@@ -186,6 +197,11 @@ class V10ValidityConfig(_StrictModel):
     control_offered_rate_per_second: float = Field(gt=0.0, allow_inf_nan=False)
     spike_offered_rate_per_second: float = Field(gt=0.0, allow_inf_nan=False)
     restore_offered_rate_per_second: float = Field(gt=0.0, allow_inf_nan=False)
+    lambda_1_rps: float = Field(gt=0.0, allow_inf_nan=False)
+    overload_queue_trigger_depth: int = Field(default=20, ge=10, le=25)
+    overload_queue_abort_depth: int = Field(default=64, gt=0)
+    preferred_trigger_minimum_depth: int = Field(default=10, ge=0)
+    preferred_trigger_maximum_depth: int = Field(default=25, gt=0)
     maximum_p95_ttft_ns: int = Field(default=2 * NS_PER_SECOND, gt=0)
     recovery_queue_depth_threshold: int = Field(ge=0)
     evaluation_window_ns: int = Field(default=250_000_000, gt=0)
@@ -200,6 +216,55 @@ class V10ValidityConfig(_StrictModel):
             raise ValueError("v10 serving stability window must be at least five seconds")
         if self.stability_window_ns % self.evaluation_window_ns:
             raise ValueError("stability window must contain an integer number of evaluations")
+        if self.spike_offered_rate_per_second <= self.lambda_1_rps:
+            raise ValueError("v10 spike must exceed measured one-GPU capacity")
+        if self.restore_offered_rate_per_second >= self.lambda_1_rps:
+            raise ValueError("v10 restore load must remain below measured one-GPU capacity")
+        if not (
+            self.preferred_trigger_minimum_depth
+            <= self.overload_queue_trigger_depth
+            <= self.preferred_trigger_maximum_depth
+            < self.overload_queue_abort_depth
+        ):
+            raise ValueError("v10 overload trigger/abort depths are not scientifically bounded")
+        return self
+
+
+class V10PrerequisiteEvidence(_StrictModel):
+    """Immutable local authorization plus measured pre/postflight evidence."""
+
+    authorization_valid: bool
+    phase_budget_valid: bool
+    two_engine_ready: bool
+    sanity_12rps_stable: bool
+    sanity_15rps_overload: bool
+    budget_pass: bool
+    cleanup_pass: bool
+    evidence_references: tuple[str, ...] = Field(min_length=7, max_length=7)
+
+    @model_validator(mode="after")
+    def references_bind_every_prerequisite(self) -> Self:
+        expected_kinds = {
+            "authorization",
+            "phase-budget",
+            "engine-readiness",
+            "sanity-12rps",
+            "sanity-15rps",
+            "budget-settlement",
+            "modal-cleanup",
+        }
+        parsed = tuple(reference.split(":", 2) for reference in self.evidence_references)
+        if (
+            any(len(parts) != 3 for parts in parsed)
+            or {parts[0] for parts in parsed} != expected_kinds
+            or any(
+                len(parts[1]) != 64
+                or any(character not in "0123456789abcdef" for character in parts[1])
+                or not parts[2]
+                for parts in parsed
+            )
+        ):
+            raise ValueError("prerequisite references must bind all seven immutable artifacts")
         return self
 
 
@@ -222,11 +287,14 @@ class GPU0OverloadEvidence(_StrictModel):
     control_rate_matches_config: bool
     overload_rate_matches_config: bool
     control_p95_ttft_pass: bool
+    control_completion_rate_tracks_offered: bool
+    control_queue_stable: bool
     ttft_exceeded: bool
     queue_positive_trend: bool
     offered_rate_exceeds_completed_rate: bool
     overload_condition_count: int = Field(ge=0, le=3)
     queue_trend: QueueTrendEvidence
+    control_queue_trend: QueueTrendEvidence
     passed: bool
 
     @model_validator(mode="after")
@@ -242,11 +310,44 @@ class GPU0OverloadEvidence(_StrictModel):
             self.control_rate_matches_config
             and self.overload_rate_matches_config
             and self.control_p95_ttft_pass
+            and self.control_completion_rate_tracks_offered
+            and self.control_queue_stable
             and self.control.completed_requests > 0
             and count >= 1
         )
         if self.overload_condition_count != count or self.passed != expected:
             raise ValueError("GPU0 overload evidence is internally inconsistent")
+        return self
+
+
+class BoundedBacklogEvidence(_StrictModel):
+    interval: PhaseInterval
+    trigger_observation_ns: int = Field(ge=0)
+    trigger_queue_depth: int = Field(ge=0)
+    maximum_queue_depth: int = Field(ge=0)
+    queue_depth_at_gpu1_first_useful: int = Field(ge=0)
+    configured_trigger_depth: int = Field(ge=0)
+    configured_abort_depth: int = Field(gt=0)
+    preferred_minimum_depth: int = Field(ge=0)
+    preferred_maximum_depth: int = Field(gt=0)
+    passed: bool
+
+    @model_validator(mode="after")
+    def consistent(self) -> Self:
+        expected = (
+            self.interval.start_ns <= self.trigger_observation_ns <= self.interval.end_ns
+            and self.preferred_minimum_depth
+            <= self.configured_trigger_depth
+            <= self.preferred_maximum_depth
+            and self.configured_trigger_depth
+            <= self.trigger_queue_depth
+            <= self.preferred_maximum_depth
+            and self.trigger_queue_depth <= self.maximum_queue_depth
+            and self.queue_depth_at_gpu1_first_useful <= self.maximum_queue_depth
+            and self.maximum_queue_depth <= self.configured_abort_depth
+        )
+        if self.passed != expected:
+            raise ValueError("bounded-backlog evidence is internally inconsistent")
         return self
 
 
@@ -303,6 +404,17 @@ class SLOStabilityEvidence(_StrictModel):
     restore_trigger_follows_stability: bool
     passed: bool
 
+    @property
+    def restoration_passed(self) -> bool:
+        """The accepted window starts in SLO; ``passed`` also proves 5 s stability."""
+
+        return (
+            self.all_windows_have_ttft_samples
+            and self.all_windows_p95_ttft_pass
+            and self.maximum_queue_depth <= self.queue_depth_threshold
+            and self.restored_marker_precedes_stability
+        )
+
     @model_validator(mode="after")
     def consistent(self) -> Self:
         expected = (
@@ -321,7 +433,13 @@ class SLOStabilityEvidence(_StrictModel):
 class GPU0RestoreStageActivityEvidence(_StrictModel):
     """Observed GPU0 work throughout one causally bounded restore stage."""
 
-    stage: Literal["h2d", "import-validation", "resume"]
+    stage: Literal[
+        "h2d",
+        "import",
+        "destination-native-write",
+        "destination-validation",
+        "resume",
+    ]
     interval: PhaseInterval
     expected_arrival_mass: float = Field(ge=0.0, allow_inf_nan=False)
     scheduled_arrival_count: int = Field(ge=0)
@@ -368,11 +486,7 @@ class GPU0RestoreActivityEvidence(_StrictModel):
     offered_rate_per_second: float = Field(ge=0.0, allow_inf_nan=False)
     offered_rate_matches_config: bool
     all_scheduled_arrivals_routed_gpu0: bool
-    stage_activity: tuple[
-        GPU0RestoreStageActivityEvidence,
-        GPU0RestoreStageActivityEvidence,
-        GPU0RestoreStageActivityEvidence,
-    ]
+    stage_activity: tuple[GPU0RestoreStageActivityEvidence, ...] = Field(min_length=5, max_length=5)
     passed: bool
 
     @model_validator(mode="after")
@@ -388,7 +502,13 @@ class GPU0RestoreActivityEvidence(_StrictModel):
             and self.activity_spans_restore
             == (self.early_half_completion_count > 0 and self.late_half_completion_count > 0)
             and tuple(stage.stage for stage in self.stage_activity)
-            == ("h2d", "import-validation", "resume")
+            == (
+                "h2d",
+                "import",
+                "destination-native-write",
+                "destination-validation",
+                "resume",
+            )
             and bool(eligible)
             and all(stage.passed is True for stage in eligible)
         )
@@ -402,6 +522,12 @@ class StateCorrectnessEvidence(_StrictModel):
     preserved_state_bytes: int = Field(gt=0)
     source_blocks_expected: int = Field(gt=0)
     source_blocks_released: int = Field(ge=0)
+    source_kv_assigned_bytes_before: int = Field(gt=0)
+    source_kv_assigned_bytes_after: int = Field(ge=0)
+    source_kv_pool_reserved_bytes_before: int = Field(gt=0)
+    source_kv_pool_reserved_bytes_after: int = Field(gt=0)
+    source_kv_unassigned_bytes_before: int = Field(ge=0)
+    source_kv_unassigned_bytes_after: int = Field(ge=0)
     transport_integrity_valid: bool
     fresh_destination_allocations: bool
 
@@ -409,9 +535,34 @@ class StateCorrectnessEvidence(_StrictModel):
     def passed(self) -> bool:
         return (
             self.logical_state_bytes == self.preserved_state_bytes
-            and self.source_blocks_released == self.source_blocks_expected
             and self.transport_integrity_valid
             and self.fresh_destination_allocations
+        )
+
+    @property
+    def state_release_passed(self) -> bool:
+        return (
+            self.source_blocks_released == self.source_blocks_expected
+            and self.source_kv_assigned_bytes_after == 0
+            and self.source_kv_assigned_bytes_before > self.source_kv_assigned_bytes_after
+        )
+
+    @property
+    def hbm_reclaim_passed(self) -> bool:
+        assigned_released = (
+            self.source_kv_assigned_bytes_before - self.source_kv_assigned_bytes_after
+        )
+        unassigned_gained = (
+            self.source_kv_unassigned_bytes_after - self.source_kv_unassigned_bytes_before
+        )
+        return (
+            self.source_kv_pool_reserved_bytes_before == self.source_kv_pool_reserved_bytes_after
+            and self.source_kv_assigned_bytes_before + self.source_kv_unassigned_bytes_before
+            == self.source_kv_pool_reserved_bytes_before
+            and self.source_kv_assigned_bytes_after + self.source_kv_unassigned_bytes_after
+            == self.source_kv_pool_reserved_bytes_after
+            and assigned_released == self.logical_state_bytes
+            and unassigned_gained == assigned_released
         )
 
 
@@ -584,6 +735,7 @@ class MovementAccountingEvidence(_StrictModel):
             and self.external_movement_bytes <= self.full_physical_touch_bytes
             and self.avoidable_movement_bytes <= self.full_physical_touch_bytes
             and self.critical_path_movement_bytes <= self.full_physical_touch_bytes
+            and self.accounting_duplicate_bytes == 0
             and self.all_physical_passes_recorded
             and self.formulas_recomputed_from_raw_artifacts
         )
@@ -644,15 +796,28 @@ class V10AssessmentWindows(_StrictModel):
 
 
 class V10ScientificValidity(_StrictModel):
-    schema_version: Literal["sloforge.branchfabric.experiment-004-v10-scientific-validity/v1"] = (
-        "sloforge.branchfabric.experiment-004-v10-scientific-validity/v1"
+    schema_version: Literal["sloforge.branchfabric.experiment-004-v10-scientific-validity/v2"] = (
+        "sloforge.branchfabric.experiment-004-v10-scientific-validity/v2"
     )
-    state_correctness_pass: bool
+    # The missing "v" is retained verbatim from the settled §27 artifact contract.
+    authorization_alid: bool
+    phase_budget_valid: bool
+    two_engine_ready: bool
+    sanity_12rps_stable: bool
+    sanity_15rps_overload: bool
+    control_stable: bool
     gpu0_overload_pass: bool
-    two_gpu_excess_capacity_pass: bool
+    bounded_backlog_pass: bool
+    state_correctness_pass: bool
+    gpu1_state_release_pass: bool
+    gpu1_hbm_reclaim_pass: bool
+    gpu1_useful_capacity_pass: bool
+    two_gpu_service_gt_offered_pass: bool
     queue_drain_pass: bool
     slo_restoration_pass: bool
-    pre_restore_stability_pass: bool
+    slo_stability_pass: bool
+    restore_load_reduced_pass: bool
+    gpu1_serving_drained_pass: bool
     gpu0_active_during_restore_pass: bool
     branch_resume_pass: bool
     movement_accounting_pass: bool
@@ -662,6 +827,7 @@ class V10ScientificValidity(_StrictModel):
     invalid_reasons: tuple[str, ...]
     timeline: V10Timeline | None = None
     gpu0_overload: GPU0OverloadEvidence | None = None
+    bounded_backlog: BoundedBacklogEvidence | None = None
     two_gpu_excess_capacity: TwoGpuCapacityEvidence | None = None
     queue_drain: QueueDrainEvidence | None = None
     slo_stability: SLOStabilityEvidence | None = None
@@ -671,16 +837,81 @@ class V10ScientificValidity(_StrictModel):
     movement_accounting: MovementAccountingEvidence | None = None
     budget: BudgetEvidence | None = None
     cleanup: CleanupEvidence | None = None
+    prerequisites: V10PrerequisiteEvidence | None = None
 
     @model_validator(mode="after")
     def all_required_booleans_fail_closed(self) -> Self:
+        if self.prerequisites is not None and (
+            self.budget is None
+            or self.cleanup is None
+            or self.prerequisites.budget_pass != self.budget.passed
+            or self.prerequisites.cleanup_pass != self.cleanup.passed
+        ):
+            raise ValueError("prerequisite budget/cleanup binding disagrees with raw evidence")
+        prerequisite_flags = (
+            self.prerequisites is not None and self.prerequisites.authorization_valid,
+            self.prerequisites is not None and self.prerequisites.phase_budget_valid,
+            self.prerequisites is not None and self.prerequisites.two_engine_ready,
+            self.prerequisites is not None and self.prerequisites.sanity_12rps_stable,
+            self.prerequisites is not None and self.prerequisites.sanity_15rps_overload,
+        )
+        control_stable = (
+            self.gpu0_overload is not None
+            and self.gpu0_overload.control_rate_matches_config
+            and self.gpu0_overload.control_p95_ttft_pass
+            and self.gpu0_overload.control_completion_rate_tracks_offered
+            and self.gpu0_overload.control_queue_stable
+            and self.gpu0_overload.control.completed_requests > 0
+        )
+        state_release = (
+            self.state_correctness is not None
+            and self.state_correctness.state_release_passed
+            and self.timeline is not None
+            and self.timeline.timestamp(V10Phase.GPU1_STATE_RELEASE_END)
+            <= self.timeline.timestamp(V10Phase.GPU1_HBM_RECLAIM_CONFIRMED)
+        )
+        hbm_reclaim = (
+            self.state_correctness is not None
+            and self.state_correctness.hbm_reclaim_passed
+            and self.timeline is not None
+            and self.timeline.timestamp(V10Phase.GPU1_STATE_RELEASE_END)
+            <= self.timeline.timestamp(V10Phase.GPU1_HBM_RECLAIM_CONFIRMED)
+            <= self.timeline.timestamp(V10Phase.GPU1_SERVING_ENABLE)
+        )
+        useful_capacity = (
+            self.two_gpu_excess_capacity is not None
+            and self.two_gpu_excess_capacity.gpu1_completions > 0
+            and self.timeline is not None
+            and self.timeline.timestamp(V10Phase.GPU1_SERVING_ENABLE)
+            <= self.timeline.timestamp(V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST)
+        )
+        restore_reduced = (
+            self.gpu0_restore_activity is not None
+            and self.gpu0_restore_activity.offered_rate_matches_config
+            and self.timeline is not None
+            and self.timeline.timestamp(V10Phase.RESTORE_LOAD_REDUCED)
+            <= self.timeline.timestamp(V10Phase.GPU1_SERVING_DRAINED)
+        )
+        gpu1_drained = self.timeline is not None and self.timeline.timestamp(
+            V10Phase.GPU1_SERVING_DRAINED
+        ) <= self.timeline.timestamp(V10Phase.RESTORE_ELIGIBLE) <= self.timeline.timestamp(
+            V10Phase.RESTORE_TRIGGER
+        )
         expected_flags = (
-            self.state_correctness is not None and self.state_correctness.passed,
+            *prerequisite_flags,
+            control_stable,
             self.gpu0_overload is not None and self.gpu0_overload.passed,
+            self.bounded_backlog is not None and self.bounded_backlog.passed,
+            self.state_correctness is not None and self.state_correctness.passed,
+            state_release,
+            hbm_reclaim,
+            useful_capacity,
             self.two_gpu_excess_capacity is not None and self.two_gpu_excess_capacity.passed,
             self.queue_drain is not None and self.queue_drain.passed,
+            self.slo_stability is not None and self.slo_stability.restoration_passed,
             self.slo_stability is not None and self.slo_stability.passed,
-            self.slo_stability is not None and self.slo_stability.passed,
+            restore_reduced,
+            gpu1_drained,
             self.gpu0_restore_activity is not None and self.gpu0_restore_activity.passed,
             self.branch_resume is not None and self.branch_resume.passed,
             self.movement_accounting is not None and self.movement_accounting.passed,
@@ -688,12 +919,24 @@ class V10ScientificValidity(_StrictModel):
             self.cleanup is not None and self.cleanup.passed,
         )
         observed_flags = (
-            self.state_correctness_pass,
+            self.authorization_alid,
+            self.phase_budget_valid,
+            self.two_engine_ready,
+            self.sanity_12rps_stable,
+            self.sanity_15rps_overload,
+            self.control_stable,
             self.gpu0_overload_pass,
-            self.two_gpu_excess_capacity_pass,
+            self.bounded_backlog_pass,
+            self.state_correctness_pass,
+            self.gpu1_state_release_pass,
+            self.gpu1_hbm_reclaim_pass,
+            self.gpu1_useful_capacity_pass,
+            self.two_gpu_service_gt_offered_pass,
             self.queue_drain_pass,
             self.slo_restoration_pass,
-            self.pre_restore_stability_pass,
+            self.slo_stability_pass,
+            self.restore_load_reduced_pass,
+            self.gpu1_serving_drained_pass,
             self.gpu0_active_during_restore_pass,
             self.branch_resume_pass,
             self.movement_accounting_pass,
@@ -923,6 +1166,7 @@ def _slo_stability(
     *,
     config: V10ValidityConfig,
     timeline: V10Timeline,
+    scheduler_waiting_queue_depths: tuple[int, ...] | None = None,
 ) -> SLOStabilityEvidence:
     duration_ns = interval.end_ns - interval.start_ns
     if duration_ns < config.stability_window_ns:
@@ -966,6 +1210,14 @@ def _slo_stability(
         outstanding_queue_depth_at(workload, by_request, timestamp)
         for timestamp in queue_event_times
     )
+    if scheduler_waiting_queue_depths is None:
+        maximum_queue_depth = maximum_outstanding
+    else:
+        if len(scheduler_waiting_queue_depths) != len(intervals) or any(
+            depth < 0 for depth in scheduler_waiting_queue_depths
+        ):
+            raise ValueError("scheduler-waiting SLO samples do not match evaluation windows")
+        maximum_queue_depth = max(scheduler_waiting_queue_depths)
     have_samples = all(row.ttft.sample_count > 0 for row in measurement.intervals)
     p95_pass = all(evaluation.satisfied for evaluation in evaluations)
     restored_before = (
@@ -982,7 +1234,7 @@ def _slo_stability(
     passed = (
         have_samples
         and p95_pass
-        and maximum_outstanding <= config.recovery_queue_depth_threshold
+        and maximum_queue_depth <= config.recovery_queue_depth_threshold
         and restored_before
         and restore_after
     )
@@ -993,7 +1245,7 @@ def _slo_stability(
         evaluation_count=len(evaluations),
         all_windows_have_ttft_samples=have_samples,
         all_windows_p95_ttft_pass=p95_pass,
-        maximum_queue_depth=maximum_outstanding,
+        maximum_queue_depth=maximum_queue_depth,
         queue_depth_threshold=config.recovery_queue_depth_threshold,
         restored_marker_precedes_stability=restored_before,
         restore_trigger_follows_stability=restore_after,
@@ -1044,10 +1296,31 @@ def _gpu0_restore_activity(
     spans_restore = early_completions > 0 and late_completions > 0
     rate_matches = _rate_matches(offered_rate, configured_rate, tolerance)
     stage_bounds: tuple[
-        tuple[Literal["h2d", "import-validation", "resume"], V10Phase, V10Phase], ...
+        tuple[
+            Literal[
+                "h2d",
+                "import",
+                "destination-native-write",
+                "destination-validation",
+                "resume",
+            ],
+            V10Phase,
+            V10Phase,
+        ],
+        ...,
     ] = (
         ("h2d", V10Phase.H2D_BEGIN, V10Phase.H2D_END),
-        ("import-validation", V10Phase.STATE_IMPORT_BEGIN, V10Phase.STATE_IMPORT_END),
+        ("import", V10Phase.STATE_IMPORT_BEGIN, V10Phase.STATE_IMPORT_END),
+        (
+            "destination-native-write",
+            V10Phase.DESTINATION_NATIVE_WRITE_BEGIN,
+            V10Phase.DESTINATION_NATIVE_WRITE_END,
+        ),
+        (
+            "destination-validation",
+            V10Phase.STATE_VALIDATE_BEGIN,
+            V10Phase.STATE_VALIDATE_END,
+        ),
         (
             "resume",
             V10Phase.BRANCH_RESUME_BEGIN,
@@ -1129,7 +1402,7 @@ def _gpu0_restore_activity(
         offered_rate_per_second=offered_rate,
         offered_rate_matches_config=rate_matches,
         all_scheduled_arrivals_routed_gpu0=all(row.device == gpu0_device for row in scheduled_rows),
-        stage_activity=(stage_activity[0], stage_activity[1], stage_activity[2]),
+        stage_activity=tuple(stage_activity),
         passed=(
             rate_matches
             and bool(requests)
@@ -1152,11 +1425,14 @@ def assess_v10_scientific_validity(
     observations: tuple[ServingObservation, ...],
     gpu0_device: str,
     gpu1_device: str,
+    bounded_backlog: BoundedBacklogEvidence,
     state_correctness: StateCorrectnessEvidence,
     branch_resume: BranchResumeEvidence,
     movement_accounting: MovementAccountingEvidence,
     budget: BudgetEvidence,
     cleanup: CleanupEvidence,
+    prerequisites: V10PrerequisiteEvidence | None = None,
+    scheduler_waiting_queue_depths: tuple[int, ...] | None = None,
 ) -> V10ScientificValidity:
     """Evaluate every required v10 gate from explicit immutable evidence."""
 
@@ -1169,6 +1445,16 @@ def assess_v10_scientific_validity(
     )
     if movement_accounting.logical_state_bytes != state_correctness.logical_state_bytes:
         raise ValueError("state and movement logical-byte denominators disagree")
+    if (
+        bounded_backlog.interval.start_ns != timeline.timestamp(V10Phase.LOAD_SPIKE_BEGIN)
+        or bounded_backlog.interval.end_ns
+        != timeline.timestamp(V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST)
+        or bounded_backlog.configured_trigger_depth != config.overload_queue_trigger_depth
+        or bounded_backlog.configured_abort_depth != config.overload_queue_abort_depth
+        or bounded_backlog.preferred_minimum_depth != config.preferred_trigger_minimum_depth
+        or bounded_backlog.preferred_maximum_depth != config.preferred_trigger_maximum_depth
+    ):
+        raise ValueError("bounded-backlog evidence is not bound to timeline/configuration")
     control = _metrics(workload, observations, windows.control)
     overload = _metrics(workload, observations, windows.overload)
     control_duration = (windows.control.end_ns - windows.control.start_ns) / NS_PER_SECOND
@@ -1180,6 +1466,12 @@ def assess_v10_scientific_validity(
         workload,
         observations,
         windows.overload,
+        sample_interval_ns=config.evaluation_window_ns,
+    )
+    control_trend = _queue_trend(
+        workload,
+        observations,
+        windows.control,
         sample_interval_ns=config.evaluation_window_ns,
     )
     control_rate_match = _rate_matches(
@@ -1195,6 +1487,13 @@ def assess_v10_scientific_validity(
     control_ttft_pass = (
         control.ttft.p95 is not None and control.ttft.p95 <= config.maximum_p95_ttft_ns
     )
+    control_completed_rate = control.completions_in_interval / control_duration
+    control_completion_tracks = _rate_matches(
+        control_completed_rate,
+        control_rate,
+        config.arrival_rate_tolerance_fraction,
+    )
+    control_queue_stable = control_trend.direction != "positive"
     ttft_exceeded = overload.ttft.p95 is not None and overload.ttft.p95 > config.maximum_p95_ttft_ns
     positive_queue = overload_trend.direction == "positive" and overload_trend.sustained
     offered_exceeds = overload_rate > overload_completed_rate
@@ -1205,15 +1504,20 @@ def assess_v10_scientific_validity(
         control_rate_matches_config=control_rate_match,
         overload_rate_matches_config=overload_rate_match,
         control_p95_ttft_pass=control_ttft_pass,
+        control_completion_rate_tracks_offered=control_completion_tracks,
+        control_queue_stable=control_queue_stable,
         ttft_exceeded=ttft_exceeded,
         queue_positive_trend=positive_queue,
         offered_rate_exceeds_completed_rate=offered_exceeds,
         overload_condition_count=overload_count,
         queue_trend=overload_trend,
+        control_queue_trend=control_trend,
         passed=(
             control_rate_match
             and overload_rate_match
             and control_ttft_pass
+            and control_completion_tracks
+            and control_queue_stable
             and control.completed_requests > 0
             and overload_count >= 1
         ),
@@ -1247,6 +1551,7 @@ def assess_v10_scientific_validity(
         windows.slo_stability,
         config=config,
         timeline=timeline,
+        scheduler_waiting_queue_depths=scheduler_waiting_queue_depths,
     )
     restore_activity = _gpu0_restore_activity(
         workload,
@@ -1257,13 +1562,57 @@ def assess_v10_scientific_validity(
         tolerance=config.arrival_rate_tolerance_fraction,
         timeline=timeline,
     )
+    prerequisite_flags = (
+        prerequisites is not None and prerequisites.authorization_valid,
+        prerequisites is not None and prerequisites.phase_budget_valid,
+        prerequisites is not None and prerequisites.two_engine_ready,
+        prerequisites is not None and prerequisites.sanity_12rps_stable,
+        prerequisites is not None and prerequisites.sanity_15rps_overload,
+    )
+    control_stable = (
+        overload_evidence.control_rate_matches_config
+        and overload_evidence.control_p95_ttft_pass
+        and overload_evidence.control_completion_rate_tracks_offered
+        and overload_evidence.control_queue_stable
+        and overload_evidence.control.completed_requests > 0
+    )
+    state_release = state_correctness.state_release_passed and timeline.timestamp(
+        V10Phase.GPU1_STATE_RELEASE_END
+    ) <= timeline.timestamp(V10Phase.GPU1_HBM_RECLAIM_CONFIRMED)
+    hbm_reclaim = state_correctness.hbm_reclaim_passed and timeline.timestamp(
+        V10Phase.GPU1_STATE_RELEASE_END
+    ) <= timeline.timestamp(V10Phase.GPU1_HBM_RECLAIM_CONFIRMED) <= timeline.timestamp(
+        V10Phase.GPU1_SERVING_ENABLE
+    )
+    useful_capacity = capacity.gpu1_completions > 0 and timeline.timestamp(
+        V10Phase.GPU1_SERVING_ENABLE
+    ) <= timeline.timestamp(V10Phase.GPU1_FIRST_USEFUL_SERVING_REQUEST)
+    restore_reduced = (
+        config.restore_offered_rate_per_second < config.lambda_1_rps
+        and restore_activity.offered_rate_matches_config
+        and timeline.timestamp(V10Phase.RESTORE_LOAD_REDUCED)
+        <= timeline.timestamp(V10Phase.GPU1_SERVING_DRAINED)
+    )
+    gpu1_drained = (
+        timeline.timestamp(V10Phase.GPU1_SERVING_DRAINED)
+        <= timeline.timestamp(V10Phase.RESTORE_ELIGIBLE)
+        <= timeline.timestamp(V10Phase.RESTORE_TRIGGER)
+    )
     flags = (
-        state_correctness.passed,
+        *prerequisite_flags,
+        control_stable,
         overload_evidence.passed,
+        bounded_backlog.passed,
+        state_correctness.passed,
+        state_release,
+        hbm_reclaim,
+        useful_capacity,
         capacity.passed,
         queue_drain.passed,
+        stability.restoration_passed,
         stability.passed,
-        stability.passed,
+        restore_reduced,
+        gpu1_drained,
         restore_activity.passed,
         branch_resume.passed,
         movement_accounting.passed,
@@ -1271,12 +1620,24 @@ def assess_v10_scientific_validity(
         cleanup.passed,
     )
     gate_names = (
-        "state correctness",
+        "authorization artifact",
+        "phase budget",
+        "two-engine readiness",
+        "12-rps sanity stability",
+        "15-rps sanity overload",
+        "GPU0 control stability",
         "GPU0 overload",
-        "two-GPU excess capacity",
+        "bounded backlog",
+        "state correctness",
+        "GPU1 state release",
+        "GPU1 HBM reclamation",
+        "GPU1 useful capacity",
+        "two-GPU service greater than offered",
         "queue drain",
         "SLO restoration",
-        "pre-restore stability",
+        "SLO stability",
+        "restore load reduced",
+        "GPU1 serving drained",
         "GPU0 active during restore",
         "branch resume",
         "movement accounting",
@@ -1289,21 +1650,34 @@ def assess_v10_scientific_validity(
         if not passed
     )
     return V10ScientificValidity(
-        state_correctness_pass=flags[0],
-        gpu0_overload_pass=flags[1],
-        two_gpu_excess_capacity_pass=flags[2],
-        queue_drain_pass=flags[3],
-        slo_restoration_pass=flags[4],
-        pre_restore_stability_pass=flags[5],
-        gpu0_active_during_restore_pass=flags[6],
-        branch_resume_pass=flags[7],
-        movement_accounting_pass=flags[8],
-        budget_pass=flags[9],
-        cleanup_pass=flags[10],
+        authorization_alid=flags[0],
+        phase_budget_valid=flags[1],
+        two_engine_ready=flags[2],
+        sanity_12rps_stable=flags[3],
+        sanity_15rps_overload=flags[4],
+        control_stable=flags[5],
+        gpu0_overload_pass=flags[6],
+        bounded_backlog_pass=flags[7],
+        state_correctness_pass=flags[8],
+        gpu1_state_release_pass=flags[9],
+        gpu1_hbm_reclaim_pass=flags[10],
+        gpu1_useful_capacity_pass=flags[11],
+        two_gpu_service_gt_offered_pass=flags[12],
+        queue_drain_pass=flags[13],
+        slo_restoration_pass=flags[14],
+        slo_stability_pass=flags[15],
+        restore_load_reduced_pass=flags[16],
+        gpu1_serving_drained_pass=flags[17],
+        gpu0_active_during_restore_pass=flags[18],
+        branch_resume_pass=flags[19],
+        movement_accounting_pass=flags[20],
+        budget_pass=flags[21],
+        cleanup_pass=flags[22],
         scientifically_valid=all(flags),
         invalid_reasons=invalid_reasons,
         timeline=timeline,
         gpu0_overload=overload_evidence,
+        bounded_backlog=bounded_backlog,
         two_gpu_excess_capacity=capacity,
         queue_drain=queue_drain,
         slo_stability=stability,
@@ -1313,6 +1687,7 @@ def assess_v10_scientific_validity(
         movement_accounting=movement_accounting,
         budget=budget,
         cleanup=cleanup,
+        prerequisites=prerequisites,
     )
 
 
@@ -1322,12 +1697,24 @@ def fail_closed_v10_scientific_validity(reason: str) -> V10ScientificValidity:
     if not reason:
         raise ValueError("fail-closed scientific validity requires an explicit reason")
     return V10ScientificValidity(
-        state_correctness_pass=False,
+        authorization_alid=False,
+        phase_budget_valid=False,
+        two_engine_ready=False,
+        sanity_12rps_stable=False,
+        sanity_15rps_overload=False,
+        control_stable=False,
         gpu0_overload_pass=False,
-        two_gpu_excess_capacity_pass=False,
+        bounded_backlog_pass=False,
+        state_correctness_pass=False,
+        gpu1_state_release_pass=False,
+        gpu1_hbm_reclaim_pass=False,
+        gpu1_useful_capacity_pass=False,
+        two_gpu_service_gt_offered_pass=False,
         queue_drain_pass=False,
         slo_restoration_pass=False,
-        pre_restore_stability_pass=False,
+        slo_stability_pass=False,
+        restore_load_reduced_pass=False,
+        gpu1_serving_drained_pass=False,
         gpu0_active_during_restore_pass=False,
         branch_resume_pass=False,
         movement_accounting_pass=False,
@@ -1342,6 +1729,7 @@ __all__ = [
     "CAUSAL_V10_TIMELINE",
     "MINIMUM_STABILITY_WINDOW_NS",
     "REQUIRED_V10_TIMELINE",
+    "BoundedBacklogEvidence",
     "BranchResumeEvidence",
     "BranchSemanticSnapshot",
     "BudgetEvidence",
@@ -1359,6 +1747,7 @@ __all__ = [
     "TwoGpuCapacityEvidence",
     "V10AssessmentWindows",
     "V10Phase",
+    "V10PrerequisiteEvidence",
     "V10ScientificValidity",
     "V10Timeline",
     "V10TimelineEvent",

@@ -1,0 +1,162 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-pre-gpu-cross-audit/v1",
+  "review_id": "v10-pre-gpu-cross-audit",
+  "reviewer_identity": "pregpu-review-resealer",
+  "reviewed_at_utc": "2026-08-13T06:08:02Z",
+  "scope": "Independent CPU-only recursive provenance and scientific launch-gate audit after freezing the Experiment 004 v10 paid path",
+  "gpu_or_modal_invoked": false,
+  "decision": "APPROVED",
+  "behavioral_implementation_decision": "APPROVED",
+  "pre_gpu_launch_decision": "APPROVED",
+  "repository_state": {
+    "head_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+    "authorization_code_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+    "paid_path_clean_relative_to_authorized_commit": true,
+    "authorization_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-authorization.json",
+    "authorization_file_sha256": "3c0fa2f9df83827a98cfa0e20baa8e0c05e289841531747ecc1509a983242948",
+    "authorization_internal_artifact_hash": "843dcfcb3e7dfb31b4fa7696bea6433e20de7e3e90809a0dce7023d4a924cbd5",
+    "authorization_subject_sha256": "67749c5c0d52823866698ce472a6dd57298be4f05558adc1541c7fc746028409",
+    "authorization_status": "APPROVED",
+    "authorization_verifier_result": "PASS"
+  },
+  "paid_path_configuration": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+    "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843",
+    "attempt_id": "exp004-v10-naive-s41-v4",
+    "seed": 41,
+    "authorization_artifact_hash": "843dcfcb3e7dfb31b4fa7696bea6433e20de7e3e90809a0dce7023d4a924cbd5",
+    "phase_budget_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d",
+    "maximum_wall_seconds": 459.0,
+    "cleanup_reserve_seconds": 10.0,
+    "reserved_wall_seconds": 469.0,
+    "reserved_A100_seconds": 938.0
+  },
+  "authorization_review_gate": {
+    "review_count": 3,
+    "roles": [
+      "capacity_methodology",
+      "queue_drain_methodology",
+      "scientific_validity"
+    ],
+    "all_decisions_approved": true,
+    "all_subject_digests_match": true,
+    "all_source_calibration_hashes_verified": true,
+    "live_review_exchange_permitted": false,
+    "asynchronous_review_wait_permitted": false
+  },
+  "phase_budget_gate": {
+    "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+    "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d",
+    "status": "EVIDENCE_DERIVED",
+    "phase_count": 20,
+    "recursive_source_reference_count": 28,
+    "all_source_hashes_verified": true,
+    "phase_upper_bound_subtotal_wall_seconds": 375.05,
+    "safety_margin_fraction": 0.25,
+    "safety_margin_wall_seconds": 93.7625,
+    "sdk_timeout_rounding_margin_wall_seconds": 0.1875,
+    "predicted_wall_clock_seconds": 469.0,
+    "required_A100_seconds": 938.0,
+    "legacy_fixed_1800_A100_second_reservation_used": false
+  },
+  "budget_gate": {
+    "ledger_artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+    "ledger_artifact_sha256": "d85de03e136807d652f94af85074ed026f9f88571bb72410831c51d1feff983f",
+    "current_conservative_usage_A100_seconds": 9622.470997419994,
+    "required_A100_seconds": 938.0,
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "projected_conservative_usage_A100_seconds": 10560.470997419994,
+    "remaining_A100_seconds_after_reservation": 239.529002580006,
+    "condition": "9622.470997419994 + 938.0 <= 10800.0",
+    "decision": "AUTHORIZE_V10",
+    "active_reservation_count": 0
+  },
+  "scientific_protocol": {
+    "sanity_guard_order_rps": [12, 15],
+    "sanity_guard_measurement_seconds_each": 3.0,
+    "adaptive_capacity_search_present": false,
+    "two_gpu_capacity_probe_present": false,
+    "reclaim_trigger_queue_depth": 20,
+    "scientific_abort_queue_depth": 25,
+    "offered_recovery_rate_rps": 15.0,
+    "queue_drain_and_excess_service_fail_closed": true,
+    "slo_stability_window_seconds": 5.0,
+    "gpu1_live_scheduler_drain_required": true,
+    "gpu0_restore_activity_fail_closed": true,
+    "transaction_wide_no_compilation_evidence_required_for_both_roles": true,
+    "movement_recomputed_from_raw_v10_state_passes": true,
+    "historical_58x_value_used_as_v10_result": false,
+    "scientific_validity_required_boolean_count": 23,
+    "missing_or_null_boolean_can_pass": false
+  },
+  "implementation_reviews": [
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-phase-budget-review.json",
+      "artifact_sha256": "e87501c69f1c121ee385dfa95843e14ec52bf0800933b07124c9c77e5dbf2e8d",
+      "decision": "APPROVED",
+      "recursive_reference_count": 12,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-load-generator-sanity-review.json",
+      "artifact_sha256": "4bcd4e922332b00262793d2326f8dc2f3dfa31a98db0a07acb37157966795cea",
+      "decision": "APPROVED",
+      "recursive_reference_count": 13,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-reclamation-controller-review.json",
+      "artifact_sha256": "b0ce12a1689b8872bdf3a82e01b5c1ea2bf3f11c32ffa9c94a301bd689c5de3b",
+      "decision": "APPROVED",
+      "recursive_reference_count": 6,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-restore-gpu0-serving-review.json",
+      "artifact_sha256": "2b1b985e8052d5fe65a0880f2ac4cbb74fa60aac765fba4a89226f054a7a6281",
+      "decision": "APPROVED",
+      "recursive_reference_count": 5,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-scientific-validity-implementation-review.json",
+      "artifact_sha256": "cee2423bbe703e10f2c64ff159f81126f083ff6f6960038bcb7f6e9e74643066",
+      "decision": "APPROVED",
+      "recursive_reference_count": 4,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-movement-accounting-integration-review.json",
+      "artifact_sha256": "49564b7b1854bc35b77d7be27d668ddf18ccad883be34d321484f153d7729ee8",
+      "decision": "APPROVED",
+      "recursive_reference_count": 4,
+      "recursive_hash_mismatch_count": 0
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/reviews/v10-gpu-budget-controller-review.json",
+      "artifact_sha256": "b7395073a4853fa74afd600931d31a14fe58aa5c75047406215adaea308fe18d",
+      "decision": "APPROVED",
+      "recursive_reference_count": 8,
+      "recursive_hash_mismatch_count": 0
+    }
+  ],
+  "recursive_review_binding_summary": {
+    "review_artifact_count": 7,
+    "recursive_reference_count": 52,
+    "recursive_hash_mismatch_count": 0,
+    "all_review_decisions_approved": true,
+    "all_unresolved_high_severity_finding_lists_empty": true,
+    "all_unresolved_reasonable_medium_severity_finding_lists_empty": true
+  },
+  "verification": {
+    "full_targeted_test_command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_gpu_harness.py tests/python/test_experiment_004_local_loadgen_gate.py tests/python/test_experiment_004_v10_authorization.py tests/python/test_experiment_004_v10_finalizer.py tests/python/test_experiment_004_v10_live_driver_gate.py tests/python/test_experiment_004_v10_sanity_path.py tests/python/test_experiment_004_v10_scientific_contract.py tests/python/test_experiment_004_v10_serving_protocol.py tests/python/test_gpu_capacity_calibration.py tests/python/test_gpu_capacity_calibration_harness.py tests/python/test_gpu_reclamation_methodology.py tests/python/test_gpu_reclamation_v10_budget.py tests/python/test_gpu_reclamation_v10_publish.py tests/python/test_gpu_reclamation_v10_validity.py tests/python/test_gpu_reclamation_worker_integrated.py tests/python/test_experiment_004_accounting.py",
+    "full_targeted_test_result": "150 passed in 9.12s",
+    "ruff_result": "All checks passed!",
+    "py_compile_result": "PASS",
+    "gpu_used": false,
+    "modal_invoked": false
+  },
+  "unresolved_high_severity_findings": [],
+  "unresolved_reasonable_medium_severity_findings": [],
+  "conclusion": "All offline authorization, budget, deterministic serving-control, restoration, validity, movement-accounting, and recursive provenance gates are approved against frozen commit 5b296ac8e4fdb6dd88f45103317606c3e7248370. The paid coordinator may perform its own mandatory fail-closed preflight and, if unchanged, allocate exactly one two-A100 v10 session."
+}

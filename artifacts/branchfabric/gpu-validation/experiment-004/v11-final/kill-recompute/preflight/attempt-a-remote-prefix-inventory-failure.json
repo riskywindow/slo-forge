@@ -1,0 +1,25 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-kill-recompute-pre-reservation-cli-capture/v1",
+  "status": "FAIL_CLOSED",
+  "attempt_id": "exp004-v11-kill-recompute-s41-a",
+  "failure_stage": "REMOTE_PREFIX_FRESHNESS_BEFORE_PREBUILD",
+  "command": [
+    "modal",
+    "volume",
+    "ls",
+    "sloforge-branchfabric-results",
+    "experiment-004/v11/kill-recompute/modal",
+    "--json"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "No such file or directory",
+  "failure_classification": "INVALID_PRE_RESERVATION_MISSING_PREFIX_PARSER_ASSUMPTION",
+  "prebuild_started": false,
+  "reservation_created": false,
+  "gpu_or_function_invoked": false,
+  "provider_resource_created": false,
+  "ledger_sha256_before": "e9b3b521da9f0a6eb3ac2e69030b7ce5560e4f5de11504644cf8f707237d8a16",
+  "ledger_sha256_after": "e9b3b521da9f0a6eb3ac2e69030b7ce5560e4f5de11504644cf8f707237d8a16",
+  "provenance": "Exact read-only Modal CLI result captured by the sole GPU coordinator; no retry, reservation, prebuild, Function, or GPU invocation occurred."
+}

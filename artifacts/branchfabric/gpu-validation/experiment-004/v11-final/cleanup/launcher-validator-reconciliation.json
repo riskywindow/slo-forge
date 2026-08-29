@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-final-cleanup-validator-reconciliation/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "status": "PASS_WITH_CONTRADICTORY_OUTER_ERROR_RECORDED",
+  "outer_error": "integrated v11 in-function cleanup evidence is not PASS-complete",
+  "immutable_cleanup_artifact_status": "PASS",
+  "function_finally_cleanup_pass": true,
+  "local_replay_of_sealed_cleanup_validator": "PASS",
+  "all_required_lifecycle_phases_present_in_order": true,
+  "all_required_empty_survivor_sets": true,
+  "all_required_release_flags": true,
+  "worker_pid_pgid_sid_ownership_complete": true,
+  "subreaper_restored": true,
+  "forced_kills": [],
+  "scientific_treatment": "the cleanup gate is PASS, but this reconciliation does not rehabilitate the independently failed state transaction",
+  "raw_cleanup_sha256": "901baea2d82de01d3dac49cbfcee90deff5e7059a30c99afd767431a91478d0c",
+  "function_completion_sha256": "a66e08dbb7f5dbc41a7fbada1ecdfdc2c6b162c23db401a404d3c59682c3e99d"
+}

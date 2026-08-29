@@ -1,0 +1,90 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-pre-gpu-review/v1",
+  "review_id": "v10-reclamation-controller-review",
+  "reviewer_id": "agent-6-controller-restore-auditor",
+  "reviewer_role": "reclamation_controller",
+  "decided_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "decision": "APPROVED",
+  "scope": "Experiment 004 v10 integrated controller, bounded reclamation trigger, queue-drain gates, and live-review exclusion",
+  "configuration": {
+    "attempt_id": "exp004-v10-naive-s41-v4",
+    "control_rate_rps": 9.0,
+    "spike_rate_rps": 15.0,
+    "restore_rate_rps": 9.0,
+    "fixed_trigger_queue_depth": 20,
+    "scientific_abort_queue_depth": 25,
+    "recovery_stability_seconds": 5.0,
+    "phase_budget_overload_upper_bound_seconds": 22.0
+  },
+  "reviewed_artifacts": [
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_controller.py",
+      "artifact_sha256": "ecc949b566d174e17a5dc127857da838b57736114e9164e57cb3185d2afe8f8e"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_v10_serving.py",
+      "artifact_sha256": "0c37383b36ecbcbfc5a03ec9a669eec2aa6a18a1b135771a46209641bbfde74b"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "artifact_sha256": "cb0077e59d47ca5e81709f548b82dcc3afe3c3b83e423b6763e9bc4ea18529a5"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/raw/exp004-v10-naive-s41-v4-config.json",
+      "artifact_sha256": "65c44f8b23c520bb89890b51757f4f98b51d512acdea572133ed869330643843"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-authorization.json",
+      "artifact_sha256": "3c0fa2f9df83827a98cfa0e20baa8e0c05e289841531747ecc1509a983242948"
+    },
+    {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/v10-phase-budget.json",
+      "artifact_sha256": "6388fccbe425a9c87a58a901e4b8861576ae78ef666da6303e9c09aa5305337d"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "status": "RESOLVED",
+      "finding": "The old integrated path could wait for asynchronous reviewer responses inside the charged Modal allocation.",
+      "resolution": "The controller has no review callback or exchange. It strictly verifies the approved content-addressed authorization and every source-evidence hash before creating either GPU worker."
+    },
+    {
+      "severity": "high",
+      "status": "RESOLVED",
+      "finding": "A backlog could previously pass the preferred scientific maximum and continue toward restore even though bounded_backlog_pass was already irrecoverably false.",
+      "resolution": "The immutable v4 configuration and both local/remote validators now bind the Reviewer-B-approved depth-20 trigger to a depth-25 fail-fast scientific abort."
+    },
+    {
+      "severity": "medium",
+      "status": "RESOLVED",
+      "finding": "The original twelve-second overload bound did not conservatively cover reaching the fixed depth-20 trigger after a lower-rate control interval.",
+      "resolution": "The measured phase budget now derives a 20.625-second prediction and selects a 22-second overload upper bound while preserving the separate transaction-wide 25 percent margin."
+    }
+  ],
+  "conformance": {
+    "authorization_verified_before_workers": true,
+    "live_review_exchange_absent": true,
+    "same_warm_engines_for_readiness_sanity_and_transaction": true,
+    "short_sanity_guards_only": true,
+    "request_state_reset_without_engine_reload": true,
+    "control_spike_boundary_uses_real_spike_start": true,
+    "fixed_trigger_predeclared": true,
+    "positive_queue_slope_required": true,
+    "bounded_backlog_fail_fast": true,
+    "offered_load_held_at_15_rps_after_gpu1_join": true,
+    "aggregate_service_must_exceed_offered": true,
+    "sustained_negative_queue_slope_required": true,
+    "five_second_slo_stability_required_before_restore": true,
+    "no_manual_mid_run_adjustment_path": true
+  },
+  "verification": {
+    "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_v10_serving_protocol.py tests/python/test_gpu_reclamation_worker_integrated.py tests/python/test_experiment_004_v10_sanity_path.py",
+    "result": "19 passed in 5.85s",
+    "gpu_used": false,
+    "static_analysis": "ruff targeted files: all checks passed",
+    "open_high_findings": 0,
+    "open_reasonable_medium_findings": 0
+  }
+}

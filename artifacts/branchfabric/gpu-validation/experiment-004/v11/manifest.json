@@ -1,0 +1,233 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-terminal-manifest/v2",
+  "created_at_utc": "2026-08-18T22:24:44Z",
+  "finalized_at_utc": "2026-08-19T06:29:34Z",
+  "status": "TERMINAL_INTEGRATED_INVALID_NO_RETRY",
+  "experiment": "BRANCHFABRIC GPU VALIDATION EXPERIMENT 004 v11",
+  "seed": 41,
+  "baseline": {
+    "status": "FROZEN_VERIFIED",
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "tag": "branchfabric-exp004-naive-baseline-v10",
+    "logical_state_bytes": 1056964608,
+    "full_physical_amplification": 58.0
+  },
+  "production_integration_gates": {
+    "status": "PASS",
+    "allocator_issued_single_use_epochs": {
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-a-allocator-issued-epochs.json",
+      "sha256": "53f9684921eafb98116898955e92a443ced571367fb8fa4b5e6e76691fda70b6"
+    },
+    "post_free_ownership_refcount_proof": {
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-b-post-free-ownership-refcount.json",
+      "sha256": "249ce23a99f612b5e65dd6657db2cb2f3eb1f1ef4daa81670b1bcba1f86f5b53"
+    },
+    "production_engine_step_lock_binding": {
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-c-engine-step-binding.json",
+      "sha256": "9f1a9282796e56bf6af03ec25bbc32b25b2801f31df0833c0e6d262a15091619"
+    },
+    "canonical_cuda_state_pass_records": {
+      "status": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/gate-d-canonical-cuda-state-pass-records.json",
+      "sha256": "6d7fcddd4e330104957cfa9cbce95a3b56cb4a03afaa0b0e8231241b149fe023"
+    },
+    "make_check": {
+      "status": "PASS",
+      "python_passed": 1859,
+      "python_skipped": 8,
+      "rust": "PASS",
+      "ui": "PASS",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/integration-gates/make-check-terminal-handoff.json",
+      "sha256": "714db31e1e82a7777d33ac8915143345cb5ee5ef1e77460f5d8b5e0c09ffaebc"
+    }
+  },
+  "micro_validation": {
+    "status": "PASS",
+    "attempt_id": "exp004-v11-micro-s41-d",
+    "hardware": "NVIDIA A100 80GB PCIe",
+    "logical_state_bytes": 1056964608,
+    "full_physical_amplification": 21.000762818351625,
+    "external_movement_amplification": 2.000257098485553,
+    "avoidable_amplification": 12.000762818351625,
+    "full_state_pass_count": 10,
+    "branch_correctness": "8/8",
+    "go_no_go": "GO_MEANINGFUL",
+    "worker_result": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/exp004-v11-micro-s41-d/remote-download/worker__result.json",
+    "worker_result_sha256": "fdd9859ccec9187facd47d6efa621449899d18b009a7b15ea746e45e1139ecb8",
+    "status_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/micro-validation/status.json",
+    "status_sha256": "b15d8b1b3bcd6304843959a47ad61a5468947b084b1fc0cfe91ce72e2b48e521",
+    "cuda_pass_summary": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/cuda-passes/summary.json",
+      "sha256": "f48f52befaca326404c3181dfb7068ca77248070f294c27bef50b0a23570dcad"
+    }
+  },
+  "integrated_v11": {
+    "status": "FAILED_INVALID_PRE_RECLAIM",
+    "attempt_id": "exp004-v11-integrated-s41-b",
+    "scientifically_valid": false,
+    "two_a100_sxm4_devices_authenticated": true,
+    "sanity_12rps_pass": true,
+    "sanity_15rps_pass": true,
+    "failure": "bounded pre-reclaim backlog 65 exceeded ceiling 64",
+    "reclaim_trigger_reached": false,
+    "state_pipeline_executed": false,
+    "retry_authorized": false,
+    "remote_manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/runtime/exp004-v11-integrated-s41-b/remote-download-dir/REMOTE_MANIFEST.json",
+    "remote_manifest_sha256": "374c12f875ffd3c4a93014420720abe69b525b5caed189b3090df748c628f64c",
+    "remote_manifest_rows_verified": "460/460",
+    "serving_status": "artifacts/branchfabric/gpu-validation/experiment-004/v11/serving/status.json",
+    "serving_status_sha256": "c6e62d018a8fc5425f274e0c80be88117fbffd5a8383c441800cc943b172324b"
+  },
+  "kill_and_recompute": {
+    "status": "NOT_RUN_PREREQUISITE_INTEGRATED_V11_FAILED",
+    "measured_tokens": null,
+    "measured_gpu_seconds": null,
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/kill-recompute/status.json",
+    "sha256": "7b0ce24c15f7dc0c32d961fbb17ae74b82de61edcbc0e00958c17dff1000c28d"
+  },
+  "analysis": {
+    "break_even": {
+      "status": "NOT_IDENTIFIABLE_WITHOUT_KILL_ARM",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/economics/break-even-model.json",
+      "sha256": "f1eee0e10a188095b03af0aa6ddf14a421bb491bbba8d005e46d07793640470b",
+      "status_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/break-even/status.json",
+      "status_sha256": "d439f45050fc3f114c7b2100b5ea74c29bd06f13a199a47b803036c36a76a9a6"
+    },
+    "amdahl": {
+      "status": "MICRO_ONLY_INTEGRATED_ECONOMIC_PATHS_NOT_IDENTIFIABLE",
+      "authoritative_denominator": "export_plus_restore_state_path_7.051284484_seconds",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/status.json",
+      "sha256": "14d3560857e510319e2b24042a3cac1962ee4f27cf15e29e1927df59bc6945a0",
+      "residual_chains_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/amdahl/residual-chains.json",
+      "residual_chains_sha256": "b1db5c1545550dd04a846a8d7fd367709cdd1ef3ed28ce8dd8e25ef004b2c248"
+    },
+    "movement_comparison": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-measured-comparison.json",
+      "sha256": "10e078d518cc24efa0db744e590338979104e738619c921f99fc4f6ba599f16b"
+    },
+    "pass_diff": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff.json",
+      "sha256": "7c469b716b38314cec340e761896b1845ab070154069ad81b78bdc3b28fbbd99"
+    },
+    "terminal_arithmetic_corrections": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/terminal-arithmetic-corrections.json",
+      "sha256": "fa6091966571c650fdd3cdca64cced400a7e250b2afdef5070186964c0fc162d",
+      "authoritative_full_physical_reduction_percent": 63.79178824422134
+    },
+    "terminal_corrected_pass_diff": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/state-passes/v10-v11-pass-diff-terminal-corrected.json",
+      "sha256": "c9289df2d654f9f4dbb4cb26edc9abd4c63e153ee26befb699a6ac260359c940"
+    },
+    "terminal_corrected_movement_comparison": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/movement/v10-v11-measured-comparison-terminal-corrected.json",
+      "sha256": "c4c00e717240d23e66f296a62d9a9952808f248d7f02f24f1b1b0a4033df8711"
+    },
+    "economic_headroom": {
+      "status": "NOT_IDENTIFIABLE_INTEGRATED_AND_KILL_ARMS_NOT_REACHED",
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/economics/headroom-status.json",
+      "sha256": "5ca20571c4cf4841d225a5c6a4967f25ee1de05c3aa38bdedafcb63e86d6f336"
+    }
+  },
+  "final_classification": "SOFTWARE_WINS",
+  "classification_qualification": "FORCED_LEAST_OVERCLAIMING_EXACT_ONE_DISPOSITION_ALL_STRICT_PREDICATES_UNESTABLISHED",
+  "strict_software_wins_predicate_measured": false,
+  "hardware_interest_survives": false,
+  "experiment_005": "NOT_GENERATED",
+  "v11_frozen": false,
+  "v11_freeze_reason": "Integrated v11 was not scientifically valid, so no optimized-preserve tag was created.",
+  "gpu_execution": {
+    "v11_known_actual_a100_hours_lower_bound": 0.5450292396083333,
+    "v11_conservative_a100_hours": 0.9879694444444445,
+    "v11_conservative_cost_usd": 2.46834286,
+    "campaign_conservative_a100_hours": 4.475976007246105,
+    "campaign_conservative_cost_usd": 11.18277845650367,
+    "active_reservations": 0,
+    "gpu_hours_artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/gpu-hours.json",
+    "gpu_hours_sha256": "6603204a729323d271d58fd805fbbfc8fc12cdc097e130adb7768e944150ba1b",
+    "parent_ledger_sha256": "cbb51bbce842202a63bbba57e271d222750ed5c208b71b3ba88dd4452b2c1dc7"
+  },
+  "cleanup": {
+    "provider_post_return": "PASS",
+    "in_function_cleanup_gate": "FAIL",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/modal-cleanup.json",
+    "sha256": "768d06d3894f2f8cf2409e0a4f63b1e289952e6d2ef5fa246fa1c8489bbe0b67"
+  },
+  "terminal_reviews": {
+    "serving_methodology": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent13-serving-methodology-terminal-review.json",
+      "sha256": "75ed04d42cfde2862e778c4307f845901330f820ccf8e302111b3add307d9c32"
+    },
+    "v10_v11_terminal_comparison": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent14-v10-v11-terminal-comparison-review.json",
+      "sha256": "0c380719ec13176ad0a202d034c621adfa6b503374cf9c8565fdfc601958b47f"
+    },
+    "interference_integrity_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent15-attempt-b-interference-integrity-cleanup-review.json",
+      "sha256": "0fe2b3e28d003e9506aaf8c8b1e18b1d1afafa0b4ca5992d877da5b9a3d923a2"
+    },
+    "economic_budget_cleanup": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent16-economic-budget-cleanup-review.json",
+      "sha256": "d6eb0ba6b9727e73c5db980f6560b6812e410f8c409a453c6cc65eee44e6dae9"
+    },
+    "amdahl_break_even_methodology": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent18-terminal-amdahl-break-even-methodology-review.json",
+      "sha256": "532253c6c9ffa08afd6b1932e8d010024e52d9ade86bdc4be0e6e1d28f7030e1"
+    },
+    "hardware_placement_economic": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/agent19-terminal-hardware-placement-economic-review.json",
+      "sha256": "b4d41a389e860f75d9b9d28ad217c464732acb5ea5ae8766b9dd4d5b91860127"
+    },
+    "adversarial_hardware_disposition": {
+      "artifact": "artifacts/branchfabric/gpu-validation/experiment-004/v11/reviews/terminal-review-supersession.json",
+      "sha256": "b1132f03c8174145d7e178a17af51cc832fa87c8f6a57de41c30c17fe0f4b093",
+      "scope_note": "Binds Agent20's required adversarial NO answer while making Agent18's state-path-only table the sole numeric Amdahl authority."
+    }
+  },
+  "plots": {
+    "count": 14,
+    "manifest": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/plot-manifest.json",
+    "manifest_sha256": "99b0b9ab759fb91ac117ab953c80d6429c99e866cfc593776e5a069205753a44",
+    "data": "artifacts/branchfabric/gpu-validation/experiment-004/v11/plots/plot-data.json",
+    "data_sha256": "21b6518b75fd32350960964aa60acb095d549fd8c75c6b0e57576da155b397d0"
+  },
+  "deliverables": {
+    "report_json": {
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v11-final.json",
+      "sha256": "1271908f358b4f5baa1dd1de44796d0344bfc32a795caf6b5cbfda91b3d98edd"
+    },
+    "report_markdown": {
+      "path": "reports/branchfabric-gpu-validation-experiment-004-v11-final.md",
+      "sha256": "83fa8e79f3f9a0321d7c403d6f7e02883811feecd5c1196d60645ccf1ab768fc"
+    },
+    "measured_software_result": {
+      "path": "docs/branchfabric/V11_MEASURED_SOFTWARE_RESULT.md",
+      "sha256": "0498c8bdfac642d9dfbabaaf60b36436ad7884e59076baf1bd0f863b4b07c0b8"
+    },
+    "preservation_break_even": {
+      "path": "docs/branchfabric/PRESERVATION_BREAK_EVEN.md",
+      "sha256": "e99bbf232ec1df62c4266a6c631ad7d18cc3e01783da56f630a632de9c06b04a"
+    },
+    "hardware_gate": {
+      "path": "docs/branchfabric/BRANCHFABRIC_HARDWARE_GATE.md",
+      "sha256": "2a2d58da80ec20cfe3f9968176e3853b772e027d28cdb652fae0339a552b8b7f"
+    },
+    "software_closure": {
+      "path": "docs/branchfabric/BRANCHFABRIC_SOFTWARE_CLOSURE.md",
+      "sha256": "115268a19403961e85158b0ad3921b5052354481b807391ae26965bc40c2d1ee"
+    }
+  },
+  "no_fpga_implementation": true,
+  "no_projected_21x_reported_as_measured": true,
+  "not_reached_values_are_not_measurements": true
+}

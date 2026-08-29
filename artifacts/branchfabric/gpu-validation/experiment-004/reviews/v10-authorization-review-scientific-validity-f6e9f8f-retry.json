@@ -1,0 +1,21 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-authorization-review/v1",
+  "reviewer_id": "reviewer-c-scientific-validity-f6e9f8f-retry",
+  "reviewer_role": "scientific_validity",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T15:39:47Z",
+  "authorization_subject_sha256": "4c80a284ca73889c8896b0be34c4db5a6e45927563b6f8ca6012d27805f7f7e4",
+  "source_evidence_hashes_verified": true,
+  "findings": [
+    "Independent canonical-JSON recomputation, excluding only the top-level authorization_subject_sha256 field, produced 4c80a284ca73889c8896b0be34c4db5a6e45927563b6f8ca6012d27805f7f7e4; rebuilding the subject through the committed authorizer produced the same exact subject and digest.",
+    "All 11 referenced calibration artifacts are regular non-symlink repository files and their byte-level SHA-256 values independently match the subject. The selected-load and calibration-result evidence bind lambda_1=12 rps, lambda_spike=15 rps, and lambda_2=20 rps to the named probe IDs.",
+    "The hashed 12-rps one-GPU result records 120 measurement-interval offers, 119 completions, 11.9 completions/s, 44.20-ms p95 TTFT, queue depth 11 to 12, zero queue-flow conservation error, complete request accounting, and no persistent positive drift.",
+    "The hashed 15-rps one-GPU result records 150 measurement-interval offers, 144 completions, 14.4 completions/s, 402.29-ms p95 TTFT, queue depth 15 to 21, zero queue-flow conservation error, complete request accounting, and persistent positive drift. This supports a bounded overload trigger without authorizing broad recalibration.",
+    "The hashed 20-rps two-GPU result records 200 measurement-interval offers, 199 completions, 19.9 completions/s, 42.44-ms p95 TTFT, queue depth 18 to 19, zero queue-flow conservation error, and no persistent positive drift; the raw measurement cohort contains exactly 100 completed requests on gpu0 and 100 on gpu1.",
+    "The settled load relationship is scientifically coherent for the single transaction: 15 rps is exactly 25 percent above the validated one-GPU point, exactly 25 percent below the validated two-GPU point, and leaves 5 rps of nominal two-GPU drain headroom. The short 12-rps and 15-rps guards remain independent fail-closed stale-calibration checks.",
+    "The authorization subject requires all reviews to complete before GPU allocation, forbids remote review exchange and asynchronous review waits, and restricts the running controller to local artifact and hash verification. Inspection of the committed integrated controller confirms that it has no reviewer channel and proceeds only after verifying the already-sealed local authorization.",
+    "The authorization binds full commit f6e9f8fa29f6b7ef7bc7310f0a3ed673ab2665f4, which exists and is the current reviewed HEAD. The launcher-enumerated paid/scientific paths are clean relative to that commit, and the commit includes the bounded readiness-clock and evidence-derived retry-budget corrections under review.",
+    "The scientific-validity v2 object exposes exactly the 23 required booleans, derives each from explicit evidence, rejects disagreement between booleans and evidence, treats missing or null booleans as invalid under strict validation, requires a causal timeline and empty invalid-reason set for success, and supplies an all-false fail-closed constructor.",
+    "Targeted independent verification completed with 23 passing authorization, scientific-contract, fail-closed, sanity-path, integrated-controller, and readiness tests. This approval is limited to the immutable load authorization for one seed-41 naive-preservation v10 transaction; runtime readiness, sanity, state correctness, recovery, movement accounting, budget settlement, and cleanup must still pass from measured evidence."
+  ]
+}

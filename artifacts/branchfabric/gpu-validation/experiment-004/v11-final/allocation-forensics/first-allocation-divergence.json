@@ -1,0 +1,92 @@
+{
+  "schema_version": "sloforge.branchfabric.v11-first-allocation-divergence/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "root_cause_class": "GATE_BUG",
+  "classification_scope": "The mismatch was caused by comparing allocation history with live semantic identity. Legitimate readiness allocation churn is the trigger, not a second independent correctness defect.",
+  "first_causal_event": {
+    "event": "ALLOC",
+    "lifecycle_phase": "PRE_ROLLOUT_READINESS",
+    "requested_phase_set_relation": "The production allocation-event queue was already contaminated when ROLLOUT_CREATED began.",
+    "logical_pages": [],
+    "runtime_request_id": "readiness-gpu1-00000",
+    "runtime_session_id": null,
+    "process": {
+      "role": "rollout",
+      "pid": 9,
+      "physical_gpu_uuid": "GPU-e44cc55c-11f8-bb1d-0120-201b7d4caf3d"
+    },
+    "thread": null,
+    "engine_step": null,
+    "scheduler_state": {
+      "request_state": "first readiness batch admitted then stepped",
+      "batch_size": 1
+    },
+    "timestamp": {
+      "exact_monotonic_ns": null,
+      "lower_bound_inclusive_ns": 170168081065,
+      "upper_bound_inclusive_ns": 170771993885,
+      "exactness": "UNRECOVERABLE",
+      "explanation": "The readiness batch records its pre-add_request start and first-token observation, but the allocator hook's issued_at_monotonic_ns record was never serialized."
+    },
+    "code_path": [
+      "gpu_capacity_calibration_worker._run_readiness_batch",
+      "LLMEngine.add_request",
+      "LLMEngine.step",
+      "KVCacheManager.allocate_slots",
+      "VllmLiveStateAdapter.observed_allocate",
+      "Vllm0230AllocatorEpochSource.issue_from_runtime_allocation"
+    ],
+    "responsible_followup": "readiness reset_prefix_cache and all later request-state resets omitted manager.take_new_block_ids, leaving historical allocation events in the queue"
+  },
+  "equality_failure": {
+    "comparison_time_ns": null,
+    "failure_observed_ns": 208607194053,
+    "expected_identity": {
+      "kind": "CURRENT_CAPTURE_PLAN_BLOCK_ID_SET",
+      "expected_count": 1152,
+      "physical_block_ids": null,
+      "sha256": null,
+      "evidence_status": "VALUES_NOT_SERIALIZED"
+    },
+    "observed_identity": {
+      "kind": "UNSCOPED_HISTORICAL_NEW_BLOCK_EVENT_QUEUE",
+      "values": null,
+      "count": null,
+      "sha256": null,
+      "evidence_status": "VALUES_NOT_SERIALIZED"
+    },
+    "differing_fields": [
+      "one or more of observed_count, duplicate_block_ids, missing_block_ids, unexpected_block_ids"
+    ],
+    "exact_differing_fields": null,
+    "explanation": "The thrown branch proves the equality predicate failed but the integrated failure writer discarded the context that identified which subpredicate failed."
+  },
+  "semantic_consequence": {
+    "current_source_allocation_invalidated": false,
+    "stale_or_reused_source_proven": false,
+    "source_release_prevented": true,
+    "explanation": "Immediately before the queue comparison, the production-gated ownership proof required exact live block-set equality, current allocator epochs, exact native owners/refcounts, branch-root relationships, and HBM assignment agreement for all 1,152 blocks."
+  },
+  "evidence": [
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/rollout.ready.json",
+      "sha256": "32b8edb99ce20fb0e9de3b46031421188af218d3e24c660597cb54c8f93c7f54"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/rollout/failure.json",
+      "sha256": "0b9be3d2688cc373b5cd42351726812b150ef4062429b415d2c0f95c7548bae8"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v10-reclaim-trigger.json",
+      "sha256": "08c0d769de1b11ab270aefc9259e9e3450c72b433cae14919c387e7b440d767f"
+    },
+    {
+      "path": "integrated/raw/exp004-v11-integrated-s41-c/barriers/v11-rollout-admission-stop.json",
+      "sha256": "f87312088d181d1a0a6b48ffc183332bf8b0658c50d4b29eb30d8c6221be2e0c"
+    },
+    {
+      "path": "integrated/scientific-validity.json",
+      "sha256": "a92131f2b37191bda1dd16275f9b2f28f428f5e660887cb5889a7040c02f9ba4"
+    }
+  ]
+}

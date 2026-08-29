@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-status/v1",
+  "observed_at_utc": "2026-08-24T02:57:34Z",
+  "status": "FAIL_PRE_FUNCTION_IMAGE_BUILD_CLIENT_DISCONNECT",
+  "scientifically_valid": false,
+  "attempt_id": "exp004-v11-integrated-s41-d",
+  "execution_mode": "integrated-reclamation-v11",
+  "failure_stage": "modal-launch",
+  "function_entered": false,
+  "gpu_allocation_observed": false,
+  "controller_started": false,
+  "source_identity_gate_reached": false,
+  "optimized_export_started": false,
+  "transaction_source_release_started": false,
+  "hbm_reclaimed": false,
+  "gpu1_serving_enabled": false,
+  "restore_started": false,
+  "branch_continuation_started": false,
+  "blocker": {
+    "code": "MODAL_IMAGE_BUILD_EXTERNAL_SHUTDOWN_AFTER_CLIENT_HEARTBEAT_FAILURE",
+    "client_exception": "AttributeError: Connection object has no attribute _transport",
+    "provider_terminal": "Image build terminated due to external shut-down",
+    "semantic_consequence": "No integrated runtime lifecycle or scientific measurement was produced."
+  },
+  "accounting": {
+    "actual_gpu_seconds": null,
+    "actual_gpu_seconds_status": "unavailable-or-not-trusted",
+    "conservative_charged_gpu_seconds": 1176.0,
+    "conservative_charged_wall_seconds": 588.0,
+    "ledger_sha256_after_settlement": "8e8011ca993f82f4de7553fb0b2e1ff464d7a65b1c4148410194826895ad6e7d",
+    "remaining_gpu_seconds": 2202.024986768025,
+    "active_reservations": 0
+  },
+  "cleanup": {
+    "in_function": "NOT_APPLICABLE_FUNCTION_NOT_ENTERED",
+    "provider": "PASS",
+    "provider_artifact": "provider-cleanup-attempt-d.json",
+    "active_apps": 0,
+    "running_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "provider_reservations": 0
+  },
+  "integrated_retry_authorized": false,
+  "kill_and_recompute_authorized": false,
+  "terminal_classification": "HARDWARE_GATE_NOT_REACHED"
+}

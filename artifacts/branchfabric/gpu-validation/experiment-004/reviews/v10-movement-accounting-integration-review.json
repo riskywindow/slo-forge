@@ -1,0 +1,47 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-implementation-review/v1",
+  "reviewer_id": "agent-9-movement-accounting-auditor",
+  "reviewer_role": "movement_accounting_integration",
+  "decision": "APPROVED",
+  "decided_at_utc": "2026-08-13T06:08:02Z",
+  "repository_commit": "5b296ac8e4fdb6dd88f45103317606c3e7248370",
+  "scope": "Pre-GPU audit of v10 raw state-pass capture, unique physical byte accounting, telemetry reconciliation, and fail-closed postprocessing for the frozen naive path.",
+  "artifact_bindings": [
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_accounting.py",
+      "artifact_sha256": "0285017813cb07367bb26acb24798bfc2b036ca3955907c82c2c6a1f55ba2a1c"
+    },
+    {
+      "artifact_reference": "experiments/branchfabric/gpu_reclamation_worker.py",
+      "artifact_sha256": "cb0077e59d47ca5e81709f548b82dcc3afe3c3b83e423b6763e9bc4ea18529a5"
+    },
+    {
+      "artifact_reference": "python/sloforge/helix/characterization/gpu_reclamation_v10_postprocess.py",
+      "artifact_sha256": "56b6eaa29cd3691c558644c82723f965f23628d9ac731820dde2fa51b3165cea"
+    },
+    {
+      "artifact_reference": "tests/python/test_experiment_004_accounting.py",
+      "artifact_sha256": "1a28d5f0af8566ced93a8622d47be76f401a6a322ce803f5fd2b3d6bf4bb5656"
+    }
+  ],
+  "findings": [
+    "v10 rebuilds every total from raw StatePassRecord objects and never imports the historical 58x value.",
+    "The fixed naive graph must contain one shared and eight private logical segments, exactly 30 operation labels over all nine segments, 270 pass records, and 522 derived graph edges; missing, duplicated, overlapping, or renamed physical events fail closed.",
+    "Logical bytes are counted once, while native endpoint reads/writes, GPU and host intermediates, D2H, and H2D occupy mutually exclusive accounting buckets. Temporary allocation capacity and checksum work are reported separately from movement amplification.",
+    "Unique D2H/H2D sizes and counts are reconciled against independently recorded CUDA operations, and host temporary totals/peaks are reconciled against the allocation tracker with zero live checkpoint buffers required.",
+    "External, full physical, avoidable lower-bound, and critical-path amplifications are independently derived from the v10 denominator and raw passes. The artifact explicitly records the conservative avoidable-byte semantics and the synchronous naive critical-path definition.",
+    "Every enriched state pass records operation, source/destination memory, logical segment and range, bytes read/written/transferred, temporary bytes, processor, wall time, CUDA overlap where available, required/avoidable classification, and fusion classification."
+  ],
+  "test_evidence": [
+    {
+      "command": "PYTHONPATH=python:experiments/branchfabric uv run --locked pytest -q tests/python/test_experiment_004_accounting.py tests/python/test_gpu_reclamation_v10_validity.py tests/python/test_experiment_004_v10_scientific_contract.py tests/python/test_experiment_004_gpu_harness.py -k 'movement or scientific or v10 or accounting or fail_closed'",
+      "result": "32 passed, 17 deselected in 0.35s"
+    }
+  ],
+  "post_run_rechecks_required": [
+    "Recompute and compare all v10 byte totals from the sealed raw run rather than projecting the historical amplification.",
+    "Verify the published state-pass graph and amplification-decomposition plots use these raw v10 records and do not sum shared per-segment operation time as independent wall time."
+  ],
+  "unresolved_high_severity_findings": [],
+  "unresolved_medium_severity_findings": []
+}

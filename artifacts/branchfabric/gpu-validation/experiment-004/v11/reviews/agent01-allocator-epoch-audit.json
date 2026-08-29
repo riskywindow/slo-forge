@@ -1,0 +1,99 @@
+{
+  "schema_version": "branchfabric.v11.pre_gpu_review.v1",
+  "review_id": "agent01-allocator-epoch-audit",
+  "reviewed_at_utc": "2026-08-19T00:14:22Z",
+  "reviewer_role": "independent_allocator_epoch_auditor",
+  "scope": "offline_only",
+  "gpu_or_modal_invoked": false,
+  "verdict": "PASS",
+  "gate": "A_ALLOCATOR_ISSUED_SINGLE_USE_EPOCHS",
+  "execution_head": "1c51853e10809686d4368037153927f25e834117",
+  "frozen_v10": {
+    "annotated_tag": "branchfabric-exp004-naive-baseline-v10",
+    "tag_target_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "target_matches_required_execution_commit": true,
+    "tag_modified": false
+  },
+  "requirements": {
+    "issued_by_runtime_allocation_path": {
+      "pass": true,
+      "evidence": "VllmLiveStateAdapter installs the source on the live KVCacheManager and invokes issue_from_runtime_allocation only while unwinding the manager's actual allocate_slots call; the authoritative allocation set is the allocator return plus the installed runtime block-table delta."
+    },
+    "not_synthesized_by_continuum_import": {
+      "pass": true,
+      "evidence": "The import stager has proof/read/consume access only and cannot choose an epoch. The monotonic source is manager-scoped and allocation events, request ownership, and the native runtime table determine issuance."
+    },
+    "unique_for_allocation_lifetime": {
+      "pass": true,
+      "evidence": "A manager-scoped monotonic counter issues a new positive epoch for every newly allocated physical block and records the exact (block_id, allocation_epoch) live pair."
+    },
+    "not_reusable_after_free": {
+      "pass": true,
+      "evidence": "free and prefix-cache reset tombstone the exact generation; physical block reuse advances the monotonic epoch and stale proof refresh fails."
+    },
+    "included_in_ownership_evidence": {
+      "pass": true,
+      "evidence": "Gate B obtains proof_for_live_blocks and compares every allocator-issued epoch against expected source allocation epochs before release."
+    },
+    "included_in_destination_commitment": {
+      "pass": true,
+      "evidence": "_destination_mapping_commitment hashes the manifest commitment, payload hash, ordered page destinations, destination target identity, and ordered allocator-issued block epochs."
+    },
+    "checked_before_admission": {
+      "pass": true,
+      "evidence": "The stager requires current epoch proof around subset validation, rechecks the final ordered destination set, and calls consume_once immediately before any branch is enqueued while the production admission gate remains held."
+    },
+    "stale_epoch_rejected": {
+      "pass": true,
+      "evidence": "require_current refreshes live runtime ownership and rejects tombstoned, consumed, source-mismatched, reordered, or generation-changed proofs."
+    },
+    "fail_closed": {
+      "pass": true,
+      "evidence": "Missing source, absent epoch, stale/freed/unowned blocks, invalid proof seal/source, evidence mismatch, and replay raise before admission; failure path scrubs then frees or requires typed runtime teardown."
+    }
+  },
+  "required_test_cases": {
+    "valid_allocation": "PASS",
+    "stale_allocation": "PASS",
+    "freed_allocation": "PASS",
+    "reused_physical_block_id_different_epoch": "PASS",
+    "double_import_or_epoch_replay": "PASS",
+    "mismatched_destination_manifest_or_commitment": "PASS"
+  },
+  "test_evidence": [
+    {
+      "command": "PYTHONPATH=python python -m pytest -q tests/python/test_vllm_allocator_epochs.py tests/python/test_vllm_live_adapter.py::test_external_computed_pages_receive_allocation_epochs_when_return_is_empty tests/python/test_vllm_reclamation_capture_plan.py::test_capture_plan_requires_all_live_allocation_epochs tests/python/test_vllm_reclamation_v11.py::test_streaming_stager_requires_typed_fused_evidence_and_cleans_up",
+      "result": "7 passed in 0.88s",
+      "exit_code": 0
+    },
+    {
+      "command": "offline direct negative audit: mismatched expected destination blocks, non-runtime-issued proof flag, and second consume",
+      "result": [
+        "mapping_mismatch_rejected",
+        "nonruntime_flag_rejected",
+        "replay_rejected"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check -- <audited Gate A source and tests>",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "coverage_notes": [
+    "The double-import property is tested at the exact single-use primitive used immediately before admission; the stager test confirms that primitive is on the production admission path.",
+    "Destination mismatch coverage combines wrong manifest identity, incomplete logical-page mapping, stale allocation evidence, and a direct ordered-block mismatch rejection.",
+    "Offline fixtures exercise the production hook and stager code without allocating a GPU. Exact vLLM 0.23.0/A100 allocation behavior remains a mandatory assertion in micro-validation, not an offline measurement."
+  ],
+  "findings": [],
+  "file_sha256": {
+    "python/sloforge/continuum/adapters/vllm_allocator_epochs.py": "14e819a5cf3ebd5f73ad2a1b9ab6b975508b6b549422d0568cee1d5dd7a8a497",
+    "python/sloforge/continuum/adapters/vllm_live.py": "149d423303dc91201826902bb406c5c6de88aed043933a23e28a4f39fed3b2f0",
+    "python/sloforge/continuum/adapters/vllm_reclamation_v11.py": "a3147e22f68fefb37607a5040ace1d2351ae5c3a82b7c2794344d86e9f04ae23",
+    "tests/python/test_vllm_allocator_epochs.py": "be044ce2be9ee8d2f83b13be27b4834ba4447387b1a41dc317458e11dfa2874f",
+    "tests/python/test_vllm_live_adapter.py": "534d9f79bfcc6fdc2d96df792122ff43aed8beec948dcd9da173a5e038ade729",
+    "tests/python/test_vllm_reclamation_v11.py": "c81463989638186cd2e1f8792ed1833a982eeeda92cabe8d8d111ad4cd4c7f3b",
+    "tests/python/test_vllm_reclamation_capture_plan.py": "18f6a3a84d1bb0c9f9dbf5a999e4ff0488054e132a8138d5203d7a1f2939c503"
+  }
+}

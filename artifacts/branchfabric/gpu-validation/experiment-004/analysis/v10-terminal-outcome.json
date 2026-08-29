@@ -1,0 +1,78 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v10-terminal-outcome/v1",
+  "attempt_id": "exp004-v10-naive-s41-v4",
+  "completed_at_utc": "2026-08-13T06:43:17Z",
+  "outcome": "BUDGET_BLOCKER",
+  "scientifically_valid": false,
+  "gpu_allocation_invoked": true,
+  "gpu_allocation_count": 1,
+  "transaction_executed": false,
+  "immediate_failure": {
+    "classification": "LOCAL_CONTROL_PLANE_READINESS_TIMEOUT",
+    "valid_scientific_blocker": false,
+    "phase": "two_engine_readiness",
+    "reason": "The controller anchored the 160-second readiness phase at controller entry instead of the workers' model-load origins. Both workers were still progressing through model load, compilation, and initial profiling when the controller terminated them.",
+    "worker_return_codes": {
+      "serving": -15,
+      "rollout": -15
+    },
+    "probe_count": 0,
+    "sanity_guard_count": 0
+  },
+  "local_fix": {
+    "status": "IMPLEMENTED_AND_CPU_VERIFIED",
+    "commit": "6394c477cacf5cbf92668a6ac1d23e30cab2cfd3",
+    "description": "Workers now emit PID- and GPU-UUID-bound engine-started barriers immediately before adapter construction; the controller validates both barriers and measures readiness from the earliest real model-load origin while retaining the absolute function deadline.",
+    "state_pipeline_changed": false,
+    "movement_pipeline_changed": false,
+    "gpu_rerun_performed": false
+  },
+  "terminal_budget_gate": {
+    "classification": "BUDGET_BLOCKER",
+    "configured_hard_ceiling_A100_seconds": 10800.0,
+    "current_conservative_usage_A100_seconds": 10298.167208919993,
+    "remaining_A100_seconds": 501.83279108000715,
+    "corrected_rerun_required_A100_seconds": 1176.0,
+    "corrected_rerun_required_A100_hours": 0.32666666666666666,
+    "shortfall_A100_seconds": 674.1672089199929,
+    "authorized": false
+  },
+  "measurement_status": {
+    "two_engine_readiness": "NOT_COMPLETED",
+    "sanity_12rps": "NOT_MEASURED",
+    "sanity_15rps": "NOT_MEASURED",
+    "control": "NOT_MEASURED",
+    "overload": "NOT_MEASURED",
+    "rollout_state": "NOT_PREPARED",
+    "reclamation": "NOT_MEASURED",
+    "recovery": "NOT_MEASURED",
+    "restore": "NOT_MEASURED",
+    "branch_correctness": "NOT_EVALUATED",
+    "movement": "NOT_MEASURED",
+    "serving_interference": "NOT_MEASURED"
+  },
+  "baseline": {
+    "frozen": false,
+    "tag_created": false,
+    "reason": "No scientifically valid v10 naive-preservation transaction exists."
+  },
+  "success_only_outputs": {
+    "required_plots_generated": false,
+    "v11_optimization_plan_generated": false,
+    "baseline_campaign_plan_generated": false,
+    "reason": "The user required these outputs only after a scientifically valid v10 pass."
+  },
+  "cleanup": {
+    "status": "PASS",
+    "active_tasks": 0,
+    "running_containers": 0,
+    "endpoints": 0,
+    "reservations": 0,
+    "owned_child_processes": 0,
+    "profilers": 0,
+    "persistent_volumes": [
+      "sloforge-model-cache",
+      "sloforge-branchfabric-results"
+    ]
+  }
+}

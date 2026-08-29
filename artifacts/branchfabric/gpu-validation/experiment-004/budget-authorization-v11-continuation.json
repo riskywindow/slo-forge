@@ -1,0 +1,60 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-budget-authorization/v1",
+  "experiment": "branchfabric-gpu-validation-experiment-004-v11",
+  "authorized_at_utc": "2026-08-26T22:31:03Z",
+  "authorization_source": "explicit-user-instruction-current-thread",
+  "authorization_text": [
+    "yeah just do that, jack up the gpu budget",
+    "just keep going until we get a successful run"
+  ],
+  "authorized_gpu_budget_usd": 80.0,
+  "money_budget_semantics": "Future paid Experiment 004 commands may set SLOFORGE_GPU_BUDGET_USD up to 80.0; each invocation remains separately bounded, reserved, settled, and cleanup-gated.",
+  "authorized_cumulative_a100_hours": 12.0,
+  "authorized_cumulative_gpu_seconds": 43200.0,
+  "ceiling_semantics": "cumulative Experiment 004 A100 device-hours across settled intervals, conservative failure charges, and active reservations",
+  "consumed_gpu_seconds_at_authorization": 19397.975013231975,
+  "remaining_gpu_seconds_at_authorization": 23802.024986768025,
+  "remaining_gpu_hours_at_authorization": 6.611673607435563,
+  "active_reservations_at_authorization": 0,
+  "ledger_path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "previous_ledger_sha256": "8e8011ca993f82f4de7553fb0b2e1ff464d7a65b1c4148410194826895ad6e7d",
+  "authorized_ledger_sha256": "ae4624645fb2fd57ef098a56826191e78d659742cb1ad0910e9d54cf841aed5d",
+  "authorized_settled_intervals_sha256": "6355f1e5e3c4bd0e8f63cff865c4926ce438a4973648cc9bd44cdcb4614de9a9",
+  "authorized_failure_charges_sha256": "f63cccef3ff25e67f941097dba21378a738da2186995608db34acda0012943a8",
+  "ledger_mutation": {
+    "hard_additional_gpu_seconds_before": 21600.0,
+    "hard_additional_gpu_seconds_after": 43200.0,
+    "settled_interval_count_before": 23,
+    "settled_interval_count_after": 23,
+    "settled_intervals_changed": false,
+    "conservative_failure_charge_count_before": 5,
+    "conservative_failure_charge_count_after": 5,
+    "conservative_failure_charges_changed": false,
+    "reservation_count_before": 0,
+    "reservation_count_after": 0
+  },
+  "money_budget_mutation": {
+    "v11_configured_budget_usd_before": 40.0,
+    "v11_authorized_budget_usd_after": 80.0
+  },
+  "authorized_scope": [
+    "sequential fresh-ID v11 integrated retries until one scientifically valid success",
+    "one kill-and-recompute comparison only after integrated v11 passes and freezes",
+    "mandatory post-run analysis and cleanup validation"
+  ],
+  "per_invocation_constraints": {
+    "sole_paid_coordinator": true,
+    "maximum_active_reservations": 1,
+    "integrated_gpu_count": 2,
+    "integrated_maximum_wall_seconds": 588.0,
+    "integrated_maximum_gpu_seconds": 1176.0,
+    "fresh_attempt_id_and_immutable_prefix_required": true,
+    "provider_cleanup_required_before_next_attempt": true
+  },
+  "does_not_execute": [
+    "Modal invocation",
+    "GPU allocation",
+    "deployment",
+    "FPGA implementation"
+  ]
+}

@@ -1,0 +1,3371 @@
+{
+  "traceEvents": [
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 18989,
+      "pid": 93568,
+      "tid": 1000656286552763583,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5a89-7ec1-a7d7-0f63f73675e4"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 18854,
+      "pid": 93568,
+      "tid": 1000656286552763583,
+      "dur": 218854,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-5a89-7ec1-a7d7-0f63f73675e4"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 279447,
+      "pid": 93568,
+      "tid": 14950149245316324291,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5b8d-7800-9b1a-bc5d840fc3fa"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 312879,
+      "pid": 93568,
+      "tid": 12958953556063186264,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5baf-7a33-8c19-88fc1176a478"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 317146,
+      "pid": 93568,
+      "tid": 16267246992990382577,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5bb3-7b41-8127-5c561a826412"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 312637,
+      "pid": 93568,
+      "tid": 12958953556063186264,
+      "dur": 116921,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-5baf-7a33-8c19-88fc1176a478"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 317047,
+      "pid": 93568,
+      "tid": 16267246992990382577,
+      "dur": 121965,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-5bb3-7b41-8127-5c561a826412"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 539169,
+      "pid": 93568,
+      "tid": 8744696374309225354,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5c91-7ce1-819f-6bfc5c4a5c7f"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 279206,
+      "pid": 93568,
+      "tid": 14950149245316324291,
+      "dur": 560914,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-5b8d-7800-9b1a-bc5d840fc3fa"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 976923,
+      "pid": 93568,
+      "tid": 11272565453210212235,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5e47-73e1-b571-8be2dfc3b1b6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 976726,
+      "pid": 93568,
+      "tid": 11272565453210212235,
+      "dur": 123327,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-5e47-73e1-b571-8be2dfc3b1b6"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1111557,
+      "pid": 93568,
+      "tid": 11371754045875229619,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-5ecd-7053-9544-34b37eea3b05"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 538885,
+      "pid": 93568,
+      "tid": 8744696374309225354,
+      "dur": 608120,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-5c91-7ce1-819f-6bfc5c4a5c7f"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1111396,
+      "pid": 93568,
+      "tid": 11371754045875229619,
+      "dur": 120207,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-5ecd-7053-9544-34b37eea3b05"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1538547,
+      "pid": 93568,
+      "tid": 17030996186145578040,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6078-74f1-8baf-a43392e310cc"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1563954,
+      "pid": 93568,
+      "tid": 4000354906705640072,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6092-7471-aa2b-66a7889c7a05"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1538258,
+      "pid": 93568,
+      "tid": 17030996186145578040,
+      "dur": 121189,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6078-74f1-8baf-a43392e310cc"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 1563701,
+      "pid": 93568,
+      "tid": 4000354906705640072,
+      "dur": 123943,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6092-7471-aa2b-66a7889c7a05"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2217820,
+      "pid": 93568,
+      "tid": 11213463743510728433,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-631f-7091-b8b5-9022822457f1"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2337146,
+      "pid": 93568,
+      "tid": 7983556780489751320,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6397-7e80-8077-43646bdc5c9c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2217433,
+      "pid": 93568,
+      "tid": 11213463743510728433,
+      "dur": 186613,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-631f-7091-b8b5-9022822457f1"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2414633,
+      "pid": 93568,
+      "tid": 1819086096069960085,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-63e5-7ad1-ab08-95bc6af61c7f"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2450334,
+      "pid": 93568,
+      "tid": 1349224644935106920,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6408-79f1-b036-658ce105f703"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2336786,
+      "pid": 93568,
+      "tid": 7983556780489751320,
+      "dur": 114600,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6397-7e80-8077-43646bdc5c9c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2414454,
+      "pid": 93568,
+      "tid": 1819086096069960085,
+      "dur": 114283,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-63e5-7ad1-ab08-95bc6af61c7f"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2450105,
+      "pid": 93568,
+      "tid": 1349224644935106920,
+      "dur": 158892,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6408-79f1-b036-658ce105f703"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2618323,
+      "pid": 93568,
+      "tid": 11725692282500268934,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-64b0-7552-9441-92858362fcd0"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 2618176,
+      "pid": 93568,
+      "tid": 11725692282500268934,
+      "dur": 187275,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-64b0-7552-9441-92858362fcd0"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 3819751,
+      "pid": 93568,
+      "tid": 2510671019067503986,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6961-7090-b55b-71a5554fbbe8"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 3819364,
+      "pid": 93568,
+      "tid": 2510671019067503986,
+      "dur": 297173,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6961-7090-b55b-71a5554fbbe8"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4164800,
+      "pid": 93568,
+      "tid": 8887863212321213279,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6abb-78c3-819f-a419f36f0b0b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4373170,
+      "pid": 93568,
+      "tid": 2067658914731114807,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6b8b-71f1-be55-217e8dd01ae6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4164541,
+      "pid": 93568,
+      "tid": 8887863212321213279,
+      "dur": 265954,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-6abb-78c3-819f-a419f36f0b0b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4554500,
+      "pid": 93568,
+      "tid": 16063674146794192492,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6c40-74f3-8190-2ae0a9b2e58b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4619896,
+      "pid": 93568,
+      "tid": 13801393236090977946,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6c82-7f11-9882-208097875400"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4372979,
+      "pid": 93568,
+      "tid": 2067658914731114807,
+      "dur": 263551,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-6b8b-71f1-be55-217e8dd01ae6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4554316,
+      "pid": 93568,
+      "tid": 16063674146794192492,
+      "dur": 129065,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6c40-74f3-8190-2ae0a9b2e58b"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4619596,
+      "pid": 93568,
+      "tid": 13801393236090977946,
+      "dur": 117409,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6c82-7f11-9882-208097875400"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4799903,
+      "pid": 93568,
+      "tid": 7907857397031677320,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6d36-71e1-9868-592ce008c2a1"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4922399,
+      "pid": 93568,
+      "tid": 2838443971107579061,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6db0-79a3-922c-4853e3dfebd3"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4799726,
+      "pid": 93568,
+      "tid": 7907857397031677320,
+      "dur": 169097,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6d36-71e1-9868-592ce008c2a1"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5009925,
+      "pid": 93568,
+      "tid": 15125514781033715391,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e08-72e3-b0b5-2f2f6d6d6cfd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5042770,
+      "pid": 93568,
+      "tid": 8834853053754949274,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e29-77c2-a2e9-8a8fdf257caf"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 4922152,
+      "pid": 93568,
+      "tid": 2838443971107579061,
+      "dur": 128760,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6db0-79a3-922c-4853e3dfebd3"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5052671,
+      "pid": 93568,
+      "tid": 9891923620978050937,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e33-7300-a463-25b944f216fd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5061205,
+      "pid": 93568,
+      "tid": 12038238028678137400,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e3b-7a20-8e79-9de309acc2fe"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5066425,
+      "pid": 93568,
+      "tid": 17796288779556687116,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e40-7461-b3c2-4d7156d8bfe4"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5085198,
+      "pid": 93568,
+      "tid": 14259819329092422013,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6e53-7031-bbb4-15110b8f9081"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5085052,
+      "pid": 93568,
+      "tid": 14259819329092422013,
+      "dur": 85146,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e53-7031-bbb4-15110b8f9081"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5052524,
+      "pid": 93568,
+      "tid": 9891923620978050937,
+      "dur": 120587,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e33-7300-a463-25b944f216fd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5185894,
+      "pid": 93568,
+      "tid": 13475322226644765419,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6eb8-7f93-917a-784bd00dbfe8"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5066287,
+      "pid": 93568,
+      "tid": 17796288779556687116,
+      "dur": 122646,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e40-7461-b3c2-4d7156d8bfe4"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5061044,
+      "pid": 93568,
+      "tid": 12038238028678137400,
+      "dur": 187503,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e3b-7a20-8e79-9de309acc2fe"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5251115,
+      "pid": 93568,
+      "tid": 13037914772334003442,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6ef9-7550-9535-ab13d139d7c2"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5009784,
+      "pid": 93568,
+      "tid": 15125514781033715391,
+      "dur": 255425,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e08-72e3-b0b5-2f2f6d6d6cfd"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5042604,
+      "pid": 93568,
+      "tid": 8834853053754949274,
+      "dur": 226280,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6e29-77c2-a2e9-8a8fdf257caf"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5301836,
+      "pid": 93568,
+      "tid": 15931218460178433658,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6f2c-7921-a74d-4b0c35817e12"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5185717,
+      "pid": 93568,
+      "tid": 13475322226644765419,
+      "dur": 133112,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6eb8-7f93-917a-784bd00dbfe8"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5363586,
+      "pid": 93568,
+      "tid": 16984253654032838752,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6f69-7a12-87ad-eab2922742c6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5250981,
+      "pid": 93568,
+      "tid": 13037914772334003442,
+      "dur": 116928,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6ef9-7550-9535-ab13d139d7c2"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5377599,
+      "pid": 93568,
+      "tid": 9023442981558538023,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6f77-7c10-8c5e-68b593516869"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5377971,
+      "pid": 93568,
+      "tid": 7920417931912623039,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6f78-7c91-895d-f57d8451a43e"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5387438,
+      "pid": 93568,
+      "tid": 17807134662737318013,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-6f81-7471-bdd9-96ae0ec401b3"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5377732,
+      "pid": 93568,
+      "tid": 7920417931912623039,
+      "dur": 112656,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6f78-7c91-895d-f57d8451a43e"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5386909,
+      "pid": 93568,
+      "tid": 17807134662737318013,
+      "dur": 117342,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6f81-7471-bdd9-96ae0ec401b3"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5530229,
+      "pid": 93568,
+      "tid": 13162937013844074158,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7010-7ca2-a469-968dd5c962b2"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5377317,
+      "pid": 93568,
+      "tid": 9023442981558538023,
+      "dur": 179717,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-6f77-7c10-8c5e-68b593516869"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5301672,
+      "pid": 93568,
+      "tid": 15931218460178433658,
+      "dur": 272590,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6f2c-7921-a74d-4b0c35817e12"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5363404,
+      "pid": 93568,
+      "tid": 16984253654032838752,
+      "dur": 261998,
+      "args": {
+        "backend": "mock-fast-replica-0",
+        "outcome": "success",
+        "request_id": "019fcae9-6f69-7a12-87ad-eab2922742c6"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5628699,
+      "pid": 93568,
+      "tid": 11904276440059782701,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7073-7601-b4ca-07c73bcfbf75"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5654612,
+      "pid": 93568,
+      "tid": 8106988749543750114,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-708c-7310-bf5e-33254aa4a7dc"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5530039,
+      "pid": 93568,
+      "tid": 13162937013844074158,
+      "dur": 125458,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7010-7ca2-a469-968dd5c962b2"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5674592,
+      "pid": 93568,
+      "tid": 14503336543118116564,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-70a0-7ab3-8060-e79381bbf728"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5628436,
+      "pid": 93568,
+      "tid": 11904276440059782701,
+      "dur": 134825,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7073-7601-b4ca-07c73bcfbf75"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5674377,
+      "pid": 93568,
+      "tid": 14503336543118116564,
+      "dur": 125743,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-70a0-7ab3-8060-e79381bbf728"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5856801,
+      "pid": 93568,
+      "tid": 17597893575310752290,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7157-7761-93e3-90f2327a86e5"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5654408,
+      "pid": 93568,
+      "tid": 8106988749543750114,
+      "dur": 207240,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-708c-7310-bf5e-33254aa4a7dc"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5864204,
+      "pid": 93568,
+      "tid": 11890937201263459110,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-715e-7721-933a-7e0aed4345bd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5940011,
+      "pid": 93568,
+      "tid": 17054312978197442894,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-71aa-75c3-a379-65d5d5181cd9"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5950543,
+      "pid": 93568,
+      "tid": 15712501136768952553,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-71b4-7891-9111-474ffd83758a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5864007,
+      "pid": 93568,
+      "tid": 11890937201263459110,
+      "dur": 114633,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-715e-7721-933a-7e0aed4345bd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5982725,
+      "pid": 93568,
+      "tid": 362999729871918703,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-71d5-7772-bd03-aed909fb4430"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5856610,
+      "pid": 93568,
+      "tid": 17597893575310752290,
+      "dur": 172884,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7157-7761-93e3-90f2327a86e5"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6055207,
+      "pid": 93568,
+      "tid": 4654094314500044566,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-721d-7933-b84f-f1a90dd44ead"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5950329,
+      "pid": 93568,
+      "tid": 15712501136768952553,
+      "dur": 116956,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-71b4-7891-9111-474ffd83758a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5982573,
+      "pid": 93568,
+      "tid": 362999729871918703,
+      "dur": 155933,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-71d5-7772-bd03-aed909fb4430"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6055077,
+      "pid": 93568,
+      "tid": 4654094314500044566,
+      "dur": 117500,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-721d-7933-b84f-f1a90dd44ead"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 5939889,
+      "pid": 93568,
+      "tid": 17054312978197442894,
+      "dur": 262074,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-71aa-75c3-a379-65d5d5181cd9"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6274557,
+      "pid": 93568,
+      "tid": 1670664823581052201,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-72f9-74a2-be02-09a4dc28eb23"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6304072,
+      "pid": 93568,
+      "tid": 13340391996964110747,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7316-7f03-b83b-995e337c865a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6274416,
+      "pid": 93568,
+      "tid": 1670664823581052201,
+      "dur": 119362,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-72f9-74a2-be02-09a4dc28eb23"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6427734,
+      "pid": 93568,
+      "tid": 13836592394628905629,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7392-76a0-8c63-9611476cf314"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6303943,
+      "pid": 93568,
+      "tid": 13340391996964110747,
+      "dur": 130966,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7316-7f03-b83b-995e337c865a"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6489818,
+      "pid": 93568,
+      "tid": 17443913671283441081,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-73d0-7312-a2ce-d50ae9ca3a31"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6427520,
+      "pid": 93568,
+      "tid": 13836592394628905629,
+      "dur": 132560,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7392-76a0-8c63-9611476cf314"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6489584,
+      "pid": 93568,
+      "tid": 17443913671283441081,
+      "dur": 119060,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-73d0-7312-a2ce-d50ae9ca3a31"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6859964,
+      "pid": 93568,
+      "tid": 274702982447741473,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7542-7962-908f-85e754499bcb"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 6859652,
+      "pid": 93568,
+      "tid": 274702982447741473,
+      "dur": 119350,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7542-7962-908f-85e754499bcb"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7111535,
+      "pid": 93568,
+      "tid": 10147370611606014237,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-763d-7de3-a6b2-305adef0b5ad"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7310988,
+      "pid": 93568,
+      "tid": 13496377363816400116,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7705-70a3-b7ab-8bebf100f610"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7111256,
+      "pid": 93568,
+      "tid": 10147370611606014237,
+      "dur": 234383,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-763d-7de3-a6b2-305adef0b5ad"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7310794,
+      "pid": 93568,
+      "tid": 13496377363816400116,
+      "dur": 117848,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7705-70a3-b7ab-8bebf100f610"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7621417,
+      "pid": 93568,
+      "tid": 6809688712650495700,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-783b-7753-8869-1074d62c7ecf"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7621169,
+      "pid": 93568,
+      "tid": 6809688712650495700,
+      "dur": 125084,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-783b-7753-8869-1074d62c7ecf"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7781697,
+      "pid": 93568,
+      "tid": 15672942478630327073,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-78dc-7cb0-b8c4-ae90952ca08b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7782607,
+      "pid": 93568,
+      "tid": 3693011647592370031,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-78dd-7342-840d-bbc12ca8356a"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7791615,
+      "pid": 93568,
+      "tid": 4657077076916728983,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-78e5-7a60-ab30-5f5652cc4389"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7858766,
+      "pid": 93568,
+      "tid": 2307799061469262232,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7929-7140-af3c-af8b856350b9"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7782481,
+      "pid": 93568,
+      "tid": 3693011647592370031,
+      "dur": 123580,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-78dd-7342-840d-bbc12ca8356a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7791380,
+      "pid": 93568,
+      "tid": 4657077076916728983,
+      "dur": 118192,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-78e5-7a60-ab30-5f5652cc4389"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7945227,
+      "pid": 93568,
+      "tid": 12094163030528338349,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-797f-7ba2-93aa-5962610159ba"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7781444,
+      "pid": 93568,
+      "tid": 15672942478630327073,
+      "dur": 264876,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-78dc-7cb0-b8c4-ae90952ca08b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8072017,
+      "pid": 93568,
+      "tid": 16542818099782993909,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-79fe-7ec0-8f13-1d2b48f95a8d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8087572,
+      "pid": 93568,
+      "tid": 3071541642343787965,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7a0d-7bb0-b603-f785f54f78b6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7858610,
+      "pid": 93568,
+      "tid": 2307799061469262232,
+      "dur": 257382,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7929-7140-af3c-af8b856350b9"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 7944823,
+      "pid": 93568,
+      "tid": 12094163030528338349,
+      "dur": 203152,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-797f-7ba2-93aa-5962610159ba"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8087366,
+      "pid": 93568,
+      "tid": 3071541642343787965,
+      "dur": 101397,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-7a0d-7bb0-b603-f785f54f78b6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8071819,
+      "pid": 93568,
+      "tid": 16542818099782993909,
+      "dur": 190165,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-79fe-7ec0-8f13-1d2b48f95a8d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8725418,
+      "pid": 93568,
+      "tid": 12176551145371857673,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7c8b-7313-a02c-179617430561"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8725143,
+      "pid": 93568,
+      "tid": 12176551145371857673,
+      "dur": 121180,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7c8b-7313-a02c-179617430561"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8959684,
+      "pid": 93568,
+      "tid": 12953743080579004205,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7d75-79a1-b4b5-4e1541eeea8d"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 8959403,
+      "pid": 93568,
+      "tid": 12953743080579004205,
+      "dur": 124954,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7d75-79a1-b4b5-4e1541eeea8d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9565502,
+      "pid": 93568,
+      "tid": 2292199545873896230,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-7fd3-7e03-a6bd-0d4ecb49a744"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9614212,
+      "pid": 93568,
+      "tid": 11838930857611075750,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8004-77e1-b109-1f83c83f7e2e"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9565363,
+      "pid": 93568,
+      "tid": 2292199545873896230,
+      "dur": 121785,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-7fd3-7e03-a6bd-0d4ecb49a744"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9614022,
+      "pid": 93568,
+      "tid": 11838930857611075750,
+      "dur": 125544,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8004-77e1-b109-1f83c83f7e2e"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9811282,
+      "pid": 93568,
+      "tid": 15036023911869195659,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-80c9-7a41-a3c1-d1647ef17ddb"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 9811022,
+      "pid": 93568,
+      "tid": 15036023911869195659,
+      "dur": 126543,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-80c9-7a41-a3c1-d1647ef17ddb"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10109916,
+      "pid": 93568,
+      "tid": 17807474464634435297,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-81f4-7ce1-894d-ae1561b98f2b"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10109679,
+      "pid": 93568,
+      "tid": 17807474464634435297,
+      "dur": 120722,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-81f4-7ce1-894d-ae1561b98f2b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10599585,
+      "pid": 93568,
+      "tid": 16060501377177682285,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-83de-73a2-b17d-661f1885bf44"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10600448,
+      "pid": 93568,
+      "tid": 4065647957185536865,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-83de-73a2-b17d-66274111b37e"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10600355,
+      "pid": 93568,
+      "tid": 4065647957185536865,
+      "dur": 115128,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-83de-73a2-b17d-66274111b37e"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10599424,
+      "pid": 93568,
+      "tid": 16060501377177682285,
+      "dur": 123407,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-83de-73a2-b17d-661f1885bf44"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10785969,
+      "pid": 93568,
+      "tid": 7166646097616402955,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8498-7e50-85ce-c5f3ee3f2614"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 10785749,
+      "pid": 93568,
+      "tid": 7166646097616402955,
+      "dur": 79437,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8498-7e50-85ce-c5f3ee3f2614"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11205671,
+      "pid": 93568,
+      "tid": 5245595978101829797,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-863b-7de3-81ab-60a339de548b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11253225,
+      "pid": 93568,
+      "tid": 2484487052733454570,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-866b-7ff0-9e5b-745cab14a762"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11322675,
+      "pid": 93568,
+      "tid": 2598794170628478519,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-86b1-73b2-940c-870f56f05c1b"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11205377,
+      "pid": 93568,
+      "tid": 5245595978101829797,
+      "dur": 128309,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-863b-7de3-81ab-60a339de548b"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11253017,
+      "pid": 93568,
+      "tid": 2484487052733454570,
+      "dur": 129458,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-866b-7ff0-9e5b-745cab14a762"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11322453,
+      "pid": 93568,
+      "tid": 2598794170628478519,
+      "dur": 123869,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-86b1-73b2-940c-870f56f05c1b"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11525073,
+      "pid": 93568,
+      "tid": 5311387197703444005,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-877b-7123-bdb2-686c90622bed"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11524819,
+      "pid": 93568,
+      "tid": 5311387197703444005,
+      "dur": 130329,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-877b-7123-bdb2-686c90622bed"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11731295,
+      "pid": 93568,
+      "tid": 13234752977641831930,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8849-7f01-9746-03ea4a9f840c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11731024,
+      "pid": 93568,
+      "tid": 13234752977641831930,
+      "dur": 160038,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8849-7f01-9746-03ea4a9f840c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11904283,
+      "pid": 93568,
+      "tid": 1863182055399167288,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-88f6-7e60-8b67-8312fd3f62fa"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11934245,
+      "pid": 93568,
+      "tid": 7182974704280632114,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8914-7283-b419-2b444365448c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12035375,
+      "pid": 93568,
+      "tid": 15836093967202874648,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8979-7e83-8c77-e8c8402bb259"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12086056,
+      "pid": 93568,
+      "tid": 3448223122348182202,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-89ac-7131-9ef7-be460a1ef894"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11904007,
+      "pid": 93568,
+      "tid": 1863182055399167288,
+      "dur": 186139,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-88f6-7e60-8b67-8312fd3f62fa"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 11934009,
+      "pid": 93568,
+      "tid": 7182974704280632114,
+      "dur": 218008,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8914-7283-b419-2b444365448c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12035191,
+      "pid": 93568,
+      "tid": 15836093967202874648,
+      "dur": 129226,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8979-7e83-8c77-e8c8402bb259"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12085773,
+      "pid": 93568,
+      "tid": 3448223122348182202,
+      "dur": 232247,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-89ac-7131-9ef7-be460a1ef894"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12320362,
+      "pid": 93568,
+      "tid": 5561066398875608156,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8a96-7b53-9eb8-7664f6cad845"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12320166,
+      "pid": 93568,
+      "tid": 5561066398875608156,
+      "dur": 126277,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8a96-7b53-9eb8-7664f6cad845"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12594531,
+      "pid": 93568,
+      "tid": 13931394753605838785,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8ba9-7590-be69-0721d7b66ca6"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12645696,
+      "pid": 93568,
+      "tid": 9648813340905729284,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8bdc-7003-b6b5-e6844999a58c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12714970,
+      "pid": 93568,
+      "tid": 17512640723345640826,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8c21-7f00-a4ef-9bf51037049d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12737735,
+      "pid": 93568,
+      "tid": 1236595416855319737,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8c38-7363-bf13-3516ae25495c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12763621,
+      "pid": 93568,
+      "tid": 5547294832997500739,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8c52-77a3-bb5c-839d37f5c213"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12594385,
+      "pid": 93568,
+      "tid": 13931394753605838785,
+      "dur": 169696,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8ba9-7590-be69-0721d7b66ca6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12645550,
+      "pid": 93568,
+      "tid": 9648813340905729284,
+      "dur": 122272,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8bdc-7003-b6b5-e6844999a58c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12838452,
+      "pid": 93568,
+      "tid": 12517680869986398825,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8c9c-70f0-9162-ce1dd5b44c87"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12763454,
+      "pid": 93568,
+      "tid": 5547294832997500739,
+      "dur": 126089,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8c52-77a3-bb5c-839d37f5c213"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12737471,
+      "pid": 93568,
+      "tid": 1236595416855319737,
+      "dur": 152090,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8c38-7363-bf13-3516ae25495c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12904848,
+      "pid": 93568,
+      "tid": 10204329744876412115,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8cdf-7b11-b04d-a4b541a0238e"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12714821,
+      "pid": 93568,
+      "tid": 17512640723345640826,
+      "dur": 212632,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8c21-7f00-a4ef-9bf51037049d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12945248,
+      "pid": 93568,
+      "tid": 8581577094599043326,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8d07-7881-a874-7fee8fb6fdb9"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12838234,
+      "pid": 93568,
+      "tid": 12517680869986398825,
+      "dur": 132289,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8c9c-70f0-9162-ce1dd5b44c87"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13023647,
+      "pid": 93568,
+      "tid": 9419851810195272138,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8d56-7c80-8e74-00e5ca0038cf"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12904636,
+      "pid": 93568,
+      "tid": 10204329744876412115,
+      "dur": 133302,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8cdf-7b11-b04d-a4b541a0238e"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13108171,
+      "pid": 93568,
+      "tid": 16959714829801104176,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8daa-7890-8598-b7614fca04e6"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13132552,
+      "pid": 93568,
+      "tid": 12615811983732311233,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8dc3-7233-bc01-bd5746078ce4"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13140926,
+      "pid": 93568,
+      "tid": 18413803003344540775,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8dcb-7243-a71c-fe6dca194c10"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13023474,
+      "pid": 93568,
+      "tid": 9419851810195272138,
+      "dur": 124100,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8d56-7c80-8e74-00e5ca0038cf"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13208374,
+      "pid": 93568,
+      "tid": 945840484757229576,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e0e-7ac1-8ee9-e6c86702e657"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 12945031,
+      "pid": 93568,
+      "tid": 8581577094599043326,
+      "dur": 268243,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8d07-7881-a874-7fee8fb6fdb9"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13236532,
+      "pid": 93568,
+      "tid": 7486640874349034040,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e2a-7641-9e89-8866b63e0213"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13256894,
+      "pid": 93568,
+      "tid": 11289904891313333890,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e3f-7770-9111-fe1f938f76be"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13258572,
+      "pid": 93568,
+      "tid": 13979347108374338388,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e41-79d1-8f57-1d2d3da9d006"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13140751,
+      "pid": 93568,
+      "tid": 18413803003344540775,
+      "dur": 129257,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8dcb-7243-a71c-fe6dca194c10"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13289216,
+      "pid": 93568,
+      "tid": 9031656868066527594,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e5f-77d3-91cc-e216b492035c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13108010,
+      "pid": 93568,
+      "tid": 16959714829801104176,
+      "dur": 195367,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8daa-7890-8598-b7614fca04e6"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13313527,
+      "pid": 93568,
+      "tid": 6440237489881355274,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e77-70a2-a3f0-6a7ff77fa3a7"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13208172,
+      "pid": 93568,
+      "tid": 945840484757229576,
+      "dur": 120471,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e0e-7ac1-8ee9-e6c86702e657"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13330957,
+      "pid": 93568,
+      "tid": 7996564540138234965,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8e89-7f23-939a-8333a8db2f66"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13236343,
+      "pid": 93568,
+      "tid": 7486640874349034040,
+      "dur": 118544,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e2a-7641-9e89-8866b63e0213"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13256720,
+      "pid": 93568,
+      "tid": 11289904891313333890,
+      "dur": 117220,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e3f-7770-9111-fe1f938f76be"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13389128,
+      "pid": 93568,
+      "tid": 5317996545383015748,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8ec3-7001-823b-50d4c834d2d8"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13132392,
+      "pid": 93568,
+      "tid": 12615811983732311233,
+      "dur": 261106,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8dc3-7233-bc01-bd5746078ce4"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13289073,
+      "pid": 93568,
+      "tid": 9031656868066527594,
+      "dur": 119450,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e5f-77d3-91cc-e216b492035c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13330792,
+      "pid": 93568,
+      "tid": 7996564540138234965,
+      "dur": 117578,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e89-7f23-939a-8333a8db2f66"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13476221,
+      "pid": 93568,
+      "tid": 8437292369071834917,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8f1a-7840-880c-89615acd52f2"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13497121,
+      "pid": 93568,
+      "tid": 2520228737539534176,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8f2f-7970-ab34-651a4646254f"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13388958,
+      "pid": 93568,
+      "tid": 5317996545383015748,
+      "dur": 116414,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8ec3-7001-823b-50d4c834d2d8"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13540728,
+      "pid": 93568,
+      "tid": 9642669734016608091,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8f5b-7c61-beac-a213796799ab"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13313356,
+      "pid": 93568,
+      "tid": 6440237489881355274,
+      "dur": 242014,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8e77-70a2-a3f0-6a7ff77fa3a7"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13476030,
+      "pid": 93568,
+      "tid": 8437292369071834917,
+      "dur": 117945,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8f1a-7840-880c-89615acd52f2"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13648527,
+      "pid": 93568,
+      "tid": 4283833203207425869,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-8fc6-7302-83d9-f79dd4b824f9"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13540567,
+      "pid": 93568,
+      "tid": 9642669734016608091,
+      "dur": 124325,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8f5b-7c61-beac-a213796799ab"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13258462,
+      "pid": 93568,
+      "tid": 13979347108374338388,
+      "dur": 418395,
+      "args": {
+        "backend": "mock-fast-replica-2",
+        "outcome": "success",
+        "request_id": "019fcae9-8e41-79d1-8f57-1d2d3da9d006"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13496959,
+      "pid": 93568,
+      "tid": 2520228737539534176,
+      "dur": 200375,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8f2f-7970-ab34-651a4646254f"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13735244,
+      "pid": 93568,
+      "tid": 11526390665742448291,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-901d-7ea0-972c-3468361d240c"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13648343,
+      "pid": 93568,
+      "tid": 4283833203207425869,
+      "dur": 120629,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-8fc6-7302-83d9-f79dd4b824f9"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13831152,
+      "pid": 93568,
+      "tid": 9315057924923421815,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-907d-72c1-9702-8472d5b16529"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13735033,
+      "pid": 93568,
+      "tid": 11526390665742448291,
+      "dur": 100411,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-901d-7ea0-972c-3468361d240c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13890993,
+      "pid": 93568,
+      "tid": 6545545771151741057,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-90b9-76a1-9a83-215f90122383"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13830978,
+      "pid": 93568,
+      "tid": 9315057924923421815,
+      "dur": 123454,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-907d-72c1-9702-8472d5b16529"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13967049,
+      "pid": 93568,
+      "tid": 5576931057831985451,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9105-7863-883a-d993e097a7b7"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13890819,
+      "pid": 93568,
+      "tid": 6545545771151741057,
+      "dur": 120218,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-90b9-76a1-9a83-215f90122383"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 13966876,
+      "pid": 93568,
+      "tid": 5576931057831985451,
+      "dur": 131886,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9105-7863-883a-d993e097a7b7"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14269220,
+      "pid": 93568,
+      "tid": 7667542582204505012,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9233-7190-8ad5-d1cbae1db725"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14357703,
+      "pid": 93568,
+      "tid": 7552926223088020214,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-928c-7f83-b507-bab75476d2c6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14269007,
+      "pid": 93568,
+      "tid": 7667542582204505012,
+      "dur": 122207,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9233-7190-8ad5-d1cbae1db725"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14455235,
+      "pid": 93568,
+      "tid": 17166487373901668940,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-92ed-7a13-bb88-0229ef591581"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14357518,
+      "pid": 93568,
+      "tid": 7552926223088020214,
+      "dur": 124164,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-928c-7f83-b507-bab75476d2c6"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14455017,
+      "pid": 93568,
+      "tid": 17166487373901668940,
+      "dur": 116297,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-92ed-7a13-bb88-0229ef591581"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14598362,
+      "pid": 93568,
+      "tid": 1916876122532672001,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-937c-75b0-826f-4991348ed08a"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14623971,
+      "pid": 93568,
+      "tid": 10249966728706692021,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9396-7113-b578-0bab075bc90d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14655039,
+      "pid": 93568,
+      "tid": 17488469731852685712,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-93b5-71f3-b7f4-b501ec113fab"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14623755,
+      "pid": 93568,
+      "tid": 10249966728706692021,
+      "dur": 133516,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9396-7113-b578-0bab075bc90d"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14841094,
+      "pid": 93568,
+      "tid": 9964771671899830364,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-946f-7ee1-9297-2f5b69c377fc"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14598173,
+      "pid": 93568,
+      "tid": 1916876122532672001,
+      "dur": 255583,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-937c-75b0-826f-4991348ed08a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14654887,
+      "pid": 93568,
+      "tid": 17488469731852685712,
+      "dur": 217305,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-93b5-71f3-b7f4-b501ec113fab"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 14840896,
+      "pid": 93568,
+      "tid": 9964771671899830364,
+      "dur": 225476,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-946f-7ee1-9297-2f5b69c377fc"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15332560,
+      "pid": 93568,
+      "tid": 1416660918011104253,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-965a-7d73-a882-b9d639099569"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15447417,
+      "pid": 93568,
+      "tid": 1332646923683640151,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-96cd-7833-8268-6c3c86e9cbcd"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15332289,
+      "pid": 93568,
+      "tid": 1416660918011104253,
+      "dur": 117342,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-965a-7d73-a882-b9d639099569"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15539106,
+      "pid": 93568,
+      "tid": 15016786823958350958,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9729-7322-95b0-6e02ed9834a5"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15447152,
+      "pid": 93568,
+      "tid": 1332646923683640151,
+      "dur": 116065,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-96cd-7833-8268-6c3c86e9cbcd"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15602163,
+      "pid": 93568,
+      "tid": 6861435846633237095,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9768-7512-8c6d-22ab6665d45c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15620768,
+      "pid": 93568,
+      "tid": 1234517687399688553,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-977b-7423-8eaa-978d212e3dd1"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15538912,
+      "pid": 93568,
+      "tid": 15016786823958350958,
+      "dur": 112697,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9729-7322-95b0-6e02ed9834a5"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15667889,
+      "pid": 93568,
+      "tid": 7075725958751841837,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-97aa-72e0-9b42-8c451ba2d08a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15602051,
+      "pid": 93568,
+      "tid": 6861435846633237095,
+      "dur": 116982,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9768-7512-8c6d-22ab6665d45c"
+      }
+    },
+    {
+      "name": "gateway.routing",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15776346,
+      "pid": 93568,
+      "tid": 16350944777050916659,
+      "dur": 0,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "policy": "slo_slack_aware",
+        "request_id": "019fcae9-9816-7643-ba7f-82abf350b2d9"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15620586,
+      "pid": 93568,
+      "tid": 1234517687399688553,
+      "dur": 165461,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-977b-7423-8eaa-978d212e3dd1"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15667728,
+      "pid": 93568,
+      "tid": 7075725958751841837,
+      "dur": 206948,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-97aa-72e0-9b42-8c451ba2d08a"
+      }
+    },
+    {
+      "name": "gateway.request",
+      "cat": "inference",
+      "ph": "X",
+      "ts": 15776078,
+      "pid": 93568,
+      "tid": 16350944777050916659,
+      "dur": 121076,
+      "args": {
+        "backend": "mock-fast-replica-1",
+        "outcome": "success",
+        "request_id": "019fcae9-9816-7643-ba7f-82abf350b2d9"
+      }
+    }
+  ],
+  "provenance": {
+    "component": "sloforge-gateway",
+    "plan_id": "opt-abaf8baf8b512a2c",
+    "profile_id": "http-profile-41-1785815718"
+  },
+  "dropped_events": 0,
+  "displayTimeUnit": "ms"
+}

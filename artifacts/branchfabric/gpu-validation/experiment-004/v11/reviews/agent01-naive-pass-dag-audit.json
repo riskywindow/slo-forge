@@ -1,0 +1,209 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-naive-pass-dag-review/v1",
+  "reviewer": "agent01-naive-pass-dag-audit",
+  "scope": "offline-only audit of the frozen v10 naive preservation pipeline",
+  "gpu_or_remote_compute_used": false,
+  "source_code_modified": false,
+  "result": "PASS_WITH_REQUIRED_GRAPH_CORRECTIONS",
+  "baseline_verification": {
+    "execution_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "analysis_commit": "1c51853e10809686d4368037153927f25e834117",
+    "tag": "branchfabric-exp004-naive-baseline-v10",
+    "tag_dereferenced_commit": "c5fa2f169e8a343ef7a86ebc814b3a23a7de6b39",
+    "immutable_baseline_sha256": "8f5aadff659bef6b60881d08cb7e48d6fd9f992362899733a7f016c80380b03e",
+    "rollout_result_sha256": "3daba7475bed0bf828d52e258085b4d4545b9661d12ad93438920ab79b51f738",
+    "cuda_and_host_operations_sha256": "edf6958f6ad95009693223cc451eddc4abb75d2c91054b9ba2fd265c347875c7",
+    "state_pass_records_sha256": "9104a08e159c06ff26a0b8ec0c0796b4d718450822914f27a835988b9bbbb0ab",
+    "movement_accounting_sha256": "ad31263ad118a2107cb9d8806b06052866144a63e7e79b2af27240ca5f5939f3",
+    "aggregate_pass_graph_sha256": "a70d1f554201bab696084e055310bbbb6a85745740845def93a4cd8a87e52dfa",
+    "raw_record_count": 270,
+    "aggregate_operation_label_count": 30,
+    "logical_segment_count": 9
+  },
+  "accounting": {
+    "logical_state_bytes": 1056964608,
+    "physical_source_bytes": 1056964608,
+    "all_pages_full_in_measured_fixture": true,
+    "external_movement_bytes": 3170893824,
+    "external_movement_amplification": 3.0,
+    "endpoint_touch_bytes": 58133053440,
+    "endpoint_touch_amplification": 55.0,
+    "full_physical_touch_bytes": 61303947264,
+    "full_physical_touch_amplification": 58.0,
+    "conservative_avoidable_bytes_from_frozen_flags": 32765902848,
+    "conservative_avoidable_amplification": 31.0,
+    "gpu_intermediate_read_write_bytes": 30651973632,
+    "gpu_intermediate_amplification": 29.0,
+    "host_intermediate_read_write_bytes": 24310185984,
+    "host_intermediate_amplification": 23.0,
+    "native_endpoint_bytes": 3170893824,
+    "native_endpoint_amplification": 3.0,
+    "decomposition_identity": "29x GPU intermediates + 23x host intermediates + 3x native source/destination endpoints + 3x transfer-link traversal = 58x"
+  },
+  "high_level_chains": [
+    {
+      "id": "capture_through_publish",
+      "touch_bytes": 22196256768,
+      "amplification": 21.0,
+      "measured_outer_wall_time_ns": 5020858689,
+      "timed_operation_union_ns": 4778800855,
+      "components_amplification": {
+        "native_read_and_contiguous": 4.0,
+        "unpage_stack_concatenate": 6.0,
+        "d2h_endpoints_and_link": 3.0,
+        "integrity_materialize_and_hash": 4.0,
+        "publish_materialize_and_hash": 4.0
+      }
+    },
+    {
+      "id": "restore_through_native_write",
+      "touch_bytes": 21139292160,
+      "amplification": 20.0,
+      "components_amplification": {
+        "transport_verify": 4.0,
+        "h2d_endpoints_and_link": 3.0,
+        "duplicate_import_verify": 4.0,
+        "zero_overlay_contiguous_stack": 7.0,
+        "fresh_destination_native_write": 2.0
+      }
+    },
+    {
+      "id": "destination_recap_and_compare",
+      "touch_bytes": 17968398336,
+      "amplification": 17.0,
+      "timed_operation_union_ns": 2332548259,
+      "components_amplification": {
+        "destination_read_and_gather_write": 2.0,
+        "native_axis_contiguous": 2.0,
+        "unpage_stack_concatenate": 6.0,
+        "validation_d2h_endpoints_and_link": 3.0,
+        "expected_concatenation": 2.0,
+        "host_compare_reads": 2.0
+      }
+    }
+  ],
+  "pass_catalog": [
+    {"id":"capture-source-native-read","stage":"capture","source_representation":"VLLM_NATIVE_PAGED_LAYOUT","destination_representation":"gathered native page-major intermediate","source_memory":"source_gpu_native_paged","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_native_read","wall_time_ns":6641515,"cuda_time_ns":5870400,"cpu_time_ns":null,"synchronization":"CUDA end-event synchronize on default stream","primary_classification":"SEMANTICALLY_REQUIRED","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"read every selected source page exactly once","v10_required_unavoidable":true},
+    {"id":"capture-native-axis-contiguous","stage":"capture","source_representation":"index_select/movedim view","destination_representation":"contiguous page-major native intermediate","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_native_read","wall_time_ns":6641515,"cuda_time_ns":5870400,"cpu_time_ns":null,"synchronization":"shares capture-source-native-read CUDA measurement","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_FUSIBLE"],"correctness_purpose":"none beyond satisfying the naive tensor layout","v10_required_unavoidable":false},
+    {"id":"capture-unpage-valid-tokens","stage":"capture_transform","source_representation":"contiguous page-major native intermediate","destination_representation":"per-layer valid-token canonical slices","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transport_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_canonical_transform","wall_time_ns":1326929697,"cuda_time_ns":1326430176,"cpu_time_ns":null,"synchronization":"shares one CUDA end-event synchronize with stack and concatenate","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"retain only valid logical tokens; standalone materialization is unnecessary","v10_required_unavoidable":false},
+    {"id":"capture-stack-layers","stage":"capture_transform","source_representation":"per-layer valid-token slices","destination_representation":"per-page layer-stacked canonical tensors","source_memory":"gpu_transport_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_canonical_transform","wall_time_ns":1326929697,"cuda_time_ns":1326430176,"cpu_time_ns":null,"synchronization":"shares one CUDA end-event synchronize with unpage and concatenate","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"canonical layer order; standalone stack is unnecessary","v10_required_unavoidable":false},
+    {"id":"capture-concatenate-pages","stage":"capture_transform","source_representation":"per-page canonical tensors","destination_representation":"NaiveCanonicalDeviceState flat uint8 payload","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transport_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_canonical_transform","wall_time_ns":1326929697,"cuda_time_ns":1326430176,"cpu_time_ns":null,"synchronization":"shares one CUDA end-event synchronize with unpage and stack","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"canonical page order; full flat materialization is unnecessary","v10_required_unavoidable":false},
+    {"id":"capture-d2h","stage":"capture_transfer","source_representation":"flat canonical CUDA uint8 payload","destination_representation":"contiguous pinned CPU uint8 payload","source_memory":"gpu_transport_buffer","destination_memory":"pinned_host_transport","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":1056964608,"temporary_bytes":0,"timing_group":"capture_d2h","wall_time_ns":168294340,"cuda_time_ns":168091431,"cpu_time_ns":null,"synchronization":"non_blocking=False plus CUDA end-event synchronize","primary_classification":"SEMANTICALLY_REQUIRED","secondary_tags":["POTENTIALLY_STREAMABLE"],"correctness_purpose":"place the preserved checkpoint outside reclaimed GPU HBM","v10_required_unavoidable":true},
+    {"id":"capture-pinned-transport-lifetime","stage":"checkpoint_lifetime","source_representation":"none","destination_representation":"pinned host checkpoint residency","source_memory":"none","destination_memory":"none","bytes_read":0,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"allocation_lifetime_only","wall_time_ns":28500523878,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"none; lifetime overlaps later work and is not a serial pass","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE"],"correctness_purpose":"checkpoint residency is required, but full-state pinning is not","v10_required_unavoidable":true},
+    {"id":"capture-integrity-manifest","stage":"capture_integrity","source_representation":"pinned CPU tensor","destination_representation":"transient pageable bytes plus manifest descriptors","source_memory":"pinned_host_transport","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"capture_integrity","wall_time_ns":1735374449,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"bind canonical payload coverage, page identity, and integrity metadata","v10_required_unavoidable":true},
+    {"id":"capture-integrity-hash-reads","stage":"capture_integrity","source_representation":"transient pageable canonical bytes","destination_representation":"aggregate SHA-256 and per-page SHA-256 digests","source_memory":"pageable_host_buffer","destination_memory":"none","bytes_read":2113929216,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"capture_integrity","wall_time_ns":1735374449,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"strong whole-payload and page integrity","v10_required_unavoidable":true},
+    {"id":"transport-publish-validation","stage":"publish","source_representation":"unchanged pinned CPU payload","destination_representation":"second transient pageable bytes object","source_memory":"pinned_host_transport","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"publish_verify","wall_time_ns":1541560854,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"immediate re-verification of an unchanged payload; evidence can be shared with manifest construction","v10_required_unavoidable":true},
+    {"id":"transport-publish-hash-reads","stage":"publish","source_representation":"second transient pageable bytes object","destination_representation":"recomputed aggregate and per-page digests","source_memory":"pageable_host_buffer","destination_memory":"none","bytes_read":2113929216,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"publish_verify","wall_time_ns":1541560854,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"same immediate redundant publication proof","v10_required_unavoidable":true},
+    {"id":"restore-transport-validation","stage":"restore_integrity","source_representation":"pinned canonical transport payload","destination_representation":"transient pageable bytes object","source_memory":"pinned_host_transport","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"restore_transport_verify","wall_time_ns":1538380110,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"fail closed if checkpoint bytes changed before import","v10_required_unavoidable":true},
+    {"id":"restore-transport-hash-reads","stage":"restore_integrity","source_representation":"transient pageable canonical bytes","destination_representation":"recomputed aggregate and per-page digests","source_memory":"pageable_host_buffer","destination_memory":"none","bytes_read":2113929216,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"restore_transport_verify","wall_time_ns":1538380110,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"fail closed if checkpoint bytes changed before import","v10_required_unavoidable":true},
+    {"id":"restore-h2d","stage":"restore_transfer","source_representation":"pinned canonical CPU uint8 payload","destination_representation":"flat canonical CUDA uint8 payload","source_memory":"pinned_host_transport","destination_memory":"gpu_transport_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":1056964608,"temporary_bytes":1056964608,"timing_group":"restore_h2d","wall_time_ns":42104594,"cuda_time_ns":41888672,"cpu_time_ns":null,"synchronization":"non_blocking=False plus CUDA end-event synchronize","primary_classification":"SEMANTICALLY_REQUIRED","secondary_tags":["POTENTIALLY_STREAMABLE"],"correctness_purpose":"return preserved state to the destination GPU","v10_required_unavoidable":true},
+    {"id":"restore-import-validation","stage":"state_import","source_representation":"same unchanged pinned checkpoint just verified before H2D","destination_representation":"third transient restore-time pageable bytes object","source_memory":"pinned_host_transport","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"duplicate_import_verify","wall_time_ns":1541696222,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"duplicate state.verify inside Vllm0230RestoreStager.import_group; metadata identity checks remain separately required","v10_required_unavoidable":false},
+    {"id":"restore-import-hash-reads","stage":"state_import","source_representation":"third transient restore-time pageable bytes object","destination_representation":"duplicate aggregate and per-page digests","source_memory":"pageable_host_buffer","destination_memory":"none","bytes_read":2113929216,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"duplicate_import_verify","wall_time_ns":1541696222,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"duplicate verification of the same immutable payload","v10_required_unavoidable":false},
+    {"id":"restore-zero-native-pages","stage":"state_import_conversion","source_representation":"none","destination_representation":"zeroed native-shaped page tensors","source_memory":"none","destination_memory":"gpu_transform_buffer","bytes_read":0,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"restore_conversion_two_subsets","wall_time_ns":2095853182,"cuda_time_ns":2095322861,"cpu_time_ns":null,"synchronization":"two CUDA end-event synchronizations, one per restore subset","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"padding initialization; measured pages are full and completely overwritten","v10_required_unavoidable":false},
+    {"id":"restore-overlay-valid-tokens","stage":"state_import_conversion","source_representation":"canonical CUDA byte slices","destination_representation":"padded native page tensors","source_memory":"gpu_transport_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"restore_conversion_two_subsets","wall_time_ns":2095853182,"cuda_time_ns":2095322861,"cpu_time_ns":null,"synchronization":"shares two subset conversion measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"place canonical logical values; standalone overlay is unnecessary","v10_required_unavoidable":false},
+    {"id":"restore-native-axis-contiguous","stage":"state_import_conversion","source_representation":"canonical-axis native page views","destination_representation":"contiguous vLLM-axis page tensors","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"restore_conversion_two_subsets","wall_time_ns":2095853182,"cuda_time_ns":2095322861,"cpu_time_ns":null,"synchronization":"shares two subset conversion measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"satisfy native axis layout; standalone contiguous copy is unnecessary","v10_required_unavoidable":false},
+    {"id":"restore-stack-native-pages","stage":"state_import_conversion","source_representation":"per-page native tensors","destination_representation":"NaiveDestinationPageState per-layer stacked tensors","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"restore_conversion_two_subsets","wall_time_ns":2095853182,"cuda_time_ns":2095322861,"cpu_time_ns":null,"synchronization":"shares two subset conversion measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"batch pages for index_copy; full stack is unnecessary","v10_required_unavoidable":false},
+    {"id":"restore-destination-native-write","stage":"state_import_write","source_representation":"per-layer native stacked tensors","destination_representation":"fresh vLLM native paged KV allocations","source_memory":"gpu_transform_buffer","destination_memory":"destination_gpu_native_paged","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"restore_native_write_two_subsets","wall_time_ns":6876539,"cuda_time_ns":6632448,"cpu_time_ns":null,"synchronization":"two CUDA end-event synchronizations, one per restore subset","primary_classification":"SEMANTICALLY_REQUIRED","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"populate fresh destination blocks before visibility","v10_required_unavoidable":true},
+    {"id":"validation-destination-native-read","stage":"destination_validation","source_representation":"fresh destination vLLM native pages","destination_representation":"gathered native page-major validation intermediate","source_memory":"destination_gpu_native_paged","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_native_read_two_subsets","wall_time_ns":7795412,"cuda_time_ns":7098368,"cpu_time_ns":null,"synchronization":"two CUDA end-event synchronizations, one per validation subset","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"prove bytes landed in destination native storage before publication","v10_required_unavoidable":true},
+    {"id":"validation-native-axis-contiguous","stage":"destination_validation","source_representation":"index_select/movedim destination view","destination_representation":"contiguous page-major validation intermediate","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_native_read_two_subsets","wall_time_ns":7795412,"cuda_time_ns":7098368,"cpu_time_ns":null,"synchronization":"shares two validation native-read measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"none beyond the naive validation layout","v10_required_unavoidable":false},
+    {"id":"validation-unpage-valid-tokens","stage":"destination_validation_transform","source_representation":"contiguous destination native pages","destination_representation":"per-layer valid-token canonical slices","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transport_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_transform_two_subsets","wall_time_ns":1253669419,"cuda_time_ns":1253107666,"cpu_time_ns":null,"synchronization":"shares two subset transform measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"canonicalize destination solely for host recapture comparison","v10_required_unavoidable":false},
+    {"id":"validation-stack-layers","stage":"destination_validation_transform","source_representation":"per-layer valid-token slices","destination_representation":"per-page canonical validation tensors","source_memory":"gpu_transport_buffer","destination_memory":"gpu_transform_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_transform_two_subsets","wall_time_ns":1253669419,"cuda_time_ns":1253107666,"cpu_time_ns":null,"synchronization":"shares two subset transform measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"canonicalize destination solely for host recapture comparison","v10_required_unavoidable":false},
+    {"id":"validation-concatenate-pages","stage":"destination_validation_transform","source_representation":"per-page canonical validation tensors","destination_representation":"flat canonical validation CUDA payload","source_memory":"gpu_transform_buffer","destination_memory":"gpu_transport_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_transform_two_subsets","wall_time_ns":1253669419,"cuda_time_ns":1253107666,"cpu_time_ns":null,"synchronization":"shares two subset transform measurements","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"canonicalize destination solely for host recapture comparison","v10_required_unavoidable":false},
+    {"id":"validation-d2h","stage":"destination_validation_transfer","source_representation":"flat canonical destination validation CUDA payload","destination_representation":"pageable CPU recapture tensors","source_memory":"gpu_transport_buffer","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":1056964608,"temporary_bytes":0,"timing_group":"validation_d2h_two_subsets","wall_time_ns":343189358,"cuda_time_ns":342854122,"cpu_time_ns":null,"synchronization":"non_blocking=False and two CUDA end-event synchronizations","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"move full destination state to CPU only for the naive equality proof","v10_required_unavoidable":true},
+    {"id":"validation-recapture-host-lifetime","stage":"destination_validation","source_representation":"none","destination_representation":"pageable recapture residency","source_memory":"none","destination_memory":"none","bytes_read":0,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"allocation_lifetime_only_two_subsets","wall_time_ns":729231603,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"none; lifetime overlaps host comparison and is not a serial pass","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE"],"correctness_purpose":"temporary storage for naive host equality proof","v10_required_unavoidable":false},
+    {"id":"validation-expected-page-concatenation","stage":"destination_validation","source_representation":"selected slices of pinned canonical checkpoint","destination_representation":"pageable expected-value tensors","source_memory":"pinned_host_transport","destination_memory":"pageable_host_buffer","bytes_read":1056964608,"bytes_written":1056964608,"transfer_bytes":0,"temporary_bytes":1056964608,"timing_group":"validation_host_compare_two_subsets","wall_time_ns":727894070,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"SOFTWARE_IMPLEMENTATION_ARTIFACT","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"materialize expected values solely for naive torch.equal","v10_required_unavoidable":false},
+    {"id":"validation-host-tensor-compare","stage":"destination_validation","source_representation":"pageable recaptured and expected canonical tensors","destination_representation":"boolean validation result","source_memory":"pageable_host_buffer","destination_memory":"none","bytes_read":2113929216,"bytes_written":0,"transfer_bytes":0,"temporary_bytes":0,"timing_group":"validation_host_compare_two_subsets","wall_time_ns":727894070,"cuda_time_ns":null,"cpu_time_ns":null,"synchronization":"synchronous Python/CPU execution","primary_classification":"CORRECTNESS_REQUIRED_BUT_REIMPLEMENTABLE","secondary_tags":["POTENTIALLY_STREAMABLE","POTENTIALLY_FUSIBLE"],"correctness_purpose":"exact equality before prefix publication and final group admission","v10_required_unavoidable":false}
+  ],
+  "timing_rules": {
+    "cpu_time": "Per-pass process CPU time was not collected in v10. cpu_time_ns must remain null; cpu_launch_ns is wall time around a PyTorch call and is not process CPU time.",
+    "shared_cuda_intervals": "Rows with the same timing_group are accounting passes implemented by one measured operation. Their wall or CUDA times must never be summed.",
+    "subset_intervals": "Rows ending in two_subsets use the sum of the two disjoint measured callback intervals, not min(start) to max(end).",
+    "critical_path": "All state operations were synchronously awaited; allocation lifetime rows overlap work and contribute no movement or serial latency."
+  },
+  "exact_execution_dag_corrections": [
+    {
+      "severity": "HIGH",
+      "finding": "The frozen aggregate graph orders capture-native-axis-contiguous before capture-source-native-read even though index_select/native read produces the movedim/contiguous input. Correct dependency: source native read -> native-axis contiguous. They share one measured CUDA operation."
+    },
+    {
+      "severity": "HIGH",
+      "finding": "The frozen aggregate graph serializes capture-pinned-transport-lifetime and validation-recapture-host-lifetime. These are allocation intervals that overlap dependent work, not movement passes or critical-path barriers. D2H should fork to checkpoint residency and integrity; recapture residency should overlap expected construction/compare."
+    },
+    {
+      "severity": "HIGH",
+      "finding": "The frozen aggregate graph coalesces two restore callbacks and therefore cannot express the exact execution order. Expand root+branch0 (954204160 bytes) and remaining branches 1-7 (102760448 bytes): write subset 0 -> validate subset 0 -> publish root prefix -> allocate remaining branches -> write subset 1 -> validate subset 1 -> admit all branches."
+    },
+    {
+      "severity": "MEDIUM",
+      "finding": "unpage/stack/concatenate and zero/overlay/permute/stack labels are exact byte-accounting abstractions but execute interleaved by page/layer inside one PyTorch call. Mark timing_shared=true and use data-dependency rather than claiming independently timed full-state kernels."
+    },
+    {
+      "severity": "MEDIUM",
+      "finding": "Each *-hash-reads label accounts for two traversals: aggregate SHA-256 plus the disjoint per-page SHA-256 traversals. Preserve both byte passes in the v10 graph even though v10 did not time them separately."
+    },
+    {
+      "severity": "MEDIUM",
+      "finding": "Frozen required_unavoidable flags are a conservative v10 accounting policy, not the v11 semantic classification. Publish verification, import verification, validation D2H, and full pinned residency can be removed or reimplemented only with equivalent evidence."
+    }
+  ],
+  "exact_dependency_template": [
+    "capture-source-native-read -> capture-native-axis-contiguous",
+    "capture-native-axis-contiguous -> capture-unpage-valid-tokens -> capture-stack-layers -> capture-concatenate-pages",
+    "capture-concatenate-pages -> capture-d2h",
+    "capture-d2h -> capture-pinned-transport-lifetime [overlapping lifetime fork]",
+    "capture-d2h -> capture-integrity-manifest -> capture-integrity-hash-reads -> transport-publish-validation -> transport-publish-hash-reads",
+    "transport-publish-hash-reads -> source release and reclamation",
+    "restore trigger -> restore-transport-validation -> restore-transport-hash-reads -> restore-h2d -> restore-import-validation -> restore-import-hash-reads",
+    "restore-import-hash-reads -> subset0[zero -> overlay -> native-axis-contiguous -> stack -> native-write -> destination-read -> validation-native-axis-contiguous -> unpage -> stack -> concatenate -> validation-d2h -> expected-concatenation -> host-compare]",
+    "subset0.host-compare -> prefix publication and remaining allocations -> subset1[zero -> overlay -> native-axis-contiguous -> stack -> native-write -> destination-read -> validation-native-axis-contiguous -> unpage -> stack -> concatenate -> validation-d2h -> expected-concatenation -> host-compare]",
+    "subset1.host-compare -> atomic branch-group admission"
+  ],
+  "removal_ranking_nonoverlapping_chains": [
+    {"rank":1,"chain":"destination native logical hash instead of full recapture/repack/D2H/host compare","current_touch_bytes":17968398336,"current_amplification":17.0,"minimum_remaining_touch_bytes":1056964608,"maximum_removable_bytes":16911433728,"maximum_removable_amplification":16.0,"measured_critical_path_group_ns":2332548259,"correctness_condition":"hash logical canonical values from destination native pages after the write; bind state identity, logical chunk index, branch identity, coverage, and ordering; fail closed and recapture only on mismatch"},
+    {"rank":2,"chain":"redundant publish verification plus duplicate import_group verification","current_touch_bytes":8455716864,"current_amplification":8.0,"minimum_remaining_touch_bytes":0,"maximum_removable_bytes":8455716864,"maximum_removable_amplification":8.0,"measured_critical_path_group_ns":3083257076,"correctness_condition":"reuse authenticated immutable transport evidence across publish and import while retaining independent pre-use validation and metadata identity validation"},
+    {"rank":3,"chain":"direct native-to-transport conversion without full native-axis/unpage/stack/concatenate intermediates","current_artifact_touch_bytes":8455716864,"current_artifact_amplification":8.0,"maximum_removable_bytes":8455716864,"maximum_removable_amplification":8.0,"measured_critical_path_group_ns":1333571212,"correctness_condition":"bitwise canonical transport equality for randomized page order, K/V, layers, shared/private pages, and partial tails"},
+    {"rank":4,"chain":"direct transport-to-native scatter and safe removal of full-page zero fill","current_artifact_touch_bytes":7398752256,"current_artifact_amplification":7.0,"maximum_removable_bytes":7398752256,"maximum_removable_amplification":7.0,"measured_critical_path_group_ns":2095853182,"correctness_condition":"fresh destination allocations, complete overwrite before visibility, deterministic tail handling, and no tenant-visible stale bytes"},
+    {"rank":5,"chain":"stream capture integrity without pageable tobytes plus separate aggregate/page traversals","current_touch_bytes":4227858432,"current_amplification":4.0,"minimum_reasonable_touch_bytes":1056964608,"maximum_removable_bytes":3170893824,"maximum_removable_amplification":3.0,"measured_critical_path_group_ns":1735374449,"correctness_condition":"same or stronger cryptographic whole-state and chunk/page proof"},
+    {"rank":6,"chain":"stream pre-restore transport validation without pageable tobytes plus separate aggregate/page traversals","current_touch_bytes":4227858432,"current_amplification":4.0,"minimum_reasonable_touch_bytes":1056964608,"maximum_removable_bytes":3170893824,"maximum_removable_amplification":3.0,"measured_critical_path_group_ns":1538380110,"correctness_condition":"fail closed before H2D using the same authenticated chunk set and whole-state root"}
+  ],
+  "smallest_majority_removal_set": {
+    "changes": [
+      "destination-native logical hashing replaces host recapture validation",
+      "direct bounded native-to-transport conversion",
+      "direct bounded transport-to-native scatter with proven-safe zero-fill elimination"
+    ],
+    "maximum_removed_bytes": 32765902848,
+    "maximum_removed_amplification": 31.0,
+    "relationship_to_v10": "These three changes target exactly the frozen conservative 31x avoidable lower bound. Streamed integrity and redundant-verification removal are additional headroom, not needed merely to cross the majority-of-pathology threshold."
+  },
+  "strong_software_floor_observation": {
+    "nonbinding_estimate": true,
+    "estimated_full_physical_amplification": 13.0,
+    "assumptions": [
+      "direct source path retains 2x endpoint work for native read plus bounded conversion output and 3x D2H endpoint/link work",
+      "direct restore retains 3x H2D endpoint/link work plus 2x destination native write work",
+      "capture integrity and pre-restore integrity each require one streamed host read",
+      "post-write destination proof requires one native read but no full gather, D2H, or host compare",
+      "digest output and metadata bytes are negligible relative to the state"
+    ],
+    "interpretation": "13x is an audit-derived engineering target, not a measured v11 result. Device-side fused hashing could reduce it further; v11 must report only measured movement."
+  },
+  "required_followup_before_gpu": [
+    "Generate the requested v11-analysis naive-pass-graph with both aggregate full-state-equivalent nodes and the expanded two-subset execution DAG.",
+    "Preserve null CPU-time fields with an explicit unavailable reason.",
+    "Attach timing_group/timing_shared metadata and prohibit summing repeated shared intervals.",
+    "Use local fixtures to prove any replacement integrity scheme before changing v10-required passes.",
+    "Do not generalize measured zero-fill removability to partial pages; local property tests must cover partial tails and stale-byte nonvisibility."
+  ],
+  "provenance": [
+    "artifacts/branchfabric/gpu-validation/experiment-004/baseline/branchfabric-exp004-naive-baseline-v10.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/result.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/rollout/telemetry/cuda-and-host-operations.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/raw/modal/exp004-v10-naive-s41-v7/state-passes/state-pass-records.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/movement-accounting.json",
+    "artifacts/branchfabric/gpu-validation/experiment-004/state-passes/v10-state-pass-graph.json",
+    "experiments/branchfabric/gpu_reclamation_worker.py",
+    "python/sloforge/continuum/adapters/vllm_reclamation.py",
+    "python/sloforge/helix/characterization/gpu_reclamation_v10_postprocess.py"
+  ]
+}

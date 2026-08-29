@@ -1,0 +1,132 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-implementation-manifest/v2",
+  "recorded_at_utc": "2026-08-11T16:09:13Z",
+  "historical_manifest": "implementation-manifest-v5.json",
+  "execution_backend": "modal",
+  "modal_sdk_version": "1.5.3",
+  "app_name": "sloforge-branchfabric-real-gpu-cow",
+  "requested_gpu": "A100-80GB",
+  "gpu_count": 1,
+  "runtime": "vllm",
+  "runtime_version": "0.23.0",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "tokenizer_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "model_volume": "sloforge-model-cache",
+  "results_volume": "sloforge-branchfabric-results",
+  "persistent_resources_allowed": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "deployed_endpoints": [],
+  "process_lifecycle": "cuda-clean controller launches one fresh worker interpreter with start_new_session; worker termination is the CUDA cleanup boundary",
+  "parent_forbidden_import_audit": "passed_at_entry_prelaunch_and_postflight",
+  "hbm_cleanup_gate": "baseline median plus 1024 MiB; three consecutive post-child samples required",
+  "forced_gpu_process_kill_required": false,
+  "modal_function_calls": [
+    "fc-01KZQER09E0M6QXC2QVJP4D6KC",
+    "fc-01KZQEYY3EGDFHQ9WYTV4P108A",
+    "fc-01KZQF7GYV3TBRBF8TC5XYXWHD",
+    "fc-01KZQFN17TMY76N2AWBE4RY26Z",
+    "fc-01KZQFZS9WHYTAC9VN1MZPFG7S",
+    "fc-01KZRMPSJ8QM871GE0G1SMBQYJ",
+    "fc-01KZRN9CXXFBKV7SDN1TCQWX1X",
+    "fc-01KZRNR4P73T6XEQ5HPWYACH0F",
+    "fc-01KZRPAH4DQ6T05QEKHJXCB8Y4",
+    "fc-01KZRPTTDEV6YJ5V1B3HC4XBB8",
+    "fc-01KZRQ69EVW5M9AVFGZSZ3J9EG",
+    "fc-01KZRQMANR9Y09EFAF2SYA8TZN"
+  ],
+  "authoritative_lifecycle_attempts": [
+    {
+      "attempt_id": "modal-smoke-shared-s41-v7",
+      "function_call_id": "fc-01KZRN9CXXFBKV7SDN1TCQWX1X"
+    },
+    {
+      "attempt_id": "modal-16k-f1-independent-s41-v2",
+      "function_call_id": "fc-01KZRPAH4DQ6T05QEKHJXCB8Y4"
+    },
+    {
+      "attempt_id": "modal-16k-f1-shared-s41-v1",
+      "function_call_id": "fc-01KZRPTTDEV6YJ5V1B3HC4XBB8"
+    },
+    {
+      "attempt_id": "modal-16k-f8-independent-s41-v1",
+      "function_call_id": "fc-01KZRQ69EVW5M9AVFGZSZ3J9EG"
+    },
+    {
+      "attempt_id": "modal-16k-f8-shared-s41-v1",
+      "function_call_id": "fc-01KZRQMANR9Y09EFAF2SYA8TZN"
+    }
+  ],
+  "gpu_hours_consumed_by_modal": 0.5640564932644445,
+  "cloud_cost_upper_bound_usd": 2.5143741184668,
+  "cloud_budget_environment_present": true,
+  "cloud_budget_usd": 40.0,
+  "remote_execution_status": "completed_fanout_8",
+  "source_files": [
+    {
+      "path": "experiments/branchfabric/modal_real_gpu_cow.py",
+      "sha256": "a2dff55469530019c4cfe72a5b0ec39e19d63137818702cb28c9370da6b3791f"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_cow_controller.py",
+      "sha256": "ce3a87b05601ab6bb5de53b5aa7870279c6eb95dc9b973775d51abef51f9036a"
+    },
+    {
+      "path": "experiments/branchfabric/gpu_cow_worker.py",
+      "sha256": "2bf2b365e3ceacb3d9badc75306dc64a0372ff8e36f2c7a93acb9c6dfbee5124"
+    },
+    {
+      "path": "tools/branchfabric-modal-launch.py",
+      "sha256": "964ee3a486095aae4aa11e14d3927294ceb0af59f62dafd41764812ad78f6f79"
+    },
+    {
+      "path": "benchmarks/branchfabric/gpu_validation_runner.py",
+      "sha256": "e8110a9039be25b4e7c4d28db64a92706e9b0d813e3722ef3e80b08ad3d10974"
+    },
+    {
+      "path": "benchmarks/branchfabric/analyze_gpu_validation.py",
+      "sha256": "470576a73483c360edc8e58348e5677f56a33835d7ce2560fc27a2f3ab7a163d"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_live.py",
+      "sha256": "70cd55cf19577644f82370728feacf91cd4b4ce153ec334b51438d288b93c1ef"
+    },
+    {
+      "path": "python/sloforge/continuum/adapters/vllm_live_trace.py",
+      "sha256": "1e1cbf417e3996d4f22e27e1097be5c0c6282b5d86cd3090a705337511266bb6"
+    },
+    {
+      "path": "tests/python/test_gpu_cow_lifecycle.py",
+      "sha256": "41c8f83f27edad826d7f3446df08694227bb7584ffbc1d312f2ebae43cc438a7"
+    },
+    {
+      "path": "tests/python/test_modal_real_gpu_cow.py",
+      "sha256": "d2952b9675753e357453bb8cc5dc50c5a42ece610eedfee1cede53f4f0436964"
+    },
+    {
+      "path": "tests/python/test_branchfabric_gpu_validation_runner.py",
+      "sha256": "fcad5d9d171eea69b1dd1ecd91dac821f23cf501ca9f6783cbbc01fc2cf9a1e3"
+    },
+    {
+      "path": "tests/python/test_branchfabric_gpu_validation_analysis.py",
+      "sha256": "b5870acfd66bc08ef1c2a0a59ea8a4872253d0744a1e42cef228f65e9cd8d1db"
+    }
+  ],
+  "measurements": [
+    "modal/modal-smoke-shared-s41-v7",
+    "modal/modal-16k-f1-independent-s41-v2",
+    "modal/modal-16k-f1-shared-s41-v1",
+    "modal/modal-16k-f8-independent-s41-v1",
+    "modal/modal-16k-f8-shared-s41-v1"
+  ],
+  "real_physical_shared_root_demonstrated": true,
+  "complete_semantic_smoke_passed": true,
+  "all_accepted_16k_lifecycles_clean": true,
+  "gpu_cow_claim": false,
+  "fanout_32_run": false,
+  "next_experiment_choice": "E",
+  "provider_cleanup_audit": "../environment/final-modal-provider-audit-v2.json",
+  "provider_cleanup_verified": true
+}

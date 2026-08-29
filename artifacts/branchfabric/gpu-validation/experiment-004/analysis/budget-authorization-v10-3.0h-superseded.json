@@ -1,0 +1,49 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-budget-authorization/v1",
+  "experiment": "branchfabric-gpu-validation-experiment-004",
+  "authorized_at_utc": "2026-08-12T23:47:51Z",
+  "authorization_source": "explicit-user-instruction-current-thread",
+  "authorized_gpu_budget_usd": 40.0,
+  "authorized_cumulative_a100_hours": 3.0,
+  "authorized_cumulative_gpu_seconds": 10800.0,
+  "ceiling_semantics": "cumulative Experiment 004 A100 device-hours across settled intervals and reservations",
+  "consumed_gpu_seconds_at_authorization": 6431.795790917997,
+  "remaining_gpu_seconds_at_authorization": 4368.204209082003,
+  "active_reservations_at_authorization": 0,
+  "ledger_path": "artifacts/branchfabric/gpu-validation/experiment-004/gpu-hours.json",
+  "previous_ledger_sha256": "58a2210952f738beab49cb6a3aedd6a1c9ce4e3235e930675af3b9416b287e55",
+  "authorized_ledger_sha256": "ad57ae26fab89cfa5fd93100b0e1bb8d9707d552d46618a2d1178406df8b521f",
+  "authorized_settled_intervals_sha256": "44e68fd972257005d02d83c9f09d4e430c87e96b01e824fe36fa5dbe1b128a08",
+  "ledger_mutation": {
+    "hard_additional_gpu_seconds_before": 7200.0,
+    "hard_additional_gpu_seconds_after": 10800.0,
+    "settled_interval_count_before": 11,
+    "settled_interval_count_after": 11,
+    "settled_intervals_changed": false,
+    "reservation_count_before": 0,
+    "reservation_count_after": 0,
+    "serialization_normalized_to_indented_json": true
+  },
+  "superseded_budget_blocker_history": {
+    "status": "preserved-immutable-and-superseded-only-by-new-explicit-authorization",
+    "calibration_outcome": {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/calibration-outcome.json",
+      "artifact_sha256": "9f50bc014cd8010e8fb3164228a0250f798413f83920bd98f2237f3ec1370fd0"
+    },
+    "calibration_blocker": {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/calibration-blocker.json",
+      "artifact_sha256": "c14f58049078ffd42134df2c7bc03b487484b21734d409fe2f4d7e243c46fd20"
+    },
+    "terminal_blocker_review": {
+      "artifact_reference": "artifacts/branchfabric/gpu-validation/experiment-004/calibration/reviews/terminal-valid-blocker-review.json",
+      "artifact_sha256": "ae20bfbcab3eb5ce7c3555c6d2308ea96e4a8ed356ac3e7a9e8182de52b51b10"
+    }
+  },
+  "authorized_action": "one bounded two-A100 v10 baseline experiment subject to all scientific and cleanup gates",
+  "does_not_authorize": [
+    "Experiment 005",
+    "optimized-preservation",
+    "kill-and-recompute",
+    "BranchFabric hardware implementation"
+  ]
+}

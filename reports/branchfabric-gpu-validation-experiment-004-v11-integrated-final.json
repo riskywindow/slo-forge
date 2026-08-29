@@ -1,0 +1,65 @@
+{
+  "schema_version": "sloforge.branchfabric.experiment-004-v11-integrated-final-report/v1",
+  "attempt_id": "exp004-v11-integrated-s41-c",
+  "execution_commit": "af8f5d474421637c257ddac8f9596870cc11ede5",
+  "offline_fixes": {
+    "early_trigger": "PASS",
+    "process_group_cleanup": "PASS",
+    "classification_logic": "PASS",
+    "make_check": "PASS"
+  },
+  "integrated_v11": {
+    "gpu_invocations": 1,
+    "scientifically_valid": false,
+    "status": "INVALID",
+    "failure_stage": "source-allocation-zero-queue-verification",
+    "failure_message": "source allocation zero-queue differs from the authenticated capture plan; runtime teardown required",
+    "trigger_backlog": 21,
+    "emergency_ceiling": 64,
+    "headroom_at_trigger": 43,
+    "predicate_to_trigger_seconds": 0.00029008,
+    "trigger_to_rollout_admission_stop_seconds": 0.020103482,
+    "queue_eventually_reached_emergency_ceiling": true,
+    "measured_integrated_logical_state_bytes": 1056964608,
+    "full_physical_amplification": null,
+    "external_amplification": null,
+    "avoidable_amplification": null,
+    "hbm_reclamation_seconds": null,
+    "first_useful_gpu1_capacity_seconds": null,
+    "serving_slo_restoration_seconds": null,
+    "rollout_restore_latency_seconds": null,
+    "residual_source_chain": null,
+    "residual_restore_chain": null,
+    "gpu0_restore_interference": null,
+    "branches_resumed": 0,
+    "exact_first_token_matches": null,
+    "frozen": false
+  },
+  "kill_and_recompute": {
+    "run": false,
+    "reason": "precommitted gate requires a scientifically valid integrated v11 result first",
+    "actual_recompute_tokens": null,
+    "actual_recompute_gpu_seconds": null
+  },
+  "analysis": {
+    "preservation_break_even": null,
+    "integrated_residual_amdahl": null,
+    "realistic_accelerator_projection": null,
+    "cuda_triton_adversary": "UNRESOLVED_WITHOUT_INTEGRATED_RESIDUAL_CHAIN"
+  },
+  "classification": "HARDWARE_GATE_NOT_REACHED",
+  "experiment_005": "NOT_GENERATED",
+  "cleanup": {
+    "in_function": "PASS",
+    "forced_kills": 0,
+    "provider": "PASS"
+  },
+  "gpu_accounting": {
+    "actual_a100_hours": 0.12112769464222221,
+    "actual_cost_usd": 0.302625432294128,
+    "provider_actual_status": "RECOVERED_FROM_COMPLETED_FUNCTION_CALL",
+    "conservative_a100_hours": 0.32666666666666666,
+    "conservative_cost_usd": 0.8161440000000001
+  },
+  "remote_manifest_sha256": "fd96eb1fbce7de15396268a784a3f449cf7684e4fc39126fa8945ed6bd1009d8"
+}
