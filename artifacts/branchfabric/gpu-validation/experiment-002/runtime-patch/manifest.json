@@ -1,0 +1,8 @@
+{
+  "schema_version": "sloforge.branchfabric.runtime-patch-manifest/v1",
+  "runtime": "vllm==0.23.0",
+  "upstream_runtime_source_modified": false,
+  "patch_files": [],
+  "adapter_isolation": "python/sloforge/continuum/adapters/vllm_live.py",
+  "note": "No vLLM source patch is required; all private access is isolated in the exact-version SLOForge adapter."
+}

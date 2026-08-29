@@ -1,0 +1,12 @@
+export DO_NOT_TRACK=1
+export HF_HOME=/tmp/sloforge-real-cow-pX0b1JVu/hf
+export HF_HUB_DISABLE_TELEMETRY=1
+export HUGGINGFACE_HUB_CACHE=/tmp/sloforge-real-cow-pX0b1JVu/hf/hub
+export SLOFORGE_REMOTE_ROOT=/tmp/sloforge-real-cow-pX0b1JVu
+export TMPDIR=/tmp/sloforge-real-cow-pX0b1JVu/tmp
+export TORCH_HOME=/tmp/sloforge-real-cow-pX0b1JVu/torch
+export TRANSFORMERS_CACHE=/tmp/sloforge-real-cow-pX0b1JVu/hf/transformers
+export TRITON_CACHE_DIR=/tmp/sloforge-real-cow-pX0b1JVu/triton
+export WANDB_DISABLED=true
+export WANDB_MODE=disabled
+export XDG_CACHE_HOME=/tmp/sloforge-real-cow-pX0b1JVu/cache

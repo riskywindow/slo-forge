@@ -1,0 +1,31 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-blocker/v1",
+  "recorded_at_utc": "2026-08-11T04:15:00Z",
+  "status": "semantic_smoke_observed_cleanup_failed",
+  "blocker": "v5 retained 14213 MiB driver-visible HBM versus a 4 MiB baseline after in-process cleanup",
+  "repository_rule": "Paid cloud work requires SLOFORGE_GPU_BUDGET_USD and an explicit deployment command",
+  "modal_remote_resource_calls_after_backend_switch": [
+    "created allowed Volume sloforge-model-cache",
+    "created allowed Volume sloforge-branchfabric-results"
+  ],
+  "modal_paid_compute_calls_after_backend_switch": [
+    "CPU-only model preparation",
+    "five bounded A100-80GB smoke attempts"
+  ],
+  "modal_gpu_function_calls": [
+    "fc-01KZQER09E0M6QXC2QVJP4D6KC",
+    "fc-01KZQEYY3EGDFHQ9WYTV4P108A",
+    "fc-01KZQF7GYV3TBRBF8TC5XYXWHD",
+    "fc-01KZQFN17TMY76N2AWBE4RY26Z",
+    "fc-01KZQFZS9WHYTAC9VN1MZPFG7S"
+  ],
+  "modal_gpu_hours": 0.12330600836833336,
+  "model_preparation_executed": true,
+  "gpu_image_built_remotely": true,
+  "semantic_smoke_executed": true,
+  "fanout_experiments_executed": [],
+  "physical_gpu_state_measured": true,
+  "real_physical_shared_root_demonstrated": true,
+  "complete_semantic_smoke_passed": false,
+  "next_allowed_action": "Fix exact runtime/model teardown and rerun only the two-branch smoke; 16K remains forbidden"
+}

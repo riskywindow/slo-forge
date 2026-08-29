@@ -1,0 +1,32 @@
+FINAL_AUDIT_STARTED_AT_UTC=2026-08-10T22:59:21Z
+remote_root_absent=true
+exact_path_matches_begin
+exact_path_matches_end
+owned_process_matches_begin
+owned_process_matches_end
+owned_process_match_count=0
+owned_socket_matches_begin
+owned_socket_matches_end
+owned_socket_match_count=0
+gpu_inventory
+0, GPU-9f432e61-badc-944e-6087-2f846d4c7e19, 0, 0, 0
+1, GPU-a473e021-97fb-64b8-74ba-471825808bed, 0, 0, 0
+gpu_processes_with_owners_begin
+gpu_processes_with_owners_end
+owned_gpu_process_match_count=0
+container_matches_begin
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.50/containers/json?all=1&filters=%7B%22label%22%3A%7B%22sloforge.experiment%3Dbranchgpu-exp001-20260810T223351Z%22%3Atrue%7D%7D": dial unix /var/run/docker.sock: connect: permission denied
+container_matches_end
+containers_used=false
+fresh_environment
+XDG_CACHE_HOME=
+HF_HOME=
+HUGGINGFACE_HUB_CACHE=
+TRANSFORMERS_CACHE=
+TORCH_HOME=
+TRITON_CACHE_DIR=
+TMPDIR=
+CUDA_VISIBLE_DEVICES=
+FINAL_AUDIT_PASS=true
+FINAL_AUDIT_FINISHED_AT_UTC=2026-08-10T22:59:21Z
+

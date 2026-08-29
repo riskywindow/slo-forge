@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "remote_host": "mew0",
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "remote_root": "/tmp/sloforge-branchgpu-ZhfJJg8F",
+  "cleanup_timestamp_utc": "2026-08-10T22:41:14Z",
+  "primary_verification_timestamp_utc": "2026-08-10T22:42:11Z",
+  "independent_verification_timestamp_utc": "2026-08-10T22:44:16Z",
+  "final_verification_timestamp_utc": "2026-08-10T22:59:21Z",
+  "removed_paths": [
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/repo",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/env",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/cache",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/hf",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/torch",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/triton",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/tmp",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/models",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/traces",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/results",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/logs",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/pids",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F"
+  ],
+  "terminated_owned_pids": [],
+  "containers_removed": [],
+  "containers_used": false,
+  "cache_paths_removed": [
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/cache",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/hf",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/torch",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/triton"
+  ],
+  "model_paths_removed": [
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/models"
+  ],
+  "environment_paths_removed": [
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/env"
+  ],
+  "verification_checks": {
+    "required_results_copied_before_cleanup": true,
+    "remote_result_hashes_validated_locally": true,
+    "remote_result_files_hash_verified": 9,
+    "remote_root_absent": true,
+    "owned_process_matches": 0,
+    "owned_gpu_process_matches": 0,
+    "experiment_temp_matches": 0,
+    "experiment_cache_matches": 0,
+    "experiment_model_matches": 0,
+    "experiment_socket_matches": 0,
+    "experiment_shared_memory_matches": 0,
+    "fresh_shell_environment_unmodified": true,
+    "final_fresh_ssh_audit_passed": true,
+    "global_environment_modified": false,
+    "docker_daemon_visibility": "permission_denied",
+    "container_check_basis": "containers_used=false plus clean exact process and path scans"
+  },
+  "unrelated_remote_state_observed_after_cleanup": [
+    "Two root-owned /workspace/live_migrator GPU processes began after experiment cleanup; they were not experiment-owned and were not touched."
+  ],
+  "process_ledger_scope_limitation": "Ephemeral SSH, rsync, and audit shell PIDs were not comprehensively recorded; no long-running, background, server, profiler, job, or GPU-active experiment process was launched, and exact post-cleanup scans found no residue.",
+  "remaining_experiment_owned_artifacts": []
+}

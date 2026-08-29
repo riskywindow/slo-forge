@@ -1,0 +1,30 @@
+{
+  "kind": "remote-cleanup-receipt",
+  "pre_removal_audit": {
+    "audited_at_utc": "2026-08-11T00:12:57.489197+00:00",
+    "cache_state": {
+      "cache": {"bytes": 0, "exists": true, "file_count": 0},
+      "hf": {"bytes": 0, "exists": true, "file_count": 0},
+      "torch": {"bytes": 0, "exists": true, "file_count": 0},
+      "triton": {"bytes": 0, "exists": true, "file_count": 0}
+    },
+    "discovered_shared_memory": [],
+    "exact_path_validated": true,
+    "gpu_process_audit_status": "captured",
+    "kind": "remote-cleanup-audit",
+    "live_registered_processes": [],
+    "live_unregistered_owned_processes": [],
+    "model_state": {"bytes": 0, "exists": true, "file_count": 0},
+    "owned_containers": [],
+    "owned_gpu_processes": [],
+    "registered_shared_memory": [],
+    "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+    "schema_version": "sloforge.branchfabric.remote-coordinator/v1",
+    "socket_paths_inside_remote_root": []
+  },
+  "remaining_experiment_owned_artifacts": [],
+  "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+  "remote_root_gone": true,
+  "removed_at_utc": "2026-08-11T00:12:57.685039+00:00",
+  "schema_version": "sloforge.branchfabric.remote-coordinator/v1"
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-artifact-index/v1",
+  "attempt": "modal-smoke-shared-s41-v5",
+  "remote_manifest_sha256": "6cf543749a21bbba1df902235a89e3dddcb0a51895460ad76317e6435565600f",
+  "local_copy_verification": "modal/modal-smoke-shared-s41-v5/LOCAL_COPY_VERIFICATION.json",
+  "physical_snapshots": "modal/modal-smoke-shared-s41-v5/runner/shared_root/raw/physical-snapshots.jsonl",
+  "gpu_memory_states": "modal/modal-smoke-shared-s41-v5/runner/shared_root/raw/gpu-memory-states.jsonl",
+  "nvidia_smi_samples": "modal/modal-smoke-shared-s41-v5/runner/shared_root/raw/nvidia-smi-samples.jsonl",
+  "phase_timings": "modal/modal-smoke-shared-s41-v5/runner/shared_root/raw/phase-timings.jsonl",
+  "block_release_evidence": "modal/modal-smoke-shared-s41-v5/runner/shared_root/raw/block-release-evidence.jsonl",
+  "postflight": "modal/modal-smoke-shared-s41-v5/wrapper/postflight.json"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "created_at_utc": "2026-08-10T22:33:51Z",
+  "status": "blocked_pre_gpu_launch_cleanup_verified",
+  "local_repository": "/Users/rishivinodkumar/sloforge",
+  "local_commit": "ab86d7600234f22f38fb71ae1d3a9d98bc048175",
+  "local_branch": "main",
+  "tracked_worktree_dirty": false,
+  "untracked_paths_preexisting_count": 14561,
+  "remote_host": "mew0",
+  "remote_root": "/tmp/sloforge-branchgpu-ZhfJJg8F",
+  "gpu_hour_limit": 4.0,
+  "actual_gpu_hours": 0.0,
+  "gpu_active_intervals": [],
+  "early_stop_condition": "runtime_or_model_incompatibility_makes_measurement_invalid",
+  "cleanup_completed_at_utc": "2026-08-10T22:41:14Z",
+  "independent_cleanup_audit_at_utc": "2026-08-10T22:44:16Z",
+  "final_cleanup_audit_at_utc": "2026-08-10T22:59:21Z",
+  "remaining_experiment_owned_artifacts": [],
+  "notes": [
+    "Only the primary coordinator may launch GPU workloads on mew0.",
+    "The remote root was persisted locally immediately after creation.",
+    "No GPU workload, model download, environment installation, runtime server, profiler, or container was started.",
+    "Ephemeral SSH, rsync, and audit shell PIDs were not comprehensively captured in processes.json; post-cleanup scans prove no experiment process remains.",
+    "This is a pre-measurement validity blocker, not a positive or negative BranchFabric result."
+  ]
+}

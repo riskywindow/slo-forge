@@ -1,0 +1,8 @@
+2026-08-11T04:01:18.175783+00:00	Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+2026-08-11T04:01:18.794658+00:00	Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:00<00:01,  1.62it/s]
+2026-08-11T04:01:19.432217+00:00	Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:01<00:01,  1.59it/s]
+2026-08-11T04:01:20.129138+00:00	Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:01<00:00,  1.51it/s]
+2026-08-11T04:01:20.682374+00:00	Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:02<00:00,  1.62it/s]
+2026-08-11T04:01:20.682522+00:00	Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:02<00:00,  1.60it/s]
+2026-08-11T04:01:20.682534+00:00	
+2026-08-11T04:01:53.143522+00:00	[rank0]:[W811 04:01:53.867659584 ProcessGroupNCCL.cpp:1575] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())

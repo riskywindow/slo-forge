@@ -1,0 +1,9 @@
+{"child_pgid":16,"child_pid":16,"child_sid":16,"event":"child_process_started","observed_at_monotonic_ns":23017102241,"observed_at_utc":"2026-08-11T15:07:00.296373+00:00","parent_pid":2,"schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"cuda_runtime_import_started","observed_at_monotonic_ns":23017923466,"observed_at_utc":"2026-08-11T15:07:00.297187+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"cuda_runtime_import_completed","observed_at_monotonic_ns":27007812903,"observed_at_utc":"2026-08-11T15:07:04.287067+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","torch_version":"2.11.0+cu130"}
+{"event":"model_load_started","observed_at_monotonic_ns":46118029202,"observed_at_utc":"2026-08-11T15:07:23.397288+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"model_load_completed","observed_at_monotonic_ns":162069578787,"observed_at_utc":"2026-08-11T15:09:19.348827+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"kv_pool_allocated","observed_at_monotonic_ns":162070593705,"observed_at_utc":"2026-08-11T15:09:19.349851+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"benchmark_started","observed_at_monotonic_ns":162071074316,"observed_at_utc":"2026-08-11T15:09:19.350343+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","trial_path":"independent_prefill"}
+{"event":"vllm_shutdown_completed_after_error","observed_at_monotonic_ns":170829097408,"observed_at_utc":"2026-08-11T15:09:28.108350+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1"}
+{"event":"child_manifest_flushed_exit_imminent","observed_at_monotonic_ns":171815061812,"observed_at_utc":"2026-08-11T15:09:29.094303+00:00","schema_version":"sloforge.branchfabric.gpu-worker-event/v1","status":"failed"}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "sloforge.branchfabric.modal-provider-audit/v1",
+  "recorded_at_utc": "2026-08-11T04:31:20Z",
+  "app_description": "sloforge-branchfabric-real-gpu-cow",
+  "experiment_apps_not_stopped_or_with_tasks": [],
+  "running_modal_containers": [],
+  "explicitly_stopped_zero_task_app_id": "ap-drLJXGOCa4tLbsRaFZ8Hqt",
+  "persistent_resources_retained": [
+    "sloforge-model-cache",
+    "sloforge-branchfabric-results"
+  ],
+  "provider_hbm_after_container_teardown_sampled": false,
+  "commands": [
+    "modal app list --json",
+    "modal container list --json",
+    "modal app stop --yes ap-drLJXGOCa4tLbsRaFZ8Hqt"
+  ]
+}

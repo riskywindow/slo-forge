@@ -1,0 +1,16 @@
++audit_at_utc=2026-08-10T22:39:30Z
+remote_commit=ab86d7600234f22f38fb71ae1d3a9d98bc048175
+real_subcommand_matches_begin
+docs/branchfabric/FUTURE_MEASUREMENT_PLAN.md:81:uv run --locked sloforge helix branchfabric-real-fanout \
+real_subcommand_matches_end
+unsupported_export_matches_begin
+python/sloforge/continuum/adapters/genesis.py:219:                "does not publish an active execution-state export contract"
+python/sloforge/continuum/adapters/sglang.py:123:                "not a complete Continuum logical-state and ownership export"
+unsupported_export_matches_end
+runtime_package_inventory
+torch=UNAVAILABLE
+transformers=UNAVAILABLE
+vllm=UNAVAILABLE
+sglang=UNAVAILABLE
+gpu_processes_at_stop_decision
+

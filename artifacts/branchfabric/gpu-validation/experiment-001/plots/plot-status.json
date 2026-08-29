@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "plots": [
+    {
+      "plot": 1,
+      "requested": "fanout versus all-branches-ready latency",
+      "status": "not_generated",
+      "reason": "No branch-readiness samples exist after the validity early stop."
+    },
+    {
+      "plot": 2,
+      "requested": "fanout versus physical HBM consumed",
+      "status": "not_generated",
+      "reason": "No HBM/state-sharing samples exist after the validity early stop."
+    },
+    {
+      "plot": 3,
+      "requested": "GPU utilization, memory, and copy activity by phase",
+      "status": "not_generated",
+      "reason": "No GPU-active phase or resource time series exists."
+    },
+    {
+      "plot": 4,
+      "requested": "fanout versus decode throughput or interference",
+      "status": "not_generated",
+      "reason": "No decode samples exist after the validity early stop."
+    }
+  ],
+  "fabricated_zero_series_used": false
+}

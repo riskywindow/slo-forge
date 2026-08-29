@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "roles": [
+    "GPU performance reviewer",
+    "measurement methodology reviewer"
+  ],
+  "verdict": "approved_zero_gpu_early_stop_not_a_gpu_measurement",
+  "gpu_hours_verified": 0.0,
+  "raw_remote_files_hash_verified": 9,
+  "interest_conditions_evaluable": false,
+  "finding": "The missing semantic runtime integration is decisive; missing remote packages are secondary. No readiness, HBM, COW, state movement, interference, or tracing metric may be inferred.",
+  "process_accounting_limitation": "Ephemeral SSH, rsync, and audit shell PIDs were not comprehensively recorded; no long-running or GPU-active experiment process was launched and cleanup scans found none."
+}

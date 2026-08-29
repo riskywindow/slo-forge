@@ -1,0 +1,63 @@
+{
+  "created_at_utc": "2026-08-11T00:11:56.664762+00:00",
+  "file_count": 9,
+  "files": [
+    {
+      "bytes": 5821,
+      "path": "environment/bootstrap.json",
+      "sha256": "08a9e02c1a88081bcb324398488f4066e8272743e9b79712f3b683acb392ab55"
+    },
+    {
+      "bytes": 5841,
+      "path": "environment/pre-gpu-20260811T001025608252Z.json",
+      "sha256": "e04955fd8a10ae5cc4533f33728133296d853377a28360bf86c1421a43bf0330"
+    },
+    {
+      "bytes": 606,
+      "path": "environment/remote-env.json",
+      "sha256": "1b6313b8eb84b09c50898e9bf21f8635bdcc5a6d3425977089f89305a42facf4"
+    },
+    {
+      "bytes": 591,
+      "path": "environment/remote-env.sh",
+      "sha256": "7def8c5e62ec3a9c4f747d2a3c7e512236f3802cfa74532db197c41fb71549ba"
+    },
+    {
+      "bytes": 1366,
+      "path": "environment/selected-idle-gpu.json",
+      "sha256": "02e371a9b8ca188559f775bf140a79f6c6420b6c4d5b58354fe0edd4574255f9"
+    },
+    {
+      "bytes": 139,
+      "path": "pids/containers.json",
+      "sha256": "bc7ccd16887be80ba67fd8adbea33f7136b5879911dcbfcba659f44d3c426943"
+    },
+    {
+      "bytes": 139,
+      "path": "pids/processes.json",
+      "sha256": "bc7ccd16887be80ba67fd8adbea33f7136b5879911dcbfcba659f44d3c426943"
+    },
+    {
+      "bytes": 139,
+      "path": "pids/shared-memory.json",
+      "sha256": "bc7ccd16887be80ba67fd8adbea33f7136b5879911dcbfcba659f44d3c426943"
+    },
+    {
+      "bytes": 39643,
+      "path": "repo/tools-branchfabric-remote-coordinator.py",
+      "sha256": "379855e2a85890900240ed83a47198b7a2fcf056db2afa4d44d6218997dc7e23"
+    }
+  ],
+  "kind": "artifact-inventory",
+  "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+  "requested_paths": [
+    "environment",
+    "results",
+    "logs",
+    "runtime",
+    "pids",
+    "repo/tools-branchfabric-remote-coordinator.py"
+  ],
+  "schema_version": "sloforge.branchfabric.remote-coordinator/v1",
+  "total_bytes": 54285
+}

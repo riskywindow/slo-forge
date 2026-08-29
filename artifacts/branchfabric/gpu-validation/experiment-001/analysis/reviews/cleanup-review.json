@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "role": "cleanup reviewer",
+  "audited_at_utc": "2026-08-10T22:44:16Z",
+  "remote_cleanup_verdict": "pass",
+  "remote_root_absent": true,
+  "owned_process_matches": 0,
+  "owned_gpu_process_matches": 0,
+  "temp_cache_model_socket_shm_matches": 0,
+  "hash_verified_remote_files": 9,
+  "containers_used": false,
+  "container_visibility": "Docker daemon query permission-denied; Podman and nerdctl unavailable. Exact process/path scans were clean and the preserved manifest records containers_used=false.",
+  "unrelated_gpu_processes": "Two root-owned live_migrator processes appeared after cleanup and were not touched.",
+  "remaining_experiment_owned_artifacts": []
+}

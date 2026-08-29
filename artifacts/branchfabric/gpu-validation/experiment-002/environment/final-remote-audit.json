@@ -1,0 +1,44 @@
+{
+  "schema_version": "sloforge.branchfabric.final-remote-audit/v1",
+  "audited_at_utc": "2026-08-11T00:39:53Z",
+  "host": "mew0",
+  "remote_root": "/tmp/sloforge-real-cow-pX0b1JVu",
+  "remote_root_gone": true,
+  "owned_processes": [],
+  "owned_gpu_processes": [],
+  "owned_sockets": [],
+  "owned_shared_memory": [],
+  "owned_containers": [],
+  "container_ownership_evidence": {
+    "registered_containers": [],
+    "experiment_created_containers": [],
+    "daemon_label_query": "unavailable_permission_denied"
+  },
+  "experiment_cache_paths_remaining": [],
+  "experiment_model_paths_remaining": [],
+  "gpu_inventory_at_final_audit": [
+    {
+      "index": 0,
+      "uuid": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used_mib": 0,
+      "utilization_percent": 0
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-a473e021-97fb-64b8-74ba-471825808bed",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used_mib": 0,
+      "utilization_percent": 0
+    }
+  ],
+  "preexisting_gpu_processes_still_present": [],
+  "raw_audit_summary": [
+    "REMOTE_ROOT_GONE",
+    "no process command referenced the remote root",
+    "no NVIDIA compute process remained",
+    "no matching shared-memory object remained",
+    "Docker label query unavailable: permission denied"
+  ],
+  "remaining_experiment_owned_artifacts": []
+}

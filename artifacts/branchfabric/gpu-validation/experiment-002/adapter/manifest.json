@@ -1,0 +1,27 @@
+{
+  "schema_version": "sloforge.branchfabric.real-runtime-adapter-manifest/v1",
+  "runtime": "vllm",
+  "runtime_version": "0.23.0",
+  "runtime_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "adapter_version": "1.0.0",
+  "scope": {
+    "same_runtime_only": true,
+    "same_policy_only": true,
+    "same_process_or_adapter_scope": "one vLLM 0.23.0 InprocClient engine",
+    "cross_runtime_portable": false
+  },
+  "source_files": [
+    {"path": "python/sloforge/continuum/adapters/real_runtime.py", "sha256": "b7b790e03da5f31c5e68dd1985b8163451d48ea8ee46c805fe20ba9f38aba8f9"},
+    {"path": "python/sloforge/continuum/adapters/real_runtime_fixture.py", "sha256": "5b7dff193d19430abfed0647fdb0989935bb0ef52c90abb6b5969eeef2dca278"},
+    {"path": "python/sloforge/continuum/adapters/vllm_live.py", "sha256": "d83ce3c59e194443bc01ea709f0fde6519e812b0169c1c19d7b71bc7fbdc481e"},
+    {"path": "python/sloforge/continuum/adapters/vllm_live_trace.py", "sha256": "1e1cbf417e3996d4f22e27e1097be5c0c6282b5d86cd3090a705337511266bb6"},
+    {"path": "benchmarks/branchfabric/gpu_validation_runner.py", "sha256": "2e051cd3ba507acf8896646c9d6d3c889c04c9a9ff7ce912816386f0fbd50335"},
+    {"path": "benchmarks/branchfabric/run_gpu_validation.py", "sha256": "88ea92a53562fac54b4ed263e8fa9a229f64002ea4f5356e04de6ce1846de5a5"},
+    {"path": "experiments/branchfabric/modal_real_gpu_cow.py", "sha256": "5025ef925ccab9e10aadab65cdfe2ff94ebea6046a26e35d0c7a2fc2c6851cf2"}
+  ],
+  "upstream_runtime_patch_required": false,
+  "gpu_semantics_validated": true,
+  "validated_scope": "2K aligned immutable shared root plus append-only private suffix on one A100",
+  "complete_semantic_smoke_passed": false,
+  "gpu_validation_blocker": "driver-visible HBM did not return to the 1 GiB postflight envelope; 16K execution is forbidden"
+}

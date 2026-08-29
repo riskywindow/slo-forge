@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "roles": [
+    "Continuum state-semantics reviewer",
+    "Helix branching reviewer"
+  ],
+  "verdict": "approved_stop_before_gpu_launch",
+  "baseline_measurements_valid": false,
+  "interest_conditions_evaluable": false,
+  "finding": "The existing adapters cannot bind live GPU KV/state to exact Helix BranchPoint semantics, physical Continuum shared-root COW, or concurrent descendant decode. Stock prefix caching would measure a different system.",
+  "required_reporting": "All hardware metrics remain null; this is neither a positive nor negative BranchFabric result."
+}

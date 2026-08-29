@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment_id": "branchgpu-exp001-20260810T223351Z",
+  "captured_at_utc": "2026-08-10T22:34:29Z",
+  "remote_host": "mew0",
+  "remote_user": "rishivin",
+  "remote_initial_cwd": "/home/rishivin",
+  "remote_root": "/tmp/sloforge-branchgpu-ZhfJJg8F",
+  "created_paths": [
+    "/tmp/sloforge-branchgpu-ZhfJJg8F",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/repo",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/env",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/cache",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/hf",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/torch",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/triton",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/tmp",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/models",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/traces",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/results",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/logs",
+    "/tmp/sloforge-branchgpu-ZhfJJg8F/pids"
+  ],
+  "initial_gpu_processes": [],
+  "initial_gpu_inventory": [
+    {
+      "index": 0,
+      "uuid": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used_mib": 0,
+      "gpu_utilization_percent": 0
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-a473e021-97fb-64b8-74ba-471825808bed",
+      "name": "NVIDIA A100 80GB PCIe",
+      "memory_used_mib": 0,
+      "gpu_utilization_percent": 0
+    }
+  ],
+  "selected_gpu": {
+    "index": 0,
+    "uuid": "GPU-9f432e61-badc-944e-6087-2f846d4c7e19",
+    "reason": "idle at preflight; one GPU would be sufficient if the runtime path were valid"
+  },
+  "initial_relevant_user_processes": [],
+  "initial_experiment_environment": {
+    "XDG_CACHE_HOME": null,
+    "HF_HOME": null,
+    "HUGGINGFACE_HUB_CACHE": null,
+    "TRANSFORMERS_CACHE": null,
+    "TORCH_HOME": null,
+    "TRITON_CACHE_DIR": null,
+    "TMPDIR": null,
+    "CUDA_VISIBLE_DEVICES": null
+  },
+  "containers_used": false,
+  "initial_containers": null,
+  "shared_model_cache_used": false,
+  "global_environment_modified": false,
+  "external_paths_created": []
+}
